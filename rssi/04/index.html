@@ -1,0 +1,1428 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula: Tecnologias de Redes Sem Fio (WLAN)</title>
+    <style>
+        /* --- GERAL & TEMA CLARO --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- CONTAINER DOS SLIDES --- */
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-background);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            visibility: hidden;
+        }
+
+            .slide.active {
+                opacity: 1;
+                transform: scale(1);
+                visibility: visible;
+                z-index: 1;
+            }
+
+        /* --- NAVEGAÇÃO --- */
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+            .nav-btn:hover {
+                background-color: #0056b3;
+                transform: translateY(-2px);
+            }
+
+            .nav-btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        .slide-counter {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* --- ESTILOS DE CONTEÚDO --- */
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.8em;
+        }
+
+        h2 {
+            font-size: 2.0em;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: var(--secondary-color);
+            font-weight: 300;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        li {
+            background: #e9ecef;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        /* --- COMPONENTES INTERATIVOS --- */
+        .interactive-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .interactive-visuals {
+            position: relative;
+            width: 100%;
+            min-height: 250px;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="%23e9ecef" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .interactive-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+            .interactive-controls button {
+                padding: 10px 15px;
+                font-size: 1em;
+                cursor: pointer;
+                border: 1px solid var(--primary-color);
+                background-color: white;
+                color: var(--primary-color);
+                border-radius: 5px;
+                transition: all 0.3s;
+            }
+
+                .interactive-controls button:hover {
+                    background-color: var(--primary-color);
+                    color: white;
+                }
+
+                .interactive-controls button:disabled {
+                    background-color: #e9ecef;
+                    color: #6c757d;
+                    border-color: #ccc;
+                    cursor: not-allowed;
+                }
+
+        .interactive-description {
+            margin-top: 15px;
+            min-height: 40px;
+            font-style: italic;
+            color: var(--secondary-color);
+        }
+
+        .device, .ap {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            padding: 5px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+            .device::before, .ap::before {
+                font-size: 24px;
+            }
+
+        .ap {
+            background-color: var(--success-color);
+        }
+
+            .ap::before {
+                content: '📡';
+            }
+
+        /* --- ANIMAÇÃO CSMA/CA --- */
+        #csma-device {
+            top: 160px;
+            left: 50px;
+            background-color: var(--primary-color);
+        }
+
+        #csma-device-2 {
+            top: 160px;
+            right: 50px;
+        }
+
+        #csma-ap {
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #csma-device::before {
+            content: '💻';
+        }
+
+        #csma-device-2::before {
+            content: '📱';
+        }
+
+        .packet, .ack {
+            position: absolute;
+            width: 50px;
+            height: 20px;
+            background-color: var(--warning-color);
+            border: 1px solid #b38600;
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 1s ease-in-out;
+            font-size: 10px;
+            text-align: center;
+            line-height: 20px;
+            color: #333;
+        }
+
+        .ack {
+            background-color: var(--success-color);
+            border-color: #1e7e34;
+            color: white;
+        }
+
+        #listening-wave {
+            position: absolute;
+            top: 190px;
+            left: 90px;
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--info-color);
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.7s ease-out;
+            z-index: 1;
+        }
+
+        .device-status {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 5; /* Garante que fique na frente */
+        }
+
+        #waiting-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            opacity: 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+
+        /* --- ANIMAÇÃO NÓ OCULTO E RTS/CTS --- */
+        .node {
+            transition: all 0.5s;
+        }
+
+        #node-a, #rts-node-a {
+            top: 150px;
+            left: 2%;
+        }
+
+        #node-b, #rts-node-b {
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #node-c, #rts-node-c {
+            top: 150px;
+            right: 2%;
+        }
+
+        #node-a::before, #rts-node-a::before {
+            content: '💻';
+        }
+
+        #node-c::before, #rts-node-c::before {
+            content: '📱';
+        }
+
+        .signal-range {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px dashed var(--info-color);
+            opacity: 0.5;
+            transform: scale(0);
+            transition: all 0.5s ease-out;
+        }
+
+        .car-packet {
+            position: absolute;
+            opacity: 0;
+            transition: all 1.5s ease-in-out;
+            font-size: 2.5em;
+            z-index: 5;
+        }
+
+        #car-a {
+            top: 150px;
+            left: 100px;
+        }
+
+        #car-c {
+            top: 150px;
+            right: 100px;
+            transform: scaleX(-1);
+        }
+        /* Espelha o carro */
+        .node-status {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.5);
+            font-size: 24px;
+            opacity: 0;
+            transition: all 0.5s;
+        }
+
+        #collision {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 4em;
+            color: var(--danger-color);
+            transition: all 0.5s;
+            z-index: 10;
+        }
+
+        .rts-cts-packet {
+            position: absolute;
+            width: 30px;
+            height: 18px;
+            font-size: 9px;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 18px;
+            opacity: 0;
+            transition: all 1s ease-in-out;
+        }
+
+        #rts-packet {
+            background: var(--info-color);
+            color: white;
+            top: 150px;
+            left: 90px;
+        }
+
+        #cts-packet {
+            background: var(--warning-color);
+            color: #333;
+            top: 60px;
+            left: calc(50% - 15px);
+        }
+
+        #cts-wave {
+            border-color: var(--warning-color);
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 50px;
+            height: 50px;
+        }
+
+        .data-packet {
+            position: absolute;
+            opacity: 0;
+            transition: all 1s ease-in-out;
+        }
+
+        /* --- VISUALIZADOR DE CANAIS --- */
+        #channel-visualizer {
+            height: 280px;
+        }
+
+        .channel-bar {
+            position: absolute;
+            bottom: 80px;
+            height: 100px;
+            background: rgba(0, 123, 255, 0.3);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .channel-label {
+            position: absolute;
+            bottom: 50px;
+            font-weight: bold;
+            width: 40px;
+            text-align: center;
+            transform: translateX(-50%);
+        }
+
+        #interference-bar {
+            position: absolute;
+            bottom: 80px;
+            height: 100px;
+            left: 22%;
+            width: 58%;
+            background: repeating-linear-gradient(45deg, rgba(220, 53, 69, 0), rgba(220, 53, 69, 0) 10px, rgba(220, 53, 69, 0.4) 10px, rgba(220, 53, 69, 0.4) 20px);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* --- MIMO & BEAMFORMING --- */
+        .mimo-beam-container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .tech-animation {
+            flex: 1;
+            min-width: 300px;
+            height: 250px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .tech-animation h3 {
+                text-align: center;
+                color: var(--secondary-color);
+            }
+
+        .tx, .rx {
+            position: absolute;
+        }
+
+        .tx {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3em;
+        }
+
+        .rx {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3em;
+        }
+
+        .stream {
+            position: absolute;
+            left: 70px;
+            height: 2px;
+            width: 0;
+            background: var(--info-color);
+            transition: width 1s;
+            display: flex;
+            align-items: center;
+        }
+
+            .stream span {
+                opacity: 0;
+                transition: opacity 0.5s 0.5s;
+                color: #333;
+                font-size: 0.8em;
+                margin-left: 5px;
+            }
+
+        #beam {
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            height: 10px;
+            width: 0;
+            background: var(--info-color);
+            border-radius: 5px;
+            transform-origin: left center;
+            transition: all 1s;
+        }
+
+        #omni-signal {
+            position: absolute;
+            left: 45px;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--info-color);
+            border-radius: 50%;
+            transform: translateY(-50%) scale(0);
+            transition: all 1s;
+            opacity: 0;
+        }
+
+        /* --- FLUXOGRAMA --- */
+        .flowchart-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .flowchart-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+            .flowchart-column h3 {
+                color: var(--secondary-color);
+            }
+
+        .flowchart-svg {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* --- TABELA DE PADRÕES --- */
+        .wifi-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+            .wifi-table th, .wifi-table td {
+                border: 1px solid var(--border-color);
+                padding: 12px;
+                text-align: left;
+            }
+
+            .wifi-table th {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .wifi-table tr:nth-child(even) {
+                background-color: var(--background-color);
+            }
+
+        .new-name {
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+
+            .slide {
+                padding: 20px;
+            }
+
+            .nav-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .device, .ap {
+                width: 60px;
+                height: 45px;
+                font-size: 10px;
+            }
+
+                .device::before, .ap::before {
+                    font-size: 18px;
+                }
+
+            .wifi-table {
+                font-size: 0.8em;
+            }
+
+            .mimo-beam-container {
+                flex-direction: column;
+            }
+
+            .flowchart-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .flowchart-svg {
+                transform: scale(0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slides-container">
+
+        <section class="slide active">
+            <h1>Tecnologias de Redes Sem Fio (WLAN)</h1>
+            <h1 class="overlay-title">Prof. William Paiva - 2025 - COTIL</h1>
+            <p class="subtitle">O Universo do Wi-Fi: Padrões, Protocolos e Frequências</p>
+        </section>
+
+        <section class="slide">
+            <h2>O que é <span class="highlight">Wi-Fi</span>?</h2>
+            <p>Wi-Fi (Wireless Fidelity) não é a internet! É a tecnologia que usamos para conectar nossos dispositivos a uma rede (e à internet) <span class="highlight">sem usar cabos</span>.</p>
+            <p>O nome técnico para essa família de tecnologias é <strong class="highlight">IEEE 802.11</strong>. Cada "versão" nova do Wi-Fi é apenas uma nova letra ou conjunto de letras adicionada a esse padrão.</p>
+        </section>
+
+        <section class="slide">
+            <h2>O Desafio do "Ar Compartilhado"</h2>
+            <p>Numa rede com cabos, cada dispositivo tem seu "caminho" exclusivo. Em uma rede sem fio, todos os dispositivos usam o mesmo meio de transmissão: o <span class="highlight">ar</span>.</p>
+            <p>Imagine uma sala de aula onde todos tentam falar ao mesmo tempo. Ninguém entende nada! Isso é uma <strong class="highlight">colisão</strong> de dados. Como evitar essa bagunça?</p>
+        </section>
+
+        <section class="slide">
+            <h2>A Solução: O Protocolo da "Educação" (CSMA/CA)</h2>
+            <ul>
+                <li><strong>CS</strong> (Carrier Sense): <span class="highlight">SENTIR</span> o meio. "Alguém já está falando?"</li>
+                <li><strong>MA</strong> (Multiple Access): Vários dispositivos podem tentar <span class="highlight">ACESSAR</span> o meio.</li>
+                <li><strong>CA</strong> (Collision Avoidance): <span class="highlight">EVITAR</span> a colisão. "Vou esperar um pouco antes de falar, por via das dúvidas."</li>
+            </ul>
+            <p>É como uma regra de etiqueta: <strong>"Ouça antes de falar!"</strong></p>
+        </section>
+
+        <section class="slide">
+            <h2>Como funciona o "Ouvir Antes de Falar"?</h2>
+            <p>Pense na sua rede Wi-Fi como uma <span class="highlight">sala de reuniões virtual</span>. Todos os seus dispositivos (notebook, celular, TV) estão nela.</p>
+            <p>Antes de transmitir, um dispositivo <strong class="highlight">não pede permissão ao AP</strong>. Em vez disso, ele "ouve" o ar para sentir se algum <strong class="highlight">outro dispositivo</strong> já está transmitindo. É uma verificação entre os próprios participantes para manter a ordem.</p>
+        </section>
+
+        <section class="slide" data-interactive="true">
+            <h2>Como o CSMA/CA Funciona na Prática</h2>
+            <div class="interactive-container">
+                <div class="interactive-visuals">
+                    <div id="csma-ap" class="ap">Access Point</div>
+                    <div id="csma-device" class="device">
+                        Seu Notebook
+                        <div id="waiting-icon">⏳</div>
+                    </div>
+                    <div id="csma-device-2" class="device">
+                        Outro Dispositivo
+                        <div id="status-device2" class="device-status"></div>
+                    </div>
+                    <div id="listening-wave"></div>
+                    <div id="packet" class="packet" style="top: 160px; left: 140px;">PACOTE</div>
+                    <div id="ack" class="ack" style="top: 60px; left: calc(50% + 30px);">ACK</div>
+                </div>
+                <p id="csma-description" class="interactive-description">Seu notebook quer enviar um pacote para o Access Point. Clique nos botões para ver o passo a passo.</p>
+                <div id="csma-controls" class="interactive-controls">
+                    <button data-step="1">1. Escutar</button>
+                    <button data-step="2" disabled>2. Esperar</button>
+                    <button data-step="3" disabled>3. Enviar</button>
+                    <button data-step="4" disabled>4. Confirmar</button>
+                    <button data-step="reset" style="background-color: var(--secondary-color); color: white; border: none;">Resetar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>Um Problema Comum: E se a "Sala" for Grande Demais?</h2>
+            <p>Imagine uma sala de reuniões tão grande que uma pessoa num canto (<span class="highlight">Notebook A</span>) não consegue ouvir outra no canto oposto (<span class="highlight">Smartphone C</span>).</p>
+            <p>Ambas acham que a sala está em silêncio e começam a falar ao mesmo tempo. O moderador (<strong class="highlight">o AP</strong>), que está no centro e ouve as duas, não entende nada. Isso é o <strong class="highlight">Problema do Nó Oculto</strong>.</p>
+        </section>
+
+        <section class="slide" data-interactive="true">
+            <h2>O Problema do Nó Oculto (Animação)</h2>
+            <div class="interactive-container">
+                <div class="interactive-visuals">
+                    <div id="node-a" class="device node">Notebook A<div class="node-status" id="status-a">👍</div></div>
+                    <div id="node-b" class="ap node">AP</div>
+                    <div id="node-c" class="device node">Smartphone C<div class="node-status" id="status-c">👍</div></div>
+                    <div id="range-a" class="signal-range"></div>
+                    <div id="range-c" class="signal-range"></div>
+                    <div id="car-a" class="car-packet">🚗</div>
+                    <div id="car-c" class="car-packet">🚗</div>
+                    <div id="collision">💥</div>
+                </div>
+                <p id="hidden-node-description" class="interactive-description">A e C querem enviar pacotes para o AP, mas não se ouvem. O que acontece?</p>
+                <div id="hidden-node-controls" class="interactive-controls">
+                    <button data-step="1">1. Mostrar Alcance</button>
+                    <button data-step="2" disabled>2. Canal Livre?</button>
+                    <button data-step="3" disabled>3. Enviar ao Mesmo Tempo</button>
+                    <button data-step="reset" style="background-color: var(--secondary-color); color: white; border: none;">Resetar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>A Solução: Pedindo Permissão para Falar</h2>
+            <p>Para resolver o problema, a rede pode usar um mecanismo opcional: <strong class="highlight">RTS/CTS</strong> (Request to Send / Clear to Send).</p>
+            <p>Funciona como <span class="highlight">levantar a mão</span> na sala de reuniões. O dispositivo pede a palavra ao AP. O AP então anuncia para a sala inteira: <br>"Atenção todos, o Notebook A vai falar agora. Por favor, fiquem em silêncio."</p>
+            <p>Assim, mesmo quem não ouvia o Notebook A, agora sabe que precisa esperar.</p>
+        </section>
+
+        <section class="slide" data-interactive="true">
+            <h2>A Solução: RTS / CTS (Animação)</h2>
+            <div class="interactive-container">
+                <div class="interactive-visuals">
+                    <div id="rts-node-a" class="device node">Notebook A</div>
+                    <div id="rts-node-b" class="ap node">AP</div>
+                    <div id="rts-node-c" class="device node">Smartphone C<div id="status-rts-c" class="device-status"></div></div>
+                    <div id="rts-packet" class="rts-cts-packet">RTS</div>
+                    <div id="cts-packet" class="rts-cts-packet">CTS</div>
+                    <div id="cts-wave" class="signal-range"></div>
+                    <div id="rts-data" class="data-packet" style="font-size: 1.5em; opacity: 0;"> PACOTE </div>
+                </div>
+                <p id="rts-cts-description" class="interactive-description">Usando "bilhetes" de permissão para organizar a conversa e evitar colisões.</p>
+                <div id="rts-cts-controls" class="interactive-controls">
+                    <button data-step="1">1. A Pede Permissão (RTS)</button>
+                    <button data-step="2" disabled>2. AP Concede (CTS)</button>
+                    <button data-step="3" disabled>3. C Fica em Silêncio</button>
+                    <button data-step="4" disabled>4. A Envia com Segurança</button>
+                    <button data-step="reset" style="background-color: var(--secondary-color); color: white; border: none;">Resetar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" data-interactive="true">
+            <h2>Canais Wi-Fi e Interferência (2.4 GHz)</h2>
+            <div class="interactive-container">
+                <div id="channel-visualizer" class="interactive-visuals">
+                    <!-- Labels dos canais -->
+                    <script>
+                        for (let i = 1; i <= 13; i++) {
+                            document.write(`<div class="channel-label" style="left: calc(${((i - 1) * 7.5) + 4}%);">${i}</div>`);
+                        }
+                    </script>
+                    <div id="interference-bar"></div>
+                </div>
+                <p id="channel-description" class="interactive-description">Os canais 1, 6 e 11 são os únicos que não se sobrepõem.</p>
+                <div id="channel-controls" class="interactive-controls">
+                    <button data-step="1">Canal 1</button>
+                    <button data-step="2">Canal 6</button>
+                    <button data-step="3">Canal 11</button>
+                    <button data-step="4">Ligar Interferência</button>
+                    <button data-step="reset" style="background-color: var(--secondary-color); color: white; border: none;">Resetar</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>A "Sopa de Letrinhas": Padrões Wi-Fi</h2>
+            <table class="wifi-table">
+                <thead><tr><th>Padrão</th><th>Nome</th><th>Frequência</th><th>Velocidade Máx.</th></tr></thead>
+                <tbody>
+                    <tr><td>802.11b</td><td>-</td><td>2.4 GHz</td><td>11 Mbps</td></tr>
+                    <tr><td>802.11g</td><td>-</td><td>2.4 GHz</td><td>54 Mbps</td></tr>
+                    <tr><td>802.11n</td><td class="new-name">Wi-Fi 4</td><td>2.4 / 5 GHz</td><td>600 Mbps</td></tr>
+                    <tr><td>802.11ac</td><td class="new-name">Wi-Fi 5</td><td>5 GHz</td><td>6.9 Gbps</td></tr>
+                    <tr><td>802.11ax</td><td class="new-name">Wi-Fi 6/6E</td><td>2.4 / 5 / 6 GHz</td><td>9.6 Gbps</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <h2>Frequências: 2.4 vs 5 vs 6 GHz</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; width:100%; max-width: 900px; text-align: left;">
+                <div style="flex: 1; min-width: 250px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;">
+                    <h3>2.4 GHz</h3><p><strong>✔️ Maior Alcance:</strong> Atravessa paredes com mais facilidade.<br><strong>❌ Muita Interferência:</strong> Compete com micro-ondas, Bluetooth, etc.</p>
+                </div>
+                <div style="flex: 1; min-width: 250px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;">
+                    <h3>5 GHz</h3><p><strong>✔️ Mais Velocidade:</strong> Ideal para streaming e jogos.<br><strong>❌ Menor Alcance:</strong> Dificuldade com obstáculos.</p>
+                </div>
+                <div style="flex: 1; min-width: 250px; border: 1px solid var(--border-color); padding: 15px; border-radius: 8px;">
+                    <h3>6 GHz (Wi-Fi 6E)</h3><p><strong>✔️ "Pista Expressa":</strong> Muitos canais e sem interferência antiga.<br><strong>❌ Menor Alcance Ainda:</strong> Exige roteadores mais próximos.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>Otimizando o Sinal: MIMO e Beamforming</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; width:100%; max-width: 900px; text-align: left;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>📡 MIMO</h3>
+                    <p><strong>Multiple Input, Multiple Output.</strong> Pense nisso como adicionar mais <span class="highlight">pistas a uma rodovia</span>. Usando múltiplas antenas, o roteador envia vários "fluxos espaciais" de dados ao mesmo tempo, no <span class="highlight">mesmo canal</span>, aumentando drasticamente a velocidade.</p>
+                </div>
+                <div style="flex: 1; min-width: 300px;">
+                    <h3>🔦 Beamforming</h3>
+                    <p>Em vez de irradiar o sinal de Wi-Fi em todas as direções (como uma lâmpada), o roteador <span class="highlight">detecta onde seu dispositivo está</span> e foca o sinal naquela direção (como uma lanterna). Isso cria uma conexão mais forte e estável.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>Animação: MIMO e Beamforming</h2>
+            <div class="mimo-beam-container">
+                <div class="tech-animation">
+                    <h3>MIMO</h3>
+                    <div class="tx">📡</div><div class="rx">💻</div>
+                    <div class="stream" style="top: 45%; background: #007bff;"><span>Fluxo 1</span></div>
+                    <div class="stream" style="top: 55%; background: #28a745;"><span>Fluxo 2</span></div>
+                </div>
+                <div class="tech-animation">
+                    <h3>Beamforming</h3>
+                    <div class="tx">📡</div><div class="rx">💻</div>
+                    <div id="omni-signal"></div>
+                    <div id="beam"></div>
+                </div>
+            </div>
+            <p class="interactive-description">Clique para ver como as tecnologias modernas otimizam o sinal Wi-Fi.</p>
+            <div class="interactive-controls">
+                <button id="play-mimo">▶️ Animar MIMO</button>
+                <button id="play-beamforming">▶️ Animar Beamforming</button>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>Segurança em Redes Wi-Fi</h2>
+            <ul>
+                <li style="border-color: var(--danger-color);"><strong>WEP (Wired Equivalent Privacy):</strong> O "Avô" Inseguro. Facilmente quebrável, não deve ser usado.</li>
+                <li style="border-color: var(--warning-color);"><strong>WPA (Wi-Fi Protected Access):</strong> O "Pai" Melhorado. Corrigiu as falhas críticas do WEP.</li>
+                <li style="border-color: var(--success-color);"><strong>WPA2 (Wi-Fi Protected Access II):</strong> O "Padrão Ouro". Usa criptografia forte (AES) e é o mais comum hoje.</li>
+                <li style="border-color: var(--info-color);"><strong>WPA3 (Wi-Fi Protected Access III):</strong> O "Guardião" Moderno. Oferece segurança ainda mais robusta, ideal para redes públicas e proteção contra ataques de força bruta.</li>
+            </ul>
+        </section>
+
+        <section class="slide">
+            <h2>Relembrando: CSMA/CD (Redes com Fio)</h2>
+            <p>Em redes <strong class="highlight">cabeadas</strong> (Ethernet), o protocolo é um pouco diferente: <strong class="highlight">CSMA/CD</strong>.</p>
+            <ul>
+                <li style="border-color: var(--danger-color);"><strong>CD</strong> (Collision Detection): <span class="highlight">DETECÇÃO</span> de Colisão.</li>
+            </ul>
+            <p>A lógica aqui é "tentar e pedir desculpas". O dispositivo envia o pacote e, ao mesmo tempo, escuta. Se detectar uma colisão, ele para, envia um "sinal de congestionamento" e espera um tempo aleatório para tentar de novo.</p>
+        </section>
+
+        <section class="slide">
+            <h2>Fluxogramas: CSMA/CD vs. CSMA/CA</h2>
+            <div class="flowchart-container">
+                <div class="flowchart-column">
+                    <h3>CSMA/CD (com Fio)</h3>
+                    <svg class="flowchart-svg" viewBox="0 0 350 350">
+                        <defs>
+                            <marker id="arrow-cd" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#6c757d" />
+                            </marker>
+                        </defs>
+                        <rect x="100" y="10" width="150" height="40" rx="8" fill="#e2f0ff" stroke="#6c757d" stroke-width="2" />
+                        <text x="175" y="35" text-anchor="middle" font-size="12">Tenta Transmitir</text>
+                        <line x1="175" y1="50" x2="175" y2="80" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-cd)" />
+                        <polygon points="175,85 240,150 175,215 110,150" fill="#fff" stroke="#6c757d" stroke-width="2" />
+                        <text x="175" y="155" text-anchor="middle" font-size="12">Colisão?</text>
+                        <line x1="240" y1="150" x2="280" y2="150" stroke="#6c757d" stroke-width="2" />
+                        <line x1="280" y1="150" x2="280" y2="180" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-cd)" />
+                        <text x="260" y="140" font-size="12" font-weight="bold">Não ✅</text>
+                        <rect x="205" y="180" width="150" height="40" rx="8" fill="#d4edda" stroke="#6c757d" stroke-width="2" />
+                        <text x="280" y="205" text-anchor="middle" font-size="12">Sucesso!</text>
+                        <line x1="175" y1="215" x2="175" y2="245" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-cd)" />
+                        <text x="200" y="235" font-size="12" font-weight="bold">Sim 💥</text>
+                        <rect x="75" y="245" width="200" height="50" rx="8" fill="#ffeeba" stroke="#6c757d" stroke-width="2" />
+                        <text x="175" y="265" text-anchor="middle" font-size="12">Para, envia Jam Signal</text>
+                        <text x="175" y="285" text-anchor="middle" font-size="12">e espera ⏳</text>
+                    </svg>
+                </div>
+                <div class="flowchart-column">
+                    <h3>CSMA/CA (sem Fio)</h3>
+                    <svg class="flowchart-svg" viewBox="0 0 300 400">
+                        <defs>
+                            <marker id="arrow-ca" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#6c757d" />
+                            </marker>
+                        </defs>
+                        <rect x="75" y="10" width="150" height="40" rx="8" fill="#e2f0ff" stroke="#6c757d" stroke-width="2" />
+                        <text x="150" y="35" text-anchor="middle" font-size="12">Escuta o Meio</text>
+                        <line x1="150" y1="50" x2="150" y2="80" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-ca)" />
+                        <polygon points="150,85 215,150 150,215 85,150" fill="#fff" stroke="#6c757d" stroke-width="2" />
+                        <text x="150" y="155" text-anchor="middle" font-size="12">Ocupado?</text>
+
+                        <line x1="215" y1="150" x2="260" y2="150" stroke="#6c757d" stroke-width="2" />
+                        <line x1="260" y1="150" x2="260" y2="50" stroke="#6c757d" stroke-width="2" />
+                        <line x1="260" y1="50" x2="225" y2="50" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-ca)" />
+                        <text x="240" y="140" font-size="12" font-weight="bold">Sim ⏳</text>
+
+                        <line x1="150" y1="215" x2="150" y2="245" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-ca)" />
+                        <text x="120" y="235" font-size="12" font-weight="bold">Não ✅</text>
+                        <rect x="75" y="245" width="150" height="40" rx="8" fill="#d4edda" stroke="#6c757d" stroke-width="2" />
+                        <text x="150" y="270" text-anchor="middle" font-size="12">Envia Pacote</text>
+                        <line x1="150" y1="285" x2="150" y2="315" stroke="#6c757d" stroke-width="2" marker-end="url(#arrow-ca)" />
+                        <rect x="75" y="315" width="150" height="40" rx="8" fill="#d4edda" stroke="#6c757d" stroke-width="2" />
+                        <text x="150" y="340" text-anchor="middle" font-size="12">Sucesso!</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide">
+            <h2>CSMA/CD vs CSMA/CA: O Duelo</h2>
+            <table class="wifi-table">
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>CSMA/CD (com fio)</th>
+                        <th>CSMA/CA (sem fio)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Princípio</strong></td>
+                        <td>Detecção de Colisão</td>
+                        <td>Prevenção de Colisão</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quando age</strong></td>
+                        <td><span class="highlight">Depois</span> que a colisão ocorre</td>
+                        <td><span class="highlight">Antes</span> da transmissão começar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recuperação</strong></td>
+                        <td>Jam Signal e Backoff</td>
+                        <td>ACKs e Retransmissão</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Eficiência</strong></td>
+                        <td>Mais eficiente, pois não espera</td>
+                        <td>Menos eficiente, pois espera por padrão</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="slide">
+            <h2>Por que a Diferença?</h2>
+            <p>Por que o Wi-Fi não usa a "Detecção de Colisão", que é mais eficiente?</p>
+            <p><strong>No Fio:</strong> Uma colisão gera um <span class="highlight">pico de voltagem</span> no cabo que é fácil de detectar. É um sinal elétrico claro.</p>
+            <p><strong>No Wi-Fi:</strong> O sinal que um dispositivo transmite é milhões de vezes mais forte (para ele mesmo) do que qualquer sinal que ele recebe. A própria "voz alta" do transmissor o deixa "surdo" para colisões. É o <span class="highlight">"near-far problem"</span>.</p>
+            <p>Por isso, a abordagem mais segura no Wi-Fi é <strong class="highlight">prevenir</strong> a colisão em vez de tentar detectá-la.</p>
+        </section>
+
+        <section class="slide">
+            <h2>Resumo da Aula</h2>
+            <ul style="font-size: 1em; text-align: left;">
+                <li>Wi-Fi é a tecnologia <strong class="highlight">IEEE 802.11</strong> que usa o <strong class="highlight">CSMA/CA</strong> para evitar colisões.</li>
+                <li>O problema do <strong class="highlight">Nó Oculto</strong> é resolvido com o mecanismo <strong class="highlight">RTS/CTS</strong>.</li>
+                <li>A frequência de <strong class="highlight">2.4 GHz</strong> tem canais sobrepostos; <strong class="highlight">5 GHz</strong> e <strong class="highlight">6 GHz</strong> oferecem mais canais e velocidade.</li>
+                <li>Tecnologias como <strong class="highlight">MIMO</strong> e <strong class="highlight">Beamforming</strong> aumentam a velocidade e a qualidade do sinal.</li>
+                <li>A segurança evoluiu do <strong class="highlight">WEP</strong> para o <strong class="highlight">WPA3</strong>, que é o padrão mais seguro atualmente.</li>
+            </ul>
+        </section>
+
+    </div>
+
+    <!-- Navegação -->
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+        <div class="slide-counter" id="slide-counter"></div>
+        <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- LÓGICA DE NAVEGAÇÃO DOS SLIDES ---
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function showSlide(index) {
+                if (index >= totalSlides || index < 0) return;
+                slides[currentSlide].classList.remove('active');
+                currentSlide = index;
+                slides[currentSlide].classList.add('active');
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+
+            nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+            prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+
+            // NOVA LÓGICA DE NAVEGAÇÃO POR TECLADO
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    const activeSlide = slides[currentSlide];
+                    if (activeSlide.dataset.interactive) {
+                        const controls = activeSlide.querySelector('.interactive-controls');
+                        const nextStepBtn = controls.querySelector('button[data-step]:not(:disabled):not([data-step="reset"])');
+                        if (nextStepBtn) {
+                            nextStepBtn.click();
+                        } else {
+                            nextBtn.click();
+                        }
+                    } else {
+                        nextBtn.click();
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    const activeSlide = slides[currentSlide];
+                    if (activeSlide.dataset.interactive) {
+                        const controls = activeSlide.querySelector('.interactive-controls');
+                        const firstStepBtn = controls.querySelector('button[data-step="1"]');
+                        const isAtStart = firstStepBtn && !firstStepBtn.disabled;
+
+                        if (!isAtStart) {
+                            const resetBtn = controls.querySelector('button[data-step="reset"]');
+                            if (resetBtn) resetBtn.click();
+                        } else {
+                            prevBtn.click();
+                        }
+                    } else {
+                        prevBtn.click();
+                    }
+                }
+            });
+            showSlide(0);
+
+            // --- LÓGICA DAS ANIMAÇÕES ---
+
+            // CSMA/CA
+            const csma = {
+                controls: document.getElementById('csma-controls'),
+                desc: document.getElementById('csma-description'),
+                packet: document.getElementById('packet'),
+                ack: document.getElementById('ack'),
+                ap: document.getElementById('csma-ap'),
+                wave: document.getElementById('listening-wave'),
+                waitIcon: document.getElementById('waiting-icon'),
+                statusDev2: document.getElementById('status-device2'),
+                reset: () => {
+                    csma.desc.textContent = 'Seu notebook quer enviar um pacote para o Access Point. Clique nos botões para ver o passo a passo.';
+                    [csma.packet, csma.ack].forEach(el => {
+                        el.style.transition = 'none';
+                        el.style.opacity = '0';
+                        el.style.transform = 'translate(0, 0)';
+                        el.offsetHeight;
+                        el.style.transition = 'all 1s ease-in-out';
+                    });
+                    csma.wave.style.transform = 'scale(0)';
+                    csma.wave.style.opacity = '0';
+                    csma.waitIcon.style.opacity = '0';
+                    csma.statusDev2.style.opacity = '0';
+                    csma.controls.querySelectorAll('button').forEach(b => b.disabled = (b.dataset.step !== '1' && !b.dataset.step.includes('reset')));
+                }
+            };
+            csma.controls.addEventListener('click', (e) => {
+                const step = e.target.dataset.step;
+                if (!step) return;
+
+                const currentBtn = csma.controls.querySelector(`[data-step="${step}"]`);
+                if (currentBtn) currentBtn.disabled = true;
+
+                const nextStepBtn = csma.controls.querySelector(`[data-step="${parseInt(step) + 1}"]`);
+
+                switch (step) {
+                    case '1':
+                        csma.desc.textContent = '1. O notebook emite uma "onda" para escutar o meio e ver se está livre.';
+                        csma.wave.style.transform = 'scale(8)';
+                        csma.wave.style.opacity = '1';
+                        csma.statusDev2.textContent = "Silêncio...";
+                        csma.statusDev2.style.opacity = '1';
+                        setTimeout(() => {
+                            csma.wave.style.opacity = '0';
+                            if (nextStepBtn) nextStepBtn.disabled = false;
+                        }, 1000);
+                        break;
+                    case '2':
+                        csma.desc.textContent = '2. Meio livre! Por segurança, ele espera um tempo aleatório (Backoff).';
+                        csma.statusDev2.style.opacity = '0';
+                        csma.waitIcon.style.opacity = '1';
+                        setTimeout(() => {
+                            csma.waitIcon.style.opacity = '0';
+                            if (nextStepBtn) nextStepBtn.disabled = false;
+                        }, 1200);
+                        break;
+                    case '3':
+                        csma.desc.textContent = '3. Agora sim! O notebook envia o pacote para o Access Point.';
+                        const moveX = csma.ap.getBoundingClientRect().left - csma.packet.getBoundingClientRect().left + 15;
+                        csma.packet.style.transform = `translate(${moveX}px, -110px)`;
+                        csma.packet.style.opacity = '1';
+                        setTimeout(() => { if (nextStepBtn) nextStepBtn.disabled = false; }, 1000);
+                        break;
+                    case '4':
+                        csma.desc.textContent = '4. O Access Point confirma o recebimento (ACK). Missão cumprida!';
+                        const ackMoveX = document.getElementById('csma-device').getBoundingClientRect().left - csma.ack.getBoundingClientRect().left + 100;
+                        csma.ack.style.transform = `translate(${ackMoveX}px, 110px)`;
+                        csma.ack.style.opacity = '1';
+                        break;
+                    case 'reset':
+                        csma.reset();
+                        break;
+                }
+            });
+
+            // Hidden Node
+            const hn = {
+                controls: document.getElementById('hidden-node-controls'),
+                desc: document.getElementById('hidden-node-description'),
+                nodeA: document.getElementById('node-a'),
+                nodeB: document.getElementById('node-b'),
+                nodeC: document.getElementById('node-c'),
+                statusA: document.getElementById('status-a'),
+                statusC: document.getElementById('status-c'),
+                rangeA: document.getElementById('range-a'),
+                rangeC: document.getElementById('range-c'),
+                carA: document.getElementById('car-a'),
+                carC: document.getElementById('car-c'),
+                collision: document.getElementById('collision'),
+                reset: () => {
+                    hn.desc.textContent = 'A e C querem enviar pacotes para o AP, mas não se ouvem. O que acontece?';
+                    [hn.rangeA, hn.rangeC, hn.collision, hn.statusA, hn.statusC].forEach(el => { el.style.transform = el.classList.contains('node-status') ? 'translateX(-50%) scale(0.5)' : 'scale(0)'; el.style.opacity = '0'; });
+                    [hn.carA, hn.carC].forEach(el => { el.style.opacity = 0; el.style.transition = 'none'; el.style.transform = el.id === 'car-c' ? 'translateX(0) scaleX(-1)' : 'translateX(0)'; el.offsetHeight; el.style.transition = 'all 1.5s ease-in-out'; });
+                    hn.controls.querySelectorAll('button').forEach(b => b.disabled = (b.dataset.step !== '1' && !b.dataset.step.includes('reset')));
+                }
+            };
+            hn.controls.addEventListener('click', (e) => {
+                const step = e.target.dataset.step;
+                if (!step) return;
+                hn.controls.querySelector(`[data-step="${step}"]`).disabled = true;
+                const nextStep = hn.controls.querySelector(`[data-step="${parseInt(step) + 1}"]`);
+                if (nextStep) nextStep.disabled = false;
+
+                const apRect = hn.nodeB.getBoundingClientRect();
+                const carARect = hn.carA.getBoundingClientRect();
+                const carCRect = hn.carC.getBoundingClientRect();
+
+                switch (step) {
+                    case '1':
+                        hn.desc.textContent = '1. O alcance de A chega ao AP, mas não em C. O mesmo vale para C.';
+                        hn.rangeA.style.cssText = `top: ${hn.nodeA.offsetTop - 125}px; left: ${hn.nodeA.offsetLeft - 100}px; width: 550px; height: 300px; transform: scale(1); opacity: 0.5;`;
+                        hn.rangeC.style.cssText = `top: ${hn.nodeC.offsetTop - 125}px; left: ${hn.nodeC.offsetLeft - 450}px; width: 550px; height: 300px; transform: scale(1); opacity: 0.5;`;
+                        break;
+                    case '2':
+                        hn.desc.textContent = '2. Ambos "escutam", não ouvem ninguém e decidem que o canal está livre.';
+                        [hn.statusA, hn.statusC].forEach(el => { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) scale(1)'; });
+                        break;
+                    case '3':
+                        hn.desc.textContent = '3. Ao mesmo tempo, eles enviam seus pacotes... COLISÃO no AP!';
+                        [hn.statusA, hn.statusC].forEach(el => { el.style.opacity = '0'; });
+                        hn.carA.style.opacity = 1;
+                        hn.carC.style.opacity = 1;
+                        const moveX_A = apRect.left - carARect.left;
+                        const moveY_A = apRect.top - carARect.top;
+                        hn.carA.style.transform = `translate(${moveX_A}px, ${moveY_A}px)`;
+                        const moveX_C = apRect.left - carCRect.left;
+                        const moveY_C = apRect.top - carCRect.top;
+                        hn.carC.style.transform = `translate(${moveX_C}px, ${moveY_C}px) scaleX(-1)`;
+                        setTimeout(() => {
+                            hn.collision.style.opacity = '1';
+                            hn.collision.style.transform = 'translate(-50%, -50%) scale(1)';
+                        }, 750);
+                        break;
+                    case 'reset': hn.reset(); break;
+                }
+            });
+
+            // RTS/CTS
+            const rts = {
+                controls: document.getElementById('rts-cts-controls'),
+                desc: document.getElementById('rts-cts-description'),
+                nodeC: document.getElementById('rts-node-c'),
+                statusC: document.getElementById('status-rts-c'),
+                rtsPacket: document.getElementById('rts-packet'),
+                ctsPacket: document.getElementById('cts-packet'),
+                ctsWave: document.getElementById('cts-wave'),
+                dataPacket: document.getElementById('rts-data'),
+                reset: () => {
+                    rts.desc.textContent = 'Usando "bilhetes" de permissão para organizar a conversa.';
+                    rts.nodeC.style.filter = 'none';
+                    rts.statusC.style.opacity = '0';
+                    [rts.rtsPacket, rts.dataPacket, rts.ctsPacket].forEach(el => { el.style.opacity = 0; el.style.transition = 'none'; el.style.transform = 'translate(0, 0)'; el.offsetHeight; el.style.transition = 'all 1s ease-in-out'; });
+                    rts.ctsWave.style.transform = 'translateX(-50%) scale(0)';
+                    rts.ctsWave.style.opacity = '0';
+                    rts.controls.querySelectorAll('button').forEach(b => b.disabled = (b.dataset.step !== '1' && !b.dataset.step.includes('reset')));
+                }
+            };
+            rts.controls.addEventListener('click', (e) => {
+                const step = e.target.dataset.step;
+                if (!step) return;
+                rts.controls.querySelector(`[data-step="${step}"]`).disabled = true;
+                const nextStep = rts.controls.querySelector(`[data-step="${parseInt(step) + 1}"]`);
+
+                const ap = document.getElementById('rts-node-b');
+                const nodeA = document.getElementById('rts-node-a');
+
+                switch (step) {
+                    case '1':
+                        rts.desc.textContent = '1. "A" envia um "Pedido para Enviar" (RTS) para o AP.';
+                        const moveRTSX = ap.offsetLeft - nodeA.offsetLeft - 15;
+                        const moveRTSY = ap.offsetTop - nodeA.offsetTop;
+                        rts.rtsPacket.style.transform = `translate(${moveRTSX}px, ${moveRTSY}px)`;
+                        rts.rtsPacket.style.opacity = 1;
+                        setTimeout(() => { if (nextStep) nextStep.disabled = false; }, 1000);
+                        break;
+                    case '2':
+                        rts.desc.textContent = '2. O AP responde com um "Livre para Enviar" (CTS) para TODOS na área.';
+                        rts.ctsWave.style.opacity = '0.5';
+                        rts.ctsWave.style.transform = 'translateX(-50%) scale(15)';
+                        setTimeout(() => {
+                            rts.ctsWave.style.opacity = '0';
+                            if (nextStep) nextStep.disabled = false;
+                        }, 1000);
+                        break;
+                    case '3':
+                        rts.desc.textContent = '3. "C" recebe o CTS e sabe que precisa esperar. Ele fica em silêncio.';
+                        rts.nodeC.style.filter = 'grayscale(100%) brightness(0.7)';
+                        rts.statusC.textContent = "Silêncio...";
+                        rts.statusC.style.opacity = '1';
+                        if (nextStep) nextStep.disabled = false;
+                        break;
+                    case '4':
+                        rts.desc.textContent = '4. Agora "A" pode enviar seu pacote ao AP sem risco de colisão.';
+                        rts.dataPacket.style.left = `${nodeA.offsetLeft + nodeA.offsetWidth - 20}px`;
+                        rts.dataPacket.style.top = `${nodeA.offsetTop + 10}px`;
+                        rts.dataPacket.offsetHeight;
+                        const dataPacketRect = rts.dataPacket.getBoundingClientRect();
+                        const apRect = ap.getBoundingClientRect();
+                        const moveDataX = apRect.left - dataPacketRect.left + (ap.offsetWidth / 2) - (rts.dataPacket.offsetWidth / 2);
+                        const moveDataY = apRect.top - dataPacketRect.top + (ap.offsetHeight / 2) - (rts.dataPacket.offsetHeight / 2);
+                        rts.dataPacket.style.transform = `translate(${moveDataX}px, ${moveDataY}px)`;
+                        rts.dataPacket.style.opacity = 1;
+                        break;
+                    case 'reset': rts.reset(); break;
+                }
+            });
+
+            // Channel Visualizer
+            const channelViz = {
+                controls: document.getElementById('channel-controls'),
+                desc: document.getElementById('channel-description'),
+                visualizer: document.getElementById('channel-visualizer'),
+                interferenceBar: document.getElementById('interference-bar'),
+                reset: () => {
+                    channelViz.desc.textContent = 'Os canais 1, 6 e 11 são os únicos que não se sobrepõem.';
+                    channelViz.visualizer.querySelectorAll('.channel-bar').forEach(bar => bar.remove());
+                    channelViz.interferenceBar.style.opacity = '0';
+                    channelViz.controls.querySelector('[data-step="4"]').textContent = 'Ligar Interferência';
+                    channelViz.controls.querySelectorAll('button').forEach(b => b.disabled = false);
+                },
+                showChannel: (channel) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'channel-bar';
+                    const width = 22 / 90 * 100; // 22MHz width over ~90MHz total span
+                    const start = (channel - 1) * 5 / 90 * 100;
+                    bar.style.left = `${start}%`;
+                    bar.style.width = `${width}%`;
+                    channelViz.visualizer.appendChild(bar);
+                }
+            };
+            channelViz.controls.addEventListener('click', (e) => {
+                const step = e.target.dataset.step;
+                if (!step) return;
+
+                if (step === 'reset') {
+                    channelViz.reset();
+                    return;
+                }
+
+                const currentBtn = channelViz.controls.querySelector(`[data-step="${step}"]`);
+                if (currentBtn) currentBtn.disabled = true;
+
+                switch (step) {
+                    case '1':
+                        channelViz.desc.textContent = 'Canal 1 selecionado.';
+                        channelViz.showChannel(1);
+                        break;
+                    case '2':
+                        channelViz.desc.textContent = 'Canal 6 selecionado. Note que não há sobreposição com o canal 1.';
+                        channelViz.showChannel(6);
+                        break;
+                    case '3':
+                        channelViz.desc.textContent = 'Canal 11 selecionado. Os três canais operam sem interferir entre si.';
+                        channelViz.showChannel(11);
+                        break;
+                    case '4':
+                        const isOff = channelViz.interferenceBar.style.opacity === '0' || channelViz.interferenceBar.style.opacity === '';
+                        channelViz.interferenceBar.style.opacity = isOff ? '1' : '0';
+                        currentBtn.textContent = isOff ? 'Desligar Interferência' : 'Ligar Interferência';
+                        channelViz.desc.textContent = isOff ? 'Aparelhos como micro-ondas operam em ~2.45GHz, interferindo nos canais centrais (5-11).' : 'Interferência desligada.';
+                        currentBtn.disabled = false; // Allow toggling
+                        break;
+                }
+            });
+
+            // MIMO & Beamforming
+            document.getElementById('play-mimo').addEventListener('click', () => {
+                document.querySelectorAll('.stream').forEach(s => {
+                    s.style.transition = 'none';
+                    s.style.width = '0';
+                    s.querySelector('span').style.opacity = '0';
+                    s.offsetHeight;
+                    s.style.transition = 'width 1s';
+                    s.style.width = '200px';
+                    s.querySelector('span').style.opacity = '1';
+                });
+            });
+            document.getElementById('play-beamforming').addEventListener('click', () => {
+                const omni = document.getElementById('omni-signal');
+                const beam = document.getElementById('beam');
+                beam.style.transition = 'none';
+                beam.style.width = '0';
+                omni.style.transition = 'none';
+                omni.style.transform = 'translateY(-50%) scale(0)';
+                omni.style.opacity = '0';
+                omni.offsetHeight;
+
+                omni.style.transition = 'all 1s';
+                beam.style.transition = 'all 1s';
+
+                omni.style.transform = 'translateY(-50%) scale(3)';
+                omni.style.opacity = '1';
+
+                setTimeout(() => {
+                    omni.style.opacity = '0';
+                    beam.style.width = '200px';
+                }, 500);
+            });
+
+            // Reset animations when returning to slide
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target.contains(csma.controls)) csma.reset();
+                        if (entry.target.contains(hn.controls)) hn.reset();
+                        if (entry.target.contains(rts.controls)) rts.reset();
+                        if (entry.target.contains(channelViz.controls)) channelViz.reset();
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            [csma.controls, hn.controls, rts.controls, channelViz.controls].forEach(el => {
+                if (el) observer.observe(el.closest('.slide'));
+            });
+        });
+    </script>
+</body>
+</html>

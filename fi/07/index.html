@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Introdução ao Linux</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Para melhor layout mobile */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Menos padding em mobile */
+            border-bottom: 1px solid #e5e7eb;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+            .slide {
+                padding: 4rem;
+            }
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        html {
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Estilos de Navegação */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: #ffffff; }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start;
+                page-break-before: always;
+            }
+            .slide:first-child { page-break-before: avoid; }
+            .nav-button, .counter, .copy-button { display: none; }
+        }
+
+        /* Estilos de Código e Tokens */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #282c34; /* Tema escuro para terminal */
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #abb2bf;
+            counter-reset: line;
+            position: relative;
+            overflow-x: auto; /* Para rolagem horizontal em mobile */
+        }
+        pre .line {
+            padding-left: 4.5em;
+            position: relative;
+            display: block; /* Garante quebra de linha correta */
+            white-space: pre-wrap; /* Quebra de linha em mobile */
+            word-break: break-all;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em;
+            padding-right: 1em;
+            text-align: right;
+            color: #5c6370;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #2d3748;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        /* Tokens para Shell Script */
+        .token-prompt { color: #61afef; } /* Azul para o prompt */
+        .token-command { color: #e5c07b; font-weight: bold; } /* Amarelo para comandos */
+        .token-option { color: #c678dd; } /* Roxo para opções/flags */
+        .token-path { color: #98c379; } /* Verde para caminhos/arquivos */
+        .token-comment { color: #5c6370; font-style: italic; } /* Cinza para comentários */
+        .token-output { color: #abb2bf; } /* Cor padrão para saídas */
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-4">Introdução ao Linux</h1>
+                <p class="text-2xl md:text-3xl text-purple-600">A Filosofia e os Primeiros Comandos no Terminal</p>
+                <p class="text-xl text-gray-600 mt-8">Fundamentos de Informática</p>
+                <div class="w-32 h-1.5 bg-purple-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: O que é um SO? -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Antes de Tudo: O que é um Sistema Operacional?</h2>
+                <p class="text-xl mb-6">Pense no seu computador como um corpo. O hardware (processador, memória, tela) são os músculos e ossos. O <strong>Sistema Operacional (SO)</strong> é o cérebro 🧠.</p>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li>Ele gerencia todos os recursos (hardware e software).</li>
+                    <li>Ele fornece uma interface para você interagir com a máquina.</li>
+                    <li>Sem ele, seu computador seria apenas uma caixa de metal e silício.</li>
+                    <li>Exemplos que você conhece: <strong>Windows, macOS, Android, iOS</strong>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 3: O que é o Linux? -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">E onde o Linux entra nisso? 🐧</h2>
+                <p class="text-2xl mb-6">Linux, em sua essência, é um <strong>kernel</strong> de sistema operacional.</p>
+                <div class="text-7xl my-8 animate-bounce">🚗</div>
+                <p class="text-xl">Se um SO completo é um carro, o <strong>kernel Linux</strong> é o <strong>motor</strong>. Ele é a peça central que se comunica diretamente com o hardware.</p>
+                <p class="text-lg mt-4 text-gray-600">Criado em 1991 por Linus Torvalds, apenas como um hobby!</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: Kernel vs. Distribuição -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Motor vs. Carro Completo: Kernel vs. Distro</h2>
+                <p class="text-xl mb-6">Você não usa só o motor, você usa o carro todo! No mundo Linux, o "carro completo" é chamado de <strong>Distribuição (ou Distro)</strong>.</p>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8 mt-8">
+                    <div class="w-full md:w-1/2 bg-blue-50 p-6 rounded-lg border border-blue-200">
+                        <h3 class="font-bold text-blue-800 text-2xl">Kernel Linux (O Motor ⚙️)</h3>
+                        <p class="mt-2">O núcleo que gerencia o hardware.</p>
+                    </div>
+                    <div class="text-4xl">+</div>
+                    <div class="w-full md:w-1/2 bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="font-bold text-green-800 text-2xl">Ferramentas e Apps (O Resto do Carro 🚗)</h3>
+                        <p class="mt-2">Interface gráfica, navegador, editor de texto, etc.</p>
+                    </div>
+                </div>
+                <p class="text-center text-3xl mt-8 font-bold">= Uma Distribuição Linux (Ubuntu, Mint, Fedora...)</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: A Filosofia Linux -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Filosofia do Linux (e do Unix)</h2>
+                <p class="text-xl mb-6">Linux foi inspirado em um sistema mais antigo, o Unix. Sua filosofia é poderosa e elegante:</p>
+                <ul class="text-xl space-y-6 list-decimal pl-6">
+                    <li><strong class="text-purple-700">Código Aberto (Open Source):</strong> Você pode ver, modificar e distribuir o código-fonte. É colaborativo por natureza. 🤝</li>
+                    <li><strong class="text-purple-700">Tudo é um Arquivo:</strong> Dispositivos, processos, conexões de rede... tudo no sistema pode ser tratado como um arquivo. 📄</li>
+                    <li><strong class="text-purple-700">Ferramentas Pequenas e Especializadas:</strong> Crie programas que fazem uma única coisa, mas a fazem muito bem. Pense em blocos de Lego. 🧱</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 6: Por que aprender Linux? -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Ok, mas por que EU deveria aprender?</h2>
+                <p class="text-xl mb-8">Mesmo que você use Windows ou macOS, entender Linux é um superpoder para qualquer pessoa de tecnologia.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                    <div class="bg-white p-4 rounded-lg shadow"><strong>🌐 Servidores:</strong> A grande maioria da internet roda em servidores Linux.</div>
+                    <div class="bg-white p-4 rounded-lg shadow"><strong>💻 Programação:</strong> É o ambiente preferido para desenvolvimento de software.</div>
+                    <div class="bg-white p-4 rounded-lg shadow"><strong>☁️ Nuvem e DevOps:</strong> Tecnologias como Docker e Kubernetes são nativas do Linux.</div>
+                    <div class="bg-white p-4 rounded-lg shadow"><strong>🔒 Segurança:</strong> Oferece um controle granular e robusto sobre o sistema.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: O Terminal -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Conhecendo sua Nova Ferramenta: O Terminal</h2>
+                <div class="text-7xl my-8">⬛️</div>
+                <p class="text-2xl mb-4">O terminal (ou <code class="inline-code">shell</code>) é uma interface de linha de comando (<code class="inline-code">CLI</code> - Command Line Interface).</p>
+                <p class="text-xl text-gray-600">Em vez de clicar em ícones, você digita comandos. É como ter uma conversa direta e sem intermediários com o seu computador. É mais rápido, poderoso e programável!</p>
+            </div>
+        </section>
+
+        <!-- Slide 8: Anatomia do Prompt -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Anatomia do Prompt de Comando</h2>
+                <p class="text-xl mb-6">Ao abrir o terminal, você verá algo assim, chamado de "prompt". Ele te dá informações importantes:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span></div></pre></div>
+                <ul class="text-xl mt-6 space-y-4">
+                    <li>👤 <code class="inline-code">aluno</code>: O nome do seu <strong>usuário</strong> atual.</li>
+                    <li>💻 <code class="inline-code">@meu-pc</code>: O <strong>hostname</strong>, nome da sua máquina na rede.</li>
+                    <li>📁 <code class="inline-code">~</code>: O seu <strong>diretório (pasta) atual</strong>. O til (<code class="inline-code">~</code>) é um atalho para o seu diretório "home".</li>
+                    <li>💲 <code class="inline-code">$</code>: Indica que o terminal está pronto para receber comandos como um usuário normal. (Se fosse <code class="inline-code">#</code>, você seria o superusuário/root!).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 9: Introdução ao pwd -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 1: Onde Estou?</h2>
+                <div class="text-7xl my-8">📍</div>
+                <p class="text-2xl mb-4">O primeiro comando que você deve aprender é o <code class="inline-code">pwd</code>.</p>
+                <p class="text-xl text-gray-600"><code class="inline-code">pwd</code> significa <strong>P</strong>rint <strong>W</strong>orking <strong>D</strong>irectory (Imprimir Diretório de Trabalho).</p>
+                <p class="text-xl text-gray-600 mt-2">Ele é o "Você está aqui" do seu sistema de arquivos.</p>
+            </div>
+        </section>
+
+        <!-- Slide 10: pwd na prática -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">pwd</code> na Prática</h2>
+                <p class="text-xl mb-6">Digite <code class="inline-code">pwd</code> e pressione Enter. O terminal mostrará o caminho completo da sua pasta atual, desde a raiz do sistema (<code class="inline-code">/</code>).</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">pwd</span></div><div class="line"><span class="token-output">/home/aluno</span></div></pre></div>
+                <p class="text-xl mt-6">Este é um <strong>caminho absoluto</strong>, pois começa na raiz (<code class="inline-code">/</code>), o ponto de partida de todo o sistema de arquivos do Linux.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 11: Introdução ao ls -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 2: O que tem aqui?</h2>
+                <div class="text-7xl my-8">🔍</div>
+                <p class="text-2xl mb-4">Agora que você sabe onde está, vamos ver o que há ao seu redor com o comando <code class="inline-code">ls</code>.</p>
+                <p class="text-xl text-gray-600"><code class="inline-code">ls</code> é a abreviação de <strong>l</strong>i<strong>s</strong>t (listar).</p>
+                <p class="text-xl text-gray-600 mt-2">Ele lista os arquivos e diretórios na sua pasta atual (ou em outra que você especificar).</p>
+            </div>
+        </section>
+
+        <!-- Slide 12: ls na prática -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">ls</code> na Prática</h2>
+                <p class="text-xl mb-6">Ao digitar <code class="inline-code">ls</code>, você verá o conteúdo do seu diretório atual.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">Documentos</span>  <span class="token-path">Imagens</span>  <span class="token-path">Música</span>  <span class="token-path">Downloads</span>  <span class="token-path">projeto_final.c</span></div></pre></div>
+                <p class="text-xl mt-6">Por padrão, muitos terminais usam cores para diferenciar tipos de arquivos. Geralmente, <strong>azul para diretórios</strong> e branco/cinza para arquivos.</p>
+            </div>
+        </section>
+
+        <!-- Slide 13: Opções (Flags) -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Turbinando Comandos com Opções (Flags)</h2>
+                <p class="text-xl mb-6">A maioria dos comandos Linux pode ser modificada com <strong>opções</strong> (também chamadas de flags ou switches). Elas geralmente começam com um hífen (<code class="inline-code">-</code>).</p>
+                <p class="text-xl mb-4">Vamos ver duas opções úteis para o <code class="inline-code">ls</code>:</p>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li><code class="inline-code">-l</code>: Usa um formato <strong>l</strong>ongo para exibir mais detalhes.</li>
+                    <li><code class="inline-code">-a</code>: Mostra <strong>t</strong>odos (<code class="inline-code">a</code>ll) os arquivos, incluindo os ocultos (que começam com <code class="inline-code">.</code>).</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Slide 14: ls -l -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Listando com Detalhes: <code class="inline-code">ls -l</code></h2>
+                <p class="text-xl mb-6">A opção <code class="inline-code">-l</code> nos dá uma visão muito mais completa:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ls</span> <span class="token-option">-l</span></div><div class="line"><span class="token-output">drwxr-xr-x 2 aluno aluno 4096 set 30 10:20 Documentos</span></div><div class="line"><span class="token-output">drwxr-xr-x 2 aluno aluno 4096 set 30 10:20 Imagens</span></div><div class="line"><span class="token-output">-rw-r--r-- 1 aluno aluno 1542 set 30 10:21 projeto_final.c</span></div></pre></div>
+                <p class="text-xl mt-6">Isso mostra: <strong>permissões</strong>, dono, tamanho, data de modificação e o nome.</p>
+                <p class="text-lg mt-2 text-gray-600">O <code class="inline-code">d</code> no início de <code class="inline-code">drwxr-xr-x</code> indica que <code class="inline-code">Documentos</code> é um <strong>d</strong>iretório.</p>
+            </div>
+        </section>
+
+        <!-- Slide 15: ls -a e combinação -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Mostrando Tudo: <code class="inline-code">ls -a</code></h2>
+                <p class="text-xl mb-6">Para ver arquivos de configuração (ocultos), use <code class="inline-code">-a</code>. E o melhor: <strong>você pode combinar opções!</strong></p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ls</span> <span class="token-option">-la</span> <span class="token-comment"># O mesmo que ls -l -a</span></div><div class="line"><span class="token-output">total 20</span></div><div class="line"><span class="token-output">drwxr-xr-x 5 aluno aluno 4096 set 30 10:25 .</span></div><div class="line"><span class="token-output">drwxr-xr-x 3 root  root  4096 set 30 10:15 ..</span></div><div class="line"><span class="token-output">-rw-r--r-- 1 aluno aluno  220 set 30 10:15 .bash_logout</span></div><div class="line"><span class="token-output">-rw-r--r-- 1 aluno aluno 3771 set 30 10:15 .bashrc</span></div><div class="line"><span class="token-output">drwxr-xr-x 2 aluno aluno 4096 set 30 10:20 Documentos</span></div><div class="line"><span class="token-output">...</span></div></pre></div>
+                <p class="text-xl mt-6">Note os arquivos <code class="inline-code">.</code> (diretório atual) e <code class="inline-code">..</code> (diretório pai, ou seja, o anterior).</p>
+            </div>
+        </section>
+
+        <!-- Slide 16: Introdução ao cd -->
+        <section id="slide-16" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 3: Movendo-se pelo Sistema</h2>
+                <div class="text-7xl my-8">🚶‍♂️</div>
+                <p class="text-2xl mb-4">Você já sabe onde está e o que tem ao redor. É hora de se mover com o comando <code class="inline-code">cd</code>.</p>
+                <p class="text-xl text-gray-600"><code class="inline-code">cd</code> significa <strong>c</strong>hange <strong>d</strong>irectory (mudar diretório).</p>
+                <p class="text-xl text-gray-600 mt-2">É o comando que você mais usará para navegar entre as pastas.</p>
+            </div>
+        </section>
+
+        <!-- Slide 17: cd na prática -->
+        <section id="slide-17" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">cd</code> na Prática</h2>
+                <p class="text-xl mb-6">Para entrar em um diretório, simplesmente digite <code class="inline-code">cd</code> seguido do nome do diretório.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment"># Vendo onde estamos primeiro</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">pwd</span></div><div class="line"><span class="token-output">/home/aluno</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Entrando na pasta Documentos</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">cd</span> <span class="token-path">Documentos</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Note como o prompt mudou!</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">pwd</span></div><div class="line"><span class="token-output">/home/aluno/Documentos</span></div></pre></div>
+                <p class="text-xl mt-6"><strong>Dica Pro:</strong> Digite as primeiras letras de uma pasta (ex: <code class="inline-code">Doc</code>) e pressione a tecla <strong>TAB</strong>. O terminal tentará autocompletar para você! ✨</p>
+            </div>
+        </section>
+
+        <!-- Slide 18: Caminhos Relativos vs Absolutos -->
+        <section id="slide-18" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Navegação: Caminhos Absolutos vs. Relativos</h2>
+                <p class="text-xl mb-6">Existem duas formas de dizer ao <code class="inline-code">cd</code> para onde ir:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                        <h3 class="font-bold text-lg mb-2">🛣️ Caminho Absoluto</h3>
+                        <p>Começa da raiz (<code class="inline-code">/</code>). É o endereço completo, não importa onde você esteja.</p>
+                        <p class="mt-4"><code class="inline-code">cd /home/aluno/Documentos</code></p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="font-bold text-lg mb-2">🌲 Caminho Relativo</h3>
+                        <p>Começa a partir do seu diretório atual. É um atalho.</p>
+                        <p class="mt-4"><code class="inline-code">cd Documentos</code> (se você já estiver em <code class="inline-code">/home/aluno</code>)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Atalhos de Navegação -->
+        <section id="slide-19" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Atalhos Essenciais do <code class="inline-code">cd</code></h2>
+                <p class="text-xl mb-6">Digitar caminhos longos o tempo todo é cansativo. Use estes atalhos:</p>
+                <ul class="text-xl space-y-4">
+                    <li><code class="inline-code">cd ..</code> : Sobe um nível no diretório (vai para o diretório "pai").</li>
+                    <li><code class="inline-code">cd ~</code> ou apenas <code class="inline-code">cd</code> : Volta instantaneamente para o seu diretório home (<code class="inline-code">/home/usuario</code>).</li>
+                    <li><code class="inline-code">cd -</code> : Volta para o último diretório em que você esteve. Super útil!</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 20: Prática com atalhos -->
+        <section id="slide-20" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Praticando a Navegação</h2>
+                <p class="text-xl mb-6">Vamos ver esses atalhos em ação.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment"># Estamos em /home/aluno/Documentos</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">pwd</span></div><div class="line"><span class="token-output">/home/aluno/Documentos</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Subindo um nível</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">cd</span> ..</div><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">pwd</span></div><div class="line"><span class="token-output">/home/aluno</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Voltando para onde estávamos (Documentos)</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">cd</span> -</div><div class="line"><span class="token-output">/home/aluno/Documentos</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 21: Desafio de Navegação -->
+        <section id="slide-21" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Mini-Desafio: Para onde vou?</h2>
+                <p class="text-xl mb-6">Imagine a seguinte estrutura de pastas:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-path">/home/aluno/</span></div><div class="line"><span class="token-path">├── Documentos/</span></div><div class="line"><span class="token-path">│   └── faculdade/</span></div><div class="line"><span class="token-path">│       └── calculo/</span></div><div class="line"><span class="token-path">└── Downloads/</span></div></pre></div>
+                <p class="text-xl my-6">Se você está em <code class="inline-code">/home/aluno/Documentos/faculdade/calculo</code>, qual comando te leva para <code class="inline-code">/home/aluno/Downloads</code>?</p>
+                <div class="bg-gray-200 p-4 rounded-lg mt-4">
+                    <p class="text-lg font-bold">Resposta (Relativa): <code class="inline-code">cd ../../../Downloads</code></p>
+                    <p class="text-lg font-bold">Resposta (Absoluta): <code class="inline-code">cd /home/aluno/Downloads</code></p>
+                    <p class="text-lg font-bold">Resposta (Com Atalho): <code class="inline-code">cd ~/Downloads</code></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 22: Introdução ao clear -->
+        <section id="slide-22" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 4: Organizando a Bagunça</h2>
+                <div class="text-7xl my-8">🧹</div>
+                <p class="text-2xl mb-4">Depois de digitar vários comandos, sua tela pode ficar poluída. Para limpá-la, use o comando <code class="inline-code">clear</code>.</p>
+                <p class="text-xl text-gray-600">Ele simplesmente limpa a tela do terminal, movendo o seu prompt para o topo.</p>
+                <p class="text-lg mt-2 text-gray-500"><strong>Importante:</strong> ele não apaga seu histórico de comandos! Você ainda pode usar a seta para cima ▲ para acessá-los.</p>
+            </div>
+        </section>
+
+        <!-- Slide 23: clear na prática -->
+        <section id="slide-23" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">clear</code> na Prática</h2>
+                <p class="text-xl mb-6">Não há segredo. Apenas digite e tecle Enter.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ls</span> <span class="token-option">-la</span></div><div class="line"><span class="token-comment"># ... um monte de saída ...</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">pwd</span></div><div class="line"><span class="token-output">/home/aluno</span></div><div class="line"> </div><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">clear</span></div><div class="line"><span class="token-comment"># ... A tela fica limpa e o prompt vai para o topo ...</span></div></pre></div>
+                <p class="text-xl mt-6"><strong>Dica Pro:</strong> O atalho <code class="inline-code">Ctrl + L</code> faz a mesma coisa que o comando <code class="inline-code">clear</code>!</p>
+            </div>
+        </section>
+
+        <!-- Slide 24: Transition to File Manipulation -->
+        <section id="slide-24" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Parte 2: Manipulando Arquivos e Pastas</h2>
+                <div class="text-7xl my-8">🛠️</div>
+                <p class="text-2xl">Agora que sabemos navegar, vamos aprender a criar, alterar e remover coisas!</p>
+                <p class="text-xl text-purple-600 font-semibold mt-4">Essa é a base para organizar seus projetos e seu sistema.</p>
+            </div>
+        </section>
+
+        <!-- Slide 25: mkdir Intro -->
+        <section id="slide-25" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 5: Criando Pastas (<code class="inline-code">mkdir</code>)</h2>
+                <div class="text-7xl my-8">📁➕</div>
+                <p class="text-2xl mb-4"><code class="inline-code">mkdir</code> significa <strong>M</strong>a<strong>k</strong>e <strong>Dir</strong>ectory (Criar Diretório).</p>
+                <p class="text-xl text-gray-600">Use este comando para criar novas pastas e organizar seus arquivos.</p>
+            </div>
+        </section>
+
+        <!-- Slide 26: mkdir Practice -->
+        <section id="slide-26" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">mkdir</code> na Prática</h2>
+                <p class="text-xl mb-6">Vamos criar uma pasta para nossas aulas dentro de Documentos.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">cd</span> <span class="token-path">Documentos/</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-comment"># (pasta vazia por enquanto)</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">mkdir</span> <span class="token-path">Aulas</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">Aulas</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 27: mkdir -p -->
+        <section id="slide-27" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Criando Estruturas Inteiras (<code class="inline-code">mkdir -p</code>)</h2>
+                <p class="text-xl mb-6">E se você quiser criar uma pasta dentro de outra que ainda não existe? Use a opção <code class="inline-code">-p</code> (de <strong>p</strong>arents, pais).</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">mkdir -p</span> <span class="token-path">Aulas/Informatica/2025</span></div><div class="line"><span class="token-comment"># Isso cria 'Aulas' (se não existir), depois 'Informatica' dentro dela, e '2025' dentro de Informatica.</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 28: touch Intro -->
+        <section id="slide-28" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 6: Criando Arquivos Vazios (<code class="inline-code">touch</code>)</h2>
+                <div class="text-7xl my-8">📄✨</div>
+                <p class="text-2xl mb-4">O comando <code class="inline-code">touch</code> é usado para criar arquivos vazios.</p>
+                <p class="text-xl text-gray-600">É útil quando você precisa que um arquivo exista antes de escrever nele, como um log ou um rascunho.</p>
+            </div>
+        </section>
+
+        <!-- Slide 29: touch Practice -->
+        <section id="slide-29" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">touch</code> na Prática</h2>
+                <p class="text-xl mb-6">Vamos criar um arquivo de anotações na nossa nova pasta.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">cd</span> <span class="token-path">Aulas/Informatica/2025</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">touch</span> <span class="token-path">anotacoes.txt</span> <span class="token-path">lista_comandos.md</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">ls</span> <span class="token-option">-l</span></div><div class="line"><span class="token-output">-rw-r--r-- 1 aluno aluno 0 set 30 13:10 anotacoes.txt</span></div><div class="line"><span class="token-output">-rw-r--r-- 1 aluno aluno 0 set 30 13:10 lista_comandos.md</span></div></pre></div>
+                <p class="text-xl mt-6">Note que o tamanho dos arquivos é <strong>0</strong>. Eles estão vazios.</p>
+            </div>
+        </section>
+
+        <!-- Slide 30: cat Intro -->
+        <section id="slide-30" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 7: Vendo o Conteúdo (<code class="inline-code">cat</code>)</h2>
+                <div class="text-7xl my-8">📖</div>
+                <p class="text-2xl mb-4"><code class="inline-code">cat</code> (de con<strong>cat</strong>enate) é um dos jeitos mais simples de ver o conteúdo de um arquivo.</p>
+                <p class="text-xl text-gray-600">Ele lê o arquivo e o imprime diretamente na tela do terminal.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 31: cat Practice -->
+        <section id="slide-31" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">cat</code> na Prática</h2>
+                <p class="text-xl mb-6">Suponha que, após editar, o arquivo <code class="inline-code">anotacoes.txt</code> tenha o seguinte conteúdo:</p>
+                <div class="bg-white p-4 rounded-lg my-4 text-gray-700 italic">
+                    <p>Aula 1: Introdução</p>
+                    <p>- Comando pwd mostra o diretório atual</p>
+                </div>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">cat</span> <span class="token-path">anotacoes.txt</span></div><div class="line"><span class="token-output">Aula 1: Introdução</span></div><div class="line"><span class="token-output">- Comando pwd mostra o diretório atual</span></div></pre></div>
+            </div>
+        </section>
+        
+        <!-- Slide 32: cp Intro -->
+        <section id="slide-32" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 8: Copiando Arquivos e Pastas (<code class="inline-code">cp</code>)</h2>
+                <div class="text-7xl my-8">📋</div>
+                <p class="text-2xl mb-4"><code class="inline-code">cp</code> significa <strong>c</strong>o<strong>p</strong>y (copiar).</p>
+                <p class="text-xl text-gray-600">A estrutura básica do comando é: <code class="inline-code">cp [origem] [destino]</code></p>
+            </div>
+        </section>
+
+        <!-- Slide 33: cp Practice (File) -->
+        <section id="slide-33" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Copiando Arquivos</h2>
+                <p class="text-xl mb-6">Você pode copiar um arquivo com um novo nome, ou para outra pasta.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment"># 1. Copia o arquivo com um novo nome na mesma pasta</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">cp</span> <span class="token-path">anotacoes.txt</span> <span class="token-path">anotacoes_backup.txt</span></div><div class="line"> </div><div class="line"><span class="token-comment"># 2. Copia o arquivo para o diretório pai (Informatica)</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">cp</span> <span class="token-path">anotacoes.txt</span> ..</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 34: cp -r Practice (Directory) -->
+        <section id="slide-34" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Copiando Pastas (<code class="inline-code">cp -r</code>)</h2>
+                <p class="text-xl mb-6">Para copiar uma pasta e todo o seu conteúdo, você precisa usar a opção <code class="inline-code">-r</code> (<strong>r</strong>ecursive).</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">cp -r</span> <span class="token-path">Aulas</span> <span class="token-path">Aulas_Copia</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">Aulas  Aulas_Copia</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 35: mv Intro -->
+        <section id="slide-35" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 9: Movendo e Renomeando (<code class="inline-code">mv</code>)</h2>
+                <div class="text-7xl my-8">🚚</div>
+                <p class="text-2xl mb-4"><code class="inline-code">mv</code> significa <strong>m</strong>o<strong>v</strong>e (mover), mas é um comando 2 em 1!</p>
+                <ul class="text-xl space-y-4 list-disc pl-6 text-left max-w-2xl mx-auto">
+                    <li>Se o destino for um <strong>novo nome</strong> na mesma pasta, ele <strong>renomeia</strong>.</li>
+                    <li>Se o destino for <strong>outra pasta</strong>, ele <strong>move</strong>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 36: mv Practice (Rename) -->
+        <section id="slide-36" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Usando <code class="inline-code">mv</code> para Renomear</h2>
+                <p class="text-xl mb-6">Vamos corrigir o nome do nosso arquivo de anotações.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">anotacoes.txt</span>  <span class="token-path">lista_comandos.md</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">mv</span> <span class="token-path">anotacoes.txt</span> <span class="token-path">anotacoes_aula1.txt</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">anotacoes_aula1.txt</span>  <span class="token-path">lista_comandos.md</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 37: mv Practice (Move) -->
+        <section id="slide-37" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Usando <code class="inline-code">mv</code> para Mover</h2>
+                <p class="text-xl mb-6">Agora, vamos mover o arquivo para a pasta de Informática.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">mv</span> <span class="token-path">anotacoes_aula1.txt</span> ../</div><div class="line"><span class="token-comment"># O '..' move o arquivo para o diretório pai, que é 'Informatica'</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">lista_comandos.md</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/.../2025$</span> <span class="token-command">ls</span> ../</div><div class="line"><span class="token-path">2025</span>  <span class="token-path">anotacoes_aula1.txt</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 38: rm Intro -->
+        <section id="slide-38" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 10: Removendo Coisas (<code class="inline-code">rm</code>)</h2>
+                <div class="text-7xl my-8">⚠️🗑️</div>
+                <p class="text-2xl font-bold text-red-600 mb-4">MUITO CUIDADO COM ESTE COMANDO!</p>
+                <p class="text-xl text-gray-800"><code class="inline-code">rm</code> significa <strong>r</strong>e<strong>m</strong>ove (remover). Ele apaga arquivos e pastas.</p>
+                <p class="text-2xl mt-4 font-bold uppercase">Não há lixeira no terminal. Uma vez apagado, já era.</p>
+            </div>
+        </section>
+
+        <!-- Slide 39: rm Practice (File) -->
+        <section id="slide-39" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Removendo um Arquivo</h2>
+                <p class="text-xl mb-6">Para apagar um arquivo, use <code class="inline-code">rm nome_do_arquivo</code>. Para mais segurança, use a opção <code class="inline-code">-i</code> (<strong>i</strong>nteractive), que pedirá confirmação.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">touch</span> <span class="token-path">arquivo_temporario.txt</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">rm -i</span> <span class="token-path">arquivo_temporario.txt</span></div><div class="line"><span class="token-output">rm: remove regular empty file 'arquivo_temporario.txt'? (y/n)</span> y</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 40: rm -r Practice (Directory) -->
+        <section id="slide-40" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Removendo Pastas (<code class="inline-code">rm -r</code>)</h2>
+                <p class="text-xl mb-6 text-red-600 font-bold">CUIDADO EM DOBRO!</p>
+                <p class="text-xl mb-6">Para apagar uma pasta e TUDO que há dentro dela, use a opção <code class="inline-code">-r</code> (recursive).</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">Aulas  Aulas_Copia</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">rm -r</span> <span class="token-path">Aulas_Copia</span></div><div class="line"><span class="token-prompt">aluno@meu-pc:~/Documentos$</span> <span class="token-command">ls</span></div><div class="line"><span class="token-path">Aulas</span></div></pre></div>
+                <p class="text-xl mt-6">O comando <code class="inline-code">rm -rf /</code> (NÃO DIGITE ISSO!) pode apagar seu sistema operacional inteiro. Tenha sempre certeza do que está fazendo.</p>
+            </div>
+        </section>
+
+        <!-- Slide 41: New Exercise -->
+        <section id="slide-41" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Missão 2.0: Organizando a Faculdade 🗺️</h2>
+                <p class="text-xl mb-6">Vamos juntar tudo. Partindo do seu diretório home (<code class="inline-code">~</code>), execute as seguintes tarefas:</p>
+                <ol class="list-decimal list-inside mt-4 space-y-3 text-lg bg-gray-50 p-6 rounded-lg">
+                    <li>Crie uma pasta `Faculdade`.</li>
+                    <li>Dentro de `Faculdade`, crie as pastas `Calculo` e `Algoritmos`.</li>
+                    <li>Dentro de `Calculo`, crie um arquivo vazio chamado `prova1.txt`.</li>
+                    <li>Ainda em `Faculdade`, crie um arquivo vazio `resumo_algoritmos.txt`.</li>
+                    <li>Copie o arquivo `prova1.txt` para a pasta `Algoritmos`.</li>
+                    <li>Renomeie a cópia que está em `Algoritmos` para `trabalho_final.txt`.</li>
+                    <li>Mova o arquivo `resumo_algoritmos.txt` para dentro da pasta `Algoritmos`.</li>
+                    <li>Apague o arquivo original `prova1.txt` da pasta `Calculo`.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Slide 42: New Exercise Solution -->
+        <section id="slide-42" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Solução da Missão 2.0</h2>
+                <p class="text-xl mb-6">Uma possível sequência de comandos para resolver o desafio:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">mkdir</span> <span class="token-path">Faculdade</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">cd</span> <span class="token-path">Faculdade</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">mkdir</span> <span class="token-path">Calculo</span> <span class="token-path">Algoritmos</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">touch</span> <span class="token-path">Calculo/prova1.txt</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">touch</span> <span class="token-path">resumo_algoritmos.txt</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">cp</span> <span class="token-path">Calculo/prova1.txt</span> <span class="token-path">Algoritmos/</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">mv</span> <span class="token-path">Algoritmos/prova1.txt</span> <span class="token-path">Algoritmos/trabalho_final.txt</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">mv</span> <span class="token-path">resumo_algoritmos.txt</span> <span class="token-path">Algoritmos/</span></div><div class="line"><span class="token-prompt">~/Faculdade$</span> <span class="token-command">rm</span> <span class="token-path">Calculo/prova1.txt</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 43: Updated Summary Table -->
+        <section id="slide-43" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo dos Comandos</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-lg mt-6 bg-white shadow rounded-lg">
+                        <thead class="bg-gray-200">
+                            <tr><th class="p-3 text-left">Comando</th><th class="p-3 text-left">O que faz</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">pwd</code></td><td class="p-3">Mostra o diretório atual.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">ls</code></td><td class="p-3">Lista arquivos e diretórios.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">cd</code></td><td class="p-3">Muda de diretório.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">clear</code></td><td class="p-3">Limpa a tela do terminal.</td></tr>
+                            <tr class="border-t bg-purple-50"><td class="p-3"><code class="inline-code">mkdir</code></td><td class="p-3">Cria um novo diretório.</td></tr>
+                            <tr class="border-t bg-purple-50"><td class="p-3"><code class="inline-code">touch</code></td><td class="p-3">Cria um arquivo vazio.</td></tr>
+                            <tr class="border-t bg-purple-50"><td class="p-3"><code class="inline-code">cat</code></td><td class="p-3">Exibe o conteúdo de um arquivo.</td></tr>
+                            <tr class="border-t bg-purple-50"><td class="p-3"><code class="inline-code">cp</code></td><td class="p-3">Copia arquivos ou pastas.</td></tr>
+                            <tr class="border-t bg-purple-50"><td class="p-3"><code class="inline-code">mv</code></td><td class="p-3">Move ou renomeia arquivos/pastas.</td></tr>
+                            <tr class="border-t bg-purple-50"><td class="p-3"><code class="inline-code">rm</code></td><td class="p-3">Remove arquivos ou pastas (PERMANENTE).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 44: Superpowers -->
+        <section id="slide-44" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Isso é só o começo!</h2>
+                <p class="text-2xl">Você agora sabe o básico de navegação e manipulação. Já é um grande passo!</p>
+                <div class="text-6xl my-8 animate-pulse">🚀</div>
+                <p class="text-xl mt-4">Comandos futuros e a combinação dos que você já sabe permitirão:</p>
+                <p class="text-xl text-purple-600 font-semibold">Editar arquivos, buscar por texto, automatizar tarefas e muito mais.</p>
+            </div>
+        </section>
+
+        <!-- Slide 45: Next Steps -->
+        <section id="slide-45" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Universo do Terminal</h2>
+                <p class="text-2xl">O segredo é a prática! Não tenha medo de explorar em uma pasta de testes.</p>
+                <ul class="text-xl space-y-4 list-disc pl-6 text-left mt-8 max-w-2xl mx-auto">
+                    <li>Crie sua própria estrutura de pastas para um projeto fictício.</li>
+                    <li>Pratique mover e copiar arquivos entre elas.</li>
+                    <li>Crie arquivos de teste e depois os apague com <code class="inline-code">rm</code>.</li>
+                    <li>A curiosidade é sua maior aliada!</li>
+                </ul>
+                <p class="text-3xl font-bold text-purple-600 mt-12">Próxima aula: Permissões e Usuários!</p>
+            </div>
+        </section>
+
+        <!-- Slide 46: Questions -->
+        <section id="slide-46" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                const span = button.querySelector('span');
+                const originalText = span ? span.textContent : 'Copiar';
+
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeText.trim();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        if(span) {
+                           span.textContent = 'Copiado!';
+                           setTimeout(() => {
+                               span.textContent = originalText;
+                           }, 2000);
+                        }
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

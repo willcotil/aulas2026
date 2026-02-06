@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 4: Fundamentos de Informática - Pull Request & Merge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --slide-bg: #f8f9fa;
+            --text-color: #5c6773;
+            --heading-color: #3d4c5a;
+            --accent-color: #ff8f40;
+            --main-branch-color: #86b300;
+            --feature-branch-color: #f29718;
+            --head-color: #f07178;
+            --pr-color: #409ae1;
+            --commit-color: #e7e8e9;
+            --commit-border: #abb0b6;
+            --review-box-bg: #f0f1f2;
+            --review-box-border: #e1e2e3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--slide-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, visibility 0.6s;
+            z-index: 1;
+        }
+
+            .slide.active {
+                opacity: 1;
+                visibility: visible;
+                z-index: 2;
+            }
+
+            .slide h1 {
+                font-size: 3.5rem;
+                font-weight: 900;
+                margin-bottom: 0.5rem;
+                color: var(--accent-color);
+            }
+
+            .slide h2 {
+                font-size: 2.2rem;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                color: var(--heading-color);
+            }
+
+            .slide h3 {
+                font-size: 1.6rem;
+                font-weight: 500;
+                margin-bottom: 1.5rem;
+                color: var(--accent-color);
+            }
+
+        .author-name {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .slide p {
+            font-size: 1.3rem;
+            max-width: 900px;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .slide ul {
+            list-style: none;
+            max-width: 800px;
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .slide li {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            background-color: #f0f1f2;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+            .slide li strong {
+                color: var(--heading-color);
+            }
+
+        code {
+            background-color: #e1e2e3;
+            color: var(--feature-branch-color);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .terminal-code {
+            background-color: #21262d;
+            color: #f0f1f2;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid var(--review-box-border);
+            margin-top: 1rem;
+        }
+
+            .terminal-code .comment {
+                color: #abb0b6;
+            }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .nav-button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+            .nav-button:hover {
+                background-color: #f29718;
+                transform: translateY(-2px);
+            }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 1.2rem;
+            background-color: rgba(0,0,0,0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .fullscreen-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0,0,0,0.05);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s;
+        }
+
+            .fullscreen-button:hover {
+                background-color: rgba(0,0,0,0.1);
+            }
+
+            .fullscreen-button svg {
+                width: 24px;
+                height: 24px;
+                fill: var(--text-color);
+            }
+
+        /* Animações e Elementos Interativos */
+        .git-animation-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 350px;
+            position: relative;
+            margin-top: 1rem;
+            border: 2px dashed #e1e2e3;
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .commit {
+            width: 40px;
+            height: 40px;
+            background-color: var(--commit-color);
+            border: 3px solid var(--commit-border);
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--heading-color);
+            font-weight: 700;
+            transition: all 0.5s ease-in-out;
+            z-index: 5;
+        }
+
+        .branch-line {
+            height: 6px;
+            position: absolute;
+            background-color: var(--main-branch-color);
+            transform-origin: left center;
+            transition: all 0.5s ease-in-out;
+            z-index: 4;
+        }
+
+        .branch-label {
+            position: absolute;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--bg-color);
+            transition: all 0.5s ease-in-out;
+            z-index: 6;
+            white-space: nowrap;
+        }
+
+        .label-main {
+            background-color: var(--main-branch-color);
+        }
+
+        .label-feature {
+            background-color: var(--feature-branch-color);
+        }
+
+        .label-head {
+            background-color: var(--head-color);
+        }
+
+        .label-pr {
+            background-color: var(--pr-color);
+            border: 2px dashed white;
+        }
+
+        .animation-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .control-button {
+            background-color: #e1e2e3;
+            color: var(--heading-color);
+            border: 1px solid #abb0b6;
+        }
+
+            .control-button:hover {
+                background-color: #abb0b6;
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide p, .slide ul, .slide h2, .slide h3, .slide .terminal-code, .slide img, .slide .author-name, .slide .interactive-layout {
+            opacity: 0;
+        }
+
+        .slide.active p, .slide.active ul, .slide.active h2, .slide.active h3, .slide.active .terminal-code, .slide.active img, .slide.active .author-name, .slide.active .interactive-layout {
+            animation: fadeIn 0.6s ease-out 0.3s forwards;
+        }
+
+        .interactive-layout {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 1rem;
+        }
+
+        .placeholder-box {
+            background-color: var(--review-box-bg);
+            border: 2px solid var(--review-box-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 45%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+            .placeholder-box h4 {
+                color: var(--heading-color);
+                font-size: 1.2rem;
+                position: absolute;
+                top: 1rem;
+            }
+
+            .placeholder-box img {
+                max-width: 100px;
+                height: auto;
+                border-radius: 50%;
+            }
+
+            .placeholder-box p {
+                font-size: 1rem;
+                margin-top: 1rem;
+            }
+
+        .arrow {
+            font-size: 3rem;
+            color: var(--accent-color);
+            font-weight: 900;
+        }
+
+        /* Media Queries para Responsividade */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1rem;
+            }
+
+                .slide h1 {
+                    font-size: 2.5rem;
+                }
+
+                .slide h2 {
+                    font-size: 1.8rem;
+                }
+
+                .slide p, .slide li {
+                    font-size: 1.1rem;
+                }
+
+            .terminal-code {
+                font-size: 0.9rem;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: center;
+                bottom: 1rem;
+            }
+
+            .nav-button {
+                width: 120px;
+                padding: 0.8rem 1rem;
+            }
+
+            .git-animation-container, .interactive-layout {
+                flex-direction: column;
+                height: auto;
+                gap: 1rem;
+            }
+
+            .placeholder-box {
+                width: 90%;
+                height: auto;
+                padding: 2rem 1rem;
+            }
+
+                .placeholder-box img {
+                    max-width: 80px;
+                }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+        <!-- AULA 4 COMEÇA AQUI -->
+        <div class="slide active" data-slide="1">
+            <h1>Aula 4</h1>
+            <p class="author-name">Fundamentos de Informática</p>
+            <h2>Unindo Mundos: Pull Requests & Merge</h2>
+            <p>Aprendendo a colaborar e integrar código de forma profissional.</p>
+        </div>
+
+        <div class="slide" data-slide="2">
+            <h2>Recapitulando: Onde Paramos?</h2>
+            <p>Na última aula, criamos uma branch <code>feature/comandos-git</code> e adicionamos um novo arquivo nela, trabalhando de forma segura e isolada da nossa branch principal (<code>main</code>).</p>
+            <div class="git-animation-container" id="anim-pr-recap"></div>
+        </div>
+
+        <div class="slide" data-slide="3">
+            <h2>O Desafio Atual</h2>
+            <h3>Nossa nova funcionalidade está pronta na branch. E agora?</h3>
+            <p>Como trazemos essa inovação, que está em uma "realidade paralela" (nossa branch), de volta para a linha do tempo principal (<code>main</code>) para que todos possam usar?</p>
+            <img src="img/unir.png" alt="[Diagrama mostrando uma branch 'feature' que precisa ser unida à 'main']" style="max-width: 500px; margin-top: 1rem;">
+        </div>
+
+        <div class="slide" data-slide="4">
+            <h2>O que é um Pull Request (PR)?</h2>
+            <p>É uma <strong>solicitação formal</strong> no GitHub para <em>"puxar"</em> (pull) as alterações de uma branch para outra. É o coração do trabalho em equipe.</p>
+            <h3>Analogia: Revisão de Trabalho em Grupo</h3>
+            <p>Pense que você escreveu sua parte de um trabalho (em sua branch). Antes de juntar com o resto, você envia para seus colegas revisarem. O Pull Request é esse momento de revisão, discussão e aprovação.</p>
+        </div>
+
+        <div class="slide" data-slide="5">
+            <h2>O Fluxo do Pull Request (Interativo)</h2>
+            <p>Vamos ver o passo a passo de como um Pull Request une as duas realidades.</p>
+            <div class="git-animation-container" id="anim-pr-main"></div>
+            <div class="animation-controls">
+                <button class="nav-button control-button step1-btn">1. Abrir Pull Request</button>
+                <button class="nav-button control-button step2-btn" disabled>2. Revisar e Aprovar</button>
+                <button class="nav-button control-button step3-btn" disabled>3. Fazer o "Merge"</button>
+            </div>
+        </div>
+
+        <div class="slide" data-slide="6">
+            <h2>Mãos à Obra: Abrindo Nosso PR</h2>
+            <h3>Vamos levar nossa página de comandos para a branch <code>main</code>!</h3>
+            <p>Acesse a página do seu repositório no GitHub. Você provavelmente verá um aviso amarelo sugerindo a criação de um Pull Request. Vamos usá-lo!</p>
+            <img src="img/pull-request-01.png" alt="[Banner amarelo no GitHub sugerindo a criação de um Pull Request]" style="max-width: 80%; border-radius: 12px; margin-top: 1rem;">
+        </div>
+
+        <div class="slide" data-slide="7">
+            <h2>Preenchendo o Formulário do PR</h2>
+            <p>Ao clicar no botão, você verá esta tela. É o formulário do nosso pedido de revisão. O GitHub já preenche o título e a descrição com base no nosso último commit.</p>
+            <img src="img/form-request.png" alt="[Tela de criação de um Pull Request no GitHub]" style="max-width: 80%; border-radius: 12px;">
+            <p style="margin-top:1rem;">Confirme que a base é <code>main</code> e o comparativo é <code>feature/comandos-git</code>, e clique em <strong>"Create pull request"</strong>.</p>
+        </div>
+
+        <div class="slide" data-slide="8">
+            <h2>A Tela de Revisão</h2>
+            <p>Esta página é o centro de discussões. Aqui, sua equipe poderia deixar comentários, sugerir mudanças e, finalmente, aprovar o seu trabalho.</p>
+            <p>Como estamos trabalhando sozinhos, nós mesmos vamos fazer o merge. Clique no botão verde <strong>"Merge pull request"</strong> e depois em <strong>"Confirm merge"</strong>.</p>
+            <img src="img/botao-merge.png" alt="[Botão para fazer o merge de um Pull Request no GitHub]" style="max-width: 80%; border-radius: 12px;">
+        </div>
+
+        <div class="slide" data-slide="9">
+            <h2>Missão Cumprida (no GitHub)!</h2>
+            <p>Parabéns! Suas alterações agora fazem parte da branch <code>main</code>.</p>
+            <img src="img/merged.png" alt="[Status de 'Merged' em um pull request roxo.]" style="max-width: 70%; border-radius: 12px;">
+            <p>Volte para a página principal do seu repositório (clicando na aba <strong>&lt;&gt; Code</strong>) e veja que o seu novo arquivo agora está lá!</p>
+        </div>
+
+        <div class="slide" data-slide="10">
+            <h2>Faxina: Apagando a Branch</h2>
+            <p>Após o merge, a branch de feature cumpriu seu propósito. É uma boa prática apagá-la para manter o repositório limpo. O GitHub facilita isso com um botão que aparece logo após o merge.</p>
+            <img src="img/delete.png" alt="[Botão para deletar a branch após o merge]" style="max-width: 70%; border-radius: 12px;">
+        </div>
+
+        <div class="slide" data-slide="11">
+            <h2>Passo Final: Sincronizando o Ambiente Local</h2>
+            <h3>Seu ambiente de trabalho (Codespace) ainda não sabe das novidades!</h3>
+            <p>Precisamos <em>"puxar"</em> (pull) as atualizações da <code>main</code> do GitHub para o nosso Codespace. É o processo inverso do <code>push</code>.</p>
+            <div class="terminal-code">
+                <span class="comment"># 1. Volte para a branch principal (se não estiver nela)</span><br>
+                $ git switch main<br><br>
+                <span class="comment"># 2. Baixe as atualizações do repositório remoto (GitHub)</span><br>
+                $ git pull origin main
+            </div>
+            <p style="margin-top:1rem;">Você verá os arquivos atualizados aparecerem no seu explorador de arquivos!</p>
+        </div>
+
+        <div class="slide" data-slide="12">
+            <h2>Colaboração: O Modelo Fork & Pull Request</h2>
+            <p>Até agora, trabalhamos no nosso próprio repositório. Mas como contribuir para o projeto de um colega, ou para um projeto de código aberto, onde não temos permissão para dar `push`?</p>
+            <h3>A resposta: Fazendo um "Fork"!</h3>
+            <img src="img/fork.png" alt="[Fazendo um fork]" style="max-height: 40%; border-radius: 12px;">
+        </div>
+
+        <div class="slide" data-slide="13">
+            <h2>O que é um Fork? (Sua Cópia Pessoal)</h2>
+            <p>Um <strong>Fork</strong> é uma cópia completa de um repositório que fica na <strong>sua conta</strong> do GitHub. Você é o dono dessa cópia e tem total permissão para fazer o que quiser nela.</p>
+            <h3>Analogia: A Fotocópia da Biblioteca</h3>
+            <p>Pense no repositório original como um livro raro na biblioteca. Você não pode escrever nele. Ao fazer um "Fork", você tira uma fotocópia completa do livro. Agora, na sua cópia, você pode rabiscar, grifar e fazer anotações à vontade, sem afetar o original.</p>
+        </div>
+
+        <div class="slide" data-slide="14">
+            <h2>Passo 1: Fazendo o Fork</h2>
+            <h3>Como "fotocopiar" o repositório do seu colega.</h3>
+            <p>Vá até a página do repositório que você quer contribuir (o repositório do Aluno A) e clique no botão <strong>"Fork"</strong>, no canto superior direito.</p>
+            <img src="img/botao-fork.png" alt="[Imagem da interface do GitHub mostrando o botão Fork]" style="max-width: 80%; border-radius: 12px;">
+            <img src="img/tela-fork.png" alt="[Imagem da interface do GitHub mostrando o botão Fork]" style="max-width: 80%; border-radius: 12px;">
+        </div>
+
+        <div class="slide" data-slide="15">
+            <h2>Passo 2: Trabalhe na Sua Cópia</h2>
+            <h3>Agora o fluxo é o mesmo que você já conhece, mas no seu Fork!</h3>
+            <p>Após o Fork, você terá uma cópia do projeto em `github.com/SEU_USUARIO/nome-do-projeto`. Agora siga os passos:</p>
+            <ul>
+                <li><strong>Clone</strong> o SEU fork para o seu ambiente de trabalho.</li>
+                <li>Crie uma nova <strong>branch</strong> para a sua alteração.</li>
+                <li>Faça as modificações e realize os <strong>commits</strong>.</li>
+                <li>Dê <strong>push</strong> das suas alterações para o SEU fork: `git push origin nome-da-sua-branch`</li>
+            </ul>
+        </div>
+
+        <div class="slide" data-slide="16">
+            <h2>Passo 3: Solicitando o Pull Request (Entre Repositórios)</h2>
+            <p>Com as alterações no seu Fork, volte para a página dele no GitHub. Assim como antes, um banner amarelo aparecerá, sugerindo criar um Pull Request.</p>
+            <p>A grande diferença está na tela seguinte:</p>
+            <img src="img/request-fork.png" alt="[Imagem da tela de criação de PR entre repositórios diferentes]" style="max-width: 80%; border-radius: 12px;">
+            <p style="margin-top:1rem;">Certifique-se de que o <strong>`base repository`</strong> é o repositório original (do Aluno A) e o <strong>`head repository`</strong> é o seu Fork. Clique em "Create pull request" para enviar sua sugestão!</p>
+        </div>
+
+        <div class="slide" data-slide="17">
+            <h2>Exercício: O PR no Repositório do Coleguinha!</h2>
+            <p>Vamos praticar o fluxo de colaboração completo.</p>
+            <ul>
+                <li><strong>Formem duplas:</strong> Definam quem será o Aluno A (Dono do Repositório) e o Aluno B (Colaborador).</li>
+                <li><strong>Aluno B:</strong> Vá ao repositório do Aluno A e faça um <strong>Fork</strong>.</li>
+                <li><strong>Aluno B:</strong> No <strong>seu Fork</strong>, crie uma branch, adicione no README.md uma linha escrito: "Participação: Seu nome", faça o commit e dê `push` para o <strong>seu Fork</strong>.</li>
+                <li><strong>Aluno B:</strong> Abra um <strong>Pull Request</strong> do seu Fork para o repositório original do Aluno A.</li>
+                <li><strong>Aluno A:</strong> Revise o PR, deixe um comentário e, por fim, faça o <strong>Merge</strong>!</li>
+                <li><strong>Invertam:</strong> Agora invertam os papéis.</li>
+            </ul>
+        </div>
+
+        <div class="slide" data-slide="18">
+            <h2>Resumo da Aula</h2>
+            <p>O que aprendemos hoje:</p>
+            <ul>
+                <li>O que é e por que usar um <strong>Pull Request</strong> para integrar código.</li>
+                <li>O conceito de <strong>Fork</strong> como uma cópia pessoal de um projeto.</li>
+                <li>Como colaborar com outros projetos usando o fluxo completo <strong>Fork & Pull Request</strong>.</li>
+                <li>A importância de sincronizar nosso ambiente local com <code>git pull</code>.</li>
+            </ul>
+        </div>
+
+        <div class="slide" data-slide="19">
+            <h2>Próxima Aula: O Lado Sombrio do Merge</h2>
+            <p>Unir as branches foi fácil. Mas... e se duas pessoas alteram a <strong>mesma linha</strong> de código ao mesmo tempo?</p>
+            <h3>Spoiler: A arte de resolver <strong>Conflitos de Merge</strong></h3>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn">Anterior</button>
+        <button class="nav-button" id="nextBtn">Próximo</button>
+    </div>
+
+    <div class="slide-counter" id="slideCounter"></div>
+
+    <button class="fullscreen-button" id="fullscreenBtn" title="Tela Cheia">
+        <svg id="fullscreen-enter-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+        <svg id="fullscreen-exit-icon" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
+    </button>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const enterIcon = document.getElementById('fullscreen-enter-icon');
+        const exitIcon = document.getElementById('fullscreen-exit-icon');
+
+        let currentSlide = 1;
+        const totalSlides = slides.length;
+        let animationStep = 0;
+
+        const updateSlides = () => {
+            slides.forEach(slide => {
+                const slideNumber = parseInt(slide.dataset.slide);
+                if (slideNumber === currentSlide) {
+                    slide.classList.add('active');
+                    runAnimationForSlide(currentSlide);
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            slideCounter.textContent = `${currentSlide} / ${totalSlides}`;
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+        };
+
+        const runAnimationForSlide = (slideNumber) => {
+            const activeSlideElement = document.querySelector(`.slide[data-slide="${slideNumber}"]`);
+            if (!activeSlideElement) return;
+
+            const container = activeSlideElement.querySelector('.git-animation-container');
+            if (!container) return;
+
+            container.innerHTML = ''; // Limpa animações anteriores
+
+            switch (slideNumber) {
+                case 2: setupBranchAnimation(container, true, false); break;
+                case 5:
+                    animationStep = 0;
+                    setupPullRequestAnimation(container);
+                    break;
+            }
+        };
+
+        const createCommit = (id, x, y, text, container) => {
+            const commit = document.createElement('div');
+            commit.className = 'commit';
+            commit.id = id;
+            commit.style.left = `${x}%`;
+            commit.style.top = `${y}%`;
+            commit.style.transform = 'translate(-50%, -50%) scale(0)';
+            commit.textContent = text;
+            container.appendChild(commit);
+            setTimeout(() => commit.style.transform = 'translate(-50%, -50%) scale(1)', 100);
+            return commit;
+        };
+
+        const createLine = (id, x1_pct, y1_pct, x2_pct, y2_pct, color, container) => {
+            const line = document.createElement('div');
+            line.className = 'branch-line';
+            line.id = id;
+            line.style.backgroundColor = `var(--${color})`;
+
+            const x1 = container.offsetWidth * (x1_pct / 100);
+            const y1 = container.offsetHeight * (y1_pct / 100);
+            const x2 = container.offsetWidth * (x2_pct / 100);
+            const y2 = container.offsetHeight * (y2_pct / 100);
+
+            const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+            line.style.width = '0px';
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(line);
+
+            setTimeout(() => { line.style.width = `${length}px`; }, 100);
+            return line;
+        };
+
+        const createLabel = (id, text, colorClass, container) => {
+            const label = document.createElement('div');
+            label.className = `branch-label ${colorClass}`;
+            label.id = id;
+            label.textContent = text;
+            label.style.opacity = '0';
+            container.appendChild(label);
+            return label;
+        };
+
+        const moveLabel = (label, commit) => {
+            if (!commit || !label) return;
+            const commitRect = commit.getBoundingClientRect();
+            const containerRect = label.parentElement.getBoundingClientRect();
+            const labelX = commitRect.left - containerRect.left + commitRect.width / 2;
+            const labelY = commitRect.top - containerRect.top;
+
+            label.style.left = `${labelX}px`;
+            label.style.top = `${labelY}px`;
+            label.style.opacity = '1';
+        }
+
+        const setupBranchAnimation = (container, autoplay = false, withControls = true) => {
+            if (!container) return;
+            const uniqueId = `anim_${container.id}`;
+
+            createLine(`l-${uniqueId}-main`, 10, 50, 60, 50, 'main-branch-color', container);
+
+            const c1 = createCommit(`${uniqueId}-c1`, 20, 50, 'C1', container);
+            const c2 = createCommit(`${uniqueId}-c2`, 50, 50, 'C2', container);
+
+            const mainLabel = createLabel(`label-${uniqueId}-main`, 'main', 'label-main', container);
+            setTimeout(() => {
+                moveLabel(mainLabel, c2);
+                mainLabel.style.transform = 'translate(-50%, -150%)';
+            }, 600);
+
+            const step1 = () => { // Cria branch
+                const featureLabel = createLabel(`label-${uniqueId}-feature`, 'feature/...', 'label-feature', container);
+                moveLabel(featureLabel, c2);
+                featureLabel.style.transform = 'translate(-50%, 200%)';
+            };
+
+            const step2 = () => { // Novo commit
+                const c3 = createCommit(`${uniqueId}-c3`, 80, 25, 'C3', container);
+                createLine(`l-${uniqueId}-feature`, 50, 50, 80, 25, 'feature-branch-color', container);
+                const featureLabel = document.getElementById(`label-${uniqueId}-feature`);
+                setTimeout(() => {
+                    moveLabel(featureLabel, c3);
+                }, 600);
+            };
+
+            if (autoplay) {
+                setTimeout(step1, 800);
+                setTimeout(step2, 1200);
+            }
+        };
+
+        const setupPullRequestAnimation = (container) => {
+            if (!container) return;
+            setupBranchAnimation(container, true, false);
+            const uniqueId = `anim_${container.id}`;
+
+            const step1Btn = container.parentElement.querySelector('.step1-btn');
+            const step2Btn = container.parentElement.querySelector('.step2-btn');
+            const step3Btn = container.parentElement.querySelector('.step3-btn');
+            if (step1Btn) step1Btn.disabled = false;
+            if (step2Btn) step2Btn.disabled = true;
+            if (step3Btn) step3Btn.disabled = true;
+
+            const handleStep1 = () => { // Abrir PR
+                const prLabel = createLabel(`label-${uniqueId}-pr`, 'Pull Request Aberto', 'label-pr', container);
+                prLabel.style.left = '50%';
+                prLabel.style.top = '75%';
+                prLabel.style.transform = 'translateX(-50%)';
+                prLabel.style.opacity = '1';
+
+                if (step1Btn) step1Btn.disabled = true;
+                if (step2Btn) step2Btn.disabled = false;
+                animationStep = 1;
+            };
+
+            const handleStep2 = () => { // Revisar
+                const prLabel = document.getElementById(`label-${uniqueId}-pr`);
+                if (prLabel) prLabel.textContent = 'PR Aprovado ✓';
+
+                if (step2Btn) step2Btn.disabled = true;
+                if (step3Btn) step3Btn.disabled = false;
+                animationStep = 2;
+            };
+
+            const handleStep3 = () => { // Merge
+                const prLabel = document.getElementById(`label-${uniqueId}-pr`);
+                if (prLabel) prLabel.style.opacity = '0';
+
+                const c4 = createCommit(`${uniqueId}-c4`, 90, 50, 'C4', container);
+                createLine(`l-${uniqueId}-merge1`, 50, 50, 90, 50, 'main-branch-color', container);
+                createLine(`l-${uniqueId}-merge2`, 80, 25, 90, 50, 'feature-branch-color', container);
+
+                setTimeout(() => {
+                    const mainLabel = document.getElementById(`label-${uniqueId}-main`);
+                    if (mainLabel) {
+                        moveLabel(mainLabel, c4);
+                        mainLabel.style.transform = 'translate(-50%, -150%)';
+                    }
+                }, 600);
+
+                if (step3Btn) step3Btn.disabled = true;
+                animationStep = 3;
+            };
+
+            if (step1Btn) step1Btn.onclick = handleStep1;
+            if (step2Btn) step2Btn.onclick = handleStep2;
+            if (step3Btn) step3Btn.onclick = handleStep3;
+        };
+
+        const handleNext = () => {
+            const activeSlideElement = document.querySelector('.slide.active');
+            const slideNumber = parseInt(activeSlideElement.dataset.slide);
+
+            if (slideNumber === 5) { // Slide da animação do PR
+                const controls = [
+                    activeSlideElement.querySelector('.step1-btn'),
+                    activeSlideElement.querySelector('.step2-btn'),
+                    activeSlideElement.querySelector('.step3-btn')
+                ];
+                if (animationStep < controls.length) {
+                    controls[animationStep].click();
+                } else {
+                    if (currentSlide < totalSlides) currentSlide++;
+                    updateSlides();
+                }
+            } else {
+                if (currentSlide < totalSlides) currentSlide++;
+                updateSlides();
+            }
+        };
+
+        const handlePrev = () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlides();
+            }
+        };
+
+        nextBtn.addEventListener('click', handleNext);
+        prevBtn.addEventListener('click', handlePrev);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextBtn.click();
+            } else if (e.key === 'ArrowLeft') {
+                prevBtn.click();
+            }
+        });
+
+        const toggleFullScreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Erro ao tentar entrar em tela cheia: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                enterIcon.style.display = 'none';
+                exitIcon.style.display = 'block';
+            } else {
+                enterIcon.style.display = 'block';
+                exitIcon.style.display = 'none';
+            }
+        });
+
+        // Initial setup
+        updateSlides();
+    </script>
+
+</body>
+</html>
+

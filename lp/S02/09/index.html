@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Ponteiros em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilos de Navegação (visíveis na tela) */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start; /* Alinha o conteúdo no topo */
+                page-break-before: always; 
+            }
+            .slide:first-child {
+                page-break-before: avoid; 
+            }
+            .nav-button, .counter, .copy-button {
+                display: none;
+            }
+        }
+
+        /* Outros estilos (código, etc.) */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #FDFDFD;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #383838;
+            counter-reset: line;
+            position: relative;
+        }
+        pre .line {
+            padding-left: 4.5em; 
+            position: relative;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em; 
+            padding-right: 1em;
+            text-align: right;
+            color: #aaa;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        .token-comment { color: #808080; font-style: italic; }
+        .token-keyword { color: #008B8B; font-weight: bold; }
+        .token-string { color: #D2691E; }
+        .token-function { color: #556B2F; }
+        .token-type { color: #20B2AA; font-style: italic; }
+        .token-number { color: #8A2BE2; }
+        .token-preprocessor { color: #C71585; }
+        .token-pointer { color: #9333ea; font-weight: bold; }
+
+        /* Depurador Interativo */
+        .debugger .line.highlight { background-color: #fef9c3; }
+        .memory-table { border-collapse: collapse; width: 100%; }
+        .memory-table th, .memory-table td { border: 1px solid #d1d5db; padding: 0.5rem; text-align: center; }
+        .memory-table th { background-color: #f3f4f6; }
+        .memory-table .scope { font-style: italic; color: #6b7280; }
+        .memory-table .value { font-family: 'Roboto Mono', monospace; font-weight: bold; }
+        .memory-table .value.changed { background-color: #fef08a; animation: flash 0.5s; }
+        @keyframes flash { from { background-color: #fef08a; } to { background-color: transparent; } }
+
+        /* Visualização de Memória */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+        .memory-cell {
+            border: 1px solid #9ca3af;
+            background-color: #f9fafb;
+            padding: 0.5rem;
+            text-align: center;
+            border-radius: 4px;
+            position: relative;
+        }
+        .memory-cell .address {
+            position: absolute;
+            top: -1.2rem;
+            left: 0;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        .memory-cell .value {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .memory-cell.highlight {
+            background-color: #f5d0fe;
+            border-color: #a855f7;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-4">Ponteiros em C</h1>
+                <p class="text-2xl md:text-3xl text-amber-600">Manipulando a Memória Diretamente</p>
+                <p class="text-xl text-gray-600 mt-8">Prof. William Paiva</p>
+                <div class="w-32 h-1.5 bg-amber-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Recapitulando o Problema -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Problema que Ficou para Trás</h2>
+                <p class="text-xl mb-6">Na última aula, vimos que uma função não consegue alterar a variável original da <code class="inline-code">main</code>. Ela recebe apenas uma <strong>CÓPIA</strong> do valor.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-type">void</span> <span class="token-function">tentarMudar</span>(<span class="token-type">int</span> x) {</div><div class="line">    x = <span class="token-number">99</span>; <span class="token-comment">// Altera a CÓPIA</span></div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> numero = <span class="token-number">10</span>;</div><div class="line">    <span class="token-function">tentarMudar</span>(numero);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"%d"</span>, numero); <span class="token-comment">// Imprime 10</span></div><div class="line">}</div></pre></div>
+                 <p class="text-2xl mt-8 text-center">Para resolver isso, a função não precisa do <strong>valor</strong> da variável. Ela precisa saber <strong>onde</strong> a variável original está guardada.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: Analogia dos Endereços -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Peça que Falta: Endereços</h2>
+                <p class="text-xl mb-6">Imagine que você quer que um amigo entregue um pacote na sua casa. Você não entrega uma <strong>cópia da sua casa</strong> para ele. Você entrega o <strong>ENDEREÇO</strong> da sua casa.</p>
+                <div class="text-6xl my-8">🏠 → ✉️</div>
+                <p class="text-xl mt-6">Na programação, é a mesma coisa. As variáveis vivem em "casas" na memória do computador. Cada "casa" tem um <strong>endereço de memória</strong> único.</p>
+                <p class="text-2xl mt-6 font-bold text-amber-600">Se uma função souber o endereço da variável, ela pode ir até lá e alterar o valor original.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: O que é Memória RAM -->
+        <section id="slide-4" class="slide">
+             <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Onde as Variáveis Moram? (Memória RAM)</h2>
+                <p class="text-xl mb-6">Pense na Memória RAM como um armário gigante, com milhões de gavetas (bytes), onde cada uma tem um número de identificação (o endereço).</p>
+                <div class="memory-grid mt-8">
+                    <div class="memory-cell"><span class="address">0x001</span><span class="value">...</span></div>
+                    <div class="memory-cell"><span class="address">0x002</span><span class="value">...</span></div>
+                    <div class="memory-cell"><span class="address">0x003</span><span class="value">...</span></div>
+                    <div class="memory-cell"><span class="address">0x004</span><span class="value">...</span></div>
+                    <div class="memory-cell highlight"><span class="address">0x005</span><span class="value">10</span></div>
+                    <div class="memory-cell"><span class="address">0x006</span><span class="value">...</span></div>
+                    <div class="memory-cell"><span class="address">0x007</span><span class="value">...</span></div>
+                    <div class="memory-cell"><span class="address">0x008</span><span class="value">...</span></div>
+                </div>
+                <p class="text-xl mt-8">Quando declaramos <code class="inline-code">int numero = 10;</code>, o computador reserva um espaço na memória (ex: no endereço <code class="inline-code">0x005</code>) e guarda o valor <code class="inline-code">10</code> lá dentro.</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: Operador & -->
+        <section id="slide-5" class="slide">
+             <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Operador <code class="inline-code">&</code> (Endereço de)</h2>
+                <p class="text-xl mb-6">Em C, usamos o caractere <strong>E comercial (<code class="inline-code">&</code>)</strong> para perguntar "Qual é o endereço desta variável?".</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-type">int</span> numero = <span class="token-number">10</span>;</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"Valor de numero: %d\n"</span>, numero);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"Endereço de numero: %p\n"</span>, &numero); <span class="token-comment">// %p para imprimir endereço</span></div></pre></div>
+                <p class="text-xl mt-4"><strong>Saída esperada:</strong></p>
+                 <div class="code-block-wrapper"><pre><div class="line">Valor de numero: 10</div><div class="line">Endereço de numero: 0x7ffc... (um endereço hexadecimal)</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 6: O que é um Ponteiro -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O que é um Ponteiro?</h2>
+                <p class="text-2xl">Um <strong>ponteiro</strong> (ou apontador) é um tipo especial de variável que não guarda um valor comum (como 10 ou 'A'), mas sim um <strong>ENDEREÇO DE MEMÓRIA</strong>.</p>
+                <div class="text-6xl my-8">✉️</div>
+                <p class="text-xl mt-6">É a nossa "variável-envelope", feita especificamente para guardar o endereço de outra variável.</p>
+            </div>
+        </section>
+
+        <!-- Slide 7: Declarando Ponteiros -->
+        <section id="slide-7" class="slide">
+             <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Declarando e Usando Ponteiros</h2>
+                <p class="text-xl mb-6">Declaramos um ponteiro usando o <strong>asterisco (<code class="inline-code">*</code>)</strong>. É crucial que o tipo do ponteiro seja o mesmo tipo da variável para a qual ele vai apontar.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-type">int</span> idade = <span class="token-number">30</span>;</div><div class="line"><span class="token-comment">// Declara um ponteiro PARA um inteiro</span></div><div class="line"><span class="token-type">int</span> <span class="token-pointer">*</span>pIdade;</div><div class="line"><span class="token-comment">// Guarda o ENDEREÇO de 'idade' dentro do ponteiro 'pIdade'</span></div><div class="line">pIdade = &idade;</div></pre></div>
+            </div>
+        </section>
+        
+        <!-- Slide 8: Operador * -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Operador <code class="inline-code">*</code> (Conteúdo de)</h2>
+                <p class="text-xl mb-6">O asterisco (<code class="inline-code">*</code>) tem um segundo uso. Quando colocado <strong>antes</strong> de uma variável ponteiro que já existe, ele significa "vá até o endereço que você está guardando e me diga qual é o <strong>CONTEÚDO</strong> que está lá".</p>
+                <p class="text-xl mb-6">A isso chamamos de <strong>derreferenciar</strong> o ponteiro.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-function">printf</span>(<span class="token-string">"O ponteiro pIdade guarda o endereço: %p\n"</span>, pIdade);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"O CONTEÚDO no endereço apontado é: %d\n"</span>, <span class="token-pointer">*</span>pIdade);</div></pre></div>
+                 <p class="text-xl mt-4"><strong>Saída esperada:</strong></p>
+                 <div class="code-block-wrapper"><pre><div class="line">O ponteiro pIdade guarda o endereço: 0x7ffc...</div><div class="line">O CONTEÚDO no endereço apontado é: 30</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Depurador de Ponteiros -->
+        <section id="slide-9" class="slide" data-animation="debugger-pointer">
+             <div class="slide-content w-full max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: O Ciclo do Ponteiro</h2>
+                <p class="text-xl mb-6 text-center">Use a <strong>seta para a direita (→)</strong> para ver como podemos alterar a variável original usando o ponteiro.</p>
+                <div class="flex gap-8 mt-8">
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                        <div class="code-block-wrapper debugger"><pre id="debugger-pointer-code"><div class="line" data-line="1"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="2">    <span class="token-type">int</span> idade = <span class="token-number">30</span>;</div><div class="line" data-line="3">    <span class="token-type">int</span> <span class="token-pointer">*</span>pIdade;</div><div class="line" data-line="4">    pIdade = &idade;</div><div class="line" data-line="5">    <span class="token-function">printf</span>(<span class="token-string">"Idade original: %d\n"</span>, idade);</div><div class="line" data-line="6">    <span class="token-pointer">*</span>pIdade = <span class="token-number">31</span>; <span class="token-comment">// Mágica!</span></div><div class="line" data-line="7">    <span class="token-function">printf</span>(<span class="token-string">"Idade alterada: %d\n"</span>, idade);</div><div class="line" data-line="8">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="9">}</div></pre></div>
+                    </div>
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                        <table id="pointer-memory-table" class="memory-table text-lg">
+                            <thead>
+                                <tr><th>Variável</th><th>Endereço</th><th>Valor</th></tr>
+                            </thead>
+                            <tbody>
+                                <!-- Linhas serão inseridas pelo JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Slide 10: Exemplo 1 -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 1: Revisão Geral</h2>
+                <p class="text-xl mb-6">Este código une tudo o que vimos: cria uma variável, um ponteiro, e exibe todas as informações possíveis que podemos extrair.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> numero = <span class="token-number">42</span>;</div><div class="line">    <span class="token-type">int</span> <span class="token-pointer">*</span>pNumero = &amp;numero;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Valor da variável 'numero':\t %d\n"</span>, numero);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Endereço da variável 'numero':\t %p\n"</span>, &numero);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Valor do ponteiro 'pNumero':\t %p\n"</span>, pNumero);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Valor APONTADO por 'pNumero':\t %d\n"</span>, <span class="token-pointer">*</span>pNumero);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Exemplo 2 -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 2: Ponteiro para Float</h2>
+                <p class="text-xl mb-6">O conceito é o mesmo para qualquer tipo de dado. Aqui, usamos um ponteiro para um <code class="inline-code">float</code> para manipular o preço de um produto.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">float</span> preco = <span class="token-number">50.00</span>;</div><div class="line">    <span class="token-type">float</span> <span class="token-pointer">*</span>pPreco = &preco;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Preço original: R$ %.2f\n"</span>, preco);</div><div class="line">    <span class="token-comment">// Aplicando um desconto de 10% através do ponteiro</span></div><div class="line">    <span class="token-pointer">*</span>pPreco = <span class="token-pointer">*</span>pPreco * <span class="token-number">0.90</span>;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Preço com desconto: R$ %.2f\n"</span>, preco);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Exemplo 3 -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 3: Atualizando Pontuação</h2>
+                <p class="text-xl mb-6">Imagine um jogo onde a pontuação é atualizada. Podemos usar um ponteiro para "apontar" para a pontuação atual e modificá-la.</p>
+                 <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> pontuacao = <span class="token-number">1000</span>;</div><div class="line">    <span class="token-type">int</span> <span class="token-pointer">*</span>ptrScore = &pontuacao;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Pontuação inicial: %d\n"</span>, pontuacao);</div><div class="line">    <span class="token-comment">// Jogador pegou um bônus de 500 pontos</span></div><div class="line">    <span class="token-pointer">*</span>ptrScore += <span class="token-number">500</span>;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Pontuação com bônus: %d\n"</span>, pontuacao);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Resumo da Analogia -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo da Analogia</h2>
+                <div class="grid grid-cols-2 gap-8 mt-8 text-xl">
+                    <div class="text-left bg-gray-100 p-4 rounded-lg">
+                        <p class="mb-2"><strong><code class="inline-code">int idade = 30;</code></strong></p>
+                        <p>A "casa" chamada <code class="inline-code">idade</code>, que tem o valor <strong>30</strong> dentro.</p>
+                    </div>
+                    <div class="text-left bg-gray-100 p-4 rounded-lg">
+                        <p class="mb-2"><strong><code class="inline-code">&idade</code></strong></p>
+                        <p>O <strong>endereço</strong> da casa <code class="inline-code">idade</code> (ex: 0x7ffc...).</p>
+                    </div>
+                    <div class="text-left bg-gray-100 p-4 rounded-lg">
+                        <p class="mb-2"><strong><code class="inline-code">pIdade</code></strong></p>
+                        <p>Um "papel" que guarda o <strong>endereço</strong> da casa <code class="inline-code">idade</code>.</p>
+                    </div>
+                     <div class="text-left bg-gray-100 p-4 rounded-lg">
+                        <p class="mb-2"><strong><code class="inline-code">*pIdade</code></strong></p>
+                        <p>"Vá até o endereço anotado no papel e me diga o que tem <strong>dentro da casa</strong>" (o valor 30).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Próximos Passos -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Onde Isso se Encaixa?</h2>
+                <p class="text-2xl">Agora temos a ferramenta que faltava para resolver o problema da última aula.</p>
+                <div class="text-6xl my-8">🔑</div>
+                <p class="text-2xl">Em vez de passar uma <strong>cópia do valor</strong> para uma função, podemos passar o <strong>ENDEREÇO</strong> da variável usando um ponteiro.</p>
+                <p class="text-3xl font-bold text-amber-600 mt-8">Próxima aula: Funções e Ponteiros!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 15: Dúvidas -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            // --- DEPURADORES E ANIMAÇÕES ---
+            const debuggers = {};
+
+            function initializeDebugger(slide) {
+                const animationType = slide.dataset.animation;
+                if (!animationType || debuggers[animationType]) return;
+
+                if (animationType === 'debugger-pointer') {
+                    const codeElement = slide.querySelector('#debugger-pointer-code');
+                    const tableBody = slide.querySelector('#pointer-memory-table tbody');
+                    const lines = Array.from(codeElement.querySelectorAll('.line'));
+                    const executionPath = [
+                        { line: 1, memory: [] },
+                        { line: 2, memory: [{ var: 'idade', addr: '0x7ff1', val: '?' }] },
+                        { line: 3, memory: [{ var: 'idade', addr: '0x7ff1', val: '30', changed: true }] },
+                        { line: 4, memory: [{ var: 'idade', addr: '0x7ff1', val: '30' }, { var: 'pIdade', addr: '0x7ff2', val: '?' }] },
+                        { line: 5, memory: [{ var: 'idade', addr: '0x7ff1', val: '30' }, { var: 'pIdade', addr: '0x7ff2', val: '0x7ff1', changed: true }] },
+                        { line: 6, memory: [{ var: 'idade', addr: '0x7ff1', val: '30' }, { var: 'pIdade', addr: '0x7ff2', val: '0x7ff1' }] },
+                        { line: 7, memory: [{ var: 'idade', addr: '0x7ff1', val: '31', changed: true }, { var: 'pIdade', addr: '0x7ff2', val: '0x7ff1' }] },
+                        { line: 8, memory: [{ var: 'idade', addr: '0x7ff1', val: '31' }, { var: 'pIdade', addr: '0x7ff2', val: '0x7ff1' }] },
+                        { line: 9, memory: [{ var: 'idade', addr: '0x7ff1', val: '31' }, { var: 'pIdade', addr: '0x7ff2', val: '0x7ff1' }] }
+                    ];
+                    let currentStep = -1;
+
+                    debuggers[animationType] = {
+                        step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             
+                             lines.forEach(l => l.classList.remove('highlight'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td>${mem.var}</td><td>${mem.addr}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => {
+                            currentStep = -1;
+                            lines.forEach(line => line.classList.remove('highlight'));
+                            tableBody.innerHTML = '';
+                        }
+                    }
+                }
+            }
+
+            // --- CONTROLE GERAL ---
+            document.addEventListener('keydown', (e) => {
+                const currentSlide = sections[currentSlideIndex];
+                const animationType = currentSlide.dataset.animation;
+                
+                if (e.key === 'ArrowRight') {
+                        nextButton.click();
+                } else if (e.key === 'ArrowLeft') {
+                    if (animationType && debuggers[animationType]) {
+                        e.preventDefault();
+                        debuggers[animationType].step();
+                    } else {
+                        prevButton.click();
+                    }
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                        
+                        // Inicializa ou reseta o depurador quando o slide entra na tela
+                        initializeDebugger(entry.target);
+                        const animationType = entry.target.dataset.animation;
+                        if(animationType && debuggers[animationType]) {
+                           debuggers[animationType].reset();
+                           debuggers[animationType].step(); // Executa o primeiro passo
+                        }
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        const span = button.querySelector('span');
+                        span.textContent = 'Copiado!';
+                        setTimeout(() => {
+                            span.textContent = 'Copiar';
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

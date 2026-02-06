@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interativo: Shell Script - Condicionais e Laços</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-12 px-4">
+
+    <div id="quiz-container" class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 transition-all duration-500">
+        
+        <div id="quiz-header">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 text-center">Quiz: Condicionais e Laços</h1>
+            <div class="mt-4 h-2 w-full bg-gray-200 rounded-full">
+                <div id="progress-bar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
+            <p id="progress-text" class="text-center text-sm text-gray-500 mt-2">Pergunta 1 de 10</p>
+        </div>
+
+        <div id="quiz-body" class="mt-6">
+            <div id="question-container">
+                <p id="question-text" class="text-xl md:text-2xl text-gray-700 leading-relaxed"></p>
+                <p id="hint-text" class="text-sm text-gray-500 mt-2 p-3 bg-gray-50 rounded-md border border-gray-200"></p>
+            </div>
+            <div id="answer-options" class="mt-6 grid grid-cols-1 gap-4">
+                <!-- As opções de resposta serão inseridas aqui pelo JavaScript -->
+            </div>
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg text-center hidden">
+                <p id="feedback-text" class="text-lg"></p>
+            </div>
+        </div>
+
+        <div id="quiz-footer" class="mt-8 text-center">
+            <button id="next-button" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg w-full md:w-auto hover:bg-indigo-700 transition-colors duration-300 disabled:bg-gray-400 hidden">
+                Próxima Pergunta
+            </button>
+            <button id="restart-button" class="bg-gray-700 text-white font-bold py-3 px-8 rounded-lg w-full md:w-auto hover:bg-gray-800 transition-colors duration-300 hidden">
+                Recomeçar Quiz
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Na estrutura `if [ \"$VAR\" -gt 10 ]; then`, qual é a função dos colchetes `[ ]`?",
+                hint: "Lembre-se que em shell, muitas coisas que parecem parte da sintaxe são, na verdade, comandos.",
+                answers: [
+                    { text: "Eles são apenas para agrupar visualmente a condição, não têm função real.", correct: false, rationale: "Embora ajudem a organizar, eles têm uma função técnica crucial e não são apenas decorativos." },
+                    { text: "São um atalho para o comando `test`, que avalia a condição e retorna verdadeiro (0) ou falso (1).", correct: true, rationale: "Esta é a função exata. O `if` então age com base no status de saída (0 para sucesso/verdadeiro) retornado pelo comando `test`." },
+                    { text: "Indicam que a comparação deve ser feita usando matemática de ponto flutuante.", correct: false, rationale: "O shell padrão não lida com ponto flutuante nativamente nos testes; para isso, seriam necessários comandos externos como `bc`." },
+                    { text: "Definem o início e o fim de uma função anônima dentro do `if`.", correct: false, rationale: "Funções em shell são declaradas com uma sintaxe diferente e não são usadas desta forma dentro de condicionais." }
+                ]
+            },
+            {
+                question: "Qual operador de teste é usado para verificar se uma variável de string é **igual** a outra?",
+                hint: "O operador para strings é visualmente diferente dos operadores para números.",
+                answers: [
+                    { text: "-eq", correct: false, rationale: "Este operador (`equal`) é usado exclusivamente para comparar valores numéricos." },
+                    { text: "=", correct: true, rationale: "O sinal de igual é o operador padrão para comparar strings dentro dos colchetes de teste." },
+                    { text: "-str_eq", correct: false, rationale: "Não existe um operador com este nome no comando `test` padrão." },
+                    { text: "-is", correct: false, rationale: "Esta sintaxe não corresponde a um operador de teste válido em Shell Script." }
+                ]
+            },
+            {
+                question: "Qual é o propósito da cláusula `elif` em uma estrutura condicional?",
+                hint: "Pense em como você faria uma segunda verificação se a primeira falhar.",
+                answers: [
+                    { text: "Para finalizar o bloco `if`, similar ao `fi`.", correct: false, rationale: "A finalização do bloco `if` é feita exclusivamente com a palavra-chave `fi`." },
+                    { text: "Para executar um bloco de código se todas as condições anteriores forem falsas.", correct: false, rationale: "Isso descreve a função da cláusula `else`, que é o caso padrão no final da estrutura." },
+                    { text: "Para testar uma nova condição somente se a condição `if` anterior for falsa.", correct: true, rationale: "Exatamente. `elif` (else if) cria uma cadeia de testes, onde cada condição só é avaliada se a anterior falhou." },
+                    { text: "Para agrupar múltiplas condições `if` em uma única linha.", correct: false, rationale: "Agrupamento de condições é feito com operadores lógicos como `-a` (AND) ou `-o` (OR), não com `elif`." }
+                ]
+            },
+            {
+                question: "Para qual cenário o laço `for` é mais adequado?",
+                hint: "O `for` brilha quando você tem uma coleção de coisas para processar, uma por uma.",
+                answers: [
+                    { text: "Executar um bloco de código continuamente enquanto um programa estiver rodando em segundo plano.", correct: false, rationale: "Este cenário é mais adequado para um laço `while`, que pode verificar uma condição (como `while [ processo_existe ]; do...`)." },
+                    { text: "Iterar sobre uma lista predefinida de itens, como nomes de arquivos ou uma sequência de números.", correct: true, rationale: "Esta é a principal força do laço `for`. Ele foi projetado para pegar cada item de uma lista e executar um bloco de código com ele." },
+                    { text: "Pausar o script até que o usuário digite uma entrada específica.", correct: false, rationale: "Um laço `while` combinado com o comando `read` seria a estrutura ideal para esperar por uma entrada específica." },
+                    { text: "Executar um bloco de código um número exato de vezes, como 100, sem uma lista.", correct: false, rationale: "Embora possível de simular, um laço `while` com um contador é frequentemente mais claro para esta tarefa específica." }
+                ]
+            },
+            {
+                question: "O que acontece se você esquecer de atualizar a variável de controle dentro de um laço `while`?",
+                hint: "Se a condição do `while` nunca se torna falsa, o que o laço fará?",
+                answers: [
+                    { text: "O script executa o laço uma vez e depois para.", correct: false, rationale: "O laço `while` sempre reavalia a condição após cada execução; ele não para automaticamente após uma iteração." },
+                    { text: "O script gera um erro de sintaxe e não executa.", correct: false, rationale: "A ausência da atualização não é um erro de sintaxe, mas sim um erro de lógica que se manifesta durante a execução." },
+                    { text: "O script entra em um loop infinito.", correct: true, rationale: "Se a variável que torna a condição falsa nunca for alterada, a condição será sempre verdadeira, e o laço se repetirá para sempre." },
+                    { text: "O laço é ignorado e o script continua a execução a partir da linha seguinte.", correct: false, rationale: "Se a condição for verdadeira na primeira verificação, o laço será iniciado. Ele não é ignorado." }
+                ]
+            },
+            {
+                question: "Qual é a sintaxe correta para incrementar uma variável numérica `CONTADOR` em 1?",
+                hint: "Operações matemáticas em shell precisam de uma sintaxe especial para serem avaliadas.",
+                answers: [
+                    { text: "CONTADOR = $CONTADOR + 1", correct: false, rationale: "O shell interpretaria isso como a atribuição da string literal \"$CONTADOR + 1\" à variável, não como uma soma." },
+                    { text: "CONTADOR=$((CONTADOR + 1))", correct: true, rationale: "A sintaxe `$((...))` é a construção de expansão aritmética padrão do Bash, que avalia a expressão matemática dentro dela." },
+                    { text: "let CONTADOR++", correct: false, rationale: "Embora `let` possa funcionar, e a sintaxe `++` seja familiar de outras linguagens, a forma `$((...))` é mais portável e comum." },
+                    { text: "CONTADOR = (CONTADOR + 1)", correct: false, rationale: "Parênteses sozinhos são usados para executar comandos em um subshell, não para aritmética." }
+                ]
+            },
+            {
+                question: "No comando `if [ -f \"/tmp/arquivo.txt\" ]; then`, o que o operador `-f` verifica?",
+                hint: "Pense nos tipos de objetos que existem em um sistema de arquivos.",
+                answers: [
+                    { text: "Se o arquivo tem permissão de execução (fast execute).", correct: false, rationale: "A verificação de permissão de execução é feita com o operador `-x`." },
+                    { text: "Se o caminho existe e é um arquivo regular (file).", correct: true, rationale: "Correto. `-f` testa especificamente se o objeto no caminho é um arquivo, e não um diretório ou outro tipo." },
+                    { text: "Se o arquivo está vazio (free).", correct: false, rationale: "Para verificar se um arquivo está vazio (tamanho zero), o teste correto seria `[ ! -s \"/caminho/arquivo\" ]`." },
+                    { text: "Se o arquivo foi formatado (formatted).", correct: false, rationale: "Não existe um operador de teste para verificar a formatação de um arquivo; o shell opera no nível do sistema de arquivos." }
+                ]
+            },
+            {
+                question: "Qual é a função da palavra-chave `done` em um script?",
+                hint: "Tanto `for` quanto `while` precisam de um ponto final claro.",
+                answers: [
+                    { text: "Ela encerra o script inteiro, similar ao comando `exit`.", correct: false, rationale: "O comando `exit` é usado para terminar o script. `done` tem um escopo mais limitado." },
+                    { text: "Ela marca o final do bloco de código de um laço (`for` ou `while`).", correct: true, rationale: "Esta é a sua função. Ela delimita o fim do corpo do laço, indicando onde a repetição termina." },
+                    { text: "É um sinônimo para a cláusula `else` em uma estrutura `if`.", correct: false, rationale: "`else` é a palavra-chave específica para o bloco alternativo de um `if`, enquanto `done` está associada a laços." },
+                    { text: "Indica que uma variável foi usada e pode ser descartada da memória.", correct: false, rationale: "O gerenciamento de memória de variáveis em shell é automático; `done` não tem relação com isso." }
+                ]
+            },
+            {
+                question: "Por que é uma boa prática colocar variáveis de string entre aspas duplas em testes, como em `[ \"$NOME\" = \"root\" ]`?",
+                hint: "O que aconteceria com a estrutura do comando `test` se a variável `$NOME` estivesse vazia?",
+                answers: [
+                    { text: "Para garantir que a comparação ignore maiúsculas e minúsculas.", correct: false, rationale: "A comparação de strings é sensível a maiúsculas e minúsculas por padrão; as aspas não alteram esse comportamento." },
+                    { text: "Para evitar que o comando `test` quebre se a variável estiver vazia ou contiver espaços.", correct: true, rationale: "Se `$NOME` estivesse vazia, o comando se tornaria `[ = \"root\" ]`, o que é um erro de sintaxe. As aspas garantem que o comando veja `[ \"\" = \"root\" ]`, que é válido." },
+                    { text: "Para forçar a variável a ser tratada como um número em vez de texto.", correct: false, rationale: "Pelo contrário, as aspas reforçam que o conteúdo deve ser tratado como uma string literal." },
+                    { text: "É apenas uma convenção de estilo e não tem efeito técnico.", correct: false, rationale: "É mais do que estilo; é uma prática defensiva crucial para escrever scripts robustos que não falham com entradas inesperadas." }
+                ]
+            },
+            {
+                question: "Como um laço `for` pode ser usado para iterar sobre todos os arquivos `.jpg` em um diretório?",
+                hint: "Pense em como o shell expande caracteres especiais antes de executar o comando.",
+                answers: [
+                    { text: "for ARQUIVO in (ls *.jpg); do", correct: false, rationale: "Embora isso possa funcionar, é considerado uma má prática, pois pode falhar com nomes de arquivos que contêm espaços. O método direto é preferível." },
+                    { text: "for ARQUIVO in *.jpg; do", correct: true, rationale: "Esta é a forma correta e mais eficiente. O shell expande o curinga `*.jpg` em uma lista de todos os arquivos correspondentes antes de o laço `for` começar a iteração." },
+                    { text: "while ARQUIVO in *.jpg; do", correct: false, rationale: "A sintaxe `in ...` pertence ao laço `for`; o laço `while` espera uma condição de teste, como `while [ condição ]; do`." },
+                    { text: "for ARQUIVO in find . -name \"*.jpg\"; do", correct: false, rationale: "Usar `find` desta forma diretamente no `for` também pode causar problemas com espaços. A combinação correta seria usar um pipe com um laço `while read`." }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionTextEl = document.getElementById('question-text');
+        const hintTextEl = document.getElementById('hint-text');
+        const answerOptionsEl = document.getElementById('answer-options');
+        const feedbackContainerEl = document.getElementById('feedback-container');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.classList.add('hidden');
+            restartButton.classList.add('hidden');
+            document.getElementById('quiz-header').classList.remove('hidden');
+            document.getElementById('quiz-body').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = quizData[currentQuestionIndex];
+            
+            // Substituir ` com <code> para renderização correta
+            questionTextEl.innerHTML = currentQuestion.question.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+            hintTextEl.innerHTML = `<strong>Dica:</strong> ${currentQuestion.hint}`;
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerHTML = answer.text.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+                button.classList.add('w-full', 'text-left', 'p-4', 'border', 'border-gray-300', 'rounded-lg', 'hover:bg-gray-100', 'transition-colors', 'duration-200');
+                button.addEventListener('click', () => selectAnswer(button, answer));
+                answerOptionsEl.appendChild(button);
+            });
+
+            updateProgress();
+        }
+
+        function resetState() {
+            feedbackContainerEl.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            while (answerOptionsEl.firstChild) {
+                answerOptionsEl.removeChild(answerOptionsEl.firstChild);
+            }
+        }
+        
+        function updateProgress() {
+            const progressPercentage = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressText.textContent = `Pergunta ${currentQuestionIndex + 1} de ${quizData.length}`;
+        }
+        
+        function selectAnswer(button, answer) {
+            Array.from(answerOptionsEl.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-gray-100');
+            });
+
+            feedbackContainerEl.classList.remove('hidden');
+            feedbackTextEl.innerHTML = answer.rationale.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+            if (answer.correct) {
+                score++;
+                button.classList.add('bg-green-100', 'border-green-500');
+                feedbackContainerEl.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                button.classList.add('bg-red-100', 'border-red-500');
+                feedbackContainerEl.classList.add('bg-red-100', 'text-red-800');
+                // Mostra a resposta correta
+                const correctButton = Array.from(answerOptionsEl.children).find((btn, index) => quizData[currentQuestionIndex].answers[index].correct);
+                correctButton.classList.add('bg-green-100', 'border-green-500');
+            }
+
+            if (quizData.length > currentQuestionIndex + 1) {
+                nextButton.textContent = "Próxima Pergunta";
+                nextButton.classList.remove('hidden');
+            } else {
+                nextButton.textContent = "Ver Resultado Final";
+                nextButton.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('quiz-body').classList.add('hidden');
+            feedbackContainerEl.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
+            
+            const resultPercentage = Math.round((score / quizData.length) * 100);
+            let feedbackMessage = `Você acertou ${score} de ${quizData.length} perguntas (${resultPercentage}%).<br><br>`;
+            
+            if (resultPercentage === 100) {
+                feedbackMessage += "Excelente! Você é um mestre do Shell Script!";
+                feedbackContainerEl.classList.add('bg-green-100', 'text-green-800');
+            } else if (resultPercentage >= 70) {
+                feedbackMessage += "Muito bem! Você tem um ótimo conhecimento sobre o assunto.";
+                 feedbackContainerEl.classList.add('bg-blue-100', 'text-blue-800');
+            } else {
+                feedbackMessage += "Bom esforço! Continue praticando para solidificar os conceitos.";
+                 feedbackContainerEl.classList.add('bg-yellow-100', 'text-yellow-800');
+            }
+            
+            feedbackTextEl.innerHTML = feedbackMessage;
+            restartButton.classList.remove('hidden');
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        restartButton.addEventListener('click', startQuiz);
+
+        startQuiz();
+    </script>
+</body>
+</html>

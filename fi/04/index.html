@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 3: Trabalhando com Branches</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfaf6;
+            --slide-bg: #f5efe6;
+            --text-color: #4a403a;
+            --heading-color: #29211d;
+            --accent-color: #a16207;
+            --main-branch-color: #4d7c0f;
+            --feature-branch-color: #c2410c;
+            --head-color: #b91c1c;
+            --commit-color: #e7e5e4;
+            --commit-border: #a8a29e;
+            --review-box-bg: #e7e5e4;
+            --review-box-border: #d6d3d1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--slide-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, visibility 0.6s;
+            z-index: 1;
+        }
+
+            .slide.active {
+                opacity: 1;
+                visibility: visible;
+                z-index: 2;
+            }
+
+            .slide h1 {
+                font-size: 3.5rem;
+                font-weight: 900;
+                margin-bottom: 0.5rem;
+                color: var(--accent-color);
+            }
+
+            .slide h2 {
+                font-size: 2.2rem;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                color: var(--heading-color);
+            }
+
+            .slide h3 {
+                font-size: 1.6rem;
+                font-weight: 500;
+                margin-bottom: 1.5rem;
+                color: var(--accent-color);
+            }
+
+        .author-name {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .slide p {
+            font-size: 1.3rem;
+            max-width: 900px;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .slide ul {
+            list-style: none;
+            max-width: 800px;
+            text-align: left;
+        }
+
+        .slide li {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            background-color: rgba(0,0,0,0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        code {
+            background-color: rgba(0,0,0,0.1);
+            color: #c2410c;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .terminal-code {
+            background-color: #29211d;
+            color: #f5efe6;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid var(--review-box-border);
+        }
+
+            .terminal-code .comment {
+                color: #a8a29e;
+            }
+
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .nav-button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+            .nav-button:hover {
+                background-color: #ca8a04;
+                transform: translateY(-2px);
+            }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 1.2rem;
+            background-color: rgba(0,0,0,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .fullscreen-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s;
+        }
+
+            .fullscreen-button:hover {
+                background-color: rgba(0,0,0,0.2);
+            }
+
+            .fullscreen-button svg {
+                width: 24px;
+                height: 24px;
+                fill: var(--text-color);
+            }
+
+        /* Animações */
+        .git-animation-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 350px;
+            position: relative;
+            margin-top: 1rem;
+            border: 2px dashed #d6d3d1;
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .commit {
+            width: 40px;
+            height: 40px;
+            background-color: var(--commit-color);
+            border: 3px solid var(--commit-border);
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            color: var(--heading-color);
+            font-weight: 700;
+            transition: all 0.5s ease-in-out;
+            z-index: 5;
+        }
+
+        .branch-line {
+            height: 6px;
+            position: absolute;
+            background-color: var(--main-branch-color);
+            transform-origin: left center;
+            transition: all 0.5s ease-in-out;
+            z-index: 4;
+        }
+
+        .branch-label {
+            position: absolute;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #f8fafc;
+            transition: all 0.5s ease-in-out;
+            z-index: 6;
+            white-space: nowrap;
+        }
+
+        .label-main {
+            background-color: var(--main-branch-color);
+        }
+
+        .label-feature {
+            background-color: var(--feature-branch-color);
+        }
+
+        .label-head {
+            background-color: var(--head-color);
+        }
+
+        .animation-controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .control-button {
+            background-color: #d6d3d1;
+            color: var(--heading-color);
+            border: 1px solid #a8a29e;
+        }
+
+            .control-button:hover {
+                background-color: #a8a29e;
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide p, .slide ul, .slide h2, .slide h3, .slide .terminal-code, .slide img, .slide .author-name {
+            opacity: 0;
+        }
+
+        .slide.active p, .slide.active ul, .slide.active h2, .slide.active h3, .slide.active .terminal-code, .slide.active img, .slide.active .author-name {
+            animation: fadeIn 0.6s ease-out 0.3s forwards;
+        }
+
+        /* Estilos para a revisão com placeholders */
+        .placeholder-box {
+            background-color: var(--review-box-bg);
+            border: 2px dashed var(--review-box-border);
+            border-radius: 12px;
+            padding: 1rem;
+            width: 30%;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            position: relative;
+            color: #a8a29e;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+            .placeholder-box h4 {
+                color: var(--accent-color);
+                font-size: 1.1rem;
+                position: absolute;
+                top: 1rem;
+            }
+
+        .arrow {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            align-self: center;
+        }
+
+        img {
+            border-radius: 1rem;
+            object-fit: scale-down;
+            width: 80%;
+            height: 80%;
+        }
+
+        /* Media Queries para Responsividade */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1rem;
+            }
+
+                .slide h1 {
+                    font-size: 2.5rem;
+                }
+
+                .slide h2 {
+                    font-size: 1.8rem;
+                }
+
+                .slide p, .slide li {
+                    font-size: 1.1rem;
+                }
+
+            .terminal-code {
+                font-size: 0.9rem;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .nav-button {
+                width: 120px;
+                padding: 0.8rem 1rem;
+            }
+
+            .git-animation-container {
+                flex-direction: column;
+                height: auto;
+                gap: 1rem;
+            }
+
+            .placeholder-box {
+                width: 90%;
+                height: 150px;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+        <!-- SLIDES DE REVISÃO -->
+        <div class="slide active" data-slide="1">
+            <h1>Revisão: O Fluxo de Trabalho no Terminal</h1>
+            <p class="author-name">Prof. William Paiva</p>
+            <h2>Da última vez, usamos a interface gráfica. Hoje, vamos usar o poder da linha de comando.</h2>
+        </div>
+
+        <div class="slide" data-slide="2">
+            <h2>A Analogia: A Cápsula do Tempo</h2>
+            <p>Vamos usar uma analogia para entender o fluxo do Git: uma cápsula do tempo para guardar nossas memórias (arquivos), um rótulo para lembrar o que tem dentro, e um local seguro para guardá-la.</p>
+            <div class="git-animation-container" id="anim-review-intro"></div>
+        </div>
+
+        <div class="slide" data-slide="3">
+            <h2>Passo 1: <code>git add</code></h2>
+            <h3>Escolhendo o que vai na Cápsula</h3>
+            <p>Com <code>git add</code>, você seleciona quais arquivos modificados quer colocar dentro da sua Cápsula do Tempo. É a sua chance de escolher exatamente o que vai fazer parte dessa "memória".</p>
+            <div class="git-animation-container" id="anim-review-add"></div>
+        </div>
+
+        <div class="slide" data-slide="4">
+            <h2>Passo 2: <code>git commit</code></h2>
+            <h3>Fechando e Rotulando a Cápsula</h3>
+            <p>O <code>commit</code> fecha a cápsula com tudo que você selecionou e cola um rótulo (a mensagem de commit). Afinal, no futuro, como vamos lembrar o que tinha na cápsula? Esse rótulo é a sua descrição.</p>
+            <div class="git-animation-container" id="anim-review-commit"></div>
+        </div>
+
+        <div class="slide" data-slide="5">
+            <h2>Passo 3: <code>git push</code></h2>
+            <h3>Enviando a Cápsula para um Local Seguro</h3>
+            <p>O <code>push</code> envia uma cópia da sua cápsula fechada e rotulada para um local seguro na nuvem (o GitHub), compartilhando seu trabalho e garantindo que ele não se perca.</p>
+            <div class="git-animation-container" id="anim-review-push"></div>
+        </div>
+
+        <!-- SLIDES DE BRANCH -->
+        <div class="slide" data-slide="6">
+            <h1>Aula 3</h1>
+            <p class="author-name">Prof. William Paiva</p>
+            <h2>Trabalhando em Realidades Paralelas com Branches</h2>
+        </div>
+
+        <div class="slide" data-slide="7">
+            <h2>Onde Paramos?</h2>
+            <p>Nossa história até agora tem sido uma linha reta de commits. Mas e se quisermos trabalhar em algo novo sem bagunçar a versão principal?</p>
+            <div class="git-animation-container" id="anim-branch-start"></div>
+        </div>
+
+        <div class="slide" data-slide="8">
+            <h2>O que é o <code>HEAD</code>?</h2>
+            <p>Pense no <code>HEAD</code> como um ponteiro que diz: <strong>"Você está trabalhando aqui"</strong>. Ele normalmente aponta para o nome de uma branch, indicando qual linha do tempo está ativa no momento.</p>
+        </div>
+
+        <div class="slide" data-slide="9">
+            <img src="img/branch.png" alt="Ilustração de Ramificações" style="border-radius: 12px; width: 80rem;">
+            <h2>A Solução: Branches</h2>
+            <p>Uma <strong>Branch</strong> (ramo) no Git é uma linha do tempo paralela que nos permite trabalhar em novas ideias de forma segura e isolada, sem afetar a branch principal (<code>main</code>).</p>
+        </div>
+
+        <div class="slide" data-slide="10">
+            <h2>Como as Branches Funcionam</h2>
+            <p>Vamos ver o passo a passo de como criar e trabalhar em uma nova branch.</p>
+            <div class="git-animation-container" id="anim-branch-main"></div>
+            <div class="animation-controls">
+                <button class="nav-button control-button step1-btn">1. <code>git branch nova-secao</code></button>
+                <button class="nav-button control-button step2-btn" disabled>2. <code>git switch nova-secao</code></button>
+                <button class="nav-button control-button step3-btn" disabled>3. Fazer novo commit</button>
+            </div>
+        </div>
+
+        <div class="slide" data-slide="11">
+            <h2>Mãos à Obra: Nossa Primeira Branch</h2>
+            <h3>Vamos criar uma branch para listar os comandos do Git que já aprendemos.</h3>
+            <p>No terminal do seu Codespace, digite o seguinte comando para criar a branch:</p>
+            <div class="terminal-code">
+                git branch feature/comandos-git
+            </div>
+        </div>
+
+        <div class="slide" data-slide="12">
+            <h2>Verificando e Trocando de Branch</h2>
+            <p>Primeiro, vamos listar as branches para ver se a nossa foi criada. O <code>*</code> indica em qual estamos.</p>
+            <div class="terminal-code">git branch</div>
+            <p>Agora, vamos entrar na nossa nova "realidade paralela" com o comando <code>switch</code>:</p>
+            <div class="terminal-code">git switch feature/comandos-git</div>
+        </div>
+
+        <div class="slide" data-slide="13">
+            <h2>Criando Nosso Arquivo de Comandos</h2>
+            <p>Agora que estamos na branch nova, vamos criar um arquivo HTML para listar os comandos. Crie um novo arquivo no seu Codespace chamado <code>index.html</code> e adicione o conteúdo abaixo.</p>
+            <div class="terminal-code" style="font-size: 0.9rem;">
+                &lt;!DOCTYPE html&gt;<br>
+                &lt;html&gt;<br>
+                &lt;head&gt;&lt;title&gt;Meus Comandos Git&lt;/title&gt;&lt;/head&gt;<br>
+                &lt;body&gt;<br>
+                &nbsp;&nbsp;&lt;h1&gt;Lista de Comandos Git&lt;/h1&gt;<br>
+                &nbsp;&nbsp;&lt;ul&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;b&gt;git add&lt;/b&gt;: Adiciona arquivos à área de preparação.&lt;/li&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;b&gt;git commit&lt;/b&gt;: Salva as alterações no histórico local.&lt;/li&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;b&gt;git push&lt;/b&gt;: Envia os commits para o GitHub.&lt;/li&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;b&gt;git branch&lt;/b&gt;: Lista e cria branches.&lt;/li&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;&lt;b&gt;git switch&lt;/b&gt;: Troca para outra branch.&lt;/li&gt;<br>
+                &nbsp;&nbsp;&lt;/ul&gt;<br>
+                &lt;/body&gt;<br>
+                &lt;/html&gt;
+            </div>
+        </div>
+
+        <div class="slide" data-slide="14">
+            <h2>Salvando nosso trabalho: O Primeiro Push</h2>
+            <p>Na primeira vez que enviamos uma branch NOVA, precisamos dizer ao Git para onde ela vai. Usamos <code>--set-upstream</code> (ou <code>-u</code>) para criar um "link" entre a branch local e a remota.</p>
+            <div class="terminal-code">
+                <span class="comment"># 1. Adiciona o novo arquivo</span><br>
+                git add index.html<br><br>
+                <span class="comment"># 2. Faz o commit</span><br>
+                git commit -m "feat: Cria página com lista de comandos Git"<br><br>
+                <span class="comment"># 3. Envia e cria o "link" com o GitHub</span><br>
+                git push --set-upstream origin feature/comandos-git
+            </div>
+        </div>
+
+        <div class="slide" data-slide="15">
+            <h2>Pushes Futuros na Mesma Branch</h2>
+            <p>Depois que o "link" foi criado, o processo fica muito mais simples! Para enviar novos commits nesta mesma branch, basta usar:</p>
+            <div class="terminal-code">
+                <span class="comment"># Faça mais alterações, adicione e commite...</span><br><br>
+                <span class="comment"># E para enviar, agora é só:</span><br>
+                git push
+            </div>
+        </div>
+
+        <div class="slide" data-slide="16">
+            <h2>Resumo Visual</h2>
+            <p>Revisando o processo completo de criação e trabalho em uma branch.</p>
+            <div class="git-animation-container" id="anim-branch-summary"></div>
+        </div>
+
+        <div class="slide" data-slide="17">
+            <h2>Próxima Aula: Unindo as Realidades</h2>
+            <p>Aprendemos a criar realidades paralelas. Mas como trazemos nossa nova página de comandos de volta para a linha do tempo principal (<code>main</code>)?</p>
+            <h3>Spoiler: <strong>Merging e Pull Requests</strong></h3>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn">Anterior</button>
+        <button class="nav-button" id="nextBtn">Próximo</button>
+    </div>
+
+    <div class="slide-counter" id="slideCounter">1 / 17</div>
+
+    <button class="fullscreen-button" id="fullscreenBtn" title="Tela Cheia">
+        <svg id="fullscreen-enter-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+        <svg id="fullscreen-exit-icon" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
+    </button>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const enterIcon = document.getElementById('fullscreen-enter-icon');
+        const exitIcon = document.getElementById('fullscreen-exit-icon');
+
+        let currentSlide = 1;
+        const totalSlides = slides.length;
+        let animationStep = 0;
+
+        const updateSlides = () => {
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+                if (parseInt(slide.dataset.slide) === currentSlide) {
+                    slide.classList.add('active');
+                    runAnimationForSlide(currentSlide);
+                }
+            });
+            slideCounter.textContent = `${currentSlide} / ${totalSlides}`;
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+        };
+
+        const runAnimationForSlide = (slideNumber) => {
+            const containers = document.querySelectorAll('.git-animation-container');
+            containers.forEach(c => c.innerHTML = '');
+
+            switch (slideNumber) {
+                case 2: animateReviewIntro(); break;
+                case 3: animateReviewAdd(); break;
+                case 4: animateReviewCommit(); break;
+                case 5: animateReviewPush(); break;
+                case 7: animateBranchStart(); break;
+                case 10:
+                    animationStep = 0;
+                    setupBranchAnimation(document.getElementById('anim-branch-main'));
+                    break;
+                case 16:
+                    const container16 = document.getElementById('anim-branch-summary');
+                    if (container16) {
+                        setupBranchAnimation(container16, true);
+                    }
+                    break;
+            }
+        };
+
+        // Funções de Animação de Revisão
+        const animateReviewIntro = () => {
+            const container = document.getElementById('anim-review-intro');
+            if (!container) return;
+            container.innerHTML = `
+                    <div class="placeholder-box"><h4>1. Cápsula do Tempo</h4>
+                    <img src="img/img01.png" /></div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="placeholder-box"><h4>2. Rótulo</h4>
+                    <img src="img/img02.jpg" /></div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="placeholder-box"><h4>3. Local Seguro</h4>
+                    <img src="img/img03.png" /></div>
+                `;
+        };
+
+        const animateReviewAdd = () => {
+            const container = document.getElementById('anim-review-add');
+            if (!container) return;
+            container.innerHTML = `
+                    <div class="placeholder-box" id="add-box-1"><h4>Arquivos</h4>
+                    <img src="img/img04.png" /></div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="placeholder-box" id="add-box-2"><h4>Cápsula (Aberta)</h4>
+                    <img src="img/img01.png" /></div>
+                `;
+        };
+
+        const animateReviewCommit = () => {
+            const container = document.getElementById('anim-review-commit');
+            if (!container) return;
+            container.innerHTML = `
+                    <div class="placeholder-box" id="commit-box-1"><h4>Cápsula (Aberta)</h4>
+                    <img src="img/img01.png" /></div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="placeholder-box" id="commit-box-2"><h4>Cápsula (Fechada)</h4>
+                    <img src="img/img02.jpg" /></div>
+                `;
+        };
+
+        const animateReviewPush = () => {
+            const container = document.getElementById('anim-review-push');
+            if (!container) return;
+            container.innerHTML = `
+                    <div class="placeholder-box" ><h4>Histórico Local</h4>
+                    <img src="img/img05.png" /></div>
+                    <div class="arrow">&rarr;</div>
+                    <div class="placeholder-box" ><h4>Local Seguro (GitHub)</h4>
+                    <img src="img/img03.png" /></div>
+                `;
+        };
+
+        // Funções de Animação de Branch
+        const createCommit = (id, x, y, text, container) => {
+            const commit = document.createElement('div');
+            commit.className = 'commit';
+            commit.id = id;
+            commit.style.left = `${x}%`;
+            commit.style.top = `${y}%`;
+            commit.style.transform = 'translate(-50%, -50%) scale(0)';
+            commit.textContent = text;
+            container.appendChild(commit);
+            return commit;
+        };
+
+        const createLine = (id, x1, y1, x2, y2, colorClass, container) => {
+            const line = document.createElement('div');
+            line.className = `branch-line`;
+            line.style.backgroundColor = `var(--${colorClass})`;
+            line.id = id;
+            const length = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            line.style.width = '0px';
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(line);
+
+            setTimeout(() => {
+                line.style.width = `${length}px`;
+            }, 100);
+            return line;
+        };
+
+        const createLabel = (id, text, colorClass, container) => {
+            const label = document.createElement('div');
+            label.className = `branch-label ${colorClass}`;
+            label.id = id;
+            label.textContent = text;
+            label.style.opacity = '0';
+            container.appendChild(label);
+            return label;
+        };
+
+        const moveLabel = (label, commit) => {
+            const commitRect = commit.getBoundingClientRect();
+            const containerRect = commit.parentElement.getBoundingClientRect();
+            label.style.left = `${commitRect.left - containerRect.left + commitRect.width / 2}px`;
+            label.style.top = `${commitRect.top - containerRect.top}px`;
+        }
+
+        const animateBranchStart = () => {
+            const container = document.getElementById('anim-branch-start');
+            if (!container) return;
+            const commitsData = [
+                { id: 'cbs-1', x: 20, y: 50, text: 'C1' },
+                { id: 'cbs-2', x: 50, y: 50, text: 'C2' },
+                { id: 'cbs-3', x: 80, y: 50, text: 'C3' },
+            ];
+
+            createLine('lbs-main', container.offsetWidth * 0.1, container.offsetHeight * 0.5, container.offsetWidth * 0.9, container.offsetHeight * 0.5, 'main-branch-color', container);
+
+            commitsData.forEach((c, index) => {
+                setTimeout(() => {
+                    const commitEl = createCommit(c.id, c.x, c.y, c.text, container);
+                    setTimeout(() => commitEl.style.transform = 'translate(-50%, -50%) scale(1)', 50);
+                }, index * 500);
+            });
+        };
+
+        const setupBranchAnimation = (container, autoplay = false) => {
+            if (!container) return;
+            const uniqueId = autoplay ? '16' : '10';
+            const commitsData = [
+                { id: `c${uniqueId}-1`, x: 20, y: 50, text: 'C1' },
+                { id: `c${uniqueId}-2`, x: 50, y: 50, text: 'C2' },
+            ];
+
+            createLine(`l${uniqueId}-main`, container.offsetWidth * 0.1, container.offsetHeight * 0.5, container.offsetWidth * 0.6, container.offsetHeight * 0.5, 'main-branch-color', container);
+
+            commitsData.forEach(c => {
+                const commitEl = createCommit(c.id, c.x, c.y, c.text, container);
+                commitEl.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
+
+            const mainLabel = createLabel(`label-${uniqueId}-main`, 'main', 'label-main', container);
+            const headLabel = createLabel(`label-${uniqueId}-head`, 'HEAD', 'label-head', container);
+            const commit2 = document.getElementById(`c${uniqueId}-2`);
+
+            setTimeout(() => {
+                if (commit2) {
+                    moveLabel(mainLabel, commit2);
+                    mainLabel.style.transform = 'translate(-50%, -150%)';
+                    mainLabel.style.opacity = '1';
+
+                    moveLabel(headLabel, commit2);
+                    headLabel.style.transform = 'translate(-50%, 200%)';
+                    headLabel.style.opacity = '1';
+                }
+            }, 500);
+
+            const step1Btn = container.parentElement.querySelector('.step1-btn');
+            const step2Btn = container.parentElement.querySelector('.step2-btn');
+            const step3Btn = container.parentElement.querySelector('.step3-btn');
+
+            if (!autoplay) {
+                if (step1Btn) step1Btn.disabled = false;
+                if (step2Btn) step2Btn.disabled = true;
+                if (step3Btn) step3Btn.disabled = true;
+            }
+
+            const handleStep1 = () => {
+                const commit2Ref = document.getElementById(`c${uniqueId}-2`);
+                if (!commit2Ref) return;
+                const featureLabel = createLabel(`label-${uniqueId}-feature`, 'nova-secao', 'label-feature', container);
+                moveLabel(featureLabel, commit2Ref);
+                featureLabel.style.transform = 'translate(-50%, -250%)';
+                setTimeout(() => featureLabel.style.opacity = '1', 100);
+                if (step1Btn) step1Btn.disabled = true;
+                if (step2Btn) step2Btn.disabled = false;
+                animationStep = 1;
+            };
+
+            const handleStep2 = () => {
+                headLabel.style.transform = 'translate(-50%, -350%)';
+                if (step2Btn) step2Btn.disabled = true;
+                if (step3Btn) step3Btn.disabled = false;
+                animationStep = 2;
+            };
+
+            const handleStep3 = () => {
+                const newCommit = createCommit(`c${uniqueId}-3`, 80, 25, 'C3', container);
+
+                createLine(`l${uniqueId}-feature`, container.offsetWidth * 0.5, container.offsetHeight * 0.5, container.offsetWidth * 0.8, container.offsetHeight * 0.25, 'feature-branch-color', container);
+
+                setTimeout(() => {
+                    newCommit.style.transform = 'translate(-50%, -50%) scale(1)';
+                    const featureLabel = document.getElementById(`label-${uniqueId}-feature`);
+                    const headLabel = document.getElementById(`label-${uniqueId}-head`);
+
+                    if (featureLabel && headLabel) {
+                        moveLabel(featureLabel, newCommit);
+                        featureLabel.style.transform = 'translate(-50%, -150%)';
+
+                        moveLabel(headLabel, newCommit);
+                        headLabel.style.transform = 'translate(-50%, 200%)';
+                    }
+                }, 500);
+                if (step3Btn) step3Btn.disabled = true;
+                animationStep = 3;
+            };
+
+            if (autoplay) {
+                setTimeout(handleStep1, 500);
+                setTimeout(handleStep2, 1500);
+                setTimeout(handleStep3, 2500);
+            } else {
+                if (step1Btn) step1Btn.onclick = handleStep1;
+                if (step2Btn) step2Btn.onclick = handleStep2;
+                if (step3Btn) step3Btn.onclick = handleStep3;
+            }
+        };
+
+        const handleNext = () => {
+            if (currentSlide === 10) {
+                const activeSlide = document.querySelector('.slide.active');
+                const controls = [
+                    activeSlide.querySelector('.step1-btn'),
+                    activeSlide.querySelector('.step2-btn'),
+                    activeSlide.querySelector('.step3-btn')
+                ];
+                if (animationStep < controls.length) {
+                    controls[animationStep].click();
+                } else {
+                    if (currentSlide < totalSlides) currentSlide++;
+                    updateSlides();
+                }
+            } else {
+                if (currentSlide < totalSlides) currentSlide++;
+                updateSlides();
+            }
+        };
+
+        const handlePrev = () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlides();
+            }
+        };
+
+        nextBtn.addEventListener('click', handleNext);
+        prevBtn.addEventListener('click', handlePrev);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                handleNext();
+            } else if (e.key === 'ArrowLeft') {
+                handlePrev();
+            }
+        });
+
+        // Lógica do botão de Tela Cheia
+        const toggleFullScreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                enterIcon.style.display = 'none';
+                exitIcon.style.display = 'block';
+            } else {
+                enterIcon.style.display = 'block';
+                exitIcon.style.display = 'none';
+            }
+        });
+
+        // Initial setup
+        updateSlides();
+    </script>
+
+</body>
+</html>

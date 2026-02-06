@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Condicionais e Laços em Shell</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Para melhor layout mobile */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Menos padding em mobile */
+            border-bottom: 1px solid #e5e7eb;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+            .slide {
+                padding: 4rem;
+            }
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        html {
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Estilos de Navegação */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: #ffffff; }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start;
+                page-break-before: always;
+            }
+            .slide:first-child { page-break-before: avoid; }
+            .nav-button, .counter, .copy-button { display: none; }
+        }
+
+        /* Estilos de Código e Tokens */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #f8f9fa; /* Tema claro para terminal */
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #212529; /* Cor do texto escura */
+            counter-reset: line;
+            position: relative;
+            overflow-x: auto; /* Para rolagem horizontal em mobile */
+        }
+        pre .line {
+            padding-left: 4.5em;
+            position: relative;
+            display: block; /* Garante quebra de linha correta */
+            white-space: pre-wrap; /* Quebra de linha em mobile */
+            word-break: break-all;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em;
+            padding-right: 1em;
+            text-align: right;
+            color: #adb5bd; /* Cor dos números de linha */
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #2d3748;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        /* Tokens para Shell Script (Tema Claro) */
+        .token-prompt { color: #007bff; } /* Azul */
+        .token-command, .token-keyword { color: #d73a49; font-weight: bold; } /* Vermelho para comandos e keywords */
+        .token-option { color: #6f42c1; } /* Roxo */
+        .token-path { color: #28a745; } /* Verde */
+        .token-comment { color: #6a737d; } /* Cinza */
+        .token-output { color: #212529; } /* Preto (cor padrão) */
+        .token-variable { color: #e65100; } /* Laranja */
+        .token-string { color: #032f62; } /* Azul escuro */
+        .token-operator { color: #d73a49; } /* Vermelho */
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-6xl md:text-8xl font-extrabold mb-4 bg-gradient-to-r from-slate-600 to-emerald-600 bg-clip-text text-transparent drop-shadow-2xl">Condicionais e Laços</h1>
+                <p class="text-2xl md:text-3xl text-emerald-700">Tomando Decisões e Repetindo Tarefas</p>
+                <p class="text-xl text-gray-600 mt-8">Fundamentos de Informática</p>
+                <div class="w-32 h-1.5 bg-emerald-600 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+        
+        <!-- PARTE 1: CONDICIONAIS -->
+
+        <!-- Slide 2: Tornando Scripts Inteligentes -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Tornando Nossos Scripts Inteligentes</h2>
+                <p class="text-xl mb-6">Na última aula, aprendemos a criar scripts que seguem uma receita de bolo, executando uma lista de comandos em ordem.</p>
+                <p class="text-xl mb-6">Hoje, vamos ensiná-los a <strong>pensar</strong>. Um script inteligente pode:</p>
+                <div class="text-center my-8">
+                    <span class="text-7xl">🧠</span>
+                    <ul class="text-2xl mt-4 space-y-3">
+                        <li>Verificar condições (<em class="text-emerald-700">"A idade do usuário é maior que 18?"</em>)</li>
+                        <li>Executar blocos de código diferentes com base nessas condições.</li>
+                        <li>Adaptar seu comportamento dinamicamente.</li>
+                    </ul>
+                </div>
+                <p class="text-2xl text-center">A ferramenta para isso é a estrutura condicional <code class="inline-code">if</code>.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: A Estrutura if -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Estrutura Condicional <code class="inline-code">if</code></h2>
+                <p class="text-xl mb-6">A sintaxe do <code class="inline-code">if</code> em Shell é um pouco diferente de outras linguagens, mas a lógica é a mesma: "<strong>Se</strong> uma condição for verdadeira, <strong>então</strong> faça isso".</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-keyword">if</span> [ <span class="token-variable">$VARIAVEL</span> <span class="token-operator">-eq</span> <span class="token-string">"valor"</span> ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-comment"># Bloco de código a ser executado se a condição for verdadeira</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"A condição é verdadeira!"</span></div><div class="line"><span class="token-keyword">fi</span></div></pre></div>
+                <ul class="text-xl mt-6 space-y-3 list-disc pl-5">
+                    <li><code class="inline-code">if [...]</code>: Inicia a verificação da condição.</li>
+                    <li><code class="inline-code">then</code>: Marca o início do bloco de código a ser executado.</li>
+                    <li><code class="inline-code">fi</code>: Fecha o bloco <code class="inline-code">if</code> (é "if" ao contrário!).</li>
+                    <li class="p-3 bg-red-100 border border-red-300 rounded-lg"><strong>CRÍTICO:</strong> Deve haver <strong>espaços</strong> depois de <code class="inline-code">[</code> e antes de <code class="inline-code">]</code>! Pense em <code class="inline-code">[</code> como um comando.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 4: O Comando test -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O que são os colchetes <code class="inline-code">[ ]</code>?</h2>
+                <p class="text-xl mb-6">Em Shell Script, os colchetes <code class="inline-code">[ ]</code> são na verdade um atalho para o comando <code class="inline-code">test</code>. Este comando avalia uma expressão e retorna um status de saída: <strong>0 para verdadeiro</strong> e <strong>1 para falso</strong>.</p>
+                 <p class="text-xl mb-6">Existem dezenas de testes que podemos fazer. Vamos focar nos mais importantes para números, strings e arquivos.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 5: Operadores de Teste -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Operadores de Teste Essenciais</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <h3 class="font-bold text-xl mb-3">🔢 Para Números</h3>
+                        <ul class="space-y-2">
+                           <li><code class="inline-code">-eq</code> (equal)</li>
+                           <li><code class="inline-code">-ne</code> (not equal)</li>
+                           <li><code class="inline-code">-gt</code> (greater than)</li>
+                           <li><code class="inline-code">-lt</code> (less than)</li>
+                           <li><code class="inline-code">-ge</code> (greater or equal)</li>
+                           <li><code class="inline-code">-le</code> (less or equal)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-3">🔤 Para Strings</h3>
+                         <ul class="space-y-2">
+                           <li><code class="inline-code">=</code> ou <code class="inline-code">==</code> (igual)</li>
+                           <li><code class="inline-code">!=</code> (diferente)</li>
+                           <li><code class="inline-code">-z</code> (é nula/vazia)</li>
+                           <li><code class="inline-code">-n</code> (não é nula)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-3">📄 Para Arquivos</h3>
+                         <ul class="space-y-2">
+                           <li><code class="inline-code">-e</code> (existe)</li>
+                           <li><code class="inline-code">-f</code> (é um arquivo)</li>
+                           <li><code class="inline-code">-d</code> (é um diretório)</li>
+                           <li><code class="inline-code">-s</code> (tem tamanho > 0)</li>
+                        </ul>
+                    </div>
+                </div>
+                 <p class="text-xl mt-8 p-4 bg-gray-100 border border-gray-300 rounded-lg"><strong>Dica:</strong> Ao testar variáveis de string, sempre as coloque entre aspas duplas (ex: <code class="inline-code">[ "$VARIAVEL" = "texto" ]</code>). Isso evita erros caso a variável esteja vazia.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 6: if/else -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">E se a condição for falsa? <code class="inline-code">else</code></h2>
+                <p class="text-xl mb-6">A cláusula <code class="inline-code">else</code> nos permite executar um bloco de código alternativo quando a condição do <code class="inline-code">if</code> não é atendida.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual a sua idade? "</span> <span class="token-variable">IDADE</span></div><div class="line"></div><div class="line"><span class="token-keyword">if</span> [ <span class="token-string">"</span><span class="token-variable">$IDADE</span><span class="token-string">"</span> <span class="token-operator">-ge</span> 18 ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Acesso permitido. Você é maior de idade."</span></div><div class="line"><span class="token-keyword">else</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Acesso negado. Você é menor de idade."</span></div><div class="line"><span class="token-keyword">fi</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 7: if/elif/else -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Múltiplas Condições: <code class="inline-code">elif</code></h2>
+                <p class="text-xl mb-6"><code class="inline-code">elif</code> (contração de "else if") permite testar uma nova condição se a anterior for falsa.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Digite um número: "</span> <span class="token-variable">NUM</span></div><div class="line"></div><div class="line"><span class="token-keyword">if</span> [ <span class="token-string">"</span><span class="token-variable">$NUM</span><span class="token-string">"</span> <span class="token-operator">-gt</span> 0 ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"O número é positivo."</span></div><div class="line"><span class="token-keyword">elif</span> [ <span class="token-string">"</span><span class="token-variable">$NUM</span><span class="token-string">"</span> <span class="token-operator">-lt</span> 0 ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"O número é negativo."</span></div><div class="line"><span class="token-keyword">else</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"O número é zero."</span></div><div class="line"><span class="token-keyword">fi</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- PARTE 2: LAÇOS -->
+
+        <!-- Slide 8: Transição Laços -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Automação de Tarefas Repetitivas</h2>
+                <div class="text-7xl my-8">🔄</div>
+                <p class="text-2xl mb-4">Nossos scripts já pensam, mas como fazê-los repetir uma ação várias vezes sem ter que escrever o mesmo código de novo e de novo?</p>
+                <p class="text-3xl text-emerald-700">Com Laços de Repetição!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 9: O Laço for -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Laço <code class="inline-code">for</code></h2>
+                <p class="text-xl mb-6">O laço <code class="inline-code">for</code> é perfeito para iterar sobre uma <strong>lista de itens</strong> (palavras, números, nomes de arquivos, etc.).</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-keyword">for</span> <span class="token-variable">VARIAVEL</span> <span class="token-keyword">in</span> <span class="token-string">item1 item2 item3</span>; <span class="token-keyword">do</span></div><div class="line">    <span class="token-comment"># Código a ser executado para cada item</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"O item atual é: </span><span class="token-variable">$VARIAVEL</span><span class="token-string">"</span></div><div class="line"><span class="token-keyword">done</span></div></pre></div>
+                <p class="text-xl mt-6">A cada "volta" do laço, a <code class="inline-code">$VARIAVEL</code> assume o valor do próximo item da lista, até que a lista termine.</p>
+            </div>
+        </section>
+
+        <!-- Slide 10: for na Prática -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">for</code> na Prática: Processando Arquivos</h2>
+                <p class="text-xl mb-6">Um dos usos mais poderosos do <code class="inline-code">for</code> é para trabalhar com arquivos. Podemos usar curingas (<code class="inline-code">*</code>) para gerar a lista de itens dinamicamente.</p>
+                <p class="text-xl font-bold">Script para renomear todos os arquivos `.txt` para `.bak`:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"></div><div class="line"><span class="token-keyword">for</span> <span class="token-variable">ARQUIVO</span> <span class="token-keyword">in</span> <span class="token-path">*.txt</span>; <span class="token-keyword">do</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Renomeando </span><span class="token-variable">$ARQUIVO</span><span class="token-string"> para </span><span class="token-variable">${ARQUIVO%.txt}</span><span class="token-string">.bak"</span></div><div class="line">    <span class="token-command">mv</span> <span class="token-string">"</span><span class="token-variable">$ARQUIVO</span><span class="token-string">"</span> <span class="token-string">"</span><span class="token-variable">${ARQUIVO%.txt}</span><span class="token-string">.bak"</span></div><div class="line"><span class="token-keyword">done</span></div><div class="line"></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Concluído!"</span></div></pre></div>
+                <p class="text-lg mt-4 text-gray-600">(<code class="inline-code">${VARIAVEL%.txt}</code> é uma forma de manipulação de string que remove a parte ".txt" do final do nome do arquivo.)</p>
+            </div>
+        </section>
+
+        <!-- Slide 11: O Laço while -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Laço <code class="inline-code">while</code></h2>
+                <p class="text-xl mb-6">O laço <code class="inline-code">while</code> executa um bloco de código <strong>enquanto uma condição for verdadeira</strong>. Ele não itera sobre uma lista, mas sim testa a condição antes de cada execução.</p>
+                 <div class="code-block-wrapper"><pre><div class="line"><span class="token-keyword">while</span> [ <span class="token-variable">$VARIAVEL</span> <span class="token-operator">-lt</span> <span class="token-string">10</span> ]; <span class="token-keyword">do</span></div><div class="line">    <span class="token-comment"># Código a ser executado enquanto a condição for verdadeira</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"O valor é </span><span class="token-variable">$VARIAVEL</span><span class="token-string">"</span></div><div class="line">    <span class="token-comment"># É crucial alterar a variável dentro do laço para não criar um loop infinito!</span></div><div class="line"><span class="token-keyword">done</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 12: while na Prática -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">while</code> na Prática: Um Contador</h2>
+                <p class="text-xl mb-6">Vamos criar um script que conta de 1 a 5.</p>
+                 <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"></div><div class="line"><span class="token-variable">CONTADOR</span>=1</div><div class="line"></div><div class="line"><span class="token-keyword">while</span> [ <span class="token-string">"</span><span class="token-variable">$CONTADOR</span><span class="token-string">"</span> <span class="token-operator">-le</span> 5 ]; <span class="token-keyword">do</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Contagem: </span><span class="token-variable">$CONTADOR</span><span class="token-string">"</span></div><div class="line">    <span class="token-variable">CONTADOR</span>=$((<span class="token-variable">$CONTADOR</span> + 1))</div><div class="line"><span class="token-keyword">done</span></div></pre></div>
+                 <p class="text-xl mt-6">A sintaxe <code class="inline-code">$((...))</code> é a forma padrão no Bash para realizar <strong>operações aritméticas</strong>.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 13: Exercício Final -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Missão: O Script de Backup Simples</h2>
+                <p class="text-xl mb-6">Vamos juntar tudo! Crie um script `backup.sh` que:</p>
+                <ol class="list-decimal list-inside mt-4 space-y-3 text-lg bg-gray-50 p-6 rounded-lg">
+                    <li>Pergunte ao usuário qual diretório ele quer "copiar".</li>
+                    <li>Verifique se o diretório digitado realmente existe (<code class="inline-code">-d</code>).</li>
+                    <li>Se não existir, mostre uma mensagem de erro e saia.</li>
+                    <li>Se existir, crie um novo diretório chamado `<nome_original>_backup`.</li>
+                    <li>Use um laço <code class="inline-code">for</code> para percorrer todos os itens dentro do diretório original.</li>
+                    <li>Para cada item, mostre uma mensagem como "Copiando [nome_do_item]..." (não precisa copiar de verdade, apenas mostrar a mensagem).</li>
+                    <li>No final, mostre uma mensagem de sucesso.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Slide 14: Solução do Exercício -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Solução da Missão</h2>
+                <div id="password-gate">
+                    <p class="text-xl mb-4">Digite a senha para revelar a solução:</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="password" id="solution-password" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" placeholder="Senha">
+                        <button id="solution-button" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">Revelar</button>
+                    </div>
+                    <p id="error-message" class="text-red-500 mt-2" style="display: none;">Senha incorreta!</p>
+                </div>
+
+                <div id="solution-code" style="display: none;">
+                    <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"></div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual diretório você quer copiar? "</span> <span class="token-variable">DIR_ORIGEM</span></div><div class="line"></div><div class="line"><span class="token-keyword">if</span> [ <span class="token-operator">-d</span> <span class="token-string">"</span><span class="token-variable">$DIR_ORIGEM</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Diretório encontrado. Iniciando o backup..."</span></div><div class="line">    <span class="token-variable">DIR_BKP</span>=<span class="token-string">"</span><span class="token-variable">${DIR_ORIGEM}</span><span class="token-string">_backup"</span></div><div class="line">    <span class="token-command">mkdir</span> <span class="token-string">"</span><span class="token-variable">$DIR_BKP</span><span class="token-string">"</span></div><div class="line"></div><div class="line">    <span class="token-keyword">for</span> <span class="token-variable">ITEM</span> <span class="token-keyword">in</span> <span class="token-string">"</span><span class="token-variable">$DIR_ORIGEM</span><span class="token-string">"</span>/*; <span class="token-keyword">do</span></div><div class="line">        <span class="token-command">echo</span> <span class="token-string">"Copiando </span><span class="token-variable">$ITEM</span><span class="token-string">..."</span></div><div class="line">        <span class="token-comment"># Aqui entraria o comando cp "$ITEM" "$DIR_BKP/"</span></div><div class="line">    <span class="token-keyword">done</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Backup concluído com sucesso!"</span></div><div class="line"><span class="token-keyword">else</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Erro: Diretório '</span><span class="token-variable">$DIR_ORIGEM</span><span class="token-string">' não encontrado."</span></div><div class="line"><span class="token-keyword">fi</span></div></pre></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Resumo -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo da Aula</h2>
+                <ul class="text-2xl space-y-6">
+                    <li><strong class="text-emerald-700">Condicionais:</strong> Permitem que o script tome decisões. A estrutura é <code class="inline-code">if [ condição ]; then ... elif ... else ... fi</code>.</li>
+                    <li><strong class="text-emerald-700">Testes <code class="inline-code">[ ]</code>:</strong> Verificam condições de números (<code class="inline-code">-eq</code>, <code class="inline-code">-gt</code>), strings (<code class="inline-code">=</code>, <code class="inline-code">-z</code>) e arquivos (<code class="inline-code">-f</code>, <code class="inline-code">-d</code>).</li>
+                    <li><strong class="text-emerald-700">Laço <code class="inline-code">for</code>:</strong> Itera sobre uma lista de itens. Perfeito para processar arquivos.</li>
+                    <li><strong class="text-emerald-700">Laço <code class="inline-code">while</code>:</strong> Repete um bloco de código enquanto uma condição for verdadeira.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Slide 16: Próximos Passos -->
+        <section id="slide-16" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Chegando na Reta Final</h2>
+                <p class="text-2xl">Vocês agora têm todas as ferramentas fundamentais para criar scripts poderosos e úteis.</p>
+                <div class="text-6xl my-8">🛠️</div>
+                <p class="text-3xl font-bold text-emerald-700 mt-12">Próxima e última aula: Revisão Prática, onde vamos construir scripts completos do zero!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 17: Perguntas -->
+        <section id="slide-17" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                const span = button.querySelector('span');
+                const originalText = 'Copiar'; // Definido estaticamente pois não há span no SVG
+
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeText.trim();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        const copyFeedback = e.currentTarget;
+                        copyFeedback.innerHTML = 'Copiado!';
+                        setTimeout(() => {
+                           copyFeedback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span>`;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+
+            // Lógica para a senha da solução no Slide 14
+            const passwordGate = document.getElementById('password-gate');
+            const solutionCode = document.getElementById('solution-code');
+            const solutionPasswordInput = document.getElementById('solution-password');
+            const solutionButton = document.getElementById('solution-button');
+            const errorMessage = document.getElementById('error-message');
+
+            if(solutionButton){
+                solutionButton.addEventListener('click', () => {
+                    if (solutionPasswordInput.value.toUpperCase() === 'COTIL') {
+                        passwordGate.style.display = 'none';
+                        solutionCode.style.display = 'block';
+                    } else {
+                        errorMessage.style.display = 'block';
+                        solutionPasswordInput.value = ''; // Limpa o campo
+                        setTimeout(() => {
+                            errorMessage.style.display = 'none';
+                        }, 2000);
+                    }
+                });
+            }
+
+            if(solutionPasswordInput){
+                solutionPasswordInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        solutionButton.click();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

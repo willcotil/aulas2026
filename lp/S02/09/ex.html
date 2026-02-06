@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Ponteiros em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .exercise-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercícios Práticos: Ponteiros em C</h1>
+        <p class="mt-2 text-gray-600">Pratique a declaração e o uso de ponteiros para manipular a memória.</p>
+
+        <!-- Exercício 1 -->
+        <div class="exercise-block mt-8">
+            <h2>1. Informações da Memória</h2>
+            <p class="mt-2">Crie um programa que declare uma variável inteira, atribua um valor a ela e declare um ponteiro para inteiro. Faça o ponteiro apontar para a variável e, em seguida, exiba na tela:</p>
+            <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                <li>O valor da variável.</li>
+                <li>O endereço da variável.</li>
+                <li>O valor que o ponteiro está guardando (que deve ser o mesmo endereço da variável).</li>
+                <li>O valor apontado pelo ponteiro.</li>
+            </ul>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="exercise-block mt-8">
+            <h2>2. Modificação Indireta</h2>
+            <p class="mt-2">Crie um programa que declare uma variável <code>idade</code> e atribua um valor a ela. Crie um ponteiro <code>pIdade</code> que aponte para <code>idade</code>. Exiba a idade. Em seguida, usando <strong>apenas o ponteiro</strong>, altere o valor da idade para um novo valor. Exiba a idade novamente para confirmar que a alteração funcionou.</p>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="exercise-block mt-8">
+            <h2>3. Soma através de Ponteiros</h2>
+            <p class="mt-2">Declare duas variáveis inteiras, <code>num1</code> e <code>num2</code>. Peça ao usuário para digitar valores para elas. Crie dois ponteiros, <code>ptr1</code> e <code>ptr2</code>, apontando para <code>num1</code> e <code>num2</code>, respectivamente. Crie uma terceira variável, <code>soma</code>, e faça com que ela receba a soma dos valores apontados pelos ponteiros. Exiba o resultado.</p>
+        </div>
+        
+        <!-- Exercício 4 -->
+        <div class="exercise-block mt-8">
+            <h2>4. Ponteiros e Condicionais</h2>
+            <p class="mt-2">Declare uma variável <code>saldo</code> do tipo <code>float</code> e inicie-a com o valor 1000.0. Crie um ponteiro para ela. Peça ao usuário para digitar um valor de saque. Usando um <code>if</code>, verifique se o saldo (acessado através do ponteiro) é suficiente para o saque. Se for, subtraia o valor do saque do saldo (usando o ponteiro). No final, exiba o saldo final.</p>
+        </div>
+
+        <!-- Exercício 5 -->
+        <div class="exercise-block mt-8">
+            <h2>5. Ponteiro para Struct (Acesso com <code>(*).</code>)</h2>
+            <p class="mt-2">Crie uma <code>struct Produto</code> com os campos <code>int codigo</code> e <code>float preco</code>. Na <code>main</code>, crie uma variável <code>produto1</code> e atribua valores a ela. Crie um ponteiro <code>ptrProduto</code> que aponte para <code>produto1</code>. Exiba o código e o preço do produto acessando os membros através do ponteiro, usando a sintaxe com parênteses e ponto: <code>(*ptrProduto).codigo</code>.</p>
+        </div>
+
+        <!-- Exercício 6 -->
+        <div class="exercise-block mt-8">
+            <h2>6. Ponteiro para Struct (Acesso com Seta <code>-></code>)</h2>
+            <p class="mt-2">Usando a mesma <code>struct Produto</code> do exercício anterior, crie uma variável <code>produto2</code> e um ponteiro para ela. Atribua valores aos membros da struct <strong>usando apenas o ponteiro</strong> e o operador seta (<code>-></code>). Por fim, exiba os dados para confirmar que foram salvos corretamente.</p>
+        </div>
+
+        <!-- NOVO Exercício 7 -->
+        <div class="exercise-block mt-8">
+            <h2>7. Ordem na Memória</h2>
+            <p class="mt-2">Declare duas variáveis, <code>var1</code> e <code>var2</code>. Crie dois ponteiros, <code>ptr1</code> e <code>ptr2</code>, que apontem para elas, respectivamente. Compare os **endereços** de memória armazenados nos ponteiros e exiba uma mensagem indicando qual variável está armazenada em um endereço de memória "menor" (vem antes na memória).</p>
+        </div>
+
+        <!-- NOVO Exercício 8 -->
+        <div class="exercise-block mt-8">
+            <h2>8. Atualizando Ficha de Personagem</h2>
+            <p class="mt-2">Crie uma <code>struct Personagem</code> com os campos <code>char nome[50]</code>, <code>int vida</code> e <code>int mana</code>. Na <code>main</code>, crie um personagem e preencha seus dados iniciais. Crie um ponteiro para este personagem. Em seguida, simule um "level up" usando **apenas o ponteiro**: aumente a vida em 50 e a mana em 25. Exiba os dados do personagem antes e depois do "level up" para mostrar as alterações.</p>
+        </div>
+
+    </div>
+</body>
+</html>
+

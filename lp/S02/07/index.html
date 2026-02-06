@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Vetores de Structs em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilos de Navegação (visíveis na tela) */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Tema Bonus Slides - CINZA CLARO */
+        .bonus-slide {
+            background-color: #f3f4f6; /* Gray 100 */
+            color: #1f2937; /* Gray 800 */
+            border-bottom-color: #d1d5db;
+        }
+        .bonus-slide h2, .bonus-slide h3 {
+            color: #166534; /* Green 800 */
+        }
+        .bonus-slide p, .bonus-slide li {
+             color: #374151; /* Gray 700 */
+        }
+        .bonus-slide pre {
+            background-color: #e5e7eb; /* Gray 200 */
+            border-color: #d1d5db;
+        }
+        .bonus-slide code.inline-code {
+             background-color: #d1d5db; /* Gray 300 */
+             color: #1f2937;
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start; /* Alinha o conteúdo no topo */
+                page-break-before: always; 
+            }
+            .slide:first-child {
+                page-break-before: avoid; 
+            }
+            .nav-button, .counter, .copy-button {
+                display: none;
+            }
+        }
+
+        /* Outros estilos (código, fichas, animações) */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #FDFDFD;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #383838;
+            counter-reset: line;
+            position: relative;
+            padding-left: 4.5em;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3em;
+            padding-right: 1em;
+            text-align: right;
+            color: #aaa;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        .token-comment { color: #808080; font-style: italic; }
+        .token-keyword { color: #008B8B; font-weight: bold; }
+        .token-string { color: #D2691E; }
+        .token-function { color: #556B2F; }
+        .token-type { color: #20B2AA; font-style: italic; }
+        .token-number { color: #8A2BE2; }
+        .token-preprocessor { color: #C71585; }
+
+        /* Animação Vetor de Structs - TEMA VERMELHO */
+        .array-container { display: flex; flex-direction: column; gap: 0.5rem; }
+        .struct-slot { border: 2px solid #fca5a5; background-color: #fee2e2; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.3s ease-in-out; position: relative;}
+        .struct-slot.active { border-color: #dc2626; background-color: #fecaca; transform: scale(1.05); }
+        .struct-slot .index-label { position: absolute; left: -2.5rem; top: 50%; transform: translateY(-50%); font-weight: bold; color: #ef4444;}
+        .struct-slot .member { opacity: 0.5; }
+        .struct-slot.active .member { opacity: 1; }
+        .struct-slot .member.highlight { font-weight: bold; color: #b91c1c; }
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-4">Vetores de Structs</h1>
+                <p class="text-2xl md:text-3xl text-red-600">Organizando Coleções de Dados</p>
+                <p class="text-xl text-gray-600 mt-8">Prof. William Paiva</p>
+                <div class="w-32 h-1.5 bg-red-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Bônus Leitura de Strings -->
+        <section id="slide-2" class="slide bonus-slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold mb-4">Bônus: Resolvendo a Leitura de Strings</h2>
+                <p class="text-xl mb-4">O <code class="inline-code">scanf("%s", ...);</code> para no primeiro espaço. Vamos ver 3 formas de resolver isso e os problemas de "buffer" (lixo de entrada).</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">1. Limpando o "buffer" com <code class="inline-code">getchar()</code></h3>
+                        <p class="mb-2">Após um <code class="inline-code">scanf</code> numérico, o "Enter" (<code class="inline-code">\n</code>) fica na entrada. O <code class="inline-code">getchar()</code> consome esse caractere antes de lermos a string.</p>
+                        <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-function">scanf</span>(<span class="token-string">"%d"</span>, &idade);</div><div class="line"><span class="token-function">getchar</span>(); <span class="token-comment">// Limpa o \n</span></div><div class="line"><span class="token-function">scanf</span>(<span class="token-string">"%[^\n]"</span>, nome);</div></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">2. O truque do espaço no <code class="inline-code">scanf</code></h3>
+                        <p class="mb-2">Colocar um espaço antes do <code class="inline-code">%</code> no formato do <code class="inline-code">scanf</code> instrui a função a ignorar qualquer "espaço em branco" (incluindo o <code class="inline-code">\n</code>) que ficou para trás.</p>
+                        <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-function">scanf</span>(<span class="token-string">"%d"</span>, &idade);</div><div class="line"><span class="token-function">scanf</span>(<span class="token-string">" %[^\n]"</span>, nome);</div><div class="line"><span class="token-comment">//   ^--- Espaço mágico!</span></div></pre></div>
+                    </div>
+                     <div>
+                        <h3 class="font-bold text-lg mb-2">3. A forma mais recomendada: <code class="inline-code">fgets</code></h3>
+                        <p class="mb-2"><strong><code class="inline-code">fgets</code></strong> é a função mais segura, pois limita o número de caracteres, evitando que o programa "quebre" se o usuário digitar um texto muito longo.</p>
+                        <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-function">fgets</span>(nome, <span class="token-number">50</span>, stdin);</div><div class="line"><span class="token-comment">// Lê até 49 chars</span></div><div class="line"><span class="token-comment">// do teclado (stdin)</span></div><div class="line"><span class="token-comment">// para a variável 'nome'.</span></div></pre></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVO SLIDE 3: DETALHES DO FGETS -->
+        <section id="slide-3" class="slide bonus-slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold mb-4">Detalhes do <code class="inline-code">fgets</code>: Lendo Tudo com Segurança</h2>
+                <p class="text-xl mb-4"><code class="inline-code">fgets</code> sempre lê uma linha inteira como <strong>texto</strong>. Para ler números, precisamos de um passo extra: ler como texto e depois <strong>converter</strong>.</p>
+                <p class="mb-4">Para isso, usamos as funções da biblioteca <code class="inline-code">&lt;stdlib.h&gt;</code>:</p>
+                <ul class="list-disc list-inside text-xl space-y-2 mb-4">
+                    <li><code class="inline-code">atoi()</code>: Converte uma string para um <strong>inteiro</strong> (ASCII to integer).</li>
+                    <li><code class="inline-code">atof()</code>: Converte uma string para um <strong>float/double</strong> (ASCII to float).</li>
+                </ul>
+                 <p class="mb-4 text-lg"><strong>Parâmetros de <code class="inline-code">fgets(buffer, 50, stdin)</code>:</strong></p>
+                <ul class="list-decimal list-inside text-lg space-y-1">
+                    <li><code class="inline-code">buffer</code>: A variável <code  class="inline-code">char[]</code> que vai receber o texto.</li>
+                    <li><code class="inline-code">50</code>: O tamanho máximo do <code  class="inline-code">buffer</code> (evita invasão de memória).</li>
+                    <li><code class="inline-code">stdin</code>: Significa <i>standard input</i> (entrada padrão), ou seja, o teclado.</li>
+                </ul>
+                <div class="code-block-wrapper mt-4"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdlib.h&gt;</span> <span class="token-comment">// Biblioteca para atoi e atof</span></div><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">char</span> buffer[<span class="token-number">50</span>];</div><div class="line">    <span class="token-type">int</span> idade;</div><div class="line">    <span class="token-type">float</span> altura;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite sua idade: "</span>);</div><div class="line">    <span class="token-function">fgets</span>(buffer, <span class="token-number">50</span>, stdin);</div><div class="line">    idade = <span class="token-function">atoi</span>(buffer); <span class="token-comment">// Converte o texto lido para int</span></div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite sua altura: "</span>);</div><div class="line">    <span class="token-function">fgets</span>(buffer, <span class="token-number">50</span>, stdin);</div><div class="line">    altura = <span class="token-function">atof</span>(buffer); <span class="token-comment">// Converte o texto lido para float</span></div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 4: O Problema que já conhecemos -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Recapitulando: O Incômodo de Muitas Variáveis</h2>
+                <p class="text-xl mb-6">Na última aula, vimos que usar uma <code class="inline-code">struct</code> é ótimo para organizar os dados de <strong>um</strong> item. Mas para cadastrar 3 alunos, o código ainda fica repetitivo e inflexível:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-keyword">struct</span> Aluno { ... };</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Aluno aluno1;</div><div class="line">    <span class="token-keyword">struct</span> Aluno aluno2;</div><div class="line">    <span class="token-keyword">struct</span> Aluno aluno3;</div><div class="line">    <span class="token-comment">// Preencher dados de aluno1...</span></div><div class="line">    <span class="token-comment">// Preencher dados de aluno2...</span></div><div class="line">    <span class="token-comment">// Preencher dados de aluno3...</span></div><div class="line">}</div></pre></div>
+                <p class="text-xl mt-6">E se precisarmos de 30 alunos? Ou 100? Declarar uma variável para cada um é impraticável.</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: O problema dos vetores paralelos -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Uma Solução Antiga: Vetores Paralelos</h2>
+                <p class="text-xl mb-6">Uma forma de resolver isso sem structs seria criar um vetor para cada informação. Os dados do aluno na posição <code  class="inline-code">[0]</code> estariam espalhados pelos dois vetores.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-type">char</span> nomes[<span class="token-number">3</span>][<span class="token-number">50</span>];</div><div class="line"><span class="token-type">int</span> ras[<span class="token-number">3</span>];</div><div class="line"><span class="token-type">float</span> notas[<span class="token-number">3</span>];</div><div class="line"><span class="token-comment">// O aluno 1 é nomes[0], ras[0], notas[0]</span></div><div class="line"><span class="token-comment">// O aluno 2 é nomes[1], ras[1], notas[1]</span></div><div class="line"><span class="token-comment">// ...</span></div></pre></div>
+                <p class="text-xl mt-6"><strong>Problema:</strong> Os dados estão logicamente conectados, mas fisicamente separados. É fácil cometer erros e misturar as informações. Não é uma boa prática!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 6: A Solução Elegante -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Solução Perfeita: Vetor de Structs</h2>
+                <p class="text-xl mb-6">A solução ideal combina o melhor dos dois mundos: o poder de agrupamento das <code class="inline-code">structs</code> com a capacidade de armazenamento dos vetores.</p>
+                <p class="text-2xl font-bold mt-8">Criamos um único vetor onde cada posição guarda uma "ficha de aluno" completa!</p>
+                <div class="code-block-wrapper mt-4"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment">// Declaramos um vetor chamado "turma" que pode guardar 3 Alunos</span></div><div class="line"><span class="token-keyword">struct</span> Aluno turma[<span class="token-number">3</span>];</div></pre></div>
+                <div class="mt-6 text-2xl"><img src="arquivo.png" class="w-1/2 mx-auto rounded-lg"/></div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Sintaxe e Acesso -->
+        <section id="slide-7" class="slide" data-animation="array">
+            <div class="slide-content w-full max-w-5xl">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Sintaxe de Acesso</h2>
+                <p class="text-xl text-center mb-8">Para acessar um membro, primeiro usamos os colchetes <code class="inline-code">[]</code> para escolher a "ficha" (o aluno), e depois o ponto <code class="inline-code">.</code> para escolher o "campo" (a informação).</p>
+                <div class="flex items-center justify-center gap-12">
+                    <div class="w-1/2">
+                        <div class="code-block-wrapper"><pre id="array-code">
+                        <div class="line" data-index="0" data-member="nome"><span class="token-function">strcpy</span>(turma[<span class="token-number">0</span>].nome, <span class="token-string">"Ana"</span>);</div><div class="line" data-index="1" data-member="ra">turma[<span class="token-number">0</span>].ra = <span class="token-number">54321</span>;</div><div class="line" data-index="2" data-member="nota">turma[<span class="token-number">0</span>].nota = <span class="token-number">9.2</span>;</div><div class="line" data-index="3" data-member="nome"><span class="token-function">strcpy</span>(turma[<span class="token-number">1</span>].nome, <span class="token-string">"Maria"</span>);</div><div class="line" data-index="4" data-member="ra">turma[<span class="token-number">1</span>].ra = <span class="token-number">22222</span>;</div><div class="line" data-index="5" data-member="nota">turma[<span class="token-number">1</span>].nota = <span class="token-number">9.8</span>;</div><div class="line" data-index="6" data-member="nome"><span class="token-function">strcpy</span>(turma[<span class="token-number">2</span>].nome, <span class="token-string">"Jéssica"</span>);</div><div class="line" data-index="7" data-member="ra">turma[<span class="token-number">2</span>].ra = <span class="token-number">12345</span>;</div><div class="line" data-index="8" data-member="nota">turma[<span class="token-number">2</span>].nota = <span class="token-number">7.7</span>;</div>
+                        </pre></div>
+                        <p class="text-lg mt-4">A sintaxe é sempre <code class="inline-code">vetor[indice].membro</code>.</p>
+                    </div>
+                    <div class="w-1/2">
+                        <div id="array-struct" class="array-container text-lg">
+                             <div class="struct-slot" data-index="0">
+                                <div class="index-label">i=0</div>
+                                <div class="member" data-member="nome"><strong>nome:</strong> ...</div>
+                                <div class="member" data-member="ra"><strong>ra:</strong> ...</div>
+                                <div class="member" data-member="nota"><strong>nota:</strong> ...</div>
+                             </div>
+                             <div class="struct-slot" data-index="1">
+                                <div class="index-label">i=1</div>
+                                <div class="member" data-member="nome"><strong>nome:</strong> ...</div>
+                                <div class="member" data-member="ra"><strong>ra:</strong> ...</div>
+                                <div class="member" data-member="nota"><strong>nota:</strong> ...</div>
+                             </div>
+                             <div class="struct-slot" data-index="2">
+                                <div class="index-label">i=2</div>
+                                <div class="member" data-member="nome"><strong>nome:</strong> ...</div>
+                                <div class="member" data-member="ra"><strong>ra:</strong> ...</div>
+                                <div class="member" data-member="nota"><strong>nota:</strong> ...</div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Exemplo 1 - Cadastrando a Turma -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 1: Cadastrando a Turma</h2>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre>
+                    <div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-preprocessor">#include &lt;string.h&gt;</span></div><div class="line"><span class="token-preprocessor">#define TAM 3</span></div><div class="line"><span class="token-keyword">struct</span> Aluno {</div><div class="line">    <span class="token-type">char</span> nome[<span class="token-number">50</span>];</div><div class="line">    <span class="token-type">int</span> ra;</div><div class="line">};</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Aluno turma[TAM];</div><div class="line">    <span class="token-comment">// Laço para CADASTRAR os 3 alunos</span></div><div class="line">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">0</span>; i < TAM; i++) {</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"\n-- Aluno %d --\n"</span>, i + <span class="token-number">1</span>);</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"Nome: "</span>);</div><div class="line">        <span class="token-function">scanf</span>(<span class="token-string">" %49[^\n]"</span>, turma[i].nome);</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"RA: "</span>);</div><div class="line">        <span class="token-function">scanf</span>(<span class="token-string">"%d"</span>, &turma[i].ra);</div><div class="line">    }</div><div class="line">    <span class="token-comment">// Laço para EXIBIR os 3 alunos</span></div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"\n--- Alunos Cadastrados ---\n"</span>);</div><div class="line">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">0</span>; i < TAM; i++) {</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"Aluno: %s | RA: %d\n"</span>, turma[i].nome, turma[i].ra);</div><div class="line">    }</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+                 <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                    <p class="text-lg text-red-800">💡 <strong>Pratique!</strong> Este é o exemplo mais importante da aula. Compile e execute!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Exemplo 2 - Estoque da Loja -->
+        <section id="slide-9" class="slide">
+             <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 2: Produto mais caro do Estoque</h2>
+                <p class="text-xl mb-4">Este programa cadastra 3 produtos e, depois de cadastrar, percorre o vetor para descobrir qual deles tem o maior preço.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-preprocessor">#include &lt;string.h&gt;</span></div><div class="line"><span class="token-preprocessor">#define TAM 3</span></div><div class="line"><span class="token-keyword">struct</span> Produto {</div><div class="line">    <span class="token-type">char</span> nome[<span class="token-number">50</span>];</div><div class="line">    <span class="token-type">double</span> preco;</div><div class="line">};</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Produto estoque[TAM];</div><div class="line">    <span class="token-type">int</span> indiceMaisCaro = <span class="token-number">0</span>;</div><div class="line">    <span class="token-comment">// 1. Laço para preencher o estoque</span></div><div class="line">    <span class="token-keyword">for</span>(<span class="token-type">int</span> i = <span class="token-number">0</span>; i < TAM; i++) {</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"\n-- Produto %d --\n"</span>, i + <span class="token-number">1</span>);</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"Nome: "</span>);</div><div class="line">        <span class="token-function">scanf</span>(<span class="token-string">" %49[^\n]"</span>, estoque[i].nome);</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"Preco: "</span>);</div><div class="line">        <span class="token-function">scanf</span>(<span class="token-string">"%lf"</span>, &estoque[i].preco);</div><div class="line">    }</div><div class="line">    <span class="token-comment">// 2. Laço para encontrar o mais caro</span></div><div class="line">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">1</span>; i < TAM; i++) {</div><div class="line">        <span class="token-keyword">if</span> (estoque[i].preco > estoque[indiceMaisCaro].preco) {</div><div class="line">            indiceMaisCaro = i;</div><div class="line">        }</div><div class="line">    }</div><div class="line">    <span class="token-comment">// 3. Exibe o resultado</span></div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"\nProduto mais caro: %s\n"</span>, estoque[indiceMaisCaro].nome);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Preco: R$ %.2f\n"</span>, estoque[indiceMaisCaro].preco);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+        
+        <!-- Slide 10: Exemplo 3 - Filtrando Personagens -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 3: Filtrando Personagens do Jogo</h2>
+                <p class="text-xl mb-4">Este programa cadastra uma equipe de 3 personagens e depois exibe apenas os que têm mais de 100 pontos de vida.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-preprocessor">#include &lt;string.h&gt;</span></div><div class="line"><span class="token-preprocessor">#define TAM 3</span></div><div class="line"><span class="token-keyword">struct</span> Personagem {</div><div class="line">    <span class="token-type">char</span> nome[<span class="token-number">50</span>];</div><div class="line">    <span class="token-type">int</span> vida;</div><div class="line">};</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Personagem equipe[TAM];</div><div class="line">    <span class="token-comment">// 1. Laço para cadastrar a equipe</span></div><div class="line">    <span class="token-keyword">for</span>(<span class="token-type">int</span> i = <span class="token-number">0</span>; i < TAM; i++) {</div><div class="line">         <span class="token-function">printf</span>(<span class="token-string">"\n-- Personagem %d --\n"</span>, i + <span class="token-number">1</span>);</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"Nome: "</span>);</div><div class="line">        <span class="token-function">scanf</span>(<span class="token-string">" %49[^\n]"</span>, equipe[i].nome);</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"Vida: "</span>);</div><div class="line">        <span class="token-function">scanf</span>(<span class="token-string">"%d"</span>, &equipe[i].vida);</div><div class="line">    }</div><div class="line">    <span class="token-comment">// 2. Laço para filtrar e exibir</span></div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"\n--- Personagens com mais de 100 de Vida ---\n"</span>);</div><div class="line">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">0</span>; i < TAM; i++) {</div><div class="line">        <span class="token-keyword">if</span> (equipe[i].vida > <span class="token-number">100</span>) {</div><div class="line">            <span class="token-function">printf</span>(<span class="token-string">"- %s (Vida: %d)\n"</span>, equipe[i].nome, equipe[i].vida);</div><div class="line">        }</div><div class="line">    }</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Resumo -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo da Aula</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li>Usar múltiplas variáveis de <strong><code class="inline-code">struct</code></strong> ou vetores paralelos não é uma boa prática.</li>
+                    <li>A solução ideal para guardar uma coleção de "fichas" é um <strong>vetor de structs</strong>.</li>
+                    <li>Declaramos com <code class="inline-code">struct NomeDoMolde nome_do_vetor[tamanho];</code></li>
+                    <li>Para acessar um membro, usamos o índice do vetor primeiro e depois o operador ponto: <code class="inline-code">vetor[i].membro</code>.</li>
+                    <li>Laços <code class="inline-code">for</code> são essenciais para percorrer um vetor de structs, seja para cadastrar, exibir ou processar os dados.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Slide 12: Próximos Passos -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Próximos Passos</h2>
+                <p class="text-2xl">Agora que sabemos organizar coleções de dados, o próximo passo é aprender a organizar nosso código.</p>
+                <div class="text-6xl my-8 font-bold text-gray-700"> Funções </div>
+                <p class="text-2xl">Como podemos criar "blocos de código" reutilizáveis para tarefas como "cadastrar um aluno" ou "exibir a turma"?</p>
+                <p class="text-3xl font-bold text-red-600 mt-8">Próxima aula: Funções!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 13: Dúvidas -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft') {
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+
+                        const animationType = entry.target.dataset.animation;
+                        if(animationType === 'array') runArrayAnimation(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const pre = button.parentElement.querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    const span = button.querySelector('span');
+                    span.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        span.textContent = 'Copiar';
+                    }, 2000);
+                });
+            });
+
+            function runArrayAnimation(slide) {
+                const codeLines = slide.querySelectorAll('#array-code .code-line');
+                const structSlots = slide.querySelectorAll('#array-struct .struct-slot');
+                let i = 0;
+                
+                const interval = setInterval(() => {
+                    if (i < codeLines.length) {
+                        // Reset previous
+                        structSlots.forEach(s => s.classList.remove('active'));
+                        structSlots.forEach(s => s.querySelectorAll('.member').forEach(m => m.classList.remove('highlight')));
+
+                        const line = codeLines[i];
+                        const index = line.dataset.index;
+                        const member = line.dataset.member;
+                        
+                        const slot = slide.querySelector(`.struct-slot[data-index="${index}"]`);
+                        slot.classList.add('active');
+                        
+                        const memberEl = slot.querySelector(`.member[data-member="${member}"]`);
+                        memberEl.classList.add('highlight');
+
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
+

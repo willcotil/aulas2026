@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Funções e Ponteiros em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .exercise-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercícios Práticos: Funções e Ponteiros</h1>
+        <p class="mt-2 text-gray-600">Pratique a passagem de ponteiros como parâmetros de funções.</p>
+
+        <!-- Exercício 1 -->
+        <div class="exercise-block mt-8">
+            <h2>1. Dobrando o Valor</h2>
+            <p class="mt-2">Crie uma função chamada <code>dobrar</code> que recebe um ponteiro para um inteiro como parâmetro. A função deve modificar a variável original, fazendo com que seu valor seja o dobro do valor original. Na <code>main</code>, leia um número, chame a função passando o endereço dele e depois exiba o novo valor.</p>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="exercise-block mt-8">
+            <h2>2. Antecessor e Sucessor</h2>
+            <p class="mt-2">Crie uma função chamada <code>calcularAntecessorSucessor</code> que recebe três parâmetros: um número inteiro <code>n</code>, um ponteiro para inteiro <code>antecessor</code> e um ponteiro para inteiro <code>sucessor</code>. A função deve calcular o antecessor e o sucessor de <code>n</code> e armazenar os resultados nas variáveis apontadas pelos ponteiros. Na <code>main</code>, leia um número e exiba seu antecessor e sucessor após chamar a função.</p>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="exercise-block mt-8">
+            <h2>3. Aplicando Desconto em Struct</h2>
+            <p class="mt-2">Crie uma <code>struct Produto</code> com <code>char nome[50]</code> e <code>float preco</code>. Crie uma função <code>aplicarDesconto</code> que recebe um ponteiro para uma <code>struct Produto</code> e um valor de desconto (ex: 10 para 10%). A função deve atualizar o preço do produto original, aplicando o desconto. Use o operador seta (<code>-></code>).</p>
+        </div>
+        
+        <!-- Exercício 4 -->
+        <div class="exercise-block mt-8">
+            <h2>4. Zerando um Vetor</h2>
+            <p class="mt-2">Crie uma função <code>zerarVetor</code> que recebe um vetor de inteiros e seu tamanho. Lembre-se que um vetor já é passado por referência. A função deve usar um laço <code>for</code> para percorrer o vetor e atribuir o valor 0 a todas as suas posições. Na <code>main</code>, crie um vetor com valores, chame a função e depois exiba o vetor para confirmar que todos os seus elementos foram zerados.</p>
+        </div>
+
+        <!-- Exercício 5 -->
+        <div class="exercise-block mt-8">
+            <h2>5. Cadastro com Função</h2>
+            <p class="mt-2">Crie uma <code>struct Pessoa</code> com <code>char nome[50]</code> e <code>int idade</code>. Crie uma função <code>cadastrarPessoa</code> que recebe um ponteiro para uma <code>struct Pessoa</code>. Dentro da função, peça ao usuário para digitar o nome e a idade, e armazene os dados diretamente na struct original através do ponteiro. Na <code>main</code>, declare uma variável do tipo <code>Pessoa</code>, chame a função passando seu endereço e depois exiba os dados.</p>
+        </div>
+
+        <!-- Exercício 6 -->
+        <div class="exercise-block mt-8">
+            <h2>6. Encontrando o Aluno com Maior Nota</h2>
+            <p class="mt-2">Crie uma <code>struct Aluno</code> com nome e nota. Crie uma função <code>encontrarMaiorNota</code> que recebe um <strong>vetor de structs Aluno</strong> e seu tamanho. A função deve percorrer o vetor, encontrar o aluno com a maior nota e **retornar** uma cópia da struct desse aluno. Na <code>main</code>, crie e preencha um vetor com 3 alunos, chame a função e exiba os dados do aluno retornado.</p>
+        </div>
+
+    </div>
+</body>
+</html>

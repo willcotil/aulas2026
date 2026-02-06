@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prof. William Paiva - 2025 - COTIL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Roboto Mono', monospace;
+            background-color: #eef2f7;
+            color: #4a5568;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem 1rem;
+            box-sizing: border-box;
+        }
+
+        /* --- TÍTULO --- */
+        .main-title {
+            color: #4a5568;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
+        }
+
+        /* --- ESTILOS DA LISTA HIERÁRQUICA --- */
+        .hierarchical-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* Espaçamento menor entre os itens principais */
+        }
+        
+        .folder-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: #ffffff;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .folder-header:hover {
+            background-color: #f7fafc;
+        }
+        
+        /* Ícone de seta (chevron) */
+        .folder-header::before {
+            content: '';
+            display: inline-block;
+            width: 0.5em;
+            height: 0.5em;
+            border-right: 2px solid #4a5568;
+            border-bottom: 2px solid #4a5568;
+            margin-right: 1.25rem;
+            transform: rotate(-45deg); /* Aponta para a direita (fechado) */
+            transition: transform 0.3s ease;
+        }
+        
+        /* Estilo do ícone quando a pasta está aberta */
+        .folder.open > .folder-header::before {
+            transform: rotate(45deg); /* Aponta para baixo (aberto) */
+        }
+
+        .folder-content {
+            display: none; /* Conteúdo escondido por padrão */
+            padding-left: 1.5rem; /* Indentação do conteúdo */
+            border-left: 2px solid #e2e8f0;
+            margin-left: 1.7rem; /* Alinha com o texto do header */
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .folder.open > .folder-content {
+            display: block; /* Mostra o conteúdo quando a pasta está aberta */
+        }
+
+        /* Item final (link) */
+        .link-item {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: #2d3748;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 0.25rem 0;
+            transition: background-color 0.2s ease;
+        }
+        
+        .link-item:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 1.8rem;
+                margin-bottom: 2rem;
+            }
+            .folder-header, .link-item {
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1 class="main-title">Prof. William Paiva - 2025 - COTIL</h1>
+        
+        <div id="hierarchical-list" class="hierarchical-list"></div>
+    </div>
+
+    <script>
+        const listContainer = document.getElementById('hierarchical-list');
+
+        /**
+         * Cria recursivamente os nós (pastas e links) da lista.
+         * @param {object} item - O objeto de dados para o nó atual.
+         * @returns {HTMLElement} O elemento HTML criado.
+         */
+        function createNode(item) {
+            // Se for uma pasta com itens dentro
+            if (item.folder && item.items) {
+                const folderDiv = document.createElement('div');
+                folderDiv.className = 'folder';
+
+                const header = document.createElement('div');
+                header.className = 'folder-header';
+                header.textContent = item.folder;
+
+                const content = document.createElement('div');
+                content.className = 'folder-content';
+                
+                // Adiciona o evento de clique para expandir/recolher
+                header.addEventListener('click', () => {
+                    folderDiv.classList.toggle('open');
+                });
+
+                // Cria os nós filhos recursivamente
+                item.items.forEach(childItem => {
+                    content.appendChild(createNode(childItem));
+                });
+
+                folderDiv.appendChild(header);
+                folderDiv.appendChild(content);
+                return folderDiv;
+            }
+            // Se for um link final
+            else if (item.text && item.link) {
+                const linkItem = document.createElement('a');
+                linkItem.href = item.link;
+                linkItem.textContent = item.text;
+                linkItem.className = 'link-item';
+                return linkItem;
+            }
+
+            // Retorna um fragmento vazio se o item for inválido
+            return document.createDocumentFragment();
+        }
+
+        /**
+         * Gera a lista completa a partir dos dados.
+         * @param {Array} data - O array de dados hierárquicos.
+         */
+        function generateHierarchicalList(data) {
+            listContainer.innerHTML = '';
+            data.forEach(item => {
+                listContainer.appendChild(createNode(item));
+            });
+        }
+
+
+        /**
+         * Carrega os dados das disciplinas do arquivo JSON externo.
+         */
+        async function loadClasses() {
+            try {
+                // Faz a requisição para o arquivo JSON
+                const response = await fetch('links.json');
+                
+                // Verifica se a requisição foi bem-sucedida
+                if (!response.ok) {
+                    throw new Error(`Erro na requisição: ${response.status}`);
+                }
+                
+                // Converte a resposta para JSON
+                const data = await response.json();
+                
+                // Chama a função para criar a lista com os dados carregados
+                generateHierarchicalList(data);
+
+            } catch (error) {
+                // Em caso de erro, exibe uma mensagem no console e na página
+                console.error("Falha ao carregar o arquivo links.json:", error);
+                listContainer.innerHTML = '<p style="text-align: center;">Não foi possível carregar a lista de disciplinas.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadClasses);
+    </script>
+</body>
+</html>
+

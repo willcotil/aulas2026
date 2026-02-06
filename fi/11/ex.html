@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Introdução ao Shell Script</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="bg-white w-full max-w-2xl p-6 md:p-8 rounded-2xl shadow-xl">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">Quiz: Introdução ao Shell Script</h1>
+        <div id="progress-bar-full" class="bg-gray-200 rounded-full h-2.5 w-full mb-6">
+            <div id="progress-bar" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+
+        <!-- Conteúdo do Quiz -->
+        <div id="question-area">
+            <h2 id="question-text" class="text-xl md:text-2xl font-semibold text-gray-700 mb-6 min-h-[80px]">Carregando pergunta...</h2>
+            <div id="options-container" class="space-y-4">
+                <!-- Opções serão inseridas aqui -->
+            </div>
+        </div>
+
+        <!-- Feedback e Navegação -->
+        <div id="feedback-container" class="mt-6 p-4 rounded-lg text-gray-700 min-h-[60px]">
+            <!-- Feedback será inserido aqui -->
+        </div>
+        <button id="next-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg mt-4 hover:bg-purple-700 transition-colors disabled:bg-gray-300" style="display: none;">Próxima Pergunta</button>
+        
+        <!-- Tela de Resultados -->
+        <div id="results-container" class="text-center" style="display: none;">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Quiz Finalizado!</h2>
+            <p class="text-xl text-gray-600 mb-6">Você acertou <span id="score-text" class="font-bold text-purple-600">0</span> de <span id="total-text" class="font-bold">0</span> perguntas.</p>
+            <p id="result-message" class="text-lg font-semibold mb-8"></p>
+            <button id="restart-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">Refazer Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Qual é o propósito principal da linha `#!/bin/bash` no início de um Shell Script?",
+                options: [
+                    "É um comentário que descreve o autor do script.",
+                    "Especifica o interpretador (shell) que deve ser usado para executar o script.",
+                    "Declara todas as variáveis globais que o script utilizará.",
+                    "É um comando que compila o script para um formato binário antes da execução."
+                ],
+                correctAnswer: 1,
+                rationale: "Essa linha, conhecida como 'shebang', informa ao sistema operacional qual programa (neste caso, o Bash) deve ser usado para processar os comandos contidos no arquivo."
+            },
+            {
+                question: "Qual das seguintes opções mostra a sintaxe CORRETA para declarar uma variável em Shell Script?",
+                options: [
+                    "NOME = \"Alice\"",
+                    "let NOME = \"Alice\"",
+                    "NOME=\"Alice\"",
+                    "string NOME = \"Alice\";"
+                ],
+                correctAnswer: 2,
+                rationale: "Esta é a sintaxe correta. O nome da variável, o sinal de igual e o valor devem estar todos juntos, sem espaços."
+            },
+            {
+                question: "Depois de criar um arquivo de script chamado `meu_script.sh`, qual comando você deve usar para torná-lo executável pelo seu usuário?",
+                options: [
+                    "execute meu_script.sh",
+                    "run meu_script.sh",
+                    "chmod +x meu_script.sh",
+                    "set-permission -e meu_script.sh"
+                ],
+                correctAnswer: 2,
+                rationale: "O comando `chmod` (change mode) com a flag `+x` adiciona a permissão de execução (execute) ao arquivo especificado."
+            },
+            {
+                question: "Qual comando é usado para pausar a execução do script e armazenar a entrada do teclado do usuário em uma variável?",
+                options: [
+                    "input",
+                    "read",
+                    "get",
+                    "prompt"
+                ],
+                correctAnswer: 1,
+                rationale: "O comando `read` é o comando integrado do shell projetado especificamente para ler uma linha da entrada padrão (teclado) e atribuí-la a uma variável."
+            },
+            {
+                question: "Se uma variável foi declarada como `PLANETA=\"Marte\"`, como você a utilizaria corretamente dentro de um comando `echo` para imprimir \"Bem-vindo a Marte!\"?",
+                options: [
+                    "echo \"Bem-vindo a PLANETA!\"",
+                    "echo \"Bem-vindo a %PLANETA%!\"",
+                    "echo \"Bem-vindo a &PLANETA!\"",
+                    "echo \"Bem-vindo a $PLANETA!\""
+                ],
+                correctAnswer: 3,
+                rationale: "O cifrão `$` é o caractere usado pelo shell para indicar que você quer o valor contido na variável, um processo chamado de 'expansão de variável'."
+            },
+            {
+                question: "Para executar um script chamado `iniciar.sh` que está no seu diretório atual, qual é o comando correto?",
+                options: [
+                    "iniciar.sh",
+                    "./iniciar.sh",
+                    "run iniciar.sh",
+                    "source iniciar.sh"
+                ],
+                correctAnswer: 1,
+                rationale: "A sintaxe `./` informa explicitamente ao shell para executar o arquivo que está neste diretório (.), resolvendo o problema de o diretório atual não estar no `PATH`."
+            },
+            {
+                question: "Qual é a principal vantagem de usar `read -p \"Sua pergunta: \" VARIAVEL` em vez de uma combinação de `echo` e `read`?",
+                options: [
+                    "É mais seguro, pois esconde o que o usuário digita.",
+                    "Permite que apenas números sejam digitados.",
+                    "Mostra a pergunta (prompt) e espera a resposta na mesma linha.",
+                    "É significativamente mais rápido na execução do que usar dois comandos."
+                ],
+                correctAnswer: 2,
+                rationale: "A opção `-p` (prompt) foi projetada para criar uma experiência de usuário mais limpa, exibindo a mensagem e posicionando o cursor para entrada na mesma linha."
+            },
+            {
+                question: "O que um Shell Script é, fundamentalmente?",
+                options: [
+                    "Um programa compilado que roda diretamente no processador.",
+                    "Uma interface gráfica para automatizar tarefas.",
+                    "Um arquivo de texto contendo uma sequência de comandos do shell.",
+                    "Uma configuração do sistema que altera o comportamento do terminal."
+                ],
+                correctAnswer: 2,
+                rationale: "Esta é a definição exata: um script é um arquivo de texto simples que lista comandos para serem executados em ordem pelo shell."
+            },
+            {
+                question: "Considere o script: `read -p \"Digite algo: \" TEXTO` e `echo \"Você digitou: $TEXTO\"`. Se o usuário apenas pressionar Enter sem digitar nada, o que será impresso?",
+                options: [
+                    "O script dará um erro.",
+                    "Você digitou: $TEXTO",
+                    "Você digitou: ",
+                    "O script ficará esperando indefinidamente."
+                ],
+                correctAnswer: 2,
+                rationale: "Quando o usuário pressiona Enter, a variável `TEXTO` recebe um valor vazio. Ao ser expandida com `echo`, ela não imprime nada, resultando apenas no texto literal."
+            },
+            {
+                question: "Qual é o erro no seguinte trecho de código?\n`echo \"Qual o seu sistema operacional?\"`\n`MEU_SO = \"Linux\"`\n`echo \"Eu uso $MEU_SO\"`",
+                options: [
+                    "O comando `echo` não pode ser usado com variáveis.",
+                    "A variável `MEU_SO` deveria estar em letras minúsculas.",
+                    "Existem espaços ao redor do sinal de `=` na declaração da variável.",
+                    "Aspas duplas não podem ser usadas para atribuir um valor a uma variável."
+                ],
+                correctAnswer: 2,
+                rationale: "Este é um erro comum e crítico. O shell tentará executar `MEU_SO` como um comando com os argumentos `=` e `\"Linux\"`, o que resultará em um erro de 'comando não encontrado'."
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const questionArea = document.getElementById('question-area');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const scoreText = document.getElementById('score-text');
+        const totalText = document.getElementById('total-text');
+        const resultMessage = document.getElementById('result-message');
+        const progressBar = document.getElementById('progress-bar');
+        
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsContainer.style.display = 'none';
+            questionArea.style.display = 'block';
+            nextBtn.style.display = 'none';
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.className = 'mt-6 p-4 rounded-lg text-gray-700 min-h-[60px]';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionText.innerHTML = currentQuestion.question;
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerHTML = option;
+                button.classList.add('w-full', 'text-left', 'p-4', 'rounded-lg', 'border', 'border-gray-300', 'hover:bg-gray-100', 'transition-colors');
+                button.addEventListener('click', () => selectAnswer(button, index));
+                optionsContainer.appendChild(button);
+            });
+            updateProgressBar();
+        }
+        
+        function resetState() {
+            nextBtn.style.display = 'none';
+            feedbackContainer.innerHTML = '';
+            feedbackContainer.className = 'mt-6 p-4 rounded-lg text-gray-700 min-h-[60px]';
+            while(optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(selectedButton, selectedIndex) {
+            const currentQuestion = quizData[currentQuestionIndex];
+            const correct = selectedIndex === currentQuestion.correctAnswer;
+            
+            if (correct) {
+                score++;
+                selectedButton.classList.add('bg-green-100', 'border-green-400');
+                feedbackContainer.className = 'mt-6 p-4 rounded-lg bg-green-100 border border-green-300 text-green-800';
+                feedbackContainer.innerHTML = `<strong>Correto!</strong> ${currentQuestion.rationale}`;
+            } else {
+                selectedButton.classList.add('bg-red-100', 'border-red-400');
+                feedbackContainer.className = 'mt-6 p-4 rounded-lg bg-red-100 border border-red-300 text-red-800';
+                feedbackContainer.innerHTML = `<strong>Incorreto.</strong> ${currentQuestion.rationale}`;
+                // Highlight the correct answer
+                optionsContainer.children[currentQuestion.correctAnswer].classList.add('bg-green-100', 'border-green-400');
+            }
+            
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+            });
+
+            if (quizData.length > currentQuestionIndex + 1) {
+                nextBtn.style.display = 'block';
+            } else {
+                setTimeout(showResults, 1500); // Wait a bit before showing results
+            }
+        }
+
+        function showResults() {
+            questionArea.style.display = 'none';
+            feedbackContainer.style.display = 'none';
+            nextBtn.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            
+            scoreText.innerText = score;
+            totalText.innerText = quizData.length;
+            
+            const percentage = (score / quizData.length) * 100;
+            if (percentage >= 80) {
+                resultMessage.innerText = "Excelente! Você é um mestre do Shell Script!";
+                resultMessage.className = "text-lg font-semibold mb-8 text-green-600";
+            } else if (percentage >= 50) {
+                resultMessage.innerText = "Muito bom! Você está no caminho certo.";
+                resultMessage.className = "text-lg font-semibold mb-8 text-yellow-600";
+            } else {
+                resultMessage.innerText = "Continue estudando! A prática leva à perfeição.";
+                resultMessage.className = "text-lg font-semibold mb-8 text-red-600";
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            showQuestion();
+        });
+
+        restartBtn.addEventListener('click', startQuiz);
+
+        startQuiz();
+
+    </script>
+</body>
+</html>

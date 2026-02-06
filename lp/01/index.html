@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 01 - Lógica de Programação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES --- */
+        :root {
+            --color-1: #360185; /* Roxo Profundo */
+            --color-2: #8f0177; /* Magenta */
+            --color-3: #de1a58; /* Rosa Vivo */
+            --color-4: #f4b342; /* Amarelo/Laranja */
+            --bg-light: #fdf4ff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: #1e293b;
+        }
+
+        /* Slide Base */
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            border-bottom: 8px solid var(--color-4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Tipografia Vibrante */
+        h1 { 
+            font-size: 4.5rem; 
+            font-weight: 900; 
+            background: -webkit-linear-gradient(45deg, var(--color-1), var(--color-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+        
+        h2 { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            color: var(--color-1); 
+            margin-bottom: 2rem; 
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 6px;
+            background-color: var(--color-4);
+            margin: 0.5rem auto 0;
+            border-radius: 4px;
+        }
+
+        p { font-size: 1.4rem; line-height: 1.6; color: #334155; max-width: 900px; text-align: center; margin-bottom: 1.5rem; }
+
+        /* Elementos Gráficos */
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(54, 1, 133, 0.15);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(45deg, var(--color-2), var(--color-4));
+        }
+
+        .code-block {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--color-1);
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            font-size: 1.2rem;
+            border-left: 8px solid var(--color-3);
+            text-align: left;
+            width: 100%;
+            max-width: 850px;
+        }
+
+        /* Placeholders de Imagem */
+        .img-placeholder {
+            width: 100%;
+            height: 300px;
+            background-color: #e2e8f0;
+            border: 4px dashed var(--color-2);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--color-2);
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .img-placeholder span { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+
+        /* Interatividade Slide 5 (Pneu) */
+        .step-item {
+            opacity: 0.3;
+            transition: opacity 0.5s, transform 0.5s;
+            transform: translateX(-20px);
+        }
+        .step-item.active {
+            opacity: 1;
+            transform: translateX(0);
+            font-weight: bold;
+            color: var(--color-1);
+        }
+        .step-image {
+            display: none;
+        }
+        .step-image.active {
+            display: flex;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Navegação Fixa */
+        .nav-controls {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+        .btn-nav {
+            background-color: var(--color-1);
+            color: white;
+            width: 3.5rem; height: 3.5rem;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+            border: none;
+        }
+        .btn-nav:hover { background-color: var(--color-2); transform: scale(1.1); }
+
+        /* =========================================
+           ESTILOS OTIMIZADOS PARA IMPRESSÃO 
+           ========================================= */
+        @media print {
+            /* Reset Global de Impressão */
+            *, *::before, *::after {
+                background: transparent !important;
+                color: #000 !important; /* Força texto preto */
+                box-shadow: none !important;
+                text-shadow: none !important;
+                -webkit-text-fill-color: black !important;
+            }
+
+            body {
+                background-color: #fff;
+                font-size: 12pt;
+                line-height: 1.3;
+                color: black;
+            }
+
+            /* Esconder elementos de navegação */
+            .nav-controls, #counter, button {
+                display: none !important;
+            }
+
+            /* Ajuste dos Slides para Fluxo Contínuo */
+            .slide { 
+                height: auto !important; 
+                min-height: 0 !important; 
+                border-bottom: 2px solid #ccc !important; /* Separador sutil */
+                page-break-after: always; /* Cada slide numa página */
+                padding: 1.5cm !important;
+                display: block !important; /* Remove flexbox para fluxo normal */
+                text-align: left !important;
+            }
+
+            .slide:last-child { 
+                page-break-after: avoid; 
+                border-bottom: none !important;
+            }
+
+            /* Títulos */
+            h1 { font-size: 24pt !important; text-align: left !important; margin-bottom: 10px !important; }
+            h2 { 
+                font-size: 18pt !important; 
+                text-align: left !important; 
+                border-bottom: 1px solid #000;
+                padding-bottom: 5px;
+                margin-bottom: 15px !important; 
+            }
+            h2::after { display: none !important; } /* Remove barra colorida decorativa */
+
+            /* Texto */
+            p, li { 
+                font-size: 11pt !important; 
+                text-align: justify !important; 
+                color: #000 !important;
+                max-width: 100% !important;
+            }
+
+            /* Cards e Caixas */
+            .card { 
+                border: 1px solid #000 !important; 
+                box-shadow: none !important;
+                margin: 10px 0 !important;
+                padding: 10px !important;
+                page-break-inside: avoid; /* Evita cortar caixa ao meio */
+            }
+            .card::before { display: none !important; } /* Remove gradiente de fundo */
+
+            /* Blocos de Código */
+            .code-block { 
+                background-color: #f5f5f5 !important; 
+                color: #000 !important; 
+                border: 1px solid #ccc !important;
+                border-left: 5px solid #000 !important;
+                page-break-inside: avoid;
+            }
+
+            /* Interatividade do Pneu (Mostrar tudo estático) */
+            .step-item { 
+                opacity: 1 !important; 
+                transform: none !important; 
+                font-weight: normal !important;
+                color: black !important;
+                border-left: 2px solid #000 !important;
+            }
+            /* Ocultar imagens interativas para economizar tinta e espaço */
+            .step-image { display: none !important; }
+            
+            /* Grids e Layout */
+            .grid {
+                display: block !important; /* Empilha itens em vez de grid */
+            }
+            .grid > div {
+                margin-bottom: 15px;
+                page-break-inside: avoid;
+            }
+            
+            /* Placeholders de imagem simples */
+            .img-placeholder { 
+                border: 1px dashed #000 !important; 
+                height: 80px !important; /* Altura reduzida na impressão */
+                margin: 5px 0 !important;
+                background-color: #fff !important;
+            }
+
+            /* Forçar larguras */
+            .w-1\/2, .w-full, .max-w-6xl, .max-w-4xl {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            .flex {
+                display: block !important; /* Quebra colunas laterais em blocos verticais */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Controles -->
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn">←</button>
+        <button class="btn-nav" id="nextBtn">→</button>
+        <button class="btn-nav" id="fsBtn">⛶</button>
+        <button class="btn-nav" onclick="window.print()">🖨️</button>
+    </div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide">
+            <h1>Lógica de Programação</h1>
+            <p class="text-2xl font-bold" style="color: var(--color-2);">Fundamentos e Algoritmos</p>
+            
+            <div class="card mt-8 p-8 flex flex-col items-center">
+                <div class="img-placeholder" style="height: 200px; width: 400px; border-color: var(--color-4);">
+                    <span>🧠 + 💻</span>
+                    (Cole aqui uma imagem legal de código ou cérebro digital)
+                </div>
+            </div>
+
+            <p class="mt-12 font-bold" style="color: var(--color-1);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: O que é Lógica? -->
+        <section class="slide">
+            <h2>O que é Lógica?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mt-8">
+                <div class="card flex flex-col justify-center">
+                    <p class="text-left font-bold text-xl">Não é só "coisa de computador"!</p>
+                    <p class="text-left">É a arte de <strong>pensar</strong> de forma organizada.</p>
+                </div>
+                <div>
+                    <div class="img-placeholder">
+                        <span>🗺️</span>
+                        (Imagem: Pessoa escolhendo caminho em um labirinto)
+                    </div>
+                </div>
+            </div>
+            <p class="mt-8 text-xl font-bold text-center" style="color: var(--color-3);">
+                Sequência + Organização = Solução
+            </p>
+        </section>
+
+        <!-- Slide 3: O Algoritmo -->
+        <section class="slide">
+            <h2>O Algoritmo</h2>
+            <div class="card w-full max-w-4xl p-8 bg-white border-l-8" style="border-left-color: var(--color-4);">
+                <p class="text-2xl font-bold mb-4">Definição:</p>
+                <p class="text-xl">"Uma sequência finita de passos bem definidos para realizar uma tarefa."</p>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mt-12 w-full max-w-5xl">
+                <div class="text-center card">
+                    <div class="text-6xl mb-2">🏁</div>
+                    <p class="font-bold">Início</p>
+                </div>
+                <div class="text-center card">
+                    <div class="text-6xl mb-2">👣</div>
+                    <p class="font-bold">Passos</p>
+                </div>
+                <div class="text-center card">
+                    <div class="text-6xl mb-2">✅</div>
+                    <p class="font-bold">Fim</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Receita de Bolo -->
+        <section class="slide">
+            <h2>Algoritmo no Dia a Dia</h2>
+            <div class="flex gap-8 w-full max-w-6xl items-center">
+                <div class="w-1/2">
+                    <div class="img-placeholder" style="height: 400px;">
+                        <span>🎂</span>
+                        (Imagem: Um bolo bonito ou ingredientes bagunçados)
+                    </div>
+                </div>
+                <div class="w-1/2 card text-left">
+                    <h3 class="font-bold text-xl mb-4" style="color: var(--color-3);">Receita de Bolo:</h3>
+                    <ol class="list-decimal pl-6 space-y-2 font-mono">
+                        <li>Quebre os ovos.</li>
+                        <li>Adicione a farinha.</li>
+                        <li>Misture bem.</li>
+                        <li class="font-bold text-red-600">Coloque no forno.</li>
+                        <li>Espere 40 min.</li>
+                        <li>Retire do forno.</li>
+                    </ol>
+                    <div class="mt-6 p-4 bg-red-100 rounded-lg text-red-800 text-sm font-bold">
+                        ⚠️ Se inverter a ordem, dá errado! A sequência importa.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Interativo - Troca de Pneu -->
+        <section class="slide" id="slide-pneu" data-interactive="true">
+            <h2>Vamos Trocar um Pneu?</h2>
+            <p class="text-sm text-gray-500 mb-6">(Use a seta → do teclado para avançar os passos)</p>
+            
+            <div class="flex gap-8 w-full max-w-6xl">
+                <!-- Lista de Passos -->
+                <div class="w-1/2 flex flex-col justify-center space-y-4 text-left" id="pneu-steps">
+                    <div class="step-item p-4 bg-white rounded shadow border-l-4 border-gray-300" data-index="0">1. Pegar macaco e chave.</div>
+                    <div class="step-item p-4 bg-white rounded shadow border-l-4 border-gray-300" data-index="1">2. Afrouxar parafusos (chão).</div>
+                    <div class="step-item p-4 bg-white rounded shadow border-l-4" style="border-left-color: var(--color-3);" data-index="2">3. Levantar o carro. ⚠️</div>
+                    <div class="step-item p-4 bg-white rounded shadow border-l-4 border-gray-300" data-index="3">4. Tirar pneu furado.</div>
+                    <div class="step-item p-4 bg-white rounded shadow border-l-4 border-gray-300" data-index="4">5. Colocar estepe.</div>
+                    <div class="step-item p-4 bg-white rounded shadow border-l-4 border-gray-300" data-index="5">6. Baixar e apertar.</div>
+                </div>
+
+                <!-- Imagens Dinâmicas -->
+                <div class="w-1/2 flex items-center justify-center">
+                    <div class="img-placeholder step-image active" id="img-0" style="height: 400px; border-color: var(--color-1);">
+                        <span>🔧</span>(Imagem: Macaco e Chave)
+                    </div>
+                    <div class="img-placeholder step-image" id="img-1" style="height: 400px; border-color: var(--color-1);">
+                        <span>🔩</span>(Imagem: Chave na roda)
+                    </div>
+                    <div class="img-placeholder step-image" id="img-2" style="height: 400px; border-color: var(--color-3);">
+                        <span>🚗⬆️</span>(Imagem: Carro levantado)
+                    </div>
+                    <div class="img-placeholder step-image" id="img-3" style="height: 400px; border-color: var(--color-1);">
+                        <span>⭕</span>(Imagem: Roda saindo)
+                    </div>
+                    <div class="img-placeholder step-image" id="img-4" style="height: 400px; border-color: var(--color-1);">
+                        <span>🆕</span>(Imagem: Estepe no lugar)
+                    </div>
+                    <div class="img-placeholder step-image" id="img-5" style="height: 400px; border-color: var(--color-1);">
+                        <span>✅</span>(Imagem: Carro pronto)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Computador vs Humano -->
+        <section class="slide">
+            <h2>Precisão é Tudo</h2>
+            <div class="flex w-full max-w-5xl gap-8 mt-8">
+                <div class="w-1/2 card bg-green-50">
+                    <h3 class="text-2xl font-bold text-green-700 mb-4">Humano 🧑</h3>
+                    <p>"Pega aquele negócio lá."</p>
+                    <div class="img-placeholder" style="height: 150px; border:none;">
+                        (Imagem: Pessoa apontando)
+                    </div>
+                    <p class="text-sm italic">Entende pelo contexto.</p>
+                </div>
+                <div class="w-1/2 card bg-slate-800 text-white">
+                    <h3 class="text-2xl font-bold text-blue-300 mb-4">Computador 💻</h3>
+                    <p class="font-mono text-red-400">Error 404: Object not found.</p>
+                    <div class="img-placeholder" style="height: 150px; border:none; background: #334155;">
+                        (Imagem: Tela de erro)
+                    </div>
+                    <p class="text-sm italic text-gray-300">Precisa de instrução exata.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Representações -->
+        <section class="slide">
+            <h2>Formas de Representar</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mt-8">
+                <div class="card">
+                    <div class="text-4xl mb-4">🗣️</div>
+                    <h3 class="font-bold mb-2">Narrativa</h3>
+                    <p class="text-sm">Português livre.</p>
+                    <div class="img-placeholder" style="height: 100px;">(Img: Texto corrido)</div>
+                </div>
+                <div class="card">
+                    <div class="text-4xl mb-4">💠</div>
+                    <h3 class="font-bold mb-2">Fluxograma</h3>
+                    <p class="text-sm">Desenhos e setas.</p>
+                    <div class="img-placeholder" style="height: 100px;">(Img: Formas geométricas)</div>
+                </div>
+                <div class="card border-4" style="border-color: var(--color-3);">
+                    <div class="text-4xl mb-4">📝</div>
+                    <h3 class="font-bold mb-2">Pseudocódigo</h3>
+                    <p class="text-sm">Português Estruturado.</p>
+                    <div class="img-placeholder" style="height: 100px;">(Img: Código portugol)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Introdução ao Pseudocódigo -->
+        <section class="slide">
+            <h2>Pseudocódigo: O Portugol</h2>
+            <p>É uma linguagem intermediária entre a nossa fala e o código de verdade (C, Python, Java).</p>
+            <div class="card w-full max-w-4xl text-left bg-slate-900 text-white p-8">
+                <p class="mb-4">Tem regras rígidas:</p>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li>Tem começo e fim definidos.</li>
+                    <li>Usa comandos específicos (palavras-chave).</li>
+                    <li>Segue uma indentação (recuo) para organizar.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 9: Comandos Básicos - Variáveis -->
+        <section class="slide">
+            <h2>Guardando Valores: Variáveis</h2>
+            <div class="flex gap-12 items-center">
+                <div class="w-1/2 text-left">
+                    <p class="mb-4">Para o computador lembrar de algo, precisamos criar uma <strong>Variável</strong>.</p>
+                    <p>Pense numa caixa com uma etiqueta.</p>
+                    <div class="code-block mt-4">
+                        Var<br>
+                        &nbsp;&nbsp;idade : inteiro<br>
+                        &nbsp;&nbsp;nome : caractere
+                    </div>
+                </div>
+                <div class="w-1/2">
+                    <div class="img-placeholder" style="height: 300px;">
+                        <span>📦</span>
+                        (Imagem: Caixas de papelão com etiquetas "Idade" e "Nome")
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Comandos Básicos - Atribuição -->
+        <section class="slide">
+            <h2>O Comando de Atribuição (<-)</h2>
+            <p>Como colocamos algo dentro da caixa?</p>
+            <div class="flex flex-col items-center gap-4">
+                <div class="text-8xl font-bold" style="color: var(--color-3);">
+                    &lt;-
+                </div>
+                <p>Lê-se: <strong>"Recebe"</strong></p>
+                <div class="code-block w-full max-w-2xl text-center">
+                    idade <strong><-</strong> 25
+                </div>
+                <p class="text-sm text-gray-500">"A variável idade RECEBE o valor 25"</p>
+                
+                <div class="img-placeholder" style="width: 500px; height: 150px;">
+                    (Imagem: Uma mão colocando o número 25 dentro da caixa "Idade")
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Comandos Básicos - E/S -->
+        <section class="slide">
+            <h2>Conversando com o Usuário</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl mt-8">
+                <!-- Escreva -->
+                <div class="card bg-blue-50">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-4">Escreva</h3>
+                    <div class="text-6xl mb-4">🖥️ 🗣️</div>
+                    <p>O computador <strong>mostra</strong> algo na tela.</p>
+                    <div class="code-block bg-slate-800 text-sm p-4">
+                        Escreva("Olá, Aluno!")
+                    </div>
+                    <div class="img-placeholder mt-4" style="height: 100px;">(Img: Tela de PC com texto)</div>
+                </div>
+
+                <!-- Leia -->
+                <div class="card bg-green-50">
+                    <h3 class="text-2xl font-bold text-green-700 mb-4">Leia</h3>
+                    <div class="text-6xl mb-4">⌨️ 👂</div>
+                    <p>O computador <strong>espera</strong> você digitar e guarda na variável.</p>
+                    <div class="code-block bg-slate-800 text-sm p-4">
+                        Leia(nome)
+                    </div>
+                    <div class="img-placeholder mt-4" style="height: 100px;">(Img: Teclado ou pessoa digitando)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Estrutura Completa -->
+        <section class="slide">
+            <h2>A Estrutura do Algoritmo</h2>
+            <p>Todo algoritmo precisa nascer e morrer.</p>
+            <div class="w-full max-w-3xl relative">
+                <!-- Estrutura Visual -->
+                <div class="absolute left-0 top-0 bottom-0 w-8 bg-gray-200 rounded-l-lg border-r-2 border-dashed border-gray-400"></div>
+                
+                <div class="ml-12 space-y-4 text-left font-mono text-lg">
+                    <div class="p-2 bg-green-200 rounded border border-green-400 font-bold">Algoritmo "NomeDoPrograma"</div>
+                    <div class="p-2 bg-yellow-100 rounded border border-yellow-400 ml-4">Var <br> &nbsp; (Declaração das caixas)</div>
+                    <div class="p-2 bg-blue-200 rounded border border-blue-400 font-bold">Inicio</div>
+                    <div class="p-2 bg-white rounded border border-gray-300 ml-8">
+                        ... comandos ...<br>
+                        ... comandos ...
+                    </div>
+                    <div class="p-2 bg-red-200 rounded border border-red-400 font-bold">FimAlgoritmo</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Exemplo Prático Explicado -->
+        <section class="slide">
+            <h2>Exemplo: Somar Dois Números</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="code-block text-sm leading-loose">
+                    Algoritmo "Soma"<br>
+                    Var<br>
+                    &nbsp;&nbsp;<span style="color:var(--color-4)">n1, n2, res</span> : inteiro<br>
+                    Inicio<br>
+                    &nbsp;&nbsp;Escreva("Digite N1: ")<br>
+                    &nbsp;&nbsp;<span style="color:var(--color-3)">Leia(n1)</span><br>
+                    &nbsp;&nbsp;Escreva("Digite N2: ")<br>
+                    &nbsp;&nbsp;<span style="color:var(--color-3)">Leia(n2)</span><br>
+                    &nbsp;&nbsp;<span style="color:var(--color-2)">res <- n1 + n2</span><br>
+                    &nbsp;&nbsp;Escreva("Soma: ", res)<br>
+                    FimAlgoritmo
+                </div>
+                <div class="flex flex-col gap-4 justify-center text-left">
+                    <div class="p-4 bg-white rounded shadow border-l-4" style="border-color: var(--color-4);">
+                        <strong>1. Var:</strong> Cria 3 caixas vazias na memória.
+                    </div>
+                    <div class="p-4 bg-white rounded shadow border-l-4" style="border-color: var(--color-3);">
+                        <strong>2. Leia:</strong> Guarda o que você digitou dentro das caixas n1 e n2.
+                    </div>
+                    <div class="p-4 bg-white rounded shadow border-l-4" style="border-color: var(--color-2);">
+                        <strong>3. Atribuição:</strong> Soma os valores e guarda o resultado na caixa 'res'.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Fluxo de Dados -->
+        <section class="slide">
+            <h2>O Fluxo dos Dados</h2>
+            <div class="flex items-center gap-4 mt-8 w-full max-w-6xl">
+                <div class="flex-1 card bg-yellow-50 border-yellow-200 text-center">
+                    <div class="text-4xl mb-2">📥</div>
+                    <h3 class="font-bold">ENTRADA</h3>
+                    <p class="text-sm">Leia(n1)<br>Leia(n2)</p>
+                </div>
+                <div class="text-4xl text-gray-400">➔</div>
+                <div class="flex-1 card bg-blue-50 border-blue-200 text-center">
+                    <div class="text-4xl mb-2">⚙️</div>
+                    <h3 class="font-bold">PROCESSAMENTO</h3>
+                    <p class="text-sm">res <- n1 + n2</p>
+                </div>
+                <div class="text-4xl text-gray-400">➔</div>
+                <div class="flex-1 card bg-green-50 border-green-200 text-center">
+                    <div class="text-4xl mb-2">📤</div>
+                    <h3 class="font-bold">SAÍDA</h3>
+                    <p class="text-sm">Escreva(res)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Cabeçalho Exercícios -->
+        <section class="slide bg-gray-900 border-none">
+            <h1 style="background: none; -webkit-text-fill-color: white; color: white;">Hora de Praticar!</h1>
+            <p class="text-gray-300">10 Exercícios para afiar a lógica.</p>
+            <div class="text-9xl mt-8 animate-bounce">🏋️</div>
+        </section>
+
+        <!-- Slide 16: Exercícios Lógicos (1-3) -->
+        <section class="slide">
+            <h2>Exercícios 1 a 3: Lógica do Dia a Dia</h2>
+            <div class="w-full max-w-5xl grid grid-cols-1 gap-6 text-left">
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">1. A Lâmpada Queimada</h3>
+                    <p class="text-sm mb-0">Escreva, em português (passo a passo narrativo), um algoritmo para trocar uma lâmpada queimada no teto de uma sala alta. Considere que você precisa buscar uma escada na despensa.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">2. Sacar Dinheiro</h3>
+                    <p class="text-sm mb-0">Descreva a sequência lógica de passos para sacar dinheiro em um caixa eletrônico. Detalhe a entrada do cartão, senha, valor e retirada do dinheiro.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">3. O Sanduíche</h3>
+                    <p class="text-sm mb-0">Liste a ordem lógica para preparar um sanduíche simples. Considere que os ingredientes estão na geladeira e precisam ser pegos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 17: Exercícios Desafio (4-6) -->
+        <section class="slide">
+            <h2>Exercícios 4 a 6: Desafios de Raciocínio</h2>
+            <div class="w-full max-w-5xl grid grid-cols-1 gap-6 text-left">
+                <div class="card p-6 border-l-8 border-yellow-400">
+                    <h3 class="text-lg font-bold text-purple-700">4. O Lobo, a Cabra e o Repolho</h3>
+                    <p class="text-sm mb-0">Um fazendeiro deve atravessar um rio com um lobo, uma cabra e um repolho. O barco só leva ele e mais um. Lobo come cabra se sozinho. Cabra come repolho se sozinha. Qual a sequência de viagens?</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">5. Complete a Sequência</h3>
+                    <p class="text-sm mb-0">Descubra a lógica e o próximo número:<br>
+                    a) 2, 4, 6, 8, ___<br>
+                    b) 1, 1, 2, 3, 5, 8, ___ (Fibonacci)<br>
+                    c) 10, 20, 40, 80, ___</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">6. Troca de Copos (Variável Auxiliar)</h3>
+                    <p class="text-sm mb-0">Você tem um copo com suco A e um copo com suco B. Como trocar os líquidos de lugar (o suco A ir para o copo B e vice-versa)? Dica: Você pode usar um terceiro copo vazio.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 18: Exercícios Técnicos (7-9) -->
+        <section class="slide">
+            <h2>Exercícios 7 a 9: Introdução Técnica</h2>
+            <div class="w-full max-w-5xl grid grid-cols-1 gap-6 text-left">
+                <div class="card p-6 bg-slate-100">
+                    <h3 class="text-lg font-bold text-purple-700">7. Teste de Mesa</h3>
+                    <p class="text-sm mb-2">Simule a memória do computador. Qual o valor final de X?</p>
+                    <code class="block bg-white p-2 rounded border border-gray-300 text-sm">
+                        A <- 10<br>
+                        B <- 5<br>
+                        C <- A + B<br>
+                        X <- C * 2
+                    </code>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">8. Desenhando o Fluxo</h3>
+                    <p class="text-sm mb-0">Desenhe no caderno o fluxograma que lê a idade de uma pessoa e decide: Se idade >= 18, imprime "Maior". Se não, imprime "Menor".</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-bold text-purple-700">9. Média de 3 Números</h3>
+                    <p class="text-sm mb-0">Escreva um <strong>Pseudocódigo</strong> completo (com Início, Var, Fim) que leia 3 números, calcule a média aritmética e mostre o resultado na tela.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Desafio Final -->
+        <section class="slide">
+            <h2>10. Desafio: Cálculo de Combustível</h2>
+            <div class="card w-full max-w-4xl p-8 bg-white border-4" style="border-color: var(--color-3);">
+                <p class="font-bold text-lg mb-4">Escreva o Pseudocódigo para o seguinte problema:</p>
+                <p class="text-gray-600 mb-4">Um motorista quer saber quanto vai gastar para encher o tanque.</p>
+                <ul class="list-disc pl-6 space-y-2 text-sm">
+                    <li>Pergunte o preço da gasolina.</li>
+                    <li>Pergunte a capacidade total do tanque.</li>
+                    <li>Pergunte quanto já tem no tanque.</li>
+                    <li>Calcule quantos litros faltam.</li>
+                    <li>Calcule o valor total (litros faltantes * preço).</li>
+                    <li>Mostre o valor na tela.</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Lógica de Navegação e Interatividade
+        const slides = document.querySelectorAll('section');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+        
+        let currentSlide = 0;
+
+        // Variáveis do Slide 5 (Pneu)
+        let pneuStep = 0;
+        const totalPneuSteps = 6;
+        const slidePneu = document.getElementById('slide-pneu');
+        const pneuStepsItems = document.querySelectorAll('.step-item');
+        const pneuImages = document.querySelectorAll('.step-image');
+
+        function scrollToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Atualiza a visualização do slide do pneu
+        function updatePneuSlide() {
+            // Atualiza lista de texto
+            pneuStepsItems.forEach((item, index) => {
+                if (index <= pneuStep) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Atualiza imagens
+            pneuImages.forEach((img, index) => {
+                if (index === pneuStep) {
+                    img.classList.add('active');
+                } else {
+                    img.classList.remove('active');
+                }
+            });
+        }
+
+        // Navegação Global
+        function next() {
+            // Verifica se está no slide interativo do pneu
+            if (slides[currentSlide].id === 'slide-pneu') {
+                if (pneuStep < totalPneuSteps - 1) {
+                    pneuStep++;
+                    updatePneuSlide();
+                    return; // Não avança o slide, apenas o passo
+                }
+            }
+            // Comportamento normal
+            scrollToSlide(currentSlide + 1);
+        }
+
+        function prev() {
+             // Verifica se está no slide interativo do pneu
+             if (slides[currentSlide].id === 'slide-pneu') {
+                if (pneuStep > 0) {
+                    pneuStep--;
+                    updatePneuSlide();
+                    return; 
+                }
+            }
+            scrollToSlide(currentSlide - 1);
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', next);
+        prevBtn.addEventListener('click', prev);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+        });
+
+        // Tela Cheia
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Inicializa o slide do pneu
+        updatePneuSlide();
+
+    </script>
+</body>
+</html>

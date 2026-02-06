@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula: Roteadores e Endereçamento IP</title>
+    <style>
+        /* --- GERAL & TEMA CLARO --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #495057;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-grey: #e9ecef;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+        }
+        
+        #presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* --- SEÇÕES DE ROLAGEM --- */
+        .scroll-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 60px 40px;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .scroll-section:last-of-type {
+            border-bottom: none;
+        }
+
+        /* --- NAVEGAÇÃO --- */
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .nav-btn:hover {
+            background-color: #004494;
+            transform: translateY(-2px);
+        }
+        .nav-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            min-width: 60px;
+            text-align: center;
+            background-color: var(--card-background);
+            padding: 5px 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* --- ESTILOS DE CONTEÚDO --- */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        h1 { font-size: 2.8em; }
+        h2 { font-size: 2.2em; }
+        h3 { font-size: 1.6em; color: var(--secondary-color); }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.7;
+            max-width: 850px;
+            text-align: center;
+        }
+        .text-left { text-align: left; }
+        .highlight { color: var(--primary-color); font-weight: bold; }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--light-grey);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .two-column-layout {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+        }
+        .column { flex: 1; }
+
+        .placeholder-img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: var(--light-grey);
+            display: block;
+            margin: 20px auto;
+        }
+        
+        /* --- TABELAS --- */
+        .styled-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 1100px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 1em;
+        }
+        .styled-table th, .styled-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .styled-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        .styled-table tr:nth-child(even) { background-color: var(--background-color); }
+        .styled-table tr:hover { background-color: #d8e6f5; }
+
+        /* --- ELEMENTOS INTERATIVOS --- */
+        .interactive-container {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .interactive-container input[type="text"], .interactive-container select {
+            font-family: 'Roboto Mono', monospace;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1.1em;
+            margin: 0 10px;
+        }
+        .interactive-container button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .result-box {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--light-grey);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+        
+        .binary-converter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .binary-bits {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .bit-box {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.5em;
+            background-color: #fff;
+        }
+        .bit-value {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+        }
+        
+        /* --- ANIMAÇÃO VIAGEM PACOTE --- */
+        #packet-journey-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            background-color: var(--light-grey);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .pj-device {
+            position: absolute;
+            font-size: 40px;
+        }
+        .pj-label {
+            position: absolute;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        #pj-pc { top: 180px; left: 50px; }
+        #pj-pc-label { top: 230px; left: 30px; }
+        #pj-switch { top: 180px; left: 200px; }
+        #pj-switch-label { top: 230px; left: 190px; }
+        #pj-router { top: 180px; left: 350px; }
+        #pj-router-label { top: 230px; left: 320px; }
+        #pj-cloud { top: 180px; left: 520px; font-size: 80px; color: #007bff; }
+        #pj-server { top: 180px; left: 700px; }
+        #pj-server-label { top: 230px; left: 680px; }
+        .pj-packet {
+            position: absolute;
+            font-size: 30px;
+            top: 185px;
+            left: 100px;
+            opacity: 0;
+            transition: all 1s ease-in-out;
+        }
+        .packet-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            .scroll-section { padding: 40px 20px; }
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.6em; }
+            p { font-size: 1em; }
+            .two-column-layout { flex-direction: column; }
+            .interactive-container input[type="text"] { width: 90%; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="presentation-container">
+    <div class="slides-container">
+        
+        <section class="scroll-section">
+            <h1>Roteadores e o Endereçamento da Internet</h1>
+            <p class="subtitle">Entendendo os Protocolos IPv4 e as Máscaras de Rede</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>O Problema da Comunicação em Larga Escala</h2>
+            <p>Imagine uma sala de reuniões gigante com milhares de pessoas. Se alguém grita "MARIA!", todas as Marias da sala respondem, e todas as outras pessoas precisam parar para ouvir a gritaria.</p>
+            <p>Essa "gritaria" em uma rede é chamada de <strong class="highlight">Broadcast</strong>. É uma mensagem enviada para <strong class="highlight">TODOS</strong> os dispositivos da mesma rede local.</p>
+            <p>Broadcasts são úteis para certas funções (como descobrir endereços), mas em uma rede muito grande, o excesso deles (um "broadcast storm") pode travar tudo.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>O Switch e o Domínio de Broadcast</h2>
+            <p>Como vimos, um Switch é inteligente para entregar mensagens diretas (unicast). Mas quando ele recebe uma mensagem de broadcast, sua única opção é encaminhá-la para <strong class="highlight">TODAS as suas portas</strong>.</p>
+            <p>Isso significa que todos os dispositivos conectados a um ou mais switches interligados formam um único e grande <strong class="highlight">Domínio de Broadcast</strong>. A "gritaria" de um é ouvida por todos.</p>
+            <img src="broadcast.gif" alt="Diagrama de um grande domínio de broadcast com vários switches" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>A Solução: Segmentar a Rede</h2>
+            <p>Para resolver o problema da "gritaria" e organizar a rede, precisamos dividi-la em "salas" menores e isoladas. Em redes, chamamos isso de <strong class="highlight">segmentação</strong>.</p>
+            <p>O dispositivo que faz essa divisão, criando barreiras para os broadcasts, é o <strong class="highlight">Roteador</strong>.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>O Roteador: Criando Múltiplos Domínios de Broadcast</h2>
+            <p>A regra de ouro: <strong class="highlight">Roteadores NÃO encaminham broadcasts</strong> de uma rede para outra.</p>
+            <p>Cada porta de um roteador conecta-se a uma rede diferente e cria um <strong class="highlight">domínio de broadcast separado e isolado</strong>. A "gritaria" de uma sala não passa para a outra.</p>
+            <img src="router-stop.gif" alt="Diagrama de um roteador separando domínios de broadcast" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>A Conexão Lógica: Protocolos</h2>
+            <p>Ok, agora temos "salas" (redes) separadas. Mas como um computador em uma sala envia uma mensagem para outro em uma sala diferente?</p>
+            <p>Precisamos de um sistema de endereçamento lógico, como CEPs e números de apartamentos, que funcione entre as salas. É aqui que entram os <strong class="highlight">Protocolos</strong>.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Introdução a Protocolos</h2>
+            <p>Um <strong class="highlight">protocolo</strong> é um conjunto de regras que governa como os dados são formatados e transmitidos. É a "linguagem" que os dispositivos usam para se comunicar de forma organizada.</p>
+            <p>O protocolo que cuida do endereçamento lógico entre redes diferentes é o <strong class="highlight">IP (Internet Protocol)</strong>.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Switch vs. Roteador: A Ligação Final</h2>
+            <table class="styled-table" style="max-width: 900px;">
+                 <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>Switch</th>
+                        <th>Roteador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Função</strong></td>
+                        <td>Conecta dispositivos na <strong>mesma rede</strong>.</td>
+                        <td>Conecta <strong>redes diferentes</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Endereço</strong></td>
+                        <td>Usa Endereço MAC (físico).</td>
+                        <td>Usa Endereço IP (lógico).</td>
+                    </tr>
+                     <tr>
+                        <td><strong>Broadcast</strong></td>
+                        <td>Encaminha para todos (cria o domínio).</td>
+                        <td>Bloqueia e isola (separa os domínios).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>A Família de Protocolos TCP/IP</h2>
+            <p>A internet funciona com uma <strong class="highlight">suíte (conjunto)</strong> de protocolos. O <strong class="highlight">IP</strong> é o responsável pelo endereçamento e roteamento, como se fosse o serviço de correios que só se preocupa com o CEP de origem e destino.</p>
+            <img src="tcpip.png" alt="Diagrama das camadas do modelo TCP/IP" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>Endereço IP: O CEP do seu Dispositivo</h2>
+            <p>O <strong class="highlight">Endereço IP</strong> é um número único que identifica um dispositivo em uma rede, permitindo que os dados o encontrem. Vamos focar na versão mais comum: o <strong class="highlight">IPv4</strong>.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Anatomia de um Endereço IPv4</h2>
+            <p>Um endereço IPv4 é um número de <strong class="highlight">32 bits</strong>, dividido em 4 blocos de 8 bits (<strong>octetos</strong>), representados em decimal (0 a 255).</p>
+            <p>Exemplo: <code>192.168.1.10</code></p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Interativo: Do Binário ao Decimal</h2>
+            <p>Vamos ver como o número <code>192</code> é formado por 8 bits.</p>
+            <div class="interactive-container binary-converter">
+                <p>Digite um número de 0 a 255:</p>
+                <input type="number" id="decimalInput" value="192" min="0" max="255">
+                <div class="binary-bits" id="binaryBits"></div>
+                <div id="binaryCalculation" class="result-box" style="font-size: 1em;"></div>
+            </div>
+        </section>
+
+        <section class="scroll-section">
+            <h2>O Esgotamento dos Endereços IPv4</h2>
+            <p>Com aproximadamente <strong class="highlight">4,3 bilhões</strong> de endereços, o IPv4 se esgotou. Isso levou à criação do <strong class="highlight">NAT</strong> e do <strong class="highlight">IPv6</strong>.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Endereços Públicos vs. Privados</h2>
+             <div class="two-column-layout" style="max-width: 900px; text-align: left;">
+                <div class="column">
+                    <h3>IP Público</h3>
+                    <p style="font-size: 1em;">É o endereço <strong class="highlight">único no mundo</strong> que seu roteador usa na internet.</p>
+                </div>
+                <div class="column">
+                    <h3>IP Privado</h3>
+                    <p style="font-size: 1em;">São endereços usados <strong class="highlight">apenas dentro da sua rede local</strong> (podem se repetir em outras casas).</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>NAT: O Tradutor de Endereços</h2>
+            <p>O <strong class="highlight">NAT (Network Address Translation)</strong> permite que vários dispositivos com IPs privados compartilhem um único IP público para acessar a internet.</p>
+            <img src="nat.gif" alt="Diagrama explicando o NAT" class="placeholder-img">
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Como o NAT Sabe Para Onde Devolver? A Tabela de Estado</h2>
+            <p>O roteador não troca apenas o IP. Ele também troca a <strong class="highlight">porta de origem</strong> por uma porta aleatória e cria uma entrada em sua <strong class="highlight">Tabela NAT</strong> (ou Tabela de Estado).</p>
+            <p><code>[IP Privado:Porta Original] ↔ [IP Público:Porta Traduzida]</code></p>
+            <p>Quando a resposta chega no IP público e na porta traduzida, o roteador consulta a tabela, descobre qual era o IP/Porta original e encaminha o pacote para o dispositivo correto na rede interna. É um processo <strong class="highlight">stateful</strong> (com estado).</p>
+            <img src="tabelanat.png" alt="Diagrama de uma Tabela NAT" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>Faixas de Endereçamento Privado (RFC 1918)</h2>
+             <table class="styled-table" style="max-width: 800px;">
+                 <thead><tr><th>Faixa de IP</th><th>Uso Comum</th></tr></thead>
+                <tbody>
+                    <tr><td><code>10.0.0.0</code> - <code>10.255.255.255</code></td><td>Grandes redes corporativas.</td></tr>
+                    <tr><td><code>172.16.0.0</code> - <code>172.31.255.255</code></td><td>Redes de médio porte.</td></tr>
+                    <tr><td><code>192.168.0.0</code> - <code>192.168.255.255</code></td><td>Redes residenciais.</td></tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>O Problema da Organização</h2>
+            <p>Imagine uma empresa com 2000 funcionários que recebe do provedor uma única rede gigante, como a <code>10.0.0.0/8</code>. Se todos os 2000 dispositivos estiverem na mesma rede, teremos um <strong class="highlight">enorme domínio de broadcast</strong>.</p>
+            <p>A "gritaria" de um dispositivo seria ouvida por todos os outros 1999, causando lentidão. Além disso, como separar o departamento de Vendas do Financeiro por segurança?</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>A Solução: Sub-redes</h2>
+            <p>A solução é pegar essa rede grande e dividi-la em redes menores e gerenciáveis: as <strong class="highlight">sub-redes</strong>.</p>
+            <p>Podemos criar uma sub-rede para Vendas, outra para o Financeiro, outra para a TI, etc. Cada uma será um <strong class="highlight">domínio de broadcast separado</strong>, isolado por um roteador.</p>
+            <p>Mas como fazemos essa divisão matematicamente? Qual ferramenta usamos?</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>A Máscara de Rede: A Ferramenta para Criar Sub-redes</h2>
+            <p>O Endereço IP é dividido em duas partes: uma que identifica a <strong class="highlight">Rede</strong> e outra que identifica o <strong class="highlight">Dispositivo (Host)</strong>.</p>
+            <p>A <strong class="highlight">Máscara de Sub-rede</strong> é a ferramenta que define onde essa divisão acontece. Ao "puxar" a linha divisória, nós "emprestamos" bits da parte de Host para criar novas sub-redes.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Como a Máscara Funciona?</h2>
+            <p>A máscara é uma sequência de bits '1' (que representam a parte da Rede) seguida por bits '0' (que representam a parte do Host).</p>
+            <p>Exemplo: <code>255.255.255.0</code> em binário é:</p>
+            <p><code>11111111.11111111.11111111.00000000</code></p>
+            <p>Os 24 bits '1' definem a rede, e os 8 bits '0' definem os hosts dentro dela.</p>
+        </section>
+        
+         <section class="scroll-section">
+            <h2>A Operação "E" (AND) Binária</h2>
+            <p>Para descobrir o "nome" da rede (o endereço de rede) de um IP, o computador realiza uma operação lógica <strong class="highlight">"E" (AND)</strong> entre o IP e a Máscara.</p>
+             <table class="styled-table" style="max-width: 400px; font-family: 'Roboto Mono'; text-align: center;">
+                 <thead><tr><th colspan="3">Regras do AND</th></tr></thead>
+                 <tbody>
+                     <tr><td>1 AND 1 = 1</td><td>1 AND 0 = 0</td><td>0 AND 0 = 0</td></tr>
+                 </tbody>
+             </table>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Interativo: Calculando o Endereço de Rede</h2>
+            <div class="interactive-container">
+                <p>IP: <code>192.168.1.10</code> | Máscara: <code>255.255.255.0</code></p>
+                <div id="and-calculation" class="result-box">
+                    <p><strong>IP:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11000000.10101000.00000001.00001010</p>
+                    <p><strong>Máscara:</strong> 11111111.11111111.11111111.00000000</p>
+                    <p>-------------------------------------------------- (AND)</p>
+                    <p><strong>Rede:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11000000.10101000.00000001.00000000</p>
+                    <p style="text-align:center; font-weight: bold; margin-top: 10px;">= 192.168.1.0</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Notação CIDR</h2>
+            <p>A notação <strong class="highlight">CIDR</strong> simplifica a máscara contando o número de bits '1'.</p>
+            <ul>
+                <li><code>255.255.255.0</code> = 24 bits '1' = <code>/24</code></li>
+                <li><code>192.168.1.10</code> com máscara <code>255.255.255.0</code> vira <code>192.168.1.10/24</code>.</li>
+            </ul>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Classes de Endereços (Conceito Histórico)</h2>
+            <p>Originalmente, as máscaras eram fixas de acordo com a "Classe" do IP (A, B, C). Hoje, o CIDR nos dá flexibilidade total para criar sub-redes de qualquer tamanho.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Endereços Especiais</h2>
+            <div class="two-column-layout" style="max-width: 900px; text-align: left;">
+                <div class="column">
+                    <h3>Endereço de Rede</h3>
+                    <p style="font-size: 1em;">O primeiro endereço da faixa (hosts em '0'). Identifica a rede. Ex: <code>192.168.1.0/24</code>.</p>
+                </div>
+                <div class="column">
+                    <h3>Endereço de Broadcast</h3>
+                    <p style="font-size: 1em;">O último endereço da faixa (hosts em '1'). Fala com todos na rede. Ex: <code>192.168.1.255/24</code>.</p>
+                </div>
+            </div>
+             <p>Estes dois endereços <strong class="highlight">não podem ser usados</strong> em dispositivos.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>O Endereço de Loopback</h2>
+            <p>A faixa <code>127.0.0.0/8</code>, especialmente <code>127.0.0.1</code> (<strong>"localhost"</strong>), é usada para um dispositivo "falar consigo mesmo", essencial para testes de software.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Calculadora de Rede Interativa</h2>
+            <p>Digite um IP e escolha a máscara para ver as informações da sub-rede.</p>
+            <div class="interactive-container">
+                <div style="text-align: center;">
+                    IP: <input type="text" id="ip-calc-input" value="192.168.1.77">
+                    Máscara (CIDR):
+                    <select id="cidr-calc-select"></select>
+                    <button id="calculate-btn">Calcular</button>
+                </div>
+                <div id="network-calc-results" class="result-box"></div>
+            </div>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Cenário: A Viagem de um Pacote</h2>
+            <p>Seu PC (<code>192.168.1.10/24</code>) quer acessar <code>www.google.com</code> (<code>8.8.8.8</code>). O que acontece?</p>
+            <p>Vamos ver a jornada passo a passo.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Interativo: A Viagem de um Pacote</h2>
+            <div id="packet-journey-container">
+                 <div class="pj-device" id="pj-pc">💻</div>
+                 <div class="pj-label" id="pj-pc-label">Seu PC<br>192.168.1.10</div>
+                 <div class="pj-device" id="pj-switch">🖧</div>
+                 <div class="pj-label" id="pj-switch-label">Switch</div>
+                 <div class="pj-device" id="pj-router">🌐</div>
+                 <div class="pj-label" id="pj-router-label">Roteador (NAT)<br>192.168.1.1<br>200.20.10.5</div>
+                 <div class="pj-device" id="pj-cloud">☁️</div>
+                 <div class="pj-device" id="pj-server">🖥️</div>
+                 <div class="pj-label" id="pj-server-label">Servidor Google<br>8.8.8.8</div>
+                 <div class="pj-packet" id="pj-packet">✉️</div>
+                 <div class="packet-info" id="pj-packet-info"></div>
+            </div>
+            <p id="pj-description" style="margin-top:20px; min-height: 40px;"></p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Resumo da Aula</h2>
+            <ul>
+                <li>O <strong class="highlight">Roteador</strong> segmenta a rede em múltiplos <strong class="highlight">domínios de broadcast</strong>.</li>
+                <li>O <strong class="highlight">Endereço IP</strong> permite a comunicação entre redes diferentes.</li>
+                <li>A <strong class="highlight">Máscara de Rede</strong> é a ferramenta para criar <strong class="highlight">sub-redes</strong>, organizando e otimizando a rede.</li>
+                <li>Dispositivos em redes diferentes se comunicam através do <strong class="highlight">Gateway Padrão</strong> (o roteador).</li>
+            </ul>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Perguntas?</h2>
+        </section>
+        
+    </div>
+
+    <!-- Navegação -->
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+        <div class="slide-counter" id="slide-counter">1 / 35</div>
+        <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+        <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = document.querySelectorAll('.scroll-section');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        let currentSectionIndex = 0;
+        const totalSections = sections.length;
+        let pjStep = 0; // Packet Journey Step
+
+        function updateNavigation() {
+            slideCounter.textContent = `${currentSectionIndex + 1} / ${totalSections}`;
+            prevBtn.disabled = currentSectionIndex === 0 && pjStep === 0;
+            nextBtn.disabled = currentSectionIndex === totalSections - 1;
+        }
+
+        function handleNavigation(direction) {
+            const currentSection = sections[currentSectionIndex];
+            
+            if (currentSection.querySelector('#packet-journey-container')) {
+                if (direction > 0) {
+                    if (runPacketJourneyStep()) return; // Animação em andamento, não avança
+                } else { // direction < 0
+                    if (pjStep > 0) {
+                        resetPacketJourney();
+                        return; // Fica na seção, apenas reseta
+                    }
+                }
+            }
+
+            if (direction > 0 && currentSectionIndex < totalSections - 1) {
+                sections[currentSectionIndex + 1].scrollIntoView({ behavior: 'smooth' });
+            } else if (direction < 0 && currentSectionIndex > 0) {
+                sections[currentSectionIndex - 1].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        nextBtn.addEventListener('click', () => handleNavigation(1));
+        prevBtn.addEventListener('click', () => handleNavigation(-1));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') handleNavigation(1);
+            if (e.key === 'ArrowLeft') handleNavigation(-1);
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(sections).indexOf(entry.target);
+                    currentSectionIndex = index;
+                    if (entry.target.querySelector('#packet-journey-container')) {
+                        resetPacketJourney();
+                    }
+                    updateNavigation();
+                }
+            });
+        }, { threshold: 0.7 });
+
+        sections.forEach(section => observer.observe(section));
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // --- INTERACTIVE SCRIPTS ---
+
+        // Binary Converter
+        const decimalInput = document.getElementById('decimalInput');
+        const binaryBitsContainer = document.getElementById('binaryBits');
+        const binaryCalculation = document.getElementById('binaryCalculation');
+
+        function updateBinaryConverter() {
+            const num = parseInt(decimalInput.value) || 0;
+            if (num < 0 || num > 255) return;
+            const binaryString = num.toString(2).padStart(8, '0');
+            binaryBitsContainer.innerHTML = '';
+            let calculation = '';
+            for (let i = 0; i < 8; i++) {
+                const bit = binaryString[i];
+                const value = Math.pow(2, 7 - i);
+                const bitBox = document.createElement('div');
+                bitBox.className = 'bit-box';
+                bitBox.textContent = bit;
+                const valueLabel = document.createElement('div');
+                valueLabel.className = 'bit-value';
+                valueLabel.textContent = value;
+                const container = document.createElement('div');
+                container.style.textAlign = 'center';
+                container.appendChild(bitBox);
+                container.appendChild(valueLabel);
+                binaryBitsContainer.appendChild(container);
+                if (bit === '1') {
+                    if (calculation !== '') calculation += ' + ';
+                    calculation += value;
+                }
+            }
+            if (calculation === '') calculation = '0';
+            binaryCalculation.textContent = `${calculation} = ${num}`;
+        }
+        decimalInput.addEventListener('input', updateBinaryConverter);
+        updateBinaryConverter();
+
+        // Network Calculator
+        const ipInput = document.getElementById('ip-calc-input');
+        const cidrSelect = document.getElementById('cidr-calc-select');
+        const calcBtn = document.getElementById('calculate-btn');
+        const resultsBox = document.getElementById('network-calc-results');
+        for (let i = 1; i <= 32; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `/${i}`;
+            if (i === 24) option.selected = true;
+            cidrSelect.appendChild(option);
+        }
+        function ipToLong(ip) { return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0; }
+        function longToIp(long) { return [ (long >>> 24), (long >>> 16 & 255), (long >>> 8 & 255), (long & 255) ].join('.'); }
+        function calculateNetwork() {
+            const ip = ipInput.value;
+            const cidr = parseInt(cidrSelect.value);
+            if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+                resultsBox.textContent = 'Erro: Endereço IP inválido.';
+                return;
+            }
+            const ipLong = ipToLong(ip);
+            const maskLong = (0xFFFFFFFF << (32 - cidr)) >>> 0;
+            const networkLong = (ipLong & maskLong) >>> 0;
+            const broadcastLong = (networkLong | (~maskLong)) >>> 0;
+            const firstHostLong = networkLong + 1;
+            const lastHostLong = broadcastLong - 1;
+            const totalHosts = Math.pow(2, 32 - cidr);
+            const usableHosts = totalHosts > 2 ? totalHosts - 2 : 0;
+            resultsBox.innerHTML = `
+                <p><strong>Endereço IP:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${ip}/${cidr}</p>
+                <p><strong>Máscara de Rede:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${longToIp(maskLong)}</p>
+                <p>-------------------------------------------------</p>
+                <p><strong>Endereço de Rede:</strong> &nbsp;&nbsp;&nbsp;&nbsp;${longToIp(networkLong)}</p>
+                <p><strong>Endereço de Broadcast:</strong> ${longToIp(broadcastLong)}</p>
+                <p><strong>Primeiro Host Válido:</strong> &nbsp;${(usableHosts > 0) ? longToIp(firstHostLong) : 'N/A'}</p>
+                <p><strong>Último Host Válido:</strong> &nbsp;&nbsp;&nbsp;${(usableHosts > 0) ? longToIp(lastHostLong) : 'N/A'}</p>
+                <p><strong>Total de Hosts:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${usableHosts}</p>
+            `;
+        }
+        calcBtn.addEventListener('click', calculateNetwork);
+        calculateNetwork();
+        
+        // Packet Journey Animation
+        const pjPacket = document.getElementById('pj-packet');
+        const pjPacketInfo = document.getElementById('pj-packet-info');
+        const pjDescription = document.getElementById('pj-description');
+
+        function resetPacketJourney() {
+            pjStep = 0;
+            pjPacket.style.transition = 'none';
+            pjPacket.style.opacity = 0;
+            pjPacket.style.left = '100px';
+            pjPacket.style.transform = 'translateY(0)';
+            pjPacketInfo.style.opacity = 0;
+            pjDescription.textContent = 'Clique na seta para a direita para iniciar a animação.';
+            updateNavigation();
+        }
+
+        function runPacketJourneyStep() {
+            pjPacket.style.transition = 'all 1s ease-in-out';
+            pjStep++;
+            updateNavigation();
+
+            switch(pjStep) {
+                case 1:
+                    pjDescription.textContent = "1. O PC cria um pacote para o Google (8.8.8.8) e percebe que o destino está fora da sua rede local.";
+                    pjPacket.style.opacity = 1;
+                    pjPacketInfo.innerHTML = "Origem: 192.168.1.10<br>Destino: 8.8.8.8";
+                    pjPacketInfo.style.opacity = 1;
+                    break;
+                case 2:
+                    pjDescription.textContent = "2. O pacote é enviado para o Gateway Padrão (Roteador), passando pelo Switch.";
+                    pjPacket.style.left = '360px';
+                    break;
+                case 3:
+                    pjDescription.textContent = "3. O Roteador realiza o NAT: troca o IP de origem privado pelo seu IP público.";
+                    pjPacketInfo.innerHTML = "Origem: <span style='color:red;'>200.20.10.5</span><br>Destino: 8.8.8.8";
+                    break;
+                case 4:
+                    pjDescription.textContent = "4. O pacote modificado é enviado para a Internet.";
+                    pjPacket.style.left = '710px';
+                    break;
+                case 5:
+                    pjDescription.textContent = "5. O servidor do Google recebe o pacote e prepara a resposta.";
+                    pjPacket.style.transform = 'translateY(40px)'; // Move para baixo para simular a volta
+                    pjPacketInfo.innerHTML = "Origem: 8.8.8.8<br>Destino: <span style='color:red;'>200.20.10.5</span>";
+                    break;
+                case 6:
+                    pjDescription.textContent = "6. A resposta volta pela Internet até o seu roteador.";
+                    pjPacket.style.left = '360px';
+                    break;
+                case 7:
+                    pjDescription.textContent = "7. O roteador desfaz o NAT, trocando o IP de destino público pelo IP privado original do PC.";
+                    pjPacketInfo.innerHTML = "Origem: 8.8.8.8<br>Destino: <span style='color:green;'>192.168.1.10</span>";
+                    break;
+                case 8:
+                    pjDescription.textContent = "8. O roteador entrega o pacote final ao PC. Comunicação completa!";
+                    pjPacket.style.left = '100px';
+                    break;
+                default:
+                    resetPacketJourney();
+                    return false; // Animação terminou, pode avançar
+            }
+            return true; // Animação em andamento
+        }
+        resetPacketJourney(); // Inicia o estado
+    });
+</script>
+</body>
+</html>
+

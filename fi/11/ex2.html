@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios Práticos: Introdução ao Shell Script</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .task-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid #6366f1;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-12 px-4">
+
+    <div class="w-full max-w-3xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">Exercícios Práticos: Introdução ao Shell Script</h1>
+
+        <!-- Exercício 1 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Exercício 1: Script de Perfil de Usuário</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                O objetivo deste exercício é praticar o uso de variáveis e a captura de dados do usuário com o comando <code class="inline-code">read</code>.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">perfil.sh</code>.</li>
+                <li>O script deve começar com uma mensagem de boas-vindas.</li>
+                <li>Peça ao usuário para digitar seu <strong>nome</strong> e armazene em uma variável.</li>
+                <li>Peça ao usuário para digitar sua <strong>idade</strong> e armazene em outra variável.</li>
+                <li>Peça ao usuário para digitar seu <strong>hobby</strong> favorito e armazene em uma terceira variável.</li>
+                <li>No final, o script deve exibir uma mensagem de resumo formatada, usando as três variáveis, como no exemplo abaixo:
+                    <br>
+                    <em>"Olá [NOME], que legal que você tem [IDADE] anos e gosta de [HOBBY]!"</em>
+                </li>
+                <li>Não se esqueça de tornar o script executável com <code class="inline-code">chmod +x perfil.sh</code>.</li>
+            </ol>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Exercício 2: Criador Simples de Arquivos</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                Este exercício foca em combinar variáveis e executar um comando do sistema (<code class="inline-code">touch</code>) com base na entrada do usuário.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">criar_arquivo.sh</code>.</li>
+                <li>Peça ao usuário para digitar o <strong>nome base</strong> do arquivo que deseja criar (ex: <code class="inline-code">relatorio</code>).</li>
+                <li>Peça ao usuário para digitar a <strong>extensão</strong> do arquivo (ex: <code class="inline-code">txt</code>, <code class="inline-code">md</code>, <code class="inline-code">log</code>).</li>
+                <li>Crie uma nova variável que junte o nome base, um ponto e a extensão (ex: <code class="inline-code">relatorio.txt</code>).</li>
+                <li>Use o comando <code class="inline-code">touch</code> com essa nova variável para criar o arquivo vazio.</li>
+                <li>Exiba uma mensagem de sucesso confirmando a criação do arquivo. Por exemplo:
+                    <br>
+                    <em>"Arquivo 'relatorio.txt' criado com sucesso!"</em>
+                </li>
+            </ol>
+        </div>
+
+    </div>
+
+</body>
+</html>
+

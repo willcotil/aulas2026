@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Structs em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .exercise-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+        .challenge {
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercícios Práticos: Structs em C</h1>
+        <p class="mt-2 text-gray-600">Pratique a criação e manipulação de estruturas para organizar seus dados.</p>
+
+        <!-- Exercício 1 -->
+        <div class="exercise-block mt-8">
+            <h2>1. Ficha de Livro</h2>
+            <p class="mt-2">Crie um programa que cadastre os dados de um único livro (título, autor e ano de publicação) usando uma <code>struct</code> e, em seguida, exiba os dados cadastrados.</p>
+            <p class="mt-2"><strong>Passos Sugeridos:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-1">
+                <li>Defina uma <code>struct Livro</code> com os campos: <code>char titulo[100]</code>, <code>char autor[100]</code> e <code>int ano</code>.</li>
+                <li>Dentro da função <code>main</code>, declare uma variável do tipo <code>struct Livro</code>, por exemplo, <code>meuLivro</code>.</li>
+                <li>Peça ao usuário para digitar o título, o autor e o ano do livro, guardando cada informação no membro correspondente (ex: <code>meuLivro.ano</code>).</li>
+                <li>Após o cadastro, mostre na tela os dados que foram armazenados na sua variável <code>struct</code>.</li>
+            </ol>
+            <p class="mt-2"><strong>Exemplo de Funcionamento:</strong></p>
+            <pre><code>Digite o titulo do livro: O Senhor dos Aneis
+Digite o autor do livro: J.R.R. Tolkien
+Digite o ano de publicacao: 1954
+
+--- Ficha do Livro ---
+Titulo: O Senhor dos Aneis
+Autor: J.R.R. Tolkien
+Ano de Publicacao: 1954</code></pre>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="exercise-block mt-8">
+            <h2>2. Cadastro de Contato</h2>
+            <p class="mt-2">Crie uma <code>struct</code> para representar um contato de uma agenda, com nome e telefone. Peça ao usuário para preencher os dados de um contato e exiba-os.</p>
+            <p class="mt-2"><strong>Passos Sugeridos:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-1">
+                <li>Defina uma <code>struct Contato</code> com os campos <code>char nome[50]</code> e <code>char telefone[20]</code>.</li>
+                <li>Na <code>main</code>, crie uma variável <code>novoContato</code> do tipo <code>struct Contato</code>.</li>
+                <li>Solicite ao usuário o nome e o telefone, armazenando nas variáveis corretas (<code>novoContato.nome</code> e <code>novoContato.telefone</code>).</li>
+                <li>Mostre os dados formatados na tela.</li>
+            </ol>
+             <p class="mt-2"><strong>Exemplo de Funcionamento:</strong></p>
+            <pre><code>Digite o nome do contato: Ana Silva
+Digite o telefone do contato: (11) 98765-4321
+
+--- Contato Salvo ---
+Nome: Ana Silva
+Telefone: (11) 98765-4321</code></pre>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="exercise-block mt-8">
+            <h2>3. Ficha de Vários Filmes</h2>
+            <p class="mt-2">Crie um programa que guarde as informações de <strong>três filmes</strong>, um de cada vez. Cada filme tem: título, diretor e uma nota de avaliação (de 0 a 10). O programa deve ler os dados dos três filmes e depois exibi-los.</p>
+             <p class="mt-2"><strong>Passos Sugeridos:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-1">
+                <li>Defina uma <code>struct Filme</code> com os campos: <code>char titulo[100]</code>, <code>char diretor[100]</code> e <code>float nota</code>.</li>
+                <li>Na <code>main</code>, declare <strong>três variáveis separadas</strong>: <code>filme1</code>, <code>filme2</code> e <code>filme3</code>.</li>
+                <li>Peça ao usuário para digitar os dados do primeiro filme e guarde-os em <code>filme1</code>.</li>
+                <li>Repita o processo para o segundo filme (guardando em <code>filme2</code>) e para o terceiro (em <code>filme3</code>).</li>
+                <li>Ao final, exiba os dados dos três filmes de forma organizada.</li>
+            </ol>
+            <p class="mt-2"><strong>Exemplo de Funcionamento:</strong></p>
+            <pre><code>-- CADASTRO DO 1o FILME --
+Digite o titulo: Jurassic Park
+Digite o diretor: Steven Spielberg
+Digite a nota: 9.3
+
+-- CADASTRO DO 2o FILME --
+Digite o titulo: Matrix
+Digite o diretor: Wachowskis
+Digite a nota: 9.0
+
+-- CADASTRO DO 3o FILME --
+Digite o titulo: Interestelar
+Digite o diretor: Christopher Nolan
+Digite a nota: 9.5
+
+--- FILMES CADASTRADOS ---
+1. Jurassic Park, por Steven Spielberg - Nota: 9.3
+2. Matrix, por Wachowskis - Nota: 9.0
+3. Interestelar, por Christopher Nolan - Nota: 9.5</code></pre>
+        </div>
+        
+        <!-- Exercício 4 -->
+        <div class="exercise-block mt-8">
+            <h2>4. Comparando Personagens</h2>
+            <p class="mt-2">Crie uma <code>struct</code> para um personagem de jogo com os campos: nome, vida e ataque. Crie <strong>duas</strong> variáveis do tipo personagem. Preencha os dados dos dois personagens e, no final, diga qual deles tem o maior poder de ataque.</p>
+            <p class="mt-2"><strong>Passos Sugeridos:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-1">
+                <li>Defina a <code>struct Personagem</code> (<code>char nome[50]</code>, <code>int vida</code>, <code>int ataque</code>).</li>
+                <li>Na <code>main</code>, declare duas variáveis: <code>personagem1</code> e <code>personagem2</code>.</li>
+                <li>Peça ao usuário para preencher todos os dados do <code>personagem1</code>.</li>
+                <li>Peça ao usuário para preencher todos os dados do <code>personagem2</code>.</li>
+                <li>Use uma estrutura <code>if/else</code> para comparar <code>personagem1.ataque</code> com <code>personagem2.ataque</code>.</li>
+                <li>Exiba o nome do personagem que possui o maior ataque.</li>
+            </ol>
+            <p class="mt-2"><strong>Exemplo de Funcionamento:</strong></p>
+            <pre><code>-- Cadastro do Personagem 1 --
+Digite o nome: Mago
+Digite a vida: 80
+Digite o ataque: 150
+
+-- Cadastro do Personagem 2 --
+Digite o nome: Guerreiro
+Digite a vida: 120
+Digite o ataque: 95
+
+O personagem com maior ataque e: Mago</code></pre>
+        </div>
+
+        <!-- Exercício 5 -->
+        <div class="exercise-block mt-8">
+            <h2>5. Desafio: Estoque da Loja</h2>
+            <div class="challenge">
+                <p><strong>Este é um desafio para prepará-lo para a próxima aula!</strong></p>
+                <p class="mt-2">Até agora, criamos apenas uma "ficha" por vez. Mas e se precisarmos cadastrar vários itens? Para isso, podemos criar um <strong>vetor de structs</strong>!</p>
+            </div>
+            <p class="mt-4">Crie um programa que cadastre <strong>3 produtos</strong> em um estoque. Cada produto tem código, nome e preço. Ao final, o programa deve listar todos os produtos cadastrados.</p>
+            <p class="mt-2"><strong>Passos Sugeridos:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-1">
+                <li>Defina uma <code>struct Produto</code> com os campos: <code>int codigo</code>, <code>char nome[50]</code> e <code>float preco</code>.</li>
+                <li>Na <code>main</code>, declare um <strong>vetor</strong> de structs: <code>struct Produto estoque[3];</code>.</li>
+                <li>Crie um laço <code>for</code> que se repita 3 vezes (de <code>i=0</code> até <code>i=2</code>).</li>
+                <li><strong>Dentro do laço</strong>, peça ao usuário para digitar o código, nome e preço do produto, guardando nas posições corretas do vetor. Exemplo: <code>scanf("%d", &estoque[i].codigo);</code>.</li>
+                <li>Após o primeiro laço, crie um <strong>segundo laço <code>for</code></strong> para percorrer o vetor e exibir os dados de todos os 3 produtos.</li>
+            </ol>
+             <p class="mt-2"><strong>Exemplo de Funcionamento:</strong></p>
+            <pre><code>-- Cadastro do Produto 1 --
+Digite o codigo: 101
+Digite o nome: Teclado
+Digite o preco: 80.50
+
+-- Cadastro do Produto 2 --
+Digite o codigo: 102
+Digite o nome: Mouse
+Digite o preco: 40.00
+
+-- Cadastro do Produto 3 --
+Digite o codigo: 205
+Digite o nome: Monitor
+Digite o preco: 550.00
+
+--- Lista de Produtos em Estoque ---
+Produto 1: Codigo 101, Nome: Teclado, Preco: R$ 80.50
+Produto 2: Codigo 102, Nome: Mouse, Preco: R$ 40.00
+Produto 3: Codigo 205, Nome: Monitor, Preco: R$ 550.00</code></pre>
+        </div>
+    </div>
+</body>
+</html>
+

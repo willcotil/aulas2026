@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 02: Topologias de Rede</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CONFIGURAÇÕES GERAIS --- */
+        :root {
+            --primary: #2c3e50;    /* Azul Petróleo */
+            --secondary: #e67e22;  /* Laranja */
+            --accent: #27ae60;     /* Verde */
+            --danger: #c0392b;     /* Vermelho */
+            --bg-app: #ecf0f1;
+            --panel-bg: #ffffff;
+            --text-main: #2c3e50;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* NUMERAÇÃO NO TOPO */
+        #top-counter {
+            position: fixed; top: 20px; right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 20px; border-radius: 20px;
+            font-weight: bold; color: var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 3000; font-family: monospace; font-size: 1.1rem;
+            border: 1px solid #bdc3c7;
+        }
+
+        /* Container principal */
+        main {
+            height: 100vh; width: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            padding-bottom: 180px; 
+        }
+
+        /* --- ESTILO DOS SLIDES --- */
+        section.slide {
+            height: 100vh; width: 100%; max-width: 1200px;
+            margin: 0 auto; background: #fff;
+            scroll-snap-align: start; position: relative;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 40px; border-bottom: 1px solid #bdc3c7;
+        }
+
+        h1 { font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem; text-align: center; }
+        h2 { font-size: 2.5rem; color: var(--primary); margin-bottom: 2rem; border-bottom: 3px solid var(--secondary); padding-bottom: 10px; text-align: center;}
+        h3 { font-size: 1.8rem; color: #7f8c8d; margin-bottom: 1rem; }
+        p, li { font-size: 1.4rem; line-height: 1.6; color: var(--text-main); max-width: 950px; }
+        
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding-left: 35px; position: relative; }
+        li::before { content: '➤'; color: var(--secondary); font-size: 1.5rem; position: absolute; left: 0; top: 2px; }
+
+        .cols { display: flex; gap: 50px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
+
+        /* Placeholders Visuais */
+        .visual-box {
+            background: #fdfdfd; border: 2px dashed #bdc3c7; border-radius: 15px;
+            width: 100%; height: 350px; display: flex; justify-content: center; align-items: center;
+            flex-direction: column; position: relative; overflow: hidden;
+            transition: all 0.3s;
+        }
+        .visual-box:hover { border-color: var(--secondary); background: #fffbf5; }
+        
+        .emoji-icon { font-size: 5rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: default; }
+        .visual-box:hover .emoji-icon { transform: scale(1.2); }
+
+        /* DIAGRAMAS (Nós e SVGs) */
+        .node { 
+            width: 44px; height: 44px; background: var(--primary); border-radius: 50%; 
+            position: absolute; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            display: grid; place-items: center; color: white; font-weight: bold; z-index: 2;
+            /* Centraliza o ponto de âncora do nó */
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Camada SVG para conexões perfeitas */
+        .connections-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+        .connections-layer line, .connections-layer circle, .connections-layer rect {
+            stroke: #95a5a6; stroke-width: 4; fill: none;
+        }
+
+        /* Barramento CSS (Slide 6) */
+        .bus-main-wire {
+            width: 80%; height: 8px; background: #333; border-radius: 4px;
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); z-index: 1;
+        }
+        .bus-drop-line {
+            width: 4px; background: #95a5a6; position: absolute; z-index: 0;
+            top: 72px; height: calc(100% - 60px - 50px - 22px);
+        }
+
+        /* Estrela HUB */
+        .star-hub {
+            z-index: 3; width: 80px; height: 50px; background: #333; color: white;
+            display: grid; place-items: center; border-radius: 5px;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-weight: bold;
+        }
+
+        /* --- PAINEL DE SIMULAÇÃO (RODAPÉ) --- */
+        #sim-panel {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: var(--panel-bg); color: #333;
+            padding: 15px 20px; z-index: 2000;
+            border-top: 5px solid var(--secondary);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .sim-header { display: flex; justify-content: space-between; align-items: center; }
+        .sim-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; gap: 10px; align-items: center;}
+        
+        .sim-content {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f4f6f7; padding: 15px; border-radius: 8px; border: 1px solid #ddd;
+        }
+
+        .status-display { 
+            font-family: monospace; font-size: 1.2rem; font-weight: bold; 
+            padding: 10px 20px; background: #fff; border-radius: 5px; border: 1px solid #ccc; width: 300px; text-align: center;
+        }
+        .status-ok { color: var(--accent); border-color: var(--accent); background: #e8f8f5; }
+        .status-fail { color: var(--danger); border-color: var(--danger); background: #fdedec; }
+        .status-partial { color: var(--secondary); border-color: var(--secondary); background: #fef5e7; }
+
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold;
+            transition: transform 0.1s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-cut { background: var(--danger); }
+        .btn-reset { background: var(--accent); }
+        
+        .controls {
+            position: fixed; bottom: 200px; right: 20px;
+            background: rgba(255, 255, 255, 0.95); padding: 10px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; gap: 10px; flex-direction: column;
+            z-index: 1000; border: 1px solid #ccc;
+        }
+        .btn-nav { width: 45px; height: 45px; border-radius: 50%; padding: 0; justify-content: center; }
+
+        @media print {
+            #sim-panel, .controls, #top-counter { display: none !important; }
+            main { height: auto; overflow: visible; padding-bottom: 0; }
+            section.slide { height: 100vh; page-break-after: always; margin: 0; padding: 20px; border: none; }
+            .visual-box { border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="top-counter">1 / 40</div>
+
+    <main id="slide-container">
+
+        <!-- INTRODUÇÃO -->
+        <section class="slide" id="slide-1">
+            <div class="visual-box" style="height: 180px; width: 180px; border-radius: 50%; border: 4px solid var(--secondary); margin-bottom: 20px;">
+                <span class="emoji-icon">🕸️</span>
+            </div>
+            <h1>Topologias de Rede</h1>
+            <h3>Física vs Lógica e Arquiteturas</h3>
+            <p><strong>Aula 02</strong> | Prof. Will</p>
+        </section>
+
+        <section class="slide" id="slide-2">
+            <h2>Recapitulando Aula 01</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><strong>Rede:</strong> Dispositivos interligados compartilhando recursos.</li>
+                        <li><strong>LAN/MAN/WAN:</strong> Classificação por tamanho geográfico.</li>
+                        <li><strong>Cliente-Servidor:</strong> Centralização e controle.</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🧠</span><span>Memória Fresca?</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-3">
+            <h2>O que é Topologia?</h2>
+            <p style="text-align: center;">Vem do grego <em>Topos</em> (lugar) + <em>Logos</em> (estudo).</p>
+            <div class="cols">
+                <div class="col">
+                    <p>É o "mapa" da rede. Define como os computadores estão conectados e como a informação viaja entre eles.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🗺️</span><span>O Mapa da Mina</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-4">
+            <h2>Física vs Lógica</h2>
+            <div class="cols">
+                <div class="col">
+                    <h3>👀 Topologia Física</h3>
+                    <p>Como os cabos estão passados fisicamente. O layout real (o que você vê ao olhar para o teto/chão).</p>
+                </div>
+                <div style="width: 2px; height: 200px; background: #bdc3c7;"></div>
+                <div class="col">
+                    <h3>🧠 Topologia Lógica</h3>
+                    <p>Como os dados fluem dentro dos cabos. O sinal elétrico segue qual caminho? (Ex: Pode ser fisicamente estrela, mas logicamente barramento).</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-5">
+            <h2>Principais Topologias</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%;">
+                <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                    <span style="font-size: 3rem;">🚌</span><p><strong>Barramento</strong><br>(Bus)</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                    <span style="font-size: 3rem;">💍</span><p><strong>Anel</strong><br>(Ring)</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                    <span style="font-size: 3rem;">⭐</span><p><strong>Estrela</strong><br>(Star)</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                    <span style="font-size: 3rem;">🕸️</span><p><strong>Malha</strong><br>(Mesh)</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                    <span style="font-size: 3rem;">🌳</span><p><strong>Árvore</strong><br>(Tree)</p>
+                </div>
+                <div style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+                    <span style="font-size: 3rem;">🧬</span><p><strong>Híbrida</strong><br>(Hybrid)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARRAMENTO -->
+        <section class="slide" id="slide-6">
+            <h2>1. Topologia em Barramento (Bus)</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Todos os computadores são ligados a um <strong>único cabo central</strong> (backbone).</p>
+                    <p>Os dados viajam por todo o cabo e "passam na porta" de todos os computadores.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box">
+                        <div class="bus-main-wire"></div>
+                        
+                        <div class="node" style="top: 50px; left: 20%;">A</div>
+                        <div class="bus-drop-line" style="left: 20%; transform: translateX(-50%); height: calc(100% - 60px - 50px - 22px);"></div>
+                        
+                        <div class="node" style="top: 50px; left: 50%;">B</div>
+                        <div class="bus-drop-line" style="left: 50%; transform: translateX(-50%); height: calc(100% - 60px - 50px - 22px);"></div>
+                        
+                        <div class="node" style="top: 50px; left: 80%;">C</div>
+                        <div class="bus-drop-line" style="left: 80%; transform: translateX(-50%); height: calc(100% - 60px - 50px - 22px);"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-7">
+            <h2>Barramento: Características</h2>
+            <ul>
+                <li>Uso comum nas décadas de 80/90.</li>
+                <li>Geralmente usa cabo <strong>Coaxial</strong>.</li>
+                <li>Conectores do tipo "T" (BNC).</li>
+                <li><strong>Broadcast:</strong> Se A envia para C, B também "ouve" (mas ignora).</li>
+            </ul>
+            <div class="visual-box" style="height: 200px; margin-top: 20px;">
+                <p style="color: #999;">[Placeholder: Foto de conector BNC e cabo coaxial]</p>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-8">
+            <h2>O Problema da Colisão</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Como só existe <strong>uma estrada</strong>, se dois computadores tentarem falar ao mesmo tempo...</p>
+                    <p style="font-size: 2rem; color: var(--danger); font-weight: bold;">💥 BOOM! Colisão!</p>
+                    <p>Os dados se corrompem e precisam ser reenviados (Protocolo CSMA/CD).</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🚗💥🚙</span><span>Trânsito Caótico</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-9">
+            <h2>Terminadores</h2>
+            <p><strong>Regra de Ouro do Barramento:</strong> As pontas do cabo não podem ficar abertas.</p>
+            <div class="cols">
+                <div class="col">
+                    <p>É necessário usar <strong>Terminadores</strong> (resistor de 50 Ohm) nas extremidades.</p>
+                    <p>Se não usar, o sinal bate na ponta e volta (reflexão), sujando a rede.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🧱</span><span>Muro de absorção</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-10">
+            <h2>Barramento: Vantagens e Desvantagens</h2>
+            <div class="cols" style="align-items: flex-start;">
+                <div class="col" style="background: #e8f8f5; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--accent);">✅ Vantagens</h3>
+                    <ul>
+                        <li>Barato (pouco cabo).</li>
+                        <li>Fácil de instalar (no início).</li>
+                        <li>Não precisa de equipamento central (hub).</li>
+                    </ul>
+                </div>
+                <div class="col" style="background: #fdedec; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--danger);">❌ Desvantagens</h3>
+                    <ul>
+                        <li>Se o cabo principal quebrar, <strong>PARA TUDO</strong>.</li>
+                        <li>Difícil achar onde está o defeito.</li>
+                        <li>Lenta com muitos usuários (muita colisão).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-11">
+            <h2>Teste Prático: Barramento</h2>
+            <p>Olhe para o painel abaixo.</p>
+            <p>O simulador está configurado em <strong>Barramento</strong>.</p>
+            <p style="background: #fff3cd; padding: 15px; border: 1px solid #ffeeba;"><strong>Atividade:</strong> Clique em "Cortar Cabo" e veja o status.</p>
+            <p>Note como a falha é crítica.</p>
+        </section>
+
+        <!-- ANEL (Corrigido com SVG) -->
+        <section class="slide" id="slide-12">
+            <h2>2. Topologia em Anel (Ring)</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Os computadores são conectados em série, formando um circuito fechado (círculo).</p>
+                    <p>O dado viaja em <strong>uma direção</strong> passando de mão em mão.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box">
+                        <!-- SVG para o anel -->
+                        <svg class="connections-layer" viewBox="0 0 300 350">
+                            <circle cx="50%" cy="50%" r="110" />
+                        </svg>
+                        
+                        <!-- Nós posicionados -->
+                        <!-- Topo: 50% height = 175px. r=110. Top = 175-110 = 65px -->
+                        <div class="node" style="top: calc(50% - 110px); left: 50%;">A</div> 
+                        <!-- Baixo: Top = 175+110 = 285px -->
+                        <div class="node" style="top: calc(50% + 110px); left: 50%;">C</div> 
+                        <!-- Esquerda: 50% width. Left = 50% - 110px -->
+                        <div class="node" style="top: 50%; left: calc(50% - 110px);">D</div> 
+                        <!-- Direita -->
+                        <div class="node" style="top: 50%; left: calc(50% + 110px);">B</div> 
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-13">
+            <h2>Token Ring (O Bastão)</h2>
+            <p>Para evitar colisões, usa-se um <strong>Token</strong> (ficha).</p>
+            <ul>
+                <li>Só quem tem o Token pode falar.</li>
+                <li>Funciona igual uma brincadeira de "batata quente" ou passar o bastão.</li>
+                <li><strong>Resultado:</strong> Zero colisão! Desempenho garantido.</li>
+            </ul>
+        </section>
+
+        <section class="slide" id="slide-14">
+            <h2>Anel: Vulnerabilidade</h2>
+            <p>Apesar de organizado, o anel clássico tem um defeito fatal.</p>
+            <div class="cols">
+                <div class="col">
+                    <p>Se <strong>UM</strong> computador desligar ou o cabo romper em <strong>UM</strong> ponto...</p>
+                    <p class="emoji-icon">⭕ ✂️ 💀</p>
+                    <p>O círculo se quebra e a rede para (na versão unidirecional simples).</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-15">
+            <h2>Anel Duplo (FDDI)</h2>
+            <p>Para resolver a falha, criou-se o <strong>Anel Duplo</strong> (Dual Ring).</p>
+            <ul>
+                <li>Dois anéis: um gira no sentido horário, outro no anti-horário.</li>
+                <li>Se o anel principal quebra, o secundário assume (backup).</li>
+                <li>Muito usado em redes de fibra óptica antigas (FDDI) para backbones de cidades.</li>
+            </ul>
+        </section>
+
+        <section class="slide" id="slide-16">
+            <h2>Teste Prático: Anel</h2>
+            <p>O simulador mudou para <strong>Anel</strong>.</p>
+            <p>Considere um anel simples (não duplo).</p>
+            <p><strong>Clique em cortar cabo:</strong> A comunicação é interrompida pois o ciclo não fecha.</p>
+        </section>
+
+        <!-- ESTRELA (Corrigido com SVG) -->
+        <section class="slide" id="slide-17">
+            <h2>3. Topologia em Estrela (Star)</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Todos os cabos vão para um <strong>Ponto Central</strong> (Concentrador).</p>
+                    <p>É a topologia padrão hoje (Ethernet com cabo par trançado).</p>
+                    <p>O ponto central pode ser um <strong>Hub</strong> ou um <strong>Switch</strong>.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box">
+                        <!-- Conexões SVG saindo do centro -->
+                        <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <!-- A: Center to Top (20%) -->
+                            <line x1="50%" y1="50%" x2="50%" y2="20%" />
+                            <!-- B: Center to Bottom Left (20%, 80%) -->
+                            <line x1="50%" y1="50%" x2="20%" y2="80%" />
+                            <!-- C: Center to Bottom Right (80%, 80%) -->
+                            <line x1="50%" y1="50%" x2="80%" y2="80%" />
+                        </svg>
+
+                        <div class="star-hub">HUB</div>
+                        
+                        <!-- Nós posicionados exatamentes nas coordenadas do SVG -->
+                        <div class="node" style="top: 20%; left: 50%;">A</div>
+                        <div class="node" style="top: 80%; left: 20%;">B</div>
+                        <div class="node" style="top: 80%; left: 80%;">C</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-18">
+            <h2>O Concentrador: Hub vs Switch</h2>
+            <div class="cols">
+                <div class="col">
+                    <h3>Hub (Burro) 📢</h3>
+                    <p>Recebe a mensagem de A e grita para <strong>TODOS</strong>.</p>
+                    <p>Gera tráfego inútil. Baixa segurança.</p>
+                </div>
+                <div style="width: 2px; height: 200px; background: #ccc;"></div>
+                <div class="col">
+                    <h3>Switch (Inteligente) 🧠</h3>
+                    <p>Lê o endereço de destino.</p>
+                    <p>Cria um canal direto entre A e B.</p>
+                    <p>Ninguém mais ouve a conversa.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-19">
+            <h2>Estrela: A Grande Vantagem</h2>
+            <p><strong>Isolamento de Falhas.</strong></p>
+            <div class="cols">
+                <div class="col">
+                    <p>Se o cabo do computador A quebrar...</p>
+                    <p>Apenas o computador A cai. O resto da rede (B, C, D) continua funcionando perfeitamente!</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🛡️</span><span>Proteção</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-20">
+            <h2>Estrela: O Ponto Único de Falha</h2>
+            <p>Nem tudo são flores.</p>
+            <p>Se o <strong>Concentrador (Switch)</strong> queimar...</p>
+            <h2 style="color: var(--danger);">💀 GAME OVER 💀</h2>
+            <p>A rede inteira para.</p>
+        </section>
+
+        <section class="slide" id="slide-21">
+            <h2>Estrela Estendida</h2>
+            <p>Podemos ligar estrelas em outras estrelas.</p>
+            <ul>
+                <li>Conectar um Switch em outro Switch (Cascateamento).</li>
+                <li>Permite cobrir distâncias maiores e adicionar mais usuários.</li>
+                <li>É a estrutura típica de um prédio (Switch de andar -> Switch do prédio).</li>
+            </ul>
+        </section>
+
+        <section class="slide" id="slide-22">
+            <h2>Estrela: Resumo</h2>
+            <div class="cols" style="align-items: flex-start;">
+                <div class="col" style="background: #e8f8f5; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--accent);">✅ Vantagens</h3>
+                    <ul>
+                        <li>Fácil adicionar novos PCs.</li>
+                        <li>Falha em um PC não afeta os outros.</li>
+                        <li>Gestão centralizada.</li>
+                    </ul>
+                </div>
+                <div class="col" style="background: #fdedec; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--danger);">❌ Desvantagens</h3>
+                    <ul>
+                        <li>Gasta muito cabo (cada PC precisa de um cabo exclusivo até o centro).</li>
+                        <li>Dependência total do Switch.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-23">
+            <h2>Teste Prático: Estrela</h2>
+            <p>O simulador mudou para <strong>Estrela</strong>.</p>
+            <p><strong>Clique em Cortar Cabo:</strong></p>
+            <p>O simulador assume que cortamos o cabo de <strong>UM</strong> computador.</p>
+            <p>Resultado? A rede continua "Parcialmente Online" (só um caiu).</p>
+        </section>
+
+        <!-- MALHA (Corrigido com SVG) -->
+        <section class="slide" id="slide-24">
+            <h2>4. Topologia em Malha (Mesh)</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Cada dispositivo tem uma conexão ponto-a-ponto com <strong>todos</strong> (ou vários) outros dispositivos.</p>
+                    <p>Não há centro. É uma teia.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box">
+                        <!-- Conexões SVG -->
+                        <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <!-- Quadrado -->
+                            <line x1="25%" y1="25%" x2="75%" y2="25%" />
+                            <line x1="75%" y1="25%" x2="75%" y2="75%" />
+                            <line x1="75%" y1="75%" x2="25%" y2="75%" />
+                            <line x1="25%" y1="75%" x2="25%" y2="25%" />
+                            <!-- Cruzamento (Diagonais) -->
+                            <line x1="25%" y1="25%" x2="75%" y2="75%" />
+                            <line x1="75%" y1="25%" x2="25%" y2="75%" />
+                        </svg>
+
+                        <!-- Nós posicionados nas coordenadas (25% e 75%) -->
+                        <div class="node" style="top: 25%; left: 25%;">A</div>
+                        <div class="node" style="top: 25%; left: 75%;">B</div>
+                        <div class="node" style="top: 75%; left: 25%;">C</div>
+                        <div class="node" style="top: 75%; left: 75%;">D</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-25">
+            <h2>Redundância Máxima</h2>
+            <p>Se um cabo quebrar, existem <strong>vários outros caminhos</strong> para chegar ao destino.</p>
+            <p>É a topologia mais confiável e robusta que existe.</p>
+            <p><strong>Exemplo:</strong> A Internet (vários caminhos de fibra entre continentes).</p>
+        </section>
+
+        <section class="slide" id="slide-26">
+            <h2>O Custo da Malha</h2>
+            <p>Ligar todo mundo com todo mundo é <strong>CARO</strong>.</p>
+            <p>Precisa de muitas placas de rede em cada PC e quilômetros de cabo.</p>
+            <p>Por isso, raramente é usada em LANs (escritórios), apenas em WANs (Internet) ou sistemas críticos (Usina Nuclear, Controle de Voo).</p>
+        </section>
+
+        <section class="slide" id="slide-27">
+            <h2>A Matemática da Malha</h2>
+            <p>Quantos cabos preciso para ligar <strong>N</strong> computadores em Malha Total?</p>
+            <div style="background: #333; color: #fff; padding: 20px; font-size: 2rem; border-radius: 10px; margin: 20px;">
+                C = N * (N - 1) / 2
+            </div>
+            <p>Onde <strong>N</strong> é o número de computadores.</p>
+        </section>
+
+        <section class="slide" id="slide-28">
+            <h2>Exemplo de Cálculo</h2>
+            <p>Se tivermos <strong>6 computadores</strong> em malha total:</p>
+            <ul>
+                <li>N = 6</li>
+                <li>Fórmula: 6 * (6 - 1) / 2</li>
+                <li>6 * 5 / 2</li>
+                <li>30 / 2 = <strong>15 cabos!</strong></li>
+            </ul>
+            <p style="font-size: 1rem; color: #666;">Imagine fazer isso com 100 computadores... (4950 cabos!). Inviável.</p>
+        </section>
+
+        <section class="slide" id="slide-29">
+            <h2>Teste Prático: Malha</h2>
+            <p>O simulador mudou para <strong>Malha</strong>.</p>
+            <p><strong>Clique em Cortar Cabo:</strong></p>
+            <p>Veja a mágica! O status continua <strong>✅ ONLINE</strong>.</p>
+            <p>O sistema automaticamente usou uma rota alternativa.</p>
+        </section>
+
+        <!-- OUTRAS -->
+        <section class="slide" id="slide-30">
+            <h2>5. Topologia em Árvore (Tree)</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>É uma variação da Estrela.</p>
+                    <p>Existe uma hierarquia: Um nó raiz conecta outros hubs/switches, que conectam os computadores.</p>
+                    <p>Parece uma árvore genealógica ou organograma de empresa.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🌳</span><span>Hierarquia</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-31">
+            <h2>Árvore: Aplicação</h2>
+            <ul>
+                <li>Muito usada em Redes de Campus Universitários.</li>
+                <li>Prédio Central -> Prédio de Engenharia -> Laboratório 1.</li>
+                <li>Facilita a gestão por setores.</li>
+                <li>Se a raiz cai, os galhos ficam isolados uns dos outros.</li>
+            </ul>
+        </section>
+
+        <section class="slide" id="slide-32">
+            <h2>6. Topologia Híbrida</h2>
+            <p>No mundo real, não seguimos uma regra só.</p>
+            <p>Misturamos tudo!</p>
+            <div class="cols">
+                <div class="col">
+                    <p>Exemplo: Várias redes em <strong>Estrela</strong> (departamentos) interligadas por um <strong>Barramento</strong> ou <strong>Anel</strong> de fibra óptica.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🧬</span><span>Mistura</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-33">
+            <h2>Ponto a Ponto (Point-to-Point)</h2>
+            <p>A mais simples de todas.</p>
+            <div class="cols">
+                <div class="col">
+                    <p>Apenas dois dispositivos ligados diretamente.</p>
+                    <p>Ex: Conectar dois roteadores via fibra em longa distância.</p>
+                    <p>Ex: Cabo Cross-over entre dois PCs.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🤝</span><span>Direto</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-34">
+            <h2>Wireless (Sem Fio)</h2>
+            <p>Como funciona o Wi-Fi?</p>
+            <p>Logicamente, o Wi-Fi funciona muito parecido com o <strong>Barramento</strong> (com colisões!), mas centralizado num Ponto de Acesso (AP).</p>
+            <p>Chamamos de modo <strong>Infraestrutura</strong> (Estrela sem fio) ou <strong>Ad-hoc</strong> (Malha/P2P sem fio).</p>
+        </section>
+
+        <!-- CONCLUSÃO -->
+        <section class="slide" id="slide-35">
+            <h2>Qual escolher?</h2>
+            <p>Critérios de decisão:</p>
+            <table style="width: 100%; border-collapse: collapse; font-size: 1.2rem; margin-top: 20px;">
+                <tr style="background: var(--primary); color: white;">
+                    <th style="padding: 10px;">Critério</th>
+                    <th style="padding: 10px;">Melhor Opção</th>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">Custo Baixo (Instalação)</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">Estrela (Equipamentos baratos)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">Confiabilidade (Crítico)</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">Malha (Mesh)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc;">Facilidade de Manutenção</td>
+                    <td style="padding: 10px; border: 1px solid #ccc;">Estrela</td>
+                </tr>
+            </table>
+        </section>
+
+        <section class="slide" id="slide-36">
+            <h2>O Padrão de Mercado</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>99% das redes locais (LAN) cabeadas hoje usam <strong>ESTRELA</strong> (ou Estrela Estendida).</p>
+                    <p>Por quê? O custo do cabo caiu e a facilidade de manutenção supera o gasto extra.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🏆</span><span>Vencedor</span></div></div>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-37">
+            <h2>Resumo Visual</h2>
+            <div style="font-size: 1.2rem; text-align: left;">
+                <p>🚌 <strong>Barramento:</strong> Varal de roupas. Um fio só. Colisão.</p>
+                <p>💍 <strong>Anel:</strong> Roda de ciranda. Bastão passa de mão em mão.</p>
+                <p>⭐ <strong>Estrela:</strong> Raios de bicicleta. Tudo vai pro centro (Switch).</p>
+                <p>🕸️ <strong>Malha:</strong> Teia de aranha. Muitos caminhos. Caro.</p>
+            </div>
+        </section>
+
+        <section class="slide" id="slide-38">
+            <h2>Exercício Rápido</h2>
+            <p>Se eu tenho um escritório com 10 computadores e quero gastar o mínimo possível, mas garantir que se um PC queimar os outros continuem trabalhando...</p>
+            <p style="margin-top: 30px;"><strong>Qual topologia uso?</strong></p>
+            <p class="fragment" style="color: var(--primary); font-weight: bold; font-size: 2rem;">Estrela!</p>
+        </section>
+
+        <section class="slide" id="slide-39">
+            <h2>Próximos Passos</h2>
+            <p>Agora que sabemos conectar fisicamente (Topologia)...</p>
+            <p>Precisamos saber <strong>COMO</strong> eles falam.</p>
+            <p>Na próxima aula: <strong>Modelo OSI e TCP/IP</strong>.</p>
+        </section>
+
+        <section class="slide" id="slide-40">
+            <h2>Fim da Aula 02</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Dúvidas?</p>
+                    <p>Não esqueçam de brincar com o simulador abaixo antes de fechar.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box" style="background: #e8f8f5; border-color: var(--accent);">
+                        <span class="emoji-icon">👋</span>
+                        <span>Até logo!</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PAINEL DE SIMULAÇÃO -->
+    <div id="sim-panel">
+        <div class="sim-header">
+            <div class="sim-title">
+                <i class="fas fa-microchip"></i> Simulador de Falha: <span id="topo-name">Nenhuma</span>
+            </div>
+            <button class="btn btn-minimize" onclick="togglePanel()" style="background:none; color:#333; border:1px solid #ccc; padding: 5px 10px;">_</button>
+        </div>
+        
+        <div class="sim-content">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="emoji-display" style="font-size: 2.5rem;" id="topo-icon">⚪</div>
+                <div style="font-size: 0.9rem; color: #666; max-width: 250px;" id="topo-desc">
+                    Navegue pelos slides para ativar o simulador.
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <button class="btn btn-cut" onclick="simulateFailure()">
+                    <i class="fas fa-cut"></i> CORTAR CABO
+                </button>
+                <button class="btn btn-reset" onclick="resetSimulation()">
+                    <i class="fas fa-undo"></i> REPARAR
+                </button>
+            </div>
+
+            <div class="status-display" id="network-status">
+                AGUARDANDO...
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="controls">
+        <button class="btn btn-nav" onclick="changeSlide(-1)" title="Anterior"><i class="fas fa-chevron-up"></i></button>
+        <button class="btn btn-nav" onclick="changeSlide(1)" title="Próximo"><i class="fas fa-chevron-down"></i></button>
+        <button class="btn btn-nav secondary" onclick="window.print()" title="PDF" style="background: #95a5a6;"><i class="fas fa-print"></i></button>
+        <button class="btn btn-nav secondary" onclick="toggleFullScreen()" title="Tela Cheia" style="background: #95a5a6;"><i class="fas fa-expand"></i></button>
+    </div>
+
+    <script>
+        const container = document.getElementById('slide-container');
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('top-counter');
+        
+        // Elementos do Simulador
+        const topoName = document.getElementById('topo-name');
+        const topoIcon = document.getElementById('topo-icon');
+        const topoDesc = document.getElementById('topo-desc');
+        const statusDisplay = document.getElementById('network-status');
+        
+        let currentIndex = 0;
+        let currentTopology = 'none'; // bus, ring, star, mesh
+
+        // Configurações das Topologias
+        const topologies = {
+            bus: {
+                name: "Barramento",
+                icon: "🚌",
+                desc: "Um único cabo central conecta todos.",
+                failMsg: "❌ REDE CAIU (Cabo rompido)",
+                failClass: "status-fail"
+            },
+            ring: {
+                name: "Anel",
+                icon: "💍",
+                desc: "Circuito fechado. Dados giram em sentido único.",
+                failMsg: "❌ REDE CAIU (Ciclo quebrado)",
+                failClass: "status-fail"
+            },
+            star: {
+                name: "Estrela",
+                icon: "⭐",
+                desc: "Cabos individuais para um ponto central.",
+                failMsg: "⚠️ PARCIAL (1 PC caiu, resto OK)",
+                failClass: "status-partial"
+            },
+            mesh: {
+                name: "Malha",
+                icon: "🕸️",
+                desc: "Múltiplos caminhos redundantes.",
+                failMsg: "✅ ONLINE (Rota alternativa)",
+                failClass: "status-ok"
+            },
+            none: {
+                name: "Geral",
+                icon: "⚪",
+                desc: "Navegue para um slide específico.",
+                failMsg: "---",
+                failClass: ""
+            }
+        };
+
+        // Mapeamento Slide -> Topologia
+        function updateSimulatorContext(index) {
+            let newTopo = 'none';
+            // Índices são base 0 (Slide 1 é index 0)
+            if (index >= 5 && index <= 10) newTopo = 'bus';
+            else if (index >= 11 && index <= 15) newTopo = 'ring';
+            else if (index >= 16 && index <= 22) newTopo = 'star';
+            else if (index >= 23 && index <= 28) newTopo = 'mesh';
+            
+            if (newTopo !== currentTopology) {
+                currentTopology = newTopo;
+                resetSimulation();
+                
+                const data = topologies[currentTopology];
+                topoName.innerText = data.name;
+                topoIcon.innerText = data.icon;
+                topoDesc.innerText = data.desc;
+            }
+        }
+
+        function simulateFailure() {
+            if (currentTopology === 'none') return;
+            
+            const data = topologies[currentTopology];
+            statusDisplay.innerText = data.failMsg;
+            statusDisplay.className = 'status-display ' + data.failClass;
+            
+            // Efeito sonoro visual (shake)
+            const panel = document.getElementById('sim-panel');
+            panel.style.transform = "translateX(5px)";
+            setTimeout(() => panel.style.transform = "translateX(-5px)", 50);
+            setTimeout(() => panel.style.transform = "translateX(0)", 100);
+        }
+
+        function resetSimulation() {
+            statusDisplay.innerText = "AGUARDANDO FALHA...";
+            statusDisplay.className = 'status-display';
+        }
+
+        function togglePanel() {
+            const panel = document.getElementById('sim-panel');
+            const main = document.querySelector('main');
+            
+            if (panel.style.transform === 'translateY(80%)') {
+                panel.style.transform = 'translateY(0)';
+                main.style.paddingBottom = "180px";
+            } else {
+                panel.style.transform = 'translateY(80%)';
+                main.style.paddingBottom = "50px";
+            }
+        }
+
+        // Navegação
+        function changeSlide(direction) {
+            let newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < slides.length) {
+                slides[newIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Scroll Listener
+        container.addEventListener('scroll', () => {
+            let scrollPos = container.scrollTop;
+            let index = Math.round(scrollPos / window.innerHeight);
+            
+            if (index !== currentIndex) {
+                currentIndex = index;
+                counter.innerText = `${currentIndex + 1} / ${slides.length}`;
+                updateSimulatorContext(currentIndex);
+            }
+        });
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+        });
+        
+        // Init
+        updateSimulatorContext(0);
+    </script>
+</body>
+</html>

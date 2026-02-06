@@ -1,0 +1,937 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula: Cabeamento de Redes Estruturadas</title>
+    <style>
+        /* --- GERAL & TEMA CLARO --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #495057;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-grey: #e9ecef;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* --- CONTAINER DOS SLIDES --- */
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--card-background);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden;
+            overflow-y: auto;
+        }
+
+            .slide.active {
+                opacity: 1;
+                transform: translateY(0);
+                visibility: visible;
+                z-index: 1;
+            }
+
+        /* --- NAVEGAÇÃO --- */
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .nav-btn:hover {
+                background-color: #004494;
+                transform: translateY(-2px);
+            }
+
+            .nav-btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        .slide-counter {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            min-width: 60px;
+            text-align: center;
+            background-color: var(--card-background);
+            padding: 5px 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- ESTILOS DE CONTEÚDO --- */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.8em;
+        }
+
+        h2 {
+            font-size: 2.2em;
+        }
+
+        h3 {
+            font-size: 1.6em;
+            color: var(--secondary-color);
+        }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.7;
+            max-width: 850px;
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        ul, ol {
+            max-width: 850px;
+            width: 100%;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .two-column-layout {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        .placeholder-img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: var(--light-grey);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* --- TABELAS --- */
+        .styled-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 1100px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 0.95em;
+        }
+
+            .styled-table th, .styled-table td {
+                border: 1px solid var(--border-color);
+                padding: 12px 15px;
+                text-align: left;
+            }
+
+            .styled-table th {
+                background-color: var(--primary-color);
+                color: white;
+                font-weight: bold;
+            }
+
+            .styled-table tr:nth-child(even) {
+                background-color: var(--background-color);
+            }
+
+            .styled-table tr:hover {
+                background-color: #d8e6f5;
+            }
+
+        /* --- INTERATIVO CRIMPAGEM --- */
+        #crimp-container {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        #rj45-plug {
+            width: 200px;
+            height: 240px;
+            border: 3px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            background: #fdfdfd;
+        }
+
+        .pin {
+            width: 10%;
+            height: 100%;
+            background-color: var(--light-grey);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.5s;
+            position: relative;
+        }
+
+        .pin-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+        }
+
+        #crimp-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+            #crimp-controls button {
+                padding: 10px 20px;
+                font-size: 1.1em;
+                cursor: pointer;
+                border: 2px solid var(--primary-color);
+                background: none;
+                color: var(--primary-color);
+                border-radius: 8px;
+                font-weight: bold;
+            }
+
+                #crimp-controls button.active, #crimp-controls button:hover {
+                    background: var(--primary-color);
+                    color: white;
+                }
+
+        #crimp-orientation {
+            text-align: center;
+        }
+
+            #crimp-orientation svg {
+                width: 120px;
+                height: auto;
+            }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.6em;
+            }
+
+            p {
+                font-size: 1em;
+            }
+
+            .two-column-layout {
+                flex-direction: column;
+            }
+
+            #crimp-container {
+                flex-direction: column;
+            }
+
+            .styled-table {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        <div class="slides-container">
+            <!-- Slide 1: Título -->
+            <section class="slide active">
+                <img src="img/conexao.png" alt="Imagem de cabos de rede" class="placeholder-img" style="max-width: 800px; margin-bottom: 20px;">
+                <h1>Cabeamento de Redes Estruturadas</h1>
+                <p class="subtitle">Os Meios Físicos que Conectam o Mundo</p>
+                <p style="font-size: 1.2em; margin-top: 20px;"><strong>Prof. William Paiva</strong></p>
+            </section>
+
+            <!-- Slide 2: Introdução -->
+            <section class="slide">
+                <h2>Os Tipos de Meios Físicos</h2>
+                <p>Para que os dados viajem de um ponto a outro em uma rede, eles precisam de um caminho. Esse caminho é o <strong class="highlight">meio de transmissão</strong>.</p>
+                <p>Nesta aula, vamos explorar os três tipos de cabos mais importantes na história e na atualidade das redes de computadores:</p>
+                <ol>
+                    <li>Cabo Coaxial (O Passado)</li>
+                    <li>Fibra Óptica (O Presente e Futuro de Longa Distância)</li>
+                    <li>Cabo de Par Trançado (O Padrão Absoluto das Redes Locais)</li>
+                </ol>
+            </section>
+
+            <!-- Slide 3: Cabo Coaxial -->
+            <section class="slide">
+                <h2>1. Cabo Coaxial: O Pioneiro</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left">O cabo coaxial foi um dos primeiros a ser usado em redes de computadores (padrão Ethernet 10Base2 e 10Base5). Ele possui um núcleo de cobre central, isolamento, uma malha metálica que atua como blindagem e uma capa externa.</p>
+                        <p class="text-left"><strong>Você está certo:</strong> seu uso em redes de computadores locais (LANs) hoje é <strong class="highlight">praticamente inexistente</strong>. Ele foi substituído por tecnologias mais eficientes e baratas.</p>
+                        <p class="text-left"><strong>Usos Atuais:</strong> Hoje, ele é amplamente utilizado para TV a cabo, antenas de TV/satélite e em sistemas de câmeras de segurança (CFTV).</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/coaxial.png" alt="Imagem de um cabo coaxial e seu conector BNC" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: Fibra Óptica Intro -->
+            <section class="slide">
+                <h2>2. Fibra Óptica: A Velocidade da Luz</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left">Diferente dos cabos metálicos que transmitem dados através de pulsos elétricos, a fibra óptica transmite informações através de <strong class="highlight">pulsos de luz</strong>.</p>
+                        <p class="text-left">Um cabo de fibra óptica é composto por filamentos extremamente finos de vidro ou plástico, capazes de guiar a luz por longas distâncias com perdas mínimas, baseando-se no princípio da <strong class="highlight">Reflexão Total Interna</strong>.</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/fibra.jpg" alt="Imagem de um cabo de fibra óptica" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: Animação Fibra -->
+            <section class="slide">
+                <h2>Como a Luz Viaja na Fibra</h2>
+                <div style="width:100%; max-width: 800px; text-align:center;">
+                    <p>A luz é "aprisionada" no núcleo da fibra e viaja "ricocheteando" em suas paredes internas.</p>
+                    <img src="img/refracao.png" alt="Animação da luz se propagando dentro de uma fibra óptica" class="placeholder-img">
+                </div>
+            </section>
+
+            <!-- Slide 6: Tipos de Fibra -->
+            <section class="slide">
+                <h2>Tipos de Fibra Óptica</h2>
+                <div class="two-column-layout">
+                    <div class="column" style="text-align: center; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;">
+                        <h3>Monomodo (Single-Mode)</h3>
+                        <img src="img/monomodo.png" alt="Diagrama do feixe de luz em fibra monomodo" class="placeholder-img" style="margin-bottom: 15px;">
+                        <p>Possui um núcleo extremamente fino. Permite que apenas <strong class="highlight">um feixe de luz</strong> viaje, quase em linha reta. Usa laser como fonte de luz.</p>
+                        <p><strong>Ideal para:</strong> Longas distâncias e altíssimas velocidades. É a base da internet global.</p>
+                    </div>
+                    <div class="column" style="text-align: center; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;">
+                        <h3>Multimodo (Multi-Mode)</h3>
+                        <img src="img/multimodo.png" alt="Diagrama dos feixes de luz em fibra multimodo" class="placeholder-img" style="margin-bottom: 15px;">
+                        <p>Possui um núcleo mais grosso. Permite que <strong class="highlight">múltiplos feixes de luz</strong> viajem ao mesmo tempo, refletindo em vários ângulos. Usa LED como fonte de luz.</p>
+                        <p><strong>Ideal para:</strong> Distâncias curtas, como em data centers e redes de campus.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: Tabela Comparativa Fibra -->
+            <section class="slide">
+                <h2>Monomodo vs. Multimodo</h2>
+                <p>(Para referência, um fio de cabelo humano tem em média 50 a 70 µm de diâmetro)</p>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>Fibra Monomodo (SMF)</th>
+                            <th>Fibra Multimodo (MMF)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Diâmetro do Núcleo</strong></td>
+                            <td>Muito Fino (~9 µm)</td>
+                            <td>Mais Grosso (~50 / 62.5 µm)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fonte de Luz</strong></td>
+                            <td>Laser</td>
+                            <td>LED (Light Emitting Diode)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Distância Máxima</strong></td>
+                            <td>Muito Longa (> 100 km)</td>
+                            <td>Curta (Até 2 km)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Largura de Banda</strong></td>
+                            <td>Praticamente Ilimitada</td>
+                            <td>Limitada (pela dispersão modal)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custo (Cabo + Equip.)</strong></td>
+                            <td>Mais Caro</td>
+                            <td>Mais Barato</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Slide 8: Conectores de Fibra -->
+            <section class="slide">
+                <h2>Conectores de Fibra Óptica</h2>
+                <p>Existem diversos tipos de conectores para fibra, cada um com um mecanismo de encaixe diferente.</p>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                    <figure>
+                        <img src="img/sc.png" alt="Conector de fibra SC" class="placeholder-img">
+                        <figcaption style="text-align: center;"><strong>SC (Subscriber Connector)</strong><br>Engate rápido (push-pull)</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="img/lc.png" alt="Conector de fibra LC" class="placeholder-img">
+                        <figcaption style="text-align: center;"><strong>LC (Lucent Connector)</strong><br>Pequeno, com trava</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="img/st.png" alt="Conector de fibra ST" class="placeholder-img">
+                        <figcaption style="text-align: center;"><strong>ST (Straight Tip)</strong><br>Engate tipo baioneta (rosqueado)</figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- Slide 9: Conexões de Fibra -->
+            <section class="slide">
+                <h2>Conexões de Fibra Óptica</h2>
+                <p>Como unir dois cabos de fibra ou conectar um cabo a um equipamento? Diferente dos cabos de cobre, não podemos simplesmente "emendar" os fios.</p>
+                <p>O alinhamento do núcleo da fibra deve ser <strong class="highlight">perfeito</strong> para que a luz passe com o mínimo de perda. Existem duas técnicas principais para isso:</p>
+                <ol>
+                    <li><strong>Fusão Óptica:</strong> A "solda" permanente.</li>
+                    <li><strong>Conectorização Mecânica:</strong> A emenda reutilizável.</li>
+                </ol>
+            </section>
+
+            <!-- Slide 10: Fusão Óptica -->
+            <section class="slide">
+                <h2>Fusão Óptica</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left">É o método de <strong class="highlight">melhor qualidade</strong>. As pontas das duas fibras são decapadas, limpas e clivadas (cortadas com precisão nanométrica).</p>
+                        <p class="text-left">Uma "Máquina de Fusão" alinha os núcleos perfeitamente e dispara um arco elétrico, <strong class="highlight">derretendo e fundindo</strong> as duas pontas de vidro como se fossem uma só. A perda de sinal é quase zero.</p>
+                        <p class="text-left"><strong>Uso:</strong> Emendas em backbones de internet, cabos submarinos e qualquer aplicação crítica que exija máxima performance.</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/fusao.jpg" alt="Imagem de uma máquina de fusão de fibra óptica" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: Conectorização Mecânica -->
+            <section class="slide">
+                <h2>Conectorização Mecânica (Emenda Mecânica)</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left">É um método <strong class="highlight">mais rápido e barato</strong>, que não exige uma máquina de fusão cara. Usa um tipo de conector especial que alinha as duas fibras e as prende mecanicamente.</p>
+                        <p class="text-left">Dentro do conector, há um gel de refração que ajuda a minimizar a perda de luz entre as pontas que não estão perfeitamente unidas.</p>
+                        <p class="text-left"><strong>Uso:</strong> Reparos de emergência, instalações de "última milha" (como levar a fibra para dentro da casa do cliente) onde o custo e a velocidade da instalação são prioritários.</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/mecanica.png" alt="Imagem de um conector de campo para fibra óptica" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 12: Par Trançado Intro -->
+            <section class="slide">
+                <h2>3. Cabo de Par Trançado: O Rei das Redes Locais</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <img src="img/trancado.jpg" alt="Imagem de um cabo de par trançado" class="placeholder-img">
+                    </div>
+                    <div class="column">
+                        <p class="text-left">É o cabo mais utilizado em redes locais (LANs) no mundo. Consiste em oito fios de cobre, organizados em <strong class="highlight">quatro pares trançados</strong>.</p>
+                        <p class="text-left">A ideia de trançar os pares foi inventada por Alexander Graham Bell em 1881. Ele descobriu que, ao trançar os fios, conseguia reduzir a interferência (ou "ruído") nas linhas telefônicas.</p>
+                        <p class="text-left">Este mesmo princípio é a chave para o funcionamento das redes modernas.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: Diafonia -->
+            <section class="slide">
+                <h2>O Inimigo: Diafonia (Crosstalk)</h2>
+                <p>Quando um sinal elétrico viaja por um fio, ele cria um campo eletromagnético ao seu redor. Se outro fio estiver muito próximo, esse campo pode <strong class="highlight">induzir um sinal "fantasma"</strong> e indesejado nele.</p>
+                <p>Esse fenômeno é chamado de <strong class="highlight">Diafonia</strong> ou <strong class="highlight">Crosstalk</strong>, e é uma das principais fontes de erros em uma transmissão de dados.</p>
+                <p>Como o trançamento dos pares resolve isso?</p>
+            </section>
+
+            <!-- Slide 14: Diagrama Diafonia -->
+            <section class="slide">
+                <h2>Diagrama: Como o Trançamento Cancela a Diafonia</h2>
+                <img src="img/diafonia.png" alt="Diagrama explicando a Diafonia" class="placeholder-img">
+                <p>O trançamento dos fios faz com que os campos eletromagnéticos gerados se cancelem mutuamente, protegendo o sinal da interferência.</p>
+            </section>
+
+            <!-- Slide 15: Tipos de Blindagem -->
+            <section class="slide">
+                <h2>Proteção Extra: Tipos de Blindagem</h2>
+                <p>Para combater a diafonia e a interferência externa (de motores, lâmpadas fluorescentes, etc.), os cabos de par trançado podem ter <strong class="highlight">blindagens</strong>.</p>
+                <p>A nomenclatura segue um padrão: <strong>XX / Y TP</strong>, onde XX é a blindagem geral e Y é a blindagem individual dos pares.</p>
+                <ul>
+                    <li><strong>U</strong> = Unshielded (Sem blindagem)</li>
+                    <li><strong>F</strong> = Foil (Folha de alumínio)</li>
+                    <li><strong>S</strong> = Screen/Braid (Malha metálica)</li>
+                </ul>
+            </section>
+
+            <!-- Slide 16: Tabela Blindagem -->
+            <section class="slide">
+                <h2>Tabela de Blindagens Comuns</h2>
+
+                <img src="img/blindagem.png" alt="Imagem comparativa dos tipos de blindagem de cabo" class="placeholder-img">
+
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Sigla</th>
+                            <th>Nome Completo (Ex: U/UTP)</th>
+                            <th>Descrição</th>
+                            <th>Vantagem / Desvantagem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>UTP</strong></td>
+                            <td>Unshielded Twisted Pair</td>
+                            <td>Nenhuma blindagem. O mais comum.</td>
+                            <td>Flexível e barato / Mais suscetível à interferência.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FTP (F/UTP)</strong></td>
+                            <td>Foiled Twisted Pair</td>
+                            <td>Uma folha de alumínio envolvendo todos os 4 pares.</td>
+                            <td>Boa proteção contra interferência externa / Menos flexível.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>STP (S/UTP)</strong></td>
+                            <td>Shielded Twisted Pair</td>
+                            <td>Uma malha metálica envolvendo todos os 4 pares.</td>
+                            <td>Proteção superior à folha / Mais grosso e caro.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SFTP (SF/UTP)</strong></td>
+                            <td>Shielded Foiled Twisted Pair</td>
+                            <td>Possui a malha e a folha de alumínio gerais.</td>
+                            <td>Excelente proteção externa / Rígido e caro.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Slide 18: Categorias -->
+            <section class="slide">
+                <h2>Evolução e Desempenho: As Categorias (CAT)</h2>
+                <p>Os cabos de par trançado evoluíram ao longo do tempo. Cada "Categoria" representa um padrão com especificações mais rigorosas, permitindo <strong class="highlight">frequências mais altas</strong> e, consequentemente, <strong class="highlight">velocidades maiores</strong>.</p>
+            </section>
+
+            <!-- Slide 19: Tabela Categorias -->
+            <section class="slide">
+                <h2>Tabela de Categorias de Cabo</h2>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Frequência Máx.</th>
+                            <th>Velocidade Máx.</th>
+                            <th>Uso Comum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CAT 1 a 4</td>
+                            <td>&lt; 20 MHz</td>
+                            <td>&lt; 16 Mbps</td>
+                            <td>Obsoletos (antigas redes de voz e dados).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAT 5e</strong></td>
+                            <td>100 MHz</td>
+                            <td>1 Gbps (Gigabit)</td>
+                            <td>Padrão mínimo para redes Gigabit residenciais e de pequenos escritórios.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAT 6</strong></td>
+                            <td>250 MHz</td>
+                            <td>1 Gbps (até 10 Gbps em distâncias curtas &lt; 55m).</td>
+                            <td>Redes corporativas, melhor desempenho e menos diafonia que o 5e.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAT 6a</strong></td>
+                            <td>500 MHz</td>
+                            <td>10 Gbps</td>
+                            <td>Padrão para redes de 10 Gigabit. Data centers, aplicações de alta demanda.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAT 7 / 7a</strong></td>
+                            <td>600 / 1000 MHz</td>
+                            <td>10 Gbps (potencial para 40 Gbps)</td>
+                            <td>Sempre blindado (S/FTP). Ambientes industriais e data centers de altíssimo desempenho.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CAT 8</strong></td>
+                            <td>2000 MHz</td>
+                            <td>25 / 40 Gbps</td>
+                            <td>Distâncias muito curtas (até 30m). Exclusivo para data centers (conexão switch-servidor).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Slide 20: Conectores RJ45 -->
+            <section class="slide">
+                <h2>Conectores: O Padrão RJ45</h2>
+                <p>A "ponta" do cabo de rede é chamada de conector RJ45 (Registered Jack 45).</p>
+                <div class="two-column-layout">
+                    <div class="column" style="text-align:center;">
+                        <h3>Conector Macho (Plug)</h3>
+                        <img src="img/macho.png" alt="Conector RJ45 Macho" class="placeholder-img">
+                        <p>É a peça que "crimpa-se" na ponta do cabo.</p>
+                    </div>
+                    <div class="column" style="text-align:center;">
+                        <h3>Conector Fêmea (Keystone Jack)</h3>
+                        <img src="img/femea.png" alt="Conector RJ45 Fêmea" class="placeholder-img">
+                        <p>É o encaixe encontrado em paredes, patch panels e alguns equipamentos.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 21: Detalhes Conector Macho - Blindagem -->
+            <section class="slide">
+                <h2>Detalhes do Conector: Blindagem</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left"><strong>Sem Blindagem vs. Blindado:</strong> Plugs blindados possuem uma carcaça metálica que faz contato com a blindagem do cabo (e com o "dreno", um fio extra sem capa).</p>
+                        <p class="text-left">Isso garante que a proteção contra interferência seja contínua de ponta a ponta. Um cabo blindado com conector comum perde grande parte de sua eficácia.</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/blindado.png" alt="Comparação de conectores RJ45 blindado e comum" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 22: Detalhes Conector Macho - Staggered -->
+            <section class="slide">
+                <h2>Detalhes do Conector: Contatos Staggered (CAT6)</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left"><strong>CAT5e vs. CAT6:</strong> Conectores CAT6 possuem os contatos internos em <strong class="highlight">zigue-zague (staggered)</strong>.</p>
+                        <p class="text-left">Isso afasta os fios uns dos outros, ajudando a reduzir a diafonia bem na ponta do cabo, que é o ponto mais crítico pois é onde os pares são desfeitos para entrar no conector.</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/cat5e6.png" alt="Comparação de contatos de conector CAT5e e CAT6" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 23: Crimpagem -->
+            <section class="slide">
+                <h2>Montando o Cabo: A Crimpagem</h2>
+                <p>O processo de fixar o conector no cabo é chamado de <strong class="highlight">crimpagem</strong>.</p>
+                <p>Para isso, a ordem dos fios coloridos dentro do conector é fundamental e segue dois padrões mundiais: <strong class="highlight">T568A</strong> e <strong class="highlight">T568B</strong>.</p>
+                <p>A única diferença entre eles é a inversão dos pares Verde e Laranja.</p>
+            </section>
+
+            <!-- Slide 24: Interativo Crimpagem -->
+            <section class="slide">
+                <h2>Guia Interativo de Crimpagem: T568A vs. T568B</h2>
+                <div id="crimp-container">
+                    <div id="crimp-orientation">
+                        <img src="img/vista.png" alt="Ferramenta Punch Down e um Keystone Jack" class="placeholder-img">
+                    </div>
+                    <div id="rj45-plug">
+                        <div class="pin"><div class="pin-label">1</div></div>
+                        <div class="pin"><div class="pin-label">2</div></div>
+                        <div class="pin"><div class="pin-label">3</div></div>
+                        <div class="pin"><div class="pin-label">4</div></div>
+                        <div class="pin"><div class="pin-label">5</div></div>
+                        <div class="pin"><div class="pin-label">6</div></div>
+                        <div class="pin"><div class="pin-label">7</div></div>
+                        <div class="pin"><div class="pin-label">8</div></div>
+                    </div>
+                    <div id="crimp-controls">
+                        <p>Selecione um padrão:</p>
+                        <button id="btn-568a">T568A</button>
+                        <button id="btn-568b">T568B</button>
+                    </div>
+                </div>
+                <p id="crimp-desc" style="margin-top: 20px;">O padrão T568B é o mais utilizado no Brasil e no mundo.</p>
+            </section>
+
+            <!-- Slide 25: Tipos de Cabo (Direto vs Crossover) -->
+            <section class="slide">
+                <h2>Tipos de Cabo: Direto vs. Crossover</h2>
+                <div class="two-column-layout">
+                    <div class="column" style="text-align: center; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;">
+                        <h3>Cabo Direto (Straight-Through)</h3>
+                        <p>Usa o <strong class="highlight">mesmo padrão</strong> nas duas pontas (ex: T568B e T568B). É o cabo padrão para conectar um computador a um switch ou roteador.</p>
+                    </div>
+                    <div class="column" style="text-align: center; border: 1px solid var(--border-color); padding: 20px; border-radius: 8px;">
+                        <h3>Cabo Crossover</h3>
+                        <p>Usa <strong class="highlight">padrões diferentes</strong> nas pontas (T568A e T568B). "Cruza" os pares de transmissão e recepção. Usado antigamente para conectar dois computadores diretamente.</p>
+                        <p><strong>Obs:</strong> Hoje é raro, pois a maioria dos equipamentos modernos possui a tecnologia <strong class="highlight">Auto MDI-X</strong>, que detecta e ajusta a conexão automaticamente.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 26: Crimpagem Fêmea -->
+            <section class="slide">
+                <h2>Crimpagem Fêmea (Keystone Jack)</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <p class="text-left">A conexão em um conector fêmea não usa um alicate de crimpagem comum. Usa-se uma ferramenta de impacto chamada <strong class="highlight">Punch Down</strong>.</p>
+                        <p class="text-left">O próprio conector possui um guia de cores impresso para os padrões A e B. Você posiciona cada fio na sua respectiva cor e usa a ferramenta para "punchar", que ao mesmo tempo fixa o fio e corta o excesso.</p>
+                    </div>
+                    <div class="column">
+                        <img src="img/punchdown.jpg" alt="Ferramenta Punch Down e um Keystone Jack" class="placeholder-img">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 27: Tabela Comparativa Geral -->
+            <section class="slide">
+                <h2>Tabela Comparativa Geral</h2>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>Cabo Coaxial</th>
+                            <th>Par Trançado (CAT6)</th>
+                            <th>Fibra Óptica (Monomodo)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Velocidade Máx.</strong></td>
+                            <td>~10 Mbps (em redes antigas)</td>
+                            <td>1 Gbps a 10 Gbps</td>
+                            <td>> 100 Gbps (Terabits)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custo</strong></td>
+                            <td>Baixo</td>
+                            <td>Muito Baixo</td>
+                            <td>Alto (equipamentos)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Facilidade de Montagem</strong></td>
+                            <td>Médio</td>
+                            <td>Fácil</td>
+                            <td>Muito Difícil (requer precisão)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flexibilidade</strong></td>
+                            <td>Média</td>
+                            <td>Alta</td>
+                            <td>Baixa (não pode dobrar muito)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Imunidade a Interferência</strong></td>
+                            <td>Boa</td>
+                            <td>Variável (depende da blindagem)</td>
+                            <td>Total (imune a EMI/RFI)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Distância Máxima</strong></td>
+                            <td>~500 metros</td>
+                            <td>100 metros</td>
+                            <td>> 100 quilômetros</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Usos Comuns</strong></td>
+                            <td>TV a Cabo, CFTV</td>
+                            <td>Redes Locais (LANs)</td>
+                            <td>Backbones, Internet, Data Centers</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Slide 28: Resumo -->
+            <section class="slide">
+                <h2>Resumo da Aula</h2>
+                <ul>
+                    <li>O <strong class="highlight">cabo coaxial</strong> é uma tecnologia antiga, hoje usada principalmente para TV e CFTV.</li>
+                    <li>A <strong class="highlight">fibra óptica</strong> transmite dados por luz, oferecendo velocidades e distâncias imensas, sendo a espinha dorsal da internet. A conexão pode ser por <strong class="highlight">fusão</strong> ou <strong class="highlight">mecânica</strong>.</li>
+                    <li>O <strong class="highlight">cabo de par trançado</strong> domina as redes locais, usando o trançamento para cancelar interferência (diafonia).</li>
+                    <li>A performance do par trançado é definida pela sua <strong class="highlight">Categoria (CAT)</strong> e seu nível de <strong class="highlight">Blindagem (UTP, FTP, etc)</strong>.</li>
+                    <li>A montagem dos cabos segue os padrões de crimpagem <strong class="highlight">T568A e T568B</strong>, que definem o tipo de cabo (direto ou crossover).</li>
+                </ul>
+            </section>
+
+        </div>
+
+        <!-- Navegação -->
+        <div class="navigation">
+            <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+            <div class="slide-counter" id="slide-counter">1 / N</div>
+            <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+            <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const slideCounter = document.getElementById('slide-counter');
+
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function updateSlideView() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                });
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+
+            function changeSlide(direction) {
+                currentSlide += direction;
+                if (currentSlide < 0) currentSlide = 0;
+                if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+                updateSlideView();
+            }
+
+            nextBtn.addEventListener('click', () => changeSlide(1));
+            prevBtn.addEventListener('click', () => changeSlide(-1));
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextBtn.click();
+                if (e.key === 'ArrowLeft') prevBtn.click();
+            });
+
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => {
+                        alert(`Erro ao tentar entrar em tela cheia: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+
+            updateSlideView();
+
+            // Crimpagem Interativa
+            const btn568a = document.getElementById('btn-568a');
+            const btn568b = document.getElementById('btn-568b');
+            const plugPins = document.querySelector('#rj45-plug').children;
+
+            // Cores: Branco/Verde, Verde, Branco/Laranja, Laranja, Branco/Azul, Azul, Branco/Marrom, Marrom
+            const T568A_COLORS = ["#90ee90", "#008000", "#ffedcc", "#ffa500", "#add8e6", "#0000ff", "#d2b48c", "#a52a2a"];
+            // Cores: Branco/Laranja, Laranja, Branco/Verde, Azul, Branco/Azul, Verde, Branco/Marrom, Marrom
+            const T568B_COLORS = ["#ffedcc", "#ffa500", "#90ee90", "#0000ff", "#add8e6", "#008000", "#d2b48c", "#a52a2a"];
+
+            function setPinColors(pattern) {
+                for (let i = 0; i < plugPins.length; i++) {
+                    plugPins[i].style.backgroundColor = pattern[i];
+                }
+            }
+
+            if (btn568a) {
+                btn568a.addEventListener('click', () => {
+                    setPinColors(T568A_COLORS);
+                    btn568a.classList.add('active');
+                    btn568b.classList.remove('active');
+                });
+
+                btn568b.addEventListener('click', () => {
+                    setPinColors(T568B_COLORS);
+                    btn568b.classList.add('active');
+                    btn568a.classList.remove('active');
+                });
+
+                btn568b.click(); // Default
+            }
+        });
+    </script>
+</body>
+</html>
+

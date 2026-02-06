@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Shell Script Revisão Prática</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Para melhor layout mobile */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Menos padding em mobile */
+            border-bottom: 1px solid #e5e7eb;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+            .slide {
+                padding: 4rem;
+            }
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        html {
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Estilos de Navegação */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: #ffffff; }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start;
+                page-break-before: always;
+            }
+            .slide:first-child { page-break-before: avoid; }
+            .nav-button, .counter, .copy-button { display: none; }
+        }
+
+        /* Estilos de Código e Tokens */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #f8f9fa; /* Tema claro para terminal */
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #212529; /* Cor do texto escura */
+            counter-reset: line;
+            position: relative;
+            overflow-x: auto; /* Para rolagem horizontal em mobile */
+        }
+        pre .line {
+            padding-left: 4.5em;
+            position: relative;
+            display: block; /* Garante quebra de linha correta */
+            white-space: pre-wrap; /* Quebra de linha em mobile */
+            word-break: break-all;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em;
+            padding-right: 1em;
+            text-align: right;
+            color: #adb5bd; /* Cor dos números de linha */
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #2d3748;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        /* Tokens para Shell Script (Tema Claro) */
+        .token-prompt { color: #007bff; } /* Azul */
+        .token-command, .token-keyword { color: #d73a49; font-weight: bold; } /* Vermelho para comandos e keywords */
+        .token-option { color: #6f42c1; } /* Roxo */
+        .token-path { color: #28a745; } /* Verde */
+        .token-comment { color: #6a737d; } /* Cinza */
+        .token-output { color: #212529; } /* Preto (cor padrão) */
+        .token-variable { color: #e65100; } /* Laranja */
+        .token-string { color: #032f62; } /* Azul escuro */
+        .token-operator { color: #d73a49; } /* Vermelho */
+
+        /* Animações */
+        .fade-in {
+            opacity: 0;
+            transition: opacity 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-6xl md:text-8xl font-extrabold mb-4 bg-gradient-to-r from-purple-500 to-blue-600 bg-clip-text text-transparent drop-shadow-2xl">Shell Script: Revisão Prática</h1>
+                <p class="text-2xl md:text-3xl text-blue-700">Construindo um Projeto Real</p>
+                <p class="text-xl text-gray-600 mt-8">Fundamentos de Informática</p>
+                <div class="w-32 h-1.5 bg-purple-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: O Que Aprendemos? -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Recapitulando Nossa Jornada</h2>
+                <p class="text-xl mb-8">Nestas últimas semanas, montamos nosso kit de ferramentas de automação. Vamos relembrar as peças principais:</p>
+                <ul class="text-2xl space-y-5">
+                    <li class="fade-in">
+                        <span class="text-purple-600 font-semibold">Fundamentos:</span> O shebang, permissões e execução de scripts.
+                    </li>
+                    <li class="fade-in">
+                        <span class="text-blue-600 font-semibold">Variáveis e Input:</span> Como guardar dados (<code class="inline-code">VAR="valor"</code>) e interagir com o usuário (<code class="inline-code">read</code>).
+                    </li>
+                    <li class="fade-in">
+                        <span class="text-purple-600 font-semibold">Condicionais:</span> Como tomar decisões com <code class="inline-code">if</code>, <code class="inline-code">elif</code>, <code class="inline-code">else</code> e testes <code class="inline-code">[ ]</code>.
+                    </li>
+                    <li class="fade-in">
+                        <span class="text-blue-600 font-semibold">Laços de Repetição:</span> Como repetir tarefas com <code class="inline-code">for</code> (para listas) e <code class="inline-code">while</code> (enquanto uma condição for verdadeira).
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 3: O Desafio Final -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Desafio Final: Um Script Organizador de Arquivos</h2>
+                <div class="text-7xl my-8 animate-bounce">🗂️</div>
+                <p class="text-2xl mb-4">Hoje, vamos unir tudo isso para criar uma ferramenta prática do mundo real.</p>
+                <p class="text-xl text-gray-700 bg-purple-100 border border-purple-300 p-6 rounded-lg">Nosso script irá automatizar a chata tarefa de organizar arquivos de uma pasta (como `Downloads`), movendo-os para subpastas baseadas na data atual e gerando um relatório do que foi feito.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: Planejando o Script (Interativo) -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Planejamento: Quebrando o Problema</h2>
+                <p class="text-xl mb-6">Um bom programador pensa antes de digitar. Vamos definir os passos do nosso script:</p>
+                <div id="plan-steps" class="space-y-4 text-xl">
+                    <!-- Steps will be injected by JS -->
+                </div>
+                <button id="next-step-btn" class="mt-8 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 text-lg">Próximo Passo</button>
+            </div>
+        </section>
+        
+        <!-- Slide 5: Passo 1: O Esqueleto e a Captura de Dados -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Passo 1: Esqueleto e Input do Usuário</h2>
+                <p class="text-xl mb-6">Começamos com o shebang, comentários iniciais e pedindo ao usuário as informações que precisamos.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Script para organizar arquivos de um diretório em subpastas com data.</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"=== Script Organizador de Arquivos ==="</span></div><div class="line"> </div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual o caminho do diretório a ser organizado? (ex: /home/aluno/Downloads): "</span> <span class="token-variable">DIR_ALVO</span></div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual extensão de arquivo você quer mover? (ex: jpg, pdf, png): "</span> <span class="token-variable">EXTENSAO</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Passo 2: Validações de Segurança -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Passo 2: Validar a Entrada</h2>
+                <p class="text-xl mb-6">E se o usuário digitar um diretório que não existe? Ou não digitar nada? Um bom script prevê isso.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment"># ... código anterior ...</span></div><div class="line"></div><div class="line"><span class="token-comment"># Verifica se o diretório alvo existe</span></div><div class="line"><span class="token-keyword">if</span> [ ! <span class="token-operator">-d</span> <span class="token-string">"</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Erro: O diretório '</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">' não foi encontrado."</span></div><div class="line">    <span class="token-command">exit</span> 1 <span class="token-comment"># Encerra o script com um código de erro</span></div><div class="line"><span class="token-keyword">fi</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Verifica se a extensão foi preenchida</span></div><div class="line"><span class="token-keyword">if</span> [ <span class="token-operator">-z</span> <span class="token-string">"</span><span class="token-variable">$EXTENSAO</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Erro: Nenhuma extensão de arquivo foi fornecida."</span></div><div class="line">    <span class="token-command">exit</span> 1</div><div class="line"><span class="token-keyword">fi</span></div></pre></div>
+                <p class="text-lg mt-4 text-gray-600">O operador <code class="inline-code">!</code> inverte o teste, então <code class="inline-code">[ ! -d ... ]</code> significa "Se <strong>NÃO</strong> for um diretório...".</p>
+            </div>
+        </section>
+        
+        <!-- Slide 7: Passo 3: Preparando o Destino -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Passo 3: Criando a Pasta de Destino</h2>
+                <p class="text-xl mb-6">Vamos usar o comando <code class="inline-code">date</code> para gerar o nome da pasta dinamicamente.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment"># ... código anterior ...</span></div><div class="line"></div><div class="line"><span class="token-comment"># Pega a data atual no formato ANO-MES-DIA</span></div><div class="line"><span class="token-variable">DATA_ATUAL</span>=$(<span class="token-command">date</span> +%F) <span class="token-comment"># %F é um atalho para %Y-%m-%d</span></div><div class="line"><span class="token-variable">DIR_DESTINO</span>=<span class="token-string">"</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">/Organizados_</span><span class="token-variable">$DATA_ATUAL</span><span class="token-string">"</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Cria o diretório de destino se ele ainda não existir</span></div><div class="line"><span class="token-command">mkdir</span> <span class="token-option">-p</span> <span class="token-string">"</span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">"</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Arquivos serão movidos para </span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">"</span></div></pre></div>
+                 <p class="text-lg mt-4 text-gray-600"><code class="inline-code">VAR=$(comando)</code> é a forma moderna de "capturar" a saída de um comando e guardá-la em uma variável.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 8: Passo 4: O Laço Principal -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Passo 4: O Coração do Script - O Laço <code class="inline-code">for</code></h2>
+                <p class="text-xl mb-6">Agora, vamos usar o <code class="inline-code">for</code> para encontrar e mover cada arquivo.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment"># ... código anterior ...</span></div><div class="line"> </div><div class="line"><span class="token-variable">CONTADOR</span>=0</div><div class="line"> </div><div class="line"><span class="token-keyword">for</span> <span class="token-variable">ARQUIVO</span> <span class="token-keyword">in</span> <span class="token-string">"</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">"</span>/*.<span class="token-variable">$EXTENSAO</span>; <span class="token-keyword">do</span></div><div class="line">    <span class="token-comment"># O if aqui evita erros caso nenhum arquivo seja encontrado</span></div><div class="line">    <span class="token-keyword">if</span> [ <span class="token-operator">-f</span> <span class="token-string">"</span><span class="token-variable">$ARQUIVO</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">        <span class="token-command">echo</span> <span class="token-string">"Movendo '</span>$(<span class="token-command">basename</span> <span class="token-string">"</span><span class="token-variable">$ARQUIVO</span><span class="token-string">"</span>)<span class="token-string">'..."</span></div><div class="line">        <span class="token-command">mv</span> <span class="token-string">"</span><span class="token-variable">$ARQUIVO</span><span class="token-string">"</span> <span class="token-string">"</span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">"</span></div><div class="line">        <span class="token-variable">CONTADOR</span>=$((<span class="token-variable">$CONTADOR</span> + 1))</div><div class="line">    <span class="token-keyword">fi</span></div><div class="line"><span class="token-keyword">done</span></div></pre></div>
+                <p class="text-lg mt-4 text-gray-600">O comando <code class="inline-code">basename</code> extrai apenas o nome do arquivo do caminho completo.</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Passo 5: O Relatório Final -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Passo 5: Feedback e Relatório</h2>
+                <p class="text-xl mb-6">Finalmente, informamos ao usuário o que foi feito e geramos um log.</p>
+                 <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment"># ... código anterior ...</span></div><div class="line"> </div><div class="line"><span class="token-variable">LOG_FILE</span>=<span class="token-string">"</span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">/log_</span><span class="token-variable">$DATA_ATUAL</span><span class="token-string">.txt"</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"----------------------------------------"</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Organização Concluída!"</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Total de </span><span class="token-variable">$CONTADOR</span><span class="token-string"> arquivos movidos."</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"----------------------------------------"</span></div><div class="line"> </div><div class="line"><span class="token-comment"># Escreve o log usando redirecionamento de saída</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Log de Organização em </span><span class="token-variable">$DATA_ATUAL</span><span class="token-string">"</span> > <span class="token-string">"</span><span class="token-variable">$LOG_FILE</span><span class="token-string">"</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Foram movidos </span><span class="token-variable">$CONTADOR</span><span class="token-string"> arquivos com a extensão '</span><span class="token-variable">$EXTENSAO</span><span class="token-string">'."</span> >> <span class="token-string">"</span><span class="token-variable">$LOG_FILE</span><span class="token-string">"</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Destino: </span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">"</span> >> <span class="token-string">"</span><span class="token-variable">$LOG_FILE</span><span class="token-string">"</span></div></pre></div>
+            </div>
+        </section>
+        
+        <!-- Slide 10: O Script Completo -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Script Organizador Completo</h2>
+                <p class="text-xl mb-6">Juntando todas as peças, temos a nossa ferramenta final!</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"=== Script Organizador de Arquivos ==="</span></div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual o caminho do diretório a ser organizado? "</span> <span class="token-variable">DIR_ALVO</span></div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual extensão de arquivo você quer mover? "</span> <span class="token-variable">EXTENSAO</span></div><div class="line"> </div><div class="line"><span class="token-keyword">if</span> [ ! <span class="token-operator">-d</span> <span class="token-string">"</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Erro: Diretório não encontrado."</span>; <span class="token-command">exit</span> 1;</div><div class="line"><span class="token-keyword">fi</span></div><div class="line"><span class="token-keyword">if</span> [ <span class="token-operator">-z</span> <span class="token-string">"</span><span class="token-variable">$EXTENSAO</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">    <span class="token-command">echo</span> <span class="token-string">"Erro: Extensão não fornecida."</span>; <span class="token-command">exit</span> 1;</div><div class="line"><span class="token-keyword">fi</span></div><div class="line"> </div><div class="line"><span class="token-variable">DATA_ATUAL</span>=$(<span class="token-command">date</span> +%F)</div><div class="line"><span class="token-variable">DIR_DESTINO</span>=<span class="token-string">"</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">/Organizados_</span><span class="token-variable">$DATA_ATUAL</span><span class="token-string">"</span></div><div class="line"><span class="token-command">mkdir</span> <span class="token-option">-p</span> <span class="token-string">"</span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">"</span></div><div class="line"> </div><div class="line"><span class="token-variable">CONTADOR</span>=0</div><div class="line"><span class="token-keyword">for</span> <span class="token-variable">ARQUIVO</span> <span class="token-keyword">in</span> <span class="token-string">"</span><span class="token-variable">$DIR_ALVO</span><span class="token-string">"</span>/*.<span class="token-variable">$EXTENSAO</span>; <span class="token-keyword">do</span></div><div class="line">    <span class="token-keyword">if</span> [ <span class="token-operator">-f</span> <span class="token-string">"</span><span class="token-variable">$ARQUIVO</span><span class="token-string">"</span> ]; <span class="token-keyword">then</span></div><div class="line">        <span class="token-command">mv</span> <span class="token-string">"</span><span class="token-variable">$ARQUIVO</span><span class="token-string">"</span> <span class="token-string">"</span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">"</span></div><div class="line">        <span class="token-variable">CONTADOR</span>=$((<span class="token-variable">$CONTADOR</span> + 1))</div><div class="line">    <span class="token-keyword">fi</span></div><div class="line"><span class="token-keyword">done</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"</span><span class="token-variable">$CONTADOR</span><span class="token-string"> arquivos movidos para </span><span class="token-variable">$DIR_DESTINO</span><span class="token-string">."</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Final e Avaliação -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Parabéns, Autômatos!</h2>
+                <p class="text-2xl">Vocês concluíram a jornada pelo mundo do Shell Script!</p>
+                <div class="text-6xl my-8">🎓</div>
+                <p class="text-xl mt-4">Agora vocês são capazes de ler, entender e, mais importante, <strong>criar suas próprias ferramentas</strong> para resolver problemas e automatizar o trabalho do dia a dia.</p>
+                <p class="text-3xl font-bold text-purple-600 mt-12">Preparem-se para a avaliação e boa sorte!</p>
+            </div>
+        </section>
+
+        <!-- Slide 12: Perguntas -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                // Lógica especial para o slide interativo (Slide 4, que é o índice 3)
+                if (currentSlideIndex === 3) {
+                    // Se uma tecla de "avançar" for pressionada, ela controla o botão do slide
+                    // Incluí a seta para a esquerda conforme o seu pedido.
+                    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        const nextStepBtn = document.getElementById('next-step-btn');
+                        if (nextStepBtn) {
+                            nextStepBtn.click();
+                        }
+                        return; // Impede que a navegação global seja acionada
+                    }
+                }
+                
+                // Navegação Padrão para os outros slides
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    prevButton.click();
+                }
+            });
+
+            // --- ANIMAÇÕES E INTERATIVIDADE ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                        
+                        // Animações de fade-in
+                        entry.target.querySelectorAll('.fade-in').forEach(el => {
+                            el.classList.add('visible');
+                        });
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // --- CÓDIGO DO SLIDE INTERATIVO DE PLANEJAMENTO ---
+            const planStepsContainer = document.getElementById('plan-steps');
+            const nextStepBtn = document.getElementById('next-step-btn');
+            if (planStepsContainer && nextStepBtn) {
+                const steps = [
+                    "1. <strong>Perguntar</strong> ao usuário o diretório alvo e a extensão do arquivo.",
+                    "2. <strong>Validar</strong> se o diretório existe e se a extensão foi informada.",
+                    "3. <strong>Criar</strong> um novo diretório de destino com a data atual (ex: `Organizados_2025-09-30`).",
+                    "4. <strong>Listar</strong> todos os arquivos com a extensão desejada no diretório alvo.",
+                    "5. <strong>Mover</strong> cada arquivo encontrado para o novo diretório de destino.",
+                    "6. <strong>Contar</strong> quantos arquivos foram movidos.",
+                    "7. <strong>Gerar</strong> um arquivo de log com um resumo da operação.",
+                    "8. <strong>Exibir</strong> uma mensagem final de sucesso para o usuário."
+                ];
+                let currentStep = 0;
+
+                const showNextStep = () => {
+                    // Se todos os passos já foram mostrados, o próximo clique avança para o slide seguinte.
+                    if (currentStep >= steps.length) {
+                        nextButton.click();
+                        return;
+                    }
+
+                    // Se ainda há passos a mostrar, exibe o próximo.
+                    const stepElement = document.createElement('div');
+                    stepElement.innerHTML = steps[currentStep];
+                    stepElement.className = 'p-4 bg-white rounded-lg shadow-md fade-in';
+                    planStepsContainer.appendChild(stepElement);
+                    setTimeout(() => stepElement.classList.add('visible'), 10);
+                    currentStep++;
+                    
+                    // Se este foi o último passo, atualiza o texto do botão.
+                    if (currentStep === steps.length) {
+                        nextStepBtn.textContent = 'Avançar para o Próximo Slide →';
+                        nextStepBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        nextStepBtn.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                    }
+                };
+                
+                showNextStep(); // Mostra o primeiro passo
+                nextStepBtn.addEventListener('click', showNextStep);
+            }
+
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+                    
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeText.trim();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        const copyFeedback = e.currentTarget;
+                        copyFeedback.innerHTML = 'Copiado!';
+                        setTimeout(() => {
+                           copyFeedback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span>`;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+

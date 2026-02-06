@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 01: Introdução a Redes de Computadores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CONFIGURAÇÕES GERAIS --- */
+        :root {
+            --primary: #004aad;
+            --secondary: #525252;
+            --accent: #00d4ff;
+            --bg-app: #eef2f5;
+            --panel-bg: #ffffff;
+            --text-main: #333;
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* NUMERAÇÃO NO TOPO */
+        #top-counter {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 3000;
+            font-family: monospace;
+            font-size: 1.1rem;
+            border: 1px solid #ddd;
+        }
+
+        /* Container principal dos slides */
+        main {
+            height: 100vh;
+            width: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            padding-bottom: 180px; 
+        }
+
+        /* --- ESTILO DOS SLIDES --- */
+        section.slide {
+            height: 100vh;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h1 { font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem; text-align: center; }
+        h2 { font-size: 2.5rem; color: var(--primary); margin-bottom: 2rem; border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+        h3 { font-size: 1.8rem; color: var(--secondary); margin-bottom: 1rem; }
+        p, li { font-size: 1.3rem; line-height: 1.6; color: var(--text-main); max-width: 900px; }
+        
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding-left: 30px; position: relative; }
+        li::before { content: '•'; color: var(--primary); font-size: 2rem; position: absolute; left: 0; top: -5px; }
+
+        /* Colunas e Visuais */
+        .cols { display: flex; gap: 40px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
+
+        .visual-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: 2px dashed #a0a0a0;
+            border-radius: 15px;
+            width: 100%; height: 300px;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            color: #555; box-shadow: 0 10px 20px rgba(0,0,0,0.1); text-align: center; padding: 20px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .visual-box:hover {
+            transform: scale(1.03);
+            border-color: var(--primary);
+        }
+
+        /* Estilo para os Emojis Divertidos */
+        .fun-icon { 
+            font-size: 6rem; 
+            margin-bottom: 15px; 
+            display: block;
+            transition: transform 0.3s;
+            cursor: default;
+        }
+        
+        .visual-box:hover .fun-icon {
+            transform: translateY(-10px) scale(1.1);
+        }
+
+        /* --- PAINEL DE DOWNLOAD (DASHBOARD - VERSÃO CLARA) --- */
+        #download-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--panel-bg);
+            color: #333; 
+            padding: 15px 20px;
+            z-index: 2000;
+            border-top: 5px solid var(--primary);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            border-bottom: 1px solid #eee; padding-bottom: 10px;
+        }
+        .panel-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        
+        .downloads-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px 50px;
+        }
+
+        .dl-item { display: flex; align-items: center; font-size: 0.95rem; }
+        .dl-label { width: 140px; color: #444; font-weight: bold; }
+        
+        .dl-track {
+            flex: 1; height: 12px; background: #e9ecef; border: 1px solid #ced4da;
+            border-radius: 6px; overflow: hidden; position: relative;
+        }
+        .dl-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 6px; }
+        .dl-status { width: 60px; text-align: right; font-family: monospace; color: #333; margin-left: 10px; font-weight: bold; }
+
+        /* --- CONTROLES FLUTUANTES --- */
+        .controls {
+            position: fixed; bottom: 200px; right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex; gap: 10px; flex-direction: column;
+            z-index: 1000; border: 1px solid #ccc;
+        }
+        .btn {
+            background: var(--primary); color: white; border: none; width: 40px; height: 40px;
+            border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center;
+        }
+        .btn:hover { background: #003380; transform: scale(1.1); }
+        .btn.start-btn { background: #28a745; color: white; width: auto; border-radius: 5px; padding: 8px 20px; font-weight: bold; font-size: 1rem; border: none; cursor: pointer;}
+        .btn.minimize-btn { background: #ddd; color: #333; width: auto; padding: 5px 15px; border-radius: 4px; font-size: 0.9rem; font-weight: bold;}
+        .btn.minimize-btn:hover { background: #ccc; }
+
+        /* --- IMPRESSÃO --- */
+        @media print {
+            #download-panel, .controls, #top-counter { display: none !important; }
+            main { height: auto; overflow: visible; padding-bottom: 0; }
+            section.slide { height: 100vh; page-break-after: always; margin: 0; padding: 30px; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NUMERAÇÃO NO TOPO -->
+    <div id="top-counter">1 / 16</div>
+
+    <main id="slide-container">
+        <!-- SLIDE 1 -->
+        <section class="slide" id="slide-1">
+            <div class="visual-box" style="height: 150px; width: 150px; border-radius: 50%; border: 4px solid var(--primary); margin-bottom: 20px;">
+                <span class="fun-icon">🌐</span>
+            </div>
+            <h1>Introdução a Redes</h1>
+            <h3 style="margin-top: 0;">Conceitos Fundamentais e Evolução</h3>
+            <p><strong>Aula 01</strong> | Prof. Will</p>
+            
+            <div style="margin-top: 30px; background: #e8f5e9; border: 1px solid #c8e6c9; padding: 15px; border-radius: 8px;">
+                <p style="margin: 0; font-size: 1rem; color: #2e7d32;">
+                    <i class="fas fa-play-circle"></i> <strong>Dinâmica da Aula:</strong><br>
+                    Assim que passarmos para o próximo slide, começará o download simulado de um arquivo de <strong>50MB</strong> no painel abaixo.
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 2 -->
+        <section class="slide" id="slide-2">
+            <h2>Roteiro da Aula</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li>O que é e por que usar redes?</li>
+                        <li>Componentes (Hardware e Meios)</li>
+                        <li>Modos de Comunicação</li>
+                        <li>Tipos de Rede (LAN, WAN, etc)</li>
+                        <li>Arquiteturas (P2P vs Cliente-Servidor)</li>
+                        <li>História e Evolução</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">🗺️</span><span>Mapa da Aula</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3 -->
+        <section class="slide" id="slide-3">
+            <h2>O que é uma Rede?</h2>
+            <p style="text-align: center; margin-bottom: 30px;">"Um conjunto de dois ou mais dispositivos interligados que trocam informações."</p>
+            <div class="cols">
+                <div class="col">
+                    <div style="background: #eef8ff; padding: 25px; border-left: 5px solid var(--primary); border-radius: 5px; width: 100%;">
+                        <h3>Objetivo Principal:</h3>
+                        <p style="margin: 0;">Compartilhar recursos e informações de forma eficiente, eliminando barreiras físicas.</p>
+                    </div>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">🔗</span><span>Conexão</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4 -->
+        <section class="slide" id="slide-4">
+            <h2>Por que montar uma rede?</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><strong>Compartilhamento de Periféricos:</strong> Impressoras, scanners.</li>
+                        <li><strong>Compartilhamento de Dados:</strong> Bancos de dados, arquivos.</li>
+                        <li><strong>Comunicação:</strong> E-mail, VoIP, chat, vídeo.</li>
+                        <li><strong>Centralização:</strong> Backups e gestão facilitada.</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">🏆</span><span>Eficiência Total</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5 -->
+        <section class="slide" id="slide-5">
+            <h2>Componentes: Dispositivos Finais</h2>
+            <p>Chamados de <strong>Hosts</strong>. Equipamentos com os quais o usuário interage.</p>
+            <div style="display: flex; justify-content: space-around; width: 100%; margin-top: 30px; flex-wrap: wrap;">
+                <div style="text-align: center; width: 200px;"><span class="fun-icon" style="font-size: 4rem;">💻</span><p>Computadores</p></div>
+                <div style="text-align: center; width: 200px;"><span class="fun-icon" style="font-size: 4rem;">📱</span><p>Celulares</p></div>
+                <div style="text-align: center; width: 200px;"><span class="fun-icon" style="font-size: 4rem;">🖨️</span><p>Impressoras</p></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6 -->
+        <section class="slide" id="slide-6">
+            <h2>Dispositivos Intermediários</h2>
+            <p>Conectam os hosts à rede e controlam o fluxo.</p>
+            <div class="cols">
+                <div class="col">
+                    <ul style="font-size: 1.1rem;">
+                        <li><strong>Switch:</strong> Conecta dispositivos na mesma rede local (LAN).</li>
+                        <li><strong>Roteador:</strong> Conecta redes diferentes e escolhe rotas (IP).</li>
+                        <li><strong>Firewall:</strong> Segurança e filtro de tráfego.</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">🚦</span><span>Controle de Tráfego</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7 -->
+        <section class="slide" id="slide-7">
+            <h2>Meios de Transmissão</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; margin-top: 20px;">
+                <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+                    <span class="fun-icon" style="font-size: 4rem;">🔌</span><h3>Cobre</h3><p>Sinais elétricos.</p>
+                </div>
+                <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+                    <span class="fun-icon" style="font-size: 4rem;">✨</span><h3>Fibra</h3><p>Pulsos de luz.</p>
+                </div>
+                <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+                    <span class="fun-icon" style="font-size: 4rem;">📡</span><h3>Sem Fio</h3><p>Ondas de rádio.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8 -->
+        <section class="slide" id="slide-8">
+            <h2>Modos de Comunicação</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><strong>Simplex:</strong> Sentido único (TV, Rádio).</li>
+                        <li><strong>Half-Duplex:</strong> Um de cada vez (Walkie-Talkie).</li>
+                        <li><strong>Full-Duplex:</strong> Simultâneo (Telefone, Redes atuais).</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">🗣️</span><span>Vai e Vem</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9 -->
+        <section class="slide" id="slide-9">
+            <h2>A Origem: Guerra Fria</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Anos 60: EUA queriam uma rede resistente a ataques nucleares.</p>
+                    <p>Nasce a <strong>ARPANET (1969)</strong>, o avô da internet.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">☢️</span><span>Defesa Nuclear</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10 -->
+        <section class="slide" id="slide-10">
+            <h2>Da Arpanet à Internet</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="fun-icon">🌍</span><span>Mundo Conectado</span></div></div>
+                <div class="col">
+                    <ul>
+                        <li><strong>Anos 70:</strong> Criação do TCP/IP.</li>
+                        <li><strong>Anos 80:</strong> Termo "Internet" surge.</li>
+                        <li><strong>1990:</strong> Tim Berners-Lee cria a WWW, HTML e HTTP.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11 -->
+        <section class="slide" id="slide-11">
+            <h2>Classificação Geográfica</h2>
+            <div style="width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                    <h3 style="color: var(--primary);">LAN</h3><small>Local</small><p>Casa, Escritório.</p>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                    <h3 style="color: var(--primary);">MAN</h3><small>Metropolitana</small><p>Cidade, Campus.</p>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                    <h3 style="color: var(--primary);">WAN</h3><small>Longa Distância</small><p>Países, Internet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12 -->
+        <section class="slide" id="slide-12">
+            <h2>Tipos Específicos</h2>
+            <div class="cols">
+                <div class="col">
+                    <h3>PAN (Personal)</h3>
+                    <p>Rede pessoal de curtíssima distância. (Bluetooth).</p>
+                </div>
+                <div class="col">
+                    <h3>SAN (Storage)</h3>
+                    <p>Rede exclusiva para armazenamento de dados em Data Centers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13 -->
+        <section class="slide" id="slide-13">
+            <h2>Arquitetura: Ponto a Ponto (P2P)</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="fun-icon">🤝</span><span>De Igual p/ Igual</span></div></div>
+                <div class="col">
+                    <ul>
+                        <li>Todos os computadores são iguais (peers).</li>
+                        <li>Fácil de montar, mas difícil gerenciar segurança.</li>
+                        <li>Ex: Torrent, Rede doméstica simples.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14 -->
+        <section class="slide" id="slide-14">
+            <h2>Arquitetura: Cliente-Servidor</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><strong>Servidor:</strong> Fornece recursos (centralizado).</li>
+                        <li><strong>Cliente:</strong> Consome recursos.</li>
+                        <li>Maior segurança e controle, mas maior custo.</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="fun-icon">🍕</span><span>Você pede, ele entrega</span></div></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Explicação da Dinâmica -->
+        <section class="slide" id="slide-15">
+            <h2>Análise do "Download" (50MB)</h2>
+            <p>Verifique o painel abaixo. Iniciamos um download de <strong>50MB</strong> no começo da aula.</p>
+            
+            <div class="cols">
+                <div class="col">
+                    <ul style="font-size: 1.1rem;">
+                        <li style="color: var(--success-color);"><strong>Fibra (500Mb):</strong> Terminou instantaneamente. 🏎️</li>
+                        <li style="color: #f1c40f;"><strong>10Mb (2010):</strong> Terminou enquanto eu explicava o slide 1 ou 2. 🚗</li>
+                        <li style="color: #f39c12;"><strong>1Mb (2005):</strong> Terminou por volta do slide 5. 🚴</li>
+                        <li style="color: #d35400;"><strong>256k (2000):</strong> Deve estar terminando agora ou em breve. 🚶</li>
+                        <li style="color: #c0392b;"><strong>Discada/Arpanet:</strong> A barra mal se moveu. Precisaríamos de mais 2 horas de aula. 🐢</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <div class="visual-box">
+                        <span class="fun-icon">🚀</span>
+                        <span>Evolução da Velocidade</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16 -->
+        <section class="slide" id="slide-16">
+            <h2>Resumo e Conclusão</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>As redes conectam o mundo moderno.</p>
+                    <ul style="font-size: 1.1rem;">
+                        <li>Evolução constante de velocidade.</li>
+                        <li>Diversos meios (cobre, fibra, ar).</li>
+                        <li>Variam de tamanho (PAN a WAN).</li>
+                    </ul>
+                    <p style="margin-top: 20px; font-weight: bold; color: var(--primary);">Próximos Passos: Topologias.</p>
+                </div>
+                <div class="col"><div class="visual-box" style="background: #e0f7fa;"><span class="fun-icon">🎉</span><span>Fim da Aula!</span></div></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- PAINEL DE DOWNLOAD FIXO -->
+    <div id="download-panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="fas fa-download"></i> Simulação: Arquivo de 50MB</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn start-btn" onclick="startSimulation()"><i class="fas fa-play"></i> Iniciar Agora</button>
+                <button class="btn minimize-btn" onclick="togglePanel()">_</button>
+            </div>
+        </div>
+        
+        <div class="downloads-grid">
+            <!-- Coluna 1 -->
+            <div class="dl-item">
+                <div class="dl-label">Arpanet (50k)</div>
+                <div class="dl-track"><div class="dl-bar" id="bar-arpanet" style="background: #8b0000;"></div></div>
+                <div class="dl-status"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div class="dl-item">
+                <div class="dl-label">Discada (56k)</div>
+                <div class="dl-track"><div class="dl-bar" id="bar-dialup" style="background: #c0392b;"></div></div>
+                <div class="dl-status"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div class="dl-item">
+                <div class="dl-label">ADSL (256k)</div>
+                <div class="dl-track"><div class="dl-bar" id="bar-256k" style="background: #d35400;"></div></div>
+                <div class="dl-status" id="status-256k">0%</div>
+            </div>
+
+            <!-- Coluna 2 -->
+            <div class="dl-item">
+                <div class="dl-label">Speedy (1Mb)</div>
+                <div class="dl-track"><div class="dl-bar" id="bar-1mb" style="background: #f39c12;"></div></div>
+                <div class="dl-status" id="status-1mb">0%</div>
+            </div>
+            <div class="dl-item">
+                <div class="dl-label">Cabo (10Mb)</div>
+                <div class="dl-track"><div class="dl-bar" id="bar-10mb" style="background: #f1c40f;"></div></div>
+                <div class="dl-status" id="status-10mb">0%</div>
+            </div>
+            <div class="dl-item">
+                <div class="dl-label">Fibra (500Mb)</div>
+                <div class="dl-track"><div class="dl-bar" id="bar-fiber" style="background: #2ecc71;"></div></div>
+                <div class="dl-status" id="status-fiber">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTROLES FLUTUANTES -->
+    <div class="controls">
+        <button class="btn" onclick="changeSlide(-1)" title="Anterior"><i class="fas fa-chevron-up"></i></button>
+        <button class="btn" onclick="changeSlide(1)" title="Próximo"><i class="fas fa-chevron-down"></i></button>
+        <button class="btn secondary" onclick="window.print()" title="PDF"><i class="fas fa-print"></i></button>
+        <button class="btn secondary" onclick="toggleFullScreen()" title="Tela Cheia"><i class="fas fa-expand"></i></button>
+    </div>
+
+    <script>
+        const container = document.getElementById('slide-container');
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('top-counter');
+        let currentIndex = 0;
+        let simulationStarted = false;
+
+        // --- Lógica da Simulação (Baseado em 50MB) ---
+        // 50MB = 400 Megabits
+        // Arpanet (50kbps): 8000s (~2.2h)
+        // Discada (56kbps): 7142s (~2h)
+        // 256kbps: 1562s (~26 min)
+        // 1Mbps: 400s (~6.6 min)
+        // 10Mbps: 40s
+        // 500Mbps: 0.8s
+
+        function startSimulation() {
+            if (simulationStarted) return; 
+            simulationStarted = true;
+
+            const btn = document.querySelector('.start-btn');
+            btn.disabled = true;
+            btn.innerHTML = "Baixando...";
+            btn.style.backgroundColor = "#999";
+            btn.style.cursor = "default";
+
+            const bars = {
+                arpanet: { el: document.getElementById('bar-arpanet'), time: 8000, status: null },
+                dialup:  { el: document.getElementById('bar-dialup'), time: 7142, status: null },
+                k256:    { el: document.getElementById('bar-256k'), time: 1562, status: document.getElementById('status-256k') },
+                mb1:     { el: document.getElementById('bar-1mb'), time: 400, status: document.getElementById('status-1mb') },
+                mb10:    { el: document.getElementById('bar-10mb'), time: 40, status: document.getElementById('status-10mb') },
+                fiber:   { el: document.getElementById('bar-fiber'), time: 1, status: document.getElementById('status-fiber') }
+            };
+
+            for (let key in bars) {
+                const item = bars[key];
+                item.el.style.transition = `width ${item.time}s linear`;
+                item.el.style.width = "100%";
+                
+                if(item.time < 3000) { 
+                    setTimeout(() => {
+                        if(item.status) item.status.innerHTML = '<i class="fas fa-check" style="color:#2ecc71"></i>';
+                    }, item.time * 1000);
+                }
+            }
+        }
+
+        function togglePanel() {
+            const panel = document.getElementById('download-panel');
+            const main = document.querySelector('main');
+            
+            if (panel.style.transform === 'translateY(85%)') {
+                panel.style.transform = 'translateY(0)'; // Mostrar
+                main.style.paddingBottom = "180px";
+            } else {
+                panel.style.transform = 'translateY(85%)'; // Esconder (deixa só o header)
+                main.style.paddingBottom = "50px";
+            }
+        }
+
+        // Navegação Padrão
+        function changeSlide(direction) {
+            let newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < slides.length) {
+                slides[newIndex].scrollIntoView({ behavior: 'smooth' });
+                currentIndex = newIndex;
+            }
+        }
+
+        // DETECTAR MUDANÇA DE SLIDE (SCROLL SPY)
+        container.addEventListener('scroll', () => {
+            let scrollPos = container.scrollTop;
+            let index = Math.round(scrollPos / window.innerHeight);
+            
+            if (index !== currentIndex) {
+                currentIndex = index;
+                // Atualiza numeração
+                counter.innerText = `${currentIndex + 1} / ${slides.length}`;
+                
+                // GATILHO DA SIMULAÇÃO: Se passar do slide 1 (índice 0)
+                if (currentIndex > 0 && !simulationStarted) {
+                    startSimulation();
+                }
+            }
+        });
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+        });
+    </script>
+</body>
+</html>

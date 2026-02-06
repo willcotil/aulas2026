@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Exercícios: Vetores e Matrizes em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .exercise-item {
+            border-left: 4px solid #34d399; /* Green-400 */
+        }
+
+        pre {
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            padding: 12px;
+            color: #1f2937;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            border: 1px solid #d1d5db;
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .exercise-item {
+                border-left: 2px solid #000000 !important;
+                page-break-inside: avoid;
+            }
+
+            header h1, h2, p, strong {
+                color: #000000 !important;
+            }
+
+            .bg-gray-100, .bg-white {
+                background-color: #ffffff !important;
+            }
+
+            pre {
+                background-color: #f5f5f5 !important;
+                border: 1px solid #ddd;
+                color: #000 !important;
+            }
+
+            .print-hr {
+                background-color: #000000 !important;
+                height: 2px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="max-w-4xl mx-auto p-6 sm:p-8 md:p-12">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Lista de Exercícios de Fixação</h1>
+            <p class="text-lg md:text-xl text-green-600">Foco em Vetores e Matrizes</p>
+            <div class="w-24 h-1 bg-green-500 mx-auto mt-4 rounded print-hr"></div>
+        </header>
+
+        <div class="bg-white rounded-xl p-6 md:p-8 border border-gray-200 shadow-md space-y-8">
+
+            <!-- Bloco I: Fundamentos de Vetores -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">Bloco I: Fundamentos de Vetores</h2>
+                <div class="space-y-6">
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">1. Lista de Compras</h3>
+                        <p>Crie um programa que leia o preço de 5 produtos de um mercado e depois exiba todos os preços digitados.</p>
+                        <pre><code>Digite o preco do produto 1: 10.50
+Digite o preco do produto 2: 3.25
+Digite o preco do produto 3: 15.00
+Digite o preco do produto 4: 7.99
+Digite o preco do produto 5: 2.50
+
+Precos digitados:
+R$ 10.50
+R$ 3.25
+R$ 15.00
+R$ 7.99
+R$ 2.50</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">2. Exibindo na Ordem Inversa</h3>
+                        <p>Crie um programa que leia 5 números inteiros e os exiba na ordem inversa em que foram digitados.</p>
+                        <pre><code>Digite o 1o numero: 10
+Digite o 2o numero: 20
+Digite o 3o numero: 30
+Digite o 4o numero: 40
+Digite o 5o numero: 50
+
+Ordem inversa:
+50
+40
+30
+20
+10</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">3. Média de Notas</h3>
+                        <p>Crie um programa que leia as 4 notas de um aluno e guarde-as em um vetor. <strong class="text-green-700">Importante:</strong> primeiro preencha todo o vetor e, só depois, crie um novo laço para calcular e exibir a média.</p>
+                        <pre><code>Digite a 1a nota: 7.0
+Digite a 2a nota: 8.5
+Digite a 3a nota: 9.0
+Digite a 4a nota: 6.5
+
+A media do aluno e: 7.75</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">4. Contando os Pares</h3>
+                        <p>Crie um programa que leia 10 números inteiros e os guarde em um vetor. <strong class="text-green-700">Importante:</strong> primeiro preencha todo o vetor e, só depois, crie um novo laço para contar quantos números pares existem.</p>
+                        <pre><code>Digite 10 numeros: 1 2 3 4 5 6 7 8 9 10
+Existem 5 numeros pares no vetor.</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">5. Encontrando o Maior Valor</h3>
+                        <p>Crie um programa que leia 5 números e os guarde em um vetor. <strong class="text-green-700">Importante:</strong> primeiro preencha todo o vetor e, só depois, crie um novo laço para encontrar e exibir o maior valor.</p>
+                        <pre><code>Digite 5 numeros: 45 12 89 34 67
+O maior valor digitado foi: 89</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco II: Fundamentos de Matrizes (Foco em Laços Duplos) -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">Bloco II: Fundamentos de Matrizes (Foco em Laços Duplos)</h2>
+                <div class="space-y-6">
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">6. Tabela Simples</h3>
+                        <p>Crie um programa que preencha uma matriz 2x3 (2 linhas e 3 colunas) com números inteiros fornecidos pelo usuário e, em seguida, exiba a matriz na tela.</p>
+                        <pre><code>Preenchendo a matriz 2x3:
+Digite o valor para [0][0]: 1
+Digite o valor para [0][1]: 2
+Digite o valor para [0][2]: 3
+Digite o valor para [1][0]: 4
+Digite o valor para [1][1]: 5
+Digite o valor para [1][2]: 6
+
+Matriz digitada:
+1  2  3
+4  5  6</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">7. Preenchimento Automático</h3>
+                        <p>Crie um programa que preencha uma matriz 3x3 com o valor da soma dos seus índices. Por exemplo, a posição `[0][1]` deve receber o valor `0 + 1 = 1`. Ao final, exiba a matriz.</p>
+                        <pre><code>Matriz gerada:
+0  1  2
+1  2  3
+2  3  4</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">8. Exibindo uma Única Linha</h3>
+                        <p>Crie um programa que preencha uma matriz 3x4 e depois exiba apenas os valores da segunda linha.</p>
+                        <pre><code>(Apos o preenchimento da matriz 3x4...)
+Valores da segunda linha (indice 1):
+10  11  12  13</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">9. Exibindo uma Única Coluna</h3>
+                        <p>Crie um programa que preencha uma matriz 3x4 e depois exiba apenas os valores da terceira coluna.</p>
+                        <pre><code>(Apos o preenchimento da matriz 3x4...)
+Valores da terceira coluna (indice 2):
+30
+31
+32</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco III: Manipulação de Matrizes -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b-2 border-gray-200 pb-2">Bloco III: Manipulação de Matrizes</h2>
+                <div class="space-y-6">
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">10. Soma Total</h3>
+                        <p>Crie um programa que preencha uma matriz 3x3 com números inteiros. <strong class="text-green-700">Importante:</strong> primeiro preencha toda a matriz e, só depois, crie um novo laço duplo para calcular e exibir a soma de todos os seus elementos.</p>
+                        <pre><code>(Apos o preenchimento da matriz 3x3...)
+A soma de todos os elementos da matriz e: 45</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">11. A Diagonal Principal</h3>
+                        <p>Crie um programa que preencha uma matriz 4x4 e depois exiba apenas os elementos que estão na diagonal principal (onde o índice da linha é igual ao índice da coluna).</p>
+                        <pre><code>(Apos o preenchimento da matriz 4x4...)
+Elementos da diagonal principal: 10 21 32 43</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">12. Tabuleiro de Damas (Início)</h3>
+                        <p>Crie um programa que inicialize uma matriz 8x8. Preencha o tabuleiro com '.' (ponto). Em seguida, peça para o usuário digitar uma linha e uma coluna e coloque a letra 'P' (peça) nessa posição. Exiba o tabuleiro no final.</p>
+                        <pre><code>Digite a linha (0-7): 3
+Digite a coluna (0-7): 4
+
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . P . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">13. Troca de Valores</h3>
+                        <p>Crie um programa que preencha uma matriz 2x2. Em seguida, troque os valores da primeira linha com os da segunda linha e exiba a matriz resultante.</p>
+                        <pre><code>Matriz original:
+1  2
+3  4
+
+Matriz com linhas trocadas:
+3  4
+1  2</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">14. Somando Duas Matrizes</h3>
+                        <p>Crie um programa que leia os valores para duas matrizes 2x2 (matriz A e matriz B). Em seguida, crie um terceiro laço para somar os elementos correspondentes de A e B, guardando o resultado em uma terceira matriz (matriz C). Ao final, exiba a matriz C resultante.</p>
+                        <pre><code>(Apos ler as matrizes A e B...)
+Matriz A:
+1  2
+3  4
+
+Matriz B:
+5  6
+7  8
+
+Matriz Soma (C):
+6   8
+10  12</code></pre>
+                    </div>
+                    <div class="exercise-item pl-4">
+                        <h3 class="font-bold text-lg">15. Simulação de um Mapa</h3>
+                        <p>Crie um programa que represente um mapa 5x5. Inicialize todas as posições com '~' (água). Em seguida, peça para o usuário digitar as coordenadas de uma ilha (linha e coluna) e marque esta posição com 'T' (terra). Exiba o mapa final.</p>
+                        <pre><code>Digite a linha da ilha (0-4): 2
+Digite a coluna da ilha (0-4): 3
+
+~ ~ ~ ~ ~
+~ ~ ~ ~ ~
+~ ~ ~ T ~
+~ ~ ~ ~ ~
+~ ~ ~ ~ ~</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm no-print">
+            <p>Bons estudos e boa programação!</p>
+        </footer>
+    </div>
+
+</body>
+</html>
+

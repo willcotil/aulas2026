@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funções em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilos de Navegação (visíveis na tela) */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start; /* Alinha o conteúdo no topo */
+                page-break-before: always; 
+            }
+            .slide:first-child {
+                page-break-before: avoid; 
+            }
+            .nav-button, .counter, .copy-button {
+                display: none;
+            }
+        }
+
+        /* Outros estilos (código, etc.) */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #FDFDFD;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0; /* Ajuste no padding geral */
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #383838;
+            counter-reset: line;
+            position: relative;
+        }
+        pre .line {
+            padding-left: 4.5em; /* Espaço para numeração */
+            position: relative;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em; /* Largura da área de numeração */
+            padding-right: 1em;
+            text-align: right;
+            color: #aaa;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        .token-comment { color: #808080; font-style: italic; }
+        .token-keyword { color: #008B8B; font-weight: bold; }
+        .token-string { color: #D2691E; }
+        .token-function { color: #556B2F; }
+        .token-type { color: #20B2AA; font-style: italic; }
+        .token-number { color: #8A2BE2; }
+        .token-preprocessor { color: #C71585; }
+
+        /* Cores Anatomia da Função */
+        .c-retorno { background-color: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; }
+        .c-nome { background-color: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; }
+        .c-parametros { background-color: #fee2e2; color: #b91c1c; padding: 2px 6px; border-radius: 4px; }
+        .c-corpo { background-color: #fef9c3; color: #a16207; padding: 2px 6px; border-radius: 4px; }
+        
+        /* Depurador Interativo */
+        .debugger .line.highlight { background-color: #fef9c3; }
+        .debugger .line.return-point::before { content: '↪' !important; color: #9333ea !important; font-weight: bold !important; }
+        .memory-table { border-collapse: collapse; width: 100%; }
+        .memory-table th, .memory-table td { border: 1px solid #d1d5db; padding: 0.5rem; text-align: center; }
+        .memory-table th { background-color: #f3f4f6; }
+        .memory-table .scope { font-style: italic; color: #6b7280; }
+        .memory-table .value { font-family: 'Roboto Mono', monospace; font-weight: bold; }
+        .memory-table .value.changed { background-color: #fef08a; animation: flash 0.5s; }
+        @keyframes flash { from { background-color: #fef08a; } to { background-color: transparent; } }
+
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-4">Funções em C</h1>
+                <p class="text-2xl md:text-3xl text-purple-600">Organizando e Reutilizando Código</p>
+                <p class="text-xl text-gray-600 mt-8">Prof. William Paiva</p>
+                <div class="w-32 h-1.5 bg-purple-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Recapitulando -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O que vimos na última aula?</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li><strong>Vetores de Structs:</strong> A forma correta de armazenar uma coleção de "fichas", como uma turma de alunos ou um estoque de produtos.</li>
+                    <li><strong>Acesso Combinado:</strong> Usamos o índice <code class="inline-code">[i]</code> para escolher a ficha e o ponto <code class="inline-code">.</code> para acessar um campo: <code class="inline-code">turma[i].nome</code>.</li>
+                    <li><strong>Laços de Repetição:</strong> Vimos que usar <code class="inline-code">for</code> para percorrer o vetor é essencial para cadastrar e manipular os dados.</li>
+                </ul>
+                <p class="text-xl mt-8">Agora que nossos <strong>dados</strong> estão organizados, vamos organizar nosso <strong>código</strong>!</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: Problema 1 - Repetição -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Problema 1: Código que se Repete</h2>
+                <p class="text-xl mb-6">Imagine que você precisa exibir um cabeçalho formatado várias vezes no seu programa. Você acabaria fazendo isso:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment">// Início do programa</span></div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"**************************\n"</span>);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"* Sistema Escolar   *\n"</span>);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"**************************\n"</span>);</div><div class="line"><span class="token-comment">// ...algum código...</span></div><div class="line"><span class="token-comment">// Mostrar o menu</span></div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"**************************\n"</span>);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"* Sistema Escolar   *\n"</span>);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"**************************\n"</span>);</div><div class="line"><span class="token-function">printf</span>(<span class="token-string">"1- Cadastrar\n2- Listar\n"</span>);</div><div class="line"><span class="token-comment">// ...outro código...</span></div></pre></div>
+                <p class="text-xl mt-6"><strong>Problema:</strong> Se você precisar mudar o cabeçalho, terá que alterá-lo em <strong>todos</strong> os lugares. É ineficiente e propenso a erros.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 4: Problema 2 - Complexidade -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Problema 2: A Função <code class="inline-code">main</code> Monolítica</h2>
+                <p class="text-xl mb-6">À medida que nossos programas crescem, colocar todo o código dentro da função <code class="inline-code">main</code> a torna um "monstro": longa, confusa e difícil de entender.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-comment">// Bloco de código para cadastrar 3 alunos...</span></div><div class="line">    <span class="token-comment">// (várias linhas de scanf e printf)</span></div><div class="line">    <span class="token-keyword">for</span>(...) { ... }</div><div class="line">    <span class="token-comment">// Bloco de código para encontrar o aluno com maior nota...</span></div><div class="line">    <span class="token-comment">// (variáveis, laço for, if, etc)</span></div><div class="line">    <span class="token-keyword">for</span>(...) { ... }</div><div class="line">    <span class="token-comment">// Bloco de código para exibir a turma toda...</span></div><div class="line">    <span class="token-comment">// (outro laço for com printf)</span></div><div class="line">    <span class="token-keyword">for</span>(...) { ... }</div><div class="line">}</div></pre></div>
+                <p class="text-xl mt-6"><strong>Problema:</strong> É difícil ler, depurar (encontrar erros) e reutilizar qualquer parte desse código em outro programa.</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: A Solução -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Solução: Funções!</h2>
+                <p class="text-xl mb-6">Uma <strong>função</strong> é um bloco de código nomeado que realiza uma tarefa específica. Pense nela como um "mini-programa" ou uma "receita" que podemos chamar sempre que precisarmos.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 text-lg">
+                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                        <h3 class="font-bold text-purple-800 mb-2">Reutilização</h3>
+                        <p>Escrevemos o código uma vez e o chamamos quantas vezes quisermos.</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                        <h3 class="font-bold text-purple-800 mb-2">Organização</h3>
+                        <p>Quebramos um problema grande em partes menores e mais fáceis de gerenciar.</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                        <h3 class="font-bold text-purple-800 mb-2">Legibilidade</h3>
+                        <p>A função <code class="inline-code">main</code> fica limpa, apenas orquestrando as chamadas para outras funções.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Anatomia da Função -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Anatomia de uma Função</h2>
+                <p class="text-xl mb-6">Uma função tem 4 partes principais, cada uma com sua cor:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="c-retorno"><span class="token-type">int</span></span> <span class="c-nome"><span class="token-function">somar</span></span>(<span class="c-parametros"><span class="token-type">int</span> a, <span class="token-type">int</span> b</span>) <span class="c-corpo">{</span></div><div class="line"><span class="c-corpo">    <span class="token-type">int</span> resultado = a + b;</span></div><div class="line"><span class="c-corpo">    <span class="token-keyword">return</span> resultado;</span></div><div class="line"><span class="c-corpo">}</span></div></pre></div>
+                <ul class="mt-6 space-y-3 text-lg">
+                    <li><span class="c-retorno font-bold">1. Tipo de Retorno:</span> O tipo de dado que a função "devolve" após terminar.</li>
+                    <li><span class="c-nome font-bold">2. Nome da Função:</span> Um nome que descreve o que ela faz.</li>
+                    <li><span class="c-parametros font-bold">3. Parâmetros:</span> As "informações" que a função precisa receber para trabalhar.</li>
+                    <li><span class="c-corpo font-bold">4. Corpo da Função:</span> O bloco de código que executa a tarefa. A palavra-chave <code class="inline-code">return</code> envia o valor de volta e <strong>finaliza a execução da função imediatamente</strong>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 7: Animação Fluxo de Execução -->
+        <section id="slide-7" class="slide" data-animation="debugger-flow">
+             <div class="slide-content w-full max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: Fluxo de Execução</h2>
+                <p class="text-xl mb-6 text-center">Use a <strong>seta para a direita (→)</strong> para ver como o programa "pula" entre a <code class="inline-code">main</code> e a função.</p>
+                <div class="flex gap-8 mt-8">
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                        <div class="code-block-wrapper debugger"><pre id="debugger-flow-code"><div class="line" data-line="1"><span class="token-type">int</span> <span class="token-function">somar</span>(<span class="token-type">int</span> a, <span class="token-type">int</span> b) {</div><div class="line" data-line="2">    <span class="token-type">int</span> resultado = a + b;</div><div class="line" data-line="3">    <span class="token-keyword">return</span> resultado;</div><div class="line" data-line="4">}</div><div class="line" data-line="5"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="6">    <span class="token-type">int</span> total;</div><div class="line" data-line="7">    total = <span class="token-function">somar</span>(<span class="token-number">5</span>, <span class="token-number">3</span>);</div><div class="line" data-line="8">    <span class="token-function">printf</span>(<span class="token-string">"Resultado: %d\n"</span>, total);</div><div class="line" data-line="9">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="10">}</div></pre></div>
+                    </div>
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                        <table id="flow-memory-table" class="memory-table text-lg">
+                            <thead>
+                                <tr><th>Escopo</th><th>Variável</th><th>Valor</th></tr>
+                            </thead>
+                            <tbody>
+                                <!-- Linhas serão inseridas pelo JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Funções void -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Funções que Não Retornam Nada (<code class="inline-code">void</code>)</h2>
+                <p class="text-xl mb-6">E se uma função só precisa <strong>fazer</strong> uma ação, mas não precisa devolver um valor? Usamos o tipo de retorno <code class="inline-code">void</code> (vazio).</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment">// Esta função apenas imprime uma linha na tela. Não há valor para retornar.</span></div><div class="line"><span class="token-type">void</span> <span class="token-function">imprimirLinha</span>() {</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"---------------------\n"</span>);</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>(){</div><div class="line">    <span class="token-function">imprimirLinha</span>();</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Relatório de Vendas\n"</span>);</div><div class="line">    <span class="token-function">imprimirLinha</span>();</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+                <p class="text-xl mt-6">Funções <code class="inline-code">void</code> não usam a palavra-chave <code class="inline-code">return</code>.</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Passagem por Valor -->
+        <section id="slide-9" class="slide" data-animation="debugger-value">
+             <div class="slide-content w-full max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: Passagem por Valor</h2>
+                <p class="text-xl mb-6 text-center">A função recebe uma <strong>CÓPIA</strong> da variável. Use a <strong>seta para a direita (→)</strong> para ver que a variável original não se altera.</p>
+                <div class="flex gap-8 mt-8">
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                        <div class="code-block-wrapper debugger"><pre id="debugger-value-code"><div class="line" data-line="1"><span class="token-type">void</span> <span class="token-function">tentarMudar</span>(<span class="token-type">int</span> x) {</div><div class="line" data-line="2">    x = <span class="token-number">99</span>;</div><div class="line" data-line="3">}</div><div class="line" data-line="4"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="5">    <span class="token-type">int</span> numero = <span class="token-number">10</span>;</div><div class="line" data-line="6">    <span class="token-function">tentarMudar</span>(numero);</div><div class="line" data-line="7">    <span class="token-function">printf</span>(<span class="token-string">"Valor final: %d"</span>, numero);</div><div class="line" data-line="8">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="9">}</div></pre></div>
+                    </div>
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                        <table id="memory-table" class="memory-table text-lg">
+                            <thead>
+                                <tr><th>Escopo</th><th>Variável</th><th>Valor</th></tr>
+                            </thead>
+                            <tbody>
+                                <!-- Linhas serão inseridas pelo JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Exemplo Prático 1 -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 1: Calculadora Simples</h2>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">somar</span>(<span class="token-type">int</span> a, <span class="token-type">int</span> b) {</div><div class="line">    <span class="token-keyword">return</span> a + b;</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">subtrair</span>(<span class="token-type">int</span> a, <span class="token-type">int</span> b) {</div><div class="line">    <span class="token-keyword">return</span> a - b;</div><div class="line">}</div><div class="line"><span class="token-type">void</span> <span class="token-function">mostrarMenu</span>() {</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"1 - Somar\n"</span>);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"2 - Subtrair\n"</span>);</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> n1 = <span class="token-number">10</span>, n2 = <span class="token-number">5</span>;</div><div class="line">    <span class="token-type">int</span> resultadoSoma, resultadoSub;</div><div class="line">    <span class="token-function">mostrarMenu</span>();</div><div class="line">    resultadoSoma = <span class="token-function">somar</span>(n1, n2);</div><div class="line">    resultadoSub = <span class="token-function">subtrair</span>(n1, n2);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Soma: %d\n"</span>, resultadoSoma);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Subtracao: %d\n"</span>, resultadoSub);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Novo Exemplo -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 2: Calculando Área</h2>
+                 <p class="text-xl mb-6">Criamos uma função específica para calcular a área de um retângulo. Isso torna o cálculo reutilizável e o <code class="inline-code">main</code> mais limpo.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">float</span> <span class="token-function">calcularAreaRetangulo</span>(<span class="token-type">float</span> base, <span class="token-type">float</span> altura) {</div><div class="line">    <span class="token-type">float</span> area = base * altura;</div><div class="line">    <span class="token-keyword">return</span> area;</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">float</span> baseUsuario, alturaUsuario;</div><div class="line">    <span class="token-type">float</span> areaFinal;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite a base: "</span>);</div><div class="line">    <span class="token-function">scanf</span>(<span class="token-string">"%f"</span>, &baseUsuario);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite a altura: "</span>);</div><div class="line">    <span class="token-function">scanf</span>(<span class="token-string">"%f"</span>, &alturaUsuario);</div><div class="line">    areaFinal = <span class="token-function">calcularAreaRetangulo</span>(baseUsuario, alturaUsuario);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"A área do retângulo é: %.2f\n"</span>, areaFinal);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+         <!-- Slide 12: Novo Exemplo -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 3: Verificador Par ou Ímpar</h2>
+                 <p class="text-xl mb-6">Esta função recebe um número e retorna <code class="inline-code">1</code> se ele for par ou <code class="inline-code">0</code> se for ímpar. O <code class="inline-code">main</code> usa o resultado para imprimir a mensagem correta.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">ehPar</span>(<span class="token-type">int</span> numero) {</div><div class="line">    <span class="token-keyword">if</span> (numero % <span class="token-number">2</span> == <span class="token-number">0</span>) {</div><div class="line">        <span class="token-keyword">return</span> <span class="token-number">1</span>; <span class="token-comment">// Verdadeiro (é par)</span></div><div class="line">    } <span class="token-keyword">else</span> {</div><div class="line">        <span class="token-keyword">return</span> <span class="token-number">0</span>; <span class="token-comment">// Falso (é ímpar)</span></div><div class="line">    }</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> num;</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite um numero: "</span>);</div><div class="line">    <span class="token-function">scanf</span>(<span class="token-string">"%d"</span>, &num);</div><div class="line">    <span class="token-keyword">if</span> (<span class="token-function">ehPar</span>(num) == <span class="token-number">1</span>) {</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"O numero %d e PAR.\n"</span>, num);</div><div class="line">    } <span class="token-keyword">else</span> {</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"O numero %d e IMPAR.\n"</span>, num);</div><div class="line">    }</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Resumo -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo da Aula</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li><strong>Funções</strong> são blocos de código nomeados que resolvem um problema específico, promovendo <strong>reutilização</strong> e <strong>organização</strong>.</li>
+                    <li>Uma função é definida por seu <strong>tipo de retorno</strong>, <strong>nome</strong> e <strong>parâmetros</strong>.</li>
+                    <li>Funções com retorno <code class="inline-code">void</code> executam uma ação, mas não devolvem um valor.</li>
+                    <li>Por padrão, C usa <strong>passagem por valor</strong>: a função recebe uma cópia dos dados, e a variável original não é alterada.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Slide 14: Próximos Passos -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Próximos Passos</h2>
+                <p class="text-2xl">Já sabemos passar valores simples para funções.</p>
+                <div class="text-6xl my-8">🤔</div>
+                <p class="text-2xl">Mas como uma função pode <strong>alterar</strong> uma variável da <code class="inline-code">main</code>? E como podemos passar um <strong>vetor</strong> ou uma <strong>struct inteira</strong> para uma função?</p>
+                <p class="text-3xl font-bold text-purple-600 mt-8">Próxima aula: Ponteiros e Funções!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 15: Dúvidas -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            // --- DEPURADORES E ANIMAÇÕES ---
+            const debuggers = {};
+
+            function initializeDebugger(slide) {
+                const animationType = slide.dataset.animation;
+                if (!animationType || debuggers[animationType]) return;
+
+                if (animationType === 'debugger-flow') {
+                    const codeElement = slide.querySelector('#debugger-flow-code');
+                    const tableBody = slide.querySelector('#flow-memory-table tbody');
+                    const lines = Array.from(codeElement.querySelectorAll('.line'));
+                    const executionPath = [
+                        { line: 5, memory: [] },
+                        { line: 6, memory: [{ scope: 'main', var: 'total', val: '?' }] },
+                        { line: 7, memory: [{ scope: 'main', var: 'total', val: '?' }] },
+                        { line: 1, memory: [{ scope: 'main', var: 'total', val: '?' }, { scope: 'somar', var: 'a', val: '5' }, { scope: 'somar', var: 'b', val: '3' }] },
+                        { line: 2, memory: [{ scope: 'main', var: 'total', val: '?' }, { scope: 'somar', var: 'a', val: '5' }, { scope: 'somar', var: 'b', val: '3' }, { scope: 'somar', var: 'resultado', val: '?' }] },
+                        { line: 3, memory: [{ scope: 'main', var: 'total', val: '?' }, { scope: 'somar', var: 'a', val: '5' }, { scope: 'somar', var: 'b', val: '3' }, { scope: 'somar', var: 'resultado', val: '8', changed: true }] },
+                        { line: 7, memory: [{ scope: 'main', var: 'total', val: '?' }] },
+                        { line: 8, memory: [{ scope: 'main', var: 'total', val: '8', changed: true }] },
+                        { line: 9, memory: [{ scope: 'main', var: 'total', val: '8' }] },
+                        { line: 10, memory: [{ scope: 'main', var: 'total', val: '8' }] }
+                    ];
+                    let currentStep = -1;
+                    
+                    debuggers[animationType] = {
+                        step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             
+                             lines.forEach(l => l.classList.remove('highlight', 'return-point'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+
+                             const returnLine = lines.find(l => parseInt(l.dataset.line) === 7);
+                             if (currentStep >= 3 && currentStep <= 5) {
+                                if(returnLine) returnLine.classList.add('return-point');
+                             }
+
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td><span class="scope">${mem.scope}</span></td><td>${mem.var}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => {
+                            currentStep = -1;
+                            lines.forEach(line => line.classList.remove('highlight', 'return-point'));
+                            tableBody.innerHTML = '';
+                        }
+                    };
+                }
+
+                if (animationType === 'debugger-value') {
+                    const codeElement = slide.querySelector('#debugger-value-code');
+                    const tableBody = slide.querySelector('#memory-table tbody');
+                    const lines = Array.from(codeElement.querySelectorAll('.line'));
+                    const executionPath = [
+                        { line: 4, memory: []},
+                        { line: 5, memory: [{ scope: 'main', var: 'numero', val: '?' }] },
+                        { line: 6, memory: [{ scope: 'main', var: 'numero', val: '10' }] },
+                        { line: 1, memory: [{ scope: 'main', var: 'numero', val: '10' }, { scope: 'tentarMudar', var: 'x', val: '10' }] },
+                        { line: 2, memory: [{ scope: 'main', var: 'numero', val: '10' }, { scope: 'tentarMudar', var: 'x', val: '10' }] },
+                        { line: 3, memory: [{ scope: 'main', var: 'numero', val: '10' }, { scope: 'tentarMudar', var: 'x', val: '99', changed: true }] },
+                        { line: 6, memory: [{ scope: 'main', var: 'numero', val: '10' }] },
+                        { line: 7, memory: [{ scope: 'main', var: 'numero', val: '10' }] },
+                        { line: 8, memory: [{ scope: 'main', var: 'numero', val: '10' }] },
+                        { line: 9, memory: [{ scope: 'main', var: 'numero', val: '10' }] },
+                    ];
+                    let currentStep = -1;
+
+                    debuggers[animationType] = {
+                        step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             
+                             lines.forEach(l => l.classList.remove('highlight', 'return-point'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+
+                             const returnLine = lines.find(l => parseInt(l.dataset.line) === 6);
+                             if (currentStep >= 2 && currentStep <= 5) {
+                                if(returnLine) returnLine.classList.add('return-point');
+                             }
+
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td><span class="scope">${mem.scope}</span></td><td>${mem.var}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => {
+                            currentStep = -1;
+                            lines.forEach(line => line.classList.remove('highlight', 'return-point'));
+                            tableBody.innerHTML = '';
+                        }
+                    }
+                }
+            }
+
+            // --- CONTROLE GERAL ---
+            document.addEventListener('keydown', (e) => {
+                const currentSlide = sections[currentSlideIndex];
+                const animationType = currentSlide.dataset.animation;
+
+                if (e.key === 'ArrowRight') {
+                        nextButton.click();
+                } else if (e.key === 'ArrowLeft') {
+                    if (animationType && debuggers[animationType]) {
+                        e.preventDefault();
+                        debuggers[animationType].step();
+                    } else {
+                        prevButton.click();
+                    }
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                        
+                        // Inicializa ou reseta o depurador quando o slide entra na tela
+                        initializeDebugger(entry.target);
+                        const animationType = entry.target.dataset.animation;
+                        if(animationType && debuggers[animationType]) {
+                           debuggers[animationType].reset();
+                           debuggers[animationType].step(); // Executa o primeiro passo
+                        }
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        const span = button.querySelector('span');
+                        span.textContent = 'Copiado!';
+                        setTimeout(() => {
+                            span.textContent = 'Copiar';
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

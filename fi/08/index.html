@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Permissões em Linux</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Para melhor layout mobile */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Menos padding em mobile */
+            border-bottom: 1px solid #e5e7eb;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+            .slide {
+                padding: 4rem;
+            }
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        html {
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Estilos de Navegação */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: #ffffff; }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start;
+                page-break-before: always;
+            }
+            .slide:first-child { page-break-before: avoid; }
+            .nav-button, .counter, .copy-button { display: none; }
+        }
+
+        /* Estilos de Código e Tokens */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #282c34; /* Tema escuro para terminal */
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #abb2bf;
+            counter-reset: line;
+            position: relative;
+            overflow-x: auto; /* Para rolagem horizontal em mobile */
+        }
+        pre .line {
+            padding-left: 4.5em;
+            position: relative;
+            display: block; /* Garante quebra de linha correta */
+            white-space: pre-wrap; /* Quebra de linha em mobile */
+            word-break: break-all;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em;
+            padding-right: 1em;
+            text-align: right;
+            color: #5c6370;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #2d3748;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        /* Tokens para Shell Script */
+        .token-prompt { color: #61afef; } /* Azul para o prompt */
+        .token-command { color: #e5c07b; font-weight: bold; } /* Amarelo para comandos */
+        .token-option { color: #c678dd; } /* Roxo para opções/flags */
+        .token-path { color: #98c379; } /* Verde para caminhos/arquivos */
+        .token-comment { color: #5c6370; font-style: italic; } /* Cinza para comentários */
+        .token-output { color: #abb2bf; } /* Cor padrão para saídas */
+        .token-permission { color: #f97316; } /* Laranja para permissões */
+        .token-user { color: #ef4444; } /* Vermelho para usuários */
+        .token-group { color: #3b82f6; } /* Azul para grupos */
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-6xl md:text-8xl font-extrabold mb-4 bg-gradient-to-r from-orange-500 to-yellow-300 bg-clip-text text-transparent drop-shadow-lg">Permissões em Linux</h1>
+                <p class="text-2xl md:text-3xl text-orange-600">Donos, Grupos e o Comando chmod</p>
+                <p class="text-xl text-gray-600 mt-8">Fundamentos de Informática</p>
+                <div class="w-32 h-1.5 bg-orange-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Ponto de Partida -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Mistério do <code class="inline-code">ls -l</code></h2>
+                <p class="text-xl mb-6">Na última aula, vimos que o comando <code class="inline-code">ls -l</code> nos dá uma visão detalhada dos nossos arquivos. Mas o que significa aquela primeira coluna cheia de letras?</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ls</span> <span class="token-option">-l</span></div><div class="line"><span class="token-permission">drwxr-xr-x</span> 2 <span class="token-user">aluno</span> <span class="token-group">aluno</span> 4096 out  1 14:20 <span class="token-path">Documentos</span></div><div class="line"><span class="token-permission">-rw-r--r--</span> 1 <span class="token-user">aluno</span> <span class="token-group">aluno</span> 1542 out  1 14:21 <span class="token-path">projeto.c</span></div></pre></div>
+                <p class="text-3xl text-center mt-8 animate-pulse">🤔 drwxr-xr-x... O que é isso?</p>
+                <p class="text-xl mt-4 text-center">Hoje, vamos decifrar este código e aprender a controlá-lo.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: Decodificando a Linha -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Decodificando a Linha de Permissões</h2>
+                <p class="text-xl mb-6">Aquela string de 10 caracteres é dividida em 4 partes:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-permission">d</span><span class="token-user">rwx</span><span class="token-group">r-x</span><span class="token-output">r-x</span></div></pre></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 text-center">
+                    <div class="bg-gray-200 p-4 rounded-lg">
+                        <p class="font-bold text-lg">Tipo de Arquivo</p>
+                        <p class="font-mono text-2xl text-red-600">d</p>
+                    </div>
+                    <div class="bg-blue-100 p-4 rounded-lg">
+                        <p class="font-bold text-lg">Permissões do Dono (User)</p>
+                        <p class="font-mono text-2xl text-blue-700">rwx</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <p class="font-bold text-lg">Permissões do Grupo (Group)</p>
+                        <p class="font-mono text-2xl text-green-700">r-x</p>
+                    </div>
+                    <div class="bg-yellow-100 p-4 rounded-lg">
+                        <p class="font-bold text-lg">Permissões dos Outros (Others)</p>
+                        <p class="font-mono text-2xl text-yellow-700">r-x</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: O Primeiro Caractere: Tipo -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Primeiro Caractere: Tipo de Arquivo</h2>
+                <p class="text-xl mb-6">A primeira letra nos diz o que estamos olhando:</p>
+                <ul class="text-2xl space-y-4">
+                    <li><code class="inline-code">-</code> : É um <strong>arquivo</strong> comum (texto, imagem, programa compilado).</li>
+                    <li><code class="inline-code">d</code> : É um <strong>d</strong>iretório (uma pasta).</li>
+                    <li><code class="inline-code">l</code> : É um <strong>l</strong>ink simbólico (um atalho para outro arquivo ou diretório).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 5: As Três Classes de Acesso -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">As Três Classes de Acesso</h2>
+                <p class="text-xl mb-6">O Linux organiza as permissões para três "níveis" de usuários:</p>
+                <ul class="text-xl space-y-6 list-none">
+                    <li><strong class="text-blue-700">👤 Dono (User)</strong>: O usuário que criou o arquivo. Ele tem o maior controle.</li>
+                    <li><strong class="text-green-700">👨‍👩‍👧‍👦 Grupo (Group)</strong>: Um conjunto de usuários que compartilham permissões. Útil para equipes que trabalham nos mesmos projetos.</li>
+                    <li><strong class="text-yellow-700">🌍 Outros (Others)</strong>: Literalmente, todo o resto. Qualquer usuário no sistema que não seja o dono e não pertença ao grupo.</li>
+                </ul>
+                <div class="mt-8 bg-orange-50 border border-orange-200 p-6 rounded-lg">
+                    <h3 class="text-2xl font-bold text-orange-800 mb-3">Por que isso é tão seguro? 🛡️</h3>
+                    <ul class="text-lg space-y-3 list-disc pl-5">
+                        <li><strong>Princípio do Menor Privilégio:</strong> Por padrão, você só tem poder sobre seus próprios arquivos. Isso impede que um usuário (ou um programa malicioso) acesse ou danifique arquivos de outros usuários ou do sistema.</li>
+                        <li><strong>Isolamento de Danos:</strong> Se a conta de um usuário for comprometida, o estrago fica contido em seu diretório. O invasor não consegue escalar facilmente o ataque para controlar todo o sistema.</li>
+                        <li><strong>Colaboração Segura:</strong> Permite que administradores criem regras granulares. Uma equipe (`grupo`) pode ter permissão para editar um relatório, enquanto o resto da empresa (`outros`) pode apenas visualizá-lo.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVO SLIDE 6: O Superusuário root -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Superusuário: <code class="inline-code">root</code> 👑</h2>
+                <p class="text-xl mb-6">Acima de todos existe um usuário especial: o <strong class="text-red-600">root</strong>. Ele é o administrador supremo do sistema.</p>
+                <ul class="text-xl space-y-4 list-disc text-left max-w-3xl mx-auto">
+                    <li>O <code class="inline-code">root</code> pode ignorar <strong>todas</strong> as verificações de permissão. Ele pode ler, escrever e apagar qualquer arquivo, em qualquer lugar.</li>
+                    <li>Trabalhar logado como <code class="inline-code">root</code> é <strong>extremamente perigoso</strong>. Um comando errado (como um <code class="inline-code">rm</code> descuidado) pode destruir o sistema operacional.</li>
+                    <li>A forma correta de executar tarefas administrativas é usando o comando <code class="inline-code">sudo</code> (<strong>S</strong>uper<strong>U</strong>ser <strong>Do</strong>). Ele eleva seus privilégios para o de <code class="inline-code">root</code> por um único comando.</li>
+                </ul>
+                <p class="text-2xl mt-8 italic text-orange-700">"Com grandes poderes vêm grandes responsabilidades."</p>
+            </div>
+        </section>
+        
+        <!-- Slide 7: O Significado de r, w, x -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Significado de <code class="inline-code">r</code>, <code class="inline-code">w</code> e <code class="inline-code">x</code></h2>
+                <p class="text-xl mb-6">Cada trio de permissões usa as letras <code class="inline-code">r</code>, <code class="inline-code">w</code> e <code class="inline-code">x</code> ou um hífen <code class="inline-code">-</code> se a permissão não for concedida.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-2xl">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-6xl">📖</p>
+                        <p class="font-bold mt-4">r</p>
+                        <p class="text-xl">Read (Leitura)</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-6xl">✍️</p>
+                        <p class="font-bold mt-4">w</p>
+                        <p class="text-xl">Write (Escrita)</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <p class="text-6xl">🏃</p>
+                        <p class="font-bold mt-4">x</p>
+                        <p class="text-xl">Execute (Execução)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Permissões em Arquivos vs Diretórios -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Contexto é Tudo: Arquivos vs. Diretórios</h2>
+                <p class="text-xl mb-6">O significado de <code class="inline-code">rwx</code> muda dependendo se é um arquivo ou um diretório.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4">📄 Para Arquivos</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-lg">
+                            <li><strong class="text-blue-600">r (read):</strong> Pode ler o conteúdo do arquivo (ex: <code class="inline-code">cat arquivo.txt</code>).</li>
+                            <li><strong class="text-green-600">w (write):</strong> Pode alterar ou apagar o conteúdo do arquivo.</li>
+                            <li><strong class="text-red-600">x (execute):</strong> Pode executar o arquivo como um programa ou script (ex: <code class="inline-code">./meu_script.sh</code>).</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4">📁 Para Diretórios</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-lg">
+                            <li><strong class="text-blue-600">r (read):</strong> Pode listar o conteúdo do diretório (ex: <code class="inline-code">ls pasta/</code>).</li>
+                            <li><strong class="text-green-600">w (write):</strong> Pode criar, renomear ou apagar arquivos dentro do diretório.</li>
+                            <li><strong class="text-red-600">x (execute):</strong> Pode <strong>entrar</strong> no diretório (ex: <code class="inline-code">cd pasta/</code>). <strong>Sem 'x', um diretório é inútil!</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Transição chmod -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Ok, Entendi. Como eu mudo isso?</h2>
+                <div class="text-7xl my-8">🔧</div>
+                <p class="text-3xl">Com o comando <code class="inline-code">chmod</code>!</p>
+                <p class="text-xl text-gray-600 mt-4"><code class="inline-code">chmod</code> significa <strong>ch</strong>ange <strong>mod</strong>e (mudar modo).</p>
+                <p class="text-xl text-gray-600">Ele tem duas maneiras de funcionar: a simbólica e a octal (numérica).</p>
+            </div>
+        </section>
+
+        <!-- Slide 10: chmod Simbólico -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Método 1: Notação Simbólica (Letras)</h2>
+                <p class="text-xl mb-6">Este método é mais intuitivo. Você combina <strong>quem</strong>, <strong>o que fazer</strong> e <strong>qual permissão</strong>.</p>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg">Quem?</h3>
+                        <p><code class="inline-code">u</code> (user/dono)</p>
+                        <p><code class="inline-code">g</code> (group/grupo)</p>
+                        <p><code class="inline-code">o</code> (others/outros)</p>
+                        <p><code class="inline-code">a</code> (all/todos)</p>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg">O que fazer?</h3>
+                        <p><code class="inline-code">+</code> (Adicionar)</p>
+                        <p><code class="inline-code">-</code> (Remover)</p>
+                        <p><code class="inline-code">=</code> (Definir exatamente)</p>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg">Qual permissão?</h3>
+                        <p><code class="inline-code">r</code> (leitura)</p>
+                        <p><code class="inline-code">w</code> (escrita)</p>
+                        <p><code class="inline-code">x</code> (execução)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: chmod Simbólico Exemplos -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">chmod</code> Simbólico na Prática</h2>
+                <p class="text-xl mb-6">Vamos tornar um script executável para o dono:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">u+x</span> <span class="token-path">meu_script.sh</span> <span class="token-comment"># Adiciona (+), para o usuário (u), a permissão de execução (x)</span></div></pre></div>
+                <p class="text-xl my-6">Remover a permissão de escrita para o grupo e outros:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">go-w</span> <span class="token-path">relatorio.txt</span> <span class="token-comment"># Remove (-), para o grupo e outros (go), a permissão de escrita (w)</span></div></pre></div>
+                <p class="text-xl my-6">Definir permissões exatas para todos de uma vez:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">u=rw,g=r,o=</span> <span class="token-path">privado.txt</span> <span class="token-comment"># Dono pode ler/escrever, grupo pode ler, outros não têm NENHUMA permissão.</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 12: chmod Octal -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Método 2: Notação Octal (Números)</h2>
+                <p class="text-xl mb-6">Este método é mais rápido, mas menos intuitivo. Ele atribui um valor numérico para cada permissão:</p>
+                <div class="grid grid-cols-3 gap-6 mt-8 text-2xl text-center">
+                    <div class="bg-blue-100 p-6 rounded-lg">
+                        <p class="font-bold">4</p>
+                        <p class="text-xl">Read (r)</p>
+                    </div>
+                    <div class="bg-green-100 p-6 rounded-lg">
+                        <p class="font-bold">2</p>
+                        <p class="text-xl">Write (w)</p>
+                    </div>
+                    <div class="bg-red-100 p-6 rounded-lg">
+                        <p class="font-bold">1</p>
+                        <p class="text-xl">Execute (x)</p>
+                    </div>
+                </div>
+                <p class="text-2xl mt-8 text-center">Para combinar permissões, você <strong>soma</strong> os valores.</p>
+            </div>
+        </section>
+
+        <!-- Slide 13: A Magia da Soma -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Magia da Soma Octal</h2>
+                <ul class="text-2xl space-y-4">
+                    <li><code class="inline-code">rwx</code> = 4 + 2 + 1 = <strong class="text-orange-600">7</strong> (Controle total)</li>
+                    <li><code class="inline-code">rw-</code> = 4 + 2 + 0 = <strong class="text-orange-600">6</strong> (Ler e escrever)</li>
+                    <li><code class="inline-code">r-x</code> = 4 + 0 + 1 = <strong class="text-orange-600">5</strong> (Ler e executar)</li>
+                    <li><code class="inline-code">r--</code> = 4 + 0 + 0 = <strong class="text-orange-600">4</strong> (Apenas leitura)</li>
+                    <li><code class="inline-code">---</code> = 0 + 0 + 0 = <strong class="text-orange-600">0</strong> (Nenhuma permissão)</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Slide 14: chmod Octal Exemplos -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">chmod</code> Octal na Prática</h2>
+                <p class="text-xl mb-6">Você usa 3 dígitos: o primeiro para o <strong>Dono</strong>, o segundo para o <strong>Grupo</strong> e o terceiro para os <strong>Outros</strong>.</p>
+                <p class="text-xl font-bold">Exemplo 1: Permissão padrão para scripts (<code class="inline-code">755</code>)</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">755</span> <span class="token-path">meu_script.sh</span></div></pre></div>
+                <p class="text-lg mt-2">↳ <strong>Dono</strong>: 7 (rwx), <strong>Grupo</strong>: 5 (r-x), <strong>Outros</strong>: 5 (r-x). (Dono pode tudo, outros podem ler e executar).</p>
+                
+                <p class="text-xl font-bold mt-8">Exemplo 2: Permissão padrão para arquivos de texto (<code class="inline-code">644</code>)</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">644</span> <span class="token-path">relatorio.txt</span></div></pre></div>
+                <p class="text-lg mt-2">↳ <strong>Dono</strong>: 6 (rw-), <strong>Grupo</strong>: 4 (r--), <strong>Outros</strong>: 4 (r--). (Dono pode ler e escrever, outros só podem ler).</p>
+            </div>
+        </section>
+
+        <!-- Slide 15: chmod 777 -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">chmod 777</code>: Poder Total (e Perigoso)</h2>
+                <div class="text-7xl my-8">☢️</div>
+                <p class="text-2xl mb-4"><code class="inline-code">chmod 777</code> dá permissão de leitura, escrita e execução para <strong>TODOS</strong> os usuários do sistema.</p>
+                <p class="text-xl text-gray-600">Isso pode ser uma <strong>grande falha de segurança</strong>, especialmente em servidores. É como deixar a porta da sua casa aberta com a chave na fechadura.</p>
+                <p class="text-xl mt-4 font-bold">Use com extrema cautela e apenas quando for absolutamente necessário (o que é raro).</p>
+            </div>
+        </section>
+
+        <!-- Slide 16: Transição chown -->
+        <section id="slide-16" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">E quem é o "Dono"? Podemos mudar?</h2>
+                <div class="text-7xl my-8">👑</div>
+                <p class="text-3xl">Sim! Com os comandos <code class="inline-code">chown</code> e <code class="inline-code">chgrp</code>.</p>
+                <p class="text-xl text-gray-600 mt-4">Esses comandos permitem alterar a propriedade de arquivos e diretórios.</p>
+                <p class="text-lg mt-4 text-red-600">Geralmente, você precisa de privilégios de superusuário (<code class="inline-code">sudo</code>) para usá-los.</p>
+            </div>
+        </section>
+
+        <!-- Slide 17: chown -->
+        <section id="slide-17" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Trocando de Dono (<code class="inline-code">chown</code>)</h2>
+                <p class="text-xl mb-6"><code class="inline-code">chown</code> significa <strong>ch</strong>ange <strong>own</strong>er (mudar dono).</p>
+                <p class="text-xl mb-6">Para passar a propriedade de um arquivo para outro usuário:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">sudo chown</span> <span class="token-user">maria</span> <span class="token-path">relatorio_joao.txt</span></div></pre></div>
+                <p class="text-xl my-6">Você também pode mudar o dono <strong>e</strong> o grupo de uma só vez usando dois pontos:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment"># O arquivo agora pertence à usuária 'maria' e ao grupo 'vendas'</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">sudo chown</span> <span class="token-user">maria</span>:<span class="token-group">vendas</span> <span class="token-path">relatorio_joao.txt</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 18: chgrp -->
+        <section id="slide-18" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Trocando Apenas o Grupo (<code class="inline-code">chgrp</code>)</h2>
+                <p class="text-xl mb-6"><code class="inline-code">chgrp</code> significa <strong>ch</strong>ange <strong>gr</strong>ou<strong>p</strong> (mudar grupo).</p>
+                <p class="text-xl mb-6">É útil quando você quer manter o dono, mas permitir que uma nova equipe acesse o arquivo.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">ls</span> <span class="token-option">-l</span> <span class="token-path">plano_estrategico.docx</span></div><div class="line"><span class="token-permission">-rw-r-----</span> 1 <span class="token-user">chefe</span> <span class="token-group">diretoria</span> 12040 out  1 15:00 <span class="token-path">plano_estrategico.docx</span></div><div class="line"> </div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">sudo chgrp</span> <span class="token-group">marketing</span> <span class="token-path">plano_estrategico.docx</span></div><div class="line"> </div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">ls</span> <span class="token-option">-l</span> <span class="token-path">plano_estrategico.docx</span></div><div class="line"><span class="token-permission">-rw-r-----</span> 1 <span class="token-user">chefe</span> <span class="token-group">marketing</span> 12040 out  1 15:01 <span class="token-path">plano_estrategico.docx</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Transição umask -->
+        <section id="slide-19" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">De onde vêm as permissões padrão?</h2>
+                <div class="text-7xl my-8">🎭</div>
+                <p class="text-3xl">Do comando <code class="inline-code">umask</code>!</p>
+                <p class="text-xl text-gray-600 mt-4"><code class="inline-code">umask</code> significa <strong>u</strong>ser file creation <strong>mask</strong> (máscara de criação de arquivos do usuário).</p>
+                <p class="text-xl text-gray-600">Ele define quais permissões serão <strong>removidas</strong> de um arquivo no momento da sua criação.</p>
+            </div>
+        </section>
+
+        <!-- Slide 20: umask Logic -->
+        <section id="slide-20" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Entendendo a Lógica da <code class="inline-code">umask</code></h2>
+                <p class="text-xl mb-6">É uma lógica "subtrativa". O sistema começa com permissões máximas e a <code class="inline-code">umask</code> remove o que for especificado.</p>
+                <ul class="text-xl space-y-4">
+                    <li>Padrão máximo para diretórios: <code class="inline-code">777</code> (rwxrwxrwx)</li>
+                    <li>Padrão máximo para arquivos: <code class="inline-code">666</code> (rw-rw-rw-) (Por segurança, arquivos não são criados como executáveis).</li>
+                </ul>
+                <p class="text-xl mt-6">A <code class="inline-code">umask</code> mais comum é <code class="inline-code">022</code>. Veja o que ela faz:</p>
+                <p class="font-mono text-xl mt-4">Diretório: 777 - 022 = <strong class="text-orange-600">755</strong> (rwxr-xr-x)</p>
+                <p class="font-mono text-xl">Arquivo:   666 - 022 = <strong class="text-orange-600">644</strong> (rw-r--r--)</p>
+            </div>
+        </section>
+        
+        <!-- Slide 21: umask na prática -->
+        <section id="slide-21" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">umask</code> na Prática</h2>
+                <p class="text-xl mb-6">Ver a sua <code class="inline-code">umask</code> atual é simples:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">umask</span></div><div class="line"><span class="token-output">0022</span></div></pre></div>
+                <p class="text-xl my-6">Para definir uma nova <code class="inline-code">umask</code> (apenas para a sessão atual do terminal):</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment"># Define uma umask mais restritiva: grupo e outros não terão permissão de escrita.</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">umask</span> <span class="token-permission">027</span></div></pre></div>
+                <p class="text-xl mt-6">Com <code class="inline-code">umask 027</code>, novos arquivos seriam <code class="inline-code">640</code> (rw-r-----) e diretórios seriam <code class="inline-code">750</code> (rwxr-x---).</p>
+            </div>
+        </section>
+
+        <!-- Slide 22: Exercício Prático -->
+        <section id="slide-22" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Missão Final: Projeto em Equipe 🗺️</h2>
+                <p class="text-xl mb-6">Simule a configuração de um projeto. Você é o líder da equipe `devs` e o usuário é `aluno`.</p>
+                <ol class="list-decimal list-inside mt-4 space-y-3 text-lg bg-gray-50 p-6 rounded-lg">
+                    <li>No seu diretório home, crie uma pasta `projeto_secreto`.</li>
+                    <li>Dentro dela, crie um script `executar.sh` e um arquivo `config.ini`.</li>
+                    <li>Mude o grupo da pasta `projeto_secreto` para `devs`. (Pode imaginar o comando, já que não temos o grupo).</li>
+                    <li>Defina as permissões da pasta para que o dono possa fazer tudo, o grupo possa ler e entrar, e outros não possam fazer nada. (<code class="inline-code">rwxr-x---</code>)</li>
+                    <li>Defina as permissões do script `executar.sh` para que o dono e o grupo possam executá-lo. (<code class="inline-code">rwxr-x---</code>)</li>
+                    <li>Defina as permissões de `config.ini` para que o dono possa ler/escrever e o grupo só possa ler. (<code class="inline-code">rw-r-----</code>)</li>
+                </ol>
+            </div>
+        </section>
+        
+        <!-- Slide 23: Solução do Exercício -->
+        <section id="slide-23" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Solução da Missão Final</h2>
+                <p class="text-xl mb-6">A sequência de comandos para resolver o desafio:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">mkdir</span> <span class="token-path">projeto_secreto</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">cd</span> <span class="token-path">projeto_secreto</span></div><div class="line"><span class="token-prompt">~/projeto_secreto$</span> <span class="token-command">touch</span> <span class="token-path">executar.sh</span> <span class="token-path">config.ini</span></div><div class="line"><span class="token-prompt">~/projeto_secreto$</span> <span class="token-command">cd ..</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chgrp</span> <span class="token-group">devs</span> <span class="token-path">projeto_secreto</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">750</span> <span class="token-path">projeto_secreto</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">750</span> <span class="token-path">projeto_secreto/executar.sh</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-permission">640</span> <span class="token-path">projeto_secreto/config.ini</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 24: Resumo dos Comandos -->
+        <section id="slide-24" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo dos Comandos de Permissão</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-lg mt-6 bg-white shadow rounded-lg">
+                        <thead class="bg-gray-200">
+                            <tr><th class="p-3 text-left">Comando</th><th class="p-3 text-left">O que faz</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">chmod</code></td><td class="p-3">Muda as permissões (read, write, execute) de um arquivo/diretório.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">chown</code></td><td class="p-3">Muda o usuário dono (e opcionalmente o grupo) de um arquivo/diretório.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">chgrp</code></td><td class="p-3">Muda apenas o grupo de um arquivo/diretório.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">umask</code></td><td class="p-3">Define as permissões padrão que serão removidas na criação de novos arquivos/diretórios.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 25: Próximos Passos -->
+        <section id="slide-25" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Você Agora tem o Controle</h2>
+                <p class="text-2xl">Entender permissões é o que separa um usuário casual de um usuário avançado de Linux. É a base da segurança e da organização do sistema.</p>
+                <div class="text-6xl my-8">🔑</div>
+                <p class="text-xl mt-4">Pratique, crie arquivos, mude permissões e observe o resultado com <code class="inline-code">ls -l</code>. A experimentação é a melhor forma de aprender!</p>
+                <p class="text-3xl font-bold text-orange-600 mt-12">Próxima aula: Processos e Redirecionamento!</p>
+            </div>
+        </section>
+
+        <!-- Slide 26: Perguntas -->
+        <section id="slide-26" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                const span = button.querySelector('span');
+                const originalText = 'Copiar'; // Definido estaticamente pois não há span no SVG
+
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeText.trim();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        const copyFeedback = e.currentTarget;
+                        copyFeedback.innerHTML = 'Copiado!';
+                        setTimeout(() => {
+                           copyFeedback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span>`;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

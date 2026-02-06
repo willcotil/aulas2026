@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula: HTTP, HTTPS e Segurança</title>
+    <style>
+        /* --- GERAL & TEMA CLARO --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            /* Paleta Web & Segurança */
+            --web-blue: #007bff;
+            --web-dark: #343a40;
+            --secure-green: #28a745;
+            --insecure-red: #dc3545;
+            --warning-yellow: #ffc107;
+            
+            --primary-color: var(--web-blue);
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --light-grey: #e9ecef;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+        }
+        
+        #presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* --- SEÇÕES DE ROLAGEM --- */
+        .scroll-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 60px 40px;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- NAVEGAÇÃO --- */
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .nav-btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .nav-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--web-dark);
+            min-width: 60px;
+            text-align: center;
+            background-color: var(--card-background);
+            padding: 5px 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-top: 3px solid var(--primary-color);
+        }
+        
+        /* --- ESTILOS DE CONTEÚDO --- */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        h1 { font-size: 2.8em; }
+        h2 { font-size: 2.2em; }
+        h3 { font-size: 1.6em; color: var(--secondary-color); }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.7;
+            max-width: 850px;
+            text-align: center;
+        }
+        .highlight { font-weight: bold; color: var(--primary-color); }
+        .code-term {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--light-grey);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #d63384; /* Pinkish for code terms */
+        }
+
+        .two-column-layout {
+            display: flex;
+            gap: 40px;
+            width: 100%;
+            max-width: 1100px;
+            align-items: center;
+            justify-content: center;
+        }
+        .column { flex: 1; text-align: left; }
+
+        .placeholder-img {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: var(--light-grey);
+            display: block;
+            margin: 20px auto;
+        }
+
+        /* --- TABELAS --- */
+        .styled-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 900px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .styled-table th, .styled-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .styled-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .styled-table tr:nth-child(even) { background-color: var(--background-color); }
+        
+        /* --- ELEMENTOS INTERATIVOS --- */
+        .interactive-box {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        /* Simulação de Navegador */
+        .browser-mockup {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: white;
+            width: 100%;
+            max-width: 700px;
+        }
+        .browser-header {
+            background: #f1f3f4;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+        }
+        .browser-dots {
+            display: flex;
+            gap: 5px;
+            margin-right: 15px;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; }
+        .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
+        .address-bar {
+            flex-grow: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 5px 15px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+        .browser-content {
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            position: relative;
+        }
+        .lock-icon { margin-right: 8px; cursor: pointer; }
+        
+        /* Botões e Controles */
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-get { background-color: var(--web-blue); color: white; }
+        .btn-post { background-color: var(--warning-yellow); color: #333; }
+        .btn-hack { background-color: var(--web-dark); color: white; }
+        .btn-reset { background-color: var(--light-grey); color: #333; }
+
+        /* Animações HTTP */
+        .http-packet {
+            position: absolute;
+            background: var(--warning-yellow);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-family: 'Roboto Mono';
+            opacity: 0;
+            transition: all 1s ease-in-out;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        .server-response {
+            font-size: 40px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .hacker-view {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .interactive-desc {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--secondary-color);
+            min-height: 1.5em;
+        }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.5em; }
+            .two-column-layout { flex-direction: column; gap: 20px; }
+            .scroll-section { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="presentation-container">
+    <div class="slides-container">
+
+        <!-- 1. CAPA -->
+        <section class="scroll-section">
+            <h1>Protocolos Web e Segurança</h1>
+            <p class="subtitle">Entendendo HTTP, HTTPS e como navegar com segurança.</p>
+            <img src="img/websecurity.png" alt="Ilustração de Segurança Web" class="placeholder-img">
+        </section>
+
+        <!-- 2. CONTEXTO -->
+        <section class="scroll-section">
+            <h2>Onde Estamos? (Camada de Aplicação)</h2>
+            <p>Na última aula, vimos como o TCP garante a entrega dos dados. Agora, vamos falar sobre o que <strong>usamos</strong> esses dados para fazer.</p>
+            <p>A <strong class="highlight">World Wide Web (WWW)</strong> é o serviço mais famoso da internet. E ela fala uma língua própria.</p>
+        </section>
+
+        <!-- 3. HTTP INTRO -->
+        <section class="scroll-section">
+            <h2>HTTP: A Língua da Web</h2>
+            <p><strong class="highlight">HTTP</strong> (HyperText Transfer Protocol) é o protocolo usado para transferir páginas web (arquivos HTML, imagens, vídeos).</p>
+            <p>Ele funciona num modelo simples de <strong class="highlight">Cliente-Servidor</strong>:</p>
+            <ol style="max-width: 600px; text-align: left;">
+                <li><strong>Requisição (Request):</strong> O cliente (seu navegador) pede algo.</li>
+                <li><strong>Resposta (Response):</strong> O servidor entrega (ou diz que não achou).</li>
+            </ol>
+        </section>
+
+        <!-- 4. INTERATIVO: REQUISIÇÃO -->
+        <section class="scroll-section" id="http-sim-section">
+            <h2>Simulador: Requisição e Resposta</h2>
+            <p>Clique nos botões ou use a seta direita (→) para simular o navegador.</p>
+            
+            <div class="browser-mockup">
+                <div class="browser-header">
+                    <div class="browser-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+                    <div class="address-bar">http://meusite.com/index.html</div>
+                </div>
+                <div class="browser-content" id="http-sim-content">
+                    <div style="position: absolute; left: 20px;">💻 Cliente</div>
+                    <div style="position: absolute; right: 20px;">🖥️ Servidor</div>
+                    
+                    <!-- Packet -->
+                    <div id="http-req-packet" class="http-packet" style="left: 80px;">GET /index.html</div>
+                    
+                    <!-- Response -->
+                    <div id="http-response-code" class="server-response" style="color: var(--secure-green);">200 OK</div>
+                </div>
+            </div>
+            <p class="interactive-desc" id="http-desc">Pressione → para enviar um pedido de sucesso.</p>
+
+            <div class="controls-row">
+                <button class="btn-get" onclick="runHttpSim('200')">Enviar GET (Sucesso)</button>
+                <button class="btn-post" onclick="runHttpSim('404')">Pedir Página Inexistente</button>
+            </div>
+        </section>
+
+        <!-- 5. MÉTODOS HTTP -->
+        <section class="scroll-section">
+            <h2>Os Verbos (Métodos) do HTTP</h2>
+            <p>O navegador não apenas "pede" coisas. Ele diz ao servidor qual é a <strong>intenção</strong> dele usando "verbos".</p>
+            <table class="styled-table">
+                <thead>
+                    <tr><th>Método</th><th>Função</th><th>Exemplo</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="code-term">GET</span></td><td>Pedir um recurso (página, imagem).</td><td>Abrir um site.</td></tr>
+                    <tr><td><span class="code-term">POST</span></td><td>Enviar dados para serem processados.</td><td>Enviar um formulário de login.</td></tr>
+                    <tr><td><span class="code-term">PUT</span></td><td>Atualizar/Substituir um recurso.</td><td>Editar um perfil.</td></tr>
+                    <tr><td><span class="code-term">DELETE</span></td><td>Remover um recurso.</td><td>Apagar uma foto.</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 6. CÓDIGOS DE STATUS -->
+        <section class="scroll-section">
+            <h2>Códigos de Status: A Resposta do Servidor</h2>
+            <p>O servidor sempre responde com um número de 3 dígitos indicando o resultado.</p>
+            <div class="two-column-layout">
+                <div class="column">
+                    <h3 style="color: var(--secure-green);">2xx (Sucesso)</h3>
+                    <p><strong>200 OK:</strong> Tudo certo, aqui está sua página.</p>
+                    <h3 style="color: var(--warning-yellow);">3xx (Redirecionamento)</h3>
+                    <p><strong>301 Moved:</strong> A página mudou de endereço.</p>
+                </div>
+                <div class="column">
+                    <h3 style="color: var(--insecure-red);">4xx (Erro do Cliente)</h3>
+                    <p><strong>404 Not Found:</strong> Página não encontrada.</p>
+                    <p><strong>403 Forbidden:</strong> Você não tem permissão.</p>
+                    <h3 style="color: #6f42c1;">5xx (Erro do Servidor)</h3>
+                    <p><strong>500 Internal Error:</strong> O servidor quebrou.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. O PROBLEMA DO HTTP -->
+        <section class="scroll-section">
+            <h2>O Problema: HTTP é "Fofoqueiro"</h2>
+            <p>O protocolo HTTP original transmite tudo em <strong class="highlight" style="color: var(--insecure-red);">Texto Plano (Clear Text)</strong>.</p>
+            <p>Isso significa que qualquer equipamento entre você e o servidor (roteador, switch, provedor, hacker no Wi-Fi do café) pode ler exatamente o que você está enviando.</p>
+            <p>Imagine enviar seu cartão de crédito escrito em um cartão postal. Isso é HTTP.</p>
+        </section>
+
+        <!-- 8. ANIMAÇÃO SNIFFING -->
+        <section class="scroll-section" id="sniff-sim-section">
+            <h2>Animação: Ataque Man-in-the-Middle (Sniffing)</h2>
+            <p>Veja o que acontece quando você envia uma senha via HTTP inseguro.</p>
+            
+            <div class="browser-mockup">
+                <div class="browser-header">
+                    <div class="address-bar" style="border: 2px solid var(--insecure-red);">
+                        🔓 http://banco-inseguro.com
+                    </div>
+                </div>
+                <div class="browser-content" id="sniffing-content">
+                    <div style="position: absolute; left: 20px;">🙎‍♂️ Você</div>
+                    <div style="position: absolute; right: 20px;">🏦 Banco</div>
+                    <div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); font-size: 40px;">🕵️‍♂️</div>
+                    
+                    <!-- Packet -->
+                    <div id="plain-packet" class="http-packet" style="left: 80px; background-color: #fff; border: 1px solid #ccc;">Senha: 12345</div>
+                    
+                    <!-- Hacker View -->
+                    <div id="hacker-screen" class="hacker-view">Interceptado: "Senha: 12345"</div>
+                </div>
+            </div>
+            <p class="interactive-desc" id="sniff-desc">Pressione → para enviar a senha.</p>
+            
+            <div class="controls-row">
+                <button class="btn-hack" onclick="runSniffingSim()">Enviar Senha (HTTP)</button>
+            </div>
+        </section>
+
+        <!-- 9. HTTPS INTRO -->
+        <section class="scroll-section">
+            <h2>A Solução: HTTPS (Secure)</h2>
+            <p>Para resolver isso, <strong class="highlight" style="color: var(--secure-green);">foi criado</strong> o <strong class="highlight" style="color: var(--secure-green);">HTTPS</strong>.</p>
+            <p>É o mesmo HTTP, mas rodando sobre uma camada de segurança chamada <strong class="highlight">SSL/TLS</strong>.</p>
+            <p>O TLS criptografa a carta antes de colocá-la no envelope. Mesmo se alguém interceptar, só verá uma sopa de letrinhas ilegível.</p>
+        </section>
+
+        <!-- 10. ANIMAÇÃO HTTPS -->
+        <section class="scroll-section" id="https-sim-section">
+            <h2>Animação: Segurança com HTTPS</h2>
+            <p>Agora veja a mesma situação com criptografia.</p>
+            
+            <div class="browser-mockup">
+                <div class="browser-header">
+                    <div class="address-bar" style="border: 2px solid var(--secure-green); color: var(--secure-green); font-weight: bold;">
+                        🔒 https://banco-seguro.com
+                    </div>
+                </div>
+                <div class="browser-content" id="https-content">
+                    <div style="position: absolute; left: 20px;">🙎‍♂️ Você</div>
+                    <div style="position: absolute; right: 20px;">🏦 Banco</div>
+                    <div style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); font-size: 40px;">🕵️‍♂️</div>
+                    
+                    <!-- Packet -->
+                    <div id="secure-packet" class="http-packet" style="left: 80px; background-color: var(--secure-green); color: white;">Ax9#j!kL2</div>
+                    
+                    <!-- Hacker View -->
+                    <div id="hacker-screen-secure" class="hacker-view">Interceptado: "Ax9#j!kL2" ???</div>
+                </div>
+            </div>
+            <p class="interactive-desc" id="https-desc">Pressione → para enviar a senha criptografada.</p>
+            
+            <div class="controls-row">
+                <button class="btn-get" style="background-color: var(--secure-green);" onclick="runHttpsSim()">Enviar Senha (HTTPS)</button>
+            </div>
+        </section>
+
+        <!-- 11. CERTIFICADOS -->
+        <section class="scroll-section">
+            <h2>O Cadeado e o Certificado Digital</h2>
+            <p>Como você sabe que está falando com o banco real e não com um site falso?</p>
+            <p>O HTTPS usa <strong class="highlight">Certificados Digitais</strong> emitidos por uma Autoridade Certificadora (CA) confiável. É como um passaporte digital do site.</p>
+            <img src="img/https.png" alt="Ilustração do cadeado HTTPS" class="placeholder-img">
+        </section>
+
+        <!-- 12. SEGURANÇA BÁSICA -->
+        <section class="scroll-section">
+            <h2>Ameaças Comuns: Phishing</h2>
+            <p>Mesmo com HTTPS, você pode ser enganado.</p>
+            <p><strong class="highlight">Phishing</strong> é quando um atacante cria um site falso que <strong>parece</strong> o original (ex: `g00gle.com` ou `bancodobrasiI.com` com 'i' maiúsculo) para roubar seus dados.</p>
+            <p>Dica: HTTPS garante que a conexão é segura, mas não garante que o dono do site é honesto!</p>
+        </section>
+
+        <!-- 13. FIREWALL -->
+        <section class="scroll-section">
+            <h2>Segurança Básica: Firewall</h2>
+            <p>O <strong class="highlight">Firewall</strong> é o porteiro da sua rede.</p>
+            <p>Ele monitora o tráfego de entrada e saída e decide quem entra e quem sai, baseado em regras (ex: "Bloquear tudo na porta 80, liberar a porta 443").</p>
+            <img src="img/firewall.png" alt="Ilustração de um Firewall" class="placeholder-img">
+        </section>
+
+        <!-- 14. RESUMO -->
+        <section class="scroll-section">
+            <h2>Resumo da Aula</h2>
+            <ul>
+                <li><strong class="highlight">HTTP</strong> é o protocolo de texto plano para transferir sites (Porta 80).</li>
+                <li><strong class="highlight" style="color: var(--secure-green);">HTTPS</strong> adiciona criptografia (SSL/TLS) para segurança (Porta 443).</li>
+                <li>Use os <strong class="highlight">Métodos</strong> (GET, POST) para interagir e observe os <strong class="highlight">Códigos de Status</strong> (200, 404).</li>
+                <li>Cuidado com <strong class="highlight">Phishing</strong> e utilize <strong class="highlight">Firewalls</strong> para proteger a rede.</li>
+            </ul>
+        </section>
+        
+    </div>
+
+    <!-- Navegação -->
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" title="Voltar">←</button>
+        <div class="slide-counter" id="slide-counter">1 / 14</div>
+        <button class="nav-btn" id="next-btn" title="Avançar">→</button>
+        <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">⛶</button>
+    </div>
+</div>
+
+<script>
+    // Estado das animações
+    let httpAnimRunning = false;
+    let sniffAnimRunning = false;
+    let httpsAnimRunning = false;
+    let timeoutIds = []; // Array para rastrear timeouts ativos
+
+    // Função auxiliar para limpar todos os timeouts pendentes
+    function clearAllTimeouts() {
+        timeoutIds.forEach(id => clearTimeout(id));
+        timeoutIds = [];
+    }
+
+    // Wrapper para setTimeout que registra o ID
+    function trackedTimeout(callback, delay) {
+        const id = setTimeout(callback, delay);
+        timeoutIds.push(id);
+        return id;
+    }
+
+    // --- SIMULADOR HTTP ---
+    function runHttpSim(type) {
+        const packet = document.getElementById('http-req-packet');
+        const response = document.getElementById('http-response-code');
+        
+        // Reset e Limpeza
+        clearAllTimeouts();
+        
+        // Força reflow para resetar animações CSS
+        packet.style.transition = 'none';
+        response.style.transition = 'none';
+        packet.style.left = '80px';
+        packet.style.opacity = '0';
+        response.style.opacity = '0';
+        void packet.offsetWidth; // Trigger reflow
+        
+        // Restaura transitions
+        packet.style.transition = 'all 1s ease-in-out';
+        response.style.transition = 'opacity 0.5s';
+        
+        // Config
+        if (type === '200') {
+            packet.textContent = "GET /index.html";
+            packet.style.backgroundColor = "var(--web-blue)";
+            packet.style.color = "white";
+            response.textContent = "200 OK";
+            response.style.color = "var(--secure-green)";
+        } else {
+            packet.textContent = "GET /nada.html";
+            packet.style.backgroundColor = "var(--warning-yellow)";
+            packet.style.color = "black";
+            response.textContent = "404 Not Found";
+            response.style.color = "var(--insecure-red)";
+        }
+
+        httpAnimRunning = true;
+
+        // Animation Request
+        trackedTimeout(() => { packet.style.opacity = '1'; }, 100);
+        trackedTimeout(() => { packet.style.left = '450px'; }, 200); // Move to server
+        
+        // Animation Response
+        trackedTimeout(() => { 
+            packet.style.opacity = '0';
+            response.style.opacity = '1'; 
+            httpAnimRunning = false;
+        }, 1500);
+    }
+
+    // --- SIMULADOR SNIFFING ---
+    function runSniffingSim() {
+        const packet = document.getElementById('plain-packet');
+        const hackerScreen = document.getElementById('hacker-screen');
+        
+        // Reset
+        clearAllTimeouts();
+        packet.style.transition = 'none';
+        packet.style.left = '80px';
+        packet.style.opacity = '0';
+        hackerScreen.style.opacity = '0';
+        void packet.offsetWidth;
+        packet.style.transition = 'all 1s ease-in-out';
+
+        sniffAnimRunning = true;
+
+        // Animate
+        trackedTimeout(() => { packet.style.opacity = '1'; }, 100);
+        trackedTimeout(() => { packet.style.left = '350px'; }, 200); // Move to middle
+        
+        // Hacker sees it
+        trackedTimeout(() => { 
+            hackerScreen.style.opacity = '1';
+        }, 1000);
+
+        // Finish move
+        trackedTimeout(() => { packet.style.left = '600px'; }, 1200);
+        trackedTimeout(() => { 
+            packet.style.opacity = '0'; 
+            sniffAnimRunning = false;
+        }, 2200);
+    }
+
+    // --- SIMULADOR HTTPS ---
+    function runHttpsSim() {
+        const packet = document.getElementById('secure-packet');
+        const hackerScreen = document.getElementById('hacker-screen-secure');
+        
+        // Reset
+        clearAllTimeouts();
+        packet.style.transition = 'none';
+        packet.style.left = '80px';
+        packet.style.opacity = '0';
+        hackerScreen.style.opacity = '0';
+        void packet.offsetWidth;
+        packet.style.transition = 'all 1s ease-in-out';
+
+        httpsAnimRunning = true;
+
+        // Animate
+        trackedTimeout(() => { packet.style.opacity = '1'; }, 100);
+        trackedTimeout(() => { packet.style.left = '350px'; }, 200); // Move to middle
+        
+        // Hacker sees garbage
+        trackedTimeout(() => { 
+            hackerScreen.style.opacity = '1';
+        }, 1000);
+
+        // Finish move
+        trackedTimeout(() => { packet.style.left = '600px'; }, 1200);
+        trackedTimeout(() => { 
+            packet.style.opacity = '0'; 
+            httpsAnimRunning = false;
+        }, 2200);
+    }
+
+
+    // --- NAVEGAÇÃO PADRÃO ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = document.querySelectorAll('.scroll-section');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const slideCounter = document.getElementById('slide-counter');
+        
+        let currentSectionIndex = 0;
+        const totalSections = sections.length;
+
+        function updateNavigation() {
+            slideCounter.textContent = `${currentSectionIndex + 1} / ${totalSections}`;
+            prevBtn.disabled = currentSectionIndex === 0;
+            nextBtn.disabled = currentSectionIndex === totalSections - 1;
+        }
+
+        function handleNavigation(direction) {
+            const currentSection = sections[currentSectionIndex];
+            
+            // Lógica para disparar animações com a seta direita
+            if (direction > 0) {
+                if (currentSection.id === 'http-sim-section' && !httpAnimRunning) {
+                    // Se a animação não estiver rodando, roda ela.
+                    // Se já rodou (response visivel), avança.
+                    const response = document.getElementById('http-response-code');
+                    if (response.style.opacity !== '1') {
+                        runHttpSim('200');
+                        return; // Não avança o slide
+                    }
+                }
+                if (currentSection.id === 'sniff-sim-section' && !sniffAnimRunning) {
+                    const hackerScreen = document.getElementById('hacker-screen');
+                    if (hackerScreen.style.opacity !== '1') {
+                        runSniffingSim();
+                        return;
+                    }
+                }
+                if (currentSection.id === 'https-sim-section' && !httpsAnimRunning) {
+                    const hackerScreen = document.getElementById('hacker-screen-secure');
+                    if (hackerScreen.style.opacity !== '1') {
+                        runHttpsSim();
+                        return;
+                    }
+                }
+            }
+
+            // Navegação Normal
+            if (direction > 0 && currentSectionIndex < totalSections - 1) {
+                sections[currentSectionIndex + 1].scrollIntoView({ behavior: 'smooth' });
+            } else if (direction < 0 && currentSectionIndex > 0) {
+                sections[currentSectionIndex - 1].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        nextBtn.addEventListener('click', () => handleNavigation(1));
+        prevBtn.addEventListener('click', () => handleNavigation(-1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') handleNavigation(1);
+            if (e.key === 'ArrowLeft') handleNavigation(-1);
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    currentSectionIndex = Array.from(sections).indexOf(entry.target);
+                    updateNavigation();
+                    
+                    // Opcional: Resetar animações ao sair e voltar? 
+                    // Por enquanto, mantemos o estado final para não ser irritante.
+                }
+            });
+        }, { threshold: 0.5 });
+
+        sections.forEach(section => observer.observe(section));
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        });
+        
+        updateNavigation();
+    });
+</script>
+</body>
+</html>

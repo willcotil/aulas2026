@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula: Protocolos de Transporte e Aplicação</title>
+    <style>
+        /* --- GERAL & TEMA CLARO --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            /* Tema Padrão: Verde (Camada de Rede) */
+            --primary-color: #28a745;
+            --primary-hover: #218838;
+            
+            /* Tema 2: Laranja (Camada de Transporte) */
+            --transport-color: #D95A00;
+            --transport-hover: #B34A00;
+            
+            /* Tema 3: Roxo (Camada de Aplicação) */
+            --application-color: #6f42c1;
+            --application-hover: #59369a;
+
+            --secondary-color: #495057;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-grey: #e9ecef;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+        }
+        
+        #presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* --- SEÇÕES DE ROLAGEM --- */
+        .scroll-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 60px 40px;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .scroll-section:last-of-type {
+            border-bottom: none;
+        }
+
+        /* --- NAVEGAÇÃO --- */
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.4s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .nav-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        .nav-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-counter {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            min-width: 60px;
+            text-align: center;
+            background-color: var(--card-background);
+            padding: 5px 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-top: 3px solid var(--primary-color);
+            transition: border-color 0.4s;
+        }
+        
+        /* --- ESTILOS DE CONTEÚDO --- */
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        h1 { font-size: 2.8em; }
+        h2 { font-size: 2.2em; }
+        h3 { font-size: 1.6em; color: var(--secondary-color); }
+
+        p {
+            font-size: 1.2em;
+            line-height: 1.7;
+            max-width: 850px;
+            text-align: center;
+        }
+        .text-left { text-align: left; }
+        .highlight { color: var(--primary-color); font-weight: bold; }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--light-grey);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .two-column-layout {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            align-items: center;
+        }
+        .column { flex: 1; }
+
+        .placeholder-img {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: var(--light-grey);
+            display: block;
+            margin: 20px auto;
+        }
+        
+        /* --- TABELAS --- */
+        .styled-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 1100px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 1em;
+        }
+        .styled-table th, .styled-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .styled-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        .styled-table tr:nth-child(even) { background-color: var(--background-color); }
+        .styled-table tr:hover { background-color: #d8e6f5; }
+        
+        /* --- ELEMENTOS INTERATIVOS --- */
+        .interactive-container {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .interactive-description { 
+             min-height: 40px;
+             font-style: italic;
+             color: var(--secondary-color);
+             margin-top: 15px;
+        }
+        .interactive-controls { margin-top: 20px; }
+        .interactive-controls button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .interactive-controls button:hover {
+             background-color: var(--primary-hover);
+        }
+        .interactive-container input[type="text"], .interactive-container select {
+            font-family: 'Roboto Mono', monospace;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1.1em;
+            margin: 0 10px;
+        }
+        .result-box {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--light-grey);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+        
+        .binary-converter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .binary-bits {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .bit-box {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.5em;
+            background-color: #fff;
+        }
+        .bit-value {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+        }
+        
+        /* --- ANIMAÇÃO VIAGEM PACOTE --- */
+        #packet-journey-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            background-color: var(--light-grey);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .pj-device {
+            position: absolute;
+            font-size: 40px;
+        }
+        .pj-label {
+            position: absolute;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        #pj-pc { top: 180px; left: 50px; }
+        #pj-pc-label { top: 230px; left: 30px; }
+        #pj-switch { top: 180px; left: 200px; }
+        #pj-switch-label { top: 230px; left: 190px; }
+        #pj-router { top: 180px; left: 350px; }
+        #pj-router-label { top: 230px; left: 320px; }
+        #pj-cloud { top: 180px; left: 520px; font-size: 80px; color: var(--info-color); }
+        #pj-server { top: 180px; left: 700px; }
+        #pj-server-label { top: 230px; left: 680px; }
+        .pj-packet {
+            position: absolute;
+            font-size: 30px;
+            top: 185px;
+            left: 100px;
+            opacity: 0;
+            transition: all 1s ease-in-out;
+        }
+        .packet-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* --- ANIMAÇÃO TCP --- */
+        #tcp-handshake-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            margin-top: 40px;
+            border: 2px dashed var(--secondary-color);
+            border-radius: 8px;
+        }
+        .tcp-device {
+            position: absolute;
+            top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #client { left: 50px; color: var(--transport-color); }
+        #server { right: 50px; color: var(--success-color); }
+        .tcp-line {
+            position: absolute;
+            top: 80px;
+            width: 1px;
+            height: 180px;
+            background-color: #ccc;
+        }
+        #client-line { left: 100px; }
+        #server-line { right: 100px; }
+        .tcp-message {
+            position: absolute;
+            background-color: var(--info-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-family: 'Roboto Mono', monospace;
+            opacity: 0;
+            transition: all 0.7s ease-in-out;
+        }
+        .tcp-step-label {
+            position: absolute;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--secondary-color);
+            width: 100%;
+            text-align: center;
+            top: 270px;
+        }
+
+        /* --- ANIMAÇÃO DNS --- */
+        #dns-process-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 350px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .dns-entity {
+            position: absolute;
+            font-size: 30px;
+            text-align: center;
+        }
+        .dns-label { font-size: 12px; font-family: 'Roboto Mono', monospace; }
+        #dns-client { top: 150px; left: 50px; }
+        #dns-resolver { top: 50px; left: 400px; }
+        #dns-root { top: 50px; left: 700px; }
+        #dns-tld { top: 250px; left: 700px; }
+        #dns-authoritative { top: 250px; left: 400px; }
+
+        .dns-line {
+            stroke: var(--info-color);
+            stroke-width: 1.5;
+            marker-end: url(#dns-arrowhead);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        /* --- ANIMAÇÃO DORA --- */
+        #dora-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 300px;
+            border: 2px dashed var(--secondary-color);
+            border-radius: 8px;
+        }
+        .dora-device {
+            position: absolute;
+            top: 50px;
+            font-size: 40px;
+            text-align: center;
+        }
+        #dora-client { left: 50px; }
+        #dora-server { right: 50px; }
+        .dora-label { font-size: 14px; font-weight: bold; }
+        .dora-message {
+            position: absolute;
+            background-color: var(--info-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-family: 'Roboto Mono', monospace;
+            opacity: 0;
+            transition: all 0.7s ease-in-out;
+            border: 1px solid #fff;
+        }
+        
+        /* --- TEMA CAMADA DE TRANSPORTE (LARANJA) --- */
+        .theme-transport h1,
+        .theme-transport h2,
+        .theme-transport h3,
+        .theme-transport .highlight {
+            color: var(--transport-color);
+        }
+        
+        .theme-transport .styled-table th {
+            background-color: var(--transport-color);
+        }
+        
+        .theme-transport .interactive-controls button {
+            background-color: var(--transport-color);
+            border-color: var(--transport-color);
+            color: white;
+        }
+
+        .theme-transport .interactive-controls button:hover {
+            background-color: var(--transport-hover);
+        }
+        
+        .theme-transport li {
+            border-left-color: var(--transport-color);
+        }
+        .theme-transport #client { color: var(--transport-color); }
+
+
+        /* --- TEMA CAMADA DE APLICAÇÃO (ROXO) --- */
+        .theme-application h1,
+        .theme-application h2,
+        .theme-application h3,
+        .theme-application .highlight {
+            color: var(--application-color);
+        }
+        
+        .theme-application .styled-table th {
+            background-color: var(--application-color);
+        }
+        
+        .theme-application .interactive-controls button {
+            background-color: var(--application-color);
+            border-color: var(--application-color);
+            color: white;
+        }
+        
+        .theme-application .interactive-controls button:hover {
+            background-color: var(--application-hover);
+        }
+        
+        .theme-application li {
+            border-left-color: var(--application-color);
+        }
+        
+        .theme-application #pj-cloud {
+             color: var(--application-color);
+        }
+        
+        .theme-application .dns-line { stroke: var(--application-color); }
+        .theme-application #dns-arrowhead polygon { fill: var(--application-color); }
+
+        .theme-application .dora-message { background-color: var(--application-color); }
+
+        /* --- RESPONSIVIDADE --- */
+        @media (max-width: 768px) {
+            .scroll-section { padding: 40px 20px; }
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.6em; }
+            p { font-size: 1em; }
+            .two-column-layout { flex-direction: column; }
+            #tcp-handshake-container { height: 350px; }
+            #client { left: 10px; }
+            #server { right: 10px; }
+            #client-line { left: 30px; }
+            #server-line { right: 30px; }
+            .tcp-message { font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="presentation-container">
+    <div class="slides-container">
+        
+        <!-- INTRODUÇÃO -->
+        <section class="scroll-section">
+            <h1>Protocolos de Transporte e Aplicação</h1>
+            <p class="subtitle">Como a Internet Garante a Entrega e Fornece Serviços Essenciais</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>O Problema da Comunicação em Larga Escala</h2>
+            <p>Imagine uma sala de reuniões gigante com milhares de pessoas. Se alguém grita "MARIA!", todas as Marias da sala respondem, e todas as outras pessoas precisam parar para ouvir a gritaria.</p>
+            <p>Essa "gritaria" em uma rede é chamada de <strong class="highlight">Broadcast</strong>. É uma mensagem enviada para <strong class="highlight">TODOS</strong> os dispositivos da mesma rede local.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>O Switch e o Domínio de Broadcast</h2>
+            <p>Um Switch (Camada 2) é inteligente para entregar mensagens diretas (unicast) usando Endereços MAC.</p>
+            <p>Mas quando ele recebe uma mensagem de broadcast, sua única opção é encaminhá-la para <strong class="highlight">TODAS as suas portas</strong>, criando um único e grande <strong class="highlight">Domínio de Broadcast</strong>.</p>
+            <img src="img/broadcast.png" alt="Diagrama de um grande domínio de broadcast com vários switches" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>A Solução: Segmentar a Rede</h2>
+            <p>Para resolver o problema da "gritaria" (broadcast storms) e organizar a rede, precisamos dividi-la em "salas" menores e isoladas.</p>
+            <p>O dispositivo que faz essa divisão, criando barreiras para os broadcasts, é o <strong class="highlight">Roteador</strong>.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>O Roteador: Criando Múltiplos Domínios de Broadcast</h2>
+            <p>A regra de ouro: <strong class="highlight">Roteadores NÃO encaminham broadcasts</strong> de uma rede para outra.</p>
+            <p>Cada porta de um roteador conecta-se a uma rede diferente e cria um <strong class="highlight">domínio de broadcast separado e isolado</strong>. A "gritaria" de uma sala não passa para a outra.</p>
+            <img src="img/broadcast2.png" alt="Diagrama de um roteador separando domínios de broadcast" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>O Roteador e a Camada de Rede</h2>
+            <p>O Roteador é o principal equipamento da <strong class="highlight">Camada 3 (Rede ou Internet)</strong>.</p>
+            <p>Para conseguir "rotear" pacotes entre redes diferentes (ex: da sua casa para o Google), ele não pode usar o Endereço MAC (que só funciona localmente). Ele precisa de um endereço lógico e universal.</p>
+            <p>Esse endereço é o <strong class="highlight">Endereço IP (Internet Protocol)</strong>.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>A Conexão Lógica: Protocolos</h2>
+            <p>Ok, agora temos "salas" (redes) separadas. Mas como um computador em uma sala envia uma mensagem para outro em uma sala diferente?</p>
+            <p>Precisamos de um sistema de endereçamento lógico, como CEPs e números de apartamentos, que funcione entre as salas. É aqui que entram os <strong class="highlight">Protocolos</strong>.</p>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>Introdução a Protocolos</h2>
+            <p>Um <strong class="highlight">protocolo</strong> é um conjunto de regras que governa como os dados são formatados e transmitidos. É a "linguagem" que os dispositivos usam para se comunicar de forma organizada.</p>
+            <p>O protocolo que cuida do endereçamento lógico entre redes diferentes é o <strong class="highlight">IP (Internet Protocol)</strong>.</p>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Switch vs. Roteador: A Ligação Final</h2>
+            <table class="styled-table" style="max-width: 900px;">
+                 <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>Switch</th>
+                        <th>Roteador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Camada OSI/TCP-IP</strong></td>
+                        <td>Camada 2 (Enlace)</td>
+                        <td>Camada 3 (Rede / Internet)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Função</strong></td>
+                        <td>Conecta dispositivos na <strong>mesma rede</strong>.</td>
+                        <td>Conecta <strong>redes diferentes</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Endereço</strong></td>
+                        <td>Usa Endereço MAC (físico).</td>
+                        <td>Usa Endereço IP (lógico).</td>
+                    </tr>
+                     <tr>
+                        <td><strong>Broadcast</strong></td>
+                        <td>Encaminha para todos (cria o domínio).</td>
+                        <td>Bloqueia e isola (separa os domínios).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="scroll-section">
+            <h2>A Família de Protocolos TCP/IP</h2>
+            <p>A internet funciona com uma <strong class="highlight">suíte (conjunto)</strong> de protocolos. O <strong class="highlight">IP</strong> é o responsável pelo endereçamento e roteamento, como se fosse o serviço de correios que só se preocupa com o CEP de origem e destino.</p>
+            <img src="img/tcpip.png" alt="Diagrama das camadas do modelo TCP/IP" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section">
+            <h2>As 4 Camadas como Etapas</h2>
+            <p>Pense nas camadas como etapas de uma linha de montagem para enviar uma carta (seus dados).</p>
+            <ol style="max-width: 700px; text-align: left;">
+                <li><strong>Aplicação:</strong> Escreve a carta (ex: DNS, HTTP, DHCP).</li>
+                <li><strong>Transporte:</strong> Coloca em um envelope, escolhe o serviço (SEDEX ou carta simples) e identifica o destinatário (ex: TCP, UDP, Portas).</li>
+                <li><strong>Rede/Internet:</strong> Coloca o CEP de origem e destino (ex: Endereço IP).</li>
+                <li><strong>Acesso à Rede:</strong> Coloca no caminhão do correio local para levar até a agência (ex: Ethernet, Wi-Fi, MAC).</li>
+            </ol>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Como os Dados se Transformam (Encapsulamento)</h2>
+            <p>Lembre-se que, à medida que os dados descem as camadas, eles são "embrulhados" (encapsulados) com novos cabeçalhos.</p>
+            <ol style="max-width: 600px; text-align: left;">
+                <li><strong>Aplicação:</strong> Seus dados (ex: "Olá!")</li>
+                <li><strong>Transporte:</strong> Cabeçalho TCP/UDP + Dados = <strong class="highlight">Segmento</strong></li>
+                <li><strong>Internet:</strong> Cabeçalho IP + Segmento = <strong class="highlight">Pacote (Datagrama)</strong></li>
+                <li><strong>Acesso à Rede:</strong> Cabeçalho Ethernet + Pacote = <strong class="highlight">Frame</strong></li>
+            </ol>
+            <img src="img/camadas.png" alt="Diagrama de Encapsulamento" class="placeholder-img" style="max-width: 800px;">
+        </section>
+
+        <!-- CAMADA DE TRANSPORTE (LARANJA) -->
+        <section class="scroll-section theme-transport">
+            <h2>A Camada de Transporte (Nosso Foco Agora)</h2>
+            <p>O IP (Camada 3) sabe entregar um pacote em um <strong class="highlight">computador</strong>. Mas como esse computador, que está rodando dezenas de programas, sabe para qual <strong class="highlight">aplicação</strong> o pacote se destina?</p>
+            <p>É a Camada de Transporte que gerencia isso, através das <strong class="highlight">Portas Lógicas</strong>.</p>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>Portas Lógicas: O Número do Apartamento</h2>
+            <p>Uma porta é simplesmente um número (de 0 a 65535) que identifica unicamente uma aplicação ou serviço rodando no dispositivo.</p>
+            <div class="two-column-layout" style="max-width: 900px; text-align: left;">
+                <div class="column">
+                    <p style="font-size: 1.1em;">O <strong class="highlight">Endereço IP</strong> (<code>8.8.8.8</code>) leva o pacote até o computador servidor do Google.</p>
+                    <p style="font-size: 1.1em;">A <strong class="highlight">Porta</strong> (<code>443</code>) informa ao servidor que este pacote deve ser entregue ao serviço HTTPS (o site seguro).</p>
+                    <p style="font-size: 1.1em;">A combinação <code>IP:Porta</code> (ex: <code>8.8.8.8:443</code>) é chamada de <strong class="highlight">Socket</strong>.</p>
+                </div>
+                <div class="column">
+                    <img src="img/predio.jpg" alt="Diagrama de IP e Porta" class="placeholder-img">
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>Tipos de Portas</h2>
+            <ol style="max-width: 700px; text-align: left;">
+                <li><strong class="highlight">Portas Bem-Conhecidas (0-1023):</strong> Reservadas globalmente para serviços padrão (HTTP, FTP, etc).</li>
+                <li><strong class="highlight">Portas Registradas (1024-49151):</strong> Usadas por aplicações específicas (ex: jogos, bancos de dados).</li>
+                <li><strong class="highlight">Portas Dinâmicas/Privadas (49152-65535):</strong> Usadas pelo seu SO como porta de "origem" temporária para suas conexões.</li>
+            </ol>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>Portas Comuns que Você Deve Conhecer</h2>
+            <table class="styled-table" style="max-width: 700px;">
+                <thead>
+                    <tr><th>Porta</th><th>Protocolo</th><th>Serviço</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>21</td><td>TCP</td><td>FTP (Transferência de Arquivos)</td></tr>
+                    <tr><td>22</td><td>TCP</td><td>SSH (Acesso Remoto Seguro)</td></tr>
+                    <tr><td>25</td><td>TCP</td><td>SMTP (Envio de E-mail)</td></tr>
+                    <tr><td>53</td><td>TCP/UDP</td><td>DNS (Resolução de Nomes)</td></tr>
+                    <tr><td>**80**</td><td>TCP</td><td>**HTTP** (Web Comum)</td></tr>
+                    <tr><td>**443**</td><td>TCP</td><td>**HTTPS** (Web Segura)</td></tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section class="scroll-section theme-transport">
+            <h2>Os Dois Protocolos de Transporte</h2>
+            <p>A Camada de Transporte oferece duas "opções de entrega" principais:</p>
+            <div class="two-column-layout" style="max-width: 900px; text-align: center;">
+                <div class="column">
+                    <h3 style="color: var(--success-color);">TCP (Transmission Control Protocol)</h3>
+                    <p style="font-size: 1.1em;">O serviço de entrega <strong class="highlight">confiável</strong> (como um SEDEX com rastreamento).</p>
+                </div>
+                <div class="column">
+                    <h3 style="color: var(--warning-color);">UDP (User Datagram Protocol)</h3>
+                    <p style="font-size: 1.1em;">O serviço de entrega <strong class="highlight">rápida</strong> e sem garantias (como uma carta simples).</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- TCP -->
+        <section class="scroll-section theme-transport">
+            <h2>TCP: O Protocolo Confiável</h2>
+            <p>O TCP é <strong class="highlight">orientado à conexão</strong>. Ele é usado quando cada bit de informação é vital e precisa chegar na ordem correta.</p>
+            <p>(Ex: Carregar um site, enviar um e-mail, baixar um arquivo).</p>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>As 4 Características do TCP</h2>
+            <ol style="max-width: 700px; text-align: left;">
+                <li><strong>1. Orientado à Conexão:</strong> Usa o "3-Way Handshake" para estabelecer uma conexão antes de enviar dados.</li>
+                <li><strong>2. Entrega Confiável:</strong> Usa "Confirmações" (ACKs) e retransmite pacotes perdidos.</li>
+                <li><strong>3. Sequenciamento:</strong> Numera os pacotes para garantir que sejam remontados na ordem correta.</li>
+                <li><strong>4. Controle de Fluxo:</strong> Gerencia a velocidade da transmissão para não sobrecarregar o receptor.</li>
+            </ol>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>TCP - Característica 1: 3-Way Handshake</h2>
+            <p>Antes de enviar qualquer dado, o cliente e o servidor precisam "apertar as mãos" para sincronizar e confirmar que ambos estão prontos para a comunicação.</p>
+        </section>
+
+        <section class="scroll-section theme-transport" data-interactive="true">
+            <h2>Interativo: O 3-Way Handshake</h2>
+            <p>Veja como o Cliente e o Servidor estabelecem a conexão.</p>
+            <div id="tcp-handshake-container">
+                <div class="tcp-device" id="client">Cliente (PC)</div>
+                <div class="tcp-line" id="client-line"></div>
+                <div class="tcp-device" id="server">Servidor (Web)</div>
+                <div class="tcp-line" id="server-line"></div>
+                
+                <div class="tcp-message" id="msg-syn" style="left: 100px; top: 100px;">SYN</div>
+                <div class="tcp-message" id="msg-synack" style="right: 100px; top: 140px;">SYN + ACK</div>
+                <div class="tcp-message" id="msg-ack" style="left: 100px; top: 180px;">ACK</div>
+
+                <div class="tcp-step-label" id="step-label">Clique na seta direita para iniciar.</div>
+            </div>
+            <p class="interactive-description" id="tcp-desc"></p>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>TCP - Característica 2 e 3: Confirmação e Sequência</h2>
+            <p>Após a conexão, os dados são enviados em blocos (segmentos). Cada segmento tem um <strong class="highlight">número de sequência</strong>.</p>
+            <p>O receptor usa esses números para remontar os dados na ordem correta e envia <strong class="highlight">confirmações (ACKs)</strong> de volta, dizendo "Recebi até o pacote X!". Se o remetente não receber um ACK, ele retransmite o pacote perdido.</p>
+            <img src="img/sequencia.png" alt="Diagrama de ACKs e Sequenciamento TCP" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>TCP - Característica 4: Controle de Fluxo</h2>
+            <p>O TCP usa um conceito chamado <strong class="highlight">"Janela Deslizante" (Sliding Window)</strong>. O receptor informa ao transmissor o tamanho do seu "buffer" (quanta informação ele consegue receber de uma vez). Isso evita que um transmissor rápido "inunde" um receptor lento.</p>
+        </section>
+
+        <!-- UDP -->
+        <section class="scroll-section theme-transport">
+            <h2>UDP: O Protocolo Rápido</h2>
+            <p>O UDP (User Datagram Protocol) é o oposto do TCP. Ele é <strong class="highlight">sem conexão</strong> (connectionless).</p>
+            <p>Não há handshake, nem ACKs, nem sequenciamento. Ele simplesmente <strong class="highlight">"dispara e esquece"</strong>. É muito mais leve e rápido, mas não oferece garantias.</p>
+        </section>
+
+        <section class="scroll-section theme-transport">
+            <h2>TCP vs. UDP: Tabela Comparativa</h2>
+            <table class="styled-table" style="max-width: 800px;">
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>TCP (Confiável)</th>
+                        <th>UDP (Rápido)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Conexão</strong></td>
+                        <td>Orientado à Conexão (Handshake)</td>
+                        <td>Sem Conexão</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Confiabilidade</strong></td>
+                        <td><strong class="highlight" style="color: var(--success-color);">Alta</strong> (ACKs e Retransmissão)</td>
+                        <td><strong class="highlight" style="color: var(--danger-color);">Baixa</strong> (Melhor Esforço)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ordenação</strong></td>
+                        <td>Garante a ordem dos pacotes</td>
+                        <td>Não garante a ordem</td>
+                    </tr>
+                     <tr>
+                        <td><strong>Velocidade (Sobrecarga)</strong></td>
+                        <td>Mais Lento (Header de 20 bytes)</td>
+                        <td>Mais Rápido (Header de 8 bytes)</td>
+                    </tr>
+                     <tr>
+                        <td><strong>Exemplos de Uso</strong></td>
+                        <td>Web (HTTPS), E-mail, FTP</td>
+                        <td>Streaming, Jogos Online, VoIP, DNS</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- CAMADA DE APLICAÇÃO (ROXO) -->
+        <section class="scroll-section theme-application">
+            <h2>A Camada de Aplicação</h2>
+            <p>Finalmente, chegamos à camada superior, onde os serviços que o usuário final "vê" realmente funcionam.</p>
+            <p>Esta camada usa os serviços da Camada de Transporte (TCP ou UDP) para funcionar. Vamos focar em dois dos serviços mais importantes da internet: **DNS** e **DHCP**.</p>
+        </section>
+
+        <!-- DNS -->
+        <section class="scroll-section theme-application">
+            <h2>DNS (Domain Name System)</h2>
+            <p>Nós usamos nomes fáceis de lembrar (<code>google.com</code>). Os roteadores usam números difíceis de lembrar (<code>142.250.218.142</code>).</p>
+            <p>O DNS é o protocolo que atua como a <strong class="highlight">"lista telefônica" da internet</strong>, traduzindo nomes de domínio em endereços IP.</p>
+        </section>
+        
+        <section class="scroll-section theme-application">
+            <h2>A Hierarquia do DNS</h2>
+            <p>Nenhum servidor no mundo conhece todos os IPs de todos os sites. O DNS é um sistema <strong class="highlight">distribuído e hierárquico</strong>.</p>
+            <img src="img/dnsservers.jpg" alt="Diagrama da hierarquia DNS" class="placeholder-img">
+        </section>
+
+        <section class="scroll-section theme-application" data-interactive="true">
+            <h2>Interativo: A Jornada da Resolução DNS</h2>
+            <p>Veja a hierarquia de servidores em ação para encontrar o IP de um site.</p>
+            <div id="dns-process-container">
+                <svg width="100%" height="100%" viewBox="0 0 800 350">
+                    <defs>
+                        <marker id="dns-arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6f42c1" />
+                        </marker>
+                    </defs>
+                    <g class="dns-entity" id="dns-client" transform="translate(100, 175)">
+                        <text x="0" y="0" font-size="40">💻</text>
+                        <text x="0" y="30" class="dns-label">Cliente</text>
+                    </g>
+                    <g class="dns-entity" id="dns-resolver" transform="translate(400, 50)">
+                        <text x="0" y="0" font-size="40">⚙️</text>
+                        <text x="0" y="30" class="dns-label">Resolver Local (Provedor)</text>
+                    </g>
+                    <g class="dns-entity" id="dns-root" transform="translate(700, 50)">
+                        <text x="0" y="0" font-size="40">🌳</text>
+                        <text x="0" y="30" class="dns-label">Servidor Raiz (.)</text>
+                    </g>
+                    <g class="dns-entity" id="dns-tld" transform="translate(700, 250)">
+                        <text x="0" y="0" font-size="40">🏷️</text>
+                        <text x="0" y="30" class="dns-label">Servidor TLD (.com)</text>
+                    </g>
+                    <g class="dns-entity" id="dns-authoritative" transform="translate(400, 250)">
+                        <text x="0" y="0" font-size="40">👑</text>
+                        <text x="0" y="30" class="dns-label">Autoritativo (google.com)</text>
+                    </g>
+
+                    <line id="dns-line-1" x1="130" y1="175" x2="390" y2="60" class="dns-line"/>
+                    <line id="dns-line-2" x1="410" y1="50" x2="690" y2="50" class="dns-line"/>
+                    <line id="dns-line-3" x1="690" y1="60" x2="410" y2="60" class="dns-line"/>
+                    <line id="dns-line-4" x1="410" y1="60" x2="690" y2="250" class="dns-line"/>
+                    <line id="dns-line-5" x1="690" y1="260" x2="410" y2="60" class="dns-line"/>
+                    <line id="dns-line-6" x1="400" y1="60" x2="400" y2="240" class="dns-line"/>
+                    <line id="dns-line-7" x1="410" y1="240" x2="410" y2="60" class="dns-line"/>
+                    <line id="dns-line-8" x1="390" y1="60" x2="130" y2="175" class="dns-line"/>
+                </svg>
+                <p id="dns-step-description" class="interactive-description">Clique na seta para a direita para iniciar o processo de resolução DNS.</p>
+            </div>
+        </section>
+        
+        <section class="scroll-section theme-application">
+            <h2>A Importância do Cache DNS</h2>
+            <p>Fazer essa jornada completa toda vez seria muito lento. Por isso, seu computador, seu roteador e seu provedor de internet guardam as respostas recentes em um <strong class="highlight">Cache</strong>.</p>
+            <p>Se você visitar <code>google.com</code> de novo, seu PC não pergunta a ninguém. Ele já sabe o IP porque está guardado no cache local, e a resposta é instantânea.</p>
+        </section>
+
+        <!-- DHCP -->
+        <section class="scroll-section theme-application">
+            <h2>DHCP (Dynamic Host Configuration Protocol)</h2>
+            <p>Quando você chega em casa e seu celular se conecta ao Wi-Fi, como ele "ganha" um endereço IP (ex: <code>192.168.1.100</code>)?</p>
+            <p>O DHCP é o protocolo de serviço que funciona como um "gerente de hotel". Ele tem uma lista de endereços IP disponíveis e os <strong class="highlight">"aluga" (lease)</strong> automaticamente para os dispositivos que entram na rede.</p>
+        </section>
+
+        <section class="scroll-section theme-application">
+            <h2>Por que precisamos do DHCP?</h2>
+            <p>Imagine ter que configurar manualmente o IP, a Máscara, o Gateway e o DNS em cada dispositivo que se conecta à sua rede. Seria um pesadelo.</p>
+            <p>O DHCP <strong class="highlight">automatiza</strong> todo esse processo de configuração, tornando as redes "plug-and-play".</p>
+        </section>
+        
+        <section class="scroll-section theme-application">
+            <h2>O que o DHCP Fornece? (Os 4 Essenciais)</h2>
+            <ol style="max-width: 700px; text-align: left;">
+                <li>O <strong class="highlight">Endereço IP</strong> (ex: 192.168.1.100)</li>
+                <li>A <strong class="highlight">Máscara de Sub-rede</strong> (ex: 255.255.255.0)</li>
+                <li>O <strong class="highlight">Gateway Padrão</strong> (o IP do seu roteador, ex: 192.168.1.1)</li>
+                <li>Os <strong class="highlight">Servidores DNS</strong> (ex: 8.8.8.8)</li>
+            </ol>
+        </section>
+
+        <section class="scroll-section theme-application">
+            <h2>O Processo DORA</h2>
+            <p>O DHCP funciona através de quatro passos conhecidos pela sigla <strong class="highlight">DORA</strong>. Esse processo é especial, pois o cliente inicia a comunicação <strong class="highlight">sem ter um IP</strong>, usando mensagens de broadcast.</p>
+            <ol style="max-width: 700px; text-align: left;">
+                <li>**Discover:** O cliente (sem IP) envia um broadcast para a rede: "Tem algum servidor DHCP aqui?"</li>
+                <li>**Offer:** O servidor DHCP responde com um broadcast: "Eu tenho um IP disponível para você."</li>
+                <li>**Request:** O cliente envia um broadcast para todos, aceitando o IP ofertado.</li>
+                <li>**Acknowledge:** O servidor envia um pacote final com o IP confirmado e todos os parâmetros de rede.</li>
+            </ol>
+        </section>
+        
+        <section class="scroll-section theme-application" data-interactive="true">
+            <h2>Interativo: O Processo DORA</h2>
+            <p>Veja a negociação de 4 passos para um cliente obter um endereço IP.</p>
+            <div id="dora-container">
+                <div class="dora-device" id="dora-client">💻<div class="dora-label">Cliente (Sem IP)</div></div>
+                <div class="dora-device" id="dora-server">🖥️<div class="dora-label">Servidor DHCP</div></div>
+                <div class="dora-message" id="dora-discover">DISCOVER (Broadcast)</div>
+                <div class="dora-message" id="dora-offer">OFFER (Broadcast)</div>
+                <div class="dora-message" id="dora-request">REQUEST (Broadcast)</div>
+                <div class="dora-message" id="dora-ack">ACK (Unicast)</div>
+            </div>
+             <p id="dora-desc" class="interactive-description">Clique na seta para a direita para iniciar o processo DORA.</p>
+        </section>
+        
+        <section class="scroll-section theme-application">
+            <h2>Resumo: A Jornada Completa</h2>
+            <p>Como tudo isso funciona junto quando você abre seu notebook?</p>
+            <ol style="max-width: 800px; text-align: left; font-size: 1.1em;">
+                <li>Você liga o PC. Ele usa <strong class="highlight">DHCP</strong> (Discover, Offer, Request, Acknowledge) para obter um IP, Máscara, Gateway e DNS.</li>
+                <li>Você digita `google.com` no navegador.</li>
+                <li>Seu PC usa <strong class="highlight">DNS</strong> para perguntar ao Servidor DNS (obtido via DHCP) qual é o IP de `google.com`.</li>
+                <li>O DNS responde com o IP (ex: `8.8.8.8`).</li>
+                <li>Seu navegador abre uma conexão <strong class="highlight" style="color:var(--transport-color)">TCP</strong> (SYN, SYN-ACK, ACK) com `8.8.8.8` na porta `443` (HTTPS).</li>
+                <li>Seu PC envia os pacotes TCP. Como `8.8.8.8` está em outra rede, ele os envia para o <strong class="highlight" style="color:var(--primary-color)">Gateway Padrão (Roteador)</strong>.</li>
+                <li>O Roteador usa <strong class="highlight" style="color:var(--primary-color)">NAT</strong> para encaminhar os pacotes para a Internet.</li>
+            </ol>
+        </section>
+
+        <section class="scroll-section theme-application">
+            <h2>Resumo da Aula</h2>
+            <ul>
+                <li style="border-left-color:var(--transport-color)">A Camada de <strong class="highlight" style="color:var(--transport-color)">Transporte</strong> usa <strong class="highlight" style="color:var(--transport-color)">Portas</strong> para gerenciar múltiplas aplicações.</li>
+                <li style="border-left-color:var(--transport-color)"><strong class="highlight" style="color:var(--transport-color)">TCP</strong> é o protocolo confiável (Handshake, ACKs) usado para web, e-mail, etc.</li>
+                <li style="border-left-color:var(--transport-color)"><strong class="highlight" style="color:var(--transport-color)">UDP</strong> é o protocolo rápido (sem garantias) usado para streaming, jogos, VoIP.</li>
+                <li><strong class="highlight">DNS</strong> é a "lista telefônica" que traduz nomes em IPs.</li>
+                <li><strong class="highlight">DHCP</strong> é o serviço que configura automaticamente o IP, Máscara, Gateway e DNS de um dispositivo (processo DORA).</li>
+            </ul>
+        </section>
+
+        <section class="scroll-section">
+            <h2>Perguntas?</h2>
+        </section>
+        
+    </div>
+
+    <!-- Navegação -->
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+        <div class="slide-counter" id="slide-counter">1 / 40</div>
+        <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+        <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = document.querySelectorAll('.scroll-section');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const slideCounter = document.getElementById('slide-counter');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        
+        let currentSectionIndex = 0;
+        const totalSections = sections.length;
+        
+        // Controladores de estado para as animações
+        let tcpStep = 0;
+        let dnsStep = 0;
+        let dhcpStep = 0;
+
+        function updateNavigation() {
+            slideCounter.textContent = `${currentSectionIndex + 1} / ${totalSections}`;
+            let isAtStart = currentSectionIndex === 0;
+            
+            // Verifica se alguma animação está em andamento
+            if(sections[currentSectionIndex].querySelector('#tcp-handshake-container') && tcpStep > 0) isAtStart = false;
+            if(sections[currentSectionIndex].querySelector('#dns-process-container') && dnsStep > 0) isAtStart = false;
+            if(sections[currentSectionIndex].querySelector('#dora-container') && dhcpStep > 0) isAtStart = false;
+
+            prevBtn.disabled = isAtStart;
+            nextBtn.disabled = currentSectionIndex === totalSections - 1;
+        }
+
+        function handleNavigation(direction) {
+            const currentSection = sections[currentSectionIndex];
+            
+            // *** TCP Handshake ***
+            if (currentSection.querySelector('#tcp-handshake-container')) {
+                if (direction > 0) { if (runTcpHandshakeStep()) return; } 
+                else { if (tcpStep > 0) { resetTcpHandshake(); return; } }
+            }
+
+            // *** DNS Process ***
+             if (currentSection.querySelector('#dns-process-container')) {
+                if (direction > 0) { if (runDnsStep()) return; } 
+                else { if (dnsStep > 0) { resetDnsProcess(); return; } }
+            }
+            
+            // *** DORA Process ***
+             if (currentSection.querySelector('#dora-container')) {
+                if (direction > 0) { if (runDoraStep()) return; } 
+                else { if (dhcpStep > 0) { resetDoraProcess(); return; } }
+            }
+
+
+            // Navegação de Rolagem
+            if (direction > 0 && currentSectionIndex < totalSections - 1) {
+                sections[currentSectionIndex + 1].scrollIntoView({ behavior: 'smooth' });
+            } else if (direction < 0 && currentSectionIndex > 0) {
+                sections[currentSectionIndex - 1].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        nextBtn.addEventListener('click', () => handleNavigation(1));
+        prevBtn.addEventListener('click', () => handleNavigation(-1));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') handleNavigation(1);
+            if (e.key === 'ArrowLeft') handleNavigation(-1);
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(sections).indexOf(entry.target);
+                    currentSectionIndex = index;
+                    
+                    if (entry.target.querySelector('#tcp-handshake-container')) resetTcpHandshake();
+                    if (entry.target.querySelector('#dns-process-container')) resetDnsProcess();
+                    if (entry.target.querySelector('#dora-container')) resetDoraProcess();
+                    
+                    // *** LÓGICA DE MUDANÇA DE TEMA ***
+                    if (entry.target.classList.contains('theme-application')) {
+                        navButtons.forEach(btn => {
+                            btn.style.backgroundColor = 'var(--application-color)';
+                            btn.onmouseover = () => { if (!btn.disabled) btn.style.backgroundColor = 'var(--application-hover)'; };
+                            btn.onmouseout = () => { if (!btn.disabled) btn.style.backgroundColor = 'var(--application-color)'; };
+                        });
+                        slideCounter.style.borderColor = 'var(--application-color)';
+                    } else if (entry.target.classList.contains('theme-transport')) {
+                        navButtons.forEach(btn => {
+                            btn.style.backgroundColor = 'var(--transport-color)';
+                            btn.onmouseover = () => { if (!btn.disabled) btn.style.backgroundColor = 'var(--transport-hover)'; };
+                            btn.onmouseout = () => { if (!btn.disabled) btn.style.backgroundColor = 'var(--transport-color)'; };
+                        });
+                        slideCounter.style.borderColor = 'var(--transport-color)';
+                    } else {
+                        navButtons.forEach(btn => {
+                            btn.style.backgroundColor = 'var(--primary-color)';
+                            btn.onmouseover = () => { if (!btn.disabled) btn.style.backgroundColor = 'var(--primary-hover)'; };
+                            btn.onmouseout = () => { if (!btn.disabled) btn.style.backgroundColor = 'var(--primary-color)'; };
+                        });
+                        slideCounter.style.borderColor = 'var(--primary-color)';
+                    }
+                    // *** FIM DA LÓGICA DE TEMA ***
+
+                    updateNavigation();
+                }
+            });
+        }, { threshold: 0.7 });
+
+        sections.forEach(section => observer.observe(section));
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // --- ANIMAÇÃO TCP HANDSHAKE ---
+        
+        function resetTcpHandshake() {
+            const msgSyn = document.getElementById('msg-syn');
+            const msgSynAck = document.getElementById('msg-synack');
+            const msgAck = document.getElementById('msg-ack');
+            const tcpDesc = document.getElementById('tcp-desc');
+            
+            if (!msgSyn) return; 
+
+            tcpStep = 0;
+            msgSyn.style.opacity = msgSynAck.style.opacity = msgAck.style.opacity = 0;
+            tcpDesc.textContent = "Clique na seta para a direita para iniciar.";
+            updateNavigation();
+        }
+
+        function runTcpHandshakeStep() {
+            const msgSyn = document.getElementById('msg-syn');
+            const msgSynAck = document.getElementById('msg-synack');
+            const msgAck = document.getElementById('msg-ack');
+            const tcpDesc = document.getElementById('tcp-desc');
+
+            if (!msgSyn) return false;
+
+            tcpStep++;
+            switch(tcpStep) {
+                case 1:
+                    tcpDesc.textContent = "Passo 1: Cliente envia SYN (Synchronize). 'Olá, quer se conectar?'";
+                    msgSyn.style.opacity = 1;
+                    break;
+                case 2:
+                    tcpDesc.textContent = "Passo 2: Servidor responde com SYN + ACK. 'Sim, quero! E você também?'";
+                    msgSynAck.style.opacity = 1;
+                    break;
+                case 3:
+                    tcpDesc.textContent = "Passo 3: Cliente finaliza com ACK. 'Confirmado!' Conexão estabelecida.";
+                    msgAck.style.opacity = 1;
+                    break;
+                default:
+                    tcpStep = 0; // Permite avançar o slide
+                    return false;
+            }
+            updateNavigation();
+            return true;
+        }
+        
+        // --- ANIMAÇÃO DNS PROCESS ---
+        
+        const dnsSteps = [
+            { desc: "Passo 1: Cliente pergunta ao Resolver: 'Qual o IP de google.com?'", line: [0] },
+            { desc: "Passo 2: Resolver pergunta ao Servidor Raiz: 'Onde encontro .com?'", line: [1] },
+            { desc: "Passo 3: Raiz responde: 'Pergunte ao Servidor TLD .com'", line: [2] },
+            { desc: "Passo 4: Resolver pergunta ao TLD .com: 'Onde encontro google.com?'", line: [3] },
+            { desc: "Passo 5: TLD responde: 'Pergunte ao Servidor Autoritativo'", line: [4] },
+            { desc: "Passo 6: Resolver pergunta ao Autoritativo: 'Qual o IP de google.com?'", line: [5] },
+            { desc: "Passo 7: Autoritativo responde: 'O IP é 142.250.218.142'", line: [6] },
+            { desc: "Passo 8: Resolver entrega o IP ao Cliente. Resolução concluída!", line: [7] }
+        ];
+
+        function resetDnsProcess() {
+            const dnsDesc = document.getElementById('dns-step-description');
+            const dnsLines = document.querySelectorAll('.dns-line');
+            if(!dnsDesc) return;
+
+            dnsStep = 0;
+            dnsDesc.textContent = "Clique na seta para a direita para iniciar o processo de resolução DNS.";
+            dnsLines.forEach(line => line.style.opacity = 0);
+            updateNavigation();
+        }
+
+        function runDnsStep() {
+            const dnsDesc = document.getElementById('dns-step-description');
+            const dnsLines = document.querySelectorAll('.dns-line');
+            if(!dnsDesc) return false;
+
+            if (dnsStep >= dnsSteps.length) { dnsStep = 0; return false; }
+            
+            const stepData = dnsSteps[dnsStep];
+            dnsDesc.textContent = stepData.desc;
+            
+            dnsLines.forEach((line, index) => {
+                line.style.opacity = (stepData.line.includes(index)) ? 1 : 0.2;
+            });
+            
+            dnsStep++;
+            updateNavigation();
+            return true;
+        }
+
+        // --- ANIMAÇÃO DORA PROCESS ---
+        
+        function resetDoraProcess() {
+            const doraDesc = document.getElementById('dora-desc');
+            const msgDiscover = document.getElementById('dora-discover');
+            const msgOffer = document.getElementById('dora-offer');
+            const msgRequest = document.getElementById('dora-request');
+            const msgAck = document.getElementById('dora-ack');
+            if(!doraDesc) return;
+            
+            dhcpStep = 0;
+            doraDesc.textContent = "Clique na seta para a direita para iniciar o processo DORA.";
+            [msgDiscover, msgOffer, msgRequest, msgAck].forEach(msg => {
+                if(msg) {
+                    msg.style.opacity = 0;
+                    msg.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                }
+            });
+            updateNavigation();
+        }
+        
+        function runDoraStep() {
+            const doraDesc = document.getElementById('dora-desc');
+            const msgDiscover = document.getElementById('dora-discover');
+            const msgOffer = document.getElementById('dora-offer');
+            const msgRequest = document.getElementById('dora-request');
+            const msgAck = document.getElementById('dora-ack');
+            if(!doraDesc) return false;
+
+            dhcpStep++;
+            switch(dhcpStep) {
+                case 1:
+                    doraDesc.textContent = "Passo 1: DISCOVER - Cliente envia broadcast: 'Alguém tem um IP para mim?'";
+                    msgDiscover.style.cssText = "top: 50%; left: 25%; opacity: 1; transform: translate(-50%, -50%) scale(1);";
+                    break;
+                case 2:
+                    doraDesc.textContent = "Passo 2: OFFER - Servidor responde: 'Sim, eu tenho! Que tal este endereço?'";
+                    msgOffer.style.cssText = "top: 50%; left: 75%; opacity: 1; transform: translate(-50%, -50%) scale(1);";
+                    break;
+                case 3:
+                    doraDesc.textContent = "Passo 3: REQUEST - Cliente responde (em broadcast): 'Ok, eu aceito este IP que você ofereceu!'";
+                    msgRequest.style.cssText = "top: 50%; left: 25%; opacity: 1; transform: translate(-50%, -50%) scale(1);";
+                    break;
+                case 4:
+                    doraDesc.textContent = "Passo 4: ACKNOWLEDGE - Servidor confirma: 'Ótimo, está registrado. O IP é seu.'";
+                    msgAck.style.cssText = "top: 50%; left: 75%; opacity: 1; transform: translate(-50%, -50%) scale(1);";
+                    break;
+                default:
+                    dhcpStep = 0;
+                    return false; // Avança o slide
+            }
+            updateNavigation();
+            return true;
+        }
+
+        // Inicializa todos
+        updateNavigation();
+    });
+</script>
+</body>
+</html>

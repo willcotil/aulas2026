@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interativo: Shell Script - Revisão Prática</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        code.inline-code {
+            background-color: #fee2e2; /* Red-100 */
+            color: #991b1b; /* Red-800 */
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-12 px-4">
+
+    <div id="quiz-container" class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 transition-all duration-500">
+        
+        <div id="quiz-header">
+            <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 bg-clip-text text-transparent text-center">Quiz: Revisão Prática de Shell</h1>
+            <div class="mt-4 h-2 w-full bg-gray-200 rounded-full">
+                <div id="progress-bar" class="h-full bg-red-500 rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
+            <p id="progress-text" class="text-center text-sm text-gray-500 mt-2">Pergunta 1 de 8</p>
+        </div>
+
+        <div id="quiz-body" class="mt-6">
+            <div id="question-container">
+                <p id="question-text" class="text-xl md:text-2xl text-gray-700 leading-relaxed"></p>
+                <p id="hint-text" class="text-sm text-gray-500 mt-2 p-3 bg-gray-50 rounded-md border border-gray-200"></p>
+            </div>
+            <div id="answer-options" class="mt-6 grid grid-cols-1 gap-4">
+                <!-- As opções de resposta serão inseridas aqui pelo JavaScript -->
+            </div>
+            <div id="feedback-container" class="mt-6 p-4 rounded-lg text-center hidden">
+                <p id="feedback-text" class="text-lg"></p>
+            </div>
+        </div>
+
+        <div id="quiz-footer" class="mt-8 text-center">
+            <button id="next-button" class="bg-red-500 text-white font-bold py-3 px-8 rounded-lg w-full md:w-auto hover:bg-red-600 transition-colors duration-300 disabled:bg-gray-400 hidden">
+                Próxima Pergunta
+            </button>
+            <button id="restart-button" class="bg-gray-700 text-white font-bold py-3 px-8 rounded-lg w-full md:w-auto hover:bg-gray-800 transition-colors duration-300 hidden">
+                Recomeçar Quiz
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "No script organizador, qual comando captura a data atual no formato AAAA-MM-DD e a armazena na variável `DATA_ATUAL`?",
+                hint: "Pense em como 'capturamos' a saída de um comando.",
+                answers: [
+                    { text: "DATA_ATUAL=date", correct: false, rationale: "Isso atribuiria a string literal 'date' à variável, não o resultado do comando." },
+                    { text: "DATA_ATUAL=$(date +%F)", correct: true, rationale: "Correto! `$(...)` executa o comando e captura sua saída. `+%F` é o formato para AAAA-MM-DD." },
+                    { text: "read DATA_ATUAL < date", correct: false, rationale: "O `read` é para entrada do usuário, e a sintaxe de redirecionamento está incorreta para este propósito." },
+                    { text: "date +%F > DATA_ATUAL", correct: false, rationale: "Isso criaria um arquivo chamado 'DATA_ATUAL' e colocaria a data dentro dele, em vez de atribuir a uma variável." }
+                ]
+            },
+            {
+                question: "Qual é o propósito da linha `exit 1` dentro de um bloco `if`?",
+                hint: "O que deve acontecer se o script encontrar um erro crítico, como um diretório que não existe?",
+                answers: [
+                    { text: "Pausa o script por 1 segundo antes de continuar.", correct: false, rationale: "Para pausar, usaríamos o comando `sleep 1`." },
+                    { text: "Retorna o valor '1' para a linha anterior do script.", correct: false, rationale: "`exit` afeta o script inteiro, não apenas uma linha." },
+                    { text: "Encerra o script imediatamente e sinaliza que ocorreu um erro.", correct: true, rationale: "Exatamente. `exit` termina o script, e um valor diferente de 0 (como 1) convencionalmente indica um erro." },
+                    { text: "Imprime o número 1 na tela.", correct: false, rationale: "Para imprimir, usaríamos o comando `echo 1`." }
+                ]
+            },
+            {
+                question: "No nosso script, usamos `mkdir -p \"$DIR_DESTINO\"`. Qual é a função da opção `-p`?",
+                hint: "O que aconteceria se a pasta 'Organizados' não existisse e tentássemos criar 'Organizados/2025-09-30'?",
+                answers: [
+                    { text: "Define as permissões (`p`ermissions) do novo diretório.", correct: false, rationale: "Para definir permissões, usamos o comando `chmod`." },
+                    { text: "Mostra um prompt (`p`rompt) pedindo confirmação antes de criar.", correct: false, rationale: "A opção `-p` não torna o `mkdir` interativo." },
+                    { text: "Cria os diretórios pais (`p`arents) necessários, caso eles não existam.", correct: true, rationale: "Correto. Se `/home/aluno/Downloads/Organizados` não existir, `-p` o criará antes de criar a pasta final." },
+                    { text: "Imprime (`p`rints) o caminho do diretório que foi criado.", correct: false, rationale: "Para essa funcionalidade, precisaríamos combinar com outros comandos ou usar a opção `-v` (verbose)." }
+                ]
+            },
+            {
+                question: "Qual é a diferença fundamental entre usar o redirecionador `>` e o `>>`?",
+                hint: "Pense no que acontece com um arquivo de log se você roda o script duas vezes no mesmo dia.",
+                answers: [
+                    { text: "`>` cria um arquivo, enquanto `>>` apenas funciona em arquivos que já existem.", correct: false, rationale: "Ambos podem criar um arquivo se ele não existir. A diferença está no que fazem se o arquivo já existe." },
+                    { text: "`>` sobrescreve o conteúdo do arquivo, enquanto `>>` adiciona o novo conteúdo ao final do arquivo.", correct: true, rationale: "Esta é a diferença crucial. `>` (sobrescrever) é ótimo para iniciar um log, e `>>` (anexar) é perfeito para adicionar novas linhas a ele." },
+                    { text: "`>` é para redirecionar a saída padrão, e `>>` é para a saída de erro.", correct: false, rationale: "Ambos redirecionam a saída padrão. Para a saída de erro, usaríamos `2>` ou `2>>`." },
+                    { text: "Não há diferença, são apenas duas formas de escrever a mesma coisa.", correct: false, rationale: "Eles têm comportamentos muito distintos e saber a diferença é essencial para o controle de arquivos." }
+                ]
+            },
+            {
+                question: "Na linha `for ARQUIVO in \"$DIR_ALVO\"/*.$EXTENSAO`, o que o `*` faz?",
+                hint: "É um caractere especial do shell, não um texto literal.",
+                answers: [
+                    { text: "Procura por um arquivo chamado literalmente '*'.", correct: false, rationale: "O `*` não é tratado como um nome de arquivo literal, mas como um padrão a ser expandido." },
+                    { text: "É um curinga (wildcard) que o shell expande para corresponder a qualquer sequência de caracteres.", correct: true, rationale: "Correto. `*.jpg` se expande para uma lista de todos os arquivos no diretório que terminam com `.jpg`." },
+                    { text: "Multiplica o número de arquivos encontrados.", correct: false, rationale: "O `*` não é um operador aritmético neste contexto." },
+                    { text: "Indica que o laço `for` deve ser executado em todos os processadores.", correct: false, rationale: "O `*` não tem relação com paralelismo ou processadores." }
+                ]
+            },
+            {
+                question: "Por que usamos `if [ -f \"$ARQUIVO\" ]; then` dentro do laço `for` no script organizador?",
+                hint: "O que acontece se nenhum arquivo com a extensão desejada for encontrado?",
+                answers: [
+                    { text: "Para verificar se o arquivo tem permissão de escrita.", correct: false, rationale: "A permissão de escrita é verificada com o operador `-w`." },
+                    { text: "Para evitar um erro caso o curinga não encontre nenhum arquivo correspondente.", correct: true, rationale: "Se `*.txt` não encontra nada, o shell pode passar a string literal `*.txt` para o laço. O `-f` garante que só tentaremos mover o item se ele for um arquivo real." },
+                    { text: "Para garantir que o laço `for` execute mais rápido.", correct: false, rationale: "Adicionar um `if` torna o laço ligeiramente mais lento, mas muito mais seguro e robusto." },
+                    { text: "Para formatar (`f`ormat) o nome do arquivo antes de movê-lo.", correct: false, rationale: "O operador `-f` é para teste de tipo de arquivo, não para formatação." }
+                ]
+            },
+            {
+                question: "Qual é a função do comando `basename` no nosso script?",
+                hint: "O que queremos mostrar na mensagem 'Movendo ...' - o caminho completo ou apenas o nome do arquivo?",
+                answers: [
+                    { text: "Muda o diretório base do script.", correct: false, rationale: "Para mudar de diretório, usamos o comando `cd`." },
+                    { text: "Extrai apenas o nome do arquivo de um caminho completo.", correct: true, rationale: "`basename /home/user/foto.jpg` retorna `foto.jpg`. É perfeito para exibir mensagens limpas para o usuário." },
+                    { text: "Converte o nome do arquivo para letras minúsculas.", correct: false, rationale: "Para manipulação de maiúsculas/minúsculas, usaríamos ferramentas como `tr` ou expansões de parâmetro do Bash." },
+                    { text: "Cria um nome de arquivo base para novos arquivos.", correct: false, rationale: "O `basename` apenas lê e extrai de uma string existente, ele não cria nada." }
+                ]
+            },
+            {
+                question: "No final, o script mostra `echo \"$CONTADOR arquivos movidos...\"`. O que aconteceria se escrevêssemos com aspas simples: `echo '$CONTADOR arquivos movidos...'`?",
+                hint: "Lembre-se da diferença fundamental entre aspas simples e duplas.",
+                answers: [
+                    { text: "O resultado seria exatamente o mesmo.", correct: false, rationale: "Aspas simples e duplas têm comportamentos muito diferentes em relação a variáveis." },
+                    { text: "O script daria um erro de sintaxe.", correct: false, rationale: "A sintaxe é válida, mas o resultado não é o esperado." },
+                    { text: "A tela imprimiria a string literal `$CONTADOR arquivos movidos...`.", correct: true, rationale: "Correto. Aspas simples (`' '`) desativam a expansão de variáveis. O shell não substitui `$CONTADOR` por seu valor." },
+                    { text: "Apenas o valor da variável `$CONTADOR` seria impresso, sem o texto.", correct: false, rationale: "Para imprimir apenas o valor, usaríamos `echo $CONTADOR`." }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionTextEl = document.getElementById('question-text');
+        const hintTextEl = document.getElementById('hint-text');
+        const answerOptionsEl = document.getElementById('answer-options');
+        const feedbackContainerEl = document.getElementById('feedback-container');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.classList.add('hidden');
+            restartButton.classList.add('hidden');
+            document.getElementById('quiz-header').classList.remove('hidden');
+            document.getElementById('quiz-body').classList.remove('hidden');
+            progressText.textContent = `Pergunta 1 de ${quizData.length}`;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = quizData[currentQuestionIndex];
+            
+            questionTextEl.innerHTML = currentQuestion.question.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+            hintTextEl.innerHTML = `<strong>Dica:</strong> ${currentQuestion.hint.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')}`;
+
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerHTML = answer.text.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+                button.classList.add('w-full', 'text-left', 'p-4', 'border', 'border-gray-300', 'rounded-lg', 'hover:bg-gray-100', 'transition-colors', 'duration-200');
+                button.addEventListener('click', () => selectAnswer(button, answer));
+                answerOptionsEl.appendChild(button);
+            });
+
+            updateProgress();
+        }
+
+        function resetState() {
+            feedbackContainerEl.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            while (answerOptionsEl.firstChild) {
+                answerOptionsEl.removeChild(answerOptionsEl.firstChild);
+            }
+        }
+        
+        function updateProgress() {
+            const progressPercentage = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressText.textContent = `Pergunta ${currentQuestionIndex + 1} de ${quizData.length}`;
+        }
+        
+        function selectAnswer(button, answer) {
+            Array.from(answerOptionsEl.children).forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-gray-100');
+            });
+
+            feedbackContainerEl.classList.remove('hidden');
+            feedbackTextEl.innerHTML = answer.rationale.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+            if (answer.correct) {
+                score++;
+                button.classList.add('bg-green-100', 'border-green-500');
+                feedbackContainerEl.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                button.classList.add('bg-red-100', 'border-red-500');
+                feedbackContainerEl.classList.add('bg-red-100', 'text-red-800');
+                const correctButton = Array.from(answerOptionsEl.children).find((btn, index) => quizData[currentQuestionIndex].answers[index].correct);
+                correctButton.classList.add('bg-green-100', 'border-green-500');
+            }
+
+            if (quizData.length > currentQuestionIndex + 1) {
+                nextButton.textContent = "Próxima Pergunta";
+                nextButton.classList.remove('hidden');
+            } else {
+                nextButton.textContent = "Ver Resultado Final";
+                nextButton.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('quiz-body').classList.add('hidden');
+            feedbackContainerEl.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
+            
+            const resultPercentage = Math.round((score / quizData.length) * 100);
+            let feedbackMessage = `<span class="font-bold text-xl block mb-2">Quiz Concluído!</span>Você acertou ${score} de ${quizData.length} perguntas (${resultPercentage}%).<br><br>`;
+            
+            if (resultPercentage === 100) {
+                feedbackMessage += "Parabéns! Você dominou todos os conceitos. Excelente trabalho!";
+                feedbackContainerEl.classList.add('bg-green-100', 'text-green-800');
+            } else if (resultPercentage >= 70) {
+                feedbackMessage += "Muito bem! Você tem um ótimo entendimento do fluxo do script.";
+                 feedbackContainerEl.classList.add('bg-blue-100', 'text-blue-800');
+            } else {
+                feedbackMessage += "Bom resultado! Revise os pontos que errou para fortalecer o conhecimento.";
+                 feedbackContainerEl.classList.add('bg-yellow-100', 'text-yellow-800');
+            }
+            
+            feedbackTextEl.innerHTML = feedbackMessage;
+            restartButton.classList.remove('hidden');
+        }
+
+        nextButton.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        restartButton.addEventListener('click', startQuiz);
+
+        startQuiz();
+    </script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Processos em Linux</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Para melhor layout mobile */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Menos padding em mobile */
+            border-bottom: 1px solid #e5e7eb;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+            .slide {
+                padding: 4rem;
+            }
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        html {
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Estilos de Navegação */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: #ffffff; }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start;
+                page-break-before: always;
+            }
+            .slide:first-child { page-break-before: avoid; }
+            .nav-button, .counter, .copy-button { display: none; }
+        }
+
+        /* Estilos de Código e Tokens */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #f8f9fa; /* Tema claro para terminal */
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #212529; /* Cor do texto escura */
+            counter-reset: line;
+            position: relative;
+            overflow-x: auto; /* Para rolagem horizontal em mobile */
+        }
+        pre .line {
+            padding-left: 4.5em;
+            position: relative;
+            display: block; /* Garante quebra de linha correta */
+            white-space: pre-wrap; /* Quebra de linha em mobile */
+            word-break: break-all;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em;
+            padding-right: 1em;
+            text-align: right;
+            color: #adb5bd; /* Cor dos números de linha */
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #2d3748;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        /* Tokens para Shell Script (Tema Claro) */
+        .token-prompt { color: #007bff; } /* Azul */
+        .token-command { color: #d73a49; } /* Vermelho */
+        .token-option { color: #6f42c1; } /* Roxo */
+        .token-path { color: #28a745; } /* Verde */
+        .token-comment { color: #6a737d; } /* Cinza */
+        .token-output { color: #212529; } /* Preto (cor padrão) */
+        .token-keyword { color: #d73a49; } /* Vermelho para PIDs */
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-6xl md:text-8xl font-extrabold mb-4 bg-gradient-to-r from-green-400 to-lime-400 bg-clip-text text-transparent drop-shadow-xl">Gerenciamento de Processos</h1>
+                <p class="text-2xl md:text-3xl text-green-700">Comandos ps, top, kill e grep</p>
+                <p class="text-xl text-gray-600 mt-8">Fundamentos de Informática</p>
+                <div class="w-32 h-1.5 bg-green-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: O que é um Processo? -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Relembrando: O que é um Processo?</h2>
+                <p class="text-xl mb-6">Pense em um programa como uma receita de bolo em um livro. A receita em si não faz nada, é apenas um conjunto de instruções.</p>
+                <div class="text-center my-8">
+                    <span class="text-7xl">📜</span>
+                    <span class="text-5xl mx-8 font-bold text-lime-600">➡️</span>
+                    <span class="text-7xl">👨‍🍳</span>
+                    <span class="text-5xl mx-8 font-bold text-lime-600">➡️</span>
+                    <span class="text-7xl">🎂</span>
+                </div>
+                <p class="text-2xl text-center">Um <strong>processo</strong> é você (o sistema operacional) pegando a receita (o programa) e começando a executá-la: medindo os ingredientes, misturando, assando. É um <strong>programa em execução</strong>.</p>
+                <p class="text-xl mt-6">Cada aba do seu navegador, cada janela aberta, até mesmo o próprio terminal, são processos.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: O Comando 'ps' -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 1: Espiando seus Processos (<code class="inline-code">ps</code>)</h2>
+                <p class="text-xl mb-6"><code class="inline-code">ps</code> significa <strong>p</strong>rocess <strong>s</strong>tatus. Sozinho, ele mostra os processos que estão rodando <strong>no seu terminal atual</strong>.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ps</span></div><div class="line"><span class="token-output">  PID TTY          TIME CMD</span></div><div class="line"><span class="token-output"> 3436 pts/0    00:00:00 bash</span></div><div class="line"><span class="token-output"> 3512 pts/0    00:00:00 ps</span></div></pre></div>
+                <ul class="text-xl mt-6 space-y-3">
+                    <li><strong class="text-lime-700">PID:</strong> <strong>P</strong>rocess <strong>ID</strong>. É o número de identificação único de cada processo. <strong>É a informação mais importante!</strong></li>
+                    <li><strong>TTY:</strong> O terminal que "controla" o processo.</li>
+                    <li><strong>TIME:</strong> Quanto tempo de CPU o processo consumiu.</li>
+                    <li><strong>CMD:</strong> O comando que iniciou o processo.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 4: ps aux -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Vendo TUDO: <code class="inline-code">ps aux</code></h2>
+                <p class="text-xl mb-6">Para ter uma visão completa de <strong>todos os processos</strong> rodando no sistema (de todos os usuários), usamos a combinação <code class="inline-code">aux</code>.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ps</span> <span class="token-option">aux</span></div></pre></div>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 text-center">
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg">a</h3>
+                        <p>Mostra processos de <strong>t</strong>odos (<code class="inline-code">a</code>ll) os usuários.</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg">u</h3>
+                        <p>Mostra em um formato mais detalhado, orientado ao <strong>u</strong>suário.</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg">x</h3>
+                        <p>Mostra processos que não estão atrelados a um terminal.</p>
+                    </div>
+                </div>
+                <p class="text-xl text-center mt-6">A saída será longa, mas muito mais informativa, com colunas como <strong>%CPU</strong>, <strong>%MEM</strong>, e o usuário que iniciou o processo.</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: O Comando 'top' -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 2: O Gerenciador de Tarefas do Terminal (<code class="inline-code">top</code>)</h2>
+                <div class="text-7xl my-8">📊</div>
+                <p class="text-2xl mb-4">O comando <code class="inline-code">top</code> é um painel interativo que mostra os processos em <strong>tempo real</strong>, atualizando a cada poucos segundos.</p>
+                <p class="text-xl text-gray-600">Ele ordena os processos por consumo de CPU, então os "gastões" ficam sempre no topo. É excelente para ver o que está deixando seu sistema lento.</p>
+                <p class="mt-8 text-2xl font-bold text-lime-700">Para sair do <code class="inline-code">top</code>, pressione a tecla <code class="inline-code">q</code>.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 6: Transição grep -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Saída do <code class="inline-code">ps aux</code> é Enorme... Como Achar Algo?</h2>
+                <div class="text-7xl my-8">🔍</div>
+                <p class="text-3xl">Usando um filtro! Apresentando o comando <code class="inline-code">grep</code> e o pipe <code class="inline-code">|</code>.</p>
+                <p class="text-xl text-gray-600 mt-4"><code class="inline-code">grep</code> é uma ferramenta poderosa que busca por linhas que contêm um determinado texto.</p>
+                <p class="text-xl text-gray-600">O pipe (<code class="inline-code">|</code>) redireciona a saída de um comando para a entrada de outro.</p>
+            </div>
+        </section>
+
+        <!-- Slide 7: ps | grep -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Juntando as Peças: <code class="inline-code">ps aux | grep</code></h2>
+                <p class="text-xl mb-6">Essa é uma das combinações mais clássicas do Linux. Vamos procurar pelo processo do Firefox:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">ps</span> <span class="token-option">aux</span> | <span class="token-command">grep</span> <span class="token-path">firefox</span></div></pre></div>
+                <p class="text-2xl text-center my-6"><strong>Tradução:</strong> "Pegue a lista de <strong>todos os processos</strong> e <strong>filtre</strong>, mostrando apenas as linhas que contêm a palavra 'firefox'".</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-output">aluno   <span class="token-keyword">12345</span>  4.5  8.1 345678 123456 pts/0  Sl  15:30   0:42 /usr/lib/firefox/firefox</span></div><div class="line"><span class="token-output">aluno   <span class="token-keyword">12399</span>  0.0  0.0 123456  1234 pts/0   S+  15:45   0:00 grep firefox</span></div></pre></div>
+                <p class="text-xl mt-6">A primeira linha é o processo que queremos! O PID dele é <code class="inline-code">12345</code>. A segunda linha é o próprio processo do `grep` que acabamos de rodar.</p>
+            </div>
+        </section>
+
+        <!-- Slide 8: pgrep -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 3: O Atalho para Procurar (<code class="inline-code">pgrep</code>)</h2>
+                <p class="text-xl mb-6"><code class="inline-code">pgrep</code> (<strong>p</strong>rocess <strong>grep</strong>) faz exatamente o que a combinação anterior faz, mas de forma mais direta e limpa: ele retorna apenas os PIDs.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">aluno@meu-pc:~$</span> <span class="token-command">pgrep</span> <span class="token-path">firefox</span></div><div class="line"><span class="token-output">12345</span></div></pre></div>
+                <p class="text-xl mt-6">É uma forma muito mais rápida e eficiente de encontrar o ID de um processo se você já sabe o nome dele.</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Conceito de Sinais -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Como "Conversar" com um Processo?</h2>
+                <div class="text-7xl my-8">📨</div>
+                <p class="text-2xl mb-4">Para controlar um processo (finalizar, pausar, etc.), nós enviamos <strong>Sinais</strong> (Signals) para ele.</p>
+                <p class="text-xl text-gray-600">Pense neles como mensagens curtas. Existem dezenas, mas duas são essenciais:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 text-left">
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="font-bold text-lg mb-2">15) SIGTERM (Terminate)</h3>
+                        <p>É o pedido <strong>educado</strong>. "Por favor, finalize suas tarefas, salve o que for preciso e encerre." É o padrão da maioria dos comandos.</p>
+                    </div>
+                    <div class="bg-red-100 p-6 rounded-lg border border-red-300">
+                        <h3 class="font-bold text-lg mb-2">9) SIGKILL (Kill)</h3>
+                        <p>É a ordem <strong>implacável</strong>. "Desligue-se AGORA." O processo não tem chance de reagir, ele é encerrado imediatamente. Use como último recurso.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Slide 10: kill -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 4: Enviando Sinais com <code class="inline-code">kill</code></h2>
+                <p class="text-xl mb-6">O comando <code class="inline-code">kill</code> envia um sinal para um processo específico, usando seu <strong>PID</strong>.</p>
+                <p class="text-xl font-bold">1. Tentativa Educada (enviando SIGTERM, o padrão):</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">kill</span> <span class="token-keyword">12345</span></div></pre></div>
+                
+                <p class="text-xl font-bold mt-8">2. Se não funcionar, a Força Bruta (enviando SIGKILL):</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">kill</span> <span class="token-option">-9</span> <span class="token-keyword">12345</span></div><div class="line"><span class="token-comment"># ou</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">kill</span> <span class="token-option">-SIGKILL</span> <span class="token-keyword">12345</span></div></pre></div>
+                <p class="text-xl mt-6 text-red-600"><strong>Aviso:</strong> Usar <code class="inline-code">kill -9</code> pode causar perda de dados, já que o programa não tem tempo de salvar nada.</p>
+            </div>
+        </section>
+
+        <!-- Slide 11: pkill -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Comando 5: O Atalho para Finalizar (<code class="inline-code">pkill</code>)</h2>
+                <p class="text-xl mb-6"><code class="inline-code">pkill</code> (<strong>p</strong>rocess <strong>kill</strong>) é a combinação perfeita de <code class="inline-code">pgrep</code> e <code class="inline-code">kill</code>. Ele encontra e envia um sinal para um processo <strong>pelo nome</strong>.</p>
+                <p class="text-xl font-bold">1. Tentativa Educada:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">pkill</span> <span class="token-path">firefox</span></div></pre></div>
+                
+                <p class="text-xl font-bold mt-8">2. Força Bruta:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">pkill</span> <span class="token-option">-9</span> <span class="token-path">firefox</span></div></pre></div>
+                <p class="text-xl mt-6">Isso economiza o passo de ter que procurar o PID primeiro. É muito mais rápido e prático!</p>
+            </div>
+        </section>
+
+        <!-- Slide 12: Exercício Prático -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Missão: O Navegador Travou! 😱</h2>
+                <p class="text-xl mb-6">Seu navegador (vamos supor que é o `chromium-browser`) travou e não fecha de jeito nenhum. Qual é a sequência de comandos que você usaria no terminal para resolver o problema?</p>
+                <ol class="list-decimal list-inside mt-4 space-y-3 text-lg bg-gray-50 p-6 rounded-lg">
+                    <li>Encontre o PID do processo do navegador.</li>
+                    <li>Tente fechar o navegador de forma educada.</li>
+                    <li>Se não funcionar, force o encerramento.</li>
+                    <li>(Bônus) Como você faria isso com um único comando?</li>
+                </ol>
+            </div>
+        </section>
+        
+        <!-- Slide 13: Solução do Exercício -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Solução da Missão</h2>
+                <p class="text-xl mb-6">Aqui está uma solução possível:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment"># 1. Encontrar o PID (vamos supor que o resultado seja 54321)</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">pgrep</span> <span class="token-path">chromium-browser</span></div><div class="line"> </div><div class="line"><span class="token-comment"># 2. Tentar fechar educadamente</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">kill</span> <span class="token-keyword">54321</span></div><div class="line"> </div><div class="line"><span class="token-comment"># 3. Se não funcionar, forçar</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">kill</span> <span class="token-option">-9</span> <span class="token-keyword">54321</span></div><div class="line"> </div><div class="line"><span class="token-comment"># 4. (Bônus) A forma mais rápida e direta</span></div><div class="line"><span class="token-prompt">~$</span> <span class="token-command">pkill</span> <span class="token-path">chromium-browser</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Resumo dos Comandos -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo dos Comandos de Processos</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-lg mt-6 bg-white shadow rounded-lg">
+                        <thead class="bg-gray-200">
+                            <tr><th class="p-3 text-left">Comando</th><th class="p-3 text-left">O que faz</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">ps aux</code></td><td class="p-3">Lista <strong>todos</strong> os processos em execução no sistema.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">top</code></td><td class="p-3">Mostra os processos em <strong>tempo real</strong>, de forma interativa.</td></tr>
+                             <tr class="border-t"><td class="p-3"><code class="inline-code">... | grep ...</code></td><td class="p-3"><strong>Filtra</strong> a saída de um comando, mostrando apenas linhas com o texto desejado.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">pgrep [nome]</code></td><td class="p-3">Procura por um processo pelo <strong>nome</strong> e retorna seu <strong>PID</strong>.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">kill [PID]</code></td><td class="p-3">Envia um sinal (por padrão, SIGTERM) para um processo, usando seu <strong>PID</strong>.</td></tr>
+                            <tr class="border-t"><td class="p-3"><code class="inline-code">pkill [nome]</code></td><td class="p-3">Procura por um processo pelo <strong>nome</strong> e envia um sinal para ele.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Próximos Passos -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Poder e Controle</h2>
+                <p class="text-2xl">Agora você sabe não apenas ver, mas também controlar os programas em execução no seu sistema. Isso é fundamental para resolver problemas, otimizar o desempenho e entender o que está acontecendo "por baixo dos panos".</p>
+                <div class="text-6xl my-8">⚙️</div>
+                <p class="text-3xl font-bold text-green-700 mt-12">Próxima aula: Redirecionamento de Entrada e Saída!</p>
+            </div>
+        </section>
+
+        <!-- Slide 16: Perguntas -->
+        <section id="slide-16" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                const span = button.querySelector('span');
+                const originalText = 'Copiar'; // Definido estaticamente pois não há span no SVG
+
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeText.trim();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        const copyFeedback = e.currentTarget;
+                        copyFeedback.innerHTML = 'Copiado!';
+                        setTimeout(() => {
+                           copyFeedback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span>`;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+

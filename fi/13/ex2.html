@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios Práticos Finais: Shell Script</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .task-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px BRL5px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid #4f46e5; /* Indigo */
+        }
+        code.inline-code {
+            background-color: #e0e7ff; /* Indigo-100 */
+            color: #3730a3; /* Indigo-800 */
+            font-weight: 600;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-12 px-4">
+
+    <div class="w-full max-w-3xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">Exercícios Práticos Finais: Shell Script</h1>
+        <p class="text-center text-lg text-gray-600 mb-12">Use todo o conhecimento adquirido nas aulas de Linux e Shell Script para resolver os desafios abaixo.</p>
+
+        <!-- Exercício 1 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Exercício 1: Script de Backup Inteligente</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                Vamos aprimorar o script de backup. Desta vez, ele será mais robusto, com mais validações e funcionalidades, incluindo a criação de um log detalhado.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">backup_inteligente.sh</code>.</li>
+                <li>Peça ao usuário um <strong>diretório de origem</strong> e um <strong>diretório de destino</strong>.</li>
+                <li><strong>Validação:</strong>
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1">
+                        <li>Verifique se o diretório de origem realmente existe. Se não, encerre com uma mensagem de erro.</li>
+                        <li>Verifique se o diretório de destino existe. Se não existir, pergunte ao usuário se ele deseja criá-lo. Se a resposta for 's' (sim), crie-o; caso contrário, encerre o script.</li>
+                    </ul>
+                </li>
+                <li>Crie um nome de arquivo para o backup no formato <code class="inline-code">backup_AAAA-MM-DD_HH-MM-SS.tar.gz</code>. (Dica: pesquise os formatos do comando `date`).</li>
+                <li>Use o comando <code class="inline-code">tar</code> para compactar <strong>todo</strong> o conteúdo do diretório de origem e salvá-lo no diretório de destino com o nome de arquivo gerado.</li>
+                <li><strong>Log de Operações:</strong> Crie um arquivo <code class="inline-code">backup.log</code> no diretório de destino. Use o redirecionador <code class="inline-code">>></code> para adicionar uma nova linha a este log a cada execução do script, contendo a data, a hora e uma mensagem de sucesso (ex: "Backup de /origem para /destino/backup_....tar.gz concluído com sucesso.").</li>
+                <li>No final, exiba uma mensagem de sucesso no terminal.</li>
+            </ol>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Exercício 2: Monitor de Saúde do Sistema</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                Crie uma ferramenta de linha de comando que exibe um relatório rápido sobre a "saúde" do sistema, usando cores para indicar o status.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">monitor.sh</code>.</li>
+                <li>O script deve verificar e exibir três informações:
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1">
+                        <li><strong>Uso da CPU:</strong> A carga média do último minuto (load average).</li>
+                        <li><strong>Uso de Memória RAM:</strong> O percentual de memória utilizada.</li>
+                        <li><strong>Uso do Disco:</strong> O percentual de uso da partição raiz (<code class="inline-code">/</code>).</li>
+                    </ul>
+                </li>
+                 <li><strong>Dicas de Comandos:</strong>
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1">
+                        <li>Para CPU, o comando <code class="inline-code">uptime</code> pode ser útil.</li>
+                        <li>Para memória, explore o comando <code class="inline-code">free -m</code>.</li>
+                        <li>Para disco, o comando <code class="inline-code">df -h /</code> é um bom começo.</li>
+                        <li>Use comandos como <code class="inline-code">grep</code>, <code class="inline-code">awk</code> ou <code class="inline-code">cut</code> para extrair apenas os números que você precisa.</li>
+                    </ul>
+                </li>
+                <li><strong>Lógica Condicional:</strong> Para cada item, use um <code class="inline-code">if</code> para exibir o status. Por exemplo, para o disco: se o uso for maior que 90%, exiba "[CRÍTICO]"; se for maior que 70%, exiba "[AVISO]"; senão, exiba "[OK]".</li>
+                <li><strong>Saída Final:</strong> A saída no terminal deve ser clara e organizada, como no exemplo abaixo:
+<pre class="bg-gray-800 text-white p-4 rounded-lg mt-2 text-sm">
+---------------------------------
+    RELATÓRIO DE SAÚDE DO SISTEMA
+---------------------------------
+CPU Load (1 min): 0.25      [OK]
+Uso de Memória: 55%         [OK]
+Uso do Disco (/): 82%       [AVISO]
+</pre>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Exercício 3: Ferramenta de Análise de Logs</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                Imagine que você é um administrador de sistemas e precisa analisar um arquivo de log para encontrar rapidamente informações sobre erros.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Primeiro, crie um arquivo de log de exemplo chamado <code class="inline-code">app.log</code> com o seguinte conteúdo:
+<pre class="bg-gray-200 p-3 rounded-lg mt-2 text-sm">
+INFO: User 'admin' logged in.
+INFO: System startup successful.
+WARNING: Disk space is running low.
+ERROR: Failed to connect to database 'prod_db'.
+INFO: User 'guest' accessed public page.
+ERROR: Null pointer exception at module 'xpto'.
+CRITICAL: System shutting down due to critical error.
+</pre>
+                </li>
+                <li>Crie um script chamado <code class="inline-code">analisar_log.sh</code>.</li>
+                <li>O script deve apresentar um menu interativo usando um laço <code class="inline-code">while</code>, que só termina quando o usuário escolhe a opção de sair.</li>
+                <li>O menu deve ter as seguintes opções:
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1">
+                        <li>1) Listar todos os erros (linhas contendo "ERROR").</li>
+                        <li>2) Listar todos os avisos (linhas contendo "WARNING").</li>
+                        <li>3) Contar o número de erros críticos (linhas contendo "CRITICAL").</li>
+                        <li>q) Sair.</li>
+                    </ul>
+                </li>
+                <li>Use <code class="inline-code">if/elif/else</code> para processar a escolha do usuário.</li>
+                <li>Para cada opção, use o comando <code class="inline-code">grep</code> para filtrar o conteúdo do arquivo <code class="inline-code">app.log</code>. (Dica: para contar linhas, use <code class="inline-code">grep -c</code>).</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

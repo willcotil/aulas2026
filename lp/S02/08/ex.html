@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Funções em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .exercise-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercícios Práticos: Funções em C</h1>
+        <p class="mt-2 text-gray-600">Pratique a modularização e a reutilização de código.</p>
+
+        <!-- Exercício 1 -->
+        <div class="exercise-block mt-8">
+            <h2>1. Mensagem de Boas-Vindas</h2>
+            <p class="mt-2">Crie uma função chamada <code>saudacao</code> que não recebe nenhum parâmetro e não retorna nada (<code>void</code>). A única coisa que essa função deve fazer é imprimir a mensagem "Bem-vindo ao programa!". Na sua função <code>main</code>, chame a função <code>saudacao</code>.</p>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="exercise-block mt-8">
+            <h2>2. Dobro de um Número</h2>
+            <p class="mt-2">Crie uma função chamada <code>calcularDobro</code> que recebe um número inteiro como parâmetro e retorna o dobro desse número. Na função <code>main</code>, peça ao usuário para digitar um número, passe-o para a função e exiba o resultado retornado.</p>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="exercise-block mt-8">
+            <h2>3. Média de Três Números</h2>
+            <p class="mt-2">Crie uma função chamada <code>calcularMedia</code> que recebe três notas do tipo <code>float</code> como parâmetros e retorna a média aritmética delas. Na <code>main</code>, chame esta função com três valores e imprima o resultado.</p>
+        </div>
+        
+        <!-- Exercício 4 -->
+        <div class="exercise-block mt-8">
+            <h2>4. Verificador de Maioridade</h2>
+            <p class="mt-2">Crie uma função chamada <code>ehMaiorDeIdade</code> que recebe uma idade (inteiro) como parâmetro. A função deve retornar <code>1</code> se a idade for maior ou igual a 18, e <code>0</code> caso contrário. Na <code>main</code>, peça uma idade ao usuário, chame a função e, usando um <code>if</code>, imprima "Acesso permitido" ou "Acesso negado" com base no retorno.</p>
+        </div>
+
+        <!-- Exercício 5 -->
+        <div class="exercise-block mt-8">
+            <h2>5. Tabuada</h2>
+            <p class="mt-2">Crie uma função <code>imprimirTabuada</code> que recebe um número inteiro como parâmetro. A função deve usar um laço <code>for</code> para imprimir a tabuada de multiplicação daquele número (de 1 a 10). A função não precisa retornar nada (<code>void</code>).</p>
+        </div>
+
+        <!-- Exercício 6 -->
+        <div class="exercise-block mt-8">
+            <h2>6. Desenhando Linhas</h2>
+            <p class="mt-2">Crie uma função chamada <code>desenharLinha</code> que recebe um número inteiro <code>tamanho</code> como parâmetro. A função deve imprimir na tela uma linha com a quantidade de traços (<code>-</code>) igual ao <code>tamanho</code> informado. Chame essa função na <code>main</code> para desenhar linhas de diferentes tamanhos.</p>
+        </div>
+
+        <!-- Exercício 7 -->
+        <div class="exercise-block mt-8">
+            <h2>7. Maior de Dois Números</h2>
+            <p class="mt-2">Crie uma função chamada <code>encontrarMaior</code> que recebe dois números inteiros como parâmetro e retorna o maior entre eles. Na <code>main</code>, peça dois números ao usuário, passe para a função e exiba o resultado.</p>
+        </div>
+
+        <!-- Exercício 8 -->
+        <div class="exercise-block mt-8">
+            <h2>8. Conversor de Temperatura</h2>
+            <p class="mt-2">Crie uma função <code>celsiusParaFahrenheit</code> que recebe uma temperatura em Celsius (<code>float</code>) e retorna o valor correspondente em Fahrenheit. A fórmula é: <code>F = C * 1.8 + 32</code>. Teste a função na <code>main</code>.</p>
+        </div>
+
+        <!-- Exercício 9 -->
+        <div class="exercise-block mt-8">
+            <h2>9. Exibindo uma Ficha</h2>
+            <p class="mt-2">Crie uma <code>struct Carro</code> com os campos <code>char modelo[50]</code> e <code>int ano</code>. Crie uma função <code>exibirCarro</code> que recebe uma variável do tipo <code>struct Carro</code> como parâmetro (passagem por valor) e exibe seus dados de forma formatada. Na <code>main</code>, crie e preencha os dados de um carro e passe-o para a função.</p>
+        </div>
+
+        <!-- Exercício 10 -->
+        <div class="exercise-block mt-8">
+            <h2>10. Cadastro de Turma com Função</h2>
+            <p class="mt-2">Crie um programa que cadastre <strong>3 alunos</strong> em um vetor de structs. O preenchimento de cada aluno deve ser feito por uma função separada que retorna uma <code>struct</code> preenchida.</p>
+            <p class="mt-2"><strong>Passos Sugeridos:</strong></p>
+             <ol class="list-decimal list-inside mt-2 ml-4 space-y-1">
+                <li>Crie uma <code>struct Aluno</code> com nome e nota.</li>
+                <li>Crie uma função chamada <code>criarAluno</code>. Ela não recebe parâmetros, mas <strong>retorna</strong> uma <code>struct Aluno</code>.</li>
+                <li>Dentro de <code>criarAluno</code>, declare uma variável local do tipo <code>struct Aluno</code>, peça ao usuário para digitar o nome e a nota, e guarde nessas variáveis. Ao final, retorne a struct preenchida com o comando <code>return</code>.</li>
+                <li>Na função <code>main</code>, declare um vetor de <code>struct Aluno</code> de tamanho 3 (ex: <code>turma[3]</code>).</li>
+                <li>Crie um laço <code>for</code> que se repita 3 vezes. A cada volta, chame a função <code>criarAluno</code> e armazene o resultado na posição correta do vetor (ex: <code>turma[i] = criarAluno();</code>).</li>
+                <li>Após o primeiro laço, crie um <strong>segundo laço</strong> para percorrer o vetor <code>turma</code> e exibir os dados de todos os alunos cadastrados.</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
+

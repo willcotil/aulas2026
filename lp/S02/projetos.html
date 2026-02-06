@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propostas de Projeto Final - Linguagem C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .project-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4f46e5;
+            margin-top: 1.5rem;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+        .instructions-box {
+            background-color: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Propostas de Projeto Final</h1>
+        <p class="mt-2 text-gray-600">Escolha um dos projetos abaixo para desenvolver em grupo nas próximas duas semanas.</p>
+
+        <div class="instructions-box">
+            <h2 class="!mt-0 !border-none !pb-2">Instruções Gerais</h2>
+            <ul class="list-disc list-inside mt-2 ml-4 space-y-2">
+                <li>Os projetos devem ser desenvolvidos em grupos de <strong>no mínimo 3 e no máximo 5 integrantes</strong>. Grupos menores serão mesclados.</li>
+                <li>O controle de versão do projeto deve ser feito obrigatoriamente via <strong>Github</strong>.</li>
+                <li>É fundamental que o histórico de commits no Github mostre contribuições de <strong>TODOS</strong> os integrantes do grupo.</li>
+                <li>Todos os grupos irão apresentar seus projetos para a turma, explicando o funcionamento do programa. O tempo máximo para cada apresentação é de <strong>15 minutos</strong>. Apresentações que excederem o tempo serão interrompidas.</li>
+                <li>Todos os projetos devem ser <strong>modularizados</strong>, separando a lógica em diferentes arquivos <code>.h</code> e <code>.c</code> quando apropriado.</li>
+                <li>Todos os projetos devem implementar um sistema de <strong>persistência de dados</strong>, salvando as informações em um arquivo de texto para que não se percam ao fechar o programa.</li>
+                <li>A interface do usuário deve ser um <strong>menu de opções infinito</strong> (usando <code>while</code> ou <code>do-while</code>) que se repete até que o usuário escolha a opção "Sair".</li>
+                <li>Os arquivos <code>.h</code> fornecidos são um ponto de partida. Vocês <strong>podem e devem</strong> alterar as funções, adicionando mais parâmetros se julgarem necessário para a lógica do programa.</li>
+            </ul>
+        </div>
+
+        <!-- Lista de Projetos -->
+        <div id="projects">
+            
+            <div class="project-block">
+                <h2>1. Agenda de Contatos</h2>
+                <h3>Conceito Principal</h3>
+                <p>Criar um sistema que permita ao usuário cadastrar, listar, buscar e remover contatos. Os contatos devem ser salvos em um arquivo para que a agenda seja permanente.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Contato</code> (nome, telefone, email).</li>
+                    <li>Permitir cadastrar um novo contato.</li>
+                    <li>Listar todos os contatos cadastrados.</li>
+                    <li>Buscar um contato pelo nome.</li>
+                    <li>Salvar a lista de contatos em um arquivo <code>agenda.txt</code>.</li>
+                    <li>Carregar os contatos do arquivo ao iniciar o programa.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>agenda.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef AGENDA_H
+#define AGENDA_H
+
+#define MAX_CONTATOS 100
+
+typedef struct {
+    char nome[50];
+    char telefone[20];
+    char email[50];
+} Contato;
+
+void cadastrar_contato(Contato agenda[], int *total_contatos);
+void listar_contatos(Contato agenda[], int total_contatos);
+void buscar_contato(Contato agenda[], int total_contatos);
+void salvar_agenda(Contato agenda[], int total_contatos);
+void carregar_agenda(Contato agenda[], int *total_contatos);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>2. Gerenciador de Estoque de Loja</h2>
+                <h3>Conceito Principal</h3>
+                <p>Desenvolver um programa para controlar o estoque de uma pequena loja. O sistema deve permitir adicionar produtos, atualizar a quantidade e listar os itens.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Produto</code> (codigo, nome, quantidade, preco).</li>
+                    <li>Permitir cadastrar um novo produto.</li>
+                    <li>Listar todos os produtos do estoque.</li>
+                    <li>Permitir a entrada (compra) e saída (venda) de produtos, atualizando a quantidade.</li>
+                    <li>Salvar e carregar o estado do estoque de um arquivo <code>estoque.txt</code>.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>estoque.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef ESTOQUE_H
+#define ESTOQUE_H
+
+#define MAX_PRODUTOS 50
+
+typedef struct {
+    int codigo;
+    char nome[50];
+    int quantidade;
+    float preco;
+} Produto;
+
+void cadastrar_produto(Produto estoque[], int *total_produtos);
+void listar_produtos(Produto estoque[], int total_produtos);
+void atualizar_estoque(Produto estoque[], int total_produtos);
+void salvar_estoque(Produto estoque[], int total_produtos);
+void carregar_estoque(Produto estoque[], int *total_produtos);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>3. Sistema de Biblioteca</h2>
+                <h3>Conceito Principal</h3>
+                <p>Criar um sistema para gerenciar o empréstimo de livros de uma biblioteca. O programa deve controlar quais livros estão disponíveis e quais estão emprestados.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Livro</code> (titulo, autor, status - 0 para disponível, 1 para emprestado).</li>
+                    <li>Permitir cadastrar novos livros.</li>
+                    <li>Listar todos os livros, mostrando seu status.</li>
+                    <li>Realizar o empréstimo de um livro (mudar status para 1).</li>
+                    <li>Realizar a devolução de um livro (mudar status para 0).</li>
+                    <li>Salvar e carregar a lista de livros de um arquivo <code>biblioteca.txt</code>.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>biblioteca.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef BIBLIOTECA_H
+#define BIBLIOTECA_H
+
+#define MAX_LIVROS 100
+
+typedef struct {
+    char titulo[100];
+    char autor[50];
+    int status; // 0 = disponível, 1 = emprestado
+} Livro;
+
+void cadastrar_livro(Livro acervo[], int *total_livros);
+void listar_livros(Livro acervo[], int total_livros);
+void emprestar_livro(Livro acervo[], int total_livros);
+void devolver_livro(Livro acervo[], int total_livros);
+void salvar_biblioteca(Livro acervo[], int total_livros);
+void carregar_biblioteca(Livro acervo[], int *total_livros);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>4. Catálogo de Filmes</h2>
+                <h3>Conceito Principal</h3>
+                <p>Desenvolver um programa para que um usuário possa catalogar seus filmes favoritos, com informações como título, diretor, ano e uma nota pessoal.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Filme</code> (titulo, diretor, ano, nota).</li>
+                    <li>Permitir cadastrar um novo filme.</li>
+                    <li>Listar todos os filmes cadastrados.</li>
+                    <li>Buscar filmes por ano de lançamento.</li>
+                    <li>Salvar e carregar o catálogo de um arquivo <code>filmes.txt</code>.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>catalogo.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef CATALOGO_H
+#define CATALOGO_H
+
+#define MAX_FILMES 100
+
+typedef struct {
+    char titulo[100];
+    char diretor[50];
+    int ano;
+    float nota;
+} Filme;
+
+void cadastrar_filme(Filme catalogo[], int *total_filmes);
+void listar_filmes(Filme catalogo[], int total_filmes);
+void buscar_por_ano(Filme catalogo[], int total_filmes);
+void salvar_catalogo(Filme catalogo[], int total_filmes);
+void carregar_catalogo(Filme catalogo[], int *total_filmes);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>5. Sistema de Cadastro de Alunos</h2>
+                <h3>Conceito Principal</h3>
+                <p>Desenvolver um sistema para gerenciar os registros de alunos de uma turma, incluindo suas notas e status final (aprovado/reprovado).</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Aluno</code> (nome, ra, nota1, nota2). A média e o status podem ser calculados.</li>
+                    <li>Permitir cadastrar um novo aluno, solicitando nome, RA e as duas notas.</li>
+                    <li>Listar todos os alunos, exibindo nome, RA, as duas notas, a média final e o status ("Aprovado" ou "Reprovado", média >= 6.0).</li>
+                    <li>Salvar e carregar os dados da turma de um arquivo <code>turma.txt</code>.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>alunos.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef ALUNOS_H
+#define ALUNOS_H
+
+#define MAX_ALUNOS 50
+
+typedef struct {
+    char nome[50];
+    int ra;
+    float nota1;
+    float nota2;
+} Aluno;
+
+void cadastrar_aluno(Aluno turma[], int *total_alunos);
+void listar_alunos(Aluno turma[], int total_alunos);
+void salvar_turma(Aluno turma[], int total_alunos);
+void carregar_turma(Aluno turma[], int *total_alunos);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>6. Gerenciador de Tarefas (To-Do List)</h2>
+                <h3>Conceito Principal</h3>
+                <p>Criar um programa de lista de tarefas onde o usuário pode adicionar novas tarefas, listá-las e marcá-las como concluídas.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Tarefa</code> (descricao, prioridade (1-5), status - 0 para pendente, 1 para concluída).</li>
+                    <li>Permitir adicionar uma nova tarefa.</li>
+                    <li>Listar todas as tarefas, mostrando seu status (ex: [X] para concluída, [ ] para pendente).</li>
+                    <li>Permitir marcar uma tarefa como concluída, buscando-a pelo seu número na lista.</li>
+                    <li>Salvar e carregar as tarefas de um arquivo <code>tarefas.txt</code>.</li>
+                </ul>
+                 <h3>Arquivo de Header Obrigatório (<code>tarefas.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef TAREFAS_H
+#define TAREFAS_H
+
+#define MAX_TAREFAS 100
+
+typedef struct {
+    char descricao[100];
+    int prioridade;
+    int status; // 0 = pendente, 1 = concluída
+} Tarefa;
+
+void adicionar_tarefa(Tarefa lista[], int *total_tarefas);
+void listar_tarefas(Tarefa lista[], int total_tarefas);
+void marcar_concluida(Tarefa lista[], int total_tarefas);
+void salvar_tarefas(Tarefa lista[], int total_tarefas);
+void carregar_tarefas(Tarefa lista[], int *total_tarefas);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>7. Controle de Despesas Pessoais</h2>
+                <h3>Conceito Principal</h3>
+                <p>Um sistema simples para que o usuário possa registrar suas despesas diárias e, no final, ver um relatório de quanto gastou.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Despesa</code> (descricao, valor, dia, mes, ano).</li>
+                    <li>Permitir registrar uma nova despesa.</li>
+                    <li>Listar todas as despesas registradas.</li>
+                    <li>Calcular e exibir o total de despesas.</li>
+                    <li>Buscar e listar todas as despesas de um determinado mês e ano.</li>
+                    <li>Salvar e carregar as despesas de um arquivo <code>despesas.txt</code>.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>despesas.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef DESPESAS_H
+#define DESPESAS_H
+
+#define MAX_DESPESAS 200
+
+typedef struct {
+    char descricao[100];
+    double valor;
+    int dia;
+    int mes;
+    int ano;
+} Despesa;
+
+void registrar_despesa(Despesa extrato[], int *total_despesas);
+void listar_despesas(Despesa extrato[], int total_despesas);
+void buscar_por_mes(Despesa extrato[], int total_despesas);
+void salvar_despesas(Despesa extrato[], int total_despesas);
+void carregar_despesas(Despesa extrato[], int *total_despesas);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>8. Sistema de Reserva de Hotel</h2>
+                <h3>Conceito Principal</h3>
+                <p>Criar um sistema que simule a reserva de quartos em um pequeno hotel (10 quartos). O programa deve mostrar quais quartos estão livres e permitir a reserva.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar um vetor de <code>struct Quarto</code> (numero, status - 0 para livre, 1 para ocupado, nome_hospede).</li>
+                    <li>Iniciar o hotel com 10 quartos, todos livres.</li>
+                    <li>Listar todos os quartos, mostrando se estão "Livre" ou "Ocupado por [Nome]".</li>
+                    <li>Permitir reservar um quarto, pedindo o número do quarto e o nome do hóspede.</li>
+                    <li>Permitir liberar um quarto (check-out).</li>
+                    <li>Salvar e carregar o estado dos quartos de um arquivo <code>hotel.txt</code>.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>hotel.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef HOTEL_H
+#define HOTEL_H
+
+#define NUM_QUARTOS 10
+
+typedef struct {
+    int numero;
+    int status; // 0 = livre, 1 = ocupado
+    char nome_hospede[50];
+} Quarto;
+
+void inicializar_hotel(Quarto hotel[]);
+void listar_quartos(Quarto hotel[]);
+void reservar_quarto(Quarto hotel[]);
+void liberar_quarto(Quarto hotel[]);
+void salvar_hotel(Quarto hotel[]);
+void carregar_hotel(Quarto hotel[]);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>9. Diário Pessoal</h2>
+                <h3>Conceito Principal</h3>
+                <p>Um programa que funciona como um diário, permitindo ao usuário criar, ler e listar entradas de texto, que são salvas em um arquivo.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct EntradaDiario</code> (titulo, conteudo, data).</li>
+                    <li>Permitir criar uma nova entrada no diário.</li>
+                    <li>Listar todas as entradas salvas, mostrando apenas o título e a data.</li>
+                    <li>Permitir ao usuário escolher uma entrada da lista para ler seu conteúdo completo.</li>
+                    <li>Salvar e carregar as entradas de um arquivo <code>diario.txt</code>.</li>
+                </ul>
+                 <h3>Arquivo de Header Obrigatório (<code>diario.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef DIARIO_H
+#define DIARIO_H
+
+#define MAX_ENTRADAS 100
+
+typedef struct {
+    char data[11]; // DD/MM/AAAA
+    char titulo[100];
+    char conteudo[500];
+} EntradaDiario;
+
+void criar_entrada(EntradaDiario diaro[], int *total_entradas);
+void listar_entradas(EntradaDiario diaro[], int total_entradas);
+void ler_entrada(EntradaDiario diaro[], int total_entradas);
+void salvar_diario(EntradaDiario diaro[], int total_entradas);
+void carregar_diario(EntradaDiario diaro[], int *total_entradas);
+
+#endif
+</code></pre></div>
+            </div>
+
+            <div class="project-block">
+                <h2>10. Jogo de Quiz com Recorde</h2>
+                <h3>Conceito Principal</h3>
+                <p>Um jogo de perguntas e respostas. As perguntas devem ser lidas de um arquivo, e o programa deve salvar o recorde (maior pontuação) em outro arquivo.</p>
+                <h3>Funcionalidades Mínimas</h3>
+                <ul class="list-disc list-inside mt-2 ml-4 space-y-1">
+                    <li>Usar uma <code>struct Pergunta</code> e uma <code>struct Jogador</code>.</li>
+                    <li>Ler um conjunto de pelo menos 5 perguntas de um arquivo <code>perguntas.txt</code>.</li>
+                    <li>Apresentar cada pergunta ao jogador e verificar se a resposta está correta.</li>
+                    <li>Manter uma pontuação e exibi-la no final do jogo.</li>
+                    <li>Carregar o recorde atual (nome e pontos) do arquivo <code>recorde.txt</code> no início.</li>
+                    <li>Se o jogador atual quebrar o recorde, salvar seu nome e nova pontuação no arquivo.</li>
+                </ul>
+                <h3>Arquivo de Header Obrigatório (<code>quiz.h</code>)</h3>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><code>#ifndef QUIZ_H
+#define QUIZ_H
+
+#define MAX_PERGUNTAS 20
+
+typedef struct {
+    char enunciado[200];
+    char opcoes[4][100];
+    int resposta_correta; // 1, 2, 3 ou 4
+} Pergunta;
+
+typedef struct {
+    char nome[50];
+    int pontuacao;
+} Jogador;
+
+int carregar_perguntas(Pergunta quiz[], const char* nome_arquivo);
+void iniciar_quiz(Pergunta quiz[], int total_perguntas);
+void carregar_recorde(Jogador *recordista);
+void salvar_recorde(Jogador recordista);
+
+#endif
+</code></pre></div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                const codeText = pre.innerText;
+
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    span.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        span.textContent = 'Copiar';
+                    }, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

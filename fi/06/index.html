@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 05: Fundamentos de Informática - Conflitos de Merge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f9f5;
+            --slide-bg: #ffffff;
+            --text-color: #4d4d5e;
+            --heading-color: #6a0dad; /* Púrpura */
+            --accent-color: #7cfc00; /* Verde Limão */
+            --accent-dark-color: #68d800;
+            --code-bg: #2a2734;
+            --code-text: #e0e0e0;
+            --comment-color: #9f8fde;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--slide-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, visibility 0.6s;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 2;
+        }
+
+        .slide h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            color: var(--heading-color);
+        }
+
+        .slide h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--heading-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 1rem;
+        }
+        
+        .slide h3 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+        
+        .author-name {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .slide p {
+            font-size: 1.3rem;
+            max-width: 900px;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .slide ul, .slide ol {
+            list-style: none;
+            max-width: 800px;
+            text-align: left;
+            margin-top: 1rem;
+        }
+        
+        .slide li {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            background-color: #f0f1f2;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .slide li strong {
+            color: var(--heading-color);
+        }
+
+        code {
+            background-color: #e8e6ef;
+            color: var(--heading-color);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+        
+        .terminal-code {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid var(--heading-color);
+            margin-top: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .terminal-code .comment {
+            color: var(--comment-color);
+        }
+        .terminal-code .prompt {
+            color: var(--accent-color);
+        }
+
+        .navigation {
+            position: fixed;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            bottom: 0;
+            width: 100%;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background-color: var(--slide-bg);
+            border-top: 1px solid #eee;
+            z-index: 10;
+        }
+
+        .nav-button {
+            background-color: var(--accent-color);
+            color: #333;
+            border: 2px solid var(--accent-dark-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            width: auto;
+            flex-grow: 1;
+            padding: 1rem;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-dark-color);
+            transform: translateY(-2px);
+        }
+        
+        .slide-counter {
+            background: transparent;
+            padding: 0 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .fullscreen-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0,0,0,0.05);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.3s;
+        }
+        .fullscreen-button:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        .fullscreen-button svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-color);
+        }
+        
+        .role-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 2rem;
+        }
+        .role-box {
+            width: 45%;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 3px solid;
+            text-align: center;
+        }
+        .role-box h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            border: none;
+            padding: 0;
+        }
+        .role-box p {
+            font-size: 1.1rem;
+            color: #fff;
+            margin: 0;
+        }
+        .role-box.purple {
+            background-color: #6a0dad;
+            border-color: #580a91;
+        }
+        .role-box.green {
+            background-color: #68d800;
+            border-color: #7cfc00;
+        }
+        .role-box.green h3, .role-box.green p {
+            color: #333;
+        }
+
+        .aluno-x {
+            color: var(--heading-color); /* Púrpura */
+            font-weight: 700;
+        }
+        .aluno-y {
+            color: #4B8A08; /* Verde escuro para contraste */
+            font-weight: 700;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide p, .slide ul, .slide ol, .slide h2, .slide h3, .slide .terminal-code, .slide img, .slide .author-name, .slide .role-container {
+            opacity: 0;
+        }
+        
+        .slide.active p, .slide.active ul, .slide.active ol, .slide.active h2, .slide.active h3, .slide.active .terminal-code, .slide.active img, .slide.active .author-name, .slide.active .role-container {
+            animation: fadeIn 0.6s ease-out 0.3s forwards;
+        }
+        
+        /* Media Queries para Responsividade */
+        @media (max-width: 768px) {
+            .slide { 
+                padding: 2rem 1rem 8rem 1rem; /* Aumenta o padding inferior para os botões não cobrirem o conteúdo */
+                overflow-y: auto; /* Habilita a rolagem DENTRO do slide */
+                justify-content: flex-start; /* Alinha o conteúdo no topo para a rolagem fazer sentido */
+            }
+            .slide h1 { font-size: 2.5rem; }
+            .slide h2 { font-size: 1.8rem; }
+            .slide p, .slide li { font-size: 1.1rem; }
+            .terminal-code { font-size: 0.9rem; }
+            
+            .navigation { 
+                gap: 0.5rem; 
+            }
+
+            .role-container { flex-direction: column; align-items: center; }
+            .role-box { width: 90%; }
+
+            .fullscreen-button {
+                display: none; /* Esconde o botão de tela cheia */
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container">
+        <!-- AULA 05 COMEÇA AQUI -->
+        <div class="slide active" data-slide="1">
+            <h1>Aula 05</h1>
+            <p class="author-name">Prof. Will - Fundamentos de Informática</p>
+            <h3 style="margin-top: -1.5rem; font-weight: 400;">COTIL/UNICAMP</h3>
+            <h2>A Arte de Resolver Conflitos de Merge</h2>
+            <p>Quando duas realidades colidem, aprenda a ser o mestre do tempo.</p>
+        </div>
+
+        <div class="slide" data-slide="2">
+            <h2>Recapitulando: Onde Paramos?</h2>
+            <p>Na última aula, aprendemos o fluxo de colaboração mais comum do mundo open-source: o <strong>Fork & Pull Request</strong>.</p>
+            <p>Conseguimos sugerir uma mudança no repositório de um colega, que foi aceita e integrada com sucesso. Mas... e se não fosse tão simples?</p>
+        </div>
+
+        <div class="slide" data-slide="3">
+            <h2>O que é um Conflito de Merge?</h2>
+            <p>Um conflito de merge acontece quando o Git não consegue decidir qual alteração manter. Isso ocorre quando duas pessoas (ou duas branches) modificam a <strong>mesma linha</strong> do mesmo arquivo.</p>
+            <h3>Analogia: O Documento Compartilhado</h3>
+            <p>Imagine que você e seu colega baixam a mesma versão de um texto. Você corrige o primeiro parágrafo, e ele reescreve o mesmo parágrafo. Quando vocês tentam juntar as versões, qual delas é a correta? O Git fica com a mesma dúvida e pede ajuda a um humano.</p>
+        </div>
+
+        <div class="slide" data-slide="4">
+            <h2>Exercício Prático: Vamos Criar um Conflito!</h2>
+            <h3>A melhor forma de aprender a resolver um problema é criá-lo em um ambiente seguro.</h3>
+            <p>Vamos simular um cenário onde dois desenvolvedores trabalham em um cardápio de cafeteria ao mesmo tempo.</p>
+            <div class="role-container">
+                <div class="role-box purple">
+                    <h3>Aluno X</h3>
+                    <p>Dono do Repositório Original.</p>
+                </div>
+                <div class="role-box green">
+                    <h3>Aluno Y</h3>
+                    <p>Colaborador que fará o Fork.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" data-slide="5">
+            <h2>Passo 1: Setup (<span class="aluno-x">Aluno X</span>)</h2>
+            <h3><span class="aluno-x">Aluno X</span> cria a base do projeto <code>cafeteria</code>.</h3>
+            <ol>
+                <li>No GitHub, crie um novo repositório chamado <code>cafeteria</code>.</li>
+                <li>Abra o novo repositório em um Codespace.</li>
+            </ol>
+        </div>
+
+        <div class="slide" data-slide="6">
+            <h2>Passo 2: Setup (<span class="aluno-y">Aluno Y</span>)</h2>
+            <h3><span class="aluno-y">Aluno Y</span> prepara seu ambiente para contribuir.</h3>
+            <ol>
+                <li>Vá até o repositório <code>cafeteria</code> do <span class="aluno-x">Aluno X</span> e clique em <strong>Fork</strong>.</li>
+                <li>Abra o <strong>SEU</strong> repositório "forkado" em um novo Codespace.</li>
+                <li>No terminal do Codespace, crie uma nova branch para fazer suas alterações e mude para ela.</li>
+            </ol>
+             <div class="terminal-code">
+                <span class="comment"># Crie uma nova branch 'cardapio' e mude para ela</span><br>
+                <span class="prompt">$</span> git switch -c cardapio
+            </div>
+        </div>
+
+        <div class="slide" data-slide="7">
+            <h2>Passo 3: A Colisão (AMBOS)</h2>
+            <h3>Hora de editar a mesma parte do código!</h3>
+            <ol>
+                <li><strong>Ambos os alunos</strong>, em seus respectivos Codespaces, devem abrir o arquivo <code>index.html</code>.</li>
+                <li>Adicionem 5 novos itens <strong>diferentes</strong> à lista <code>&lt;ul&gt;</code>. Não combinem os itens!</li>
+                <li>O <strong><span class="aluno-x">Aluno X</span></strong> deve estar trabalhando na branch <code>main</code>.</li>
+                <li>O <strong><span class="aluno-y">Aluno Y</span></strong> deve estar trabalhando na branch <code>cardapio</code>.</li>
+                <li>Após salvar, ambos devem fazer o processo de add, commit e push.</li>
+            </ol>
+        </div>
+
+         <div class="slide" data-slide="8">
+            <h2>Passo 3.1: Comandos do Push (AMBOS)</h2>
+            <p>Após salvar as alterações no <code>index.html</code>, executem estes comandos.</p>
+            <div class="terminal-code">
+                <span class="comment"># Adicione o arquivo modificado</span><br>
+                <span class="prompt">$</span> git add index.html<br><br>
+                <span class="comment"># Faça o commit com uma mensagem clara</span><br>
+                <span class="prompt">$</span> git commit -m "Adiciona novos itens ao cardapio"<br><br>
+                <span class="comment"># Envie para o GitHub.</span><br>
+                <span class="prompt">$</span> git push
+            </div>
+        </div>
+
+        <div class="slide" data-slide="9">
+            <h2>Passo 4: O Pull Request (<span class="aluno-y">Aluno Y</span>)</h2>
+            <h3><span class="aluno-y">Aluno Y</span> sugere suas mudanças para o projeto original.</h3>
+            <p>Vá até a página do <strong>seu Fork</strong> no GitHub. Crie um Pull Request da sua branch <code>cardapio</code> para a branch <code>main</code> do repositório do <strong><span class="aluno-x">Aluno X</span></strong>.</p>
+            <p>Ao fazer isso, o GitHub irá avisar...</p>
+        </div>
+
+        <div class="slide" data-slide="10">
+            <h2>O CONFLITO!</h2>
+            <h3>"Can't automatically merge"</h3>
+            <p>O GitHub não consegue unir os arquivos porque ambos modificaram a mesma seção. Ele mostra um aviso claro de que há conflitos que precisam ser resolvidos manualmente.</p>
+             <img src="conflito.png" alt="[Imagem do aviso de conflito no GitHub]" style="max-width: 80%; border-radius: 12px;">
+             <p>Não se desespere! Isso é normal. Clique no botão <strong>"Resolve conflicts"</strong>.</p>
+        </div>
+
+        <div class="slide" data-slide="11">
+            <h2>Entendendo os Marcadores de Conflito</h2>
+            <p>O GitHub abrirá um editor de texto mostrando o arquivo com marcadores especiais inseridos pelo Git:</p>
+            <div class="terminal-code">
+                &lt;ul&gt;<br>
+                <span class="comment">&lt;!-- Itens que não tiveram conflito --&gt;</span><br>
+                &lt;li&gt;Espresso&lt;/li&gt;<br>
+                <span class="prompt">&lt;&lt;&lt;&lt;&lt;&lt;&lt; main (As mudanças que vieram da branch base)</span><br>
+                &nbsp;&nbsp;&lt;li&gt;Pão de Queijo&lt;/li&gt;<br>
+                &nbsp;&nbsp;&lt;li&gt;Croissant&lt;/li&gt;<br>
+                <span class="prompt">=======</span><br>
+                <span class="comment">(As suas mudanças na branch 'cardapio')</span><br>
+                &nbsp;&nbsp;&lt;li&gt;Frappuccino&lt;/li&gt;<br>
+                &nbsp;&nbsp;&lt;li&gt;Muffin&lt;/li&gt;<br>
+                <span class="prompt">&gt;&gt;&gt;&gt;&gt;&gt;&gt; cardapio</span><br>
+                &lt;/ul&gt;<br>
+            </div>
+        </div>
+
+        <div class="slide" data-slide="12">
+            <h2>Resolvendo o Conflito no GitHub</h2>
+            <h3>Sua missão: "limpar" o arquivo.</h3>
+            <ol>
+                <li>Edite o código diretamente no editor do GitHub para chegar à versão final desejada. Decida quais itens manter (neste caso, todos!).</li>
+                <li><strong>Apague os marcadores de conflito</strong> inseridos pelo Git:
+                    <ul style="margin-top:0.5rem; max-width: 100%;">
+                        <li style="background:none; border:none; padding: 0.2rem 1rem; font-size:1.1rem; margin-bottom:0.2rem;"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; main</code></li>
+                        <li style="background:none; border:none; padding: 0.2rem 1rem; font-size:1.1rem; margin-bottom:0.2rem;"><code>=======</code></li>
+                        <li style="background:none; border:none; padding: 0.2rem 1rem; font-size:1.1rem; margin-bottom:0.2rem;"><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; cardapio</code></li>
+                    </ul>
+                </li>
+                <li>Após o arquivo ficar limpo e com o conteúdo final correto, clique em <strong>"Mark as resolved"</strong>.</li>
+                <li>Finalmente, clique em <strong>"Commit merge"</strong> para salvar a resolução do conflito.</li>
+            </ol>
+        </div>
+
+        <div class="slide" data-slide="13">
+            <h2>Merge Realizado com Sucesso!</h2>
+            <p>Após resolver o conflito, o Pull Request estará pronto para o merge. O <span class="aluno-x">Aluno X</span> pode agora clicar em <strong>"Merge pull request"</strong> com segurança.</p>
+             <img src="merge.png" alt="[Imagem do PR pronto para o merge após a resolução do conflito]" style="max-width: 80%; border-radius: 12px;">
+             <p>Parabéns, vocês resolveram seu primeiro conflito!</p>
+        </div>
+
+        <div class="slide" data-slide="14">
+            <h2>Passo Final: Sincronizando (<span class="aluno-x">Aluno X</span>)</h2>
+            <h3>O trabalho foi integrado no GitHub, mas seu Codespace não sabe disso!</h3>
+            <p>O <strong><span class="aluno-x">Aluno X</span></strong> precisa atualizar seu ambiente de trabalho para baixar as mudanças que foram integradas (incluindo as contribuições do <span class="aluno-y">Aluno Y</span>).</p>
+            <div class="terminal-code">
+                <span class="comment"># Garanta que você está na branch 'main'</span><br>
+                <span class="prompt">$</span> git switch main<br><br>
+                <span class="comment"># Puxe as últimas atualizações do repositório remoto</span><br>
+                <span class="prompt">$</span> git pull
+            </div>
+            <p>O arquivo <code>index.html</code> no Codespace do <span class="aluno-x">Aluno X</span> será atualizado magicamente!</p>
+        </div>
+
+        <div class="slide" data-slide="15">
+            <h2>Invertendo os Papéis: Loja de Games</h2>
+            <h3>Agora, vamos praticar de novo, trocando as funções.</h3>
+            <ul>
+                <li><strong><span class="aluno-y">Aluno Y</span></strong>: Cria um novo repositório <code>loja-de-games</code> com um <code>index.html</code> contendo uma lista de 5 jogos.</li>
+                <li><strong><span class="aluno-x">Aluno X</span></strong>: Faz o Fork, abre-o em um Codespace, e cria uma branch <code>catalogo</code>.</li>
+                <li><strong>Ambos</strong>: Adicionam 5 jogos <strong>diferentes</strong> à mesma lista em suas respectivas branches.</li>
+                <li><strong>Ambos</strong>: Fazem add, commit e push.</li>
+                <li><strong><span class="aluno-x">Aluno X</span></strong>: Abre o Pull Request para o repositório do <span class="aluno-y">Aluno Y</span>.</li>
+                <li><strong><span class="aluno-y">Aluno Y</span></strong>: Gerencia e resolve o conflito que aparecerá.</li>
+            </ul>
+        </div>
+        
+        <div class="slide" data-slide="16">
+            <h2>Resumo da Aula</h2>
+            <p>O que aprendemos hoje:</p>
+            <ul>
+                <li>O que é um <strong>Conflito de Merge</strong> e por que ele acontece.</li>
+                <li>Como <strong>provocar um conflito</strong> de forma controlada para estudo.</li>
+                <li>Interpretar os <strong>marcadores de conflito</strong> (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>).</li>
+                <li>Como <strong>resolver conflitos</strong> diretamente na interface do GitHub.</li>
+                <li>A importância de usar <code>git pull</code> para manter o ambiente de trabalho sincronizado.</li>
+            </ul>
+        </div>
+
+        <div class="slide" data-slide="17">
+            <h2>Fim do Módulo Git & GitHub</h2>
+            <p>Parabéns! Vocês agora dominam as ferramentas essenciais para colaboração em desenvolvimento de software.</p>
+            <h3>Bons estudos para a avaliação!</h3>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn">Anterior</button>
+        <div class="slide-counter" id="slideCounter"></div>
+        <button class="nav-button" id="nextBtn">Próximo</button>
+    </div>
+    
+    <button class="fullscreen-button" id="fullscreenBtn" title="Tela Cheia">
+        <svg id="fullscreen-enter-icon" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+        <svg id="fullscreen-exit-icon" viewBox="0 0 24 24" style="display: none;"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"></path></svg>
+    </button>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const enterIcon = document.getElementById('fullscreen-enter-icon');
+        const exitIcon = document.getElementById('fullscreen-exit-icon');
+        
+        let currentSlide = 1;
+        const totalSlides = slides.length;
+
+        const updateSlides = () => {
+            slides.forEach(slide => {
+                const slideNumber = parseInt(slide.dataset.slide);
+                if (slideNumber === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            slideCounter.textContent = `${currentSlide} / ${totalSlides}`;
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+        };
+
+        const handleNext = () => {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlides();
+            }
+        };
+
+        const handlePrev = () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlides();
+            }
+        };
+
+        nextBtn.addEventListener('click', handleNext);
+        prevBtn.addEventListener('click', handlePrev);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextBtn.click();
+            } else if (e.key === 'ArrowLeft') {
+                prevBtn.click();
+            }
+        });
+
+        const toggleFullScreen = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Erro ao tentar entrar em tela cheia: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        };
+
+        fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                enterIcon.style.display = 'none';
+                exitIcon.style.display = 'block';
+            } else {
+                enterIcon.style.display = 'block';
+                exitIcon.style.display = 'none';
+            }
+        });
+
+        // Initial setup
+        updateSlides();
+    </script>
+
+</body>
+</html>
+
+
+
+

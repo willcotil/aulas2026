@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Introdução ao Shell Script</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* Para melhor layout mobile */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem; /* Menos padding em mobile */
+            border-bottom: 1px solid #e5e7eb;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+            .slide {
+                padding: 4rem;
+            }
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        html {
+            scroll-snap-type: y mandatory;
+        }
+
+        /* Estilos de Navegação */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: #ffffff; }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start;
+                page-break-before: always;
+            }
+            .slide:first-child { page-break-before: avoid; }
+            .nav-button, .counter, .copy-button { display: none; }
+        }
+
+        /* Estilos de Código e Tokens */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #f8f9fa; /* Tema claro para terminal */
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #212529; /* Cor do texto escura */
+            counter-reset: line;
+            position: relative;
+            overflow-x: auto; /* Para rolagem horizontal em mobile */
+        }
+        pre .line {
+            padding-left: 4.5em;
+            position: relative;
+            display: block; /* Garante quebra de linha correta */
+            white-space: pre-wrap; /* Quebra de linha em mobile */
+            word-break: break-all;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em;
+            padding-right: 1em;
+            text-align: right;
+            color: #adb5bd; /* Cor dos números de linha */
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #2d3748;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        /* Tokens para Shell Script (Tema Claro) */
+        .token-prompt { color: #007bff; } /* Azul */
+        .token-command { color: #d73a49; } /* Vermelho */
+        .token-option { color: #6f42c1; } /* Roxo */
+        .token-path { color: #28a745; } /* Verde */
+        .token-comment { color: #6a737d; } /* Cinza */
+        .token-output { color: #212529; } /* Preto (cor padrão) */
+        .token-variable { color: #e65100; } /* Laranja */
+        .token-string { color: #032f62; } /* Azul escuro */
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-6xl md:text-8xl font-extrabold mb-4 bg-gradient-to-r from-orange-600 to-amber-400 bg-clip-text text-transparent drop-shadow-xl">Introdução ao Shell Script</h1>
+                <p class="text-2xl md:text-3xl text-orange-700">Variáveis, Shebang e Input do Usuário</p>
+                <p class="text-xl text-gray-600 mt-8">Fundamentos de Informática</p>
+                <div class="w-32 h-1.5 bg-orange-600 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: O que é Shell Script? -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O que é Shell Script?</h2>
+                <p class="text-xl mb-6">Até agora, nós digitamos comandos no terminal um por um. Um Shell Script é simplesmente um <strong>arquivo de texto contendo uma sequência desses comandos</strong>.</p>
+                <div class="text-center my-8">
+                    <span class="text-5xl">📄</span>
+                    <p class="text-2xl mt-2">Lista de Comandos</p>
+                    <span class="text-5xl my-4 block text-amber-600">⬇️</span>
+                    <span class="text-7xl">🤖</span>
+                    <p class="text-2xl mt-2">O Shell lê e executa em ordem</p>
+                </div>
+                <p class="text-2xl text-center">É a forma mais fundamental de <strong>automação</strong> no Linux. Você escreve as instruções uma vez e pode executá-las quantas vezes quiser.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: O Shebang -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Primeira Linha Mágica: O "Shebang"</h2>
+                <p class="text-xl mb-6">Todo script shell deve começar com uma linha especial chamada "shebang". Ela diz ao sistema operacional qual interpretador deve ser usado para executar os comandos no arquivo.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div></pre></div>
+                <ul class="text-xl mt-6 space-y-3 list-disc pl-5">
+                    <li><code class="inline-code">#!</code> - O "shebang" em si. Identifica o arquivo como um script.</li>
+                    <li><code class="inline-code">/bin/bash</code> - O caminho para o interpretador. Na maioria das vezes, usaremos o <strong>Bash</strong> (<strong>B</strong>ourne-<strong>A</strong>gain <strong>SH</strong>ell), que é o shell padrão em muitas distribuições Linux.</li>
+                </ul>
+                <p class="text-xl mt-6 p-4 bg-orange-100 border border-orange-300 rounded-lg"><strong>Regra de Ouro:</strong> O shebang <strong>DEVE</strong> ser a primeira linha do seu arquivo. Sem espaços ou linhas em branco antes dele.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: Criando e Executando seu Primeiro Script -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Seu Primeiro Script: "Olá, Mundo!"</h2>
+                <p class="text-xl mb-6">Vamos criar um script simples. São 3 passos:</p>
+                <p class="text-xl font-bold">1. Criar o arquivo (usando o VIM que aprendemos!):</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">vim</span> <span class="token-path">ola.sh</span></div></pre></div>
+                <p class="text-xl font-bold mt-4">2. Escrever o código dentro do arquivo:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Olá, turma de Fundamentos de Informática!"</span></div></pre></div>
+                <p class="text-xl font-bold mt-4">3. Salvar e sair do VIM (<code class="inline-code">:wq</code>).</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: Tornando o Script Executável -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Permissão para Executar</h2>
+                <p class="text-xl mb-6">Se tentarmos rodar o script agora, teremos um erro de "Permissão negada". Por padrão, novos arquivos não têm permissão de execução.</p>
+                <p class="text-xl mb-6">Lembram da aula de permissões? Usamos o <code class="inline-code">chmod</code> para adicionar a permissão de execução (<code class="inline-code">x</code>) para o nosso usuário (<code class="inline-code">u</code>).</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-option">u+x</span> <span class="token-path">ola.sh</span></div></pre></div>
+                <p class="text-xl mt-6">Agora, se listarmos o arquivo, veremos a permissão `x` e o nome do arquivo provavelmente estará em outra cor (verde, em muitos terminais).</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">ls</span> <span class="token-option">-l</span> <span class="token-path">ola.sh</span></div><div class="line"><span class="token-output">-rwxrw-r-- 1 aluno aluno 68 Out 2 10:30 ola.sh</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Executando o Script -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Executando o Script</h2>
+                <p class="text-xl mb-6">Para executar um script que está no diretório atual, usamos <code class="inline-code">./</code> seguido do nome do arquivo.</p>
+                <p class="text-xl mb-6">O <code class="inline-code">./</code> diz ao shell: "Não procure por este comando no sistema, execute o arquivo que está <strong>exatamente aqui</strong>, neste diretório".</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> ./<span class="token-path">ola.sh</span></div><div class="line"><span class="token-output">Olá, turma de Fundamentos de Informática!</span></div></pre></div>
+                <p class="text-2xl mt-8 text-center">🎉 Parabéns, você criou e executou seu primeiro Shell Script!</p>
+            </div>
+        </section>
+
+        <!-- Slide 7: Variáveis -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Guardando Informações: Variáveis</h2>
+                <div class="text-7xl my-8">📦</div>
+                <p class="text-2xl mb-4">Variáveis são "caixas" ou "contêineres" onde podemos armazenar dados (texto, números) para usar mais tarde no script.</p>
+                <p class="text-xl text-gray-600">Isso torna nossos scripts mais flexíveis e fáceis de ler.</p>
+            </div>
+        </section>
+        
+        <!-- Slide 8: Declarando e Usando Variáveis -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Declarando e Usando Variáveis</h2>
+                <p class="text-xl mb-6">A sintaxe é simples, mas com uma regra <strong>muito importante</strong>.</p>
+                <p class="text-xl font-bold">Para declarar:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-variable">NOME_DA_VARIAVEL</span>=<span class="token-string">"valor"</span></div></pre></div>
+                <p class="text-2xl mt-4 p-4 text-red-700 bg-red-100 border border-red-300 rounded-lg">⚠️ <strong>REGRA CRÍTICA:</strong> Não pode haver espaços antes ou depois do sinal de igual <code class="inline-code">=</code>!</p>
+                
+                <p class="text-xl font-bold mt-8">Para usar (acessar o valor):</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-command">echo</span> <span class="token-string">"O valor é: </span><span class="token-variable">$NOME_DA_VARIAVEL</span><span class="token-string">"</span></div></pre></div>
+                 <p class="text-xl mt-4">Usamos o cifrão <code class="inline-code">$</code> antes do nome da variável para pegar o valor que está "dentro" dela.</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Exemplo com Variáveis -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Script com Variáveis</h2>
+                <p class="text-xl mb-6">Vamos modificar nosso script `ola.sh` para usar variáveis.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-variable">TURMA</span>=<span class="token-string">"Fundamentos de Informática"</span></div><div class="line"><span class="token-variable">MENSAGEM</span>=<span class="token-string">"Sejam bem-vindos ao mundo do Shell Script!"</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Olá, turma de </span><span class="token-variable">$TURMA</span><span class="token-string">"</span></div><div class="line"><span class="token-command">echo</span> <span class="token-string">"</span><span class="token-variable">$MENSAGEM</span><span class="token-string">"</span></div></pre></div>
+                 <p class="text-xl mt-6 font-bold">Saída esperada:</p>
+                 <div class="code-block-wrapper"><pre><div class="line"><span class="token-output">Olá, turma de Fundamentos de Informática</span></div><div class="line"><span class="token-output">Sejam bem-vindos ao mundo do Shell Script!</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Interagindo com o Usuário -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Tornando os Scripts Interativos</h2>
+                <div class="text-7xl my-8">💬</div>
+                <p class="text-3xl">Com o comando <code class="inline-code">read</code>!</p>
+                <p class="text-xl text-gray-600 mt-4">O comando <code class="inline-code">read</code> pausa o script, espera o usuário digitar algo e pressionar Enter, e então armazena o que foi digitado em uma variável.</p>
+            </div>
+        </section>
+
+        <!-- Slide 11: read na Prática -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6"><code class="inline-code">read</code> na Prática</h2>
+                <p class="text-xl mb-6">Vamos criar um script que pergunta o nome do usuário.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Por favor, digite seu nome:"</span></div><div class="line"><span class="token-command">read</span> <span class="token-variable">NOME_USUARIO</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Olá, </span><span class="token-variable">$NOME_USUARIO</span><span class="token-string">! Tenha um bom dia."</span></div></pre></div>
+                 <p class="text-xl mt-6 font-bold">Como ele vai rodar:</p>
+                 <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> ./<span class="token-path">pergunta_nome.sh</span></div><div class="line"><span class="token-output">Por favor, digite seu nome:</span></div><div class="line"><span class="token-output">William</span>  <span class="token-comment"><-- aqui você digita</span></div><div class="line"><span class="token-output">Olá, William! Tenha um bom dia.</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Melhorando o read com -p -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Melhorando a Experiência com <code class="inline-code">read -p</code></h2>
+                <p class="text-xl mb-6">Usar um <code class="inline-code">echo</code> antes de cada <code class="inline-code">read</code> funciona, mas podemos fazer melhor. A opção <code class="inline-code">-p</code> (de <strong>p</strong>rompt) permite mostrar uma mensagem na mesma linha em que o usuário vai digitar.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Digite seu nome: "</span> <span class="token-variable">NOME_USUARIO</span></div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"Qual sua comida favorita? "</span> <span class="token-variable">COMIDA</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Então seu nome é </span><span class="token-variable">$NOME_USUARIO</span><span class="token-string"> e você gosta de </span><span class="token-variable">$COMIDA</span><span class="token-string">."</span></div></pre></div>
+                 <p class="text-xl mt-6 font-bold">Como ele vai rodar agora:</p>
+                 <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> ./<span class="token-path">script_melhorado.sh</span></div><div class="line"><span class="token-output">Digite seu nome: Ana</span></div><div class="line"><span class="token-output">Qual sua comida favorita? Lasanha</span></div><div class="line"><span class="token-output">Então seu nome é Ana e você gosta de Lasanha.</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Exercício Prático -->
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Missão: O Script de Boas-Vindas</h2>
+                <p class="text-xl mb-6">Crie um script chamado `boas_vindas.sh` que faça o seguinte:</p>
+                <ol class="list-decimal list-inside mt-4 space-y-3 text-lg bg-gray-50 p-6 rounded-lg">
+                    <li>Mostre uma mensagem de boas-vindas.</li>
+                    <li>Pergunte ao usuário de qual cidade ele é, usando um prompt (<code class="inline-code">read -p</code>).</li>
+                    <li>Armazene a resposta em uma variável chamada `CIDADE`.</li>
+                    <li>Exiba uma mensagem final, como: "Que legal! [Nome da cidade] é uma cidade muito bonita."</li>
+                    <li>Não se esqueça do shebang e de tornar o script executável!</li>
+                </ol>
+            </div>
+        </section>
+        
+        <!-- Slide 14: Solução do Exercício -->
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Solução da Missão</h2>
+                <p class="text-xl mb-6">O conteúdo do arquivo `boas_vindas.sh`:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">#!/bin/bash</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"--- Bem-vindo ao meu script! ---"</span></div><div class="line"> </div><div class="line"><span class="token-command">read</span> <span class="token-option">-p</span> <span class="token-string">"De qual cidade você é? "</span> <span class="token-variable">CIDADE</span></div><div class="line"> </div><div class="line"><span class="token-command">echo</span> <span class="token-string">"Que legal! </span><span class="token-variable">$CIDADE</span><span class="token-string"> é uma cidade muito bonita."</span></div></pre></div>
+                <p class="text-xl mt-6 font-bold">Comandos para executar:</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-prompt">~$</span> <span class="token-command">chmod</span> <span class="token-option">+x</span> <span class="token-path">boas_vindas.sh</span></div><div class="line"><span class="token-prompt">~$</span> ./<span class="token-path">boas_vindas.sh</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Resumo -->
+        <section id="slide-15" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo da Aula</h2>
+                <ul class="text-2xl space-y-6">
+                    <li><strong class="text-orange-700">Shell Script:</strong> Um arquivo com uma sequência de comandos para automação.</li>
+                    <li><strong class="text-orange-700">Shebang <code class="inline-code">#!/bin/bash</code>:</strong> A primeira linha obrigatória que define o interpretador.</li>
+                    <li><strong class="text-orange-700">Execução:</strong> Torne o script executável com <code class="inline-code">chmod +x</code> e rode com <code class="inline-code">./script.sh</code>.</li>
+                    <li><strong class="text-orange-700">Variáveis:</strong> Guardam dados. Declare com <code class="inline-code">VAR="valor"</code> (sem espaços!) e use com <code class="inline-code">$VAR</code>.</li>
+                    <li><strong class="text-orange-700">Input do Usuário:</strong> O comando <code class="inline-code">read -p "Pergunta: " VARIAVEL</code> é a melhor forma de pedir dados ao usuário.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 16: Próximos Passos -->
+        <section id="slide-16" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Tornando os Scripts Inteligentes</h2>
+                <p class="text-2xl">Agora que nossos scripts podem usar variáveis e interagir com o usuário, o próximo passo é ensiná-los a <strong>tomar decisões</strong>.</p>
+                <div class="text-6xl my-8">🧠</div>
+                <p class="text-3xl font-bold text-orange-700 mt-12">Próxima aula: Lógica com Estruturas Condicionais (if, else)!</p>
+            </div>
+        </section>
+
+        <!-- Slide 17: Perguntas -->
+        <section id="slide-17" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') {
+                    e.preventDefault(); // Evita a rolagem padrão da página
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                const span = button.querySelector('span');
+                const originalText = 'Copiar'; // Definido estaticamente pois não há span no SVG
+
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = codeText.trim();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        const copyFeedback = e.currentTarget;
+                        copyFeedback.innerHTML = 'Copiado!';
+                        setTimeout(() => {
+                           copyFeedback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span>`;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Falha ao copiar texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+

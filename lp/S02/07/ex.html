@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Vetores de Structs em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .exercise-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #dc2626;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercícios Práticos: Vetores de Structs</h1>
+        <p class="mt-2 text-gray-600">Pratique o cadastro e a manipulação de coleções de dados.</p>
+
+        <!-- Exercício 1 -->
+        <div class="exercise-block mt-8">
+            <h2>1. Agenda de Contatos</h2>
+            <p class="mt-2">Crie um programa que cadastre <strong>3 contatos</strong> (nome e telefone) em um vetor de structs. Ao final, exiba a lista de contatos cadastrados.</p>
+            <pre><code>-- Cadastro do Contato 1 --
+Nome: Ana
+Telefone: 111-111
+
+-- Cadastro do Contato 2 --
+Nome: Beto
+Telefone: 222-222
+
+-- Cadastro do Contato 3 --
+Nome: Carla
+Telefone: 333-333
+
+--- Contatos na Agenda ---
+1. Nome: Ana, Telefone: 111-111
+2. Nome: Beto, Telefone: 222-222
+3. Nome: Carla, Telefone: 333-333</code></pre>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="exercise-block mt-8">
+            <h2>2. Média da Turma</h2>
+            <p class="mt-2">Crie um programa que leia o nome e a nota de <strong>4 alunos</strong>. Armazene os dados em um vetor de structs. Ao final, calcule e exiba a média das notas da turma.</p>
+            <pre><code>-- Cadastro do Aluno 1 --
+Nome: Daniel
+Nota: 8.0
+
+... (cadastro dos outros 3 alunos)
+
+--- Resultado ---
+A media de notas da turma e: 7.5</code></pre>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="exercise-block mt-8">
+            <h2>3. Atleta mais Alto</h2>
+            <p class="mt-2">Crie um programa que cadastre <strong>3 atletas</strong>, armazenando nome e altura (em metros). Ao final, o programa deve encontrar e exibir o nome do atleta mais alto.</p>
+            <pre><code>-- Atleta 1 --
+Nome: Felipe
+Altura: 1.85
+
+-- Atleta 2 --
+Nome: Gerson
+Altura: 1.91
+
+-- Atleta 3 --
+Nome: Helio
+Altura: 1.79
+
+--- Resultado ---
+O atleta mais alto e: Gerson</code></pre>
+        </div>
+        
+        <!-- Exercício 4 -->
+        <div class="exercise-block mt-8">
+            <h2>4. Produtos em Estoque</h2>
+            <p class="mt-2">Crie um programa para gerenciar o estoque de <strong>5 produtos</strong>. Para cada produto, armazene o código (int) e a quantidade (int). Ao final, exiba quantos produtos têm mais de 100 unidades em estoque.</p>
+            <pre><code>-- Produto 1 --
+Codigo: 101
+Quantidade: 150
+
+... (cadastro dos outros 4 produtos)
+
+--- Relatorio de Estoque ---
+Quantidade de produtos com mais de 100 unidades: 3</code></pre>
+        </div>
+
+        <!-- Exercício 5 -->
+        <div class="exercise-block mt-8">
+            <h2>5. Cadastro de Carros</h2>
+            <p class="mt-2">Crie uma struct para armazenar os dados de um carro (marca, modelo e ano). Cadastre <strong>3 carros</strong> em um vetor de structs e depois liste todos os carros cadastrados.</p>
+            <pre><code>-- Carro 1 --
+Marca: Ford
+Modelo: Ka
+Ano: 2018
+
+... (cadastro dos outros 2 carros)
+
+--- Carros Cadastrados ---
+1. Marca: Ford, Modelo: Ka, Ano: 2018
+2. Marca: Fiat, Modelo: Uno, Ano: 2015
+3. Marca: Honda, Modelo: Civic, Ano: 2020</code></pre>
+        </div>
+
+        <!-- Exercício 6 -->
+        <div class="exercise-block mt-8">
+            <h2>6. Busca por Paciente</h2>
+            <p class="mt-2">Crie um programa que cadastre <strong>4 pacientes</strong> (nome e idade). Após o cadastro, o programa deve perguntar ao usuário o nome de um paciente para buscar. Se encontrar, deve exibir a idade dele.</p>
+            <pre><code>-- Cadastro do Paciente 1 --
+Nome: Joao
+Idade: 45
+
+... (cadastro dos outros 3 pacientes)
+
+Digite o nome do paciente a ser buscado: Maria
+--- Ficha do Paciente ---
+Idade de Maria: 32 anos.</code></pre>
+        </div>
+
+        <!-- Exercício 7 -->
+        <div class="exercise-block mt-8">
+            <h2>7. Lista de Tarefas</h2>
+            <p class="mt-2">Crie um programa que armazene <strong>5 tarefas</strong>. Cada tarefa tem uma descrição e um status (1 para 'Concluída', 0 para 'Pendente'). Ao final, o programa deve contar e exibir quantas tarefas estão pendentes.</p>
+            <pre><code>-- Tarefa 1 --
+Descricao: Estudar C
+Status (1-Concluida, 0-Pendente): 0
+
+... (cadastro das outras 4 tarefas)
+
+--- Resumo ---
+Voce tem 3 tarefas pendentes.</code></pre>
+        </div>
+
+        <!-- Exercício 8 -->
+        <div class="exercise-block mt-8">
+            <h2>8. Filtrando Alunos Aprovados</h2>
+            <p class="mt-2">Crie um programa que leia os dados de <strong>5 alunos</strong> (nome e nota). Após o cadastro, o programa deve exibir uma lista contendo apenas os nomes dos alunos que foram aprovados (nota >= 6.0).</p>
+            <pre><code>-- Aluno 1 --
+Nome: Pedro
+Nota: 7.5
+
+... (cadastro dos outros 4 alunos)
+
+--- Alunos Aprovados ---
+- Pedro
+- Ana
+- Julia</code></pre>
+        </div>
+
+        <!-- Exercício 9 -->
+        <div class="exercise-block mt-8">
+            <h2>9. O Carro Mais Antigo</h2>
+            <p class="mt-2">Utilizando a mesma struct de carro (marca, modelo, ano) do exercício 5, cadastre <strong>4 carros</strong>. Ao final, o programa deve encontrar e exibir os dados do carro mais antigo da lista (menor ano).</p>
+            <pre><code>-- Carro 1 --
+Marca: VW
+Modelo: Fusca
+Ano: 1975
+
+... (cadastro dos outros 3 carros)
+
+--- Carro mais antigo ---
+Marca: VW
+Modelo: Fusca
+Ano: 1975</code></pre>
+        </div>
+
+        <!-- Exercício 10 -->
+        <div class="exercise-block mt-8">
+            <h2>10. Média Salarial por Cargo</h2>
+            <p class="mt-2">Crie um programa que cadastre <strong>5 funcionários</strong> (nome, cargo e salário). Após o cadastro, o programa deve calcular e exibir a média salarial apenas dos funcionários que ocupam o cargo de "Programador".</p>
+            <pre><code>-- Funcionario 1 --
+Nome: Carlos
+Cargo: Programador
+Salario: 4000.00
+
+-- Funcionario 2 --
+Nome: Diana
+Cargo: Designer
+Salario: 3500.00
+
+... (cadastro dos outros 3 funcionários)
+
+--- Analise Salarial ---
+Media salarial dos programadores: R$ 4750.00</code></pre>
+        </div>
+    </div>
+</body>
+</html>

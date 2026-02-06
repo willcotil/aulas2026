@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios - Modularização em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .exercise-block {
+                page-break-inside: avoid;
+            }
+        }
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #7c3aed;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-top: 2rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #d1d5db;
+        }
+        p, li {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+        code {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+        }
+        pre {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercícios Práticos: Modularização em C</h1>
+        <p class="mt-2 text-gray-600">Pratique a separação de código em arquivos .h e .c para criar projetos organizados.</p>
+
+        <!-- Exercício 1 -->
+        <div class="exercise-block mt-8">
+            <h2>1. Módulo de Conversão de Temperatura</h2>
+            <p class="mt-2">Crie um módulo chamado <code>temperatura</code> que forneça funções para converter Celsius para Fahrenheit e vice-versa. O programa principal deve usar este módulo para realizar as conversões.</p>
+            <p class="mt-2"><strong>Instruções:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-2">
+                <li><strong>Arquivo <code>temperatura.h</code>:</strong> Crie este arquivo com os protótipos das funções <code>float celsius_para_fahrenheit(float celsius);</code> e <code>float fahrenheit_para_celsius(float fahrenheit);</code>. Use "include guards".<br><small>(Fórmulas: F = C * 1.8 + 32; C = (F - 32) / 1.8)</small></li>
+                <li><strong>Arquivo <code>temperatura.c</code>:</strong> Implemente as duas funções de conversão. Lembre-se de incluir <code>"temperatura.h"</code>.</li>
+                <li><strong>Arquivo <code>main.c</code>:</strong> Crie o programa principal que inclui <code>&lt;stdio.h&gt;</code> e <code>"temperatura.h"</code>. Nele, teste as duas funções com valores fixos (ex: 30°C e 86°F) e imprima os resultados para verificar se estão corretos.</li>
+                <li><strong>Compilação:</strong> Compile seu projeto com o comando <code>gcc main.c temperatura.c -o programa</code>.</li>
+            </ol>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="exercise-block mt-8">
+            <h2>2. Módulo de Gerenciamento de Aluno</h2>
+            <p class="mt-2">Crie um módulo <code>aluno</code> para gerenciar os dados de um aluno. O módulo deve ter uma função para preencher os dados de um aluno e outra para exibi-los.</p>
+            <p class="mt-2"><strong>Instruções:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-2">
+                <li><strong>Arquivo <code>aluno.h</code>:</strong> Defina uma <code>struct Aluno</code> com os campos <code>char nome[50]</code> e <code>float nota</code>. Declare os protótipos das funções: <code>void preencher_aluno(struct Aluno *a);</code> e <code>void exibir_aluno(struct Aluno a);</code>.</li>
+                <li><strong>Arquivo <code>aluno.c</code>:</strong> Implemente as funções declaradas. A função <code>preencher_aluno</code> deve receber um ponteiro para a struct e usar o operador seta (<code>-></code>) para preencher os dados.</li>
+                <li><strong>Arquivo <code>main.c</code>:</strong> No programa principal, declare uma variável do tipo <code>struct Aluno</code>. Chame a função <code>preencher_aluno</code>, passando o endereço da sua variável. Depois, chame a função <code>exibir_aluno</code> para mostrar os dados.</li>
+                 <li><strong>Compilação:</strong> Compile com <code>gcc main.c aluno.c -o programa</code>.</li>
+            </ol>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="exercise-block mt-8">
+            <h2>3. Módulo de Controle de Conta Bancária</h2>
+            <p class="mt-2">Crie um módulo <code>conta</code> que gerencie uma conta bancária simples. A conta deve ter um número e um saldo. As funções devem permitir depositar e sacar dinheiro.</p>
+             <p class="mt-2"><strong>Instruções:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-2">
+                <li><strong>Arquivo <code>conta.h</code>:</strong> Defina uma <code>struct Conta</code> com <code>int numero</code> e <code>double saldo</code>. Declare os protótipos das funções <code>void depositar(struct Conta *c, double valor);</code> e <code>void sacar(struct Conta *c, double valor);</code>.</li>
+                <li><strong>Arquivo <code>conta.c</code>:</strong> Implemente as funções. A função <code>sacar</code> deve verificar se há saldo suficiente antes de realizar a operação.</li>
+                <li><strong>Arquivo <code>main.c</code>:</strong> Crie uma variável <code>struct Conta</code> e inicialize seu saldo (ex: 1000.0). Exiba o saldo inicial. Chame a função <code>depositar</code> com um valor. Chame a função <code>sacar</code> com outro valor. Exiba o saldo final.</li>
+                <li><strong>Compilação:</strong> Compile com <code>gcc main.c conta.c -o programa</code>.</li>
+            </ol>
+        </div>
+        
+        <!-- Exercício 4 -->
+        <div class="exercise-block mt-8">
+            <h2>4. Módulo de Vetor</h2>
+            <p class="mt-2">Crie um módulo <code>vetor_utils</code> (utilidades de vetor) que ofereça funções para manipular um vetor de inteiros.</p>
+            <p class="mt-2"><strong>Instruções:</strong></p>
+            <ol class="list-decimal list-inside mt-2 ml-4 space-y-2">
+                <li><strong>Arquivo <code>vetor_utils.h</code>:</strong> Declare os protótipos de três funções: <code>void preencher_vetor(int vetor[], int tamanho);</code>, <code>void exibir_vetor(int vetor[], int tamanho);</code> e <code>int somar_elementos(int vetor[], int tamanho);</code>.</li>
+                <li><strong>Arquivo <code>vetor_utils.c</code>:</strong> Implemente as três funções. A primeira deve usar um laço para pedir os valores ao usuário. A segunda deve usar um laço para exibir os valores. A terceira deve calcular e retornar a soma dos elementos.</li>
+                <li><strong>Arquivo <code>main.c</code>:</strong> Crie um vetor de inteiros (ex: tamanho 5). Chame a função <code>preencher_vetor</code>. Em seguida, chame a função <code>exibir_vetor</code>. Por fim, chame a função <code>somar_elementos</code> e armazene o resultado em uma variável para exibi-la.</li>
+                <li><strong>Compilação:</strong> Compile com <code>gcc main.c vetor_utils.c -o programa</code>.</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
+

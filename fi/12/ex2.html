@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercícios Práticos: Condicionais e Laços em Shell</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .task-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid #52525b; /* Zinc */
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-12 px-4">
+
+    <div class="w-full max-w-3xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">Exercícios Práticos: Condicionais e Laços</h1>
+
+        <!-- Exercício 1 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-zinc-700 mb-4">Exercício 1: Verificador de Idade</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                O objetivo é praticar a estrutura <code class="inline-code">if/elif/else</code> e os operadores de comparação numérica.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">verificar_idade.sh</code>.</li>
+                <li>Peça ao usuário para digitar sua idade e armazene o valor em uma variável.</li>
+                <li>Use uma estrutura condicional para verificar a idade e exibir uma das seguintes mensagens:
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1">
+                        <li>Se a idade for <strong>menor que 13</strong>: "Você é uma criança."</li>
+                        <li>Se a idade for <strong>entre 13 e 17</strong> (inclusive): "Você é um adolescente."</li>
+                        <li>Se a idade for <strong>18 ou maior</strong>: "Você é um adulto."</li>
+                    </ul>
+                </li>
+                <li><strong>Desafio (opcional):</strong> Adicione uma verificação para garantir que o usuário digitou um número e não um texto.</li>
+            </ol>
+        </div>
+
+        <!-- Exercício 2 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-zinc-700 mb-4">Exercício 2: Contador de Arquivos</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                Este exercício foca no uso do laço <code class="inline-code">for</code> para iterar sobre itens, combinado com um teste de arquivo (<code class="inline-code">-f</code>) e aritmética básica.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">contar_arquivos.sh</code>.</li>
+                <li>Inicialize uma variável contadora com o valor 0.</li>
+                <li>Use um laço <code class="inline-code">for</code> para percorrer todos os itens no diretório atual (dica: use o curinga <code class="inline-code">*</code>).</li>
+                <li>Dentro do laço, use um <code class="inline-code">if</code> com o teste <code class="inline-code">-f</code> para verificar se o item atual é um <strong>arquivo regular</strong> (e não um diretório).</li>
+                <li>Se for um arquivo, incremente a sua variável contadora.</li>
+                <li>Após o laço terminar, exiba uma mensagem final mostrando o número total de arquivos encontrados. Ex: <em>"O diretório atual contém X arquivos."</em></li>
+            </ol>
+        </div>
+
+        <!-- Exercício 3 -->
+        <div class="task-card">
+            <h2 class="text-2xl font-bold text-zinc-700 mb-4">Exercício 3: Menu Interativo Simples</h2>
+            <p class="text-lg text-gray-600 mb-6">
+                O objetivo aqui é criar um programa que continua rodando até que o usuário decida sair, praticando o laço <code class="inline-code">while</code> e a comparação de strings.
+            </p>
+            <h3 class="font-semibold text-xl mb-3 text-gray-700">Sua Missão:</h3>
+            <ol class="list-decimal list-inside space-y-3 text-gray-700 text-lg">
+                <li>Crie um script chamado <code class="inline-code">menu.sh</code>.</li>
+                <li>Crie um laço <code class="inline-code">while</code> que rode "infinitamente" (dica: <code class="inline-code">while true</code>).</li>
+                <li>Dentro do laço, exiba um menu de opções para o usuário:
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1 font-mono">
+                        <li>1) Listar arquivos</li>
+                        <li>2) Mostrar data e hora atual</li>
+                        <li>q) Sair</li>
+                    </ul>
+                </li>
+                <li>Use o comando <code class="inline-code">read</code> para capturar a escolha do usuário.</li>
+                <li>Use uma estrutura <code class="inline-code">if/elif/else</code> para verificar a escolha:
+                    <ul class="list-disc list-inside pl-6 mt-2 space-y-1">
+                        <li>Se for '1', execute o comando <code class="inline-code">ls -l</code>.</li>
+                        <li>Se for '2', execute o comando <code class="inline-code">date</code>.</li>
+                        <li>Se for 'q', exiba "Saindo..." e use o comando <code class="inline-code">break</code> para sair do laço.</li>
+                        <li>Caso contrário, mostre uma mensagem de "Opção inválida".</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+    </div>
+
+</body>
+</html>

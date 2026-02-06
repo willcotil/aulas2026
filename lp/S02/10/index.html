@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Funções e Ponteiros em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilos de Navegação (visíveis na tela) */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start; /* Alinha o conteúdo no topo */
+                page-break-before: always; 
+            }
+            .slide:first-child {
+                page-break-before: avoid; 
+            }
+            .nav-button, .counter, .copy-button {
+                display: none;
+            }
+        }
+
+        /* Outros estilos (código, etc.) */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #FDFDFD;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #383838;
+            counter-reset: line;
+            position: relative;
+        }
+        pre .line {
+            padding-left: 4.5em; 
+            position: relative;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em; 
+            padding-right: 1em;
+            text-align: right;
+            color: #aaa;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        .token-comment { color: #808080; font-style: italic; }
+        .token-keyword { color: #008B8B; font-weight: bold; }
+        .token-string { color: #D2691E; }
+        .token-function { color: #556B2F; }
+        .token-type { color: #20B2AA; font-style: italic; }
+        .token-number { color: #8A2BE2; }
+        .token-preprocessor { color: #C71585; }
+        .token-pointer { color: #9333ea; font-weight: bold; }
+
+        /* Depurador Interativo */
+        .debugger .line.highlight { background-color: #fef9c3; }
+        .debugger .line.return-point::before { content: '↪' !important; color: #9333ea !important; font-weight: bold !important; }
+        .memory-table { border-collapse: collapse; width: 100%; }
+        .memory-table th, .memory-table td { border: 1px solid #d1d5db; padding: 0.5rem; text-align: center; }
+        .memory-table th { background-color: #f3f4f6; }
+        .memory-table .scope { font-style: italic; color: #6b7280; }
+        .memory-table .value { font-family: 'Roboto Mono', monospace; font-weight: bold; }
+        .memory-table .value.changed { background-color: #fef08a; animation: flash 0.5s; }
+        @keyframes flash { from { background-color: #fef08a; } to { background-color: transparent; } }
+
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Conteúdo dos slides -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-4">Funções e Ponteiros</h1>
+                <p class="text-2xl md:text-3xl text-blue-600">O Poder da Passagem por Referência</p>
+                <p class="text-xl text-gray-600 mt-8">Prof. William Paiva</p>
+                <div class="w-32 h-1.5 bg-blue-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Recapitulando a Última Aula</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li><strong>Ponteiros:</strong> São variáveis que guardam <strong>endereços de memória</strong> de outras variáveis.</li>
+                    <li><strong>Operador <code class="inline-code">&</code>:</strong> Pega o endereço de uma variável (ex: <code class="inline-code">&idade</code>).</li>
+                    <li><strong>Operador <code class="inline-code">*</code>:</strong> Declara um ponteiro (ex: <code class="inline-code">int *p</code>) ou acessa o <strong>conteúdo</strong> no endereço apontado (ex: <code class="inline-code">*p = 99</code>).</li>
+                    <li><strong>O Problema:</strong> Funções em C, por padrão, usam <strong>passagem por valor</strong>, recebendo apenas uma CÓPIA do dado, o que as impede de alterar a variável original.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Solução: Passagem por Referência</h2>
+                <p class="text-xl mb-6">Se a função não pode alterar a variável original recebendo uma cópia, a solução é simples:</p>
+                <p class="text-2xl mt-8 font-bold text-blue-600">"Não me dê uma cópia do seu dado. Me dê o endereço de onde ele está, e eu mesmo vou até lá para alterá-lo."</p>
+                <div class="text-6xl my-8">✉️ → 🏠</div>
+                <p class="text-xl mt-6">Passar o endereço de uma variável para uma função é chamado de <strong>passagem por referência</strong>. A "referência" é o endereço de memória.</p>
+            </div>
+        </section>
+        
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Sintaxe da Passagem por Referência</h2>
+                <p class="text-xl mb-6">O processo tem duas partes essenciais:</p>
+                <div class="mt-8">
+                    <h3 class="font-bold text-xl mb-2">1. Na Definição da Função:</h3>
+                    <p class="text-lg mb-2">A função deve ser declarada para aceitar um <strong>ponteiro</strong> como parâmetro.</p>
+                    <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment">// A função espera um endereço de um inteiro</span></div><div class="line"><span class="token-type">void</span> <span class="token-function">adicionarDez</span>(<span class="token-type">int</span> <span class="token-pointer">*</span>numeroPtr) { ... }</div></pre></div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="font-bold text-xl mb-2">2. Na Chamada da Função:</h3>
+                    <p class="text-lg mb-2">Ao chamar a função, você deve passar o <strong>endereço</strong> da sua variável, usando o operador <code class="inline-code">&</code>.</p>
+                    <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-type">int</span> minhaIdade = <span class="token-number">20</span>;</div><div class="line"><span class="token-comment">// Passamos o endereço de 'minhaIdade' para a função</span></div><div class="line"><span class="token-function">adicionarDez</span>(&minhaIdade);</div></pre></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-5" class="slide" data-animation="debugger-ref">
+            <div class="slide-content w-full max-w-6xl">
+               <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: Passagem por Referência</h2>
+               <p class="text-xl mb-6 text-center">Use a <strong>barra de espaço</strong> para ver a função alterando a variável original na <code class="inline-code">main</code>.</p>
+               <div class="flex gap-8 mt-8">
+                   <div class="w-1/2">
+                       <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                       <div class="code-block-wrapper debugger"><pre id="debugger-ref-code"><div class="line" data-line="1"><span class="token-type">void</span> <span class="token-function">adicionarDez</span>(<span class="token-type">int</span> <span class="token-pointer">*</span>numPtr) {</div><div class="line" data-line="2">    <span class="token-pointer">*</span>numPtr = <span class="token-pointer">*</span>numPtr + <span class="token-number">10</span>;</div><div class="line" data-line="3">}</div><div class="line" data-line="4"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="5">    <span class="token-type">int</span> numero = <span class="token-number">25</span>;</div><div class="line" data-line="6">    <span class="token-function">adicionarDez</span>(&numero);</div><div class="line" data-line="7">    <span class="token-function">printf</span>(<span class="token-string">"Valor final: %d"</span>, numero);</div><div class="line" data-line="8">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="9">}</div></pre></div>
+                   </div>
+                   <div class="w-1/2">
+                       <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                       <table id="ref-memory-table" class="memory-table text-lg">
+                           <thead>
+                               <tr><th>Escopo</th><th>Variável</th><th>Endereço</th><th>Valor</th></tr>
+                           </thead>
+                           <tbody></tbody>
+                       </table>
+                   </div>
+               </div>
+           </div>
+       </section>
+        
+        <section id="slide-6" class="slide" data-animation="debugger-swap">
+             <div class="slide-content w-full max-w-6xl">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: A Função <code class="inline-code">troca()</code></h2>
+                <p class="text-xl mb-6 text-center">Use a <strong>barra de espaço</strong> para ver como a troca de valores funciona com ponteiros.</p>
+                <div class="flex gap-8 mt-8">
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                        <div class="code-block-wrapper debugger"><pre id="debugger-swap-code"><div class="line" data-line="1"><span class="token-type">void</span> <span class="token-function">trocar</span>(<span class="token-type">int</span> <span class="token-pointer">*</span>ptrA, <span class="token-type">int</span> <span class="token-pointer">*</span>ptrB) {</div><div class="line" data-line="2">    <span class="token-type">int</span> temp = <span class="token-pointer">*</span>ptrA;</div><div class="line" data-line="3">    <span class="token-pointer">*</span>ptrA = <span class="token-pointer">*</span>ptrB;</div><div class="line" data-line="4">    <span class="token-pointer">*</span>ptrB = temp;</div><div class="line" data-line="5">}</div><div class="line" data-line="6"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="7">    <span class="token-type">int</span> a = <span class="token-number">10</span>;</div><div class="line" data-line="8">    <span class="token-type">int</span> b = <span class="token-number">20</span>;</div><div class="line" data-line="9">    <span class="token-function">trocar</span>(&a, &b);</div><div class="line" data-line="10">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="11">}</div></pre></div>
+                    </div>
+                    <div class="w-1/2">
+                        <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                        <table id="swap-memory-table" class="memory-table text-lg">
+                           <thead>
+                               <tr><th>Escopo</th><th>Variável</th><th>Endereço</th><th>Valor</th></tr>
+                           </thead>
+                           <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Passando Vetores para Funções</h2>
+                <p class="text-xl mb-6">Aqui temos uma ótima notícia! Em C, quando você passa um vetor para uma função, você <strong>NÃO</strong> está passando uma cópia. Você está, na verdade, passando o <strong>endereço do primeiro elemento</strong> do vetor.</p>
+                <p class="text-xl mb-6">Isso significa que vetores são naturalmente passados "por referência", e a função <strong>PODE</strong> alterar o conteúdo do vetor original!</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">void</span> <span class="token-function">imprimirVetor</span>(<span class="token-type">int</span> vetor[], <span class="token-type">int</span> tamanho) {</div><div class="line">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">0</span>; i < tamanho; i++) {</div><div class="line">        <span class="token-function">printf</span>(<span class="token-string">"%d "</span>, vetor[i]);</div><div class="line">    }</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"\n"</span>);</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> meusNumeros[<span class="token-number">3</span>] = {<span class="token-number">10</span>, <span class="token-number">20</span>, <span class="token-number">30</span>};</div><div class="line">    <span class="token-function">imprimirVetor</span>(meusNumeros, <span class="token-number">3</span>);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <section id="slide-8" class="slide" data-animation="debugger-vector">
+            <div class="slide-content w-full max-w-6xl">
+               <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: Modificando um Vetor</h2>
+               <p class="text-xl mb-6 text-center">Use a <strong>barra de espaço</strong> para ver a função <code class="inline-code">dobrarValores</code> alterando o vetor <code class="inline-code">numeros</code> original.</p>
+               <div class="flex gap-8 mt-8">
+                   <div class="w-1/2">
+                       <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                       <div class="code-block-wrapper debugger"><pre id="debugger-vector-code"><div class="line" data-line="1"><span class="token-type">void</span> <span class="token-function">dobrarValores</span>(<span class="token-type">int</span> vec[], <span class="token-type">int</span> tam) {</div><div class="line" data-line="2">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">0</span>; i < tam; i++) {</div><div class="line" data-line="3">        vec[i] = vec[i] * <span class="token-number">2</span>;</div><div class="line" data-line="4">    }</div><div class="line" data-line="5">}</div><div class="line" data-line="6"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="7">    <span class="token-type">int</span> numeros[<span class="token-number">3</span>] = {<span class="token-number">5</span>, <span class="token-number">10</span>, <span class="token-number">15</span>};</div><div class="line" data-line="8">    <span class="token-function">dobrarValores</span>(numeros, <span class="token-number">3</span>);</div><div class="line" data-line="9">    <span class="token-comment">// O vetor original foi modificado!</span></div><div class="line" data-line="10">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="11">}</div></pre></div>
+                   </div>
+                   <div class="w-1/2">
+                       <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                       <table id="vector-memory-table" class="memory-table text-lg">
+                           <thead>
+                               <tr><th>Escopo</th><th>Variável</th><th>Valor</th></tr>
+                           </thead>
+                           <tbody></tbody>
+                       </table>
+                   </div>
+               </div>
+           </div>
+        </section>
+
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 2 (Vetor): Somando Elementos</h2>
+                <p class="text-xl mb-6">Uma função que recebe um vetor e retorna a soma de todos os seus elementos. Note que a função não modifica o vetor, apenas o lê.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">somarVetor</span>(<span class="token-type">int</span> vetor[], <span class="token-type">int</span> tamanho) {</div><div class="line">    <span class="token-type">int</span> soma = <span class="token-number">0</span>;</div><div class="line">    <span class="token-keyword">for</span> (<span class="token-type">int</span> i = <span class="token-number">0</span>; i < tamanho; i++) {</div><div class="line">        soma += vetor[i];</div><div class="line">    }</div><div class="line">    <span class="token-keyword">return</span> soma;</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">int</span> meusNumeros[<span class="token-number">4</span>] = {<span class="token-number">10</span>, <span class="token-number">5</span>, <span class="token-number">2</span>, <span class="token-number">3</span>};</div><div class="line">    <span class="token-type">int</span> total = <span class="token-function">somarVetor</span>(meusNumeros, <span class="token-number">4</span>);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"A soma dos elementos é: %d\n"</span>, total); <span class="token-comment">// Saída: 20</span></div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">E as Structs?</h2>
+                <p class="text-xl mb-6">Ao contrário dos vetores, `structs` são passadas por <strong>valor</strong> (cópia) por padrão. Se a struct for muito grande, criar uma cópia dela toda vez que chamamos a função é ineficiente.</p>
+                <p class="text-xl mb-6">A melhor prática é passar um <strong>ponteiro para a struct</strong>, ou seja, passar seu endereço por referência. Isso é muito mais rápido e permite que a função modifique a struct original.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-keyword">struct</span> Aluno {</div><div class="line">    <span class="token-type">float</span> nota;</div><div class="line">};</div><div class="line"><span class="token-comment">// Função recebe um PONTEIRO para um Aluno</span></div><div class="line"><span class="token-type">void</span> <span class="token-function">promoverAluno</span>(<span class="token-keyword">struct</span> Aluno <span class="token-pointer">*</span>alunoPtr) {</div><div class="line">    <span class="token-keyword">if</span> (alunoPtr->nota >= <span class="token-number">6.0</span>) { <span class="token-comment">/* ... */</span> }</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Aluno aluno1;</div><div class="line">    aluno1.nota = <span class="token-number">7.5</span>;</div><div class="line">    <span class="token-comment">// Passamos o ENDEREÇO da struct</span></div><div class="line">    <span class="token-function">promoverAluno</span>(&aluno1);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Acesso com Ponteiros: Operador Seta (<code class="inline-code">-></code>)</h2>
+                <p class="text-xl mb-6">Quando temos um ponteiro para uma struct, acessar um membro fica um pouco mais verboso:</p>
+                <code class="inline-code">(*alunoPtr).nota = 10.0;</code>
+                <p class="text-lg mt-2">Primeiro derreferenciamos (<code class="inline-code">*</code>) para "chegar na struct" e depois usamos o ponto (<code class="inline-code">.</code>). Os parênteses são obrigatórios!</p>
+                <p class="text-xl my-6">Para simplificar isso, C nos dá um atalho: o <strong>operador seta (<code class="inline-code">-></code>)</strong>.</p>
+                <code class="inline-code">alunoPtr->nota = 10.0;</code>
+                <p class="text-lg mt-2">As duas formas fazem <strong>exatamente a mesma coisa</strong>, mas a seta é muito mais limpa e fácil de ler.</p>
+            </div>
+        </section>
+        
+        <section id="slide-12" class="slide" data-animation="debugger-struct">
+            <div class="slide-content w-full max-w-6xl">
+               <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Depurador: Modificando uma Struct</h2>
+               <p class="text-xl mb-6 text-center">Use a <strong>barra de espaço</strong> para ver a função alterando a nota do aluno na <code class="inline-code">main</code>.</p>
+               <div class="flex gap-8 mt-8">
+                   <div class="w-1/2">
+                       <h3 class="font-bold text-lg mb-2 text-center">Código</h3>
+                       <div class="code-block-wrapper debugger"><pre id="debugger-struct-code"><div class="line" data-line="1"><span class="token-keyword">struct</span> Aluno {</div><div class="line" data-line="2">    <span class="token-type">float</span> nota;</div><div class="line" data-line="3">};</div><div class="line" data-line="4"><span class="token-type">void</span> <span class="token-function">darPontoExtra</span>(<span class="token-keyword">struct</span> Aluno <span class="token-pointer">*</span>p) {</div><div class="line" data-line="5">    p->nota += <span class="token-number">1.0</span>;</div><div class="line" data-line="6">}</div><div class="line" data-line="7"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line" data-line="8">    <span class="token-keyword">struct</span> Aluno aluno1;</div><div class="line" data-line="9">    aluno1.nota = <span class="token-number">8.5</span>;</div><div class="line" data-line="10">    <span class="token-function">darPontoExtra</span>(&aluno1);</div><div class="line" data-line="11">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line" data-line="12">}</div></pre></div>
+                   </div>
+                   <div class="w-1/2">
+                       <h3 class="font-bold text-lg mb-2 text-center">Teste de Mesa (Memória)</h3>
+                       <table id="struct-memory-table" class="memory-table text-lg">
+                           <thead>
+                               <tr><th>Escopo</th><th>Variável</th><th>Endereço</th><th>Valor</th></tr>
+                           </thead>
+                           <tbody></tbody>
+                       </table>
+                   </div>
+               </div>
+           </div>
+        </section>
+
+        <section id="slide-13" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exemplo 4 (Struct): Exibindo Dados</h2>
+                <p class="text-xl mb-6">Esta função recebe o endereço de uma <code class="inline-code">struct</code> e apenas a utiliza para exibir seus dados. Passar por referência aqui é mais eficiente do que copiar a <code class="inline-code">struct</code> inteira.</p>
+                 <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-preprocessor">#include &lt;string.h&gt;</span></div><div class="line"><span class="token-keyword">struct</span> Produto {</div><div class="line">    <span class="token-type">char</span> nome[<span class="token-number">50</span>];</div><div class="line">    <span class="token-type">double</span> preco;</div><div class="line">};</div><div class="line"><span class="token-type">void</span> <span class="token-function">exibirProduto</span>(<span class="token-keyword">struct</span> Produto <span class="token-pointer">*</span>prodPtr) {</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Nome: %s\n"</span>, prodPtr->nome);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Preço: R$ %.2f\n"</span>, prodPtr->preco);</div><div class="line">}</div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Produto caneta;</div><div class="line">    <span class="token-function">strcpy</span>(caneta.nome, <span class="token-string">"Caneta Super"</span>);</div><div class="line">    caneta.preco = <span class="token-number">2.50</span>;</div><div class="line">    <span class="token-function">exibirProduto</span>(&caneta);</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <section id="slide-14" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo da Aula</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li>Para uma função alterar uma variável externa, usamos <strong>passagem por referência</strong>.</li>
+                    <li>Isso é feito declarando o parâmetro da função como um <strong>ponteiro</strong> (ex: <code class="inline-code">int *p</code>) e passando o <strong>endereço</strong> da variável na chamada (ex: <code class="inline-code">&var</code>).</li>
+                    <li>Vetores são uma exceção: eles são sempre passados por referência naturalmente.</li>
+                    <li>Para acessar membros de uma <strong>struct</strong> através de um ponteiro, usamos o <strong>operador seta (<code class="inline-code">-></code>)</strong>.</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section id="slide-15" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Próximos Passos</h2>
+                <p class="text-2xl">Agora que dominamos a base de vetores, structs e funções com ponteiros, podemos começar a construir programas mais complexos e organizados.</p>
+                <p class="text-3xl font-bold text-blue-600 mt-8">Próxima aula: Modularização de Código (Arquivos .c e .h)!</p>
+            </div>
+        </section>
+        
+        <section id="slide-16" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            // --- DEPURADORES E ANIMAÇÕES ---
+            const debuggers = {};
+
+            function initializeDebugger(slide) {
+                const animationType = slide.dataset.animation;
+                if (!animationType || debuggers[animationType]) return;
+                
+                 if (animationType === 'debugger-ref') {
+                    const tableBody = slide.querySelector('#ref-memory-table tbody');
+                    const lines = Array.from(slide.querySelectorAll('#debugger-ref-code .line'));
+                    const executionPath = [
+                        { line: 4, memory: [] },
+                        { line: 5, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '?' }] },
+                        { line: 6, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '25', changed: true }] },
+                        { line: 1, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '25' }, { scope: 'adicionarDez', var: 'numPtr', addr: '0x200', val: '0x100' }] },
+                        { line: 2, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '25' }, { scope: 'adicionarDez', var: 'numPtr', addr: '0x200', val: '0x100' }] },
+                        { line: 3, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '35', changed: true }, { scope: 'adicionarDez', var: 'numPtr', addr: '0x200', val: '0x100' }] },
+                        { line: 6, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '35' }] },
+                        { line: 7, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '35' }] },
+                        { line: 8, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '35' }] },
+                        { line: 9, memory: [{ scope: 'main', var: 'numero', addr: '0x100', val: '35' }] }
+                    ];
+                    let currentStep = -1;
+
+                    debuggers[animationType] = {
+                        step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             lines.forEach(l => l.classList.remove('highlight', 'return-point'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+                             const returnLine = lines.find(l => parseInt(l.dataset.line) === 6);
+                             if (currentStep >= 3 && currentStep <= 5) { if(returnLine) returnLine.classList.add('return-point'); }
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td><span class="scope">${mem.scope}</span></td><td>${mem.var}</td><td>${mem.addr}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => { currentStep = -1; lines.forEach(line => line.classList.remove('highlight', 'return-point')); tableBody.innerHTML = ''; }
+                    }
+                }
+
+                if (animationType === 'debugger-swap') {
+                    const tableBody = slide.querySelector('#swap-memory-table tbody');
+                    const lines = Array.from(slide.querySelectorAll('#debugger-swap-code .line'));
+                    const executionPath = [
+                        { line: 6, memory: [] },
+                        { line: 7, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '?'}, {scope: 'main', var: 'b', addr: '0x104', val: '?'}] },
+                        { line: 8, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '10', changed: true}, {scope: 'main', var: 'b', addr: '0x104', val: '?'}] },
+                        { line: 9, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '10'}, {scope: 'main', var: 'b', addr: '0x104', val: '20', changed: true}] },
+                        { line: 1, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '10'}, {scope: 'main', var: 'b', addr: '0x104', val: '20'}, {scope:'trocar', var:'ptrA', addr: '0x200', val: '0x100'}, {scope:'trocar', var:'ptrB', addr: '0x204', val: '0x104'}] },
+                        { line: 2, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '10'}, {scope: 'main', var: 'b', addr: '0x104', val: '20'}, {scope:'trocar', var:'ptrA', addr: '0x200', val: '0x100'}, {scope:'trocar', var:'ptrB', addr: '0x204', val: '0x104'}, {scope:'trocar', var:'temp', addr:'0x208', val:'10', changed:true}] },
+                        { line: 3, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '20', changed:true}, {scope: 'main', var: 'b', addr: '0x104', val: '20'}, {scope:'trocar', var:'ptrA', addr: '0x200', val: '0x100'}, {scope:'trocar', var:'ptrB', addr: '0x204', val: '0x104'}, {scope:'trocar', var:'temp', addr:'0x208', val:'10'}] },
+                        { line: 4, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '20'}, {scope: 'main', var: 'b', addr: '0x104', val: '10', changed:true}, {scope:'trocar', var:'ptrA', addr: '0x200', val: '0x100'}, {scope:'trocar', var:'ptrB', addr: '0x204', val: '0x104'}, {scope:'trocar', var:'temp', addr:'0x208', val:'10'}] },
+                        { line: 5, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '20'}, {scope: 'main', var: 'b', addr: '0x104', val: '10'}] },
+                        { line: 9, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '20'}, {scope: 'main', var: 'b', addr: '0x104', val: '10'}] },
+                        { line: 10, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '20'}, {scope: 'main', var: 'b', addr: '0x104', val: '10'}] },
+                        { line: 11, memory: [{scope: 'main', var: 'a', addr: '0x100', val: '20'}, {scope: 'main', var: 'b', addr: '0x104', val: '10'}] }
+                    ];
+                     let currentStep = -1;
+                    debuggers[animationType] = {
+                        step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             lines.forEach(l => l.classList.remove('highlight', 'return-point'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+                             const returnLine = lines.find(l => parseInt(l.dataset.line) === 9);
+                             if (currentStep >= 4 && currentStep <= 8) { if(returnLine) returnLine.classList.add('return-point'); }
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td><span class="scope">${mem.scope}</span></td><td>${mem.var}</td><td>${mem.addr}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => { currentStep = -1; lines.forEach(line => line.classList.remove('highlight', 'return-point')); tableBody.innerHTML = ''; }
+                    }
+                }
+
+                if (animationType === 'debugger-vector') {
+                    const tableBody = slide.querySelector('#vector-memory-table tbody');
+                    const lines = Array.from(slide.querySelectorAll('#debugger-vector-code .line'));
+                    const executionPath = [
+                        {line: 6, memory: []},
+                        {line: 7, memory: [{scope: 'main', var: 'numeros', val: '{5, 10, 15}', changed: true}]},
+                        {line: 8, memory: [{scope: 'main', var: 'numeros', val: '{5, 10, 15}'}]},
+                        {line: 1, memory: [{scope: 'main', var: 'numeros', val: '{5, 10, 15}'}, {scope: 'dobrarValores', var: 'i', val: '?'}]},
+                        {line: 2, memory: [{scope: 'main', var: 'numeros', val: '{5, 10, 15}'}, {scope: 'dobrarValores', var: 'i', val: '0'}]},
+                        {line: 3, memory: [{scope: 'main', var: 'numeros', val: '{10, 10, 15}', changed: true}, {scope: 'dobrarValores', var: 'i', val: '0'}]},
+                        {line: 2, memory: [{scope: 'main', var: 'numeros', val: '{10, 10, 15}'}, {scope: 'dobrarValores', var: 'i', val: '1'}]},
+                        {line: 3, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 15}', changed: true}, {scope: 'dobrarValores', var: 'i', val: '1'}]},
+                        {line: 2, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 15}'}, {scope: 'dobrarValores', var: 'i', val: '2'}]},
+                        {line: 3, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 30}', changed: true}, {scope: 'dobrarValores', var: 'i', val: '2'}]},
+                        {line: 2, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 30}'}]},
+                        {line: 5, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 30}'}]},
+                        {line: 8, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 30}'}]},
+                        {line: 10, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 30}'}]},
+                        {line: 11, memory: [{scope: 'main', var: 'numeros', val: '{10, 20, 30}'}]},
+                    ];
+                    let currentStep = -1;
+                    debuggers[animationType] = {
+                         step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             lines.forEach(l => l.classList.remove('highlight', 'return-point'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+                             const returnLine = lines.find(l => parseInt(l.dataset.line) === 8);
+                             if (currentStep >= 3 && currentStep <= 11) { if(returnLine) returnLine.classList.add('return-point'); }
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td><span class="scope">${mem.scope}</span></td><td>${mem.var}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => { currentStep = -1; lines.forEach(line => line.classList.remove('highlight', 'return-point')); tableBody.innerHTML = ''; }
+                    }
+                }
+                
+                if (animationType === 'debugger-struct') {
+                    const tableBody = slide.querySelector('#struct-memory-table tbody');
+                    const lines = Array.from(slide.querySelectorAll('#debugger-struct-code .line'));
+                    const executionPath = [
+                        { line: 7, memory: [] },
+                        { line: 8, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '??' }] },
+                        { line: 9, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '8.5' }] },
+                        { line: 10, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '8.5' }] },
+                        { line: 4, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '8.5' }, { scope: 'darPontoExtra', var: 'p', addr: '0x400', val: '0x300' }] },
+                        { line: 5, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '8.5' }, { scope: 'darPontoExtra', var: 'p', addr: '0x400', val: '0x300' }] },
+                        { line: 6, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '9.5', changed: true }, { scope: 'darPontoExtra', var: 'p', addr: '0x400', val: '0x300' }] },
+                        { line: 10, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '9.5' }] },
+                        { line: 11, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '9.5' }] },
+                        { line: 12, memory: [{ scope: 'main', var: 'aluno1', addr: '0x300', val: '9.5' }] },
+                    ];
+                    let currentStep = -1;
+                    debuggers[animationType] = {
+                         step: () => {
+                             currentStep = (currentStep + 1) % executionPath.length;
+                             const { line: currentLineNumber, memory } = executionPath[currentStep];
+                             lines.forEach(l => l.classList.remove('highlight', 'return-point'));
+                             const currentLine = lines.find(l => parseInt(l.dataset.line) === currentLineNumber);
+                             if (currentLine) currentLine.classList.add('highlight');
+                             const returnLine = lines.find(l => parseInt(l.dataset.line) === 10);
+                             if (currentStep >= 4 && currentStep <= 6) { if(returnLine) returnLine.classList.add('return-point'); }
+                             tableBody.innerHTML = '';
+                             memory.forEach(mem => {
+                                 const row = document.createElement('tr');
+                                 const valClass = mem.changed ? 'value changed' : 'value';
+                                 row.innerHTML = `<td><span class="scope">${mem.scope}</span></td><td>${mem.var}</td><td>${mem.addr}</td><td><span class="${valClass}">${mem.val}</span></td>`;
+                                 tableBody.appendChild(row);
+                             });
+                        },
+                        reset: () => { currentStep = -1; lines.forEach(line => line.classList.remove('highlight', 'return-point')); tableBody.innerHTML = ''; }
+                    }
+                }
+            }
+
+            // --- CONTROLE GERAL ---
+            document.addEventListener('keydown', (e) => {
+                const currentSlide = sections[currentSlideIndex];
+                const animationType = currentSlide.dataset.animation;
+                
+                if (e.key === 'ArrowRight') {
+                        nextButton.click();
+                } else if (e.key === 'ArrowLeft') {
+                    if (animationType && debuggers[animationType]) {
+                        e.preventDefault();
+                        debuggers[animationType].step();
+                    } else {
+                        prevButton.click();
+                    }
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                        
+                        initializeDebugger(entry.target);
+                        const animationType = entry.target.dataset.animation;
+                        if(animationType && debuggers[animationType]) {
+                           debuggers[animationType].reset();
+                           debuggers[animationType].step(); 
+                        }
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        const span = button.querySelector('span');
+                        span.textContent = 'Copiado!';
+                        setTimeout(() => {
+                            span.textContent = 'Copiar';
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

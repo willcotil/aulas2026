@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação Rolável - Modularização em C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilos de Navegação (visíveis na tela) */
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid #d1d5db;
+            border-radius: 9999px;
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .nav-button:hover {
+            background-color: white;
+        }
+        .counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .slide {
+                min-height: 0;
+                padding: 1.5cm;
+                border-bottom: none !important;
+                align-items: flex-start; /* Alinha o conteúdo no topo */
+                page-break-before: always; 
+            }
+            .slide:first-child {
+                page-break-before: avoid; 
+            }
+            .nav-button, .counter, .copy-button {
+                display: none;
+            }
+        }
+
+        /* Outros estilos (código, etc.) */
+        code, pre {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .code-block-wrapper {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+        pre {
+            background-color: #FDFDFD;
+            border: 1px solid #EAEAEA;
+            border-radius: 0.5rem;
+            padding: 1.5rem 1.5rem 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #383838;
+            counter-reset: line;
+            position: relative;
+        }
+        pre .line {
+            padding-left: 4.5em; 
+            position: relative;
+        }
+        pre .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            width: 3.5em; 
+            padding-right: 1em;
+            text-align: right;
+            color: #aaa;
+            user-select: none;
+        }
+        code.inline-code {
+            background-color: #e5e7eb;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        .token-comment { color: #808080; font-style: italic; }
+        .token-keyword { color: #008B8B; font-weight: bold; }
+        .token-string { color: #D2691E; }
+        .token-function { color: #556B2F; }
+        .token-type { color: #20B2AA; font-style: italic; }
+        .token-number { color: #8A2BE2; }
+        .token-preprocessor { color: #C71585; }
+        .token-pointer { color: #9333ea; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+    <main>
+        <!-- Slide 1: Título -->
+        <section id="slide-1" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-5xl md:text-7xl font-extrabold text-gray-900 mb-4">Modularização em C</h1>
+                <p class="text-2xl md:text-3xl text-teal-600">Arquivos .c e .h</p>
+                <p class="text-xl text-gray-600 mt-8">Prof. William Paiva</p>
+                <div class="w-32 h-1.5 bg-teal-500 mx-auto mt-6 rounded"></div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Recapitulando -->
+        <section id="slide-2" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Onde Paramos?</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li>Aprendemos a organizar nossos dados com <strong>Structs</strong> e <strong>Vetores de Structs</strong>.</li>
+                    <li>Aprendemos a organizar nosso código em blocos reutilizáveis com <strong>Funções</strong>.</li>
+                    <li>Aprendemos a manipular a memória e alterar variáveis remotamente com <strong>Ponteiros</strong>.</li>
+                </ul>
+                <p class="text-xl mt-8">Até agora, todo o nosso código, não importa o quão organizado, vive em um <strong>único arquivo</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: O Problema -->
+        <section id="slide-3" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">O Problema: O Arquivo Gigante</h2>
+                <p class="text-xl mb-6">À medida que um projeto cresce, o arquivo <code class="inline-code">main.c</code> se torna uma "parede de texto" com centenas ou milhares de linhas.</p>
+                <div class="code-block-wrapper"><pre><div class="line"><span class="token-comment">// main.c</span></div><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-keyword">struct</span> Aluno { ... };</div><div class="line"><span class="token-keyword">struct</span> Professor { ... };</div><div class="line"><span class="token-keyword">struct</span> Disciplina { ... };</div><div class="line"><span class="token-type">void</span> <span class="token-function">cadastrarAluno</span>() { ... }</div><div class="line"><span class="token-type">void</span> <span class="token-function">listarAlunos</span>() { ... }</div><div class="line"><span class="token-type">void</span> <span class="token-function">cadastrarProfessor</span>() { ... }</div><div class="line"><span class="token-comment">// ... dezenas de outras funções ...</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-comment">// Lógica principal do programa...</span></div><div class="line">}</div></pre></div>
+                <p class="text-xl mt-6"><strong>Problemas:</strong> É difícil de navegar, de dar manutenção, e impossível de reutilizar a função <code class="inline-code">cadastrarAluno</code> em outro projeto sem copiar e colar.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: A Solução -->
+        <section id="slide-4" class="slide">
+            <div class="slide-content w-full max-w-5xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">A Solução: Separar para Conquistar</h2>
+                <p class="text-xl mb-6">A solução é separar nosso projeto em múltiplos arquivos, cada um com uma responsabilidade clara. Usamos dois tipos de arquivos:</p>
+                <div class="flex justify-center gap-8 mt-12 text-lg">
+                    <div class="w-1/2 bg-teal-50 p-6 rounded-lg border border-teal-200">
+                        <h3 class="font-bold text-teal-800 mb-2 text-2xl">Arquivo Header (.h)</h3>
+                        <p class="text-5xl my-4">📜</p>
+                        <p>Funciona como um <strong>"Menu"</strong> ou um "Índice". Ele <strong>DECLARA</strong> o que existe e está disponível para ser usado. Ele diz <strong>O QUE</strong> as funções fazem, mas não como.</p>
+                    </div>
+                    <div class="w-1/2 bg-teal-50 p-6 rounded-lg border border-teal-200">
+                        <h3 class="font-bold text-teal-800 mb-2 text-2xl">Arquivo Fonte (.c)</h3>
+                        <p class="text-5xl my-4">⚙️</p>
+                        <p>Funciona como a <strong>"Cozinha"</strong> ou os "Capítulos". Ele <strong>IMPLEMENTA</strong> o código das funções. Ele mostra <strong>COMO</strong> as funções realmente funcionam por dentro.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Slide 5: Anatomia do .h -->
+        <section id="slide-5" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Anatomia de um Arquivo Header (<code class="inline-code">.h</code>)</h2>
+                <p class="text-xl mb-6">O arquivo <code class="inline-code">.h</code> é a parte "pública" do nosso módulo. Ele contém:</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-comment">// "Include Guards": Evitam que o arquivo seja incluído mais de uma vez</span></div><div class="line"><span class="token-preprocessor">#ifndef ALUNO_H</span></div><div class="line"><span class="token-preprocessor">#define ALUNO_H</span></div><div class="line"> </div><div class="line"><span class="token-comment">// 1. Includes de bibliotecas necessárias (raro, mas pode acontecer)</span></div><div class="line"> </div><div class="line"><span class="token-comment">// 2. Definições de Structs</span></div><div class="line"><span class="token-keyword">struct</span> Aluno {</div><div class="line">    <span class="token-type">char</span> nome[<span class="token-number">50</span>];</div><div class="line">    <span class="token-type">int</span> ra;</div><div class="line">};</div><div class="line"> </div><div class="line"><span class="token-comment">// 3. Protótipos das Funções (apenas a assinatura)</span></div><div class="line"><span class="token-type">void</span> <span class="token-function">cadastrarAluno</span>(<span class="token-keyword">struct</span> Aluno <span class="token-pointer">*</span>a);</div><div class="line"><span class="token-type">void</span> <span class="token-function">exibirAluno</span>(<span class="token-keyword">struct</span> Aluno a);</div><div class="line"> </div><div class="line"><span class="token-preprocessor">#endif</span></div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Anatomia do .c -->
+        <section id="slide-6" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Anatomia de um Arquivo Fonte (<code class="inline-code">.c</code>)</h2>
+                <p class="text-xl mb-6">O arquivo <code class="inline-code">.c</code> contém a implementação, o "recheio" das funções declaradas no <code class="inline-code">.h</code>.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-comment">// 1. Inclui seu PRÓPRIO header para ter acesso às structs e protótipos</span></div><div class="line"><span class="token-preprocessor">#include "aluno.h"</span> <span class="token-comment">// Aspas para arquivos locais</span></div><div class="line"> </div><div class="line"><span class="token-comment">// 2. Implementação completa das funções</span></div><div class="line"><span class="token-type">void</span> <span class="token-function">cadastrarAluno</span>(<span class="token-keyword">struct</span> Aluno <span class="token-pointer">*</span>a) {</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite o nome: "</span>);</div><div class="line">    <span class="token-function">scanf</span>(<span class="token-string">" %49[^\n]"</span>, a->nome);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Digite o RA: "</span>);</div><div class="line">    <span class="token-function">scanf</span>(<span class="token-string">"%d"</span>, &a->ra);</div><div class="line">}</div><div class="line"> </div><div class="line"><span class="token-type">void</span> <span class="token-function">exibirAluno</span>(<span class="token-keyword">struct</span> Aluno a) {</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Nome: %s | RA: %d\n"</span>, a.nome, a.ra);</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+        
+        <!-- Slide 7: Conexão -->
+        <section id="slide-7" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Como o <code class="inline-code">main.c</code> Usa Tudo Isso?</h2>
+                <p class="text-xl mb-6">O arquivo principal fica muito mais limpo. Ele só precisa "ler o menu" (<code class="inline-code">#include "aluno.h"</code>) para saber quais funções ele pode usar.</p>
+                <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-preprocessor">#include "aluno.h"</span> <span class="token-comment">// Inclui nossas declarações</span></div><div class="line"> </div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-keyword">struct</span> Aluno aluno1;</div><div class="line"> </div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Cadastro do primeiro aluno:\n"</span>);</div><div class="line">    <span class="token-function">cadastrarAluno</span>(&aluno1); <span class="token-comment">// Chama a função do outro arquivo</span></div><div class="line"> </div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"\nExibindo dados:\n"</span>);</div><div class="line">    <span class="token-function">exibirAluno</span>(aluno1); <span class="token-comment">// Chama a outra função</span></div><div class="line"> </div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div></pre></div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Como Compilar -->
+        <section id="slide-8" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Como Compilar Múltiplos Arquivos?</h2>
+                <p class="text-xl mb-6">Agora que temos vários arquivos <code class="inline-code">.c</code>, precisamos dizer ao compilador para juntar todos eles.</p>
+                <p class="text-xl mb-6">O comando no terminal (usando GCC) é:</p>
+                <div class="code-block-wrapper"><pre><div class="line">gcc main.c aluno.c -o meu_programa</div></pre></div>
+                <p class="text-xl mt-6"><strong>O que isso faz?</strong></p>
+                <ol class="list-decimal list-inside mt-4 space-y-2 text-lg">
+                    <li>O GCC compila <code class="inline-code">main.c</code> e encontra uma chamada para <code class="inline-code">cadastrarAluno()</code>, mas não sabe como ela funciona. Ele confia na declaração de <code class="inline-code">aluno.h</code>.</li>
+                    <li>O GCC compila <code class="inline-code">aluno.c</code> e cria o código de máquina para a função <code class="inline-code">cadastrarAluno()</code>.</li>
+                    <li>Na etapa final, chamada de "linkagem", o compilador junta os dois pedaços, conectando a chamada em <code class="inline-code">main.c</code> com a implementação em <code class="inline-code">aluno.c</code>.</li>
+                    <li>O programa executável <code class="inline-code">meu_programa</code> é gerado.</li>
+                </ol>
+            </div>
+        </section>
+        
+        <!-- NOVO SLIDE 9: EXERCÍCIO PRÁTICO -->
+        <section id="slide-9" class="slide">
+            <div class="slide-content w-full max-w-5xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Exercício Prático: Seu Primeiro Módulo</h2>
+                <p class="text-xl mb-6">Vamos praticar! Crie um módulo <code class="inline-code">geometria</code> com duas funções: uma para calcular a área e outra para o perímetro de um retângulo.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">1. Crie o arquivo <code class="inline-code">geometria.h</code></h3>
+                        <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#ifndef GEOMETRIA_H</span></div><div class="line"><span class="token-preprocessor">#define GEOMETRIA_H</span></div><div class="line"><span class="token-type">float</span> <span class="token-function">calcularArea</span>(<span class="token-type">float</span> b, <span class="token-type">float</span> h);</div><div class="line"><span class="token-type">float</span> <span class="token-function">calcularPerimetro</span>(<span class="token-type">float</span> b, <span class="token-type">float</span> h);</div><div class="line"><span class="token-preprocessor">#endif</span></div></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg mb-2">2. Crie o arquivo <code class="inline-code">geometria.c</code></h3>
+                        <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include "geometria.h"</span></div><div class="line"><span class="token-type">float</span> <span class="token-function">calcularArea</span>(<span class="token-type">float</span> b, <span class="token-type">float</span> h) {</div><div class="line">    <span class="token-keyword">return</span> b * h;</div><div class="line">}</div><div class="line"><span class="token-type">float</span> <span class="token-function">calcularPerimetro</span>(<span class="token-type">float</span> b, <span class="token-type">float</span> h) {</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">2</span> * (b + h);</div><div class="line">}</div></pre></div>
+                    </div>
+                </div>
+                 <div class="w-full mt-4">
+                    <h3 class="font-bold text-lg mb-2">3. Crie o <code class="inline-code">main.c</code> e compile tudo!</h3>
+                    <div class="code-block-wrapper"><button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button><pre><div class="line"><span class="token-preprocessor">#include &lt;stdio.h&gt;</span></div><div class="line"><span class="token-preprocessor">#include "geometria.h"</span></div><div class="line"><span class="token-type">int</span> <span class="token-function">main</span>() {</div><div class="line">    <span class="token-type">float</span> area = <span class="token-function">calcularArea</span>(<span class="token-number">10</span>, <span class="token-number">5</span>);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Area: %.2f\n"</span>, area);</div><div class="line">    <span class="token-function">printf</span>(<span class="token-string">"Perimetro: %.2f\n"</span>, <span class="token-function">calcularPerimetro</span>(<span class="token-number">10</span>, <span class="token-number">5</span>));</div><div class="line">    <span class="token-keyword">return</span> <span class="token-number">0</span>;</div><div class="line">}</div><div class="line"><span class="token-comment">// Para compilar: gcc main.c geometria.c -o geometria_app</span></div></pre></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Resumo e Benefícios -->
+        <section id="slide-10" class="slide">
+            <div class="slide-content w-full max-w-4xl text-left">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Resumo e Benefícios</h2>
+                <ul class="text-xl space-y-4 list-disc pl-6">
+                    <li><strong>Arquivos <code class="inline-code">.h</code> (Headers):</strong> Contêm as <strong>declarações</strong>. São o "contrato", o que o módulo oferece ao resto do programa. Incluem protótipos de funções e definições de structs.</li>
+                    <li><strong>Arquivos <code class="inline-code">.c</code> (Fontes):</strong> Contêm a <strong>implementação</strong>. São o código que faz o trabalho de verdade.</li>
+                    <li><strong><code class="inline-code">#include "arquivo.h"</code>:</strong> Usamos aspas para incluir nossos próprios arquivos de cabeçalho.</li>
+                    <li><strong>Compilação:</strong> Devemos passar <strong>todos</strong> os arquivos <code class="inline-code">.c</code> para o compilador para que ele possa juntá-los.</li>
+                    <li><strong>Vantagens:</strong> Código mais limpo, fácil de manter, reutilizável e ideal para trabalho em equipe.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 11: Próximos Passos -->
+        <section id="slide-11" class="slide">
+            <div class="slide-content w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Próximos Passos</h2>
+                <p class="text-2xl">Agora vocês têm todo o conhecimento necessário para construir um projeto completo e bem estruturado!</p>
+                <div class="text-6xl my-8">🚀</div>
+                <p class="text-3xl font-bold text-teal-600 mt-8">Próxima etapa: O Projeto Final!</p>
+            </div>
+        </section>
+        
+        <!-- Slide 12: Dúvidas -->
+        <section id="slide-12" class="slide">
+            <div class="slide-content text-center">
+                <h1 class="text-7xl font-extrabold text-gray-900">Perguntas?</h1>
+            </div>
+        </section>
+    </main>
+
+    <!-- Elementos de Navegação Fixos -->
+    <button id="prev" class="nav-button left-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="next" class="nav-button right-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+    <div id="counter" class="counter"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const counterElement = document.getElementById('counter');
+            let currentSlideIndex = 0;
+
+            function updateCounter(index) {
+                counterElement.textContent = `${index + 1} / ${sections.length}`;
+            }
+
+            function navigateTo(index) {
+                if (index >= 0 && index < sections.length) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- NAVEGAÇÃO ---
+            prevButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex > 0 ? currentSlideIndex - 1 : sections.length - 1;
+                navigateTo(newIndex);
+            });
+
+            nextButton.addEventListener('click', () => {
+                const newIndex = currentSlideIndex < sections.length - 1 ? currentSlideIndex + 1 : 0;
+                navigateTo(newIndex);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    nextButton.click();
+                } else if (e.key === 'ArrowLeft') {
+                    prevButton.click();
+                }
+            });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const index = Array.from(sections).indexOf(entry.target);
+                        currentSlideIndex = index;
+                        updateCounter(index);
+                    }
+                });
+            }, { threshold: 0.5 }); 
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Botão de Copiar
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pre = e.currentTarget.closest('.code-block-wrapper').querySelector('pre');
+                    let codeText = '';
+                    pre.querySelectorAll('.line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        const span = button.querySelector('span');
+                        span.textContent = 'Copiado!';
+                        setTimeout(() => {
+                            span.textContent = 'Copiar';
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

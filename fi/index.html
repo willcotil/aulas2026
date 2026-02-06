@@ -1,0 +1,168 @@
+
+
+
+        <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prof. William Paiva - 2025 - COTIL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh; /* Garante que o corpo ocupe pelo menos a altura da tela */
+            font-family: 'Roboto Mono', monospace;
+            background-color: #eef2f7; /* Tom de branco levemente azulado */
+            color: #4a5568; /* Cor de texto escura e suave */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .container {
+            width: 100%;
+            max-width: 1200px; /* Limita a largura máxima em telas grandes */
+            padding: 2rem 1rem; /* Espaçamento interno (vertical, horizontal) */
+            box-sizing: border-box;
+        }
+
+        /* --- TÍTULO --- */
+        .main-title {
+            color: #4a5568;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
+        }
+
+        /* --- LISTA DE LINKS --- */
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Espaçamento entre os itens da lista */
+        }
+
+        /* --- ESTILO DOS ITENS DA LISTA --- */
+        .list-item-link {
+            display: block; /* Para ocupar a largura total */
+            padding: 1.25rem 1.5rem;
+            background-color: #ffffff; /* Fundo branco para os itens */
+            color: #4a5568; /* Cor do texto original */
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: left; /* Alinhar texto à esquerda */
+            border: 1px solid #e2e8f0; /* Borda sutil */
+            border-radius: 8px; /* Bordas arredondadas */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+
+        .list-item-link:hover, .list-item-link:focus {
+            transform: translateY(-3px); /* Efeito de "levantar" mais sutil */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+            background-color: #f7fafc; /* Leve mudança de cor no hover */
+            outline: none; /* Remove a borda de foco padrão */
+        }
+        
+        /* --- MEDIA QUERIES PARA RESPONSIVIDADE --- */
+
+        /* Telas de Tablet (até 1024px) */
+        @media (max-width: 1024px) {
+            .main-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        /* Telas de Celular (até 768px) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+            .main-title {
+                font-size: 1.8rem;
+                margin-bottom: 2rem;
+            }
+            .list-item-link {
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1 class="main-title">Prof. William Paiva - 2025 - COTIL</h1>
+        
+        <!-- O container para a lista de links que será gerada via JS -->
+        <div id="link-list" class="link-list"></div>
+    </div>
+
+    <script>
+        // Seleciona o container da lista
+        const listContainer = document.getElementById('link-list');
+
+        /**
+         * Gera os elementos HTML dos links e os insere na página.
+         * @param {Array} classesData - Um array de objetos, cada um contendo 'text' e 'link'.
+         */
+        function generateLinks(classesData) {
+            // Limpa o container caso haja algum conteúdo de fallback
+            listContainer.innerHTML = ''; 
+            
+            classesData.forEach(cls => {
+                // Cria um elemento de link (<a>)
+                const linkItem = document.createElement('a');
+                
+                // Define os atributos e o conteúdo do link
+                linkItem.href = cls.link;
+                linkItem.textContent = cls.text;
+                linkItem.className = 'list-item-link'; // Aplica a classe de estilo
+
+                // Adiciona o item criado ao container da lista
+                listContainer.appendChild(linkItem);
+            });
+        }
+
+        /**
+         * Carrega os dados das disciplinas do arquivo JSON externo.
+         */
+        async function loadClasses() {
+            try {
+                // Faz a requisição para o arquivo JSON
+                const response = await fetch('links.json');
+                
+                // Verifica se a requisição foi bem-sucedida
+                if (!response.ok) {
+                    throw new Error(`Erro na requisição: ${response.status}`);
+                }
+                
+                // Converte a resposta para JSON
+                const classes = await response.json();
+                
+                // Chama a função para criar os links com os dados carregados
+                generateLinks(classes);
+                
+            } catch (error) {
+                // Em caso de erro, exibe uma mensagem no console e na página
+                console.error("Falha ao carregar o arquivo links.json:", error);
+                listContainer.innerHTML = '<p style="text-align: center;">Não foi possível carregar a lista de disciplinas.</p>';
+            }
+        }
+
+        // Inicia o processo de carregamento dos dados assim que a página carregar
+        document.addEventListener('DOMContentLoaded', loadClasses);
+    </script>
+</body>
+</html>
+
