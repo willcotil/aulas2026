@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB_TEC - Aula 01: Fundamentos Profissionais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body { overflow: visible !important; background: white !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { 
+                display: block !important; 
+                page-break-after: always; 
+                border-bottom: 2px solid #f1f5f9;
+                padding: 40px 0;
+            }
+            .print-break { page-break-after: always; }
+        }
+
+        .node-rect { fill: white; stroke: #2563eb; stroke-width: 2; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #1e293b; }
+        .edge { stroke: #94a3b8; stroke-width: 2; fill: none; }
+        
+        code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #e11d48; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="no-print h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 text-white p-2 rounded-lg"><i class="fas fa-database text-sm"></i></div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">Base de Dados I <span class="text-blue-600">Tecnologia</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-slate-400 hover:text-slate-600"><i class="fas fa-expand"></i></button>
+        </div>
+    </header>
+
+    <!-- Barra de Progresso -->
+    <div class="no-print h-1.5 w-full bg-slate-100 overflow-hidden">
+        <div id="progress-bar" class="h-full bg-blue-600 transition-all duration-500 w-0 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
+    </div>
+
+    <!-- Main -->
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+        <div id="steps-container" class="w-full max-w-5xl">
+            <!-- Injetado via JS -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="no-print h-20 bg-white/80 backdrop-blur-md border-t border-slate-200 px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+        
+        <div id="step-counter" class="text-xs font-black text-slate-400 uppercase tracking-widest">Tópico 1 / 35</div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            {
+                title: "Introdução a Banco de Dados",
+                content: `<div class="text-center space-y-8 py-10">
+                    <div class="inline-block p-6 bg-blue-100 rounded-full text-blue-600 mb-4 animate-bounce"><i class="fas fa-database text-7xl"></i></div>
+                    <h2 class="text-5xl md:text-7xl font-black text-slate-900 leading-tight">Aula 01: Fundamentos</h2>
+                    <p class="text-2xl text-slate-500 max-w-2xl mx-auto leading-relaxed italic">Do caos do papel à inteligência estruturada dos SGBDs modernos.</p>
+                </div>`
+            },
+            {
+                title: "A Era do Papel: Onde tudo começou",
+                content: `<div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <p class="text-xl">Antes do silício, as empresas dependiam de salas imensas chamadas <strong>"Arquivo Morto"</strong>.</p>
+                        <ul class="space-y-4">
+                            <li class="flex gap-3"><i class="fas fa-folder text-blue-500 mt-1"></i> <span><strong>Fichas:</strong> Cada cliente era um pedaço de papel.</span></li>
+                            <li class="flex gap-3"><i class="fas fa-boxes-stacked text-blue-500 mt-1"></i> <span><strong>Gavetas:</strong> Organização limitada ao espaço físico.</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-100 rounded-3xl h-64 flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300">
+                        <i class="fas fa-file-lines text-6xl text-slate-300 mb-4"></i>
+                        <p class="text-slate-400 font-bold uppercase text-xs">Exemplo: Prontuário Médico de 1970</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "O Problema da Busca Física",
+                content: `<div class="space-y-8">
+                    <div class="p-8 bg-amber-50 border-l-8 border-amber-400 rounded-r-2xl">
+                        <h4 class="font-bold text-amber-800 text-2xl mb-2">Correlação: "A Agulha no Palheiro"</h4>
+                        <p class="text-lg italic">"Imagine precisar das notas de um aluno de 1985 para emitir um diploma. Um funcionário teria que andar até o depósito, abrir dezenas de pastas e ler papel por papel."</p>
+                    </div>
+                    <p class="text-xl leading-relaxed">Hoje, um <code>SELECT</code> faz isso em menos de 0.001 segundos. No papel, levava-se <strong>horas</strong>.</p>
+                </div>`
+            },
+            {
+                title: "Risco de Perda Irreversível",
+                content: `<div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-8 bg-red-50 border border-red-100 rounded-3xl space-y-4">
+                        <i class="fas fa-fire text-red-500 text-4xl"></i>
+                        <h4 class="font-bold text-xl text-red-800">Sem Backup Digital</h4>
+                        <p class="text-sm leading-relaxed">Fazer backup em papel significava tirar xerox de tudo. O custo era proibitivo. Um incêndio ou vazamento de água destruía o patrimônio intelectual da empresa para sempre.</p>
+                    </div>
+                    <div class="p-8 bg-white border border-slate-200 rounded-3xl shadow-sm">
+                        <h4 class="font-bold mb-4">Correlação Moderna:</h4>
+                        <p class="text-slate-500 text-sm leading-relaxed">O que fazemos hoje com "Replicação em Nuvem" era impossível no mundo físico. A informação era <strong>única e frágil</strong>.</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "O Custo da Reorganização",
+                content: `<div class="space-y-8">
+                    <p class="text-xl">Se você decidisse que agora as pastas seriam por <strong>CPF</strong> em vez de <strong>Nome</strong>, precisaria de uma equipe trabalhando por semanas apenas para trocar os papéis de lugar.</p>
+                    <div class="bg-slate-800 text-white p-10 rounded-3xl text-center">
+                        <i class="fas fa-shuffle text-4xl mb-4 text-blue-400"></i>
+                        <p class="text-2xl font-light">"O mundo físico não tem flexibilidade lógica."</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "A Transição: Arquivos de Texto (.txt)",
+                content: `<div class="space-y-8">
+                    <p class="text-xl leading-relaxed text-slate-600">A primeira evolução digital foi salvar dados em arquivos sequenciais. <strong>Exemplo real:</strong></p>
+                    <div class="bg-slate-900 p-8 rounded-2xl font-mono text-green-400 shadow-2xl overflow-x-auto">
+                        <p class="text-slate-500 opacity-50 mb-2">// alunos_2024.csv</p>
+                        <p>12345678901;Joao Silva;Sistemas;A</p>
+                        <p>98765432100;Maria Lima;Edificacoes;B</p>
+                        <p>11122233344;Carlos Souza;Mecanica;A</p>
+                    </div>
+                    <p class="text-lg text-red-500 font-bold">Problema: Se você quiser mudar o nome do curso "Sistemas" para "Informática", terá que abrir o arquivo e torcer para não errar nada.</p>
+                </div>`
+            },
+            {
+                title: "Conceito 01: O Dado",
+                content: `<div class="flex flex-col items-center gap-10">
+                    <div class="p-12 bg-slate-100 rounded-3xl border-l-8 border-slate-400">
+                        <p class="text-5xl font-mono tracking-tighter">"190,00", "Aprovado"</p>
+                    </div>
+                    <p class="text-xl text-slate-500 text-center max-w-xl italic">"Dados são fatos brutos. Isolados, eles não possuem significado."</p>
+                </div>`
+            },
+            {
+                title: "Conceito 02: A Informação",
+                content: `<div class="flex flex-col items-center gap-10">
+                    <div class="p-12 bg-blue-600 text-white rounded-3xl shadow-xl">
+                        <p class="text-3xl font-bold">"O aluno foi Aprovado e a mensalidade custa R$ 190,00."</p>
+                    </div>
+                    <p class="text-xl text-slate-500 text-center max-w-xl">"Informação é o dado dotado de contexto e significado."</p>
+                </div>`
+            },
+            {
+                title: "Pirâmide DIKW",
+                content: `<div class="flex flex-col items-center space-y-4 py-6">
+                    <div class="w-full max-w-sm p-4 bg-slate-900 text-white rounded-xl text-center font-bold">SABEDORIA (Decidir estratégia)</div>
+                    <div class="w-full max-w-sm p-4 bg-slate-700 text-white rounded-xl text-center font-bold">CONHECIMENTO (Aprender padrões)</div>
+                    <div class="w-full max-w-sm p-4 bg-blue-600 text-white rounded-xl text-center font-bold">INFORMAÇÃO (Entender o fato)</div>
+                    <div class="w-full max-w-sm p-4 bg-blue-300 text-blue-900 rounded-xl text-center font-bold">DADO (Capturar o valor)</div>
+                </div>`
+            },
+            {
+                title: "O que são Metadados? (EXEMPLO)",
+                content: `<div class="grid md:grid-cols-2 gap-10">
+                    <div class="space-y-6">
+                        <p class="text-xl leading-relaxed">São as <strong>regras e descrições</strong>. Sem metadados, o computador não sabe se "10" é uma idade, um preço ou uma nota.</p>
+                        <div class="p-6 bg-slate-50 border rounded-2xl">
+                            <h5 class="font-bold text-blue-600 mb-2 uppercase">Exemplo de Metadado:</h5>
+                            <ul class="text-sm font-mono space-y-1">
+                                <li>Campo: <code class="text-blue-700">VALOR_PRODUTO</code></li>
+                                <li>Tipo: <code class="text-blue-700">Decimal (10,2)</code></li>
+                                <li>Regra: <code class="text-blue-700">Não pode ser negativo</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-slate-100 rounded-3xl h-64 flex items-center justify-center text-slate-400 font-bold">
+                        [IMAGEM: Print de Propriedades de uma Foto - ISO, Data, GPS]
+                    </div>
+                </div>`
+            },
+            {
+                title: "O SGBD Profissional",
+                content: `<div class="space-y-10 text-center">
+                    <p class="text-xl text-slate-600">Para gerenciar esses dados, usamos softwares específicos. <br><strong>Os mais famosos do mercado:</strong></p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div class="p-6 bg-white border-2 border-blue-600 rounded-2xl shadow-lg scale-110"><h5 class="font-black">MySQL</h5><p class="text-[10px] text-blue-500 uppercase">O mais popular (Web)</p></div>
+                        <div class="p-6 bg-white border-2 border-blue-400 rounded-2xl shadow-lg scale-110"><h5 class="font-black">PostgreSQL</h5><p class="text-[10px] text-blue-500 uppercase">O mais robusto (Open Source)</p></div>
+                        <div class="p-6 bg-slate-50 border rounded-2xl opacity-60"><h5 class="font-bold">Oracle</h5></div>
+                        <div class="p-6 bg-slate-50 border rounded-2xl opacity-60"><h5 class="font-bold">SQL Server</h5></div>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Vantagem: Controle de Concorrência",
+                content: `<div class="grid md:grid-cols-2 gap-10 items-center">
+                    <p class="text-xl">Permite que centenas de usuários acessem o mesmo dado ao mesmo tempo. <br><br><strong>Correlação:</strong> Em um arquivo Excel, se dois usuários salvam ao mesmo tempo, um perde o trabalho. No MySQL, o banco organiza quem escreve primeiro.</p>
+                    <div class="bg-blue-50 p-10 rounded-3xl border border-blue-100 text-center"><i class="fas fa-users-viewfinder text-blue-500 text-6xl"></i></div>
+                </div>`
+            },
+            {
+                title: "Vantagem: Integridade",
+                content: `<p class="text-xl leading-relaxed">Garante que "lixo" não entre no sistema. <br><br><strong>Exemplo:</strong> Se você tentar colocar a palavra "DEZ" em um campo de Salário (que espera número), o SGBD <strong>rejeita a operação</strong> na hora.</p>`
+            },
+            {
+                title: "Vantagem: Segurança",
+                content: `<p class="text-xl leading-relaxed">Controle granular. <br><br><strong>Exemplo:</strong> O sistema de uma escola. <br>• Aluno: Só vê suas notas. <br>• Professor: Vê notas da turma e edita. <br>• Diretor: Vê dados financeiros.</p>`
+            },
+            {
+                title: "Arquitetura ANSI/SPARC (3 Níveis)",
+                content: `<div class="grid md:grid-cols-2 gap-10">
+                    <div class="flex flex-col gap-3">
+                        <div class="p-4 bg-purple-600 text-white rounded-xl font-bold">1. EXTERNO (Visões)</div>
+                        <div class="p-4 bg-blue-600 text-white rounded-xl font-bold">2. CONCEITUAL (Logica)</div>
+                        <div class="p-4 bg-slate-800 text-white rounded-xl font-bold">3. INTERNO (Físico)</div>
+                    </div>
+                    <div class="space-y-4 text-sm">
+                        <p><strong>Externo:</strong> O que o usuário vê (telas e relatórios customizados).</p>
+                        <p><strong>Conceitual:</strong> Onde o DBA define as tabelas e relações (Modelo de Dados).</p>
+                        <p><strong>Interno:</strong> Como os dados estão no disco (arquivos, índices, compactação).</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Independência Física",
+                content: `<div class="p-10 bg-blue-50 border-2 border-blue-200 rounded-3xl">
+                    <h4 class="font-bold text-2xl text-blue-900 mb-4 italic">O que é?</h4>
+                    <p class="text-xl text-blue-800">Poder mudar o hardware ou o local do arquivo no disco (Nível Interno) sem precisar alterar as tabelas ou os programas.</p>
+                </div>`
+            },
+            {
+                title: "Independência Lógica",
+                content: `<div class="p-10 bg-purple-50 border-2 border-purple-200 rounded-3xl">
+                    <h4 class="font-bold text-2xl text-purple-900 mb-4 italic">O que é?</h4>
+                    <p class="text-xl text-purple-800">Poder adicionar novas colunas ou tabelas (Nível Conceitual) sem quebrar as visões e aplicativos antigos.</p>
+                </div>`
+            },
+            {
+                title: "Linguagens SQL",
+                content: `<div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-white border rounded-2xl shadow-sm">
+                        <h5 class="font-bold text-blue-600">DDL</h5>
+                        <p class="text-xs">Define estrutura. Comandos: <code>CREATE, ALTER, DROP</code></p>
+                    </div>
+                    <div class="p-6 bg-white border rounded-2xl shadow-sm">
+                        <h5 class="font-bold text-green-600">DML</h5>
+                        <p class="text-xs">Altera dados. Comandos: <code>INSERT, UPDATE, DELETE</code></p>
+                    </div>
+                    <div class="p-6 bg-white border rounded-2xl shadow-sm">
+                        <h5 class="font-bold text-purple-600">DQL</h5>
+                        <p class="text-xs">Recupera dados. Comando: <code>SELECT</code></p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Categorias: Modelo Hierárquico",
+                content: `<div class="grid md:grid-cols-2 gap-10">
+                    <div class="space-y-4">
+                        <p class="text-lg">Dados em estrutura de árvore (Pastas do Windows).</p>
+                        <div class="p-4 bg-red-50 border-l-4 border-red-500 font-bold text-red-800 uppercase text-xs tracking-widest">Regra: 1 Único Pai</div>
+                        <p class="text-sm text-slate-500 leading-relaxed italic">"Aqui um filho não pode ter dois pais. Se um Funcionário pertence a dois Departamentos, ele tem que ser cadastrado <strong>duas vezes</strong>. Ruim!"</p>
+                    </div>
+                    <!-- Diagrama Hierárquico Corrigido -->
+                    <div class="bg-white p-4 rounded-2xl border shadow-inner h-64">
+                        <svg width="100%" height="100%" viewBox="0 0 400 200">
+                            <!-- Linhas -->
+                            <line x1="200" y1="50" x2="100" y2="120" class="edge" />
+                            <line x1="200" y1="50" x2="300" y2="120" class="edge" />
+                            <!-- Nós -->
+                            <rect x="140" y="20" width="120" height="30" class="node-rect" />
+                            <text x="200" y="40" text-anchor="middle" class="node-text">EMPRESA</text>
+                            
+                            <rect x="50" y="120" width="100" height="30" class="node-rect" />
+                            <text x="100" y="140" text-anchor="middle" class="node-text">RH (Pai 1)</text>
+                            
+                            <rect x="250" y="120" width="100" height="30" class="node-rect" />
+                            <text x="300" y="140" text-anchor="middle" class="node-text">TI (Pai 2)</text>
+                            
+                            <line x1="100" y1="150" x2="100" y2="180" class="edge" />
+                            <rect x="50" y="170" width="100" height="25" class="node-rect" fill="#f8fafc" />
+                            <text x="100" y="187" text-anchor="middle" class="node-text" style="font-size:10px">FUNC. JOAO</text>
+                        </svg>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Categorias: Modelo em Rede",
+                content: `<div class="grid md:grid-cols-2 gap-10">
+                    <div class="bg-white p-4 rounded-2xl border shadow-inner h-64">
+                        <svg width="100%" height="100%" viewBox="0 0 400 200">
+                            <!-- Linhas conectadas corretamente -->
+                            <path d="M 100 135 L 200 65" class="edge" stroke="#2563eb" />
+                            <path d="M 300 135 L 200 65" class="edge" stroke="#2563eb" />
+                            
+                            <!-- Nós -->
+                            <rect x="150" y="40" width="100" height="30" class="node-rect" />
+                            <text x="200" y="60" text-anchor="middle" class="node-text">JOÃO (Filho)</text>
+                            
+                            <rect x="50" y="135" width="100" height="30" class="node-rect" />
+                            <text x="100" y="155" text-anchor="middle" class="node-text">PROJETO A (Pai)</text>
+                            
+                            <rect x="250" y="135" width="100" height="30" class="node-rect" />
+                            <text x="300" y="155" text-anchor="middle" class="node-text">PROJETO B (Pai)</text>
+                        </svg>
+                    </div>
+                    <div class="space-y-4">
+                        <p class="text-lg leading-relaxed">Resolve o problema da duplicação.</p>
+                        <div class="p-4 bg-green-50 border-l-4 border-green-500 font-bold text-green-800 uppercase text-xs tracking-widest">Regra: Múltiplos Pais</div>
+                        <p class="text-sm text-slate-500 leading-relaxed">Aqui, o João pode estar ligado a dois projetos ao mesmo tempo sem que você precise criar dois "Joões" no sistema. É um grafo.</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Categorias: Modelo Relacional",
+                content: `<div class="space-y-6">
+                    <p class="text-xl">O padrão mundial hoje (MySQL, Postgres). <br><br><strong>Correlação:</strong> Imagine várias folhas de Excel que se conversam. Se você muda o ID do produto em uma lista, o nome dele atualiza em todas as outras.</p>
+                    <div class="p-6 bg-blue-600 text-white rounded-3xl shadow-xl">Dados organizados em TABELAS ligadas por CHAVES.</div>
+                </div>`
+            },
+            {
+                title: "Categorias: OO e Não-Relacional",
+                content: `<div class="grid md:grid-cols-2 gap-6">
+                    <div class="p-6 bg-slate-50 border rounded-2xl">
+                        <h5 class="font-bold text-blue-600 mb-2">Orientado a Objeto (OO)</h5>
+                        <p class="text-xs">Guarda os dados exatamente como as classes no Java ou C#. <br><strong>Ex:</strong> db4o.</p>
+                    </div>
+                    <div class="p-6 bg-slate-900 text-white rounded-2xl">
+                        <h5 class="font-bold text-blue-400 mb-2">Não-Relacional (NoSQL)</h5>
+                        <p class="text-xs">Para dados ultra-rápidos e redes sociais. <br><strong>Ex:</strong> MongoDB (Guarda dados como posts e comentários).</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Usuários: Mono vs Multi",
+                content: `<div class="grid md:grid-cols-2 gap-6 items-center">
+                    <div class="p-6 bg-amber-50 border rounded-2xl">
+                        <h5 class="font-bold text-amber-800 mb-2">Monousuário</h5>
+                        <p class="text-xs">Apenas 1 pessoa por vez. <br><strong>Exemplo:</strong> O banco de dados SQLite que guarda suas mensagens no WhatsApp dentro do seu celular.</p>
+                    </div>
+                    <div class="p-6 bg-green-50 border rounded-2xl">
+                        <h5 class="font-bold text-green-800 mb-2">Multiusuário</h5>
+                        <p class="text-xs">Milhares de pessoas juntas. <br><strong>Exemplo:</strong> O banco de dados do Facebook ou da Amazon.</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Localização: Centralizado vs Distribuído",
+                content: `<div class="grid md:grid-cols-2 gap-6 items-center">
+                    <div class="p-8 bg-slate-50 border rounded-3xl">
+                        <h5 class="font-bold mb-4">Centralizado</h5>
+                        <p class="text-sm leading-relaxed italic">"Um único servidor na sede da empresa segura todos os dados."</p>
+                    </div>
+                    <div class="p-8 bg-blue-50 border-2 border-blue-200 rounded-3xl">
+                        <h5 class="font-bold mb-4 text-blue-800">Distribuído</h5>
+                        <p class="text-sm leading-relaxed italic">"Os dados estão espalhados em vários servidores pelo mundo (Nuvem). Se um cair, o outro assume."</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "O Papel do DBA",
+                content: `<div class="flex flex-col items-center gap-10">
+                    <p class="text-2xl text-center font-light">"O Database Administrator é o guardião da velocidade e da segurança."</p>
+                    <div class="grid md:grid-cols-3 gap-4 w-full">
+                        <div class="p-4 bg-white border rounded-xl text-center text-xs font-bold">Monitorar Performance</div>
+                        <div class="p-4 bg-white border rounded-xl text-center text-xs font-bold">Garantir Backup</div>
+                        <div class="p-4 bg-white border rounded-xl text-center text-xs font-bold">Liberar Acessos</div>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Exercício 1",
+                content: `<div class="space-y-6">
+                    <p class="text-2xl font-bold">Diferencie Dado de Informação utilizando o exemplo de uma loja de conveniência.</p>
+                    <textarea class="w-full h-32 p-4 border rounded-xl bg-white shadow-inner" placeholder="Escreva sua resposta aqui..."></textarea>
+                </div>`
+            },
+            {
+                title: "Exercício 2",
+                content: `<div class="space-y-6">
+                    <p class="text-2xl font-bold">Por que o modelo em Rede foi considerado uma evolução do modelo Hierárquico?</p>
+                    <div class="grid gap-3">
+                        <button class="w-full p-4 bg-white border rounded-xl text-left hover:bg-slate-50">a) Porque usava internet.</button>
+                        <button class="w-full p-4 bg-white border rounded-xl text-left hover:bg-slate-50">b) Porque permitiu que um registro filho tivesse múltiplos pais, evitando duplicação.</button>
+                        <button class="w-full p-4 bg-white border rounded-xl text-left hover:bg-slate-50">c) Porque era mais simples e rápido.</button>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Exercício 3",
+                content: `<div class="space-y-6 text-center">
+                    <p class="text-2xl font-bold italic">"Se eu trocar o servidor de disco HD por SSD, qual independência de dados estou utilizando?"</p>
+                    <div class="flex justify-center gap-10 mt-10">
+                        <button class="p-6 bg-white border-2 border-blue-600 rounded-3xl font-bold">FÍSICA</button>
+                        <button class="p-6 bg-white border-2 border-slate-200 rounded-3xl font-bold opacity-40">LÓGICA</button>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Exercício 4",
+                content: `<div class="space-y-6">
+                    <p class="text-2xl font-bold">Cite um SGBD famoso para aplicações WEB e um exemplo de banco Monousuário.</p>
+                    <input type="text" class="w-full p-4 border rounded-xl" placeholder="SGBD Web:">
+                    <input type="text" class="w-full p-4 border rounded-xl" placeholder="SGBD Monousuário:">
+                </div>`
+            },
+            {
+                title: "Exercício 5",
+                content: `<div class="space-y-6">
+                    <p class="text-2xl font-bold">Explique, com suas palavras, o que são Metadados.</p>
+                    <textarea class="w-full h-32 p-4 border rounded-xl bg-white shadow-inner" placeholder="Sua resposta..."></textarea>
+                </div>`
+            },
+            {
+                title: "Missão Cumprida!",
+                content: `<div class="text-center py-10 space-y-10">
+                    <div class="p-10 bg-green-100 rounded-full inline-block"><i class="fas fa-check-circle text-green-600 text-8xl"></i></div>
+                    <h2 class="text-5xl font-black">Aula 01 Concluída</h2>
+                    <p class="text-2xl text-slate-500">Parabéns! Você agora entende a fundação sólida de como os dados são organizados profissionalmente.</p>
+                    <div class="mt-12 px-10 py-4 bg-blue-600 text-white rounded-3xl font-black text-xl uppercase shadow-xl inline-block">Próxima Aula: Modelagem (DER)</div>
+                </div>`
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-blue-600 tracking-widest mb-4">Tópico ${currentStep + 1} de ${steps.length}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12">${step.title}</h2>
+                    <div class="content-body">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerText = currentStep === steps.length - 1 ? 'FINALIZAR' : 'PRÓXIMO';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 pb-4"><h1>Apostila: Banco de Dados I - Aula 01</h1></div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10"><h2>${i+1}. ${s.title}</h2>${s.content}</div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

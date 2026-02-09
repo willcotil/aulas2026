@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Disciplina: Tópicos em TI - Python 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Placeholder Comments -->
+    <!-- Chosen Palette: Warm Neutrals (Stone, Amber, Orange, Zinc). Creates a calm, academic, yet modern atmosphere suitable for a technical curriculum. -->
+    
+    <!-- Application Structure Plan: 
+         The application is structured as a vertical interactive dashboard. 
+         1. Hero Section: Sets the context (Course Title, Target Audience).
+         2. Course Overview (Dashboard): High-level stats and a distribution chart to show the balance between Theory, OOP, and Applied Frameworks.
+         3. Interactive Timeline (The Core): A tabbed interface separating Semester 1 and 2. It replaces the static table with a filterable list (All/Exams/Holidays) to allow students to quickly plan their schedule.
+         4. Learning Modules: A thematic breakdown of content (OOP, Web, Data, Games) to explain 'What' will be learned, independent of 'When'.
+         5. Assessment Roadmap: A focused view on the 6 evaluations.
+         Reasoning: The report is a chronological list. Transforming it into tabs and thematic blocks makes it easier to digest the "Why" and "How" alongside the "When". 
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Doughnut Chart (Chart.js): Shows the percentage of time spent on Fundamentals vs. OOP vs. Applied Frameworks vs. Assessments. Justification: Quickly communicates the course focus shift from syntax to application.
+         2. Interactive Timeline (DOM Manipulation): Replaces the markdown table. Justification: Users need to filter out holidays or focus just on exam dates.
+         3. Progress/Status Cards: Uses Tailwind grid/flex. Justification: Clearly delimits the three major frameworks (Django, Matplotlib, PyGame).
+         4. Assessment Timeline: Vertical step layout using CSS borders. Justification: Visualizes the milestones clearly.
+         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All icons are Unicode or CSS shapes.
+    -->
+
+    <style>
+        /* Chart Container Styling per requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px; /* Base height */
+            max-height: 400px;
+        }
+        
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Custom Scrollbar for inner containers if needed */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #d6d3d1; 
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased selection:bg-amber-200 selection:text-amber-900">
+
+    <!-- Navigation / Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold tracking-tight text-stone-900">
+                <span class="text-amber-600">Python</span> Tópicos em TI
+            </h1>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#overview" class="hover:text-amber-600 transition-colors">Visão Geral</a>
+                <a href="#timeline" class="hover:text-amber-600 transition-colors">Cronograma</a>
+                <a href="#modules" class="hover:text-amber-600 transition-colors">Módulos</a>
+                <a href="#assessments" class="hover:text-amber-600 transition-colors">Avaliações</a>
+            </nav>
+            <div class="text-xs text-stone-500 font-mono hidden sm:block">2026</div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <!-- Section 1: Introduction & Overview -->
+        <section id="overview" class="scroll-mt-20">
+            <div class="text-center max-w-3xl mx-auto mb-10">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-4">A Jornada Python 2026</h2>
+                <p class="text-lg text-stone-600 leading-relaxed">
+                    Este plano de ensino foi desenhado para alunos com experiência prévia em programação (C), permitindo uma imersão acelerada na sintaxe do Python. O foco central é transitar rapidamente dos fundamentos para a Orientação a Objetos (OOP) no primeiro semestre, culminando em aplicações práticas (Web, Dados e Jogos) no segundo semestre.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- Stat Card 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 flex flex-col items-center justify-center hover:border-amber-200 transition-all">
+                    <div class="text-4xl mb-2">📅</div>
+                    <div class="text-3xl font-bold text-stone-900">30</div>
+                    <div class="text-sm text-stone-500 uppercase tracking-wide">Encontros Totais</div>
+                </div>
+                <!-- Stat Card 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 flex flex-col items-center justify-center hover:border-amber-200 transition-all">
+                    <div class="text-4xl mb-2">📝</div>
+                    <div class="text-3xl font-bold text-stone-900">6</div>
+                    <div class="text-sm text-stone-500 uppercase tracking-wide">Avaliações</div>
+                </div>
+                <!-- Stat Card 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-100 flex flex-col items-center justify-center hover:border-amber-200 transition-all">
+                    <div class="text-4xl mb-2">🛠️</div>
+                    <div class="text-3xl font-bold text-stone-900">3</div>
+                    <div class="text-sm text-stone-500 uppercase tracking-wide">Frameworks (Django, PyGame, Matplotlib)</div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 md:p-10">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-stone-900 mb-4">Distribuição do Conteúdo</h3>
+                        <p class="text-stone-600 mb-6">
+                            O gráfico ao lado ilustra o equilíbrio estratégico do curso. Observe como uma grande parcela é dedicada à <strong>Orientação a Objetos</strong> e <strong>Aplicações Práticas</strong>. Isso garante que, além de aprender a sintaxe, você saia do curso construindo software real.
+                        </p>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-stone-400 mr-3"></span>
+                                <span class="text-stone-700"><strong>Fundamentos:</strong> Sintaxe rápida e estruturas de dados.</span>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-amber-500 mr-3"></span>
+                                <span class="text-stone-700"><strong>OOP:</strong> Classes, herança, polimorfismo.</span>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-orange-600 mr-3"></span>
+                                <span class="text-stone-700"><strong>Aplicações:</strong> Web, Games, Dados.</span>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-3 h-3 rounded-full bg-stone-800 mr-3"></span>
+                                <span class="text-stone-700"><strong>Avaliações:</strong> Provas teóricas e práticas.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Chart Container -->
+                    <div class="chart-container">
+                        <canvas id="contentDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Interactive Timeline -->
+        <section id="timeline" class="scroll-mt-20">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-stone-900 border-l-4 border-amber-500 pl-4">Cronograma Detalhado</h2>
+                <p class="mt-2 text-stone-600">
+                    Navegue pelo calendário acadêmico. Utilize os filtros para isolar datas de provas ou feriados. O cronograma é dividido em dois semestres, cada um com objetivos pedagógicos distintos.
+                </p>
+            </div>
+
+            <!-- Timeline Controls -->
+            <div class="bg-white rounded-t-xl border border-stone-200 p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-16 z-40 shadow-sm">
+                <div class="flex space-x-2 bg-stone-100 p-1 rounded-lg">
+                    <button onclick="switchSemester(1)" id="btn-sem1" class="px-4 py-2 rounded-md text-sm font-medium transition-all bg-white text-stone-900 shadow-sm">1º Semestre</button>
+                    <button onclick="switchSemester(2)" id="btn-sem2" class="px-4 py-2 rounded-md text-sm font-medium transition-all text-stone-500 hover:text-stone-900">2º Semestre</button>
+                </div>
+                
+                <div class="flex space-x-2 text-sm">
+                    <button onclick="filterTimeline('all')" id="filter-all" class="px-3 py-1 rounded-full border border-stone-300 bg-stone-100 text-stone-900 focus:ring-2 focus:ring-amber-500">Todos</button>
+                    <button onclick="filterTimeline('evaluation')" id="filter-evaluation" class="px-3 py-1 rounded-full border border-stone-300 hover:bg-stone-50 text-stone-600 focus:ring-2 focus:ring-amber-500">Avaliações</button>
+                    <button onclick="filterTimeline('content')" id="filter-content" class="px-3 py-1 rounded-full border border-stone-300 hover:bg-stone-50 text-stone-600 focus:ring-2 focus:ring-amber-500">Aulas</button>
+                </div>
+            </div>
+
+            <!-- Timeline Content Container -->
+            <div id="timeline-container" class="bg-white border-x border-b border-stone-200 rounded-b-xl min-h-[400px]">
+                <!-- JS will populate this -->
+            </div>
+        </section>
+
+        <!-- Section 3: Learning Modules -->
+        <section id="modules" class="scroll-mt-20">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-stone-900 border-l-4 border-amber-500 pl-4">Módulos de Aprendizado</h2>
+                <p class="mt-2 text-stone-600">
+                    O curso é estruturado não apenas por datas, mas por grandes áreas de competência. Abaixo, detalhamos o que compõe cada pilar do conhecimento que será construído, desde a lógica básica até frameworks complexos.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Module 1 -->
+                <div class="group bg-white rounded-xl shadow-sm border border-stone-200 p-6 hover:shadow-md transition-all">
+                    <div class="w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:bg-amber-100 transition-colors">🚀</div>
+                    <h3 class="text-xl font-bold text-stone-800 mb-2">Fundamentos & Pythonic Way</h3>
+                    <p class="text-sm text-stone-500 mb-4">1º Semestre (Início)</p>
+                    <ul class="text-sm text-stone-600 space-y-2">
+                        <li>• Sintaxe vs. Linguagem C</li>
+                        <li>• Listas, Tuplas, Sets e Dicionários</li>
+                        <li>• Comprehension Lists & Lambdas</li>
+                        <li>• Modularização e Docstrings</li>
+                    </ul>
+                </div>
+
+                <!-- Module 2 -->
+                <div class="group bg-white rounded-xl shadow-sm border border-stone-200 p-6 hover:shadow-md transition-all">
+                    <div class="w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:bg-amber-100 transition-colors">🧩</div>
+                    <h3 class="text-xl font-bold text-stone-800 mb-2">Orientação a Objetos</h3>
+                    <p class="text-sm text-stone-500 mb-4">1º Semestre (Final)</p>
+                    <ul class="text-sm text-stone-600 space-y-2">
+                        <li>• Classes, Objetos e Atributos</li>
+                        <li>• Métodos Mágicos (__init__, __str__)</li>
+                        <li>• Herança e Polimorfismo</li>
+                        <li>• Tratamento de Exceções</li>
+                    </ul>
+                </div>
+
+                <!-- Module 3 -->
+                <div class="group bg-white rounded-xl shadow-sm border border-stone-200 p-6 hover:shadow-md transition-all">
+                    <div class="w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:bg-amber-100 transition-colors">📊</div>
+                    <h3 class="text-xl font-bold text-stone-800 mb-2">Ciência de Dados</h3>
+                    <p class="text-sm text-stone-500 mb-4">2º Semestre</p>
+                    <ul class="text-sm text-stone-600 space-y-2">
+                        <li>• NumPy: Arrays e Matrizes</li>
+                        <li>• Matplotlib: Gráficos de Linha/Barra</li>
+                        <li>• Subplots e Eixos Múltiplos</li>
+                        <li>• Histogramas e Dispersão</li>
+                    </ul>
+                </div>
+
+                <!-- Module 4 -->
+                <div class="group bg-white rounded-xl shadow-sm border border-stone-200 p-6 hover:shadow-md transition-all">
+                    <div class="w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:bg-amber-100 transition-colors">🌐</div>
+                    <h3 class="text-xl font-bold text-stone-800 mb-2">Web com Django</h3>
+                    <p class="text-sm text-stone-500 mb-4">2º Semestre</p>
+                    <ul class="text-sm text-stone-600 space-y-2">
+                        <li>• Arquitetura MVT (Model-View-Template)</li>
+                        <li>• Rotas e Views</li>
+                        <li>• ORM e Banco de Dados (SQLite)</li>
+                        <li>• Formulários e Templates HTML</li>
+                    </ul>
+                </div>
+
+                <!-- Module 5 -->
+                <div class="group bg-white rounded-xl shadow-sm border border-stone-200 p-6 hover:shadow-md transition-all">
+                    <div class="w-12 h-12 bg-stone-100 rounded-lg flex items-center justify-center text-2xl mb-4 group-hover:bg-amber-100 transition-colors">🎮</div>
+                    <h3 class="text-xl font-bold text-stone-800 mb-2">Games com PyGame</h3>
+                    <p class="text-sm text-stone-500 mb-4">2º Semestre</p>
+                    <ul class="text-sm text-stone-600 space-y-2">
+                        <li>• Loop de Jogo e Eventos</li>
+                        <li>• Sprites e Colisões</li>
+                        <li>• Gerenciamento de Assets (Som/Img)</li>
+                        <li>• Lógica de Estados de Jogo</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 4: Assessment Center -->
+        <section id="assessments" class="scroll-mt-20 mb-20">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-stone-900 border-l-4 border-amber-500 pl-4">Roadmap de Avaliações</h2>
+                <p class="mt-2 text-stone-600">
+                    O curso prevê 6 momentos avaliativos principais, 3 por semestre. Este roadmap ajuda você a se preparar para os marcos críticos da disciplina.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-200">
+                    
+                    <!-- Semester 1 Assessments -->
+                    <div class="p-6">
+                        <h3 class="font-bold text-stone-900 mb-6 flex items-center">
+                            <span class="bg-stone-100 text-stone-600 px-2 py-1 rounded text-xs mr-2">2026.1</span>
+                            Avaliações do 1º Semestre
+                        </h3>
+                        <div class="space-y-6 relative border-l-2 border-stone-200 ml-3 pl-6">
+                            
+                            <!-- A1 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-white border-2 border-amber-500"></span>
+                                <div class="text-sm text-amber-600 font-bold">20/03/2026</div>
+                                <div class="font-bold text-stone-800">Avaliação 1</div>
+                                <div class="text-sm text-stone-500">Teórica/Prática: Fundamentos, Coleções e Funções.</div>
+                            </div>
+
+                            <!-- A2 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-white border-2 border-amber-500"></span>
+                                <div class="text-sm text-amber-600 font-bold">15/05/2026</div>
+                                <div class="font-bold text-stone-800">Avaliação 2</div>
+                                <div class="text-sm text-stone-500">Teórica/Prática: Modularização, NumPy e Introdução OOP.</div>
+                            </div>
+
+                            <!-- A3 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-stone-800 border-2 border-stone-800"></span>
+                                <div class="text-sm text-amber-600 font-bold">19/06/2026</div>
+                                <div class="font-bold text-stone-800">Avaliação 3 (Final)</div>
+                                <div class="text-sm text-stone-500">Exame Final abrangendo todo o conteúdo do semestre, com foco em OOP.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Semester 2 Assessments -->
+                    <div class="p-6">
+                        <h3 class="font-bold text-stone-900 mb-6 flex items-center">
+                            <span class="bg-stone-100 text-stone-600 px-2 py-1 rounded text-xs mr-2">2026.2</span>
+                            Avaliações do 2º Semestre
+                        </h3>
+                        <div class="space-y-6 relative border-l-2 border-stone-200 ml-3 pl-6">
+                            
+                            <!-- A4 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-white border-2 border-orange-500"></span>
+                                <div class="text-sm text-orange-600 font-bold">28/08/2026</div>
+                                <div class="font-bold text-stone-800">Avaliação 4</div>
+                                <div class="text-sm text-stone-500">Prática: Visualização de Dados (Matplotlib) e NumPy.</div>
+                            </div>
+
+                            <!-- A5 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-white border-2 border-orange-500"></span>
+                                <div class="text-sm text-orange-600 font-bold">09/10/2026</div>
+                                <div class="font-bold text-stone-800">Avaliação 5</div>
+                                <div class="text-sm text-stone-500">Prática: Desenvolvimento Web com Django (MVT, Forms, ORM).</div>
+                            </div>
+
+                            <!-- A6 -->
+                            <div class="relative">
+                                <span class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-stone-800 border-2 border-stone-800"></span>
+                                <div class="text-sm text-orange-600 font-bold">27/11/2026</div>
+                                <div class="font-bold text-stone-800">Avaliação 6 (Final)</div>
+                                <div class="text-sm text-stone-500">Prática: Desenvolvimento de Jogos com PyGame. Encerramento.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-10 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-sm">Plano de Ensino Gerado para o Curso Técnico de Informática</p>
+            <p class="text-xs mt-2 text-stone-600">Baseado no calendário letivo 2026</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA STORAGE ---
+        // Types: 'class', 'evaluation', 'holiday', 'break' (no class)
+        const scheduleData = {
+            1: [
+                { id: 1, date: '13/02/2026', type: 'class', topic: 'Intro e Sintaxe Básica', desc: 'Apresentação, Filosofia Python, Ambientes, Variáveis e Tipos (Comparativo C).' },
+                { id: 2, date: '20/02/2026', type: 'class', topic: 'Operadores e Controle', desc: 'Operadores (Aritméticos, Lógicos, Bitwise), if/elif/else, while e for.' },
+                { id: 3, date: '27/02/2026', type: 'class', topic: 'Estruturas de Dados', desc: 'Listas, Tuplas, Sets e Dicionários (Slicing e Métodos).' },
+                { id: 4, date: '06/03/2026', type: 'class', topic: 'Funções I', desc: 'Definição, Chamada, Argumentos (*args, **kwargs).' },
+                { id: 5, date: '13/03/2026', type: 'class', topic: 'Funções II e Módulos', desc: 'Retorno, Escopo (LEGB), Modularização Básica.' },
+                { id: 6, date: '20/03/2026', type: 'evaluation', topic: 'AVALIAÇÃO 1', desc: 'Teórica/Prática cobrindo fundamentos até Funções.' },
+                { id: 7, date: '27/03/2026', type: 'class', topic: 'Funções Avançadas', desc: 'Lambda, List/Dict Comprehensions, Iteradores.' },
+                { id: 8, date: '03/04/2026', type: 'holiday', topic: 'Feriado', desc: 'Sexta-feira Santa.' },
+                { id: 9, date: '10/04/2026', type: 'class', topic: 'Arrays (NumPy) e Docs', desc: 'Arrays, Matrizes e Docstrings.' },
+                { id: 10, date: '17/04/2026', type: 'class', topic: 'Intro a OOP', desc: 'Classe, Objeto, Atributos, Métodos, self, __init__.' },
+                { id: 11, date: '24/04/2026', type: 'class', topic: 'OOP Intermediário', desc: 'Encapsulamento, Herança e Polimorfismo.' },
+                { id: 12, date: '01/05/2026', type: 'holiday', topic: 'Feriado', desc: 'Dia do Trabalho.' },
+                { id: 13, date: '08/05/2026', type: 'class', topic: 'OOP Avançado I', desc: 'Métodos Mágicos (__str__) e Tratamento de Exceções.' },
+                { id: 14, date: '15/05/2026', type: 'evaluation', topic: 'AVALIAÇÃO 2', desc: 'Prova Teórica/Prática (Foco em NumPy e OOP inicial).' },
+                { id: 15, date: '22/05/2026', type: 'class', topic: 'OOP Avançado II', desc: 'Associação, Agregação e Composição. Revisão.' },
+                { id: 16, date: '29/05/2026', type: 'holiday', topic: 'Feriado (Emenda)', desc: 'Corpus Christi (Quinta emenda Sexta).' },
+                { id: 17, date: '05/06/2026', type: 'class', topic: 'Revisão Geral', desc: 'Tira-dúvidas e exercícios de fixação.' },
+                { id: 18, date: '12/06/2026', type: 'class', topic: 'Pré-Exame', desc: 'Correção de exercícios complexos e preparação.' },
+                { id: 19, date: '19/06/2026', type: 'evaluation', topic: 'AVALIAÇÃO 3 (Final)', desc: 'Exame Final do 1º Semestre.' }
+            ],
+            2: [
+                { id: 1, date: '07/08/2026', type: 'class', topic: 'Matplotlib Básico', desc: 'Estrutura, linhas, barras, subplots e eixos múltiplos.' },
+                { id: 2, date: '14/08/2026', type: 'class', topic: 'Matplotlib Avançado', desc: 'Dispersão, histogramas e customização total.' },
+                { id: 3, date: '21/08/2026', type: 'class', topic: 'Revisão A4', desc: 'Revisão de Matplotlib e Tira-dúvidas.' },
+                { id: 4, date: '28/08/2026', type: 'evaluation', topic: 'AVALIAÇÃO 4', desc: 'Prática: Matplotlib e NumPy.' },
+                { id: 5, date: '04/09/2026', type: 'break', topic: 'Sem Aula', desc: 'Não há expediente.' },
+                { id: 6, date: '11/09/2026', type: 'class', topic: 'Django: Conceitos', desc: 'Arquitetura MVT, URLs e estrutura de projeto.' },
+                { id: 7, date: '18/09/2026', type: 'class', topic: 'Django: Views/Templates', desc: 'Criação de App, Views e Templates HTML.' },
+                { id: 8, date: '25/09/2026', type: 'class', topic: 'Django: Models', desc: 'Modelos e ORM (SQLite).' },
+                { id: 9, date: '02/10/2026', type: 'class', topic: 'Django: Forms', desc: 'Formulários e Processamento POST. Revisão A5.' },
+                { id: 10, date: '09/10/2026', type: 'evaluation', topic: 'AVALIAÇÃO 5', desc: 'Prova Prática: Django.' },
+                { id: 11, date: '16/10/2026', type: 'class', topic: 'PyGame: Intro', desc: 'Loop Principal, Desenho e Eventos.' },
+                { id: 12, date: '23/10/2026', type: 'class', topic: 'PyGame: Interação', desc: 'Movimentação de Sprite e Colisão Básica.' },
+                { id: 13, date: '30/10/2026', type: 'class', topic: 'PyGame: Game Design', desc: 'Gerenciamento de Assets, Estados de Jogo e Classes.' },
+                { id: 14, date: '06/11/2026', type: 'break', topic: 'Sem Aula', desc: 'Não há expediente.' },
+                { id: 15, date: '13/11/2026', type: 'class', topic: 'PyGame: Polimento', desc: 'Efeitos Sonoros e Colisão Avançada. Revisão A6.' },
+                { id: 16, date: '20/11/2026', type: 'holiday', topic: 'Feriado', desc: 'Dia da Consciência Negra.' },
+                { id: 17, date: '27/11/2026', type: 'evaluation', topic: 'AVALIAÇÃO 6 (Final)', desc: 'Prova Prática: PyGame / Encerramento.' }
+            ]
+        };
+
+        // --- STATE MANAGEMENT ---
+        let currentSemester = 1;
+        let currentFilter = 'all'; // all, evaluation, content
+
+        // --- DOM ELEMENTS ---
+        const timelineContainer = document.getElementById('timeline-container');
+        const btnSem1 = document.getElementById('btn-sem1');
+        const btnSem2 = document.getElementById('btn-sem2');
+
+        const filterAll = document.getElementById('filter-all');
+        const filterEvaluation = document.getElementById('filter-evaluation');
+        const filterContent = document.getElementById('filter-content');
+
+        // --- FUNCTIONS ---
+
+        function updateSemesterButtonStyles() {
+            // Remove active styles from both
+            btnSem1.classList.remove('bg-white', 'text-stone-900', 'shadow-sm');
+            btnSem1.classList.add('text-stone-500', 'hover:text-stone-900');
+            btnSem2.classList.remove('bg-white', 'text-stone-900', 'shadow-sm');
+            btnSem2.classList.add('text-stone-500', 'hover:text-stone-900');
+
+            // Add active styles to current semester button
+            const activeBtn = currentSemester === 1 ? btnSem1 : btnSem2;
+            activeBtn.classList.remove('text-stone-500', 'hover:text-stone-900');
+            activeBtn.classList.add('bg-white', 'text-stone-900', 'shadow-sm');
+        }
+
+        function updateFilterButtonStyles() {
+            // Reset all filters
+            [filterAll, filterEvaluation, filterContent].forEach(btn => {
+                btn.classList.remove('bg-stone-100', 'text-stone-900');
+                btn.classList.add('hover:bg-stone-50', 'text-stone-600');
+            });
+            
+            // Set active filter
+            let activeFilterBtn;
+            if (currentFilter === 'all') activeFilterBtn = filterAll;
+            else if (currentFilter === 'evaluation') activeFilterBtn = filterEvaluation;
+            else if (currentFilter === 'content') activeFilterBtn = filterContent;
+
+            if (activeFilterBtn) {
+                activeFilterBtn.classList.add('bg-stone-100', 'text-stone-900');
+                activeFilterBtn.classList.remove('hover:bg-stone-50', 'text-stone-600');
+            }
+        }
+
+        function switchSemester(sem) {
+            currentSemester = sem;
+            updateSemesterButtonStyles();
+            renderTimeline(sem);
+        }
+
+        function filterTimeline(filter) {
+            currentFilter = filter;
+            updateFilterButtonStyles();
+            renderTimeline(currentSemester);
+        }
+
+        function renderTimeline(semester) {
+            timelineContainer.innerHTML = '';
+            const data = scheduleData[semester];
+
+            const filteredData = data.filter(item => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'evaluation') return item.type === 'evaluation';
+                if (currentFilter === 'content') return item.type === 'class';
+                return true;
+            });
+
+            if (filteredData.length === 0) {
+                timelineContainer.innerHTML = `<div class="p-8 text-center text-stone-500">Nenhum evento encontrado para este filtro.</div>`;
+                return;
+            }
+
+            const list = document.createElement('div');
+            list.className = 'divide-y divide-stone-100';
+
+            filteredData.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'p-4 hover:bg-stone-50 transition-colors flex flex-col sm:flex-row gap-4 items-start sm:items-center';
+                
+                // Icon Logic
+                let icon = '';
+                let dateColor = '';
+                let titleColor = 'text-stone-800';
+                
+                switch(item.type) {
+                    case 'evaluation':
+                        icon = '<span class="text-xl">🎓</span>';
+                        dateColor = 'text-amber-600 font-bold';
+                        titleColor = 'text-stone-900 font-bold';
+                        row.classList.add('bg-amber-50/50');
+                        break;
+                    case 'holiday':
+                        icon = '<span class="text-xl">🏖️</span>';
+                        dateColor = 'text-orange-400';
+                        titleColor = 'text-stone-400 italic';
+                        break;
+                    case 'break':
+                        icon = '<span class="text-xl">🚫</span>';
+                        dateColor = 'text-stone-400';
+                        titleColor = 'text-stone-400 italic';
+                        break;
+                    default: // class
+                        icon = '<span class="text-xl">📚</span>';
+                        dateColor = 'text-stone-500 font-medium';
+                }
+
+                row.innerHTML = `
+                    <div class="flex items-center min-w-[140px]">
+                        <div class="w-10 h-10 rounded-full bg-white border border-stone-200 flex items-center justify-center mr-3 shrink-0">
+                            ${icon}
+                        </div>
+                        <div class="${dateColor}">${item.date}</div>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="${titleColor} text-lg">${item.topic}</div>
+                        <div class="text-sm text-stone-500 mt-1">${item.desc}</div>
+                    </div>
+                    ${item.type === 'class' || item.type === 'evaluation' ? 
+                        `<div class="hidden sm:block text-xs font-mono text-stone-300 px-2 border border-stone-100 rounded">Encontro ${item.id}</div>` 
+                        : ''}
+                `;
+                list.appendChild(row);
+            });
+
+            timelineContainer.appendChild(list);
+        }
+
+        // --- CHART JS ---
+        function initChart() {
+            const ctx = document.getElementById('contentDistributionChart').getContext('2d');
+            
+            // Rough calculation based on syllabus
+            // Fundamentals: ~8 classes
+            // OOP: ~7 classes
+            // Applied (Data, Web, Games): ~11 classes
+            // Evaluations: 6 classes
+            // Holidays/Breaks: ~5 (Not counted in learning time)
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Fundamentos Python', 'Orientação a Objetos', 'Aplicações (Web/Games/Dados)', 'Avaliações'],
+                    datasets: [{
+                        data: [25, 22, 34, 19], // percentages approx
+                        backgroundColor: [
+                            '#a8a29e', // Stone 400 (Fundamentals)
+                            '#f59e0b', // Amber 500 (OOP)
+                            '#ea580c', // Orange 600 (Applications)
+                            '#292524'  // Stone 800 (Evaluations)
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont'
+                                },
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}%`;
+                                }
+                            },
+                            backgroundColor: '#1c1917',
+                            padding: 12
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            // Ensure initial state is correctly rendered
+            updateSemesterButtonStyles();
+            updateFilterButtonStyles();
+            renderTimeline(currentSemester);
+        });
+
+    </script>
+</body>
+</html>

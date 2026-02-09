@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Ensino - Banco de Dados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { 
+            border-bottom: 3px solid #3b82f6; 
+            color: #3b82f6;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-12">
+
+    <!-- Header Section -->
+    <header class="bg-slate-900 text-white py-12 shadow-lg mb-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
+                <i data-lucide="database" class="text-blue-400"></i>
+                Plano de Disciplina: Banco de Dados
+            </h1>
+            <p class="text-slate-400 text-lg">Modelagem, Implementação e Gestão de Dados</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4">
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="bg-blue-100 p-3 rounded-lg text-blue-600">
+                    <i data-lucide="clock"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500">Carga Horária</p>
+                    <p class="font-bold text-xl">40 Horas</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="bg-green-100 p-3 rounded-lg text-green-600">
+                    <i data-lucide="calendar"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500">Encontros</p>
+                    <p class="font-bold text-xl">26 Aulas</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="bg-purple-100 p-3 rounded-lg text-purple-600">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500">Avaliações</p>
+                    <p class="font-bold text-xl">6 Totais</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center gap-4">
+                <div class="bg-orange-100 p-3 rounded-lg text-orange-600">
+                    <i data-lucide="award"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-500">Sistema</p>
+                    <p class="font-bold text-xl">3.0 + 1.0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="flex border-b border-slate-200 bg-slate-50">
+                <button onclick="openTab(event, 'semestre1')" class="tab-btn active px-8 py-4 text-slate-600 hover:bg-white transition-all">
+                    1º Semestre (Teoria)
+                </button>
+                <button onclick="openTab(event, 'semestre2')" class="tab-btn px-8 py-4 text-slate-600 hover:bg-white transition-all">
+                    2º Semestre (SQL)
+                </button>
+                <button onclick="openTab(event, 'regras')" class="tab-btn px-8 py-4 text-slate-600 hover:bg-white transition-all">
+                    Sistema de Notas
+                </button>
+            </div>
+
+            <!-- Tab Content: Semestre 1 -->
+            <div id="semestre1" class="tab-content active p-6">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-lucide="layout"></i> Modelagem e Estrutura
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50">
+                                <th class="p-4 border-b font-semibold text-slate-700">Aula</th>
+                                <th class="p-4 border-b font-semibold text-slate-700">Conteúdo</th>
+                                <th class="p-4 border-b font-semibold text-slate-700">Atividade</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr><td class="p-4 text-blue-600 font-bold">01</td><td class="p-4">Introdução a Banco de Dados</td><td class="p-4 italic">Conceitos</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">02</td><td class="p-4">MER (Modelo Entidade Relacionamento)</td><td class="p-4">Prática</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">03</td><td class="p-4">Tipos de Entidades e Entidade Associativa</td><td class="p-4">Fixação</td></tr>
+                            <tr class="bg-blue-50/50"><td class="p-4 text-blue-600 font-bold">04</td><td class="p-4">Laboratório de Exercícios</td><td class="p-4 font-semibold text-blue-800">Visto no Caderno (1.0)</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">05</td><td class="p-4">Dicionário de Dados</td><td class="p-4">Atributos</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">06</td><td class="p-4">Atividade Prática de Revisão</td><td class="p-4 italic">Simulado</td></tr>
+                            <tr class="bg-red-50"><td class="p-4 text-red-600 font-bold">07</td><td class="p-4 font-bold">1ª Avaliação (Teoria e MER)</td><td class="p-4 font-bold">Prova (3.0 pts)</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">08</td><td class="p-4">Atividade Avaliativa Pós-Prova</td><td class="p-4 italic">Reforço</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">09</td><td class="p-4">Normalização (1FN, 2FN, 3FN)</td><td class="p-4">Teoria</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">10</td><td class="p-4">Normalização - Dependência Funcional</td><td class="p-4">Exercícios</td></tr>
+                            <tr class="bg-red-50"><td class="p-4 text-red-600 font-bold">11</td><td class="p-4 font-bold">2ª Avaliação (Normalização)</td><td class="p-4 font-bold">Prova (3.0 pts)</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">12</td><td class="p-4">DER (Diagrama Entidade Relacionamento)</td><td class="p-4 italic">Modelagem</td></tr>
+                            <tr class="bg-red-50"><td class="p-4 text-red-600 font-bold">13</td><td class="p-4 font-bold">3ª Avaliação (Módulo 1 Final)</td><td class="p-4 font-bold">Prova (3.0 pts)</td></tr>
+                            <tr><td class="p-4 text-blue-600 font-bold">14</td><td class="p-4">Recuperação de Conteúdo</td><td class="p-4">Plantão</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Content: Semestre 2 -->
+            <div id="semestre2" class="tab-content p-6">
+                <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i data-lucide="terminal"></i> Implementação SQL
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50">
+                                <th class="p-4 border-b font-semibold text-slate-700">Aula</th>
+                                <th class="p-4 border-b font-semibold text-slate-700">Conteúdo</th>
+                                <th class="p-4 border-b font-semibold text-slate-700">Atividade</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr><td class="p-4 text-indigo-600 font-bold">15</td><td class="p-4">Introdução à Linguagem SQL</td><td class="p-4">DDL/DML</td></tr>
+                            <tr><td class="p-4 text-indigo-600 font-bold">16</td><td class="p-4">Instalação e Setup de Ambiente</td><td class="p-4 italic">Configuração</td></tr>
+                            <tr><td class="p-4 text-indigo-600 font-bold">17</td><td class="p-4">INSERT, UPDATE e DELETE</td><td class="p-4">Prática</td></tr>
+                            <tr class="bg-indigo-50/50"><td class="p-4 text-indigo-600 font-bold">18</td><td class="p-4">Laboratório de Exercícios SQL</td><td class="p-4 font-semibold text-indigo-800">Visto no PC (1.0)</td></tr>
+                            <tr class="bg-red-50"><td class="p-4 text-red-600 font-bold">19</td><td class="p-4 font-bold">1ª Avaliação SQL (CRUD)</td><td class="p-4 font-bold">Prova (3.0 pts)</td></tr>
+                            <tr><td class="p-4 text-indigo-600 font-bold">20</td><td class="p-4">SELECT: ORDER BY e Funções</td><td class="p-4">Filtros</td></tr>
+                            <tr><td class="p-4 text-indigo-600 font-bold">21</td><td class="p-4">SELECT: LIMIT, BETWEEN e LIKE</td><td class="p-4 italic">Avançado</td></tr>
+                            <tr><td class="p-4 text-indigo-600 font-bold">22</td><td class="p-4">SELECT: JUNÇÕES (JOINs) I</td><td class="p-4">Cruzamento</td></tr>
+                            <tr class="bg-red-50"><td class="p-4 text-red-600 font-bold">23</td><td class="p-4 font-bold">2ª Avaliação SQL (Consultas e Joins)</td><td class="p-4 font-bold">Prova (3.0 pts)</td></tr>
+                            <tr class="bg-indigo-50/50"><td class="p-4 text-indigo-600 font-bold">24</td><td class="p-4">Finalização do Projeto de Semestre</td><td class="p-4 font-semibold text-indigo-800">Visto Projeto (1.0)</td></tr>
+                            <tr class="bg-red-50"><td class="p-4 text-red-600 font-bold">25</td><td class="p-4 font-bold">Entrega do Projeto de Semestre (Avaliação 3)</td><td class="p-4 font-bold">Projeto (3.0 pts)</td></tr>
+                            <tr><td class="p-4 text-indigo-600 font-bold">26</td><td class="p-4">Recuperação Final</td><td class="p-4 italic">Fechamento</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Content: Regras -->
+            <div id="regras" class="tab-content p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                            <i data-lucide="check-circle" class="text-green-500"></i> Avaliação Padrão
+                        </h2>
+                        <ul class="space-y-4 text-slate-700">
+                            <li class="flex items-start gap-3">
+                                <span class="bg-slate-100 text-slate-800 font-bold px-2 py-1 rounded">3,0</span>
+                                <div>
+                                    <p class="font-bold">Prova Individual / Projeto</p>
+                                    <p class="text-sm">Avaliações bimestrais de conteúdo técnico.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="bg-slate-100 text-slate-800 font-bold px-2 py-1 rounded">1,0</span>
+                                <div>
+                                    <p class="font-bold">Visto em Aula</p>
+                                    <p class="text-sm">Realização das atividades propostas no laboratório.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2 text-blue-800">
+                            <i data-lucide="star"></i> Bônus Cumulativo: 0,3
+                        </h2>
+                        <div class="space-y-4">
+                            <p class="text-blue-900 leading-relaxed">
+                                Alunos que finalizam suas tarefas e atuam como <strong>Tutores</strong> (ajudando colegas indicados pelo professor) ganham um bônus de <strong>0,3 ponto</strong>.
+                            </p>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm border border-blue-100">
+                                <p class="text-sm font-bold text-blue-800 mb-2 uppercase">A Regra de Ouro:</p>
+                                <ul class="list-disc ml-4 text-sm text-blue-700 space-y-2">
+                                    <li>O bônus completa a nota da prova (até o teto de 3.0).</li>
+                                    <li><strong>Sobra de Pontos:</strong> Se o bônus não for necessário (nota cheia) ou se sobrar saldo, ele é <strong>acumulado</strong> para as provas seguintes.</li>
+                                    <li><strong class="text-blue-900 italic font-bold text-base block mt-2">Expira no final do semestre.</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-slate-100 rounded-lg text-sm text-slate-600">
+                    <p><strong>Nota:</strong> O bônus de tutoria só é validado após o professor conferir o exercício finalizado do tutor e autorizar a ajuda ao colega.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Tab Navigation Function
+        function openTab(evt, tabName) {
+            var i, tabContent, tabBtns;
+            
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].classList.remove("active");
+            }
+
+            tabBtns = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>
