@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Ensino - Fundamentos de Informática</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- KaTeX para fórmulas matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .tab-btn.active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .table-row-eval { background-color: #fefce8; font-weight: 600; }
+        .content-section { scroll-margin-top: 2rem; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Cabeçalho Simples -->
+    <header class="bg-white border-b py-4 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-6 flex justify-between items-center">
+            <h1 class="font-bold text-blue-600 text-lg">COTIL - Fundamentos de Informática</h1>
+            <span class="text-xs text-gray-400 uppercase tracking-widest font-semibold">Plano de Ensino 2026</span>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal Centrado -->
+    <main class="max-w-4xl mx-auto px-6 py-12">
+        
+        <!-- Identificação -->
+        <section id="identificacao" class="content-section mb-16">
+            <div class="bg-blue-600 rounded-2xl p-8 text-white shadow-xl">
+                <h2 class="text-3xl font-bold mb-4">Fundamentos de Informática</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-blue-100">
+                    <div class="flex items-center">
+                        <i data-lucide="clock" class="w-5 h-5 mr-2"></i>
+                        <span><strong>Carga Horária:</strong> 80 horas</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i data-lucide="calendar" class="w-5 h-5 mr-2"></i>
+                        <span><strong>Ano Letivo:</strong> 2026</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ementa -->
+        <section id="ementa" class="content-section mb-16">
+            <div class="flex items-center mb-4">
+                <div class="p-2 bg-blue-100 rounded-lg text-blue-600 mr-3">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <h3 class="text-2xl font-bold">Ementa</h3>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm leading-relaxed text-gray-600">
+                Evolução histórica da computação. Conceitos de arquitetura de hardware e tipos de software. Operação de sistemas operacionais. Edição técnica de textos e fundamentos de planilhas eletrônicas. Administração via linha de comando Linux, automação com Shell Script e controle de versão distribuído (GIT).
+            </div>
+        </section>
+
+        <!-- Cronograma -->
+        <section id="cronograma" class="content-section mb-16">
+            <div class="flex items-center mb-6">
+                <div class="p-2 bg-purple-100 rounded-lg text-purple-600 mr-3">
+                    <i data-lucide="calendar-days"></i>
+                </div>
+                <h3 class="text-2xl font-bold">Cronograma de Aulas</h3>
+            </div>
+
+            <!-- Tabs de Semestre -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button onclick="switchTab('semestre1')" id="btn-semestre1" class="tab-btn active px-6 py-3 text-sm transition-all focus:outline-none">
+                    1º Semestre (17 Aulas)
+                </button>
+                <button onclick="switchTab('semestre2')" id="btn-semestre2" class="tab-btn px-6 py-3 text-sm transition-all focus:outline-none">
+                    2º Semestre (17 Aulas)
+                </button>
+            </div>
+
+            <!-- Semestre 1 -->
+            <div id="semestre1" class="tab-content block animate-in fade-in duration-300">
+                <div class="overflow-x-auto bg-white rounded-xl border shadow-sm text-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="px-6 py-3 font-bold text-gray-500 w-20 text-center">Aula</th>
+                                <th class="px-6 py-3 font-bold text-gray-500">Conteúdo Programático</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">01</td><td class="px-6 py-3 font-medium">Contrato Pedagógico e Evolução Histórica da Computação</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">02</td><td class="px-6 py-3">Conceitos Básicos: Dado, Informação e Processamento</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">03</td><td class="px-6 py-3">Hardware: Placa-mãe, CPU e Memórias (RAM, ROM, Cache)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">04</td><td class="px-6 py-3">Hardware: Dispositivos de Armazenamento e Barramentos</td></tr>
+                            <tr class="table-row-eval"><td class="px-6 py-3 text-center font-mono text-blue-700">05</td><td class="px-6 py-3 text-blue-700 italic">Avaliação 1 (Histórico, Conceitos e Hardware)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">06</td><td class="px-6 py-3">Software: Sistemas Operacionais (O papel do Kernel)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">07</td><td class="px-6 py-3">Sistemas Operacionais: Gestão de Arquivos e Permissões</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">08</td><td class="px-6 py-3">Sistemas Operacionais: Utilitários e Configurações de Sistema</td></tr>
+                            <tr class="table-row-eval"><td class="px-6 py-3 text-center font-mono text-blue-700">09</td><td class="px-6 py-3 text-blue-700 italic">Avaliação 2 (Sistemas Operacionais)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">10</td><td class="px-6 py-3">Edição de Texto: Formatação Profissional e Normas ABNT</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">11</td><td class="px-6 py-3">Edição de Texto: Elementos Gráficos e Tabelas</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">12</td><td class="px-6 py-3">Edição de Texto: Sumários e Referências Automáticas</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">13</td><td class="px-6 py-3">Planilha Eletrônica: Introdução e Interface</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">14</td><td class="px-6 py-3">Planilha Eletrônica: Operadores e Fórmulas Matemáticas</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">15</td><td class="px-6 py-3">Planilha Eletrônica: Funções Estatísticas e Formatação Condicional</td></tr>
+                            <tr class="table-row-eval"><td class="px-6 py-3 text-center font-mono text-blue-700">16</td><td class="px-6 py-3 text-blue-700 italic">Avaliação 3 (Edição de Texto e Planilha Básica)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">17</td><td class="px-6 py-3 italic text-gray-500">Encerramento do 1º Semestre e Feedback Individual</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Semestre 2 -->
+            <div id="semestre2" class="tab-content hidden animate-in fade-in duration-300">
+                <div class="overflow-x-auto bg-white rounded-xl border shadow-sm text-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b">
+                                <th class="px-6 py-3 font-bold text-gray-500 w-20 text-center">Aula</th>
+                                <th class="px-6 py-3 font-bold text-gray-500">Conteúdo Programático</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">18</td><td class="px-6 py-3 font-medium">Introdução ao Linux: Filosofia Open Source e Distribuições</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">19</td><td class="px-6 py-3">Terminal: Navegação (cd, ls, pwd) e Manipulação de Arquivos</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">20</td><td class="px-6 py-3">Terminal: Permissões de Sistema (chmod, chown) e Usuários</td></tr>
+                            <tr class="table-row-eval"><td class="px-6 py-3 text-center font-mono text-blue-700">21</td><td class="px-6 py-3 text-blue-700 italic">Avaliação 4 (Fundamentos de Linux e Terminal)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">22</td><td class="px-6 py-3">Terminal Avançado: Filtros (grep, find), Redirecionadores e Pipes</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">23</td><td class="px-6 py-3">Shell Script: Conceitos, Shebang e Variáveis de Ambiente</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">24</td><td class="px-6 py-3">Shell Script: Entrada de Dados (read) e Operações Aritméticas</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">25</td><td class="px-6 py-3">Shell Script: Estruturas de Decisão (IF, ELSE, CASE)</td></tr>
+                            <tr class="table-row-eval"><td class="px-6 py-3 text-center font-mono text-blue-700">26</td><td class="px-6 py-3 text-blue-700 italic">Avaliação 5 (Automação com Shell Script I)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">27</td><td class="px-6 py-3">Shell Script: Estruturas de Repetição (FOR, WHILE)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">28</td><td class="px-6 py-3">Shell Script: Criação de Scripts de Automação de Tarefas</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">29</td><td class="px-6 py-3">Git: Fundamentos do Controle de Versão e Instalação</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">30</td><td class="px-6 py-3">Git Local: Ciclo de Vida do Arquivo (Add, Commit, Log)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">31</td><td class="px-6 py-3">GitHub: Conexão Remota, SSH Keys e Sincronização (Push/Pull)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">32</td><td class="px-6 py-3">Git Colaborativo: Branches, Merges e Resolução de Conflitos</td></tr>
+                            <tr class="table-row-eval"><td class="px-6 py-3 text-center font-mono text-blue-700">33</td><td class="px-6 py-3 text-blue-700 italic">Avaliação 6 (Controle de Versão com Git)</td></tr>
+                            <tr><td class="px-6 py-3 text-center font-mono text-gray-400">34</td><td class="px-6 py-3 italic text-gray-500">Fechamento do Ano, Recuperação e Feedback Final</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detalhamento da Avaliação -->
+        <section id="avaliacao" class="content-section mb-16">
+            <div class="flex items-center mb-6">
+                <div class="p-2 bg-red-100 rounded-lg text-red-600 mr-3">
+                    <i data-lucide="clipboard-check"></i>
+                </div>
+                <h3 class="text-2xl font-bold">Detalhamento das Avaliações</h3>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl border p-8 shadow-sm">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Composição da Nota Semestral</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
+                            <span class="block text-blue-600 font-bold text-2xl">3.0</span>
+                            <span class="text-xs text-blue-400 uppercase font-bold tracking-wider">Avaliação I</span>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
+                            <span class="block text-blue-600 font-bold text-2xl">3.0</span>
+                            <span class="text-xs text-blue-400 uppercase font-bold tracking-wider">Avaliação II</span>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
+                            <span class="block text-blue-600 font-bold text-2xl">3.0</span>
+                            <span class="text-xs text-blue-400 uppercase font-bold tracking-wider">Avaliação III</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-100 mb-8 max-w-lg mx-auto">
+                        <div>
+                            <h5 class="font-bold text-green-700">Exercícios e Práticas</h5>
+                            <p class="text-xs text-green-600">Entregues durante as aulas conforme solicitado pelo professor.</p>
+                        </div>
+                        <span class="text-2xl font-bold text-green-700">1.0</span>
+                    </div>
+
+                    <div class="text-center pt-4 border-t">
+                        <div class="text-2xl font-mono text-gray-700" id="media-formula">
+                            $$Nota = A_1 + A_2 + A_3 + Exercícios$$
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bônus de Tutoria -->
+                <div class="bg-indigo-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+                    <i data-lucide="users" class="absolute -right-4 -bottom-4 w-32 h-32 text-indigo-500 opacity-30"></i>
+                    <h4 class="text-xl font-bold mb-4 flex items-center">
+                        <i data-lucide="award" class="mr-2"></i> Adicional de Tutoria
+                    </h4>
+                    <div class="space-y-4 text-indigo-100 relative z-10">
+                        <p class="leading-relaxed">
+                            É possível conquistar um adicional de <strong class="text-white text-lg">0,3 pontos</strong> por avaliação, somado à nota final do semestre se necessário.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-4">
+                            <div class="bg-indigo-700 p-4 rounded-lg bg-opacity-40">
+                                <h5 class="font-bold text-white mb-1">Critério</h5>
+                                <p>Disponibilidade para auxiliar colegas indicados pelo professor após concluir as próprias tarefas.</p>
+                            </div>
+                            <div class="bg-indigo-700 p-4 rounded-lg bg-opacity-40">
+                                <h5 class="font-bold text-white mb-1">Regras</h5>
+                                <p>Pontos cumulativos no semestre. Não utilizados, expiram ao término do período.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-gray-400 text-xs py-10 border-t">
+            &copy; 2026 COTIL - Fundamentos de Informática.
+        </footer>
+    </main>
+
+    <script>
+        // Inicializar Ícones
+        lucide.createIcons();
+
+        // Renderizar Fórmulas Matemáticas
+        window.onload = function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ]
+            });
+        };
+
+        // Lógica de Troca de Abas
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => {
+                c.classList.add('hidden');
+                c.classList.remove('block');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('block');
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

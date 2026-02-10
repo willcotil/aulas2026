@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 01 - Evolução Histórica da Computação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- KaTeX para fórmulas matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        .slide {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            transition: all 0.5s ease-in-out;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            pointer-events: none;
+            background-color: #f9fafb;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 10; }
+        
+        /* Placeholder Style */
+        .img-placeholder {
+            background: #e5e7eb;
+            border: 2px dashed #9ca3af;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            min-height: 120px;
+        }
+
+        /* Abacus Logic */
+        .abacus-wire {
+            height: 8px;
+            background: #4b2c20;
+            width: 280px;
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .bead {
+            width: 24px;
+            height: 36px;
+            background: radial-gradient(circle, #d97706, #92400e);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+
+        @media print {
+            body { overflow: visible !important; height: auto !important; }
+            .slide { 
+                position: relative !important; opacity: 1 !important; height: auto !important; 
+                min-height: 280mm; page-break-after: always; display: flex !important;
+                border-bottom: 2px solid #eee;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <!-- Header UI -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur border-b">
+        <div class="flex items-center space-x-4">
+            <span class="font-bold text-blue-700">Aula 01: Evolução</span>
+            <div class="h-1.5 w-32 bg-gray-200 rounded-full">
+                <div id="progressBar" class="h-full bg-blue-600 transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-xs font-mono">01 / 30</span>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 hover:bg-gray-100 rounded-lg text-blue-600" title="Gerar Apostila"><i data-lucide="printer"></i></button>
+        </div>
+    </div>
+
+    <div id="presentation">
+        
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <h1 class="text-5xl font-black text-gray-900 text-center mb-4">Evolução Histórica da Computação</h1>
+            <p class="text-xl text-blue-600 mb-8">Da contagem com pedras à Inteligência Artificial</p>
+<img src="img/abaco-iphone.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="mt-8 text-sm text-gray-400">Pressione as setas do teclado para navegar</p>
+        </section>
+
+        <!-- SLIDE 2: O que é computar? -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">Computar = Calcular</h2>
+            <div class="max-w-2xl space-y-4">
+                <p>O termo "computador" já foi uma <strong>profissão</strong>. Eram pessoas contratadas para realizar cálculos matemáticos complexos para navegação ou astronomia.</p>
+                <div class="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500">
+                    <p class="italic text-gray-700">"A história da computação é a busca incessante do ser humano para automatizar o pensamento matemático e reduzir o erro humano."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: Pré-História: Ábaco (2400 a.C.) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">Ábaco: O primeiro passo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-4xl">
+                <div>
+                    <p class="mb-4 text-gray-600">Não é um computador no sentido moderno, mas a primeira ferramenta de auxílio ao cálculo. Introduziu a <strong>notação posicional</strong>.</p>
+                    <img src="img/abaco.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+                <div class="bg-amber-50 p-6 rounded-xl border border-amber-200">
+                    <h4 class="font-bold text-amber-800 mb-2">Curiosidade</h4>
+                    <p class="text-sm text-amber-700">O Soroban (ábaco japonês) ainda é usado em escolas para ensinar agilidade mental e compreensão decimal profunda.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Interativo - Como usar o Ábaco -->
+        <section class="slide no-print bg-stone-100">
+            <h2 class="text-3xl font-bold mb-8 text-stone-800">Interativo: Entendendo o Valor Posicional</h2>
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <div class="bg-stone-800 p-10 rounded-xl shadow-2xl border-8 border-stone-900">
+                    <div class="space-y-8">
+                        <div class="flex items-center space-x-4"><span class="w-8 text-white font-mono">C</span><div class="abacus-wire"><div class="bead" onclick="moveBead(this, 100)"></div><div class="bead" onclick="moveBead(this, 100)"></div></div></div>
+                        <div class="flex items-center space-x-4"><span class="w-8 text-white font-mono">D</span><div class="abacus-wire"><div class="bead" onclick="moveBead(this, 10)"></div><div class="bead" onclick="moveBead(this, 10)"></div><div class="bead" onclick="moveBead(this, 10)"></div></div></div>
+                        <div class="flex items-center space-x-4"><span class="w-8 text-white font-mono">U</span><div class="abacus-wire"><div class="bead" onclick="moveBead(this, 1)"></div><div class="bead" onclick="moveBead(this, 1)"></div><div class="bead" onclick="moveBead(this, 1)"></div><div class="bead" onclick="moveBead(this, 1)"></div></div></div>
+                    </div>
+                </div>
+                <div class="bg-emerald-900 w-80 h-72 rounded-lg border-8 border-emerald-950 p-6 shadow-inner text-white font-mono">
+                    <h4 class="text-emerald-300 text-xs uppercase mb-4">Tradução Digital</h4>
+                    <div id="abacusDisplay">
+                        <p class="text-5xl text-yellow-400 mb-2" id="abacusValue">0</p>
+                        <div class="text-xs space-y-1 opacity-80" id="abacusLogic">Mova as contas para a direita.</div>
+                    </div>
+                    <button onclick="resetAbacus()" class="mt-8 text-[10px] border border-emerald-700 px-2 py-1 rounded">RESET</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Mecanismo de Antikythera (150 a.C.) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">Mecanismo de Antikythera</h2>
+            <img src="img/mecanismo.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-2xl text-center mt-4">Um complexo sistema de engrenagens de bronze que previa eclipses e ciclos olímpicos. O primeiro <strong>computador analógico</strong> conhecido.</p>
+        </section>
+
+        <!-- SLIDE 6: Pascalina (1642) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">A Pascalina de Blaise Pascal</h2>
+            <img src="img/pascalina.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="max-w-xl text-center space-y-4">
+                <p>Criada para ajudar seu pai no cálculo de impostos. Funcionava com engrenagens conectadas: quando uma roda completava 10 posições, avançava 1 na próxima (o conceito do "vai um").</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Jacquard e o Binário (1801) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">O Tear de Jacquard</h2>
+            <div class="grid grid-cols-2 gap-8 items-center max-w-4xl">
+            <img src="img/tear.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                <div class="space-y-4">
+                    <p>A primeira vez que usamos o <b>Binário</b> na indústria. Os furos nos cartões determinavam o padrão do tecido. <strong>Furo = 1, Sem Furo = 0.</strong></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Charles Babbage e a Máquina Analítica -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6 text-blue-800">A Máquina Analítica (1837)</h2>
+            <img src="img/analitica.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-2xl text-center italic">"O projeto do primeiro computador de propósito geral."</p>
+            <p class="text-sm mt-4 text-gray-500">Já previa entrada, processamento, memória (o "armazém") e saída.</p>
+        </section>
+
+        <!-- SLIDE 9: Ada Lovelace: A Visionária -->
+        <section class="slide bg-purple-50">
+            <h2 class="text-3xl font-bold mb-6 text-purple-900">Ada Lovelace: A Primeira Programadora</h2>
+            <div class="flex flex-col md:flex-row gap-10 items-center max-w-4xl">
+            <img src="img/ada.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                <div class="space-y-4">
+                    <p class="text-lg">Ada percebeu algo que Babbage não viu: a máquina não servia apenas para números, mas para qualquer coisa que pudesse ser traduzida em lógica (música, poesia, arte).</p>
+                    <p class="font-bold text-purple-700">Ela escreveu o primeiro algoritmo complexo (para calcular números de Bernoulli).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: Herman Hollerith e o Censo (1890) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">Herman Hollerith: Big Data em 1890</h2>
+            <img src="img/herman.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center">Usou cartões perfurados para processar o censo dos EUA em meses (levaria anos). Sua empresa tornou-se a <strong>IBM</strong> em 1924.</p>
+        </section>
+
+        <!-- SLIDE 11: Alan Turing e a Criptografia -->
+        <section class="slide bg-slate-900 text-white">
+            <h2 class="text-3xl font-bold mb-6 text-blue-400">Alan Turing: O Herói da 2ª Guerra</h2>
+            <div class="grid grid-cols-2 gap-8 items-center max-w-4xl">
+                <div class="space-y-4">
+                    <p>Desenvolveu a <b>Bombe</b>, máquina eletromecânica para quebrar o código nazista <b>Enigma</b>.</p>
+                    <div class="p-4 bg-white/5 rounded border border-white/20">
+                        <p class="italic"><i data-lucide="info" class="inline w-3 mr-1"></i> Ver Filme: <strong>O Jogo da Imitação</strong> (2014) para entender a pressão e o gênio de Turing.</p>
+                    </div>
+                </div>
+            <img src="img/bombe.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Arquitetura de Von Neumann (1945) -->
+        <section class="slide bg-blue-50">
+            <h2 class="text-3xl font-bold mb-6">John Von Neumann</h2>
+            <img src="img/von.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Ele propôs o <strong>Programa Armazenado</strong>: a ideia de que o software e os dados ficam na mesma memória. É o modelo padrão até hoje.</p>
+        </section>
+
+        <!-- SLIDE 13: 1ª Geração: Válvulas (1940 - 1956) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">1ª Geração: As Válvulas</h2>
+            <div class="flex gap-10 items-center">
+            <img src="img/valvula.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                <div class="space-y-2">
+                    <p class="font-bold text-red-600">Problemas:</p>
+                    <ul class="list-disc list-inside text-gray-600">
+                        <li>Muito calor (queimavam como lâmpadas)</li>
+                        <li>Tamanho imenso</li>
+                        <li>Linguagem de Máquina (difícil programar)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: ENIAC (1946) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4">ENIAC</h2>
+            <img src="img/eniac.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="font-mono text-xs mt-4">30 TONELADAS | 18.000 VÁLVULAS | 170 m²</p>
+        </section>
+
+        <!-- SLIDE 15: 2ª Geração: Transistores (1956 - 1963) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">2ª Geração: O Transistor</h2>
+            <img src="img/transistor.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center">Menores, não aquecem tanto, consomem menos energia. O computador começa a caber em salas comuns.</p>
+        </section>
+
+        <!-- SLIDE 16: 3ª Geração: Circuitos Integrados (1964 - 1971) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">3ª Geração: Chips de Silício</h2>
+            <img src="img/silicio.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center">Milhares de transistores colocados em uma única placa de silício. O computador torna-se um produto empresarial em massa.</p>
+        </section>
+
+        <!-- SLIDE 17: Lei de Moore -->
+        <section class="slide bg-blue-900 text-white">
+            <h2 class="text-3xl font-bold mb-8 text-blue-300">Lei de Moore</h2>
+            <div class="max-w-2xl text-center space-y-6">
+                <p>Gordon Moore (Intel) previu em 1965:</p>
+                <div class="text-4xl font-mono p-6 bg-blue-800 rounded-2xl border border-blue-600 shadow-xl">
+                    "O número de transistores dobra a cada 18 a 24 meses."
+                </div>
+                <p class="text-sm opacity-70">Isto significa que a capacidade de processamento cresce exponencialmente enquanto o preço cai.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: 4ª Geração: Microprocessadores (1971 - Hoje) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">4ª Geração: Microprocessadores</h2>
+            <img src="img/4004.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center">Todo o poder de processamento em um
+                único chip. Isso permitiu o nascimento do <b>Computador Pessoal (PC)</b>.</p>
+        </section>
+
+        <!-- SLIDE 19: Altair 8800 e o Nascimento da Microsoft -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">Altair 8800 e Bill Gates</h2>
+            <div class="grid grid-cols-2 gap-8 items-center max-w-4xl">
+            <img src="img/altair.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                <div class="space-y-4">
+                    <p>Bill Gates e Paul Allen viram esta máquina e criaram o <b>BASIC</b>, o primeiro software para PCs. Nascia a <strong>Microsoft</strong>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Apple I e II: Jobs e Wozniak -->
+        <section class="slide bg-stone-50">
+            <h2 class="text-3xl font-bold mb-6">Steve Jobs & Steve Wozniak</h2>
+            <div class="flex flex-col md:flex-row gap-10 items-center max-w-4xl">
+            <img src="img/apple1.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                <div class="space-y-2">
+                    <p><strong>Wozniak:</strong> O gênio da engenharia que desenhou as máquinas.</p>
+                    <p><strong>Jobs:</strong> O visionário que percebeu que computadores deviam ser bonitos e fáceis de usar.</p>
+                    <p class="mt-4 text-blue-600 font-bold">O Apple II foi o primeiro PC pronto para o uso doméstico.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 21: IBM PC e a "Briga" de Mercado -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">O Gigante IBM PC (1981)</h2>
+            <img src="img/ibm.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center">A IBM padronizou a arquitetura do PC. Como o software era da Microsoft (MS-DOS), isso permitiu que outras empresas criassem "clones", dominando o mundo.</p>
+        </section>
+
+        <!-- SLIDE 22: Mac vs. Windows: A Batalha das GUIs -->
+        <section class="slide bg-zinc-100">
+            <h2 class="text-3xl font-bold mb-8">Interface Gráfica (GUI)</h2>
+            <div class="grid grid-cols-2 gap-8 text-center">
+                <div>
+            <img src="img/mac.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                    <p class="font-bold">Apple Macintosh</p>
+                    <p class="text-xs text-gray-500 italic">Fechado, Elegante, Caro</p>
+                </div>
+                <div>
+            <img src="img/3.1.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                    <p class="font-bold">Microsoft Windows</p>
+                    <p class="text-xs text-gray-500 italic">Aberto a clones, Pragmático, Popular</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 23: Richard Stallman e o Software Livre -->
+        <section class="slide bg-amber-50">
+            <h2 class="text-3xl font-bold mb-6">Richard Stallman (FSF)</h2>
+            <img src="img/stallman.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center font-semibold text-amber-900">"Software deve ser livre: para usar, estudar, modificar e distribuir."</p>
+            <p class="text-sm mt-4 text-gray-600">Criou o projeto GNU e as bases éticas que permitem a existência do Linux hoje.</p>
+        </section>
+
+        <!-- SLIDE 24: Linus Torvalds e o Linux -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">Linus Torvalds e o Pinguim</h2>
+            <img src="img/torvalds.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="max-w-2xl text-center space-y-4">
+                <p>Em 1991, um estudante finlandês criou o núcleo (kernel) de um sistema e o distribuiu de graça na internet.</p>
+                <p class="bg-gray-100 p-4 rounded-lg font-mono text-sm">Hoje o Linux move a internet, supercomputadores e todos os celulares Android.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 25: A Era Mobile e Steve Jobs (2007) -->
+        <section class="slide bg-black text-white">
+            <h2 class="text-3xl font-bold mb-8 text-blue-400">O Marco do iPhone</h2>
+            <img src="img/jobs.png" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-6">A computação torna-se móvel e onipresente. O computador agora é um acessório pessoal que nunca desligamos.</p>
+        </section>
+
+        <!-- SLIDE 26: 5ª Geração: IA e Redes Neurais -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-6">A Era da IA</h2>
+            <div class="flex gap-4">
+                <div class="p-6 bg-purple-100 rounded-xl text-center"><i data-lucide="brain-circuit" class="mx-auto text-purple-600 mb-2"></i> ChatGPT / IA</div>
+                <div class="p-6 bg-blue-100 rounded-xl text-center"><i data-lucide="database" class="mx-auto text-blue-600 mb-2"></i> Big Data</div>
+                <div class="p-6 bg-green-100 rounded-xl text-center"><i data-lucide="cloud" class="mx-auto text-green-600 mb-2"></i> Nuvem</div>
+            </div>
+            <p class="mt-8 text-gray-500">A máquina começa a tomar decisões baseada em padrões de dados.</p>
+        </section>
+
+        <!-- SLIDE 27: Computação Quântica -->
+        <section class="slide bg-indigo-900 text-white">
+            <h2 class="text-3xl font-bold mb-8 text-indigo-300">O Próximo Salto: Quântico</h2>
+            <div class="grid grid-cols-2 gap-12 text-center">
+                <div class="p-4 border border-white/20 rounded-lg">
+                    <p class="font-bold text-4xl mb-2">0 / 1</p>
+                    <p class="text-xs uppercase opacity-50">Bit Clássico</p>
+                </div>
+                <div class="p-4 border border-white/20 rounded-lg animate-pulse">
+                    <p class="font-bold text-4xl mb-2">∞</p>
+                    <p class="text-xs uppercase opacity-50">Qubit (Superposição)</p>
+                </div>
+            </div>
+            <p class="mt-12 text-center text-sm italic">Isso permitirá quebrar qualquer senha atual e simular medicamentos em segundos.</p>
+        </section>
+
+        <!-- SLIDE 28: Quiz Final (Interativo) -->
+        <section class="slide no-print bg-yellow-50">
+            <h2 class="text-3xl font-black mb-10">Desafio Final</h2>
+            <div id="quizFinal" class="space-y-4 w-full max-w-lg">
+                <p class="font-bold mb-6">Qual destas pessoas é o responsável pelo Kernel do Linux?</p>
+                <button onclick="checkFinal(this, false)" class="w-full p-4 bg-white border-2 rounded-xl text-left">Bill Gates</button>
+                <button onclick="checkFinal(this, false)" class="w-full p-4 bg-white border-2 rounded-xl text-left">Richard Stallman</button>
+                <button onclick="checkFinal(this, true)" class="w-full p-4 bg-white border-2 rounded-xl text-left">Linus Torvalds</button>
+            </div>
+            <p id="finalResult" class="mt-8 font-bold text-lg h-8"></p>
+        </section>
+
+        <!-- SLIDE 29: Resumo da Apostila -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-8">Resumo para Estudo</h2>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+                <div class="p-3 bg-gray-50 border rounded"><strong>Pascal/Leibniz:</strong> Engrenagens mecânicas.</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>Jacquard:</strong> Binário nos teares.</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>Ada Lovelace:</strong> Primeira Programadora.</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>Turing:</strong> Bases da computação e Enigma.</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>1ª Gen:</strong> Válvulas.</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>2ª Gen:</strong> Transistores.</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>3ª Gen:</strong> Circuitos Integrados (Chips).</div>
+                <div class="p-3 bg-gray-50 border rounded"><strong>4ª Gen:</strong> Microprocessadores e PCs.</div>
+            </div>
+        </section>
+
+        <!-- SLIDE 30: Fim -->
+        <section class="slide bg-blue-700 text-white">
+            <h1 class="text-6xl font-black mb-4">Fim da Aula 01</h1>
+            <p class="text-xl mb-12">Você acaba de viajar por 4000 anos de história.</p>
+            <div class="flex gap-4 no-print">
+                <button onclick="window.print()" class="px-8 py-3 bg-white text-blue-700 rounded-full font-bold shadow-xl hover:bg-gray-100 transition">GERAR APOSTILA (PDF)</button>
+            </div>
+            <p class="mt-16 text-xs text-blue-300">COTIL - Fundamentos de Informática</p>
+        </section>
+
+    </div>
+
+    <!-- Nav Buttons -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-4 bg-white/80 backdrop-blur rounded-full shadow-lg border hover:bg-white"><i data-lucide="chevron-left"></i></button>
+        <button id="nextBtn" class="p-4 bg-blue-600 rounded-full shadow-lg text-white hover:bg-blue-700"><i data-lucide="chevron-right"></i></button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // SLIDE LOGIC
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${slides.length}`;
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => { if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } });
+        document.getElementById('prevBtn').addEventListener('click', () => { if(currentSlide > 0) { currentSlide--; updateSlides(); } });
+        
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown') document.getElementById('nextBtn').click();
+            if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') document.getElementById('prevBtn').click();
+        });
+
+        // ABACUS LOGIC
+        let totalValue = 0;
+        function moveBead(bead, value) {
+            const isMoved = bead.style.transform === 'translateX(200px)';
+            if (!isMoved) {
+                bead.style.transform = 'translateX(200px)';
+                totalValue += value;
+            } else {
+                bead.style.transform = 'translateX(0px)';
+                totalValue -= value;
+            }
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('abacusValue').innerText = totalValue;
+            let c = Math.floor((totalValue % 1000) / 100);
+            let d = Math.floor((totalValue % 100) / 10);
+            let u = totalValue % 10;
+            document.getElementById('abacusLogic').innerHTML = `Decomposição: (${c}x100) + (${d}x10) + (${u}x1)`;
+        }
+
+        function resetAbacus() {
+            document.querySelectorAll('.bead').forEach(b => b.style.transform = 'translateX(0px)');
+            totalValue = 0;
+            updateDisplay();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        function checkFinal(btn, correct) {
+            const res = document.getElementById('finalResult');
+            if(correct) {
+                btn.className = "w-full p-4 bg-green-100 border-green-500 border-2 rounded-xl text-left font-bold text-green-700";
+                res.innerText = "✅ Correto! Linus Torvalds criou o Linux em 1991.";
+            } else {
+                btn.className = "w-full p-4 bg-red-100 border-red-500 border-2 rounded-xl text-left font-bold text-red-700";
+                res.innerText = "❌ Tente novamente!";
+            }
+        }
+    </script>
+</body>
+</html>
