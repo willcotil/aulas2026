@@ -1,0 +1,459 @@
+import React, { useState } from 'react';
+import { 
+  Users, 
+  Database, 
+  Smartphone, 
+  Monitor, 
+  Globe, 
+  Server, 
+  Calendar, 
+  Award, 
+  AlertTriangle, 
+  CheckCircle,
+  FileText,
+  Presentation,
+  Calculator,
+  Info
+} from 'lucide-react';
+
+const CoursePlan = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // State for Grade Calculator
+  const [calcGrade, setCalcGrade] = useState(2.0);
+  const [calcMembers, setCalcMembers] = useState(3);
+  const [maxGradeForItem, setMaxGradeForItem] = useState(3.0); // Ex: Database is worth 3.0
+
+  const totalPointsToDistribute = (calcGrade * calcMembers).toFixed(1);
+  const isMaxGrade = calcGrade === maxGradeForItem;
+
+  const requirements = [
+    { 
+      title: "Web", 
+      icon: <Globe className="w-8 h-8 text-blue-500" />, 
+      desc: "Interface acessível via navegador consumindo a API." 
+    },
+    { 
+      title: "Desktop", 
+      icon: <Monitor className="w-8 h-8 text-purple-500" />, 
+      desc: "Aplicação local rodando em Windows/Linux consumindo a API." 
+    },
+    { 
+      title: "Mobile", 
+      icon: <Smartphone className="w-8 h-8 text-green-500" />, 
+      desc: "App nativo ou híbrido para dispositivos móveis." 
+    },
+    { 
+      title: "Banco de Dados", 
+      icon: <Database className="w-8 h-8 text-yellow-500" />, 
+      desc: "Modelagem e implementação relacional ou não-relacional." 
+    },
+  ];
+
+  const timelineSem1 = [
+    {
+      title: "Início das Aulas",
+      date: "Aula 1-2",
+      type: "info",
+      desc: "Definição de grupos e escopo. Revisão da documentação do ano anterior."
+    },
+    {
+      title: "Entrega 1: Banco de Dados",
+      date: "Aprox. Aula 6",
+      type: "delivery",
+      points: 3.0,
+      desc: "Modelo ER/Diagramas atualizados e Script SQL funcional ou Banco NoSQL populado."
+    },
+    {
+      title: "Entrega 2: API Back-end",
+      date: "Aprox. Aula 10",
+      type: "delivery",
+      points: 3.0,
+      desc: "API Restful rodando, conectada ao banco e documentada (Swagger/Postman)."
+    },
+    {
+      title: "Entrega 3: Pôster A0",
+      date: "Fim do Semestre",
+      type: "delivery",
+      points: 1.0,
+      desc: "Arquivo PDF finalizado no padrão da FECITEC."
+    },
+    {
+      title: "Banca Parcial (MVP)",
+      date: "Fim do Semestre",
+      type: "delivery",
+      points: 2.0,
+      desc: "Apresentação para banca. Deve ter 1 versão parcial funcional de cada vertente (Web, Desk, Mobile) consumindo dados."
+    }
+  ];
+
+  const timelineSem2 = [
+    {
+      title: "FECITEC - Feira de Ciências",
+      date: "31 Ago - 02 Set",
+      type: "event",
+      points: 3.0,
+      desc: "Exibição do projeto e avaliação por profissionais externos. O sistema deve estar funcional."
+    },
+    {
+      title: "Entrega: Feedback & Ajustes",
+      date: "Pós-FECITEC",
+      type: "delivery",
+      points: 2.0,
+      desc: "Implementação das melhorias sugeridas pelos avaliadores da feira."
+    },
+    {
+      title: "Banca Final",
+      date: "Novembro (TBD)",
+      type: "delivery",
+      points: 5.0,
+      desc: "Avaliação final. Todas as vertentes funcionando plenamente e integradas."
+    }
+  ];
+
+  const TimelineItem = ({ item }) => (
+    <div className="relative pl-8 pb-8 border-l-2 border-slate-200 last:pb-0 group hover:border-blue-400 transition-colors">
+      <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 
+        ${item.type === 'delivery' ? 'bg-red-500 border-red-500' : 
+          item.type === 'event' ? 'bg-purple-600 border-purple-600' : 
+          'bg-slate-300 border-slate-300'} group-hover:scale-125 transition-transform`} 
+      />
+      
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{item.date}</span>
+            <h4 className="text-lg font-bold text-slate-800">{item.title}</h4>
+          </div>
+          {item.points && (
+            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-2 py-1 rounded">
+              {item.points.toFixed(1)} pts
+            </span>
+          )}
+        </div>
+        <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-blue-900 to-slate-900 text-white pt-12 pb-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-2 mb-4 opacity-80">
+            <span className="bg-blue-500/20 px-3 py-1 rounded-full text-xs font-bold border border-blue-400/30">
+              COTIL - UNICAMP
+            </span>
+            <span className="text-sm font-medium">Ano Letivo 2026</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+            Projeto Integrador II
+          </h1>
+          <p className="text-xl text-blue-100 max-w-2xl">
+            Da documentação à prática. Desenvolvimento Multiplataforma Integrado.
+          </p>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 -mt-10 mb-20">
+        
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-2 mb-8 flex flex-wrap gap-2">
+          {['overview', 'timeline', 'grades'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all text-sm md:text-base
+                ${activeTab === tab 
+                  ? 'bg-blue-600 text-white shadow-md' 
+                  : 'hover:bg-slate-50 text-slate-600'}`}
+            >
+              {tab === 'overview' && 'Visão Geral'}
+              {tab === 'timeline' && 'Cronograma'}
+              {tab === 'grades' && 'Avaliação & Regras'}
+            </button>
+          ))}
+        </div>
+
+        {/* Content Area */}
+        <div className="space-y-8 animate-in fade-in duration-500">
+          
+          {/* OVERVIEW TAB */}
+          {activeTab === 'overview' && (
+            <>
+              {/* Group Rules Alert */}
+              <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-lg shadow-sm flex flex-col md:flex-row gap-4 items-start">
+                <AlertTriangle className="w-8 h-8 text-red-600 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-bold text-red-800 mb-1">Regra Obrigatória de Grupos</h3>
+                  <p className="text-red-700 leading-relaxed">
+                    Os grupos devem ter estritamente <strong>3 ou 4 membros</strong>. 
+                    Grupos menores serão dissolvidos e integrados a outros. 
+                    Grupos maiores deverão ceder membros. <br/>
+                    <span className="text-sm font-semibold opacity-80">Não haverá exceções. Organize-se na primeira semana.</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Architecture Section */}
+              <section className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <Server className="w-6 h-6 text-blue-600" />
+                  <h2 className="text-2xl font-bold">Arquitetura do Projeto</h2>
+                </div>
+                <p className="text-slate-600 mb-8">
+                  O projeto iniciado no ano anterior deve agora ser implementado utilizando uma arquitetura centralizada. 
+                  Recomenda-se fortemente o uso de uma <strong>API RESTful</strong> para conectar todas as pontas.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {requirements.map((req, idx) => (
+                    <div key={idx} className="bg-slate-50 p-6 rounded-xl border border-slate-100 hover:border-blue-200 transition-all hover:-translate-y-1">
+                      <div className="mb-4 bg-white w-14 h-14 rounded-full flex items-center justify-center shadow-sm">
+                        {req.icon}
+                      </div>
+                      <h3 className="font-bold text-lg mb-2">{req.title}</h3>
+                      <p className="text-sm text-slate-500">{req.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Event Highlight */}
+              <section className="bg-gradient-to-br from-indigo-900 to-purple-800 p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2 text-purple-200 font-bold uppercase tracking-widest text-xs">
+                    Evento Obrigatório
+                  </div>
+                  <h2 className="text-3xl font-bold mb-4">FECITEC 2026</h2>
+                  <p className="text-indigo-100 mb-6 max-w-xl">
+                    A Feira de Ciência e Tecnologia do COTIL ocorrerá de <strong>31 de Agosto a 02 de Setembro</strong>. 
+                    A presença é obrigatória e seu projeto será avaliado por profissionais do mercado.
+                  </p>
+                  <div className="flex gap-4">
+                    <div className="bg-white/10 px-4 py-2 rounded-lg text-center backdrop-blur-sm">
+                      <span className="block text-2xl font-bold">A0</span>
+                      <span className="text-xs text-indigo-200">Pôster PDF</span>
+                    </div>
+                    <div className="bg-white/10 px-4 py-2 rounded-lg text-center backdrop-blur-sm">
+                      <span className="block text-2xl font-bold">MVP</span>
+                      <span className="text-xs text-indigo-200">Funcional</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* TIMELINE TAB */}
+          {activeTab === 'timeline' && (
+            <div className="grid md:grid-cols-2 gap-12">
+              {/* Semester 1 */}
+              <div>
+                <div className="flex items-center gap-3 mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  <div className="bg-blue-600 text-white w-8 h-8 rounded flex items-center justify-center font-bold">1</div>
+                  <div>
+                    <h3 className="font-bold text-blue-900">Primeiro Semestre</h3>
+                    <p className="text-sm text-blue-700">Foco: Back-end e Protótipos (~17 Aulas)</p>
+                  </div>
+                </div>
+                <div className="pl-2">
+                  {timelineSem1.map((item, idx) => <TimelineItem key={idx} item={item} />)}
+                </div>
+              </div>
+
+              {/* Semester 2 */}
+              <div>
+                <div className="flex items-center gap-3 mb-6 bg-purple-50 p-4 rounded-lg border border-purple-100">
+                  <div className="bg-purple-600 text-white w-8 h-8 rounded flex items-center justify-center font-bold">2</div>
+                  <div>
+                    <h3 className="font-bold text-purple-900">Segundo Semestre</h3>
+                    <p className="text-sm text-purple-700">Foco: Integração Final e FECITEC</p>
+                  </div>
+                </div>
+                <div className="pl-2">
+                  {timelineSem2.map((item, idx) => <TimelineItem key={idx} item={item} />)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* GRADES TAB */}
+          {activeTab === 'grades' && (
+            <div className="space-y-8">
+              
+              {/* Distribution Rule Simulator */}
+              <div className="bg-slate-800 text-white p-6 rounded-xl shadow-lg border border-slate-700">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700">
+                  <Calculator className="text-green-400 w-6 h-6" />
+                  <div>
+                    <h3 className="text-xl font-bold">Simulador de Distribuição Dinâmica</h3>
+                    <p className="text-slate-400 text-sm">Regra obrigatória para distribuição de notas individuais</p>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Membros do Grupo</label>
+                      <div className="flex gap-2">
+                        {[3, 4].map(num => (
+                          <button
+                            key={num}
+                            onClick={() => setCalcMembers(num)}
+                            className={`flex-1 py-2 rounded font-bold border ${calcMembers === num ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-700 border-slate-600 text-slate-300'}`}
+                          >
+                            {num} Alunos
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Nota Atribuída ao Grupo</label>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max={maxGradeForItem} 
+                        step="0.1"
+                        value={calcGrade}
+                        onChange={(e) => setCalcGrade(parseFloat(e.target.value))}
+                        className="w-full h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                      />
+                      <div className="flex justify-between mt-2">
+                        <span className="text-2xl font-bold text-blue-400">{calcGrade.toFixed(1)}</span>
+                        <span className="text-xs text-slate-400">Máx desta atividade: {maxGradeForItem.toFixed(1)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-700 flex flex-col justify-center">
+                    <p className="text-slate-400 text-xs uppercase font-bold mb-2">Total de pontos (P) para distribuir:</p>
+                    <div className="text-4xl font-mono font-bold text-green-400 mb-2">
+                      {calcMembers} x {calcGrade.toFixed(1)} = <span className="text-white">{totalPointsToDistribute}</span>
+                    </div>
+                    <div className="space-y-2 text-sm text-slate-300 mt-4">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle size={14} className="mt-1 text-green-500 shrink-0"/>
+                        <span>Distribua os <strong>{totalPointsToDistribute}</strong> pontos entre os {calcMembers} alunos.</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        {isMaxGrade ? (
+                          <CheckCircle size={14} className="mt-1 text-green-500 shrink-0"/>
+                        ) : (
+                          <AlertTriangle size={14} className="mt-1 text-yellow-500 shrink-0"/>
+                        )}
+                        <span>
+                          {isMaxGrade 
+                            ? "Como a nota foi máxima, todos podem receber nota máxima." 
+                            : "As notas individuais DEVEM ser diferentes (variação mín. 0.1)."}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Example */}
+                <div className="mt-6 pt-4 border-t border-slate-700 bg-slate-800/50 rounded p-3">
+                    <p className="text-xs text-slate-400 mb-2 font-bold uppercase">Exemplo Prático (Se não for nota máxima):</p>
+                    <div className="flex gap-4 text-sm font-mono text-slate-300">
+                        <span className="bg-slate-700 px-2 py-1 rounded">Aluno A: {(calcGrade + 0.5).toFixed(1)}</span>
+                        <span className="bg-slate-700 px-2 py-1 rounded">Aluno B: {(calcGrade - 0.2).toFixed(1)}</span>
+                        <span className="bg-slate-700 px-2 py-1 rounded">Aluno C: Restante</span>
+                    </div>
+                </div>
+              </div>
+
+              {/* Standard Grades Table */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <Award className="text-yellow-500" />
+                  Composição de Notas (Individual)
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Sem 1 Table */}
+                  <div>
+                    <h4 className="font-bold text-slate-500 uppercase text-xs tracking-wider mb-4 border-b pb-2">1º Semestre (Total: 9.0)</h4>
+                    <ul className="space-y-4">
+                      {[
+                        { label: 'Banco de Dados', val: 3, icon: <Database size={16}/> },
+                        { label: 'API Backend', val: 3, icon: <Server size={16}/> },
+                        { label: 'Banca Parcial (MVP)', val: 2, icon: <Presentation size={16}/> },
+                        { label: 'Pôster A0', val: 1, icon: <FileText size={16}/> },
+                      ].map((grade, i) => (
+                        <li 
+                            key={i} 
+                            className="flex items-center justify-between group cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors"
+                            onClick={() => {
+                                setMaxGradeForItem(grade.val);
+                                setCalcGrade(grade.val > 2 ? 2.0 : 0.5); // Reset a generic value
+                                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to calculator
+                            }}
+                        >
+                          <div className="flex items-center gap-3 text-slate-700">
+                            <span className="p-2 bg-slate-100 rounded-lg text-slate-500">{grade.icon}</span>
+                            <span>{grade.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <span className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 font-medium">Simular</span>
+                             <span className="font-bold text-slate-900">{grade.val.toFixed(1)}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                   {/* Sem 2 Table */}
+                   <div>
+                    <h4 className="font-bold text-slate-500 uppercase text-xs tracking-wider mb-4 border-b pb-2">2º Semestre (Total: 10.0)</h4>
+                    <ul className="space-y-4">
+                      {[
+                        { label: 'FECITEC (Exibição)', val: 3, icon: <Users size={16}/> },
+                        { label: 'Acompanhamento', val: 2, icon: <CheckCircle size={16}/> },
+                        { label: 'Banca Final', val: 5, icon: <Award size={16}/> },
+                      ].map((grade, i) => (
+                        <li 
+                            key={i} 
+                            className="flex items-center justify-between group cursor-pointer hover:bg-slate-50 p-1 rounded transition-colors"
+                            onClick={() => {
+                                setMaxGradeForItem(grade.val);
+                                setCalcGrade(grade.val > 2 ? 2.0 : 0.5);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                        >
+                          <div className="flex items-center gap-3 text-slate-700">
+                            <span className="p-2 bg-slate-100 rounded-lg text-slate-500">{grade.icon}</span>
+                            <span>{grade.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <span className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 font-medium">Simular</span>
+                             <span className="font-bold text-slate-900">{grade.val.toFixed(1)}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Teacher's Note */}
+              <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 text-sm text-blue-800">
+                <strong>Nota do Professor:</strong> A avaliação é contínua. Embora existam datas de entrega, o acompanhamento em sala de aula é fundamental. A banca final em novembro exigirá que todas as vertentes (Web, Mobile, Desktop) estejam funcionando plenamente e sem erros críticos.
+              </div>
+            </div>
+          )}
+
+        </div>
+      </main>
+
+      <footer className="bg-white border-t py-8 text-center text-slate-400 text-sm">
+        <p>© 2026 COTIL - Disciplina de Projeto Integrador II</p>
+      </footer>
+    </div>
+  );
+};
+
+export default CoursePlan;

@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 02: Funções e Lógica</title>
+    <title>Aula 02: Loops & Funções</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
 
         :root {
-            /* Paleta: Azul Profundo & Vermelho Vivo */
-            --bg: #f0f2f5;
-            --slide-bg: #ffffff;
-            --text: #050e3c;
-            --primary: #002455;
-            --accent: #dc0000; /* Vermelho para destaques/alertas */
-            --code-bg: #050e3c;
-            --code-text: #ffffff;
-            --success: #16a34a;
+            /* Paleta: https://colorhunt.co/palette/f5ad189e1c60811844561530 */
+            --bg: #fffdf5;         /* Fundo Creme Claro */
+            --slide-bg: #ffffff;   /* Branco */
+            --text: #561530;       /* Roxo Profundo */
+            --primary: #9E1C60;    /* Magenta Escuro */
+            --accent: #F5AD18;     /* Amarelo Mostarda */
+            --secondary: #811844;  /* Vinho */
+            
+            --code-bg: #561530;    /* Fundo Código */
+            --code-text: #F5AD18;  /* Texto Código */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,17 +48,23 @@
         }
         .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
 
-        .slide.topic { background-color: var(--primary); color: white; text-align: center; }
-        .slide.topic h1, .slide.topic h2, .slide.topic p { color: white; }
-        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); }
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: var(--text);
+            color: var(--accent);
+            text-align: center;
+            border: 10px solid var(--primary);
+        }
+        .slide.topic h1, .slide.topic h2, .slide.topic p { color: var(--accent); }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--primary); text-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
         .slide-content-wrapper { max-width: 1000px; width: 100%; margin: 0 auto; }
         .slide-number { position: absolute; top: 30px; right: 40px; font-size: 1.2rem; color: var(--primary); font-weight: 800; opacity: 0.3; }
 
         /* Typography */
-        h1 { font-size: 3rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
-        h2 { font-size: 2.2rem; font-weight: 700; color: var(--primary); margin-bottom: 25px; }
-        p, li { font-size: 1.25rem; color: #334155; line-height: 1.6; margin-bottom: 15px; }
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; border-bottom: 4px solid var(--accent); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text); line-height: 1.6; margin-bottom: 15px; }
         ul, ol { margin-left: 30px; margin-bottom: 25px; }
 
         /* Code */
@@ -65,79 +72,88 @@
             background: var(--code-bg);
             color: var(--code-text);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-family: 'Fira Code', monospace;
             font-size: 1rem;
             margin: 20px 0;
             overflow-x: auto;
-            border-left: 6px solid var(--accent);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-variant-ligatures: none;
         }
-        code { font-family: 'Fira Code', monospace; background: #e2e8f0; color: var(--accent); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-weight: 600; }
+        code { 
+            font-family: 'Fira Code', monospace; 
+            background: #fff0f5; 
+            color: var(--secondary); 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border: 1px solid #ffdde8;
+        }
         pre code { background: transparent; color: inherit; padding: 0; border: none; }
 
         /* Layouts */
         .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
-        .col { background: #f8fafc; padding: 25px; border-radius: 12px; border: 2px solid #e2e8f0; }
-        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; }
+        .col { background: #fffcf0; padding: 25px; border-radius: 12px; border: 2px solid var(--accent); }
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--secondary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; }
 
-        /* Interactive & Exercises */
-        .interactive-area { background: #f8fafc; border: 2px dashed var(--primary); padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; }
-        .arrow-visualizer { font-family: 'Fira Code', monospace; font-size: 1.3rem; text-align: left; background: white; padding: 30px; border-radius: 8px; border: 1px solid #ccc; line-height: 1.8; }
-        .fade-out { opacity: 0.1; text-decoration: line-through; color: var(--accent); transition: all 0.8s; }
-        .highlight-anim { color: var(--success); font-weight: bold; transition: all 0.5s; }
-
-        .quick-exercise {
-            border-left: 5px solid var(--accent);
-            background-color: #fff1f2; /* Fundo avermelhado bem suave */
-            padding: 30px;
-            border-radius: 0 12px 12px 0;
-            margin-top: 30px;
+        /* Interactive Elements */
+        .interactive-area {
+            background: #fff;
+            border: 2px solid var(--text);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 5px 5px 0px var(--accent);
         }
-        .quick-exercise h3 { color: var(--accent); font-size: 1.5rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .quick-exercise pre { background: white; border: 1px solid #e2e8f0; color: var(--text); }
+        
+        /* Loop Visualizer */
+        .loop-viz { display: flex; flex-direction: column; align-items: center; gap: 10px; font-family: 'Fira Code', monospace; }
+        .loop-box { 
+            display: flex; gap: 5px; 
+            padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; justify-content: center;
+            background: #f9f9f9;
+        }
+        .loop-step { padding: 5px 10px; border-radius: 4px; transition: all 0.3s; opacity: 0.3; }
+        .loop-step.active { background: var(--primary); color: white; opacity: 1; transform: scale(1.1); font-weight: bold; }
+        .variable-watch { font-size: 1.5rem; color: var(--secondary); font-weight: bold; margin: 10px 0; }
+        .output-console { 
+            background: var(--code-bg); color: var(--code-text); 
+            width: 100%; min-height: 60px; padding: 10px; 
+            text-align: left; border-radius: 5px; margin-top: 10px;
+        }
 
+        /* Final List */
         .final-list ol { counter-reset: item; list-style: none; padding: 0; }
         .final-list li { 
-            background: white; 
-            margin-bottom: 10px; 
-            padding: 15px 15px 15px 50px; 
-            border-radius: 8px; 
-            position: relative; 
-            border: 1px solid #e2e8f0;
-            font-size: 1rem;
+            background: white; margin-bottom: 10px; padding: 15px 15px 15px 60px; 
+            border-radius: 8px; position: relative; border: 2px solid var(--bg); font-size: 1rem; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .final-list li::before {
-            content: counter(item);
-            counter-increment: item;
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--primary);
-            color: white;
-            width: 25px; height: 25px;
-            border-radius: 50%;
-            text-align: center;
-            font-size: 0.9rem;
-            line-height: 25px;
-            font-weight: bold;
+            content: counter(item); counter-increment: item; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; 
+            text-align: center; font-size: 1rem; line-height: 30px; font-weight: bold;
+            box-shadow: 2px 2px 0 var(--accent);
         }
 
         /* Controls */
-        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .btn { background: white; border: 2px solid #e2e8f0; color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .btn:hover { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); }
-        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--primary); }
+        .btn { background: white; border: 2px solid var(--primary); color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn:hover { background: var(--primary); color: var(--accent); transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--primary); width: 0%; transition: width 0.3s; z-index: 101; }
 
         @media print {
             body, .container { height: auto; overflow: visible; background: white; }
-            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ddd; overflow: visible; pointer-events: auto; padding: 40px; }
-            .controls, .progress-bar, button { display: none !important; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; }
+            .controls, .progress-bar, .interactive-area button { display: none !important; }
             .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
             .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; }
-            pre, .quick-exercise { border: 1px solid #000; color: black; background: #fff; }
+            pre, .col, .interactive-area { border: 1px solid #000; color: black; background: #fff; box-shadow: none; }
             h1, h2, p, li { color: black !important; }
+            code { background: #eee; color: black; border: none; }
         }
     </style>
 </head>
@@ -146,394 +162,289 @@
 <div class="progress-bar" id="progressBar"></div>
 
 <div class="controls">
-    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">⛶</button>
-    <button class="btn" onclick="prevSlide()" title="Anterior (←)">←</button>
-    <button class="btn" onclick="nextSlide()" title="Próximo (→)">→</button>
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
 </div>
 
 <div class="container">
 
-    <!-- SLIDE 1: ABERTURA -->
+    <!-- CAPA -->
     <div class="slide active">
         <div class="slide-content-wrapper">
             <div class="slide-number">01</div>
-            <h1>JS: Funções & Lógica</h1>
-            <h2 style="color: var(--primary); font-size: 2rem;">A Base Sólida para Electron</h2>
+            <h1>Aula 02: Loops & Funções</h1>
+            <h2>Lógica Intermediária para Electron</h2>
             <br>
-            <p><strong>Roteiro da Aula (3 aulas de 45 min):</strong></p>
+            <p><strong>Agenda:</strong></p>
             <ol>
-                <li><strong>Funções:</strong> Clássicas vs Arrow Functions.</li>
-                <li><strong>Parâmetros:</strong> Padrão e Rest (Adeus sobrecarga).</li>
-                <li><strong>Lógica:</strong> Short-Circuit e Nullish Coalescing.</li>
-                <li><strong>Controle:</strong> Loops modernos e acesso seguro (Optional Chaining).</li>
+                <li><strong>Parte 1: Loops Clássicos</strong> (While, Do..While, For).</li>
+                <li><strong>Parte 2: Controle</strong> (Break, Continue).</li>
+                <li><strong>Parte 3: Funções</strong> (Do Clássico ao Arrow).</li>
             </ol>
-            <div style="margin-top: 40px; color: var(--primary); opacity: 0.7; font-weight: 600;">
-                Foco total em exercícios práticos.
+            <div style="margin-top: 40px; color: var(--primary); font-weight: 600;">
+                Técnico em Informática • 2026
             </div>
         </div>
     </div>
 
-    <!-- BLOCO 1: FUNÇÕES -->
+    <!-- TÓPICO 1: LOOPS CLÁSSICOS -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
-            <i class="fa-solid fa-code"></i>
-            <h1>Parte 1: Funções</h1>
-            <p>Do C para o JS Moderno</p>
+            <i class="fa-solid fa-rotate-right"></i>
+            <h1>Parte 1: Os Clássicos</h1>
+            <p>While, Do-While e For</p>
         </div>
     </div>
 
-    <!-- SLIDE 3: FUNÇÃO CLÁSSICA -->
+    <!-- SLIDE 3: WHILE -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">03</div>
-            <h2>1. A Função Clássica</h2>
-            <p>Em C, vocês declaravam tipos de retorno e de argumentos. No JS clássico, é mais solto, mas a estrutura visual é similar.</p>
+            <h2>O Loop <code>while</code></h2>
+            <p>Idêntico ao C. Executa <strong>enquanto</strong> a condição for verdadeira. O teste é feito no início.</p>
+            <pre>
+let energia = 5;
+
+while (energia > 0) {
+    console.log(`Energia: ${energia}`);
+    energia--; // Decremento
+}
+console.log("Sem energia.");</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: DO...WHILE -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>O Loop <code>do...while</code></h2>
+            <p>Garante que o bloco rode <strong>pelo menos uma vez</strong>, pois o teste é feito no final.</p>
+            <pre>
+let resposta = "";
+
+do {
+    console.log("Executando menu...");
+    // Suponha que o usuário digitou "S"
+    resposta = "N"; 
+} while (resposta === "S");</pre>
+            <p class="highlight" style="color: var(--primary); font-weight: bold;">Ideal para menus e validações que precisam rodar antes de verificar.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: FOR CLÁSSICO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">05</div>
+            <h2>O Loop <code>for</code> Clássico</h2>
+            <p>O bom e velho contador. A única diferença do C é declarar o índice com <code>let</code>.</p>
+            <pre>
+//      Início;    Condição;   Passo
+for (let i = 0; i < 5; i++) {
+    console.log(`Índice: ${i}`);
+}</pre>
+            
+            <div class="interactive-area">
+                <h3>Visualizador de Loop</h3>
+                <div class="loop-viz">
+                    <div class="loop-box">
+                        <span id="step1" class="loop-step">let i = 0</span>
+                        <span id="step2" class="loop-step">i &lt; 3</span>
+                        <span id="step3" class="loop-step">i++</span>
+                    </div>
+                    <div class="variable-watch">i = <span id="varI">-</span></div>
+                    <div class="output-console" id="consoleOutput">// Console...</div>
+                    <button onclick="nextLoopStep()" style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px;">Próximo Passo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: CONTROLE -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-traffic-light"></i>
+            <h1>Parte 2: Controle de Fluxo</h1>
+            <p>Comandando o Loop</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: BREAK -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">07</div>
+            <h2>Break: Abortar Missão</h2>
+            <p>O <code>break</code> encerra o loop imediatamente. Ignora o restante das iterações.</p>
+            <pre>
+for (let i = 0; i < 100; i++) {
+    if (i === 5) {
+        console.log("Achei o 5! Parando...");
+        break; // Sai do loop imediatamente
+    }
+    console.log(i);
+}</pre>
+            <p>Essencial para otimizar buscas (parar assim que encontrar).</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: CONTINUE -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">08</div>
+            <h2>Continue: Pular a Vez</h2>
+            <p>O <code>continue</code> encerra a iteração <strong>atual</strong> e força o loop a ir para a próxima.</p>
+            <pre>
+for (let i = 0; i < 6; i++) {
+    // Se for par, pula
+    if (i % 2 === 0) {
+        continue; // Não executa o log abaixo
+    }
+    console.log(i); // Só imprime ímpares: 1, 3, 5
+}</pre>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: FUNÇÕES -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-code"></i>
+            <h1>Parte 3: Funções</h1>
+            <p>A base da programação modular</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: FUNÇÃO CLÁSSICA -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">10</div>
+            <h2>1. Declaração de Função (Function Statement)</h2>
+            <p>Esta é a forma mais próxima do C que vocês conhecem. A função tem nome e escopo elevado (hoisting).</p>
             <div class="comparison">
                 <div class="col">
-                    <h3>Linguagem C</h3>
+                    <h3>C (Clássico)</h3>
                     <pre>
+// Tipo de retorno obrigatório
 int somar(int a, int b) {
     return a + b;
 }</pre>
                 </div>
                 <div class="col">
-                    <h3>Javascript (Function)</h3>
+                    <h3>JS (Declaração)</h3>
                     <pre>
+// Sem tipo, palavra 'function'
 function somar(a, b) {
     return a + b;
 }</pre>
                 </div>
             </div>
-            <p style="margin-top:15px; font-size: 0.9rem;"><em>Note a ausência de <code>int</code>. O JS descobre o tipo na hora.</em></p>
         </div>
     </div>
 
-    <!-- SLIDE 4: EXERCÍCIO 1 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">04</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 1</h3>
-                <p>Abra seu VSCode e crie o arquivo <code>aula02.js</code>.</p>
-                <p><strong>Tarefa:</strong> Escreva uma função <strong>clássica</strong> chamada <code>olaMundo</code> que receba um nome e imprima "Olá, [nome]!" usando <code>function</code>.</p>
-                <p>Chame a função para testar: <code>olaMundo("João");</code></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 5: ARROW FUNCTIONS -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">05</div>
-            <h2>2. Arrow Functions (Funções Flecha)</h2>
-            <p>No JS moderno, funções são tratadas como <strong>Valores</strong>. Podemos guardar uma função dentro de uma variável, assim como guardamos um número.</p>
-            <pre>
-const somar = (a, b) => {
-    return a + b;
-};</pre>
-            <p><strong>Por que usamos <code>const</code>?</strong></p>
-            <ul>
-                <li>Para garantir que a função <code>somar</code> não seja sobrescrita por outra coisa (como um número) no meio do código.</li>
-                <li>É uma boa prática de segurança.</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- SLIDE 6: EXERCÍCIO 2 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">06</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 2</h3>
-                <p><strong>Tarefa:</strong> Reescreva a função <code>olaMundo</code> do exercício anterior, mas agora usando a sintaxe de <strong>Arrow Function</strong>.</p>
-                <pre>const olaMundo = ...</pre>
-                <p>Mantenha as chaves <code>{}</code> por enquanto. Execute e veja se funciona igual.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 7: RETORNO IMPLÍCITO -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">07</div>
-            <h2>3. O Poder do Retorno Implícito</h2>
-            <p>Aqui o JS brilha sobre o C. Se sua função apenas calcula e retorna um valor (uma linha), podemos <strong>remover</strong>:</p>
-            <ol>
-                <li>A palavra <code>return</code>.</li>
-                <li>As chaves <code>{}</code>.</li>
-            </ol>
-            
-            <div class="interactive-area">
-                <div class="arrow-visualizer" id="funcCode">
-                    <span id="p1">const dobro = (n) => </span><span id="p2">{</span>
-                    <br>&nbsp;&nbsp;<span id="p3">return</span> n * 2<span id="p4">;</span>
-                    <br><span id="p5">};</span>
-                </div>
-                <button onclick="simplifyArrow()" style="margin-top: 20px; padding: 10px 20px; cursor: pointer; background: var(--primary); color: white; border: none; border-radius: 5px;">Simplificar!</button>
-                <button onclick="resetArrow()" style="margin-top: 20px; padding: 10px 20px; cursor: pointer; background: var(--accent); color: white; border: none; border-radius: 5px;">Resetar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 8: EXERCÍCIO 3 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">08</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 3</h3>
-                <p><strong>Tarefa:</strong> Crie uma Arrow Function chamada <code>metade</code>.</p>
-                <ul>
-                    <li>Ela recebe um número.</li>
-                    <li>Retorna o número dividido por 2.</li>
-                    <li><strong>Regra:</strong> Não pode usar a palavra <code>return</code> nem chaves <code>{}</code>.</li>
-                </ul>
-                <p>Exemplo: <code>console.log(metade(10)); // Deve sair 5</code></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 9: PARÂMETROS PADRÃO -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">09</div>
-            <h2>4. Parâmetros Padrão (Default)</h2>
-            <p>Em C, para ter comportamentos diferentes, fazíamos sobrecarga (várias funções com mesmo nome). Em JS, definimos o valor padrão no argumento.</p>
-            <pre>
-// Se a cor não for enviada, assume "Azul"
-const criarBotao = (texto, cor = "Azul") => {
-    console.log(`Botão ${texto} na cor ${cor}`);
-};
-
-criarBotao("Salvar", "Vermelho"); // Cor: Vermelho
-criarBotao("Cancelar");           // Cor: Azul (Automático!)</pre>
-        </div>
-    </div>
-
-    <!-- SLIDE 10: PARÂMETROS REST -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">10</div>
-            <h2>5. Parâmetros Rest (...)</h2>
-            <p>E se quisermos uma função que aceita <strong>qualquer quantidade</strong> de números? Em C usaríamos vetores complexos. Em JS, usamos o Rest Operator <code>...</code>.</p>
-            <pre>
-// ...notas transforma todos os argumentos num array
-const mostrarNotas = (...notas) => {
-    console.log(notas); // [10, 5, 8, 9...]
-};
-
-mostrarNotas(10, 20, 30, 40, 50);</pre>
-            <p>Muito útil para somatórios ou logs.</p>
-        </div>
-    </div>
-
-    <!-- SLIDE 11: EXERCÍCIO 4 -->
+    <!-- SLIDE 11: EXPRESSÃO DE FUNÇÃO -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">11</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 4</h3>
-                <p><strong>Tarefa:</strong> Crie uma função <code>saudacaoCompleta(nomePrincipal, ...outrosNomes)</code>.</p>
-                <ol>
-                    <li>Imprima "Olá mestre [nomePrincipal]".</li>
-                    <li>Imprima "Olá também para: [outrosNomes]".</li>
-                </ol>
-                <p>Chame assim: <code>saudacaoCompleta("Ana", "Pedro", "Luiza", "João")</code>.</p>
-            </div>
+            <h2>2. Expressão de Função (Function Expression)</h2>
+            <p>No JS, uma função é um valor. Podemos guardá-la dentro de uma variável.</p>
+            <pre>
+// Guardando uma função anônima na constante 'ola'
+const ola = function(nome) {
+    console.log("Olá " + nome);
+};
+
+// Chamamos usando o nome da variável
+ola("Maria");</pre>
+            <p>Isso é vital para <strong>Callbacks</strong> (passar funções como parâmetro), muito usado em Electron para eventos de clique.</p>
         </div>
     </div>
 
-    <!-- BLOCO 2: LÓGICA -->
-    <div class="slide topic">
+    <!-- SLIDE 12: ARROW FUNCTION -->
+    <div class="slide">
         <div class="slide-content-wrapper">
-            <i class="fa-solid fa-brain"></i>
-            <h1>Parte 2: Lógica Avançada</h1>
-            <p>Escrevendo menos e fazendo mais</p>
+            <div class="slide-number">12</div>
+            <h2>3. Arrow Function (Função Flecha)</h2>
+            <p>Introduzida no ES6, é a sintaxe preferida no desenvolvimento moderno (React/Electron).</p>
+            <pre>
+// Removemos a palavra 'function' e usamos '=>'
+const somar = (a, b) => {
+    return a + b;
+};</pre>
+            <p><strong>Vantagens:</strong> Código mais limpo e comportamento diferente do <code>this</code> (escopo).</p>
         </div>
     </div>
 
-    <!-- SLIDE 13: SHORT CIRCUIT -->
+    <!-- SLIDE 13: RETORNO IMPLÍCITO -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">13</div>
-            <h2>6. Short-Circuit (Curto-Circuito)</h2>
-            <p>Podemos usar <code>||</code> (OU) e <code>&&</code> (E) para tomar decisões sem usar <code>if</code>.</p>
-            <div class="comparison">
-                <div class="col">
-                    <h3>Operador || (OU)</h3>
-                    <p>Usa o primeiro valor verdadeiro (valor padrão).</p>
-                    <pre>
-let usuario = ""; // Vazio é falso
-let nome = usuario || "Desconhecido";
-console.log(nome); // "Desconhecido"</pre>
-                </div>
-                <div class="col">
-                    <h3>Operador && (E)</h3>
-                    <p>Só executa a segunda parte se a primeira for verdadeira.</p>
-                    <pre>
-let logado = true;
-logado && console.log("Painel Admin");
-// Equivalente a: if(logado) {...}</pre>
-                </div>
-            </div>
+            <h2>Retorno Implícito</h2>
+            <p>A "Arrow Function" tem um superpoder: se a função tem apenas uma linha, podemos remover as chaves <code>{}</code> e o <code>return</code>.</p>
+            <pre>
+// Com corpo normal
+const dobro = (n) => {
+    return n * 2;
+};
+
+// Com retorno implícito (Muito mais limpo!)
+const dobro = n => n * 2;</pre>
+            <p style="font-size: 0.9em; color: var(--secondary);">*Se tiver apenas 1 parâmetro, os parênteses também são opcionais.</p>
         </div>
     </div>
 
-    <!-- SLIDE 14: EXERCÍCIO 5 -->
+    <!-- SLIDE 14: PARÂMETROS PADRÃO E REST -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">14</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 5</h3>
-                <p><strong>Tarefa:</strong></p>
-                <ol>
-                    <li>Defina uma variável <code>idade = 18</code>.</li>
-                    <li>Use o operador <code>&&</code> para imprimir "Pode dirigir" <strong>apenas se</strong> a idade for maior ou igual a 18.</li>
-                    <li>Não use <code>if</code>.</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 15: NULLISH COALESCING -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">15</div>
-            <h2>7. Nullish Coalescing (??)</h2>
-            <p>O problema do <code>||</code> é que ele considera o número <code>0</code> como falso. Mas as vezes 0 é um valor válido (ex: nota 0).</p>
-            <p>O <code>??</code> só troca se for <strong>null</strong> ou <strong>undefined</strong>.</p>
-            <pre>
-let nota = 0; // Aluno tirou zero
-
-// Com OU (Errado)
-console.log(nota || 10); // Imprime 10! (Opa!)
-
-// Com Nullish (Certo)
-console.log(nota ?? 10); // Imprime 0.</pre>
-        </div>
-    </div>
-
-    <!-- SLIDE 16: EXERCÍCIO 6 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">16</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 6</h3>
-                <p><strong>Tarefa:</strong> Imagine um sistema de jogo.</p>
-                <ol>
-                    <li>Crie <code>pontuacao = 0;</code></li>
-                    <li>Crie uma variável <code>placar</code> que recebe <code>pontuacao</code> ou <code>50</code> (padrão) usando <code>??</code>.</li>
-                    <li>Imprima e verifique se saiu 0 ou 50.</li>
-                    <li>Mude <code>pontuacao</code> para <code>null</code> e teste de novo.</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 17: OPTIONAL CHAINING -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">17</div>
-            <h2>8. Optional Chaining (?.)</h2>
-            <p><strong>Comparação com C:</strong> Em C, se você tem um ponteiro de struct <code>aluno->endereco->rua</code> e <code>endereco</code> é NULL, o programa fecha (Segmentation Fault).</p>
-            <p>No JS, também dá erro. Mas o <code>?.</code> resolve isso.</p>
-            <pre>
-const usuario = { nome: "Will", endereco: null };
-
-// Erro Crítico
-// console.log(usuario.endereco.rua); 
-
-// Modo Seguro (Retorna undefined, não trava)
-console.log(usuario?.endereco?.rua);</pre>
-        </div>
-    </div>
-
-    <!-- SLIDE 18: EXERCÍCIO 7 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">18</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 7</h3>
-                <p><strong>Tarefa:</strong></p>
-                <ol>
-                    <li>Crie um objeto <code>pessoa = { nome: "Ana" }</code> (sem idade).</li>
-                    <li>Tente imprimir <code>pessoa.idade</code>.</li>
-                    <li>Agora tente imprimir <code>pessoa.detalhes.altura</code> (vai dar erro).</li>
-                    <li>Corrija usando <code>?.</code> para imprimir <code>undefined</code> em vez de erro.</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- BLOCO 3: CONTROLE -->
-    <div class="slide topic">
-        <div class="slide-content-wrapper">
-            <i class="fa-solid fa-rotate"></i>
-            <h1>Parte 3: Estruturas de Controle</h1>
-            <p>Loops clássicos e modernos</p>
-        </div>
-    </div>
-
-    <!-- SLIDE 20: LOOPS -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">20</div>
-            <h2>9. Estruturas de Repetição</h2>
-            <p>Temos os clássicos do C e os modernos do JS.</p>
-            
+            <h2>Parâmetros Especiais</h2>
             <div class="comparison">
                 <div class="col">
-                    <h3>Os Clássicos (Igual C)</h3>
-                    <p><code>while (condicao) { ... }</code></p>
-                    <p><code>do { ... } while (condicao);</code></p>
-                    <p><code>for (let i=0; i<10; i++) { ... }</code></p>
-                </div>
-                <div class="col" style="border-color: var(--accent);">
-                    <h3>O Moderno (for...of)</h3>
-                    <p>Ideal para percorrer arrays e strings.</p>
+                    <h3>Default Parameters</h3>
+                    <p>Valor padrão se nada for enviado.</p>
                     <pre>
-for (const item of lista) {
-    console.log(item);
+function cor(c = "Azul") {
+    console.log(c);
+}
+cor(); // Imprime "Azul"</pre>
+                </div>
+                <div class="col">
+                    <h3>Rest Parameters (...)</h3>
+                    <p>Aceita n argumentos como array.</p>
+                    <pre>
+function somar(...nums) {
+    // nums é um array [1,2,3]
+    console.log(nums.length);
 }</pre>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 21: EXERCÍCIO 8 -->
+    <!-- SLIDE 15: LISTA FINAL -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">21</div>
-            <div class="quick-exercise">
-                <h3><i class="fa-solid fa-pen-to-square"></i> Exercício de Fixação 8</h3>
-                <p><strong>Tarefa:</strong></p>
-                <ol>
-                    <li>Crie um array: <code>const numeros = [10, 20, 30, 40];</code></li>
-                    <li>Use um loop <code>for...of</code> para percorrer a lista.</li>
-                    <li>Imprima apenas os números maiores que 20.</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 22: LISTA FINAL -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">22</div>
-            <h2>Lista Final de Exercícios</h2>
-            <p>Para entregar. Salve como <code>lista02_seuNome.js</code>.</p>
-            
+            <div class="slide-number">15</div>
+            <h2>Lista de Exercícios (Integrada)</h2>
             <div class="final-list">
                 <ol>
-                    <li>Crie uma arrow function <code>dobro(n)</code> que retorna o dobro de N (implícito).</li>
-                    <li>Crie uma arrow function <code>dividir(a, b)</code> que retorna a divisão.</li>
-                    <li>Crie uma função <code>mensagem(nome)</code>. Se nome for vazio, use "Visitante" (Parâmetro padrão).</li>
-                    <li>Crie uma função que receba N números (Rest) e imprima todos no console.</li>
-                    <li>Crie um objeto <code>produto</code> com <code>nome</code> e <code>preco</code>. Imprima numa template string.</li>
-                    <li>Use <code>&&</code> para imprimir "Idoso" se <code>idade >= 60</code> (sem if).</li>
-                    <li>Use <code>??</code> para definir uma variável <code>taxa</code>. Se não houver valor, use 5. Teste com 0.</li>
-                    <li>Crie um objeto <code>usuario</code> sem endereço. Tente acessar <code>usuario.endereco.cep</code> usando <code>?.</code>.</li>
-                    <li>Crie um array de nomes. Use <code>for...of</code> para dar "Bom dia" a cada um.</li>
-                    <li><strong>Desafio:</strong> Crie uma função que receba um array de idades e retorne apenas as maiores que 18 (use <code>for...of</code> e <code>if</code> e push num novo array).</li>
+                    <li>Crie um loop <code>while</code> que imprima os números pares de 0 a 20.</li>
+                    <li>Use <code>do...while</code> para simular um sistema que pede senha (variável fixa) até "acertar".</li>
+                    <li>Crie um loop infinito com <code>for</code> ou <code>while</code> que para (<code>break</code>) quando uma variável contadora chegar a 50.</li>
+                    <li>Faça um loop de 0 a 10. Use <code>continue</code> para <strong>não</strong> imprimir o número 5.</li>
+                    <li>Crie uma <strong>função clássica</strong> que receba um número e retorne <code>true</code> se for par.</li>
+                    <li>Crie uma <strong>expressão de função</strong> que receba um nome e imprima no console.</li>
+                    <li>Crie uma <strong>Arrow Function</strong> chamada <code>saudacao(nome)</code> que retorne "Olá [nome]". Use retorno implícito.</li>
+                    <li>Crie uma Arrow Function <code>calculadora(a, b, op)</code> usando <code>switch/case</code> para retornar soma, subtração, etc.</li>
+                    <li>Crie uma função que aceita <strong>n</strong> números (Rest Parameter <code>...nums</code>) e retorna o maior deles (dica: use um loop <code>for</code> dentro).</li>
+                    <li><strong>Desafio:</strong> Crie uma função <code>fatorial(n)</code> usando Arrow Function e um loop <code>while</code>.</li>
                 </ol>
             </div>
         </div>
@@ -547,6 +458,7 @@ for (const item of lista) {
     const totalSlides = slides.length;
     const progressBar = document.getElementById('progressBar');
 
+    // Slide Navigation
     function showSlide(index) {
         if (index < 0) index = 0;
         if (index >= totalSlides) index = totalSlides - 1;
@@ -575,27 +487,47 @@ for (const item of lista) {
         else if (e.key.toLowerCase() === 'f') toggleFullscreen();
     });
 
-    // Arrow Function Visualizer Logic
-    function simplifyArrow() {
-        document.getElementById('p2').classList.add('fade-out');
-        document.getElementById('p3').classList.add('fade-out');
-        document.getElementById('p4').classList.add('fade-out');
-        document.getElementById('p5').classList.add('fade-out');
-        setTimeout(() => {
-            document.getElementById('p1').innerHTML = "const dobro = n => ";
-            document.getElementById('p2').style.display = 'none';
-            document.getElementById('p3').style.display = 'none';
-            document.getElementById('p4').style.display = 'none';
-            document.getElementById('p5').style.display = 'none';
-            document.getElementById('funcCode').innerHTML = '<span class="highlight-anim">const dobro = n => n * 2;</span>';
-        }, 800);
-    }
+    // --- Interactive: Loop Viz ---
+    let loopState = 0;
+    let loopI = 0;
+    function nextLoopStep() {
+        // Steps: 0=Init, 1=Check, 2=Body, 3=Increment
+        const step1 = document.getElementById('step1'); // init
+        const step2 = document.getElementById('step2'); // cond
+        const step3 = document.getElementById('step3'); // inc
+        const varDisplay = document.getElementById('varI');
+        const consoleOut = document.getElementById('consoleOutput');
 
-    function resetArrow() {
-        document.getElementById('funcCode').innerHTML = 
-            '<span id="p1">const dobro = (n) => </span><span id="p2">{</span>' +
-            '<br>&nbsp;&nbsp;<span id="p3">return</span> n * 2<span id="p4">;</span>' +
-            '<br><span id="p5">};</span>';
+        // Reset Styles
+        [step1, step2, step3].forEach(s => s.classList.remove('active'));
+
+        if (loopState === 0) {
+            // Init
+            loopI = 0;
+            consoleOut.innerHTML = "";
+            step1.classList.add('active');
+            varDisplay.innerText = loopI;
+            loopState = 1;
+        } else if (loopState === 1) {
+            // Check Condition
+            step2.classList.add('active');
+            if (loopI < 3) {
+                loopState = 2; // Go to body
+            } else {
+                consoleOut.innerHTML += "<br>> Loop Terminado!";
+                loopState = 0; // Reset
+            }
+        } else if (loopState === 2) {
+            // Body
+            consoleOut.innerHTML += `<br>> Índice: ${loopI}`;
+            loopState = 3;
+        } else if (loopState === 3) {
+            // Increment
+            step3.classList.add('active');
+            loopI++;
+            varDisplay.innerText = loopI;
+            loopState = 1; // Back to check
+        }
     }
 
     showSlide(0);
