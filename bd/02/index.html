@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB_TEC - Aula 02: Modelagem e MER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#362F4F',      // Roxo Escuro (Texto, Títulos)
+                            primary: '#5B23FF',   // Roxo Vibrante (Botões, Entidades)
+                            secondary: '#008BFF', // Azul (Atributos, Links)
+                            accent: '#E4FF30',    // Amarelo Neon (Destaques, Relacionamentos)
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #362F4F; /* brand-dark */
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body { overflow: visible !important; background: white !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { 
+                display: block !important; 
+                page-break-after: always; 
+                border-bottom: 2px solid #f1f5f9;
+                padding: 40px 0;
+            }
+            .print-break { page-break-after: always; }
+        }
+
+        /* Diagramas SVG */
+        .node-rect { fill: white; stroke: #5B23FF; stroke-width: 2; } /* brand-primary */
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #362F4F; } /* brand-dark */
+        .edge { stroke: #362F4F; stroke-width: 2; fill: none; } /* brand-dark */
+        
+        code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #5B23FF; font-size: 0.9em; font-weight: bold; }
+        
+        /* Scrollbar personalizada para combinar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #5B23FF; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #362F4F; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="no-print h-16 bg-white border-b border-brand-primary/20 px-6 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-brand-primary text-white p-2 rounded-lg"><i class="fas fa-project-diagram text-sm"></i></div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase text-brand-dark">Base de Dados I <span class="text-brand-primary">Modelagem</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-accent/20 hover:bg-brand-accent hover:text-brand-dark rounded-lg text-brand-dark text-sm font-bold transition duration-300">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-dark/50 hover:text-brand-primary"><i class="fas fa-expand"></i></button>
+        </div>
+    </header>
+
+    <!-- Barra de Progresso -->
+    <div class="no-print h-1.5 w-full bg-slate-100 overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-primary transition-all duration-500 w-0 shadow-[0_0_10px_#5B23FF]"></div>
+    </div>
+
+    <!-- Main -->
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+        <div id="steps-container" class="w-full max-w-5xl">
+            <!-- Injetado via JS -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="no-print h-20 bg-white/80 backdrop-blur-md border-t border-brand-primary/10 px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-slate-100 text-brand-dark rounded-xl font-bold hover:bg-slate-200 transition">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+        
+        <div id="step-counter" class="text-xs font-black text-brand-secondary uppercase tracking-widest">Tópico 1 / 25</div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-primary text-white rounded-xl font-bold hover:bg-brand-dark transition shadow-lg shadow-brand-primary/30">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            {
+                title: "Aula 02: Modelagem de Dados",
+                content: `<div class="text-center space-y-8 py-10">
+                    <div class="inline-block p-6 bg-brand-primary/10 rounded-full text-brand-primary mb-4 animate-bounce"><i class="fas fa-sitemap text-7xl"></i></div>
+                    <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">O Projeto (MER)</h2>
+                    <p class="text-2xl text-slate-500 max-w-2xl mx-auto leading-relaxed italic">Antes de construir o banco, precisamos desenhar a planta. Hoje vamos aprender a abstrair o mundo real.</p>
+                </div>`
+            },
+            {
+                title: "O que é Modelagem de Dados?",
+                content: `<div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <p class="text-xl leading-relaxed">É o processo de criar um <strong>modelo visual</strong> que descreve os dados de uma empresa e como eles se relacionam.</p>
+                        <div class="p-6 bg-brand-primary/5 border-l-4 border-brand-primary rounded-r-xl">
+                            <p class="text-brand-dark font-bold italic">"Ninguém constrói um prédio sem planta. Ninguém cria um banco de dados sem modelo."</p>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-dashed border-brand-secondary/30 rounded-3xl h-64 flex flex-col items-center justify-center p-6 text-center">
+                        <div class="flex gap-4 items-center opacity-70">
+                            <i class="fas fa-pen-ruler text-6xl text-brand-secondary"></i>
+                            <i class="fas fa-arrow-right text-brand-dark text-2xl"></i>
+                            <i class="fas fa-server text-6xl text-brand-dark"></i>
+                        </div>
+                        <p class="text-brand-secondary font-bold mt-4 uppercase text-xs">Do Desenho à Implementação</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Os 3 Níveis de Abstração",
+                content: `<div class="flex flex-col gap-6 items-center">
+                    <div class="w-full max-w-2xl p-6 bg-brand-dark text-white rounded-2xl shadow-lg relative border-2 border-brand-accent">
+                        <span class="absolute top-0 right-0 bg-brand-accent text-brand-dark px-3 py-1 text-xs font-bold rounded-bl-xl">ALTO NÍVEL</span>
+                        <h4 class="text-xl font-bold mb-2">1. Projeto Conceitual (MER)</h4>
+                        <p class="text-sm opacity-90 text-brand-accent">Foco no negócio. O que vamos guardar? (Cliente, Produto). Entendido pelo cliente final.</p>
+                    </div>
+                    <i class="fas fa-arrow-down text-brand-primary text-2xl"></i>
+                    <div class="w-full max-w-2xl p-6 bg-brand-primary text-white rounded-2xl shadow-lg relative">
+                        <span class="absolute top-0 right-0 bg-white text-brand-primary px-3 py-1 text-xs font-bold rounded-bl-xl">MÉDIO NÍVEL</span>
+                        <h4 class="text-xl font-bold mb-2">2. Projeto Lógico (Relacional)</h4>
+                        <p class="text-sm opacity-90">Foco na estrutura. Tabelas, chaves primárias e estrangeiras. Entendido pelo programador.</p>
+                    </div>
+                    <i class="fas fa-arrow-down text-brand-primary text-2xl"></i>
+                    <div class="w-full max-w-2xl p-6 bg-brand-secondary text-white rounded-2xl shadow-lg relative">
+                        <span class="absolute top-0 right-0 bg-white text-brand-secondary px-3 py-1 text-xs font-bold rounded-bl-xl">BAIXO NÍVEL</span>
+                        <h4 class="text-xl font-bold mb-2">3. Projeto Físico (SQL)</h4>
+                        <p class="text-sm opacity-90">Foco na máquina. Scripts SQL, tipos de dados (int, varchar), índices. Entendido pelo SGBD.</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Etapas do Desenvolvimento",
+                content: `<div class="space-y-8">
+                    <p class="text-xl text-center mb-8 text-brand-dark">O ciclo de vida de um banco de dados segue passos rigorosos:</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 bg-white border border-brand-primary/20 rounded-2xl shadow-sm hover:shadow-md transition hover:border-brand-primary">
+                            <h5 class="font-bold text-brand-dark flex items-center gap-2"><span class="bg-brand-accent text-brand-dark w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Requisitos</h5>
+                            <p class="text-sm text-slate-500 mt-2">Entrevista com o cliente. O que o sistema deve fazer? Documentação.</p>
+                        </div>
+                        <div class="p-6 bg-white border border-brand-primary/20 rounded-2xl shadow-sm hover:shadow-md transition hover:border-brand-primary">
+                            <h5 class="font-bold text-brand-dark flex items-center gap-2"><span class="bg-brand-accent text-brand-dark w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Conceitual</h5>
+                            <p class="text-sm text-slate-500 mt-2">Desenho do MER (Diagramas, Entidades, Relacionamentos).</p>
+                        </div>
+                        <div class="p-6 bg-white border border-brand-primary/20 rounded-2xl shadow-sm hover:shadow-md transition hover:border-brand-primary">
+                            <h5 class="font-bold text-brand-dark flex items-center gap-2"><span class="bg-brand-accent text-brand-dark w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span> Lógico</h5>
+                            <p class="text-sm text-slate-500 mt-2">Transformação em Modelo Relacional (Tabelas e Chaves).</p>
+                        </div>
+                        <div class="p-6 bg-white border border-brand-primary/20 rounded-2xl shadow-sm hover:shadow-md transition hover:border-brand-primary">
+                            <h5 class="font-bold text-brand-dark flex items-center gap-2"><span class="bg-brand-accent text-brand-dark w-6 h-6 rounded-full flex items-center justify-center text-xs">4</span> Físico</h5>
+                            <p class="text-sm text-slate-500 mt-2">Implementação, comandos SQL, armazenamento e acesso.</p>
+                        </div>
+                    </div>
+                </div>`
+            },
+            {
+                title: "O que é o MER?",
+                content: `<div class="text-center space-y-12">
+                    <h2 class="text-3xl font-black text-brand-primary">Modelo Entidade-Relacionamento</h2>
+                    <p class="text-xl text-slate-600 max-w-3xl mx-auto">Criado por Peter Chen (1976), é a técnica padrão para modelagem conceitual. Ele descreve o mundo real através de três componentes básicos:</p>
+                    
+                    <div class="flex flex-col md:flex-row justify-center gap-12 items-center font-bold text-sm">
+                        
+                        <!-- Entidade: Retângulo -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-32 h-16 bg-brand-primary text-white border-2 border-brand-dark shadow-xl flex items-center justify-center">
+                                ENTIDADE
+                            </div>
+                            <span class="text-slate-400 font-normal mt-2">Retângulo</span>
+                        </div>
+
+                        <!-- Atributo: Círculo/Elipse -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-32 h-16 bg-brand-secondary text-white border-2 border-brand-dark rounded-[50%] shadow-xl flex items-center justify-center">
+                                ATRIBUTO
+                            </div>
+                            <span class="text-slate-400 font-normal mt-2">Elipse</span>
+                        </div>
+
+                        <!-- Relacionamento: Losango -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-20 h-20 bg-brand-dark text-brand-accent border-2 border-brand-accent transform rotate-45 shadow-xl flex items-center justify-center mb-2">
+                                <div class="transform -rotate-45">RELAÇÃO</div>
+                            </div>
+                            <span class="text-slate-400 font-normal mt-2">Losango</span>
+                        </div>
+
+                    </div>
+                </div>`
+            },
+            {
+                title: "Componente 1: Entidade",
+                content: `<div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-xl leading-relaxed">Representa um objeto do mundo real (físico ou lógico) sobre o qual desejamos armazenar informações.</p>
+                        <ul class="text-sm space-y-2 text-slate-600">
+                            <li>• <strong>Pessoas:</strong> Cliente, Aluno, Funcionário.</li>
+                            <li>• <strong>Lugares:</strong> Cidade, Departamento.</li>
+                            <li>• <strong>Coisas:</strong> Produto, Carro.</li>
+                            <li>• <strong>Eventos:</strong> Venda, Matrícula.</li>
+                        </ul>
+                    </div>
+                    <!-- Diagrama Entidade -->
+                    <div class="bg-slate-50 h-64 rounded-3xl flex items-center justify-center border border-slate-200">
+                        <div class="bg-white border-4 border-brand-primary w-48 h-24 flex items-center justify-center text-brand-dark font-black text-2xl shadow-2xl tracking-widest">
+                            ALUNO
+                        </div>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Regras de Nomenclatura (Entidades)",
+                content: `<div class="bg-white p-8 border border-slate-200 rounded-3xl shadow-sm">
+                    <h4 class="font-bold text-xl mb-6 text-brand-dark border-b pb-2">Boas Práticas para Nomes de Tabelas/Entidades:</h4>
+                    <ul class="space-y-4 text-lg text-slate-600">
+                        <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary"></i> Começar sempre com uma letra.</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary"></i> Usar palavras no <strong>singular</strong> (Ex: <code>Cliente</code>, não <s class="text-red-400 text-sm">Clientes</s>).</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary"></i> <strong>Sem espaços</strong>. Use PascalCase ou snake_case.</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary"></i> Evitar acentos e caracteres especiais (ç, ã, é).</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary"></i> Devem ser <strong>únicos</strong> dentro do banco de dados.</li>
+                    </ul>
+                </div>`
+            },
+            {
+                title: "Instância de Entidade",
+                content: `<div class="space-y-8">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-6 bg-brand-primary/5 border border-brand-primary/30 rounded-2xl">
+                            <h5 class="font-bold text-brand-primary text-xl">Entidade (Tipo)</h5>
+                            <p class="text-sm mt-2">É a classe, o molde. <br>Ex: Entidade "Carro".</p>
+                        </div>
+                        <div class="p-6 bg-brand-secondary/5 border border-brand-secondary/30 rounded-2xl">
+                            <h5 class="font-bold text-brand-secondary text-xl">Instância (Ocorrência)</h5>
+                            <p class="text-sm mt-2">É um objeto específico criado a partir do molde. <br>Ex: "Fusca Azul Placa ABC-1234".</p>
+                        </div>
+                    </div>
+                    <!-- Tabela de Instâncias -->
+                    <div class="overflow-hidden rounded-xl border border-slate-300 shadow-md">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-brand-dark text-white">
+                                <tr>
+                                    <th class="p-3 text-brand-accent">ID</th>
+                                    <th class="p-3">Modelo</th>
+                                    <th class="p-3">Cor</th>
+                                    <th class="p-3">Ano</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white">
+                                <tr class="border-b border-slate-100"><td class="p-3 font-bold text-brand-primary">1</td><td class="p-3">Fusca</td><td class="p-3">Azul</td><td class="p-3">1980</td></tr>
+                                <tr class="border-b border-slate-100 bg-slate-50"><td class="p-3 font-bold text-brand-primary">2</td><td class="p-3">Gol</td><td class="p-3">Branco</td><td class="p-3">2010</td></tr>
+                                <tr><td class="p-3 font-bold text-brand-primary">3</td><td class="p-3">Civic</td><td class="p-3">Preto</td><td class="p-3">2022</td></tr>
+                            </tbody>
+                        </table>
+                        <p class="p-2 text-center text-xs bg-slate-100 text-slate-500 font-bold">Cada linha é uma instância da entidade Carro</p>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Componente 2: Atributo",
+                content: `<div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <p class="text-xl">São as características ou propriedades de uma entidade. É o dado que queremos salvar.</p>
+                        <div class="p-4 bg-brand-secondary/10 border-l-4 border-brand-secondary text-brand-dark text-sm italic">
+                            Entidade: ALUNO <br>
+                            Atributos: Nome, CPF, Data de Nascimento, Email.
+                        </div>
+                    </div>
+                    <!-- Diagrama Atributos SVG -->
+                    <div class="bg-white rounded-3xl border border-slate-200 h-64 flex items-center justify-center p-4">
+                        <svg width="300" height="200" viewBox="0 0 300 200">
+                            <!-- Linhas -->
+                            <line x1="150" y1="100" x2="80" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <line x1="150" y1="100" x2="220" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <line x1="150" y1="100" x2="150" y2="160" stroke="#362F4F" stroke-width="2" />
+                            
+                            <!-- Entidade -->
+                            <rect x="100" y="85" width="100" height="30" fill="white" stroke="#5B23FF" stroke-width="2" />
+                            <text x="150" y="105" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#362F4F">ALUNO</text>
+                            
+                            <!-- Atributos -->
+                            <ellipse cx="80" cy="50" rx="35" ry="15" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <text x="80" y="54" text-anchor="middle" font-size="10" fill="#0369a1">Nome</text>
+                            
+                            <ellipse cx="220" cy="50" rx="35" ry="15" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <text x="220" y="54" text-anchor="middle" font-size="10" fill="#0369a1">CPF</text>
+                            
+                            <ellipse cx="150" cy="160" rx="40" ry="15" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <text x="150" y="164" text-anchor="middle" font-size="10" fill="#0369a1">Email</text>
+                        </svg>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Tipos de Atributos: Simples vs Composto",
+                content: `<div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-4">
+                        <div class="p-6 border border-brand-secondary/20 rounded-3xl bg-white shadow-sm">
+                            <h5 class="font-bold text-lg mb-2 text-brand-dark">Simples (Atômico)</h5>
+                            <p class="text-sm text-slate-500">Indivisível. Valor único.</p>
+                            <p class="mt-2 font-mono text-xs bg-brand-secondary/10 text-brand-secondary p-1 rounded inline-block">Ex: CPF</p>
+                        </div>
+                        <div class="p-6 border border-brand-secondary/20 rounded-3xl bg-white shadow-sm">
+                            <h5 class="font-bold text-lg mb-2 text-brand-dark">Composto</h5>
+                            <p class="text-sm text-slate-500">Dividido em partes menores.</p>
+                            <p class="mt-2 font-mono text-xs bg-brand-secondary/10 text-brand-secondary p-1 rounded inline-block">Ex: Endereço</p>
+                        </div>
+                    </div>
+                    <!-- Diagrama Composto -->
+                    <div class="bg-white rounded-3xl border border-slate-200 h-64 flex items-center justify-center">
+                        <svg width="300" height="200" viewBox="0 0 300 200">
+                            <!-- Entidade -->
+                            <rect x="100" y="150" width="100" height="30" fill="white" stroke="#5B23FF" stroke-width="2" />
+                            <text x="150" y="170" text-anchor="middle" font-weight="bold" font-size="12" fill="#362F4F">CLIENTE</text>
+
+                            <!-- Atributo Composto -->
+                            <line x1="150" y1="150" x2="150" y2="100" stroke="#362F4F" stroke-width="2" />
+                            <ellipse cx="150" cy="100" rx="40" ry="15" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <text x="150" y="104" text-anchor="middle" font-size="10" fill="#0369a1">Endereço</text>
+
+                            <!-- Sub-atributos -->
+                            <line x1="150" y1="85" x2="90" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <ellipse cx="90" cy="50" rx="30" ry="12" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <text x="90" y="54" text-anchor="middle" font-size="9" fill="#0369a1">Rua</text>
+
+                            <line x1="150" y1="85" x2="210" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <ellipse cx="210" cy="50" rx="30" ry="12" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <text x="210" y="54" text-anchor="middle" font-size="9" fill="#0369a1">CEP</text>
+                        </svg>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Tipos: Monovalorado vs Multivalorado",
+                content: `<div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-4">
+                        <div class="p-6 border border-brand-secondary/20 rounded-3xl bg-white shadow-sm">
+                            <h5 class="font-bold text-lg mb-2 text-brand-dark">Monovalorado</h5>
+                            <p class="text-sm text-slate-500">Apenas um valor por pessoa.</p>
+                            <p class="mt-2 font-mono text-xs bg-brand-secondary/10 text-brand-secondary p-1 rounded inline-block">Ex: Data Nasc.</p>
+                        </div>
+                        <div class="p-6 border border-brand-secondary/20 rounded-3xl bg-white shadow-sm">
+                            <h5 class="font-bold text-lg mb-2 text-brand-dark">Multivalorado</h5>
+                            <p class="text-sm text-slate-500">Pode ter vários valores.</p>
+                            <p class="mt-2 font-mono text-xs bg-brand-secondary/10 text-brand-secondary p-1 rounded inline-block">Ex: Telefone</p>
+                        </div>
+                    </div>
+                    <!-- Diagrama Multivalorado -->
+                    <div class="bg-white rounded-3xl border border-slate-200 h-64 flex items-center justify-center">
+                        <svg width="300" height="150" viewBox="0 0 300 150">
+                            <!-- Entidade -->
+                            <rect x="100" y="100" width="100" height="30" fill="white" stroke="#5B23FF" stroke-width="2" />
+                            <text x="150" y="120" text-anchor="middle" font-weight="bold" font-size="12" fill="#362F4F">ALUNO</text>
+
+                            <!-- Multivalorado (Borda Dupla) -->
+                            <line x1="150" y1="100" x2="150" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <ellipse cx="150" cy="50" rx="45" ry="20" fill="#f0f9ff" stroke="#008BFF" stroke-width="2" />
+                            <ellipse cx="150" cy="50" rx="38" ry="15" fill="none" stroke="#008BFF" stroke-width="2" />
+                            <text x="150" y="54" text-anchor="middle" font-size="10" fill="#0369a1">Telefone</text>
+                        </svg>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Atributos Especiais: Chaves",
+                content: `<div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <div class="p-6 bg-brand-primary/10 border-l-4 border-brand-primary rounded-r-xl">
+                            <h5 class="font-bold text-brand-primary">Chave Primária (PK)</h5>
+                            <p class="text-sm text-slate-600">Identificador único. Representado por texto <u>sublinhado</u>.</p>
+                        </div>
+                        <div class="p-6 bg-brand-accent/20 border-l-4 border-brand-accent rounded-r-xl">
+                            <h5 class="font-bold text-brand-dark">Chave Única (Unique)</h5>
+                            <p class="text-sm text-slate-600">Valor não repetido. Visualmente, usamos sublinhado tracejado ou (U).</p>
+                        </div>
+                    </div>
+                    <!-- Diagrama PK -->
+                    <div class="bg-white rounded-3xl border border-slate-200 h-64 flex items-center justify-center">
+                        <svg width="300" height="150" viewBox="0 0 300 150">
+                            <!-- Entidade -->
+                            <rect x="100" y="100" width="100" height="30" fill="white" stroke="#5B23FF" stroke-width="2" />
+                            <text x="150" y="120" text-anchor="middle" font-weight="bold" font-size="12" fill="#362F4F">PRODUTO</text>
+
+                            <!-- PK (Sublinhado) -->
+                            <line x1="150" y1="100" x2="100" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <ellipse cx="100" cy="50" rx="40" ry="18" fill="#f3e8ff" stroke="#5B23FF" stroke-width="2" />
+                            <text x="100" y="54" text-anchor="middle" font-size="10" fill="#5B23FF" style="text-decoration: underline; font-weight: bold;">Código</text>
+                            
+                            <!-- Unique (Tracejado) -->
+                            <line x1="150" y1="100" x2="220" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <ellipse cx="220" cy="50" rx="35" ry="15" fill="#fef08a" stroke="#E4FF30" stroke-width="2" />
+                            <text x="220" y="54" text-anchor="middle" font-size="10" fill="#362F4F" style="text-decoration: underline; text-decoration-style: dashed;">Email</text>
+                        </svg>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Chave Composta vs Surrogada",
+                content: `<div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <h5 class="font-bold border-b border-brand-primary pb-2 text-brand-dark">Chave Primária Composta</h5>
+                        <p class="text-sm text-slate-600">Quando a identificação única exige a combinação de dois ou mais atributos.</p>
+                        <code class="text-xs">PK = (Numero_Predio + Numero_Sala)</code>
+                    </div>
+                    <div class="space-y-4">
+                        <h5 class="font-bold border-b border-brand-primary pb-2 text-brand-primary">Chave Surrogada (Surrogate)</h5>
+                        <p class="text-sm text-slate-600">É a nossa estratégia favorita! Um código artificial (geralmente numérico sequencial) criado apenas para identificar o registro.</p>
+                        <code class="text-xs">PK = ID (1, 2, 3...)</code>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Componente 3: Relacionamento",
+                content: `<div class="text-center space-y-8">
+                    <p class="text-xl max-w-3xl mx-auto">É a associação entre entidades. Representa uma ação ou ligação no mundo real.</p>
+                    <!-- Diagrama Relacionamento SVG -->
+                    <div class="bg-white rounded-3xl border border-slate-200 h-48 flex items-center justify-center">
+                        <svg width="400" height="100" viewBox="0 0 400 100">
+                            <!-- Linhas -->
+                            <line x1="110" y1="50" x2="160" y2="50" stroke="#362F4F" stroke-width="2" />
+                            <line x1="240" y1="50" x2="290" y2="50" stroke="#362F4F" stroke-width="2" />
+                            
+                            <!-- Entidade 1 -->
+                            <rect x="10" y="35" width="100" height="30" fill="white" stroke="#5B23FF" stroke-width="2" />
+                            <text x="60" y="55" text-anchor="middle" font-size="10" font-weight="bold" fill="#362F4F">PROFESSOR</text>
+                            
+                            <!-- Relacionamento -->
+                            <polygon points="200,20 240,50 200,80 160,50" fill="#E4FF30" stroke="#362F4F" stroke-width="2" />
+                            <text x="200" y="54" text-anchor="middle" font-size="9" font-weight="bold" fill="#362F4F">LECIONA</text>
+                            
+                            <!-- Entidade 2 -->
+                            <rect x="290" y="35" width="100" height="30" fill="white" stroke="#5B23FF" stroke-width="2" />
+                            <text x="340" y="55" text-anchor="middle" font-size="10" font-weight="bold" fill="#362F4F">DISCIPLINA</text>
+                        </svg>
+                    </div>
+                    <p class="text-slate-500 italic">"Um PROFESSOR <span class="font-bold text-brand-primary underline">LECIONA</span> uma DISCIPLINA."</p>
+                </div>`
+            },
+            {
+                title: "Graus de Relacionamento",
+                content: `<div class="grid md:grid-cols-3 gap-6 text-center h-full items-start">
+                    <div class="bg-white border border-brand-primary/20 rounded-2xl shadow-sm h-full flex flex-col p-4">
+                        <h5 class="font-bold mb-2 text-brand-primary">Unário (Auto)</h5>
+                        <p class="text-xs text-slate-500 mb-4">Entidade se relaciona com ela mesma.</p>
+                        <!-- SVG Unário -->
+                        <div class="flex-grow flex items-center justify-center">
+                            <svg width="120" height="100" viewBox="0 0 120 100">
+                                <rect x="30" y="60" width="60" height="25" fill="white" stroke="#5B23FF" stroke-width="2" />
+                                <text x="60" y="77" text-anchor="middle" font-size="8" font-weight="bold" fill="#362F4F">FUNC.</text>
+                                
+                                <polygon points="60,10 80,30 60,50 40,30" fill="#E4FF30" stroke="#362F4F" stroke-width="2" />
+                                <text x="60" y="33" text-anchor="middle" font-size="6" font-weight="bold" fill="#362F4F">GERENCIA</text>
+                                
+                                <!-- Loop Lines -->
+                                <polyline points="60,60 60,50" fill="none" stroke="#362F4F" stroke-width="1.5" />
+                                <polyline points="80,30 90,30 90,72 90,72 80,72" fill="none" stroke="#362F4F" stroke-width="1.5" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-brand-primary/20 rounded-2xl shadow-sm h-full flex flex-col p-4 ring-2 ring-brand-primary/20">
+                        <h5 class="font-bold mb-2 text-brand-primary">Binário</h5>
+                        <p class="text-xs text-slate-500 mb-4">Liga duas entidades. (O mais comum)</p>
+                        <!-- SVG Binário -->
+                        <div class="flex-grow flex items-center justify-center">
+                            <svg width="180" height="60" viewBox="0 0 180 60">
+                                <rect x="5" y="20" width="50" height="20" fill="white" stroke="#5B23FF" stroke-width="2" />
+                                <text x="30" y="33" text-anchor="middle" font-size="8" font-weight="bold" fill="#362F4F">CLI</text>
+                                
+                                <rect x="125" y="20" width="50" height="20" fill="white" stroke="#5B23FF" stroke-width="2" />
+                                <text x="150" y="33" text-anchor="middle" font-size="8" font-weight="bold" fill="#362F4F">PROD</text>
+                                
+                                <polygon points="90,10 110,30 90,50 70,30" fill="#E4FF30" stroke="#362F4F" stroke-width="2" />
+                                <text x="90" y="33" text-anchor="middle" font-size="6" font-weight="bold" fill="#362F4F">COMPRA</text>
+                                
+                                <line x1="55" y1="30" x2="70" y2="30" stroke="#362F4F" stroke-width="1.5" />
+                                <line x1="110" y1="30" x2="125" y2="30" stroke="#362F4F" stroke-width="1.5" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-brand-primary/20 rounded-2xl shadow-sm h-full flex flex-col p-4">
+                        <h5 class="font-bold mb-2 text-brand-primary">Ternário</h5>
+                        <p class="text-xs text-slate-500 mb-4">Liga três entidades simultaneamente.</p>
+                        <!-- SVG Ternário -->
+                        <div class="flex-grow flex items-center justify-center">
+                            <svg width="140" height="120" viewBox="0 0 140 120">
+                                <rect x="40" y="5" width="60" height="20" fill="white" stroke="#5B23FF" stroke-width="2" />
+                                <text x="70" y="18" text-anchor="middle" font-size="8" font-weight="bold" fill="#362F4F">MÉDICO</text>
+                                
+                                <polygon points="70,40 90,60 70,80 50,60" fill="#E4FF30" stroke="#362F4F" stroke-width="2" />
+                                <text x="70" y="63" text-anchor="middle" font-size="5" font-weight="bold" fill="#362F4F">CONSULTA</text>
+                                
+                                <rect x="5" y="90" width="50" height="20" fill="white" stroke="#5B23FF" stroke-width="2" />
+                                <text x="30" y="103" text-anchor="middle" font-size="8" font-weight="bold" fill="#362F4F">PACIENTE</text>
+                                
+                                <rect x="85" y="90" width="50" height="20" fill="white" stroke="#5B23FF" stroke-width="2" />
+                                <text x="110" y="103" text-anchor="middle" font-size="8" font-weight="bold" fill="#362F4F">HOSPITAL</text>
+                                
+                                <line x1="70" y1="25" x2="70" y2="40" stroke="#362F4F" stroke-width="1.5" />
+                                <line x1="60" y1="70" x2="30" y2="90" stroke="#362F4F" stroke-width="1.5" />
+                                <line x1="80" y1="70" x2="110" y2="90" stroke="#362F4F" stroke-width="1.5" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Chave Estrangeira (FK - Foreign Key)",
+                content: `<div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div class="space-y-6">
+                        <p class="text-xl">É o "elo de ligação".</p>
+                        <p class="text-slate-600">É um atributo (campo) em uma tabela que faz referência à Chave Primária de outra tabela. É assim que o banco sabe que o "Pedido 10" pertence ao "Cliente 5".</p>
+                    </div>
+                    <!-- Diagrama FK SVG -->
+                    <div class="bg-white rounded-3xl border border-slate-200 h-64 flex items-center justify-center p-4">
+                        <svg width="300" height="200" viewBox="0 0 300 200">
+                            <!-- Tabelas -->
+                            <g transform="translate(10, 20)">
+                                <text x="0" y="0" font-size="10" font-weight="bold" fill="#362F4F">TB_CLIENTES</text>
+                                <rect x="0" y="5" width="80" height="60" fill="white" stroke="#362F4F" />
+                                <rect x="0" y="5" width="80" height="20" fill="#f1f5f9" stroke="#362F4F" />
+                                <text x="5" y="18" font-size="9" fill="#362F4F">ID (PK)</text>
+                                <text x="5" y="38" font-size="9" fill="#362F4F">Nome</text>
+                            </g>
+                            
+                            <g transform="translate(180, 20)">
+                                <text x="0" y="0" font-size="10" font-weight="bold" fill="#362F4F">TB_PEDIDOS</text>
+                                <rect x="0" y="5" width="100" height="80" fill="white" stroke="#362F4F" />
+                                <rect x="0" y="5" width="100" height="20" fill="#f1f5f9" stroke="#362F4F" />
+                                <text x="5" y="18" font-size="9" fill="#362F4F">Num_Pedido (PK)</text>
+                                <text x="5" y="38" font-size="9" fill="#362F4F">Data</text>
+                                <rect x="0" y="45" width="100" height="20" fill="#E4FF30" stroke="none" />
+                                <text x="5" y="58" font-size="9" fill="#362F4F" font-weight="bold">ID_Cliente (FK)</text>
+                            </g>
+                            
+                            <!-- Seta Curva -->
+                            <path d="M 180 75 Q 130 75 95 35" fill="none" stroke="#5B23FF" stroke-width="2" marker-end="url(#arrow)" />
+                            
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#5B23FF" />
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>`
+            },
+            {
+                title: "Cardinalidade 1:1 (Um para Um)",
+                content: `<div class="space-y-6 text-center">
+                    <div class="flex items-center justify-center gap-8 text-2xl font-bold text-slate-700">
+                        <div class="p-4 border rounded-xl border-brand-primary/30">PRESIDENTE</div>
+                        <i class="fas fa-arrows-left-right text-brand-primary"></i>
+                        <div class="p-4 border rounded-xl border-brand-primary/30">PAÍS</div>
+                    </div>
+                    <p class="text-lg text-slate-600 mt-8">Uma ocorrência de uma entidade se relaciona com apenas uma ocorrência da outra.</p>
+                    <div class="bg-brand-primary/10 p-4 rounded-xl inline-block text-brand-primary text-sm font-bold">"Um país tem um presidente. Um presidente governa um país."</div>
+                </div>`
+            },
+            {
+                title: "Cardinalidade 1:N (Um para Muitos)",
+                content: `<div class="space-y-6 text-center">
+                    <div class="flex items-center justify-center gap-8 text-2xl font-bold text-slate-700">
+                        <div class="p-4 border rounded-xl border-brand-primary/30">MÃE</div>
+                        <i class="fas fa-arrows-left-right text-brand-primary"></i>
+                        <div class="p-4 border rounded-xl border-brand-primary/30">FILHO</div>
+                    </div>
+                    <p class="text-lg text-slate-600 mt-8">A mais comum. Um lado pode ter vários, o outro só um.</p>
+                    <div class="bg-brand-primary/10 p-4 rounded-xl inline-block text-brand-primary text-sm font-bold">"Uma mãe pode ter vários filhos. Um filho tem apenas uma mãe biológica."</div>
+                </div>`
+            },
+            {
+                title: "Cardinalidade N:N (Muitos para Muitos)",
+                content: `<div class="space-y-6 text-center">
+                    <div class="flex items-center justify-center gap-8 text-2xl font-bold text-slate-700">
+                        <div class="p-4 border rounded-xl border-brand-primary/30">ALUNO</div>
+                        <i class="fas fa-arrows-left-right text-brand-primary"></i>
+                        <div class="p-4 border rounded-xl border-brand-primary/30">DISCIPLINA</div>
+                    </div>
+                    <p class="text-lg text-slate-600 mt-8">Muitos se relacionam com muitos.</p>
+                    <div class="bg-brand-primary/10 p-4 rounded-xl inline-block text-brand-primary text-sm font-bold">"Um aluno cursa várias disciplinas. Uma disciplina tem vários alunos."</div>
+                    <p class="text-xs text-red-500 mt-4 font-bold uppercase">* Gera uma tabela associativa no modelo físico.</p>
+                </div>`
+            },
+            {
+                title: "Ferramenta da Aula: brModelo Web",
+                content: `<div class="text-center space-y-8">
+                    <p class="text-xl">Para desenhar nossos diagramas sem instalar nada, usaremos:</p>
+                    <a href="https://www.brmodeloweb.com/" target="_blank" class="inline-block p-8 bg-white border-2 border-brand-primary rounded-3xl shadow-xl hover:scale-105 transition hover:shadow-brand-primary/50">
+                        <h4 class="text-3xl font-black text-brand-primary mb-2">brModelo Web</h4>
+                        <p class="text-slate-500">www.brmodeloweb.com</p>
+                    </a>
+                    <p class="text-sm text-slate-400">Clique para abrir (Login gratuito)</p>
+                </div>`
+            },
+            {
+                title: "Exercício 1: Guiado (Ao Vivo)",
+                content: `<div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-brand-primary">Cenário: Biblioteca Escolar</h3>
+                    <p class="text-lg leading-relaxed bg-white p-6 rounded-2xl border border-brand-primary/20 shadow-sm">
+                        "Deseja-se um sistema para controlar os empréstimos de livros. 
+                        Temos <strong>Alunos</strong> (Nome, Matrícula, Email) e <strong>Livros</strong> (Título, Autor, ISBN). 
+                        Um aluno pode pegar vários livros emprestados. Um livro pode ser emprestado várias vezes ao longo do tempo. 
+                        Precisamos saber a Data do Empréstimo."
+                    </p>
+                    <div class="p-4 bg-brand-accent/20 text-brand-dark text-sm rounded-xl font-bold text-center">
+                        Vamos abrir o brModelo e fazer juntos!
+                    </div>
+                </div>`
+            },
+            {
+                title: "Exercício 2: Individual (Prática)",
+                content: `<div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-green-700">Cenário: Pet Shop</h3>
+                    <div class="bg-white p-6 rounded-2xl border border-green-200 shadow-sm space-y-4 text-slate-700">
+                        <p>Modele um sistema simples para um Pet Shop. Requisitos:</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>O sistema deve cadastrar <strong>Clientes</strong> (Nome, CPF, Telefone).</li>
+                            <li>O sistema deve cadastrar <strong>Pets</strong> (Nome, Espécie, Raça, DataNascimento).</li>
+                            <li>Um Cliente pode ter vários Pets.</li>
+                            <li>Um Pet pertence a apenas um Cliente (Dono).</li>
+                        </ul>
+                    </div>
+                    <p class="text-center text-sm text-slate-500">Desenhe as Entidades, Atributos e o Relacionamento com cardinalidade.</p>
+                </div>`
+            },
+            {
+                title: "Resumo da Aula",
+                content: `<div class="grid md:grid-cols-2 gap-8">
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand-primary"></i> Modelagem tem 3 níveis: Conceitual, Lógico, Físico.</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand-primary"></i> MER usa Entidades, Atributos e Relacionamentos.</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand-primary"></i> Entidades = Tabelas; Atributos = Colunas.</li>
+                    </ul>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand-primary"></i> Chave Primária (PK) identifica. Chave Estrangeira (FK) conecta.</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand-primary"></i> Cardinalidade define a quantidade (1:1, 1:N, N:N).</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-brand-primary"></i> Usar IDs numéricos é a melhor prática.</li>
+                    </ul>
+                </div>`
+            },
+            {
+                title: "Fim da Aula 02",
+                content: `<div class="text-center space-y-10 py-10">
+                    <div class="inline-block p-10 bg-brand-accent/20 rounded-full">
+                        <i class="fas fa-check-circle text-brand-accent text-8xl"></i>
+                    </div>
+                    <h2 class="text-5xl font-black text-brand-dark">Parabéns!</h2>
+                    <p class="text-2xl text-slate-500 max-w-2xl mx-auto">Você deu o primeiro passo para se tornar um arquiteto de dados.</p>
+                    <div class="mt-12 px-10 py-4 bg-brand-primary text-white rounded-3xl font-black text-xl uppercase shadow-xl inline-block">
+                        Próxima Aula: Normalização e Modelo Relacional
+                    </div>
+                </div>`
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-secondary tracking-widest mb-4">Tópico ${currentStep + 1} de ${steps.length}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>' : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Modelagem de Dados (MER)</h1>
+                <p>Aula 02 - Conceitos, Abstração e Diagramas</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-primary">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 03 - Hardware: Placa-mãe, CPU e Memórias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;700&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Personalizada */
+        :root {
+            --color-red: #BF1A1A;
+            --color-orange: #FF6C0C;
+            --color-cream: #FFE08F;
+            --color-blue: #060771;
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Roboto Slab', serif; 
+            background-color: var(--color-blue); /* Fundo padrão escuro para contraste */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-cream); /* Fundo dos slides */
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            /* Animação e Estado */
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            background-color: var(--color-cream);
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: translateY(0) scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor */
+        .text-red { color: var(--color-red); }
+        .text-orange { color: var(--color-orange); }
+        .text-cream { color: var(--color-cream); }
+        .text-blue { color: var(--color-blue); }
+        
+        .bg-red { background-color: var(--color-red); }
+        .bg-orange { background-color: var(--color-orange); }
+        .bg-cream { background-color: var(--color-cream); }
+        .bg-blue { background-color: var(--color-blue); }
+        
+        .border-red { border-color: var(--color-red); }
+        .border-blue { border-color: var(--color-blue); }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 4px 4px 0px var(--color-blue);
+            border: 2px solid var(--color-blue);
+            transition: all 0.2s ease;
+        }
+        .card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px var(--color-red); }
+        
+        .img-placeholder {
+            background: #fff;
+            border: 2px dashed var(--color-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-blue);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+        .img-placeholder::after {
+            content: '📸 Inserir Imagem';
+            position: absolute;
+            opacity: 0.3;
+            font-weight: bold;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+                background: white !important;
+            }
+
+            .slide { 
+                position: relative !important; 
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                display: block !important; 
+                page-break-inside: avoid;
+                page-break-after: always; 
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            h1 { font-size: 24pt !important; color: black !important; }
+            h2 { font-size: 18pt !important; color: black !important; border-bottom: 2px solid var(--color-red); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li { font-size: 11pt !important; color: #000 !important; line-height: 1.5; }
+            
+            .card {
+                border: 1px solid #000;
+                box-shadow: none !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            .text-cream { color: black !important; }
+            .bg-blue { background-color: transparent !important; color: black !important; border: 2px solid black; }
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur-md border-b-4 border-red shadow-lg">
+        <div class="flex items-center space-x-4">
+            <span class="font-bold text-blue tracking-tighter text-xl">AULA 03</span>
+            <div class="h-4 w-32 md:w-64 bg-gray-200 rounded-full overflow-hidden border border-blue">
+                <div id="progressBar" class="h-full bg-orange transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-xs font-mono text-blue font-bold tracking-wider">00 / 00</span>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-cream rounded text-blue transition border-2 border-transparent hover:border-blue" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-blue text-white rounded hover:bg-blue/90 transition flex items-center gap-2 font-bold shadow-md" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Gerar Apostila</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active bg-blue">
+            <div class="text-center text-cream">
+                <span class="bg-red text-white px-6 py-2 rounded-full text-sm font-bold tracking-widest uppercase mb-8 inline-block shadow-lg border-2 border-white">Hardware Avançado</span>
+                <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight text-white drop-shadow-md">O Coração da<br><span class="text-orange">Máquina</span></h1>
+                <p class="text-2xl font-mono opacity-90 max-w-2xl mx-auto border-t-2 border-orange pt-6 mt-6">Placa-Mãe • Processador • Memórias</p>
+            </div>
+            <div class="mt-16 animate-bounce text-orange no-print">
+                <i data-lucide="arrow-down" class="mx-auto w-10 h-10"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Agenda -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-blue mb-10 border-l-8 border-red pl-4">Roteiro da Aula</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+                <div class="card p-6 bg-white">
+                    <div class="text-red mb-4"><i data-lucide="layout-grid" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-xl mb-2 text-blue">1. Placa-Mãe</h3>
+                    <ul class="text-sm list-disc pl-4 space-y-1">
+                        <li>Fatores de Forma</li>
+                        <li>Chipset & Bus</li>
+                        <li>Slots & VRM</li>
+                    </ul>
+                </div>
+                <div class="card p-6 bg-white">
+                    <div class="text-orange mb-4"><i data-lucide="cpu" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-xl mb-2 text-blue">2. Processador</h3>
+                    <ul class="text-sm list-disc pl-4 space-y-1">
+                        <li>Clock & Overclock</li>
+                        <li>Cores & Threads</li>
+                        <li>Arquitetura</li>
+                    </ul>
+                </div>
+                <div class="card p-6 bg-white">
+                    <div class="text-blue mb-4"><i data-lucide="memory-stick" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-xl mb-2 text-blue">3. Memórias</h3>
+                    <ul class="text-sm list-disc pl-4 space-y-1">
+                        <li>Cache (L1, L2, L3)</li>
+                        <li>RAM (DDR, Latência)</li>
+                        <li>ROM (BIOS, Boot)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 1: PLACA-MÃE -->
+        
+        <!-- SLIDE 3 -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-red text-white p-3 rounded font-bold">01</span>
+                <h2 class="text-4xl font-bold text-blue">A Placa-Mãe (Motherboard)</h2>
+            </div>
+            <p class="text-xl max-w-3xl text-center mb-8">Não é apenas uma base de plástico. É o <strong>sistema nervoso central</strong> que conecta e alimenta todos os componentes.</p>
+                <img src="img/mae.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="text-sm mt-4 font-mono text-red font-bold">PCB (Printed Circuit Board) - Placa de Circuito Impresso</p>
+        </section>
+
+        <!-- SLIDE 4: Fatores de Forma -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-blue mb-8">Fatores de Forma (Tamanho)</h2>
+            <p class="mb-8 text-center max-w-2xl">O tamanho define o gabinete e a quantidade de expansões.</p>
+            <div class="flex items-end justify-center gap-8 w-full border-b-4 border-gray-200 pb-8">
+                <img src="img/atx.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            </div>
+        </section>
+
+        <!-- SLIDE 5: O Chipset (O Gerente) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-6">O Chipset (O Gerente)</h2>
+            <p class="text-center max-w-2xl mb-8 text-lg">Imagine que o <strong>Processador (CPU)</strong> é o chefe da empresa. Ele pensa muito rápido, na velocidade da luz.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-5xl">
+                <div class="card p-6 bg-white border-l-4 border-orange">
+                    <h3 class="font-bold text-lg text-blue mb-2">O Problema</h3>
+                    <p class="mb-4">O teclado, o mouse e o pen-drive são muito lentos para o chefe. Se ele tivesse que falar com cada um, ficaria entediado esperando.</p>
+                    <h3 class="font-bold text-lg text-blue mb-2">A Solução: Chipset</h3>
+                    <p>É o <strong>assistente</strong>. Ele conversa com todo mundo (lento e rápido), organiza as informações e passa para o chefe só o que importa, na hora certa.</p>
+                </div>
+                <div class="img-placeholder w-full h-48 bg-white border-2 border-orange shadow-lg">
+                    <img src="img/chipset.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5.5: Ponte Norte e Sul -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-red mb-6">Ponte Norte vs. Ponte Sul</h2>
+            <p class="mb-8 text-center max-w-2xl">Para organizar esse trânsito de dados, a placa-mãe dividia o trabalho em duas "Pontes" (Bridges).</p>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl">
+                <!-- Ponte Norte -->
+                <div class="card p-6 border-t-8 border-blue text-center bg-blue/5">
+                    <h3 class="text-xl font-bold text-blue mb-2">Ponte Norte (Northbridge)</h3>
+                    <div class="bg-blue text-white text-xs py-1 px-2 rounded-full inline-block mb-4 font-bold">A Via Expressa 🏎️</div>
+                    <p class="text-sm mb-2">Conectava o Processador ao que também é muito rápido:</p>
+                    <ul class="text-sm font-bold text-blue space-y-1">
+                        <li>• Memória RAM</li>
+                        <li>• Placa de Vídeo (Jogos)</li>
+                    </ul>
+                </div>
+
+                <!-- Ponte Sul -->
+                <div class="card p-6 border-t-8 border-orange text-center bg-orange/5">
+                    <h3 class="text-xl font-bold text-orange mb-2">Ponte Sul (Southbridge)</h3>
+                    <div class="bg-orange text-white text-xs py-1 px-2 rounded-full inline-block mb-4 font-bold">A Rua Local 🐢</div>
+                    <p class="text-sm mb-2">Conectava o Processador ao que é mais lento (Periféricos):</p>
+                    <ul class="text-sm font-bold text-orange space-y-1">
+                        <li>• Mouse e Teclado</li>
+                        <li>• USB (Pen-drive)</li>
+                        <li>• Som e Rede</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-white p-4 rounded-xl border-2 border-blue text-center max-w-3xl shadow-lg">
+                <p class="font-bold text-blue uppercase text-xs mb-1">Evolução dos Computadores</p>
+                <p class="text-sm"><strong>Curiosidade:</strong> Hoje em dia, os processadores ficaram tão modernos que "engoliram" a Ponte Norte. A RAM e o Vídeo agora falam direto com o processador. A Ponte Sul virou o que chamamos apenas de "Chipset" hoje.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Soquete (Socket) -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-blue mb-6">Soquete (Socket)</h2>
+            <p class="text-center mb-8 max-w-2xl">O encaixe do processador. <strong class="text-red">Atenção:</strong> Processador e Placa-mãe devem ter o mesmo soquete!</p>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="card p-6 text-center">
+                    <h3 class="text-xl font-bold text-blue mb-2">LGA (Land Grid Array)</h3>
+                    <p class="text-sm mb-4">Pinos na <strong>Placa-mãe</strong>. Processador liso.</p>
+                    <img src="img/lga.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+                <div class="card p-6 text-center">
+                    <h3 class="text-xl font-bold text-red mb-2">PGA (Pin Grid Array)</h3>
+                    <p class="text-sm mb-4">Pinos no <strong>Processador</strong>. Placa-mãe com furos.</p>
+                    <img src="img/pga.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Slots de Expansão e RAM -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-8">Slots e Conexões</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+                <div class="card p-4">
+                    <h4 class="font-bold text-orange border-b border-orange pb-2 mb-2">DIMM (RAM)</h4>
+                    <p class="text-sm">Encaixe das memórias. Possui uma trava e um chanfro que muda conforme a geração (DDR3, DDR4, DDR5).</p>
+                    <img src="img/dimm.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+                <div class="card p-4">
+                    <h4 class="font-bold text-blue border-b border-blue pb-2 mb-2">PCI Express (x16)</h4>
+                    <p class="text-sm">O slot rápido. Usado principalmente para <strong>Placas de Vídeo</strong> (GPU).</p>
+                    <img src="img/pcie.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+                <div class="card p-4">
+                    <h4 class="font-bold text-red border-b border-red pb-2 mb-2">M.2 (NVMe)</h4>
+                    <p class="text-sm">O novo padrão de armazenamento. SSDs que parecem chicletes, direto na placa.</p>
+                    <img src="img/m2.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Energia (VRM) -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-red mb-4">VRM (Módulo Regulador de Voltagem)</h2>
+            <p class="mb-6 max-w-2xl text-center text-sm">O componente mais subestimado. Ele converte os 12V da fonte para a voltagem baixa (ex: 1.2V) que o processador precisa.</p>
+                    <img src="img/vrm.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="bg-red/10 p-4 rounded mt-4 border-l-4 border-red max-w-2xl">
+                <p class="font-bold text-red">Por que importa?</p>
+                <p class="text-sm">VRMs ruins superaquecem e fazem o processador diminuir a velocidade (Thermal Throttling) para não queimar.</p>
+            </div>
+        </section>
+
+        <!-- MÓDULO 2: PROCESSADOR -->
+
+        <!-- SLIDE 9 -->
+        <section class="slide bg-blue text-white">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-orange text-white p-3 rounded font-bold">02</span>
+                <h2 class="text-4xl font-bold">Processador (CPU)</h2>
+            </div>
+            <p class="text-2xl font-light italic mb-8">"O cérebro que nunca dorme."</p>
+
+                    <img src="img/processador.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl text-black">
+                <div class="card p-6 bg-white">
+                    <h3 class="font-bold text-blue mb-2">Função</h3>
+                    <p>Buscar, Decodificar e Executar instruções.</p>
+                </div>
+                <div class="card p-6 bg-white">
+                    <h3 class="font-bold text-blue mb-2">Material</h3>
+                    <p>Silício (Areia purificada) e metais condutores.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: O Clock -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-6">Frequência (Clock)</h2>
+            <div class="flex items-center gap-8 mb-8">
+                <div class="w-32 h-32 rounded-full border-4 border-orange flex items-center justify-center relative">
+                    <div class="w-full h-1 bg-red absolute animate-pulse"></div>
+                    <div class="h-full w-1 bg-red absolute animate-pulse"></div>
+                </div>
+                <div class="text-left">
+                    <p class="text-xl font-bold">Hertz (Hz) = Ciclos por segundo.</p>
+                    <p class="mt-2">1 GHz = 1 Bilhão de ciclos por segundo.</p>
+                </div>
+            </div>
+            <p class="max-w-2xl text-center">O Clock é o "marcapasso". Ele dita o ritmo. Quanto mais alto, mais rápido as instruções são processadas (teoricamente).</p>
+        </section>
+
+        <!-- SLIDE 11: Núcleos (Cores) -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-blue mb-8">Núcleos (Cores)</h2>
+            <p class="mb-8 text-center max-w-2xl">Antigamente, CPUs tinham 1 núcleo (uma boca). Hoje, têm vários (várias bocas para comer tarefas).</p>
+            <div class="grid grid-cols-2 gap-12 items-center">
+                <div class="text-center">
+                    <div class="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center font-bold text-2xl border-4 border-gray-500">1 Core</div>
+                    <p class="text-sm">Single Task. Faz uma coisa de cada vez.</p>
+                </div>
+                <div class="text-center">
+                    <div class="grid grid-cols-2 gap-2 w-32 h-32 mx-auto mb-4">
+                        <div class="bg-red rounded-full flex items-center justify-center text-white font-bold">1</div>
+                        <div class="bg-red rounded-full flex items-center justify-center text-white font-bold">2</div>
+                        <div class="bg-red rounded-full flex items-center justify-center text-white font-bold">3</div>
+                        <div class="bg-red rounded-full flex items-center justify-center text-white font-bold">4</div>
+                    </div>
+                    <p class="text-sm">Quad Core. Faz 4 coisas ao mesmo tempo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Threads (Hyperthreading) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">Threads: A Ilusão Mágica</h2>
+            <div class="card p-8 max-w-3xl bg-white">
+                <h3 class="font-bold text-blue text-xl mb-4 text-center">Analogia da Cozinha</h3>
+                <div class="flex gap-8 items-start">
+                    <div class="flex-1 text-center border-r border-gray-200 pr-4">
+                        <div class="text-4xl mb-2">👨‍🍳</div>
+                        <h4 class="font-bold">Core (Núcleo)</h4>
+                        <p class="text-sm text-gray-600 mt-2">É o cozinheiro. A unidade física que trabalha.</p>
+                    </div>
+                    <div class="flex-1 text-center">
+                        <div class="text-4xl mb-2">👐</div>
+                        <h4 class="font-bold">Threads</h4>
+                        <p class="text-sm text-gray-600 mt-2">São as mãos do cozinheiro. Se ele tem 2 mãos (Hyperthreading), ele pode segurar a panela com uma enquanto mexe com a outra.</p>
+                    </div>
+                </div>
+                <div class="bg-orange text-white text-center mt-6 p-2 rounded text-sm font-mono">
+                    1 Core físico pode simular 2 Cores lógicos (Threads).
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: Transistores e Litografia -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-blue mb-6">Transistores e Nanômetros (nm)</h2>
+            <p class="text-center max-w-2xl mb-8">Dentro da CPU existem bilhões de transistores (interruptores de luz). A <strong>litografia</strong> é o tamanho deles.</p>
+            
+            <div class="flex items-center gap-4 text-2xl font-bold text-gray-400 mb-4">
+                <span>14nm</span> 
+                <span>→</span> 
+                <span>10nm</span> 
+                <span>→</span> 
+                <span class="text-red scale-110">7nm</span>
+                <span>→</span> 
+                <span class="text-blue scale-125">3nm</span>
+            </div>
+            
+            <div class="card bg-blue text-dark p-6 max-w-xl text-center">
+                <p class="font-bold">Quanto MENOR o número (nm):</p>
+                <ul class="text-left mt-4 space-y-2 text-sm">
+                    <li>✅ Cabe mais transistores no mesmo espaço.</li>
+                    <li>✅ Mais performance.</li>
+                    <li>✅ Gasta menos energia (mais eficiente).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: Overclock -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-red mb-6">Overclocking ⚡</h2>
+            <p class="max-w-2xl text-center mb-8">Forçar o componente a trabalhar acima da frequência de fábrica.</p>
+                    <img src="img/overclock.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="card p-6 border-l-4 border-green-500">
+                    <h3 class="font-bold text-green-700">Vantagens</h3>
+                    <p class="text-sm mt-2">Ganho de desempenho "grátis" em jogos e renderização.</p>
+                </div>
+                <div class="card p-6 border-l-4 border-red">
+                    <h3 class="font-bold text-red">Riscos</h3>
+                    <p class="text-sm mt-2">Aumenta o calor drasticamente. Diminui a vida útil. Pode causar instabilidade (telas azuis).</p>
+                </div>
+            </div>
+            <p class="mt-8 text-xs font-mono bg-white p-2 rounded">Requer placa-mãe robusta (VRM) e refrigeração avançada.</p>
+        </section>
+
+        <!-- MÓDULO 3: MEMÓRIAS -->
+
+        <!-- SLIDE 15: Pirâmide de Memória -->
+        <section class="slide bg-blue text-white">
+            <div class="flex items-center gap-4 mb-4">
+                <span class="bg-cream text-blue p-3 rounded font-bold">03</span>
+                <h2 class="text-4xl font-bold">Hierarquia de Memória</h2>
+            </div>
+            <p class="mb-8 text-cream/80">A regra é: Quanto mais rápida, mais cara e menor.</p>
+            
+            <div class="flex flex-col items-center w-full max-w-2xl font-bold text-black">
+                <!-- Topo -->
+                <div class="w-32 py-2 bg-red text-white text-center rounded-t-lg text-xs">Registradores</div>
+                <!-- Cache -->
+                <div class="w-48 py-3 bg-orange text-white text-center text-sm shadow-lg">Cache (L1, L2, L3)</div>
+                <!-- RAM -->
+                <div class="w-72 py-4 bg-cream text-blue text-center shadow-lg">Memória RAM</div>
+                <!-- Disco -->
+                <div class="w-96 py-6 bg-gray-300 text-gray-700 text-center rounded-b-lg shadow-lg">Disco (SSD / HD)</div>
+            </div>
+            
+            <div class="flex justify-between w-full max-w-lg mt-4 text-xs text-cream">
+                <span>⬆️ Mais Rápida</span>
+                <span>⬇️ Maior Capacidade</span>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: Memória Cache -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">Memória Cache (SRAM)</h2>
+            <p class="max-w-2xl text-center mb-8">A RAM é rápida, mas a CPU é MUITO mais rápida. A CPU não gosta de esperar.</p>
+            
+            <div class="card p-8 bg-white border-2 border-orange relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-orange text-white text-xs px-2 py-1 font-bold">Dentro da CPU</div>
+                <h3 class="text-xl font-bold text-blue mb-4">Analogia do Escritório</h3>
+                <ul class="space-y-4 text-sm">
+                    <li><strong>L1 (Level 1):</strong> Papel na mão do funcionário. (Instantâneo, minúsculo).</li>
+                    <li><strong>L2 (Level 2):</strong> Papel na mesa. (Muito rápido).</li>
+                    <li><strong>L3 (Level 3):</strong> Papel na gaveta. (Rápido, compartilhado entre os núcleos).</li>
+                    <li class="text-gray-400 border-t pt-2"><strong>RAM:</strong> Arquivo no outro andar. (Lento comparado ao cache).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: Memória RAM -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-blue mb-6">Memória RAM (DRAM)</h2>
+            <p class="text-center font-bold text-red mb-2">Random Access Memory (Memória de Acesso Aleatório)</p>
+            <p class="text-center text-sm text-gray-500 mb-8 max-w-xl mx-auto">"Aleatório" significa que ler a última célula demora o mesmo tempo que ler a primeira.</p>
+                    <img src="img/ram.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="grid grid-cols-2 gap-4 w-full max-w-3xl mt-6">
+                <div class="card p-4 text-center border-l-4 border-blue">
+                    <h4 class="font-bold text-blue">Volátil</h4>
+                    <p class="text-xs">Perde tudo sem energia.</p>
+                </div>
+                <div class="card p-4 text-center border-l-4 border-blue">
+                    <h4 class="font-bold text-blue">Endereçamento</h4>
+                    <p class="text-xs">Organizada como uma planilha gigante (Linha X Coluna).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: Gerações DDR -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-6">Evolução DDR</h2>
+            <p class="mb-8">Double Data Rate (Transfere dados 2x por ciclo).</p>
+            
+            <div class="space-y-4 w-full max-w-2xl font-mono text-sm">
+                <div class="flex items-center bg-white p-3 rounded shadow opacity-50">
+                    <span class="w-20 font-bold text-red">DDR3</span>
+                    <span class="flex-1 text-center">~1600 MHz</span>
+                    <span>(Antigo)</span>
+                </div>
+                <div class="flex items-center bg-white p-3 rounded shadow border-l-4 border-orange">
+                    <span class="w-20 font-bold text-orange">DDR4</span>
+                    <span class="flex-1 text-center">~3200 MHz</span>
+                    <span>(Padrão Atual)</span>
+                </div>
+                <div class="flex items-center bg-white p-3 rounded shadow border-l-4 border-blue scale-105 font-bold">
+                    <span class="w-20 font-bold text-blue">DDR5</span>
+                    <span class="flex-1 text-center">~6000+ MHz</span>
+                    <span>(Futuro/Topo)</span>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-red/10 p-4 rounded text-red text-xs font-bold">
+                ⚠️ CUIDADO: Os encaixes são diferentes! Você não pode plugar DDR4 em slot DDR3.
+            </div>
+        </section>
+
+        <!-- SLIDE 19: Latência vs Frequência -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-blue mb-6">O Mito da Velocidade: Latência vs Frequência</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">🏎️</div>
+                    <h3 class="font-bold text-blue">Frequência (MHz)</h3>
+                    <p class="text-sm text-gray-600">Velocidade máxima de transferência.</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">⏱️</div>
+                    <h3 class="font-bold text-red">Latência (CL)</h3>
+                    <p class="text-sm text-gray-600">Tempo de reação (Atraso).</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-left max-w-4xl space-y-4 w-full">
+                <div class="card p-4 border-l-4 border-red">
+                    <h4 class="font-bold text-red">O que é Latência (CL)?</h4>
+                    <p class="text-sm text-gray-700 mt-2">É o tempo que a memória leva para "encontrar" o dado na prateleira antes de começar a enviar para o processador. <strong>Quanto menor o número CL, melhor.</strong></p>
+                </div>
+                <div class="card p-4 border-l-4 border-blue">
+                    <h4 class="font-bold text-blue">Analogia do Garçom</h4>
+                    <p class="text-sm text-gray-700 mt-2">Imagine um garçom que corre muito rápido (Alta Frequência), mas demora 10 minutos parado na mesa tentando lembrar o pedido (Alta Latência). O serviço será lento.</p>
+                    <p class="font-bold mt-2 text-sm">O ideal é: Alta Frequência (Corre muito) + Baixa Latência (Reage rápido).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Dual Channel -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-6">Dual Channel: O Poder do Par</h2>
+            <p class="mb-6 text-center max-w-2xl">Usar dois pentes de memória dobra a largura da "estrada" de dados.</p>
+            <div class="flex gap-8 items-center justify-center w-full max-w-4xl">
+                <div class="card p-6 w-48 text-center opacity-70">
+                    <div class="h-20 bg-gray-300 w-4 mx-auto mb-2"></div>
+                    <h4 class="font-bold">Single Channel</h4>
+                    <p class="text-xs font-bold mt-2 text-red">64 bits</p>
+                </div>
+                <div class="text-2xl text-blue font-bold">VS</div>
+                <div class="card p-6 w-48 text-center border-2 border-green-500">
+                    <div class="flex justify-center gap-2 mb-2">
+                        <div class="h-20 bg-green-500 w-4"></div>
+                        <div class="h-20 bg-green-500 w-4"></div>
+                    </div>
+                    <h4 class="font-bold">Dual Channel</h4>
+                    <p class="text-xs font-bold mt-2 text-green-600">128 bits</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border-2 border-orange mt-8 max-w-3xl w-full">
+                <h3 class="font-bold text-orange mb-2 text-lg">Por que 2 pentes são melhores que 1?</h3>
+                <p class="text-sm mb-4">A comunicação entre CPU e RAM acontece por uma "estrada" (barramento).</p>
+                <ul class="list-disc pl-5 text-sm space-y-2 text-gray-700">
+                    <li><strong>1 Pente (Single Channel):</strong> A estrada tem apenas <strong>64 bits</strong> de largura. Os dados podem engarrafar.</li>
+                    <li><strong>2 Pentes (Dual Channel):</strong> O sistema acessa os dois módulos ao mesmo tempo, criando uma via de <strong>128 bits</strong>.</li>
+                </ul>
+                <p class="mt-4 font-bold text-blue text-sm border-t pt-2 border-gray-200">Resultado: O dobro de dados trafega ao mesmo tempo, eliminando gargalos para a CPU (especialmente em jogos).</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 21: Memória ROM -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-red mb-6">Memória ROM</h2>
+            <p class="text-center font-bold mb-2">Read-Only Memory (Memória Somente Leitura)</p>
+                    <img src="img/bios.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <ul class="list-disc pl-6 space-y-2 mt-6 max-w-2xl text-sm">
+                <li>Não volátil (não apaga sem energia).</li>
+                <li>Grava o <strong>Firmware</strong> da placa-mãe (BIOS/UEFI).</li>
+                <li>Contém as instruções primordiais para acordar o computador.</li>
+            </ul>
+        </section>
+
+        <!-- SLIDE 22: BIOS vs UEFI -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-8">BIOS vs UEFI</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="card p-6 bg-gray-100 font-mono text-xs">
+                    <h3 class="text-lg font-bold mb-2 text-gray-700">BIOS (Legacy)</h3>
+                    <p class="mb-2 text-blue">Tela azul e texto branco.</p>
+                    <p>Antigo, suporta HDs pequenos, apenas teclado.</p>
+                </div>
+                <div class="card p-6 bg-white border-2 border-blue font-sans text-sm">
+                    <h3 class="text-lg font-bold mb-2 text-blue">UEFI (Moderno)</h3>
+                    <p class="mb-2 text-orange font-bold">Interface Gráfica com Mouse.</p>
+                    <p>Inicia muito mais rápido, suporta HDs gigantes e Boot Seguro.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 23: O Processo de Boot (POST) -->
+        <section class="slide bg-blue text-white">
+            <h2 class="text-3xl font-bold text-cream mb-8">O que acontece quando você liga o PC?</h2>
+            <div class="space-y-4 w-full max-w-xl text-left">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-cream text-blue flex items-center justify-center font-bold mr-4">1</div>
+                    <p>Fonte envia energia estável (Power Good).</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-cream text-blue flex items-center justify-center font-bold mr-4">2</div>
+                    <p>Processador busca instruções na <strong>ROM</strong>.</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-cream text-blue flex items-center justify-center font-bold mr-4">3</div>
+                    <div class="flex-1 bg-white/10 p-3 rounded">
+                        <p class="font-bold text-orange">POST (Power On Self Test)</p>
+                        <p class="text-xs opacity-70">A BIOS testa: "Tem RAM? Tem Vídeo? Tem Teclado?"</p>
+                        <p class="text-xs opacity-70">Se der erro: Bipes sonoros. 🔊</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-cream text-blue flex items-center justify-center font-bold mr-4">4</div>
+                    <p>BIOS procura o Sistema Operacional no Disco e carrega para a RAM.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 24: Bateria CMOS -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-blue mb-6">A Bateria da Placa-Mãe (CMOS)</h2>
+                    <img src="img/bateria.png" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <div class="card p-6 mt-8 max-w-2xl bg-white">
+                <h4 class="font-bold text-red mb-2">Para que serve?</h4>
+                <p class="text-sm">A ROM não apaga, mas as suas CONFIGURAÇÕES (data, hora, ordem de boot) precisam de energia para ficarem salvas no chip CMOS. Se o relógio do seu PC atrasa, troque essa bateria!</p>
+            </div>
+        </section>
+
+        <!-- MÓDULO EXERCÍCIOS -->
+
+        <!-- SLIDE 25 -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-red mb-6 border-b-4 border-red pb-2">Exercícios de Fixação (1-5)</h2>
+            <ol class="space-y-4 text-left max-w-3xl text-sm font-medium w-full list-decimal pl-8">
+                <li class="pl-2">Explique a função do Chipset na placa-mãe e por que a "Ponte Norte" desapareceu das placas modernas.</li>
+                <li class="pl-2">O que acontece se você instalar um processador com TDP de 125W em uma placa-mãe com VRMs fracos projetados para 65W?</li>
+                <li class="pl-2">Defina "Clock" do processador. Um processador de 4GHz é sempre mais rápido que um de 3GHz? Justifique.</li>
+                <li class="pl-2">Qual a diferença entre um Core (Núcleo) e uma Thread? Use uma analogia para explicar.</li>
+                <li class="pl-2">Por que a memória Cache L1 é muito menor que a memória RAM? (Pense em custo e física).</li>
+            </ol>
+        </section>
+
+        <!-- SLIDE 26 -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-red mb-6 border-b-4 border-red pb-2">Exercícios de Fixação (6-10)</h2>
+            <ol start="6" class="space-y-4 text-left max-w-3xl text-sm font-medium w-full list-decimal pl-8">
+                <li class="pl-2">Descreva a diferença entre Latência e Frequência na memória RAM. O que é melhor para jogos?</li>
+                <li class="pl-2">O que é Dual Channel e qual a vantagem técnica de usar 2 pentes de 8GB ao invés de 1 pente de 16GB?</li>
+                <li class="pl-2">Explique a função da memória ROM e do POST durante a inicialização do computador.</li>
+                <li class="pl-2">Qual a função da bateria CR2032 (CMOS) na placa-mãe? O que acontece se ela for removida?</li>
+                <li class="pl-2">Compare BIOS Legacy com UEFI. Cite duas vantagens do UEFI.</li>
+            </ol>
+        </section>
+
+        <!-- SLIDE 27: Próxima Aula -->
+        <section class="slide bg-blue text-white">
+            <h2 class="text-2xl opacity-70 mb-4 font-mono">Próxima Etapa...</h2>
+            <h1 class="text-5xl font-black mb-8 text-center leading-tight">Onde guardamos tudo?</h1>
+            <div class="flex gap-8 justify-center items-center mb-8">
+                <div class="text-center animate-pulse">
+                    <i data-lucide="hard-drive" class="w-16 h-16 mb-2"></i>
+                    <p class="font-bold text-orange">HDs & SSDs</p>
+                </div>
+                <div class="text-2xl text-cream font-bold">+</div>
+                <div class="text-center animate-pulse delay-100">
+                    <i data-lucide="cable" class="w-16 h-16 mb-2"></i>
+                    <p class="font-bold text-orange">Barramentos</p>
+                </div>
+            </div>
+            <p class="max-w-xl text-center text-sm opacity-80">Na Aula 04, vamos entender como os dados viajam (Barramentos) e onde eles descansam (Armazenamento).</p>
+        </section>
+
+        <!-- SLIDE 28: Fim -->
+        <section class="slide bg-white">
+            <h1 class="text-6xl font-black text-blue mb-4">FIM DA AULA 03</h1>
+            <p class="text-xl text-gray-600 mb-12">Obrigado pela atenção!</p>
+            <div class="flex gap-4 no-print">
+                <button onclick="window.print()" class="px-8 py-3 bg-red text-white rounded-full font-bold shadow-lg hover:bg-orange transition flex items-center border-2 border-transparent">
+                    <i data-lucide="printer" class="mr-2"></i> Salvar Apostila PDF
+                </button>
+            </div>
+            <p class="mt-16 text-xs font-mono text-gray-400">COTIL - Fundamentos de Informática</p>
+        </section>
+
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-4 bg-white/90 backdrop-blur rounded-full shadow-lg border-2 border-blue text-blue hover:bg-blue hover:text-white transition transform active:scale-95">
+            <i data-lucide="arrow-up"></i>
+        </button>
+        <button id="nextBtn" class="p-4 bg-blue rounded-full shadow-lg text-white border-2 border-blue hover:bg-white hover:text-blue transition transform active:scale-95">
+            <i data-lucide="arrow-down"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica dos Slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            // Update Progress
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${slides.length}`;
+        }
+
+        // Initialize slides on load
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } });
+        document.getElementById('prevBtn').addEventListener('click', () => { if(currentSlide > 0) { currentSlide--; updateSlides(); } });
+        
+        // Navegação por teclado
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>

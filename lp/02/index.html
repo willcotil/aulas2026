@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 02 - Variáveis e Tipos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES (Terrosos / Militar) --- */
+        :root {
+            --color-1: #492828; /* Marrom Escuro (Texto/Títulos) */
+            --color-2: #656d3f; /* Verde Oliva Escuro (Destaques) */
+            --color-3: #84934a; /* Verde Oliva Claro (Bordas/Detalhes) */
+            --color-4: #b0b0a8; /* Cinza/Verde neutro para suporte */
+            --bg-light: #ececec; /* Fundo Geral */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--color-1);
+        }
+
+        /* Slide Base */
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            border-bottom: 8px solid var(--color-3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Tipografia */
+        h1 { 
+            font-size: 4rem; 
+            font-weight: 900; 
+            color: var(--color-1);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            text-align: center;
+        }
+        
+        h2 { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            color: var(--color-2); 
+            margin-bottom: 2rem; 
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 6px;
+            background-color: var(--color-3);
+            margin: 0.5rem auto 0;
+            border-radius: 4px;
+        }
+
+        p, li { font-size: 1.3rem; line-height: 1.6; color: #374151; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* Elementos Gráficos */
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--color-4);
+            position: relative;
+            /* Removido transition e hover transform para evitar movimento no telão */
+        }
+        
+        /* Faixa decorativa sutil no card */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 2rem; right: 2rem;
+            height: 4px;
+            background-color: var(--color-3);
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Comparação de Código */
+        .code-comparison {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            max-width: 1000px;
+            justify-content: center;
+        }
+        .code-box {
+            flex: 1;
+            background-color: var(--color-1); /* Fundo escuro baseado na paleta */
+            color: #ececec;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            text-align: left;
+            border-left: 5px solid;
+            position: relative;
+        }
+        .code-box.portugol { border-color: var(--color-3); }
+        .code-box.c-lang { border-color: var(--color-2); background-color: #2d1a1a; } /* Um tom ainda mais escuro de marrom */
+        
+        .code-label {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--color-3);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .c-lang .code-label { background: var(--color-2); color: white; }
+
+        /* Depurador / Teste de Mesa */
+        .debugger-container {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 2rem;
+        }
+        .debug-code {
+            flex: 1;
+            background: white;
+            border: 2px solid var(--color-4);
+            border-radius: 1rem;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            text-align: left;
+        }
+        .debug-line {
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            margin-bottom: 2px;
+        }
+        .debug-line.active {
+            background-color: var(--color-3);
+            color: white;
+            font-weight: bold;
+        }
+        .trace-table {
+            flex: 1;
+            background: white;
+            border: 2px solid var(--color-2);
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .trace-table::before {
+            content: 'TESTE DE MESA';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid var(--color-1); padding: 8px; text-align: center; font-family: 'Fira Code', monospace; }
+        th { background-color: var(--bg-light); color: var(--color-1); }
+        .cell-val { color: var(--color-2); font-weight: bold; }
+        .cell-new { animation: popIn 0.5s; background-color: #e3e8cc; }
+
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Navegação Fixa */
+        .nav-controls {
+            position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100;
+        }
+        .btn-nav {
+            background-color: var(--color-1); color: white; width: 3.5rem; height: 3.5rem;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s; border: none; font-size: 1.2rem;
+        }
+        .btn-nav:hover { background-color: var(--color-2); transform: scale(1.1); }
+
+        /* Impressão */
+        @media print {
+            body { background: white; color: black; }
+            .slide { 
+                height: auto; min-height: 29.7cm; border-bottom: none; 
+                page-break-after: always; padding: 1cm; align-items: flex-start; 
+            }
+            .slide:last-child { page-break-after: avoid; }
+            .nav-controls { display: none !important; }
+            h1 { font-size: 3rem; color: black; }
+            h2 { color: black; text-align: left; border-bottom: 1px solid black; width: 100%; }
+            h2::after { display: none; }
+            .card, .code-box, .trace-table, .debug-code { 
+                box-shadow: none !important; border: 1px solid #ccc !important; 
+                background: white !important; color: black !important;
+                page-break-inside: avoid;
+            }
+            .card::before { display: none; }
+            .code-label { color: black; background: #eee; border: 1px solid #ccc; }
+            table, th, td { border-color: black; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .grid, .flex { display: block !important; }
+            .grid > div, .flex > div { margin-bottom: 20px; width: 100% !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn">←</button>
+        <button class="btn-nav" id="nextBtn">→</button>
+        <button class="btn-nav" id="fsBtn">⛶</button>
+        <button class="btn-nav" onclick="window.print()">🖨️</button>
+    </div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide">
+            <h1>Aula 02</h1>
+            <h2 style="border: none; font-size: 2.5rem; color: var(--color-2);">Variáveis, Tipos e Teste de Mesa</h2>
+            
+            <div class="card mt-8 p-8 flex flex-col items-center">
+                <div style="font-size: 5rem;">📦 🏷️ 📝</div>
+                <p class="mt-4 font-bold">Hoje vamos aprender a guardar informações!</p>
+            </div>
+
+            <p class="mt-12 font-bold" style="color: var(--color-1);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: O Conceito de Memória -->
+        <section class="slide">
+            <h2>Onde guardamos as coisas?</h2>
+            <p>Computadores têm uma memória RAM. Imagine a memória como um <strong>armário gigante cheio de gavetas</strong>.</p>
+            <div class="flex gap-8 mt-8 w-full max-w-4xl justify-center items-center">
+                <div class="text-6xl">🗄️</div>
+                <div class="text-4xl text-gray-400">➡️</div>
+                <div class="card bg-white p-6">
+                    <p class="mb-0 font-bold" style="color: var(--color-2);">Para usar uma gaveta, precisamos:</p>
+                    <ol class="list-decimal text-left pl-6 mt-2">
+                        <li>Dar um <strong>NOME</strong> para ela (Etiqueta).</li>
+                        <li>Definir o <strong>TIPO</strong> de coisa que vai dentro (Roupa? Livro? Comida?).</li>
+                        <li>Colocar um <strong>VALOR</strong> dentro.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: O que é uma Variável? -->
+        <section class="slide">
+            <h2>Variável</h2>
+            <p>Uma variável é um espaço na memória do computador destinado a guardar um valor que pode mudar durante a execução do algoritmo.</p>
+            
+            <div class="card mt-8 p-8 w-full max-w-2xl bg-white border-2" style="border-color: var(--color-3);">
+                <div class="flex justify-around items-center">
+                    <div class="text-center">
+                        <div class="w-32 h-32 border-4 border-dashed border-gray-400 flex items-center justify-center rounded-lg bg-white relative">
+                            <span class="text-gray-300 font-bold text-xl">Vazio</span>
+                            <span class="absolute -top-4 bg-gray-200 px-2 rounded font-bold text-sm border border-gray-400">idade</span>
+                        </div>
+                        <p class="text-sm mt-2">Declaração</p>
+                    </div>
+                    <div class="text-4xl text-gray-400">➔</div>
+                    <div class="text-center">
+                        <div class="w-32 h-32 border-4 border-solid flex items-center justify-center rounded-lg bg-white relative shadow-md" style="border-color: var(--color-3);">
+                            <span class="font-bold text-4xl" style="color: var(--color-2);">18</span>
+                            <span class="absolute -top-4 px-2 rounded font-bold text-sm border" style="background-color: var(--color-3); color: white; border-color: var(--color-2);">idade</span>
+                        </div>
+                        <p class="text-sm mt-2">Atribuição</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Regras de Nomenclatura -->
+        <section class="slide">
+            <h2>Regras para Nomes</h2>
+            <p>Não podemos dar qualquer nome para as gavetas. Existem regras!</p>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl mt-4">
+                <div class="card" style="border-color: var(--color-3);">
+                    <h3 class="text-xl font-bold mb-4" style="color: var(--color-2);">✅ Permitido</h3>
+                    <ul class="text-sm">
+                        <li>Começar com letra (<code>nota</code>)</li>
+                        <li>Conter números (<code>nota1</code>)</li>
+                        <li>Usar <em>underline</em> (<code>nota_final</code>)</li>
+                        <li>Ser significativo (<code>salario</code>)</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color: #ef4444;">
+                    <h3 class="text-xl font-bold text-red-700 mb-4">❌ Proibido</h3>
+                    <ul class="text-sm">
+                        <li>Começar com número (<code>1nota</code>)</li>
+                        <li>Espaços em branco (<code>nota final</code>)</li>
+                        <li>Caracteres especiais (<code>m@dia</code>, <code>ç</code>, <code>ã</code>)</li>
+                        <li>Palavras reservadas (<code>inicio</code>, <code>int</code>)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Tipos de Dados Primitivos -->
+        <section class="slide">
+            <h2>Tipos de Dados</h2>
+            <p>O computador precisa saber o tamanho da "caixa".</p>
+            <div class="grid grid-cols-2 gap-6 w-full max-w-6xl mt-4">
+                <div class="card border-l-8" style="border-left-color: var(--color-1);">
+                    <h3 class="font-bold text-lg" style="color: var(--color-1);">1. Inteiro</h3>
+                    <p class="text-sm text-left">Números sem vírgula. Positivos ou negativos.</p>
+                    <code class="block mt-2 text-center bg-gray-100 p-2">10, -5, 0, 2024</code>
+                </div>
+                <div class="card border-l-8" style="border-left-color: var(--color-2);">
+                    <h3 class="font-bold text-lg" style="color: var(--color-2);">2. Real (Float)</h3>
+                    <p class="text-sm text-left">Números com vírgula (casas decimais).</p>
+                    <code class="block mt-2 text-center bg-gray-100 p-2">3.14, -1.5, 10.0</code>
+                </div>
+                <div class="card border-l-8" style="border-left-color: var(--color-3);">
+                    <h3 class="font-bold text-lg" style="color: var(--color-3);">3. Caractere (Char)</h3>
+                    <p class="text-sm text-left">Letras, símbolos ou textos. Sempre entre aspas.</p>
+                    <code class="block mt-2 text-center bg-gray-100 p-2">"A", "Maria", "@"</code>
+                </div>
+                <div class="card border-l-8" style="border-left-color: #555;">
+                    <h3 class="font-bold text-lg" style="color: #555;">4. Lógico (Boolean)</h3>
+                    <p class="text-sm text-left">Apenas dois valores possíveis.</p>
+                    <code class="block mt-2 text-center bg-gray-100 p-2">Verdadeiro, Falso</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Declarando Variáveis -->
+        <section class="slide">
+            <h2>Declarando Variáveis</h2>
+            <p>Como "reservar" a caixa no código.</p>
+            
+            <div class="code-comparison mt-8">
+                <div class="code-box portugol">
+                    <span class="code-label">Pseudocódigo</span>
+                    Var<br>
+                    &nbsp;&nbsp;idade : inteiro<br>
+                    &nbsp;&nbsp;altura : real<br>
+                    &nbsp;&nbsp;nome : caractere
+                </div>
+                <div class="code-box c-lang">
+                    <span class="code-label">Linguagem C</span>
+                    int idade;<br>
+                    float altura;<br>
+                    char nome[50];
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Atribuição -->
+        <section class="slide">
+            <h2>Comando de Atribuição</h2>
+            <p>Como guardar um valor dentro da variável.</p>
+
+            <div class="code-comparison mt-8">
+                <div class="code-box portugol">
+                    <span class="code-label">Pseudocódigo ( <- )</span>
+                    idade <- 18<br>
+                    altura <- 1.75<br>
+                    nome <- "Ana"
+                </div>
+                <div class="code-box c-lang">
+                    <span class="code-label">Linguagem C ( = )</span>
+                    idade = 18;<br>
+                    altura = 1.75;<br>
+                    strcpy(nome, "Ana");
+                </div>
+            </div>
+            <p class="text-sm mt-4 italic text-gray-500">*Nota: Em C, o "=" não é igualdade matemática, é ATRIBUIÇÃO.</p>
+        </section>
+
+        <!-- Slide 8: O Teste de Mesa -->
+        <section class="slide">
+            <h2>O Teste de Mesa 📝</h2>
+            <div class="card w-full max-w-4xl p-8 bg-white" style="border-color: var(--color-2);">
+                <p class="text-xl font-bold mb-4" style="color: var(--color-1);">O que é?</p>
+                <p class="text-left">É uma simulação manual da execução do algoritmo. Você "finge" ser o computador e executa linha por linha, anotando em uma tabela como os valores das variáveis mudam.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl mt-8">
+                <div class="text-center">
+                    <div class="text-6xl mb-2">🕵️‍♂️</div>
+                    <p class="font-bold">Para que serve?</p>
+                    <p class="text-sm">Encontrar erros de lógica e entender como o programa funciona.</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-6xl mb-2">📋</div>
+                    <p class="font-bold">Como fazer?</p>
+                    <p class="text-sm">Desenhe uma tabela. Cada coluna é uma variável. Cada linha é um passo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Interativo - Teste de Mesa 1 -->
+        <section class="slide" id="slide-debug-1" data-interactive="true">
+            <h2>Vamos Praticar: Teste de Mesa</h2>
+            <p class="text-sm text-gray-500 mb-4">(Use a seta → do teclado para avançar a execução)</p>
+
+            <div class="debugger-container">
+                <div class="debug-code" id="code-1">
+                    <div class="debug-line" data-line="1">Var X, Y : inteiro</div>
+                    <div class="debug-line" data-line="2">Inicio</div>
+                    <div class="debug-line" data-line="3">&nbsp;&nbsp;X <- 10</div>
+                    <div class="debug-line" data-line="4">&nbsp;&nbsp;Y <- 5</div>
+                    <div class="debug-line" data-line="5">&nbsp;&nbsp;X <- Y + 2</div>
+                    <div class="debug-line" data-line="6">&nbsp;&nbsp;Y <- X + Y</div>
+                    <div class="debug-line" data-line="7">Fim</div>
+                </div>
+
+                <div class="trace-table">
+                    <table id="table-1">
+                        <thead>
+                            <tr>
+                                <th>Linha</th>
+                                <th>Variável X</th>
+                                <th>Variável Y</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Linhas inseridas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Interativo - Teste de Mesa 2 -->
+        <section class="slide" id="slide-debug-2" data-interactive="true">
+            <h2>Teste de Mesa: Troca de Valores</h2>
+            <p class="text-sm text-gray-500 mb-4">(Use a seta → do teclado para avançar)</p>
+
+            <div class="debugger-container">
+                <div class="debug-code" id="code-2">
+                    <div class="debug-line" data-line="1">Var A, B, Aux : inteiro</div>
+                    <div class="debug-line" data-line="2">Inicio</div>
+                    <div class="debug-line" data-line="3">&nbsp;&nbsp;A <- 5</div>
+                    <div class="debug-line" data-line="4">&nbsp;&nbsp;B <- 8</div>
+                    <div class="debug-line" data-line="5">&nbsp;&nbsp;Aux <- A</div>
+                    <div class="debug-line" data-line="6">&nbsp;&nbsp;A <- B</div>
+                    <div class="debug-line" data-line="7">&nbsp;&nbsp;B <- Aux</div>
+                    <div class="debug-line" data-line="8">Fim</div>
+                </div>
+
+                <div class="trace-table">
+                    <table id="table-2">
+                        <thead>
+                            <tr>
+                                <th>Linha</th>
+                                <th>A</th>
+                                <th>B</th>
+                                <th>Aux</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Linhas inseridas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Constantes -->
+        <section class="slide">
+            <h2>Constantes</h2>
+            <p>Às vezes, queremos uma caixa cujo valor <strong>NUNCA</strong> muda.</p>
+            <div class="card flex items-center gap-8 p-8">
+                <div class="text-6xl">🔒</div>
+                <div class="text-left">
+                    <h3 class="font-bold text-xl mb-2">Exemplo: PI (3.1415)</h3>
+                    <p class="text-sm">Em Pseudocódigo:</p>
+                    <code class="block bg-gray-100 p-2 mb-2">Constante PI <- 3.1415</code>
+                    <p class="text-sm">Em C:</p>
+                    <code class="block bg-gray-800 text-white p-2">const float PI = 3.1415;</code>
+                </div>
+            </div>
+            <p class="mt-6 text-sm text-red-500 font-bold">Se tentar mudar o valor de uma constante, dá erro!</p>
+        </section>
+
+        <!-- Slide 12: Cabeçalho Exercícios -->
+        <section class="slide" style="border:none; background-color: var(--color-1);">
+            <h1 style="color: var(--bg-light); background: none; -webkit-text-fill-color: var(--bg-light);">Hora de Praticar!</h1>
+            <p style="color: var(--color-3);">10 Exercícios para dominar variáveis e tipos.</p>
+            <div class="text-9xl mt-8 animate-pulse">✍️</div>
+        </section>
+
+        <!-- Exercícios Parte 1 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Tipos e Nomes)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6">
+                    <h3 class="font-bold" style="color: var(--color-2);">1. Identifique o Tipo</h3>
+                    <p class="text-sm">Qual o melhor tipo de dado (Inteiro, Real, Caractere, Lógico) para guardar:</p>
+                    <ul class="text-sm list-disc pl-6">
+                        <li>a) A idade de uma pessoa.</li>
+                        <li>b) O preço de um produto.</li>
+                        <li>c) O nome de uma rua.</li>
+                        <li>d) Se a lâmpada está acesa ou apagada.</li>
+                        <li>e) O número de telefone.</li>
+                    </ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold" style="color: var(--color-2);">2. Nomes Válidos</h3>
+                    <p class="text-sm">Quais destes nomes de variáveis são inválidos? Por quê?</p>
+                    <code class="block bg-gray-100 p-2 text-sm mt-2">nome_aluno, 1nota, media final, salario$, _total, int</code>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold" style="color: var(--color-2);">3. Tradução para C</h3>
+                    <p class="text-sm">Escreva como ficaria a declaração dessas variáveis em C:</p>
+                    <code class="block bg-gray-100 p-2 text-sm mt-2">
+                        Var<br>
+                        &nbsp;&nbsp;quantidade : inteiro<br>
+                        &nbsp;&nbsp;preco : real<br>
+                        &nbsp;&nbsp;letra : caractere
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 2 (Teste de Mesa) -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Teste de Mesa)</h2>
+            <p class="text-sm mb-4">Faça o teste de mesa no papel para descobrir os valores finais.</p>
+            <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold mb-2" style="color: var(--color-2);">4. Qual o valor de A, B e C?</h3>
+                    <div class="code-block text-sm bg-slate-100 text-black border-slate-300">
+                        A <- 10<br>
+                        B <- 20<br>
+                        C <- A<br>
+                        B <- C<br>
+                        A <- B
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold mb-2" style="color: var(--color-2);">5. Qual o valor de X e Y?</h3>
+                    <div class="code-block text-sm bg-slate-100 text-black border-slate-300">
+                        X <- 10<br>
+                        Y <- X + 2<br>
+                        X <- Y - X<br>
+                        Y <- X * 2
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold mb-2" style="color: var(--color-2);">6. Expressões Matemáticas</h3>
+                    <p class="text-sm mb-2">Calcule o resultado:</p>
+                    <ul class="text-sm list-disc pl-6 font-mono">
+                        <li>R1 <- 2 + 3 * 4</li>
+                        <li>R2 <- (2 + 3) * 4</li>
+                        <li>R3 <- 10 % 3 (Resto da divisão)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 3 (Lógica) -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Construção)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6">
+                    <h3 class="font-bold" style="color: var(--color-2);">7. Área do Retângulo</h3>
+                    <p class="text-sm">Escreva um algoritmo (pseudocódigo) que declare variáveis para base e altura, atribua valores a elas, calcule a área (base * altura) e guarde numa variável 'area'.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold" style="color: var(--color-2);">8. Média Simples</h3>
+                    <p class="text-sm">Escreva um algoritmo que declare 3 variáveis para notas (n1, n2, n3), atribua os valores 5, 7 e 10, e calcule a média, guardando em uma variável 'media'.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold" style="color: var(--color-2);">9. Desafio da Constante</h3>
+                    <p class="text-sm">Escreva um algoritmo para calcular a área de um círculo (A = PI * r²). Declare PI como constante (3.14) e o raio como variável.</p>
+                </div>
+                 <div class="card p-6 border-l-8 border-yellow-400">
+                    <h3 class="font-bold" style="color: var(--color-2);">10. Desafio de Lógica</h3>
+                    <p class="text-sm">Sem usar uma terceira variável auxiliar, como você trocaria os valores de duas variáveis inteiras A e B? (Dica: use soma e subtração).</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+        let currentSlide = 0;
+
+        // --- DADOS PARA O DEPURADOR ---
+        const debug1 = {
+            element: document.getElementById('slide-debug-1'),
+            steps: [
+                { line: 1, x: '?', y: '?' },
+                { line: 2, x: '?', y: '?' },
+                { line: 3, x: '10', y: '?', new: 'x' },
+                { line: 4, x: '10', y: '5', new: 'y' },
+                { line: 5, x: '7', y: '5', new: 'x' }, 
+                { line: 6, x: '7', y: '12', new: 'y' }, 
+                { line: 7, x: '7', y: '12' }
+            ],
+            currentStep: 0,
+            tableId: 'table-1',
+            linesId: 'code-1'
+        };
+
+        const debug2 = {
+            element: document.getElementById('slide-debug-2'),
+            steps: [
+                { line: 1, a: '?', b: '?', aux: '?' },
+                { line: 2, a: '?', b: '?', aux: '?' },
+                { line: 3, a: '5', b: '?', aux: '?', new: 'a' },
+                { line: 4, a: '5', b: '8', aux: '?', new: 'b' },
+                { line: 5, a: '5', b: '8', aux: '5', new: 'aux' },
+                { line: 6, a: '8', b: '8', aux: '5', new: 'a' },
+                { line: 7, a: '8', b: '5', aux: '5', new: 'b' },
+                { line: 8, a: '8', b: '5', aux: '5' }
+            ],
+            currentStep: 0,
+            tableId: 'table-2',
+            linesId: 'code-2'
+        };
+
+        function updateDebugger(debugObj) {
+            const stepData = debugObj.steps[debugObj.currentStep];
+            
+            // Atualizar Linha Ativa no Código
+            const lines = document.getElementById(debugObj.linesId).children;
+            for(let i=0; i<lines.length; i++) lines[i].classList.remove('active');
+            
+            // Encontra a div que tem o data-line igual ao stepData.line
+            const activeLine = document.querySelector(`#${debugObj.linesId} .debug-line[data-line="${stepData.line}"]`);
+            if(activeLine) activeLine.classList.add('active');
+
+            // Adicionar linha na tabela
+            const tbody = document.querySelector(`#${debugObj.tableId} tbody`);
+            
+            // Limpa tabela se for passo 0
+            if(debugObj.currentStep === 0) tbody.innerHTML = '';
+
+            const row = document.createElement('tr');
+            
+            let html = `<td>${stepData.line}</td>`;
+            
+            if(debugObj.tableId === 'table-1') {
+                html += `<td class="${stepData.new === 'x' ? 'cell-new' : ''}">${stepData.x}</td>`;
+                html += `<td class="${stepData.new === 'y' ? 'cell-new' : ''}">${stepData.y}</td>`;
+            } else {
+                html += `<td class="${stepData.new === 'a' ? 'cell-new' : ''}">${stepData.a}</td>`;
+                html += `<td class="${stepData.new === 'b' ? 'cell-new' : ''}">${stepData.b}</td>`;
+                html += `<td class="${stepData.new === 'aux' ? 'cell-new' : ''}">${stepData.aux}</td>`;
+            }
+            
+            row.innerHTML = html;
+            tbody.appendChild(row);
+            
+            const container = document.querySelector(`#${debugObj.tableId}`).parentElement;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Navegação Geral
+        function scrollToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+                
+                // Reset debuggers when entering their slide
+                if(slides[index].id === 'slide-debug-1') {
+                    debug1.currentStep = 0;
+                    document.querySelector(`#${debug1.tableId} tbody`).innerHTML = '';
+                    updateDebugger(debug1);
+                }
+                if(slides[index].id === 'slide-debug-2') {
+                    debug2.currentStep = 0;
+                    document.querySelector(`#${debug2.tableId} tbody`).innerHTML = '';
+                    updateDebugger(debug2);
+                }
+            }
+        }
+
+        function next() {
+            // Lógica para Depurador 1
+            if (slides[currentSlide].id === 'slide-debug-1') {
+                if (debug1.currentStep < debug1.steps.length - 1) {
+                    debug1.currentStep++;
+                    updateDebugger(debug1);
+                    return;
+                }
+            }
+            // Lógica para Depurador 2
+            if (slides[currentSlide].id === 'slide-debug-2') {
+                if (debug2.currentStep < debug2.steps.length - 1) {
+                    debug2.currentStep++;
+                    updateDebugger(debug2);
+                    return;
+                }
+            }
+            scrollToSlide(currentSlide + 1);
+        }
+
+        function prev() {
+            scrollToSlide(currentSlide - 1);
+        }
+
+        // Eventos
+        nextBtn.addEventListener('click', next);
+        prevBtn.addEventListener('click', prev);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+        });
+
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+        
+        // Inicializar depuradores no estado 0
+        updateDebugger(debug1);
+        updateDebugger(debug2);
+
+    </script>
+</body>
+</html>

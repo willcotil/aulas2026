@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 03: DOM & Eventos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta: https://colorhunt.co/palette/fdb5ce13244016476a3b9797 */
+            --bg: #f4f9fc;         /* Fundo Neutro Claro */
+            --slide-bg: #ffffff;   /* Branco */
+            --text: #132440;       /* Azul Profundo (Texto Principal) */
+            --primary: #16476A;    /* Azul Médio (Títulos) */
+            --accent: #3B9797;     /* Verde Água (Destaques/Botões) */
+            --highlight: #FDB5CE;  /* Rosa (Detalhes sutis) */
+            
+            --code-bg: #132440;    /* Fundo Código */
+            --code-text: #FDB5CE;  /* Texto Código */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Slides */
+        .slide {
+            background: var(--slide-bg);
+            padding: 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: var(--text);
+            color: var(--highlight);
+            text-align: center;
+            border: 10px solid var(--accent);
+        }
+        .slide.topic h1, .slide.topic h2, .slide.topic p { color: var(--highlight); }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); text-shadow: 0 0 15px rgba(59, 151, 151, 0.5); }
+
+        .slide-content-wrapper { max-width: 1000px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 30px; right: 40px; font-size: 1.2rem; color: var(--primary); font-weight: 800; opacity: 0.3; }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; border-bottom: 4px solid var(--highlight); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--highlight);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-variant-ligatures: none;
+        }
+        code { 
+            font-family: 'Fira Code', monospace; 
+            background: #eef6fa; 
+            color: #d63384;
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border: 1px solid #daeef7;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+        /* Layouts */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .col { background: #fdf2f6; padding: 25px; border-radius: 12px; border: 2px solid var(--highlight); }
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; }
+
+        /* Interactive Elements */
+        .interactive-area {
+            background: #fff;
+            border: 2px solid var(--text);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 8px 8px 0px var(--accent);
+        }
+        .interactive-area h3 { color: var(--accent); margin-bottom: 20px; }
+
+        /* Demo Elements */
+        .demo-box {
+            width: 150px;
+            height: 150px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .demo-input {
+            padding: 10px;
+            font-size: 1.2rem;
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            width: 80%;
+            margin-bottom: 10px;
+        }
+
+        .demo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            min-height: 40px;
+        }
+
+        /* Final List */
+        .final-list ol { counter-reset: item; list-style: none; padding: 0; }
+        .final-list li { 
+            background: white; margin-bottom: 10px; padding: 15px 15px 15px 60px; 
+            border-radius: 8px; position: relative; border: 2px solid #eef6fa; font-size: 1rem; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .final-list li::before {
+            content: counter(item); counter-increment: item; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: var(--accent); color: white; width: 30px; height: 30px; border-radius: 50%; 
+            text-align: center; font-size: 1rem; line-height: 30px; font-weight: bold;
+            box-shadow: 2px 2px 0 var(--text);
+        }
+
+        /* Controls */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--accent); }
+        .btn { background: white; border: 2px solid var(--accent); color: var(--accent); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn:hover { background: var(--accent); color: white; transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; }
+            .controls, .progress-bar, .interactive-area button { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; }
+            pre, .col, .interactive-area { border: 1px solid #000; color: black; background: #fff; box-shadow: none; }
+            h1, h2, p, li { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <h1>Aula 03: DOM & Eventos</h1>
+            <h2>Manipulando HTML com JS</h2>
+            <br>
+            <p><strong>Agenda do Dia:</strong></p>
+            <ol>
+                <li><strong>Parte 0: JS no Navegador</strong> (Setup Inicial).</li>
+                <li><strong>Parte 1: O DOM</strong> (A árvore da página).</li>
+                <li><strong>Parte 2: Seletores</strong> (Como "pegar" o HTML).</li>
+                <li><strong>Parte 3: Manipulação</strong> (Mudando texto e estilo).</li>
+                <li><strong>Parte 4: Eventos</strong> (Interatividade).</li>
+            </ol>
+            <div style="margin-top: 40px; color: var(--accent); font-weight: 600;">
+                Técnico em Informática • 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 0: CONFIGURAÇÃO -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-brands fa-html5"></i>
+            <h1>Parte 0: JS no Navegador</h1>
+            <p>Saindo do Terminal</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: ONDE VIVE O JS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">03</div>
+            <h2>Do Node para o Navegador</h2>
+            <p>Até agora, rodávamos <code>node arquivo.js</code> no terminal. O Node é ótimo para servidores e automação.</p>
+            <p>Porém, para criar interfaces visuais (Web ou Electron), precisamos que o <strong>Navegador</strong> execute nosso código.</p>
+            <div class="comparison">
+                <div class="col">
+                    <h3>Node.js</h3>
+                    <p>Sem interface gráfica (Apenas texto).</p>
+                    <p>Acesso a arquivos do PC.</p>
+                </div>
+                <div class="col">
+                    <h3>Navegador (Browser)</h3>
+                    <p>Interface Visual Rica (DOM).</p>
+                    <p>Segurança restrita (Sem acesso direto a arquivos).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: A TAG SCRIPT -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>A Tag <code>&lt;script&gt;</code></h2>
+            <p>É ela que conecta o HTML ao Javascript.</p>
+            <pre>
+&lt;!-- index.html --&gt;
+&lt;body&gt;
+  &lt;h1&gt;Minha Página&lt;/h1&gt;
+
+  &lt;!-- Recomendado: Antes de fechar o body --&gt;
+  &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;</pre>
+            <p class="highlight" style="color: var(--accent); font-weight:bold;">Importante: O JS deve carregar POR ÚLTIMO para garantir que os elementos da tela já existam.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: CONSOLE DO NAVEGADOR -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">05</div>
+            <h2>Onde está o <code>console.log</code>?</h2>
+            <p>No navegador, não temos o terminal do VSCode. Temos o <strong>Console do Desenvolvedor</strong>.</p>
+            <div class="col" style="background: white;">
+                <h3>Como acessar:</h3>
+                <ol>
+                    <li>Abra seu arquivo HTML no Chrome.</li>
+                    <li>Pressione <strong>F12</strong> (ou botão direito > Inspecionar).</li>
+                    <li>Clique na aba <strong>Console</strong>.</li>
+                </ol>
+            </div>
+            <p style="margin-top:20px;">É lá que veremos erros e mensagens.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: EXERCÍCIO SETUP -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">06</div>
+            <div class="interactive-area" style="text-align: left; padding: 40px;">
+                <h3><i class="fa-solid fa-bolt"></i> Exercício 0: Hello Browser</h3>
+                <p>Prepare o terreno:</p>
+                <ol>
+                    <li>Crie um arquivo <code>index.html</code> (digite <code>!</code> e tab no VSCode).</li>
+                    <li>Crie um arquivo <code>app.js</code> e escreva: <code>console.log("Olá do Navegador!");</code></li>
+                    <li>No HTML, adicione <code>&lt;script src="app.js"&gt;&lt;/script&gt;</code> antes de fechar o body.</li>
+                    <li>Abra o HTML no navegador, aperte F12 e veja a mensagem no Console.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: DOM -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-sitemap"></i>
+            <h1>Parte 1: O DOM</h1>
+            <p>Document Object Model</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: O CONCEITO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">08</div>
+            <h2>O que é o DOM?</h2>
+            <p>Quando o navegador carrega uma página, ele cria uma <strong>Árvore de Objetos</strong> que representa o HTML.</p>
+            <p>O Javascript não vê "texto" HTML, ele vê essa árvore. Cada tag (div, p, button) vira um <strong>Objeto</strong> no JS.</p>
+            <div class="comparison">
+                <div class="col">
+                    <h3>HTML (Texto)</h3>
+                    <pre>
+&lt;div&gt;
+  &lt;h1&gt;Olá&lt;/h1&gt;
+&lt;/div&gt;</pre>
+                </div>
+                <div class="col">
+                    <h3>DOM (Memória)</h3>
+                    <p><code>document</code> (Raiz)</p>
+                    <p>└─ <code>body</code></p>
+                    <p>&nbsp;&nbsp;&nbsp;└─ <code>div</code></p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <code>h1</code> ("Olá")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: SELEÇÃO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">09</div>
+            <h2>Selecionando Elementos</h2>
+            <p>Para mexer em algo, primeiro precisamos "pegar" esse algo. Antigamente usávamos <code>getElementById</code>, mas hoje usamos o poderoso <code>querySelector</code>.</p>
+            <pre>
+// Pega pelo ID (igual CSS)
+const titulo = document.querySelector("#meuTitulo");
+
+// Pega pela Classe
+const botoes = document.querySelector(".btn-salvar");
+
+// Pega pela Tag
+const paragrafo = document.querySelector("p");</pre>
+            <p class="highlight" style="color: var(--accent); font-weight:bold;">Se houver vários, ele pega apenas o primeiro!</p>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: MANIPULAÇÃO -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <h1>Parte 2: Manipulação</h1>
+            <p>Alterando a página dinamicamente</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: TEXTO E HTML -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">11</div>
+            <h2>Mudando o Conteúdo</h2>
+            <p>Depois de selecionar, podemos mudar o que está escrito.</p>
+            <pre>
+const titulo = document.querySelector("h1");
+
+// Muda apenas o texto
+titulo.innerText = "Novo Título";
+
+// Muda o HTML (permite tags)
+titulo.innerHTML = "Título &lt;i&gt;Itálico&lt;/i&gt;";</pre>
+            
+            <div class="interactive-area">
+                <h3>Teste ao Vivo</h3>
+                <h1 id="demoTitle" style="color: var(--text);">Texto Original</h1>
+                <button onclick="changeText()" style="margin-top:10px; padding:10px; background:var(--accent); color:white; border:none; border-radius:5px; cursor:pointer;">Mudar Texto via JS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: ESTILOS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">12</div>
+            <h2>Mudando o Estilo (CSS)</h2>
+            <p>Podemos acessar qualquer propriedade CSS via objeto <code>style</code>.</p>
+            <p>Nota: Propriedades com hífen viram CamelCase (ex: <code>background-color</code> vira <code>backgroundColor</code>).</p>
+            <pre>
+const caixa = document.querySelector("#minhaCaixa");
+
+caixa.style.backgroundColor = "red";
+caixa.style.fontSize = "20px";
+caixa.style.display = "none"; // Esconde</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: INTERATIVO ESTILO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">13</div>
+            <h2>Prática: Pintor</h2>
+            <p>Clique nos botões para manipular o estilo da caixa via JS.</p>
+            
+            <div class="interactive-area">
+                <div id="paintBox" class="demo-box">Caixa</div>
+                
+                <button onclick="paint('red')" style="background: red; color: white; border:none; padding:5px 10px;">Red</button>
+                <button onclick="paint('#132440')" style="background: #132440; color: white; border:none; padding:5px 10px;">Blue</button>
+                <button onclick="paint('#3B9797')" style="background: #3B9797; color: white; border:none; padding:5px 10px;">Teal</button>
+                <button onclick="toggleCircle()" style="background: gray; color: white; border:none; padding:5px 10px;">Círculo?</button>
+            </div>
+            
+            <pre style="margin-top: 10px;">
+// O que acontece no clique do botão Blue:
+caixa.style.backgroundColor = "#132440";</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: CÓDIGO DO PINTOR (NOVO) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">14</div>
+            <h2>Bastidores: Como funciona?</h2>
+            <p>Aqui está o código Javascript que fez a mágica acontecer no slide anterior.</p>
+            <div class="comparison">
+                <div class="col">
+                    <h3>Função Pintar</h3>
+                    <pre>
+function paint(cor) {
+    const box = document.querySelector("#paintBox");
+    box.style.backgroundColor = cor;
+}</pre>
+                </div>
+                <div class="col">
+                    <h3>Função Círculo (Toggle)</h3>
+                    <pre>
+function toggleCircle() {
+    const box = document.querySelector("#paintBox");
+    
+    if (box.style.borderRadius === "50%") {
+        box.style.borderRadius = "10px";
+    } else {
+        box.style.borderRadius = "50%";
+    }
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: EVENTOS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-computer-mouse"></i>
+            <h1>Parte 3: Eventos</h1>
+            <p>O Fim da Execução Linear</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 16: O CONCEITO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">16</div>
+            <h2>Programação Orientada a Eventos</h2>
+            <p>Em C, o programa começa no <code>main()</code> e vai linha a linha até o fim.</p>
+            <p>No JS (Front-end), o código carrega e <strong>fica esperando</strong> algo acontecer (um clique, uma tecla, o mouse mexer).</p>
+            <p class="highlight" style="color: var(--accent); font-weight: bold;">Nós criamos "Escutadores" (Listeners).</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 17: ADDEVENTLISTENER -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">17</div>
+            <h2>addEventListener</h2>
+            <p>A função mais importante do DOM. Ela liga um evento a uma função.</p>
+            <pre>
+const botao = document.querySelector("#btnSalvar");
+
+// Quando 'click' acontecer, execute a função
+botao.addEventListener("click", () => {
+    alert("Salvando...");
+    console.log("Clicou!");
+});</pre>
+            <p>Note o uso de uma <strong>Arrow Function</strong> como callback!</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 18: INPUTS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">18</div>
+            <h2>Lendo Inputs (Caixas de Texto)</h2>
+            <p>Para pegar o que o usuário digitou, não usamos <code>innerText</code>, usamos <code>value</code>.</p>
+            <pre>
+const campo = document.querySelector("#nome");
+const valor = campo.value;</pre>
+            
+            <p><strong>Evento 'input':</strong> Dispara a cada letra digitada.</p>
+            <pre>
+campo.addEventListener("input", () => {
+    console.log("Digitando: " + campo.value);
+});</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 19: ESPELHO MÁGICO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">19</div>
+            <h2>Prática: O Espelho</h2>
+            <p>Tudo o que você digita no input aparece no texto abaixo instantaneamente.</p>
+            
+            <div class="interactive-area">
+                <input type="text" id="mirrorInput" class="demo-input" placeholder="Digite aqui..." oninput="mirrorText()">
+                <p>Resultado:</p>
+                <div id="mirrorOutput" class="demo-text">...</div>
+            </div>
+            
+            <pre style="margin-top: 10px;">
+input.addEventListener("input", () => {
+    output.innerText = input.value;
+});</pre>
+        </div>
+    </div>
+
+    <!-- TÓPICO 4: CRIANDO ELEMENTOS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-hammer"></i>
+            <h1>Parte 4: Criando Elementos</h1>
+            <p>HTML Dinâmico</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 21: CREATEELEMENT -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">21</div>
+            <h2>Criando e Adicionando</h2>
+            <p>Podemos criar tags novas que não existiam no HTML original.</p>
+            <ol>
+                <li>Criar: <code>document.createElement("tag")</code></li>
+                <li>Preencher: Mudar <code>innerText</code> ou estilo.</li>
+                <li>Adicionar: <code>pai.appendChild(filho)</code></li>
+            </ol>
+            <pre>
+// 1. Cria
+const novoItem = document.createElement("li");
+
+// 2. Preenche
+novoItem.innerText = "Comprar Leite";
+
+// 3. Adiciona na lista existente (ul)
+document.querySelector("ul").appendChild(novoItem);</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 22: LISTA FINAL -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">22</div>
+            <h2>Lista de Exercícios (DOM)</h2>
+            <div class="final-list">
+                <ol>
+                    <li>Crie um HTML com um <code>h1</code> com id "titulo". No JS, mude o texto dele para "Aula de DOM".</li>
+                    <li>Crie 3 botões com cores diferentes (Vermelho, Verde, Azul). Ao clicar em cada um, mude a cor de fundo do <code>body</code> para a cor correspondente.</li>
+                    <li>Crie um contador: Um número 0 na tela e dois botões (+ e -). Ao clicar, o número deve atualizar.</li>
+                    <li>Crie um input de texto e um botão "Mostrar". Ao clicar no botão, exiba o conteúdo do input em um <code>alert</code>.</li>
+                    <li><strong>Lâmpada:</strong> Coloque uma imagem de lâmpada (apagada). Ao clicar nela, troque a imagem para uma lâmpada acesa (troque o <code>src</code>).</li>
+                    <li>Crie dois inputs numéricos e um botão "Somar". Ao clicar, mostre o resultado da soma em um <code>span</code>.</li>
+                    <li><strong>Dark Mode:</strong> Crie um botão que, ao ser clicado, alterna (toggle) uma classe <code>.dark</code> no body que muda as cores.</li>
+                    <li>Crie uma lista <code>ul</code> vazia. Crie um input e um botão "Adicionar". Ao clicar, adicione um novo <code>li</code> na lista com o texto do input.</li>
+                    <li>No exercício anterior, limpe o input após adicionar o item (faça <code>input.value = ""</code>).</li>
+                    <li><strong>Desafio:</strong> Crie uma "Galeria". Tenha uma imagem grande e várias miniaturas. Ao clicar numa miniatura, a imagem grande deve mostrar a foto clicada.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    // Slide Nav
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    // --- Demo Functions ---
+    function changeText() {
+        const title = document.getElementById("demoTitle");
+        title.innerText = (title.innerText === "Texto Original") ? "Texto Alterado!" : "Texto Original";
+        title.style.color = (title.innerText === "Texto Original") ? "#132440" : "#3B9797";
+    }
+
+    function paint(color) {
+        document.getElementById("paintBox").style.backgroundColor = color;
+    }
+
+    function toggleCircle() {
+        const box = document.getElementById("paintBox");
+        if (box.style.borderRadius === "50%") {
+            box.style.borderRadius = "10px";
+        } else {
+            box.style.borderRadius = "50%";
+        }
+    }
+
+    function mirrorText() {
+        const val = document.getElementById("mirrorInput").value;
+        const out = document.getElementById("mirrorOutput");
+        out.innerText = val === "" ? "..." : val;
+    }
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

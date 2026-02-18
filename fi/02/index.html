@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 02 - Conceitos Básicos de Computação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Personalizada */
+        :root {
+            --color-teal-dark: #3F9AAE;
+            --color-teal-light: #79C9C5;
+            --color-cream: #FFE2AF;
+            --color-orange: #F96E5B;
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--color-cream);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            /* Garante que a página não role no modo apresentação */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            /* Animação e Estado */
+            opacity: 0;
+            transform: scale(0.95);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            background-color: var(--color-cream);
+            overflow-y: auto; /* Permite rolar apenas o conteúdo do slide se necessário */
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor */
+        .text-teal-dark { color: var(--color-teal-dark); }
+        .text-teal-light { color: var(--color-teal-light); }
+        .text-orange { color: var(--color-orange); }
+        .bg-teal-dark { background-color: var(--color-teal-dark); }
+        .bg-teal-light { background-color: var(--color-teal-light); }
+        .bg-orange { background-color: var(--color-orange); }
+        .bg-cream { background-color: var(--color-cream); }
+        
+        .border-teal-dark { border-color: var(--color-teal-dark); }
+        .border-orange { border-color: var(--color-orange); }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px -10px rgba(63, 154, 174, 0.2);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-teal-light); }
+        
+        .img-placeholder {
+            background: #f0f0f0;
+            border: 2px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9rem;
+            text-align: center;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+            }
+
+            .slide { 
+                position: relative !important; /* Remove o posicionamento absoluto */
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                
+                display: block !important; /* Garante que ocupem espaço */
+                
+                page-break-inside: avoid;
+                page-break-after: always; 
+                
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            /* Esconde elementos de navegação */
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            /* Ajustes de Tipografia para Papel */
+            h1 { font-size: 24pt !important; color: black !important; }
+            h2 { font-size: 18pt !important; color: black !important; border-bottom: 1px solid #000; padding-bottom: 5px; }
+            p, li { font-size: 12pt !important; color: #333 !important; }
+            
+            .card {
+                border: 1px solid #ddd;
+                box-shadow: none !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            /* Garante contraste nos cards escuros */
+            .bg-teal-dark { background-color: #ddd !important; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur-md border-b border-teal-light/30 shadow-sm">
+        <div class="flex items-center space-x-4">
+            <span class="font-bold text-teal-dark tracking-wide">AULA 02</span>
+            <div class="h-2 w-32 md:w-64 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-orange transition-all duration-300 w-0"></div>
+            </div>
+            <!-- Contador Binário -->
+            <span id="slideCounter" class="text-xs font-mono text-gray-500 tracking-wider">000000 / 000000</span>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-teal-light/20 rounded-lg text-teal-dark transition" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-teal-dark text-white rounded-lg hover:bg-teal-dark/90 transition flex items-center gap-2" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Imprimir PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-orange text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase mb-6 inline-block">Fundamentos de Informática</span>
+                <h1 class="text-5xl md:text-6xl font-extrabold text-teal-dark mb-6 leading-tight">Conceitos Básicos<br>& A Jornada do Bit</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Hardware, Software, DIKW e o Sistema Binário.</p>
+            </div>
+            <div class="mt-12 animate-bounce text-teal-dark no-print">
+                <p class="text-xs uppercase tracking-widest mb-2">Start</p>
+                <i data-lucide="arrow-down" class="mx-auto"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Definição Básica -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-teal-dark mb-8">O que é um Computador?</h2>
+            <div class="card p-8 max-w-3xl text-center">
+                <p class="text-xl leading-relaxed">
+                    "Uma máquina eletrônica capaz de receber <strong>dados</strong> (entrada), <strong>processá-los</strong> de acordo com regras lógicas (programa) e produzir <strong>informação</strong> (saída)."
+                </p>
+            </div>
+            <div class="mt-8 flex gap-4 text-sm font-mono text-gray-500">
+                <span>Receber 📥</span> <span>➜</span> <span>Processar ⚙️</span> <span>➜</span> <span>Armazenar 💾</span> <span>➜</span> <span>Exibir 📤</span>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: O Grande Divisor -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-10">As Duas Metades</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+                <div class="card p-8 border-t-8 border-teal-dark hover:scale-105 transition">
+                    <div class="w-16 h-16 bg-teal-dark rounded-full flex items-center justify-center text-white mb-4 mx-auto"><i data-lucide="monitor" size="32"></i></div>
+                    <h3 class="text-2xl font-bold text-center mb-2">Hardware</h3>
+                    <p class="text-center text-gray-600">A parte física.</p>
+                    <p class="text-center text-xs mt-2 text-orange italic">"O que você chuta."</p>
+                </div>
+                <div class="card p-8 border-t-8 border-orange hover:scale-105 transition">
+                    <div class="w-16 h-16 bg-orange rounded-full flex items-center justify-center text-white mb-4 mx-auto"><i data-lucide="code" size="32"></i></div>
+                    <h3 class="text-2xl font-bold text-center mb-2">Software</h3>
+                    <p class="text-center text-gray-600">A parte lógica.</p>
+                    <p class="text-center text-xs mt-2 text-teal-dark italic">"O que você xinga."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Hardware Detalhado -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">1. Hardware</h2>
+            <p class="text-center max-w-2xl mb-8">Corresponde a todos os componentes físicos, tangíveis e eletrônicos.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+                <div class="card p-4">
+                    <img src="img/cpu.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                    <h4 class="font-bold">CPU</h4>
+                    <p class="text-xs">O Cérebro</p>
+                </div>
+                <div class="card p-4">
+                    <img src="img/ram.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                    <h4 class="font-bold">RAM</h4>
+                    <p class="text-xs">Memória de Trabalho</p>
+                </div>
+                <div class="card p-4">
+                    <img src="img/disco.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                    <h4 class="font-bold">Armazenamento</h4>
+                    <p class="text-xs">Memória de Longo Prazo</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Analogia Corpo Humano (ATUALIZADO) -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-orange mb-8">Analogia: Corpo Humano</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center w-full max-w-6xl">
+                <img src="img/androide.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="card p-4 border-l-4 border-teal-dark">
+                        <div class="text-2xl mb-1">🧠</div>
+                        <h4 class="font-bold text-sm text-teal-dark">Cérebro</h4>
+                        <p class="text-xs">Processador (CPU)</p>
+                    </div>
+                    <div class="card p-4 border-l-4 border-orange">
+                        <div class="text-2xl mb-1">👀 👂 🖐️</div>
+                        <h4 class="font-bold text-sm text-orange">Sentidos</h4>
+                        <p class="text-xs">Teclado, Mouse (Entrada)</p>
+                    </div>
+                    <div class="card p-4 border-l-4 border-teal-light">
+                        <div class="text-2xl mb-1">🗣️ 👋</div>
+                        <h4 class="font-bold text-sm text-teal-light">Fala e Gestos</h4>
+                        <p class="text-xs">Monitor, Som (Saída)</p>
+                    </div>
+                    <div class="card p-4 border-l-4 border-gray-600">
+                        <div class="text-2xl mb-1">⚡</div>
+                        <h4 class="font-bold text-sm text-gray-600">Sistema Nervoso</h4>
+                        <p class="text-xs">Placa-Mãe (Conecta tudo)</p>
+                    </div>
+                    <div class="card p-4 border-l-4 border-blue-600">
+                        <div class="text-2xl mb-1">📚</div>
+                        <h4 class="font-bold text-sm text-blue-600">Memória Longa</h4>
+                        <p class="text-xs">Discos (HD/SSD)</p>
+                    </div>
+                    <div class="card p-4 border-l-4 border-red-500">
+                        <div class="text-2xl mb-1">💭</div>
+                        <h4 class="font-bold text-sm text-red-500">"Na ponta da língua"</h4>
+                        <p class="text-xs">RAM (Curto prazo/Rápida)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Software Detalhado -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">2. Software</h2>
+            <p class="text-center max-w-2xl mb-8">Parte lógica. Conjunto de instruções que dizem ao hardware o que fazer.</p>
+            <div class="card p-8 bg-white max-w-3xl w-full">
+                <h3 class="font-bold text-orange mb-4 border-b pb-2">Hierarquia do Software</h3>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="bg-teal-dark text-white text-xs px-2 py-1 rounded mr-3 mt-1">Nível 1</span>
+                        <div>
+                            <strong>Software de Sistema (SO):</strong>
+                            <p class="text-sm text-gray-500">Windows, Linux, Android. Gerencia a máquina.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-teal-light text-white text-xs px-2 py-1 rounded mr-3 mt-1">Nível 2</span>
+                        <div>
+                            <strong>Software de Aplicação:</strong>
+                            <p class="text-sm text-gray-500">Excel, Chrome, Jogos. Serve ao usuário.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Dado vs Informação -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-10">Conceito Fundamental</h2>
+            <div class="flex gap-12 items-center justify-center w-full">
+                <div class="text-center w-64 p-6 bg-white rounded-xl shadow-sm">
+                    <div class="text-6xl font-mono text-gray-400 mb-2">42</div>
+                    <h3 class="font-bold text-gray-600">DADO</h3>
+                    <p class="text-xs text-gray-400 mt-2">Elemento bruto. Sozinho não significa nada.</p>
+                </div>
+                <div class="text-4xl text-teal-dark">➜</div>
+                <div class="text-center w-64 p-6 bg-white rounded-xl shadow-lg border-2 border-teal-dark">
+                    <div class="text-6xl font-mono text-teal-dark mb-2">42ºC</div>
+                    <h3 class="font-bold text-teal-dark">INFORMAÇÃO</h3>
+                    <p class="text-xs text-teal-dark/60 mt-2">Dado + Contexto.<br>"O paciente está com febre."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Pirâmide DIKW -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">A Pirâmide DIKW</h2>
+            <p class="mb-8 text-gray-500">Data, Information, Knowledge, Wisdom</p>
+            
+            <div class="flex flex-col-reverse gap-2 w-full max-w-lg items-center text-center text-white font-bold">
+                <!-- Wisdom -->
+                <div class="w-24 py-2 bg-blue-600 rounded-t-xl shadow-lg">W</div>
+                <!-- Knowledge -->
+                <div class="w-48 py-2 bg-green-500 shadow-lg">K</div>
+                <!-- Information -->
+                <div class="w-72 py-2 bg-orange shadow-lg">I</div>
+                <!-- Data -->
+                <div class="w-96 py-2 bg-red-500 rounded-b-xl shadow-lg">D</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-8 w-full max-w-4xl text-sm">
+                <div class="bg-red-50 p-3 border-l-4 border-red-500">
+                    <strong>DATA (Dado):</strong> Fatos brutos, símbolos, números sem contexto. <br><em>Ex: Vermelho</em>
+                </div>
+                <div class="bg-orange/10 p-3 border-l-4 border-orange">
+                    <strong>INFORMATION (Informação):</strong> Dados processados com significado. <br><em>Ex: Sinal Vermelho no semáforo.</em>
+                </div>
+                <div class="bg-green-50 p-3 border-l-4 border-green-500">
+                    <strong>KNOWLEDGE (Conhecimento):</strong> Informação aplicada/entendida. <br><em>Ex: Sinal vermelho significa "Pare o carro".</em>
+                </div>
+                <div class="bg-blue-50 p-3 border-l-4 border-blue-600">
+                    <strong>WISDOM (Sabedoria):</strong> Julgamento ético e previsão. <br><em>Ex: Parar evita acidentes e salva vidas.</em>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: Ciclo de Processamento -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-8">O Ciclo de Processamento</h2>
+            <div class="flex items-center justify-center gap-4 w-full max-w-5xl">
+                <!-- Entrada -->
+                <div class="bg-white p-6 rounded-xl border-b-4 border-yellow-400 text-center w-64 shadow-sm">
+                    <h3 class="text-xl font-bold mb-2">1. Entrada</h3>
+                    <p class="text-sm text-gray-500">Receber Dados</p>
+                    <div class="mt-4 text-2xl">📥</div>
+                </div>
+                <i data-lucide="arrow-right" class="text-gray-300"></i>
+                <!-- Processamento -->
+                <div class="bg-white p-6 rounded-xl border-b-4 border-teal-dark text-center w-64 shadow-lg scale-110">
+                    <h3 class="text-xl font-bold mb-2 text-teal-dark">2. Processamento</h3>
+                    <p class="text-sm text-gray-500">Transformar</p>
+                    <div class="mt-4 text-2xl animate-spin-slow">⚙️</div>
+                </div>
+                <i data-lucide="arrow-right" class="text-gray-300"></i>
+                <!-- Saída -->
+                <div class="bg-white p-6 rounded-xl border-b-4 border-green-500 text-center w-64 shadow-sm">
+                    <h3 class="text-xl font-bold mb-2">3. Saída</h3>
+                    <p class="text-sm text-gray-500">Gerar Informação</p>
+                    <div class="mt-4 text-2xl">📤</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: Periféricos de Entrada -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">Dispositivos de Entrada</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl">
+                <div class="card p-4 text-center"><i data-lucide="keyboard" class="mx-auto mb-2 w-8 h-8 text-teal-dark"></i><h4 class="font-bold">Teclado</h4></div>
+                <div class="card p-4 text-center"><i data-lucide="mouse" class="mx-auto mb-2 w-8 h-8 text-teal-dark"></i><h4 class="font-bold">Mouse</h4></div>
+                <div class="card p-4 text-center"><i data-lucide="mic" class="mx-auto mb-2 w-8 h-8 text-teal-dark"></i><h4 class="font-bold">Microfone</h4></div>
+                <div class="card p-4 text-center"><i data-lucide="scan" class="mx-auto mb-2 w-8 h-8 text-teal-dark"></i><h4 class="font-bold">Scanner</h4></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Periféricos de Saída -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">Dispositivos de Saída</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-5xl">
+                <div class="card p-4 text-center"><i data-lucide="monitor" class="mx-auto mb-2 w-8 h-8 text-orange"></i><h4 class="font-bold">Monitor</h4></div>
+                <div class="card p-4 text-center"><i data-lucide="printer" class="mx-auto mb-2 w-8 h-8 text-orange"></i><h4 class="font-bold">Impressora</h4></div>
+                <div class="card p-4 text-center"><i data-lucide="speaker" class="mx-auto mb-2 w-8 h-8 text-orange"></i><h4 class="font-bold">Som</h4></div>
+                <div class="card p-4 text-center"><i data-lucide="projector" class="mx-auto mb-2 w-8 h-8 text-orange"></i><h4 class="font-bold">Projetor</h4></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Memória - RAM vs Armazenamento -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-teal-dark mb-8">Memória: Onde guardo as coisas?</h2>
+            <div class="flex flex-col md:flex-row gap-8 w-full max-w-5xl">
+                <div class="flex-1 card p-6 border-t-4 border-green-500">
+                    <h3 class="text-xl font-bold mb-2">Memória RAM</h3>
+                    <p class="text-xs uppercase tracking-widest text-green-600 font-bold mb-4">Volátil</p>
+                    <ul class="text-sm space-y-2">
+                        <li>• Muito rápida.</li>
+                        <li>• É a "mesa de trabalho" do computador.</li>
+                        <li>• <span class="text-red-500 font-bold">Apaga se a luz acabar.</span></li>
+                    </ul>
+                </div>
+                <div class="flex-1 card p-6 border-t-4 border-blue-500">
+                    <h3 class="text-xl font-bold mb-2">Armazenamento (HD/SSD)</h3>
+                    <p class="text-xs uppercase tracking-widest text-blue-600 font-bold mb-4">Não Volátil</p>
+                    <ul class="text-sm space-y-2">
+                        <li>• Mais lenta que a RAM.</li>
+                        <li>• É o "arquivo/armário" do computador.</li>
+                        <li>• <span class="text-green-600 font-bold">Mantém os dados salvos.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: Interativo - Memória -->
+        <section class="slide no-print bg-teal-dark/5">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">Quiz da Memória 🧠</h2>
+            <p class="mb-8 text-center">Onde fica salvo quando...</p>
+            <div class="grid grid-cols-1 gap-4 w-full max-w-md">
+                <div class="card p-4">
+                    <p class="font-bold mb-2">Você está digitando um texto no Word (sem salvar):</p>
+                    <div class="flex gap-2">
+                        <button onclick="alert('Correto! Está na memória temporária.')" class="bg-green-100 hover:bg-green-200 px-4 py-1 rounded text-sm w-full font-bold text-green-800">RAM</button>
+                        <button onclick="alert('Errado! Se não salvou, não está no disco.')" class="bg-gray-100 hover:bg-gray-200 px-4 py-1 rounded text-sm w-full">HD/SSD</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- JORNADA DO BIT AO BYTE -->
+        <!-- ============================================== -->
+
+        <!-- SLIDE 14: Introdução ao Bit -->
+        <section class="slide bg-teal-dark text-white">
+            <div class="text-center">
+                <h2 class="text-6xl font-black mb-6">0 e 1</h2>
+                <h3 class="text-2xl font-light mb-8">A Jornada do Binário</h3>
+                <div class="flex gap-8 justify-center items-center">
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 border-4 border-white rounded-full flex items-center justify-center text-4xl mb-2 opacity-50">⛔</div>
+                        <p>0 (Desligado)</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-white text-teal-dark rounded-full flex items-center justify-center text-4xl mb-2 font-bold shadow-lg animate-pulse">💡</div>
+                        <p>1 (Ligado)</p>
+                    </div>
+                </div>
+                <div class="mt-12 bg-white/10 p-4 rounded-lg backdrop-blur">
+                    <p class="font-bold text-xl">BIT = BInary digiT</p>
+                    <p class="text-sm">A menor unidade de informação possível.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Por que Binário? (Corrigido) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">Por que não usamos decimal?</h2>
+            <p class="max-w-2xl text-center mb-8">Humanos têm 10 dedos (Sistema Decimal). Computadores usam eletricidade.</p>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="card p-6 text-center border-l-4 border-orange">
+                    <h3 class="font-bold text-lg mb-2">Sistema Decimal (Base 10)</h3>
+                    <p class="text-sm">Dígitos: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9</p>
+                    <p class="text-xs text-gray-500 mt-2">Difícil distinguir 10 níveis de voltagem sem erros.</p>
+                </div>
+                <!-- Correção de contraste aqui -->
+                <div class="card p-6 text-center border-l-4 border-teal-dark bg-teal-dark text-white">
+                    <h3 class="font-bold text-lg mb-2 text-teal-dark">Sistema Binário (Base 2)</h3>
+                    <p class="text-sm text-teal-dark">Dígitos: 0, 1</p>
+                    <p class="text-xs text-gray-500 mt-2">Fácil: Tem corrente (1) ou Não tem corrente (0).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: Como contar em Binário -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">Contando até 15 com 4 bits</h2>
+            <p class="mb-6 text-center">No decimal, quando acabam os números (9), adicionamos uma casa (10). No binário, quando acaba (1), adicionamos uma casa (10).</p>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl font-mono text-sm bg-white p-6 rounded-xl shadow-lg">
+                <div>
+                    <div class="flex justify-between border-b py-1"><span>Decimal</span> <span>Binário (4 bits)</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>0</span> <span class="text-teal-dark font-bold">0000</span></div>
+                    <div class="flex justify-between py-1"><span>1</span> <span class="text-teal-dark font-bold">0001</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>2</span> <span class="text-teal-dark font-bold">0010</span></div>
+                    <div class="flex justify-between py-1"><span>3</span> <span class="text-teal-dark font-bold">0011</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>4</span> <span class="text-teal-dark font-bold">0100</span></div>
+                    <div class="flex justify-between py-1"><span>5</span> <span class="text-teal-dark font-bold">0101</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>6</span> <span class="text-teal-dark font-bold">0110</span></div>
+                    <div class="flex justify-between py-1"><span>7</span> <span class="text-teal-dark font-bold">0111</span></div>
+                </div>
+                <div>
+                    <div class="flex justify-between border-b py-1"><span>Decimal</span> <span>Binário (4 bits)</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>8</span> <span class="text-teal-dark font-bold">1000</span></div>
+                    <div class="flex justify-between py-1"><span>9</span> <span class="text-teal-dark font-bold">1001</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>10</span> <span class="text-teal-dark font-bold">1010</span></div>
+                    <div class="flex justify-between py-1"><span>11</span> <span class="text-teal-dark font-bold">1011</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>12</span> <span class="text-teal-dark font-bold">1100</span></div>
+                    <div class="flex justify-between py-1"><span>13</span> <span class="text-teal-dark font-bold">1101</span></div>
+                    <div class="flex justify-between py-1 bg-gray-50"><span>14</span> <span class="text-teal-dark font-bold">1110</span></div>
+                    <div class="flex justify-between py-1"><span>15</span> <span class="text-teal-dark font-bold">1111</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: O Byte -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-orange mb-6">O Nascimento do Byte</h2>
+            <div class="flex flex-col items-center space-y-8">
+                <div class="flex gap-1">
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">0</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">1</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">0</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">0</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">0</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">0</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">0</div>
+                    <div class="w-12 h-16 border-2 border-gray-300 rounded flex items-center justify-center font-mono text-2xl">1</div>
+                </div>
+                
+                <div class="max-w-2xl text-center space-y-4">
+                    <p class="text-xl"><strong>1 Byte = 8 Bits</strong></p>
+                    <p class="text-gray-600">Por que 8? Porque era o suficiente para representar uma letra inteira do alfabeto, números e símbolos na tabela ASCII.</p>
+                </div>
+
+                <div class="card p-4 bg-teal-dark text-white font-mono">
+                    01000001 = Letra 'A'
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: 256 Valores -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">O Poder do Byte</h2>
+            <p class="text-center mb-8">Com 8 interruptores (bits), quantas combinações podemos fazer?</p>
+            
+            <div class="text-6xl font-black text-orange mb-4">256</div>
+            <p class="text-gray-500 mb-8">De 0 a 255</p>
+
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200 font-mono text-lg">
+                2<sup class="text-sm">8</sup> = 2 x 2 x 2 x 2 x 2 x 2 x 2 x 2 = 256
+            </div>
+            
+            <p class="mt-8 text-sm text-gray-500 max-w-md text-center">É por isso que as cores RGB vão até 255 e os IPs antigos iam até 255!</p>
+        </section>
+
+        <!-- SLIDE 19: Soma Binária -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">Aritmética Binária: Soma</h2>
+            <div class="grid grid-cols-2 gap-12 w-full max-w-4xl items-center">
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-4 text-center border-b pb-2">Regras</h3>
+                    <ul class="space-y-2 font-mono text-sm">
+                        <li>0 + 0 = 0</li>
+                        <li>0 + 1 = 1</li>
+                        <li>1 + 0 = 1</li>
+                        <li class="bg-yellow-100 p-1">1 + 1 = 0 (e "vai 1")</li>
+                    </ul>
+                </div>
+                
+                <div class="font-mono text-3xl bg-gray-900 text-green-400 p-8 rounded-xl text-right">
+                    <div class="text-xs text-gray-500 mb-2">Exemplo (2 + 1 = 3)</div>
+                    <p>  0010 (2)</p>
+                    <p>+ 0001 (1)</p>
+                    <p class="border-t border-gray-600 mt-2 pt-2">  0011 (3)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Subtração Binária -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">Aritmética Binária: Subtração</h2>
+            <div class="grid grid-cols-2 gap-12 w-full max-w-4xl items-center">
+                 <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-4 text-center border-b pb-2">Regras</h3>
+                    <ul class="space-y-2 font-mono text-sm">
+                        <li>1 - 1 = 0</li>
+                        <li>1 - 0 = 1</li>
+                        <li>0 - 0 = 0</li>
+                        <li class="bg-yellow-100 p-1">0 - 1 = 1 (pede emprestado)</li>
+                    </ul>
+                </div>
+
+                <div class="font-mono text-3xl bg-gray-900 text-green-400 p-8 rounded-xl text-right">
+                    <div class="text-xs text-gray-500 mb-2">Exemplo (3 - 1 = 2)</div>
+                    <p>  0011 (3)</p>
+                    <p>- 0001 (1)</p>
+                    <p class="border-t border-gray-600 mt-2 pt-2">  0010 (2)</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SLIDE 21: Unidades de Medida -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">A Escada dos Bytes</h2>
+            <div class="space-y-4 w-full max-w-2xl">
+                <div class="flex items-center bg-white p-3 rounded shadow-sm">
+                    <div class="w-24 font-bold text-orange">Bit</div>
+                    <div class="flex-1 text-sm">0 ou 1</div>
+                </div>
+                <div class="flex items-center bg-white p-3 rounded shadow-sm">
+                    <div class="w-24 font-bold text-orange">Byte</div>
+                    <div class="flex-1 text-sm">8 bits (Uma letra)</div>
+                </div>
+                <div class="flex items-center bg-white p-3 rounded shadow-sm">
+                    <div class="w-24 font-bold text-orange">KB</div>
+                    <div class="flex-1 text-sm">Kilobyte (1024 bytes) - Texto</div>
+                </div>
+                <div class="flex items-center bg-white p-3 rounded shadow-sm border-2 border-teal-dark">
+                    <div class="w-24 font-bold text-teal-dark">MB</div>
+                    <div class="flex-1 text-sm">Megabyte (1024 KB) - MP3/Foto</div>
+                </div>
+                <div class="flex items-center bg-white p-3 rounded shadow-sm">
+                    <div class="w-24 font-bold text-orange">GB</div>
+                    <div class="flex-1 text-sm">Gigabyte (1024 MB) - Vídeo HD</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SLIDE 22: Desafio Binário -->
+        <section class="slide no-print bg-teal-dark/10">
+            <h2 class="text-3xl font-bold text-teal-dark mb-8">Desafio Binário 🔢</h2>
+            <p class="mb-4">Como se escreve o número <strong>5</strong> em binário (4 bits)?</p>
+            <p class="text-xs mb-8 text-gray-500">Dica: 4 + 1 = 5. (Posições: 8 4 2 1)</p>
+            
+            <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+                <button onclick="alert('Errado! Isso é 3 (2+1).')" class="card p-4 hover:bg-red-100 font-mono">0011</button>
+                <button onclick="alert('Correto! (0x8 + 1x4 + 0x2 + 1x1) = 5')" class="card p-4 border-2 border-teal-dark hover:bg-teal-dark hover:text-white font-mono font-bold">0101</button>
+                <button onclick="alert('Errado! Isso é 4 (4).')" class="card p-4 hover:bg-red-100 font-mono">0100</button>
+                <button onclick="alert('Errado! Isso é 7 (4+2+1).')" class="card p-4 hover:bg-red-100 font-mono">0111</button>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- CONTINUAÇÃO (CONTEÚDO EXTRA) -->
+        <!-- ============================================== -->
+
+        <!-- SLIDE 23: Periféricos Intro -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-teal-dark mb-8">Periféricos: A Comunicação</h2>
+            <div class="grid grid-cols-3 gap-8 w-full max-w-5xl">
+                <!-- Entrada -->
+                <div class="bg-teal-dark/10 p-6 rounded-xl border border-teal-dark">
+                    <h3 class="font-bold text-teal-dark mb-4 text-center border-b pb-2 border-teal-dark/20">ENTRADA (Input)</h3>
+                    <p class="text-sm text-center mb-4">Enviam dados PARA o computador.</p>
+                    <div class="flex justify-center gap-2 text-2xl">⌨️ 🖱️ 🎤 📷</div>
+                </div>
+                <!-- Saída -->
+                <div class="bg-orange/10 p-6 rounded-xl border border-orange">
+                    <h3 class="font-bold text-orange mb-4 text-center border-b pb-2 border-orange/20">SAÍDA (Output)</h3>
+                    <p class="text-sm text-center mb-4">Recebem dados DO computador.</p>
+                    <div class="flex justify-center gap-2 text-2xl">🖥️ 🖨️ 🔊 🎧</div>
+                </div>
+                <!-- Entrada e Saída -->
+                <div class="bg-teal-light/20 p-6 rounded-xl border border-teal-light">
+                    <h3 class="font-bold text-teal-dark mb-4 text-center border-b pb-2 border-teal-light/50">HÍBRIDOS (I/O)</h3>
+                    <p class="text-sm text-center mb-4">Fazem os dois sentidos.</p>
+                    <div class="flex justify-center gap-2 text-2xl">📱 (Touch) 💾 (Pendrive)</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SLIDE 24 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4">Software Livre (GPL)</h2>
+            <img src="img/gnu.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center">Código aberto. Liberdade para usar, estudar, modificar e distribuir.</p>
+        </section>
+
+        <!-- SLIDE 25 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-orange">Exemplo: O Caixa Eletrônico</h2>
+            <ul class="list-disc space-y-2 text-left text-lg">
+                <li><strong>Entrada:</strong> Cartão + Senha (Teclado)</li>
+                <li><strong>Processamento:</strong> Verificar saldo no banco de dados.</li>
+                <li><strong>Saída:</strong> Dinheiro (Dispensador) + Recibo.</li>
+            </ul>
+        </section>
+
+        <!-- SLIDE 26 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Curiosidade: O Primeiro Mouse</h2>
+            <img src="img/mouse64.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Feito de madeira em 1964 por Douglas Engelbart.</p>
+        </section>
+
+        <!-- SLIDES 27-33: Placeholders Solicitados -->
+        
+        <!-- SLIDE 27 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Firmware</h2>
+            <img src="img/firmware.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Um software especial gravado diretamente no hardware. Ex: A BIOS do computador.</p>
+        </section>
+
+        <!-- SLIDE 28 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-orange">Drivers</h2>
+            <img src="img/driver.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Programas tradutores. Ensinam o Sistema Operacional a conversar com um hardware específico (ex: placa de vídeo).</p>
+        </section>
+
+        <!-- SLIDE 29 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Cloud Computing (Nuvem)</h2>
+            <img src="img/nuvem.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Usar hardware e software via internet. Seus dados não estão no seu PC, mas em servidores gigantes (Data Centers).</p>
+        </section>
+
+        <!-- SLIDE 30 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Placa de Vídeo (GPU)</h2>
+            <img src="img/gpu.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Um "cérebro" extra dedicado apenas para desenhar imagens na tela (Jogos, Renderização 3D).</p>
+        </section>
+
+        <!-- SLIDE 31 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Placa de Rede</h2>
+            <img src="img/rede.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">O componente responsável por conectar o computador à internet ou a outros computadores.</p>
+        </section>
+
+        <!-- SLIDE 32 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Fonte de Alimentação</h2>
+            <img src="img/fonte.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">Converte a energia da tomada (AC) para a energia que o PC usa (DC). O coração elétrico.</p>
+        </section>
+
+        <!-- SLIDE 33 -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-4 text-teal-dark">Gabinete</h2>
+            <img src="img/gabinete.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
+            <p class="max-w-xl text-center mt-4">A "caixa" que protege todos os componentes internos. Não confundir com CPU!</p>
+        </section>
+
+        <!-- SLIDE 34: Interativo - Receita de Bolo -->
+        <section class="slide no-print bg-orange/5">
+            <h2 class="text-3xl font-bold text-orange mb-6">Analogia Final: O Bolo 🍰</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl text-center">
+                <div class="card p-6">
+                    <div class="text-4xl mb-2">🥣</div>
+                    <h3 class="font-bold text-gray-700">Hardware</h3>
+                    <p class="text-xs mt-2">A batedeira, o forno, a forma.</p>
+                </div>
+                <div class="card p-6 border-2 border-orange">
+                    <div class="text-4xl mb-2">📜</div>
+                    <h3 class="font-bold text-orange">Software</h3>
+                    <p class="text-xs mt-2">A Receita (Instruções passo a passo).</p>
+                </div>
+                <div class="card p-6">
+                    <div class="text-4xl mb-2">🥚</div>
+                    <h3 class="font-bold text-gray-700">Dados</h3>
+                    <p class="text-xs mt-2">Os ingredientes (Ovos, farinha).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 35: Resumo Visual -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold mb-8">Mapa Mental da Aula</h2>
+            <div class="flex flex-col items-center gap-4 w-full max-w-2xl text-sm">
+                <div class="bg-teal-dark text-white px-6 py-3 rounded-xl w-full text-center font-bold">COMPUTADOR</div>
+                <div class="flex w-full gap-4">
+                    <div class="flex-1 flex flex-col gap-2">
+                        <div class="bg-teal-light text-white px-4 py-2 rounded text-center font-bold">HARDWARE (Físico)</div>
+                        <div class="bg-gray-100 p-2 rounded text-center">CPU / RAM / HD</div>
+                        <div class="bg-gray-100 p-2 rounded text-center">Periféricos</div>
+                    </div>
+                    <div class="flex-1 flex flex-col gap-2">
+                        <div class="bg-orange text-white px-4 py-2 rounded text-center font-bold">SOFTWARE (Lógico)</div>
+                        <div class="bg-gray-100 p-2 rounded text-center">SO / Apps</div>
+                        <div class="bg-gray-100 p-2 rounded text-center">Binários (0/1)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 36: Desafio Final -->
+        <section class="slide no-print bg-teal-dark/10">
+            <h2 class="text-3xl font-bold text-teal-dark mb-8">Desafio Final 🏆</h2>
+            <p class="mb-6">Um caixa eletrônico é Hardware ou Software?</p>
+            <div class="space-y-4 w-full max-w-md">
+                <button onclick="alert('Incorreto! Ele é físico, mas precisa de programas para funcionar.')" class="w-full card p-4 font-bold hover:bg-red-100">Apenas Hardware</button>
+                <button onclick="alert('Incorreto! Você toca nele, ele tem tela e botões.')" class="w-full card p-4 font-bold hover:bg-red-100">Apenas Software</button>
+                <button onclick="alert('CORRETO! É um Sistema Computacional completo (Hardware + Software).')" class="w-full card p-4 font-bold border-2 border-teal-dark hover:bg-teal-dark hover:text-white">É um Sistema (Ambos)</button>
+            </div>
+        </section>
+
+        <!-- SLIDE 37: Lista de Exercícios -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-teal-dark mb-6">Exercícios de Fixação</h2>
+            <p class="text-sm text-gray-500 mb-6 italic">Responda em um documento de texto e envie ao professor.</p>
+            <ol class="list-decimal text-left max-w-3xl space-y-2 text-sm font-medium text-gray-700 pl-6">
+                <li>Qual a diferença fundamental entre Hardware e Software? Dê um exemplo de cada.</li>
+                <li>Na pirâmide DIKW, qual a diferença entre Dado e Informação?</li>
+                <li>Explique a analogia do corpo humano para: CPU, RAM e HD.</li>
+                <li>Por que os computadores utilizam o sistema binário (0 e 1) e não o decimal?</li>
+                <li>Converta o número binário <strong>0101</strong> para decimal.</li>
+                <li>Se a energia acabar repentinamente, o que acontece com os dados na RAM? E no HD?</li>
+                <li>O que é um periférico de Entrada? Cite dois exemplos.</li>
+                <li>Quantos bits existem em 1 Byte? Quantos valores diferentes 1 Byte pode armazenar?</li>
+                <li>O que é um Driver e para que ele serve?</li>
+                <li>Diferencie Software Livre de Software Proprietário.</li>
+            </ol>
+        </section>
+
+        <!-- SLIDE 38: Próxima Aula -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-gray-400 mb-4">Próxima Aula...</h2>
+            <h1 class="text-5xl font-black text-teal-dark mb-8 text-center leading-tight">Mergulho no Hardware:<br>Placa-mãe, CPU e Memórias</h1>
+            <p class="text-xl max-w-2xl text-center text-gray-600">Vamos abrir a caixa e entender como as peças conversam entre si.</p>
+            <div class="mt-12 flex gap-4 opacity-50">
+                <i data-lucide="cpu" class="w-12 h-12"></i>
+                <i data-lucide="settings" class="w-12 h-12"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 39: Conclusão -->
+        <section class="slide bg-teal-dark text-white">
+            <h1 class="text-6xl font-black mb-6">FIM DA AULA 02</h1>
+            <p class="text-xl opacity-90 mb-12">Obrigado pela atenção!</p>
+            
+            <button onclick="window.print()" class="no-print bg-white text-teal-dark px-8 py-4 rounded-full font-bold shadow-2xl hover:scale-105 transition flex items-center gap-3">
+                <i data-lucide="book-open"></i> Baixar Apostila para Estudo
+            </button>
+            
+            <p class="mt-16 text-sm opacity-50 font-mono">COTIL - Fundamentos de Informática</p>
+        </section>
+
+    </div>
+
+    <!-- Navegação -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-4 bg-white/90 backdrop-blur rounded-full shadow-lg border hover:bg-white text-teal-dark transition transform active:scale-95">
+            <i data-lucide="arrow-up"></i>
+        </button>
+        <button id="nextBtn" class="p-4 bg-teal-dark rounded-full shadow-lg text-white hover:bg-teal-light transition transform active:scale-95">
+            <i data-lucide="arrow-down"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica dos Slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            // Update Progress
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Binary Counter Logic
+            const currentBinary = (currentSlide + 1).toString(2).padStart(6, '0');
+            const totalBinary = slides.length.toString(2).padStart(6, '0');
+            slideCounter.innerText = `${currentBinary} / ${totalBinary}`;
+        }
+
+        // Initialize slides on load
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } });
+        document.getElementById('prevBtn').addEventListener('click', () => { if(currentSlide > 0) { currentSlide--; updateSlides(); } });
+        
+        // Navegação por teclado
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
+```
