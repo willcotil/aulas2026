@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 03: Tecnologias de Rede</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- PALETA DE CORES TERROSAS --- */
+        :root {
+            --primary: #8a7650;    /* Marrom/Oliva */
+            --secondary: #8e977d;  /* Verde Sálvia */
+            --bg-app: #ece7d1;     /* Bege Claro */
+            --accent: #dbcea5;     /* Khaki */
+            
+            --panel-bg: #ffffff;   
+            --text-main: #333333;
+            --danger: #d9534f;     
+            --success: #5cb85c;    
+            --slide-bg: #ffffff;   
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* NUMERAÇÃO NO TOPO */
+        #top-counter {
+            position: fixed; top: 20px; right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 20px; border-radius: 20px;
+            font-weight: bold; color: var(--primary);
+            box-shadow: 0 4px 15px rgba(138, 118, 80, 0.2);
+            z-index: 3000; font-family: monospace; font-size: 1.1rem;
+            border: 2px solid var(--accent);
+        }
+
+        /* Container principal */
+        main {
+            height: 100vh; width: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* --- ESTILO DOS SLIDES --- */
+        section.slide {
+            height: 100vh; width: 100%; max-width: 1200px;
+            margin: 0 auto; background: var(--slide-bg);
+            scroll-snap-align: start; position: relative;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 40px; border-bottom: 3px solid var(--accent);
+            box-shadow: 0 0 30px rgba(0,0,0,0.03);
+        }
+
+        h1 { font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem; text-align: center; }
+        h2 { font-size: 2.5rem; color: var(--primary); margin-bottom: 2rem; border-bottom: 4px solid var(--accent); padding-bottom: 10px; text-align: center; width: 100%;}
+        h3 { font-size: 1.8rem; color: var(--secondary); margin-bottom: 1rem; }
+        p, li { font-size: 1.4rem; line-height: 1.6; color: var(--text-main); max-width: 950px; }
+        
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding-left: 40px; position: relative; }
+        li::before { content: '➤'; color: var(--primary); font-size: 1.5rem; position: absolute; left: 0; top: 2px; }
+
+        .cols { display: flex; gap: 50px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
+
+        /* A grande sacada: A caixa de "Gancho" para o próximo slide */
+        .hook-box {
+            margin-top: 40px; padding: 15px 25px; background: var(--bg-app);
+            border-left: 6px solid var(--primary); border-radius: 0 10px 10px 0;
+            font-style: italic; font-weight: bold; color: var(--primary);
+            max-width: 900px; text-align: left; font-size: 1.3rem;
+            box-shadow: 0 4px 10px rgba(138, 118, 80, 0.1);
+        }
+
+        /* Caixas Visuais e Emojis */
+        .visual-box {
+            background: #ffffff; border: 3px dashed var(--secondary); border-radius: 15px;
+            width: 100%; height: 300px; display: flex; justify-content: center; align-items: center;
+            flex-direction: column; position: relative; overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(138, 118, 80, 0.15);
+        }
+        .visual-box:hover { border-color: var(--primary); background: var(--accent); transform: translateY(-5px);}
+        .emoji-icon { font-size: 6rem; transition: transform 0.3s; cursor: default; }
+        .visual-box:hover .emoji-icon { transform: scale(1.15); }
+
+        /* --- ESTRUTURA DO FRAME CSS --- */
+        .frame-visual {
+            display: flex; width: 100%; max-width: 1000px; height: 90px; border: 3px solid var(--primary); border-radius: 12px; overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15); text-align: center; font-weight: bold; font-size: 1.2rem; line-height: 1.2;
+            margin: 20px 0; background: #fff;
+        }
+        .frame-part { 
+            padding: 10px 5px; display: flex; flex-direction: column; justify-content: center; 
+            border-right: 2px solid var(--primary); transition: all 0.4s ease;
+        }
+        .frame-part:last-child { border-right: none; }
+        .frame-part span { font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 5px;}
+        
+        .dimmed { opacity: 0.3; background: #f0f0f0 !important; color: #999 !important; border-color: #ccc !important; }
+        .highlighted { transform: scale(1.02); box-shadow: inset 0 0 15px rgba(0,0,0,0.2); z-index: 10; border: 3px solid var(--danger); background: var(--accent) !important; color: var(--text-main) !important;}
+
+        /* --- SIMULADOR CSMA/CD --- */
+        .csmacd-container { width: 100%; max-width: 900px; height: 250px; position: relative; margin-top: 20px; background: var(--bg-app); border-radius: 15px; border: 2px solid var(--secondary); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 5px 15px rgba(0,0,0,0.05); overflow: hidden;}
+        .csmacd-bus { width: 80%; height: 8px; background: #333; position: absolute; border-radius: 4px; }
+        .csmacd-pc { position: absolute; top: -60px; font-size: 3rem; text-align: center; }
+        .csmacd-pc span { display: block; font-size: 1rem; font-weight: bold; font-family: sans-serif; color: var(--primary); }
+        .csmacd-pkt { position: absolute; width: 30px; height: 20px; background: var(--primary); border-radius: 5px; top: -6px; opacity: 0; z-index: 10; }
+        .collision-boom { position: absolute; font-size: 5rem; top: -50px; left: 50%; transform: translateX(-50%) scale(0); opacity: 0; transition: 0.2s; z-index: 20; }
+
+        /* --- SIMULADOR DE SWITCH (Slide Exclusivo) --- */
+        .sim-content {
+            display: flex; align-items: flex-start; justify-content: space-around; gap: 20px;
+            background: var(--bg-app); padding: 30px; border-radius: 15px; border: 2px solid var(--primary);
+            width: 100%; max-width: 1100px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .mac-table { width: 350px; border-collapse: collapse; background: white; border: 2px solid var(--primary); }
+        .mac-table th { background: var(--primary); color: white; padding: 10px; font-size: 1.2rem; }
+        .mac-table td { border: 1px solid var(--accent); padding: 10px; text-align: center; font-family: monospace; font-size: 1.3rem;}
+        
+        .sim-network { display: flex; align-items: center; gap: 30px; }
+        .sim-pc { background: white; border: 3px solid var(--secondary); padding: 15px; border-radius: 10px; text-align: center; width: 120px; transition: 0.3s; font-size: 1.1rem; }
+        .sim-pc.active { background: var(--accent); border-color: var(--primary); transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .sim-switch { background: #333; color: white; padding: 30px 20px; border-radius: 8px; font-weight: bold; font-size: 1.3rem; width: 150px; text-align: center; position: relative; }
+        
+        .sim-log { 
+            background: #222; color: #00ff00; font-family: monospace; padding: 15px; 
+            border-radius: 8px; height: 200px; width: 100%; overflow-y: auto; font-size: 1rem; margin-top: 15px; border: 3px solid #111;
+        }
+
+        /* Botões */
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold;
+            transition: all 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center;
+        }
+        .btn:hover { background: #6b5a3b; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn:disabled { background: var(--secondary); cursor: not-allowed; transform: none; opacity: 0.6; box-shadow: none; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #a94442; }
+        
+        .controls {
+            position: fixed; bottom: 30px; right: 30px;
+            background: rgba(255, 255, 255, 0.95); padding: 10px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(138, 118, 80, 0.3); display: flex; gap: 10px; flex-direction: column;
+            z-index: 4000; border: 2px solid var(--accent);
+        }
+        .btn-nav { width: 50px; height: 50px; border-radius: 50%; padding: 0; justify-content: center; font-size: 1.2rem;}
+
+        @media print {
+            .controls, #top-counter { display: none !important; }
+            main { height: auto; overflow: visible; padding-bottom: 0; }
+            section.slide { height: 100vh; page-break-after: always; margin: 0; padding: 30px; border: none; box-shadow: none; }
+            .visual-box { border: 2px solid var(--secondary); background: #fff !important; }
+            .hook-box { border: 1px solid var(--primary); background: #fff; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="top-counter">1 / 31</div>
+
+    <main id="slide-container">
+
+        <!-- Slide 1: CAPA -->
+        <section class="slide" id="slide-1">
+            <div class="visual-box" style="height: 180px; width: 180px; border-radius: 50%; border: 4px solid var(--primary); margin-bottom: 20px; background: var(--bg-app);">
+                <span class="emoji-icon">🔌</span>
+            </div>
+            <h1>Tecnologias de Rede</h1>
+            <h3>Colégio Técnico de Limeira</h3>
+            <p><strong>Prof. William Paiva</strong></p>
+            <div class="hook-box">
+                "Nossa jornada hoje vai desvendar os segredos de como os computadores conversam nos cabos. Vamos começar entendendo as regras do jogo..."
+            </div>
+        </section>
+
+        <!-- Slide 2: ROTEIRO -->
+        <section class="slide" id="slide-2">
+            <h2>Roteiro da Aula</h2>
+            <div class="cols">
+                <div class="col">
+                    <ul>
+                        <li><strong>Parte 1:</strong> A Origem e o Caos</li>
+                        <li><strong>Parte 2:</strong> CSMA/CD: A Educação das Máquinas</li>
+                        <li><strong>Parte 3:</strong> Endereçamento e o Quadro Ethernet</li>
+                        <li><strong>Parte 4:</strong> Switches: A Evolução da Inteligência</li>
+                    </ul>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🗺️</span><span>Mapa da Mina</span></div></div>
+            </div>
+            <div class="hook-box">
+                "Para criar uma rede do zero, precisamos de 4 pilares fundamentais..."
+            </div>
+        </section>
+
+        <!-- PARTE 1 -->
+        <section class="slide" id="slide-3">
+            <h2>As 4 Regras da LAN</h2>
+            <p>Uma rede local precisa ditar 4 regras para funcionar:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;">
+                <div style="background: var(--bg-app); padding: 20px; border-radius: 10px; border: 1px solid var(--accent);">
+                    <h3>1. Meio Físico</h3><p style="font-size: 1.1rem;">Cobre, Fibra ou Ar?</p>
+                </div>
+                <div style="background: var(--bg-app); padding: 20px; border-radius: 10px; border: 1px solid var(--accent);">
+                    <h3>2. Formato</h3><p style="font-size: 1.1rem;">Como empacotar a mensagem?</p>
+                </div>
+                <div style="background: var(--bg-app); padding: 20px; border-radius: 10px; border: 1px solid var(--accent);">
+                    <h3>3. Acesso</h3><p style="font-size: 1.1rem;">Quem pode falar e quando?</p>
+                </div>
+                <div style="background: var(--bg-app); padding: 20px; border-radius: 10px; border: 1px solid var(--accent);">
+                    <h3>4. Velocidade</h3><p style="font-size: 1.1rem;">Quão rápido viaja o pulso?</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "A primeira tecnologia a dominar com perfeição essas 4 regras nasceu nos anos 70..."
+            </div>
+        </section>
+
+        <!-- Slide 4: ORIGEM -->
+        <section class="slide" id="slide-4">
+            <h2>A Origem: Nasce a Ethernet</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Criada em <strong>1973</strong> por Bob Metcalfe no lendário laboratório <strong>Xerox PARC</strong>.</p>
+                    <p>Foi a primeira solução unificada e viável para interligar vários computadores localmente.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">💡</span><span>Xerox PARC</span></div></div>
+            </div>
+            <div class="hook-box">
+                "Mas Metcalfe não tirou a ideia do nada. Ele observou como as ilhas do Havaí se comunicavam..."
+            </div>
+        </section>
+
+        <!-- Slide 5: ALOHA -->
+        <section class="slide" id="slide-5">
+            <h2>A Inspiração: ALOHAnet 🌺</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🏝️</span><span>Ondas de Rádio</span></div></div>
+                <div class="col">
+                    <p>A Ethernet foi inspirada na <strong>ALOHAnet</strong>, uma rede de rádio no Havaí.</p>
+                    <p>Na ALOHAnet, todos transmitiam pelo mesmo "ar" (ondas de rádio). Se duas ilhas transmitissem juntas, a mensagem se perdia e elas tentavam de novo.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "A grande sacada da Ethernet foi pegar esse 'ar compartilhado' e prendê-lo dentro de um fio de cobre..."
+            </div>
+        </section>
+
+        <!-- Slide 6: O PRIMEIRO CABO -->
+        <section class="slide" id="slide-6">
+            <h2>O Primeiro Padrão (802.3)</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>O primeiro modelo de Ethernet usava um <strong>cabo coaxial grosso</strong>.</p>
+                    <p>Operava na topologia de <strong>Barramento (Bus)</strong>. Todo mundo era furado no mesmo cabo principal.</p>
+                    <p>Mais tarde, os antigos <strong>HUBs</strong> mantiveram essa mesma lógica elétrica.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🔌</span><span>Cabo Único</span></div></div>
+            </div>
+            <div class="hook-box">
+                "Conectar todos no mesmo cabo contínuo é fácil e barato. Mas gera um problema físico assustador..."
+            </div>
+        </section>
+
+        <!-- Slide 7: MEIO COMPARTILHADO -->
+        <section class="slide" id="slide-7">
+            <h2>O Problema do Meio Compartilhado</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🗣️💥🗣️</span><span>Falando Junto</span></div></div>
+                <div class="col">
+                    <p>Em um meio compartilhado, todos os PCs disputam o mesmo fio de cobre.</p>
+                    <p>Pense num cano d'água onde todos jogam água ao mesmo tempo.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Se duas máquinas enviarem sinais elétricos ao mesmo tempo, as voltagens se misturam. E o que acontece com os dados?"
+            </div>
+        </section>
+
+        <!-- Slide 8: COLISÃO -->
+        <section class="slide" id="slide-8">
+            <h2>A Colisão de Dados</h2>
+            <p>A mistura de sinais elétricos no cabo gera uma <strong>Colisão</strong>.</p>
+            <p style="font-size: 2.2rem; font-weight: bold; color: var(--danger); text-align: center; margin: 30px 0;">Os dados viram lixo eletrônico.</p>
+            <p>A mensagem original é destruída, a tensão sobe e tudo precisa ser reenviado do zero.</p>
+            <div class="hook-box">
+                "Isso cria uma verdadeira 'zona de perigo' na nossa rede..."
+            </div>
+        </section>
+
+        <!-- Slide 9: DOMÍNIO COLISÃO -->
+        <section class="slide" id="slide-9">
+            <h2>O Domínio de Colisão</h2>
+            <p>Um <strong>Domínio de Colisão</strong> é a área da rede onde as mensagens de qualquer máquina podem colidir umas com as outras.</p>
+            <ul>
+                <li>Num cabo de Barramento ou usando um HUB... a rede inteira é um <strong>único domínio gigante</strong>.</li>
+                <li>Se tivermos 100 PCs conectados num HUB, o trânsito fica caótico e a rede para.</li>
+            </ul>
+            <div class="hook-box">
+                "Para evitar esse caos, os computadores precisavam aprender 'boas maneiras' e respeitar o trânsito..."
+            </div>
+        </section>
+
+        <!-- PARTE 2 -->
+        <section class="slide" id="slide-10">
+            <h2>A Solução: CSMA/CD</h2>
+            <p>A Ethernet inventou o <strong>CSMA/CD</strong>: as regras de educação da rede.</p>
+            <div style="background: var(--bg-app); padding: 20px; border-radius: 10px; border-left: 5px solid var(--primary); text-align: left; width: 100%; max-width: 900px;">
+                <p><strong>C</strong>arrier <strong>S</strong>ense (Sentir a Portadora): <em>Escute o cabo antes de falar.</em></p>
+                <p><strong>M</strong>ultiple <strong>A</strong>ccess (Acesso Múltiplo): <em>Todos têm o direito de usar o fio.</em></p>
+                <p><strong>C</strong>ollision <strong>D</strong>etection (Detecção de Colisão): <em>Se batermos de frente, nós paramos.</em></p>
+            </div>
+            <div class="hook-box">
+                "Como essa 'educação' funciona passo a passo na prática?"
+            </div>
+        </section>
+
+        <!-- Slide 11: ALGORITMO CSMA/CD -->
+        <section class="slide" id="slide-11">
+            <h2>O Algoritmo CSMA/CD</h2>
+            <ol>
+                <li><strong>PC-A quer falar:</strong> Ele "escuta" o cabo.</li>
+                <li><strong>Está quieto?</strong> Ele transmite a mensagem.</li>
+                <li><strong>PC-C falou junto?</strong> Colisão! A voltagem sobe.</li>
+                <li><strong>Detecção (CD):</strong> Ambos percebem o erro instantaneamente e param.</li>
+            </ol>
+            <div class="hook-box">
+                "Ok, eles pararam. Mas eles precisam tentar de novo. Como desempatar para não baterem novamente?"
+            </div>
+        </section>
+
+        <!-- Slide 12: JAM / BACKOFF -->
+        <section class="slide" id="slide-12">
+            <h2>O Sinal de JAM e o Sorteio</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🎲</span><span>Sorteio de Tempo</span></div></div>
+                <div class="col">
+                    <p>Ao colidir, os PCs enviam um <strong>sinal de JAM</strong> para a rede inteira saber da batida.</p>
+                    <p>Para o desempate, eles ativam um <strong>Cronômetro Aleatório</strong> (Backoff).</p>
+                    <p>Quem tirar o menor tempo de espera no sorteio invisível, tenta falar primeiro.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Chega de teoria. Vamos ver uma rede usando o CSMA/CD em tempo real!"
+            </div>
+        </section>
+
+        <!-- Slide 13: SIMULADOR CSMA/CD -->
+        <section class="slide" id="slide-13">
+            <h2>Simulador CSMA/CD (Prática)</h2>
+            <p>Gerencie o envio de pacotes no meio compartilhado.</p>
+            
+            <div class="csmacd-container">
+                <div class="csmacd-bus">
+                    <div class="csmacd-pc" style="left: -15px;">💻<span>PC-A</span></div>
+                    <div class="csmacd-pc" style="left: calc(50% - 24px);">💻<span>PC-B</span></div>
+                    <div class="csmacd-pc" style="right: -15px;">💻<span>PC-C</span></div>
+                    
+                    <div class="csmacd-pkt" id="csma-pkt-a" style="left: 0;"></div>
+                    <div class="csmacd-pkt" id="csma-pkt-c" style="right: 0; background: var(--danger);"></div>
+                    <div class="collision-boom" id="csma-boom">💥</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 20px; margin-top: 40px;">
+                <button class="btn" id="btn-csma-success" onclick="simCsmaSuccess()"><i class="fas fa-arrow-right"></i> Envio Sucesso (A p/ C)</button>
+                <button class="btn btn-danger" id="btn-csma-fail" onclick="simCsmaCollision()"><i class="fas fa-car-crash"></i> Forçar Colisão (A e C)</button>
+            </div>
+            <p id="csma-log" style="font-family: monospace; font-weight: bold; margin-top: 20px; height: 30px; color: var(--primary);">- Aguardando ação -</p>
+            
+            <div class="hook-box" style="margin-top: 10px;">
+                "O CSMA/CD limpou a estrada. Mas quando o pacote chega, como a placa de rede sabe que a mensagem é para ELA?"
+            </div>
+        </section>
+
+        <!-- PARTE 3 -->
+        <section class="slide" id="slide-14">
+            <h2>O Envelope Ethernet</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>O CSMA/CD apenas libera a estrada. Mas o pacote precisa ter um remetente e um destinatário legíveis.</p>
+                    <p>Cada arquivo enviado é embalado em um <strong>Quadro (Frame)</strong>.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">✉️</span><span>O Quadro Local</span></div></div>
+            </div>
+            <div class="hook-box">
+                "Para preencher o remetente e destinatário nesse envelope, as máquinas precisam ter um nome (ou RG)..."
+            </div>
+        </section>
+
+        <!-- Slide 15: MAC ADDRESS -->
+        <section class="slide" id="slide-15">
+            <h2>O RG da Placa: Endereço MAC</h2>
+            <p>Todo equipamento de rede tem um "Chassi" de fábrica físico e único.</p>
+            <div class="visual-box" style="height: 120px; border: none; background: var(--bg-app); margin-top: 10px;">
+                <p style="font-size: 3rem; font-family: monospace; font-weight: bold; color: var(--primary); margin: 0; letter-spacing: 5px;">3C:FD:FE:0A:B1:C2</p>
+            </div>
+            <p>Este é o <strong>Endereço MAC (Media Access Control)</strong>.</p>
+            <p>Possui 48 bits (6 bytes) e é escrito em formato Hexadecimal.</p>
+            <div class="hook-box">
+                "Essas letras e números não são aleatórios. Eles escondem informações sobre a máquina..."
+            </div>
+        </section>
+
+        <!-- Slide 16: OUI -->
+        <section class="slide" id="slide-16">
+            <h2>OUI e Número de Série</h2>
+            <p>O MAC é dividido em duas metades (24 bits cada):</p>
+            <div style="display: flex; width: 100%; max-width: 700px; height: 120px; border: 3px solid var(--primary); border-radius: 10px; overflow: hidden; margin-top: 20px;">
+                <div style="flex: 1; background: var(--accent); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <strong style="font-size: 2rem;">3C:FD:FE</strong>
+                    <span style="font-size: 1.2rem; margin-top: 5px;">OUI (Identifica o Fabricante)</span>
+                </div>
+                <div style="flex: 1; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <strong style="font-size: 2rem;">0A:B1:C2</strong>
+                    <span style="font-size: 1.2rem; margin-top: 5px;">Nº Série (Único da Placa)</span>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Pela metade OUI sabemos quem fabricou a placa. Mas e se eu quiser mandar um recado para TODOS os MACs da sala ao mesmo tempo?"
+            </div>
+        </section>
+
+        <!-- Slide 17: BROADCAST MAC -->
+        <section class="slide" id="slide-17">
+            <h2>O Grito Geral: Broadcast MAC</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="emoji-icon">📢</span><span>Broadcast</span></div></div>
+                <div class="col">
+                    <p>Existe um MAC especial, reservado para quando você quer falar com <strong>todos</strong>:</p>
+                    <p style="background: var(--primary); color: white; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 1.8rem; font-weight: bold; text-align: center;">FF:FF:FF:FF:FF:FF</p>
+                    <p>Qualquer PC que veja esse destino no cabo é obrigado a ler a mensagem.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Será que você consegue descobrir o MAC do computador que você está usando agora?"
+            </div>
+        </section>
+
+        <!-- Slide 18: PRATICA NINJA -->
+        <section class="slide" id="slide-18">
+            <h2>Prática Ninja 🥷</h2>
+            <p>Abra o <strong>Prompt de Comando (CMD)</strong> do seu Windows.</p>
+            <p>Digite:</p>
+            <div style="background: #1e1e1e; color: #00ff00; padding: 20px; font-family: monospace; font-size: 2rem; border-radius: 8px; border: 2px solid #555;">ipconfig /all</div>
+            <p>Procure pela linha "Endereço Físico".</p>
+            <div class="hook-box">
+                "Agora que temos os Endereços MAC, vamos voltar ao 'Envelope' e colar essas etiquetas nele."
+            </div>
+        </section>
+
+        <!-- Slide 19: FRAME GERAL -->
+        <section class="slide" id="slide-19">
+            <h2>Anatomia do Frame Ethernet II</h2>
+            <p>Este é o quadro completo. O envelope real onde tudo viaja:</p>
+            
+            <div class="frame-visual">
+                <div class="frame-part" style="width: 15%; background: #ddd;">Preâmbulo</div>
+                <div class="frame-part" style="width: 15%; background: var(--accent);">MAC Destino</div>
+                <div class="frame-part" style="width: 15%; background: var(--bg-app);">MAC Origem</div>
+                <div class="frame-part" style="width: 10%; background: #e0e0e0;">Tipo</div>
+                <div class="frame-part" style="width: 35%; background: var(--secondary); color: white;">Dados (Payload)</div>
+                <div class="frame-part" style="width: 10%; background: var(--primary); color: white;">FCS</div>
+            </div>
+            
+            <div class="hook-box">
+                "Vamos quebrar esse envelope parte por parte. O que a ponta da frente faz assim que bate na placa de rede?"
+            </div>
+        </section>
+
+        <!-- Slide 20: PREAMBULO / TIPO -->
+        <section class="slide" id="slide-20">
+            <h2>Dissecando: Acordando a Rede</h2>
+            <div class="frame-visual">
+                <div class="frame-part highlighted">Preâmbulo</div>
+                <div class="frame-part dimmed" style="width: 15%;">MAC Destino</div>
+                <div class="frame-part dimmed" style="width: 15%;">MAC Origem</div>
+                <div class="frame-part highlighted" style="width: 10%;">Tipo</div>
+                <div class="frame-part dimmed" style="width: 35%;">Dados (Payload)</div>
+                <div class="frame-part dimmed" style="width: 10%;">FCS</div>
+            </div>
+            <ul style="margin-top: 20px;">
+                <li><strong>Preâmbulo:</strong> "Acorda" a placa de rede receptora e sincroniza o relógio (1s e 0s alternados).</li>
+                <li><strong>Tipo:</strong> Avisa o protocolo interno (Ex: "0x0800 significa que é um pacote IP").</li>
+            </ul>
+            <div class="hook-box">
+                "Com a placa acordada, entregamos os endereços (remetente/destinatário) e a carga principal..."
+            </div>
+        </section>
+
+        <!-- Slide 21: MAC E DADOS -->
+        <section class="slide" id="slide-21">
+            <h2>Dissecando: Endereços e Carga</h2>
+            <div class="frame-visual">
+                <div class="frame-part dimmed" style="width: 15%;">Preâmbulo</div>
+                <div class="frame-part highlighted" style="width: 15%;">MAC Destino</div>
+                <div class="frame-part highlighted" style="width: 15%;">MAC Origem</div>
+                <div class="frame-part dimmed" style="width: 10%;">Tipo</div>
+                <div class="frame-part highlighted" style="width: 35%;">Dados (Payload)</div>
+                <div class="frame-part dimmed" style="width: 10%;">FCS</div>
+            </div>
+            <ul style="margin-top: 20px;">
+                <li><strong>MAC Destino / Origem:</strong> Quem envia e quem recebe.</li>
+                <li><strong>Dados (Payload):</strong> O tesouro! De 46 a 1500 bytes da sua foto ou e-mail.</li>
+            </ul>
+            <div class="hook-box">
+                "Mas e se o cabo der mau contato, ou sofrer interferência, e os dados forem corrompidos no caminho?"
+            </div>
+        </section>
+
+        <!-- Slide 22: FCS -->
+        <section class="slide" id="slide-22">
+            <h2>O Guarda-Costas: FCS</h2>
+            <div class="frame-visual">
+                <div class="frame-part dimmed" style="width: 15%;">Preâmbulo</div>
+                <div class="frame-part dimmed" style="width: 15%;">MAC Destino</div>
+                <div class="frame-part dimmed" style="width: 15%;">MAC Origem</div>
+                <div class="frame-part dimmed" style="width: 10%;">Tipo</div>
+                <div class="frame-part dimmed" style="width: 35%;">Dados (Payload)</div>
+                <div class="frame-part highlighted" style="width: 10%;">FCS</div>
+            </div>
+            <div class="cols" style="margin-top: 20px;">
+                <div class="col">
+                    <p>O <strong>FCS (Frame Check Sequence)</strong> é um cálculo matemático feito na saída e verificado na chegada.</p>
+                    <p style="color: var(--danger); font-weight: bold;">Se o cálculo bater diferente, o frame corrompido é destruído na hora!</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Temos um envelope perfeito (Frame) e regras de trânsito (CSMA/CD). Mas o equipamento central da época destruía todo o desempenho..."
+            </div>
+        </section>
+
+        <!-- PARTE 4 -->
+        <section class="slide" id="slide-23">
+            <h2>O Passado: O HUB</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>O HUB centralizava os cabos, mas era eletricamente "Burro".</p>
+                    <p>Ele <strong>não conseguia ler</strong> o Envelope (Frame Ethernet).</p>
+                    <p>O que entra numa porta, ele clona e cospe para TODAS as outras. Mantendo as colisões constantes.</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🪨</span><span>Pedra (HUB)</span></div></div>
+            </div>
+            <div class="hook-box">
+                "Para as redes crescerem em velocidade, precisávamos de um equipamento que conseguisse ABRIR e LER o Frame..."
+            </div>
+        </section>
+
+        <!-- Slide 24: O SWITCH -->
+        <section class="slide" id="slide-24">
+            <h2>A Salvação: O Switch</h2>
+            <div class="cols">
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🧠</span><span>Cérebro (Switch)</span></div></div>
+                <div class="col">
+                    <p>O <strong>Switch</strong> revolucionou tudo.</p>
+                    <p>Ele é Inteligente: Ele abre o Frame, lê o "MAC Destino" e entrega a mensagem <strong>exatamente e apenas na porta correta</strong>.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Mas o Switch não tem bola de cristal. Como ele adivinha qual computador está conectado em qual porta?"
+            </div>
+        </section>
+
+        <!-- Slide 25: CAM TABLE -->
+        <section class="slide" id="slide-25">
+            <h2>A Tabela MAC (CAM Table)</h2>
+            <p>O Switch possui memória RAM interna e atua como um espião.</p>
+            <div style="background: var(--bg-app); padding: 25px; border-radius: 10px; border-left: 5px solid var(--primary); font-size: 1.3rem; line-height: 1.6;">
+                Ele vigia o "MAC de Origem" de todo envelope que entra:<br><br>
+                <em>"Aham... O quadro entrou na Porta 3 e o MAC de origem é AA:AA... Logo, eu anoto na minha tabela: MAC AA:AA mora na Porta 3!"</em>
+            </div>
+            <div class="hook-box">
+                "E se chegar um envelope para um destino que ele AINDA não anotou na tabela?"
+            </div>
+        </section>
+
+        <!-- Slide 26: FLOODING -->
+        <section class="slide" id="slide-26">
+            <h2>O Processo de Flooding</h2>
+            <p>Se o Switch recebe um quadro para um destino desconhecido, ele usa um modo de pânico controlado.</p>
+            <p>Ele age como um HUB por um segundo: inunda (<strong>Flooding</strong>) todas as portas.</p>
+            <p>Quando o verdadeiro dono responder, o Switch anota o MAC dele e a inundação acaba para sempre!</p>
+            <div class="hook-box">
+                "Ao separar as conversas por porta, o Switch acabou com os congestionamentos e liberou um novo superpoder..."
+            </div>
+        </section>
+
+        <!-- Slide 27: DIREÇÃO DE TRAFEGO -->
+        <section class="slide" id="slide-27">
+            <h2>A Direção do Tráfego</h2>
+            <p>Antes do Switch, o tráfego nos cabos era restrito a uma via:</p>
+            <div class="cols" style="align-items: flex-start; margin-top: 20px;">
+                <div class="col" style="background: var(--bg-app); padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--primary);">Simplex</h3>
+                    <p>Mão única pura. (Ex: Antena de TV pra sua casa).</p>
+                </div>
+                <div class="col" style="background: var(--bg-app); padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--primary);">Half-Duplex</h3>
+                    <p>Vai OU Vem. Um de cada vez. Era a realidade dos HUBs e do CSMA/CD. (Ex: Walkie-Talkie).</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Mas com portas privativas e cabos modernos, chegamos ao cálice sagrado da velocidade..."
+            </div>
+        </section>
+
+        <!-- Slide 28: FULL DUPLEX -->
+        <section class="slide" id="slide-28">
+            <h2>O Milagre do Full-Duplex</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>O Switch permite usar fios separados dentro do cabo para enviar e receber <strong>ao mesmo tempo</strong>.</p>
+                    <p>Isso é o <strong>Full-Duplex</strong>. Dobra a velocidade prática e decreta a Morte do CSMA/CD (pois não há mais risco de colisão!).</p>
+                </div>
+                <div class="col"><div class="visual-box"><span class="emoji-icon">🛣️</span><span>Via Dupla</span></div></div>
+            </div>
+            <div class="hook-box">
+                "Para provar que o Switch é inteligente, vamos rodar um Switch de verdade na memória do seu navegador agora..."
+            </div>
+        </section>
+
+        <!-- Slide 29: SIMULADOR SWITCH EXCLUSIVO -->
+        <section class="slide" id="slide-29" style="padding: 20px;">
+            <h2 style="margin-bottom: 10px;">Simulador: O Cérebro do Switch</h2>
+            
+            <div class="sim-content">
+                <!-- Tabela MAC -->
+                <div>
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.3rem;">Tabela CAM (RAM)</h4>
+                    <table class="mac-table" id="mac-table">
+                        <tr><th>Porta</th><th>MAC Address</th></tr>
+                        <tr><td>1</td><td id="table-p1">- vazio -</td></tr>
+                        <tr><td>2</td><td id="table-p2">- vazio -</td></tr>
+                        <tr><td>3</td><td id="table-p3">- vazio -</td></tr>
+                    </table>
+                </div>
+
+                <!-- Rede Físico Simplificado -->
+                <div class="sim-network">
+                    <div style="display:flex; flex-direction: column; gap: 40px;">
+                        <div class="sim-pc" id="pc-a"><strong>PC A</strong><br><small>MAC: AA:AA</small><br><small>Porta 1</small></div>
+                        <div class="sim-pc" id="pc-b"><strong>PC B</strong><br><small>MAC: BB:BB</small><br><small>Porta 2</small></div>
+                    </div>
+                    <div class="sim-switch" id="sw-core">SWITCH L2</div>
+                    <div style="display:flex; flex-direction: column; justify-content: center;">
+                        <div class="sim-pc" id="pc-c"><strong>PC C</strong><br><small>MAC: CC:CC</small><br><small>Porta 3</small></div>
+                    </div>
+                </div>
+
+                <!-- Logs -->
+                <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn" style="padding: 8px 12px; font-size: 0.9rem;" onclick="simulateSwitchAction('A_to_B')" id="btn-sw-1">1. A envia p/ B</button>
+                        <button class="btn" style="padding: 8px 12px; font-size: 0.9rem;" onclick="simulateSwitchAction('B_to_A')" id="btn-sw-2">2. B responde A</button>
+                        <button class="btn" style="padding: 8px 12px; font-size: 0.9rem;" onclick="simulateSwitchAction('C_to_A')" id="btn-sw-3">3. C envia p/ A</button>
+                        <button class="btn btn-danger" style="padding: 8px 12px; font-size: 0.9rem; margin-left: auto;" onclick="resetSwitch()">Limpar RAM</button>
+                    </div>
+                    <div class="sim-log" id="sim-console">
+                        > Switch inicializado. Tabela MAC vazia.<br>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hook-box" style="margin-top: 15px;">
+                "Se o MAC e o Switch resolvem os problemas locais de forma tão inteligente... por que inventaram o endereço IP?"
+            </div>
+        </section>
+
+        <!-- Slide 30: MAC vs IP -->
+        <section class="slide" id="slide-30">
+            <h2>MAC vs IP Address</h2>
+            <div class="cols" style="align-items: flex-start;">
+                <div class="col" style="background: var(--bg-app); padding: 30px; border-radius: 10px;">
+                    <h3 style="color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px;">MAC (Hardware)</h3>
+                    <ul>
+                        <li>Fixo de fábrica (RG).</li>
+                        <li>Usado na <strong>Rede Local (LAN)</strong>.</li>
+                        <li>O Switch usa ele para entregar dados na mesma sala.</li>
+                    </ul>
+                </div>
+                <div class="col" style="background: #fff; padding: 30px; border-radius: 10px; border: 3px solid var(--accent);">
+                    <h3 style="color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px;">IP (Software)</h3>
+                    <ul>
+                        <li>Muda com o local (CEP).</li>
+                        <li>Usado na <strong>Internet (WAN)</strong>.</li>
+                        <li>O Roteador usa ele para achar redes distantes.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Para não esquecer de tudo que vimos até aqui..."
+            </div>
+        </section>
+
+        <!-- Slide 31: RESUMO -->
+        <section class="slide" id="slide-31">
+            <h2>Resumo da Aula</h2>
+            <ul>
+                <li><strong>Ethernet (802.3):</strong> O padrão rei das LANs.</li>
+                <li><strong>CSMA/CD:</strong> Educação para evitar batidas em cabos antigos.</li>
+                <li><strong>Endereço MAC:</strong> O RG de 48 bits colado no "Envelope" (Frame Ethernet).</li>
+                <li><strong>Switch & Full-Duplex:</strong> O hardware que separou as estradas e nos deu redes rápidas, inteligentes e simultâneas.</li>
+            </ul>
+            
+            <div class="visual-box" style="height: auto; padding: 20px; background: var(--bg-app); border-color: var(--primary); margin-top: 30px;">
+                <h3 style="margin: 0; color: var(--primary);">Fim da Aula 03! ✅</h3>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONTROLES FLUTUANTES DE NAVEGAÇÃO -->
+    <div class="controls">
+        <button class="btn btn-nav" onclick="changeSlide(-1)" title="Anterior"><i class="fas fa-chevron-up"></i></button>
+        <button class="btn btn-nav" onclick="changeSlide(1)" title="Próximo"><i class="fas fa-chevron-down"></i></button>
+        <button class="btn btn-nav" style="background: var(--secondary);" onclick="window.print()" title="PDF"><i class="fas fa-print"></i></button>
+        <button class="btn btn-nav" style="background: var(--secondary);" onclick="toggleFullScreen()" title="Tela Cheia"><i class="fas fa-expand"></i></button>
+    </div>
+
+    <script>
+        const container = document.getElementById('slide-container');
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('top-counter');
+        let currentIndex = 0;
+
+        // --- NAVEGAÇÃO BÁSICA ---
+        function changeSlide(direction) {
+            let newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < slides.length) {
+                slides[newIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        container.addEventListener('scroll', () => {
+            let scrollPos = container.scrollTop;
+            let index = Math.round(scrollPos / window.innerHeight);
+            if (index !== currentIndex) {
+                currentIndex = index;
+                counter.innerText = `${currentIndex + 1} / ${slides.length}`;
+            }
+        });
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+        });
+
+        // --- SIMULADOR CSMA/CD ---
+        let isCsmaSimulating = false;
+        
+        function simCsmaLog(msg, isWarn=false) {
+            const logEl = document.getElementById('csma-log');
+            logEl.innerText = `> ${msg}`;
+            logEl.style.color = isWarn ? "var(--danger)" : "var(--primary)";
+        }
+
+        function simCsmaSuccess() {
+            if (isCsmaSimulating) return;
+            isCsmaSimulating = true;
+            
+            const btn1 = document.getElementById('btn-csma-success');
+            const btn2 = document.getElementById('btn-csma-fail');
+            btn1.disabled = true; btn2.disabled = true;
+            
+            simCsmaLog("PC-A escuta o cabo. Está livre. Iniciando envio...");
+            
+            const pktA = document.getElementById('csma-pkt-a');
+            pktA.style.transition = "none";
+            pktA.style.left = "0%";
+            pktA.style.opacity = "1";
+            
+            setTimeout(() => {
+                pktA.style.transition = "left 2s linear";
+                pktA.style.left = "100%";
+                
+                setTimeout(() => {
+                    simCsmaLog("Sucesso! O pacote chegou ao destino sem colisões.");
+                    pktA.style.opacity = "0";
+                    setTimeout(() => {
+                        pktA.style.left = "0%";
+                        isCsmaSimulating = false;
+                        btn1.disabled = false; btn2.disabled = false;
+                    }, 500);
+                }, 2000);
+            }, 100);
+        }
+
+        function simCsmaCollision() {
+            if (isCsmaSimulating) return;
+            isCsmaSimulating = true;
+            
+            const btn1 = document.getElementById('btn-csma-success');
+            const btn2 = document.getElementById('btn-csma-fail');
+            btn1.disabled = true; btn2.disabled = true;
+            
+            simCsmaLog("PC-A e PC-C transmitem juntos! Tensão elétrica subindo...", true);
+            
+            const pktA = document.getElementById('csma-pkt-a');
+            const pktC = document.getElementById('csma-pkt-c');
+            const boom = document.getElementById('csma-boom');
+            
+            pktA.style.transition = "none"; pktA.style.left = "0%"; pktA.style.opacity = "1";
+            pktC.style.transition = "none"; pktC.style.right = "0%"; pktC.style.opacity = "1";
+            
+            setTimeout(() => {
+                pktA.style.transition = "left 1s linear"; pktA.style.left = "50%";
+                pktC.style.transition = "right 1s linear"; pktC.style.right = "50%";
+                
+                setTimeout(() => {
+                    boom.style.opacity = "1";
+                    boom.style.transform = "translateX(-50%) scale(1.5)";
+                    simCsmaLog("💥 COLISÃO (CD)! Sinal JAM enviado. Sorteando Backoff...", true);
+                    
+                    pktA.style.opacity = "0"; pktC.style.opacity = "0";
+                    
+                    setTimeout(() => {
+                        boom.style.opacity = "0";
+                        boom.style.transform = "translateX(-50%) scale(0)";
+                        pktA.style.left = "0%"; pktC.style.right = "0%";
+                        
+                        setTimeout(() => {
+                            isCsmaSimulating = false;
+                            btn1.disabled = false; btn2.disabled = false;
+                            simCsmaLog("Sorteio finalizado. Cabo livre para nova tentativa.");
+                        }, 1000);
+                    }, 2000);
+                }, 1000);
+            }, 100);
+        }
+
+        // --- SIMULADOR SWITCH ---
+        let macTable = { 1: null, 2: null, 3: null };
+        const macs = { A: "AA:AA", B: "BB:BB", C: "CC:CC" };
+
+        function logConsole(msg, isAlert = false) {
+            const consoleEl = document.getElementById('sim-console');
+            const color = isAlert ? '#ff5555' : '#00ff00';
+            consoleEl.innerHTML += `<span style="color: ${color};">> ${msg}</span><br>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function highlightNode(id, duration = 1500, isError = false) {
+            const el = document.getElementById(id);
+            el.classList.add('active');
+            if (isError) el.style.borderColor = "var(--danger)";
+            
+            setTimeout(() => {
+                el.classList.remove('active');
+                if (isError) el.style.borderColor = "var(--secondary)";
+            }, duration);
+        }
+
+        function simulateSwitchAction(action) {
+            const btns = [document.getElementById('btn-sw-1'), document.getElementById('btn-sw-2'), document.getElementById('btn-sw-3')];
+            btns.forEach(b => b.disabled = true);
+            
+            if (action === 'A_to_B') {
+                logConsole("---", false);
+                logConsole("PC A inicia envio de frame. Destino: BB:BB | Origem: AA:AA");
+                highlightNode('pc-a', 2000);
+                
+                setTimeout(() => {
+                    if (macTable[1] !== macs.A) {
+                        macTable[1] = macs.A;
+                        document.getElementById('table-p1').innerText = macs.A;
+                        document.getElementById('table-p1').style.color = "var(--success)";
+                        logConsole("Anotando... MAC AA:AA memorizado na Porta 1.");
+                    }
+
+                    if (Object.values(macTable).includes(macs.B)) {
+                        logConsole("Destino BB:BB encontrado na tabela! UNICAST na Porta 2.");
+                        highlightNode('pc-b');
+                    } else {
+                        logConsole("Destino BB:BB DESCONHECIDO.", true);
+                        logConsole("FLOODING (Inundação) executado para portas 2 e 3!", true);
+                        highlightNode('pc-b', 1500);
+                        highlightNode('pc-c', 1500, true); 
+                    }
+                    setTimeout(() => btns.forEach(b => b.disabled = false), 1500);
+                }, 1000);
+            } 
+            else if (action === 'B_to_A') {
+                logConsole("---", false);
+                logConsole("PC B responde. Destino: AA:AA | Origem: BB:BB");
+                highlightNode('pc-b', 2000);
+                
+                setTimeout(() => {
+                    if (macTable[2] !== macs.B) {
+                        macTable[2] = macs.B;
+                        document.getElementById('table-p2').innerText = macs.B;
+                        document.getElementById('table-p2').style.color = "var(--success)";
+                        logConsole("Anotando... MAC BB:BB memorizado na Porta 2.");
+                    }
+
+                    if (Object.values(macTable).includes(macs.A)) {
+                        logConsole("Destino AA:AA encontrado! UNICAST para Porta 1.");
+                        highlightNode('pc-a');
+                    } else {
+                        logConsole("Destino AA:AA DESCONHECIDO. FLOODING!", true);
+                        highlightNode('pc-a', 1500);
+                        highlightNode('pc-c', 1500, true);
+                    }
+                    setTimeout(() => btns.forEach(b => b.disabled = false), 1500);
+                }, 1000);
+            }
+            else if (action === 'C_to_A') {
+                logConsole("---", false);
+                logConsole("PC C inicia envio. Destino: AA:AA | Origem: CC:CC");
+                highlightNode('pc-c', 2000);
+                
+                setTimeout(() => {
+                    if (macTable[3] !== macs.C) {
+                        macTable[3] = macs.C;
+                        document.getElementById('table-p3').innerText = macs.C;
+                        document.getElementById('table-p3').style.color = "var(--success)";
+                        logConsole("Anotando... MAC CC:CC memorizado na Porta 3.");
+                    }
+
+                    if (Object.values(macTable).includes(macs.A)) {
+                        logConsole("Destino AA:AA encontrado! UNICAST seguro para Porta 1.");
+                        highlightNode('pc-a');
+                    } else {
+                        logConsole("Destino AA:AA DESCONHECIDO. FLOODING portas 1 e 2!", true);
+                        highlightNode('pc-a', 1500);
+                        highlightNode('pc-b', 1500, true);
+                    }
+                    setTimeout(() => btns.forEach(b => b.disabled = false), 1500);
+                }, 1000);
+            }
+        }
+
+        function resetSwitch() {
+            macTable = { 1: null, 2: null, 3: null };
+            document.getElementById('table-p1').innerText = "- vazio -";
+            document.getElementById('table-p2').innerText = "- vazio -";
+            document.getElementById('table-p3').innerText = "- vazio -";
+            document.getElementById('table-p1').style.color = "var(--text-main)";
+            document.getElementById('table-p2').style.color = "var(--text-main)";
+            document.getElementById('table-p3').style.color = "var(--text-main)";
+            
+            document.getElementById('sim-console').innerHTML = "> Switch reiniciado. Memória CAM apagada.<br>";
+        }
+
+    </script>
+</body>
+</html>
+```

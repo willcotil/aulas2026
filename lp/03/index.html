@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 03 - Introdução ao C e Variáveis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES NEON --- */
+        :root {
+            --color-1: #362f4f; /* Roxo Escuro / Fundo Escuro */
+            --color-2: #5b23ff; /* Roxo Vibrante */
+            --color-3: #008bff; /* Azul Vibrante */
+            --color-4: #e4ff30; /* Amarelo Neon */
+            --bg-light: #f5f5fa; /* Fundo Claro (para leitura) */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--color-1);
+            overflow-x: hidden;
+        }
+
+        /* Slide Base */
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            border-bottom: 8px solid var(--color-2);
+            position: relative;
+        }
+
+        /* Tipografia */
+        h1 { 
+            font-size: 4rem; 
+            font-weight: 900; 
+            color: var(--color-1);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        h2 { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            color: var(--color-2); 
+            margin-bottom: 2rem; 
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 6px;
+            background-color: var(--color-4);
+            margin: 0.5rem auto 0;
+            border-radius: 4px;
+        }
+
+        p, li { font-size: 1.3rem; line-height: 1.6; color: #362f4f; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* Elementos Gráficos */
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(54, 47, 79, 0.15);
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 2rem; right: 2rem;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-2), var(--color-3));
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Botão de Copiar e Wrapper */
+        .code-block-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 850px;
+            margin: 1rem auto;
+        }
+        
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: var(--color-1);
+            color: var(--color-4);
+            border: 1px solid var(--color-4);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+        
+        .copy-button:hover {
+            background-color: var(--color-4);
+            color: var(--color-1);
+        }
+        
+        .code-block-wrapper:hover .copy-button {
+            opacity: 1;
+        }
+
+        /* Blocos de Código Escuros (Alto Contraste) */
+        .code-block {
+            background-color: var(--color-1);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.4rem;
+            text-align: left;
+            border-left: 5px solid var(--color-4);
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin: 0; /* Removida margem para o wrapper assumir o layout */
+        }
+        
+        .highlight-code-box {
+            background-color: #262138;
+            border: 2px dashed var(--color-4);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        code.inline-code {
+            background-color: #e2e8f0;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+            font-family: 'Fira Code', monospace;
+            color: var(--color-2);
+            font-weight: bold;
+        }
+        
+        /* Sintaxe C Colorida (Tema Escuro Neon) */
+        .syn-kw { color: #ff79c6; font-weight: bold; } /* Palavras-chave (return) */
+        .syn-type { color: #8be9fd; font-weight: bold; } /* Tipos (int, char, float) */
+        .syn-func { color: #50fa7b; font-weight: bold; } /* Funções (printf, main) */
+        .syn-str { color: #f1fa8c; } /* Textos ("Olá") */
+        .syn-num { color: #bd93f9; } /* Números (0, 42) */
+        .syn-inc { color: #ffb86c; } /* Includes (#include) */
+        .syn-comment { color: #6272a4; font-style: italic; } /* Comentários */
+
+        /* Geometria Types Analogy */
+        .shape-container { display: flex; align-items: center; justify-content: center; gap: 2rem; margin-top: 1rem; }
+        .slot { width: 120px; height: 120px; border: 4px dashed var(--color-1); display: flex; align-items: center; justify-content: center; border-radius: 12px; position: relative;}
+        .slot::after { content: 'Memória'; position: absolute; bottom: -25px; font-size: 0.9rem; font-weight: bold; color: var(--color-1); }
+        
+        /* SVG Shapes */
+        .shape { width: 80px; height: 80px; transition: transform 0.5s ease; }
+        .shape-char { fill: var(--color-4); stroke: var(--color-1); stroke-width: 4; } /* Triangulo */
+        .shape-int { fill: var(--color-3); stroke: var(--color-1); stroke-width: 4; } /* Quadrado */
+        .shape-float { fill: var(--color-2); stroke: var(--color-1); stroke-width: 4; } /* Circulo */
+        
+        /* --- DEPURADOR GEOMÉTRICO (Slide) --- */
+        .geo-debugger {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--color-3);
+            box-shadow: 0 10px 30px rgba(0, 139, 255, 0.1);
+        }
+        .geo-code { flex: 1; font-family: 'Fira Code', monospace; font-size: 1.1rem; line-height: 1.8; background: var(--color-1); color: white; padding: 1.5rem; border-radius: 8px; }
+        .geo-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.4; }
+        .geo-code .line.active { background-color: var(--color-4); color: var(--color-1); font-weight: bold; opacity: 1; transform: scale(1.02); }
+        .geo-memory { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; border-left: 2px dashed #cbd5e1; position: relative;}
+        
+        .geo-item { position: relative; width: 100px; height: 100px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: scale(0.5); display: flex; align-items: center; justify-content: center; }
+        .geo-item.visible { opacity: 1; transform: scale(1); }
+        .geo-item svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .geo-item .geo-val { position: relative; z-index: 2; font-family: 'Fira Code', monospace; font-size: 1.8rem; font-weight: bold; color: var(--color-1); opacity: 0; transition: opacity 0.5s; text-shadow: 0 0 5px white; }
+        .geo-item.filled .geo-val { opacity: 1; }
+        .geo-label { position: absolute; right: -80px; font-family: 'Fira Code', monospace; font-size: 0.9rem; font-weight: bold; color: var(--color-1); }
+
+        /* --- DEPURADOR MATRIZ DE MEMÓRIA (Slide) --- */
+        .memory-debugger {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--color-3);
+            box-shadow: 0 10px 30px rgba(0, 139, 255, 0.1);
+        }
+        .mem-code { flex: 1; font-family: 'Fira Code', monospace; font-size: 1.1rem; line-height: 1.8; background: var(--color-1); color: white; padding: 1.5rem; border-radius: 8px;}
+        .mem-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.4; }
+        .mem-code .line.active { background-color: var(--color-4); color: var(--color-1); font-weight: bold; opacity: 1; transform: scale(1.02); }
+        
+        .mem-grid { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; align-content: start; }
+        .mem-byte { 
+            aspect-ratio: 1; border: 2px solid #cbd5e1; border-radius: 4px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-color: #f8fafc; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .mem-byte .addr { font-size: 0.6rem; color: #94a3b8; position: absolute; top: 2px; left: 4px; }
+        .mem-byte .val { font-size: 1.2rem; font-weight: bold; font-family: 'Fira Code', monospace; z-index: 2; opacity: 0; transition: opacity 0.5s; }
+        
+        /* Tipos na matriz */
+        .byte-char { background-color: var(--color-4); border-color: #a3e635; color: var(--color-1); }
+        .byte-int { background-color: var(--color-3); border-color: #0284c7; color: white;}
+        .byte-float { background-color: var(--color-2); border-color: #4338ca; color: white;}
+        
+        .mem-byte.filled { transform: scale(1.05); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .mem-byte.filled .val { opacity: 1; }
+        
+        /* Navegação Fixa */
+        .nav-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-nav { background-color: var(--color-1); color: var(--color-4); width: 3.5rem; height: 3.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s, background-color 0.2s; border: 2px solid var(--color-4); font-size: 1.2rem; }
+        .btn-nav:hover { background-color: var(--color-2); color: white; border-color: var(--color-2); transform: scale(1.1); }
+        .counter { position: fixed; bottom: 2rem; left: 2rem; background-color: var(--color-1); padding: 0.5rem 1.5rem; border-radius: 2rem; font-weight: 800; border: 2px solid var(--color-4); color: var(--color-4); z-index: 50; }
+
+        /* Impressão */
+        @media print {
+            body { background: white; color: black; counter-reset: page-counter; }
+            .slide { height: auto; min-height: 29.7cm; border-bottom: none; page-break-after: always; padding: 1cm; align-items: flex-start; position: relative; counter-increment: page-counter; }
+            .slide:last-child { page-break-after: avoid; }
+            .slide::after { content: "Página " counter(page-counter); position: absolute; bottom: 1.5cm; right: 1.5cm; font-size: 11pt; color: #555; font-family: 'Inter', sans-serif; }
+            .nav-controls, .counter, .copy-button { display: none !important; }
+            h1 { font-size: 3rem; color: black; background: none; -webkit-text-fill-color: black; }
+            h2 { color: black; text-align: left; border-bottom: 1px solid black; width: 100%; }
+            h2::after { display: none; }
+            .card, .code-block, .geo-debugger, .memory-debugger, .geo-code, .mem-code, .highlight-code-box { box-shadow: none !important; border: 1px solid #ccc !important; background: white !important; color: black !important; page-break-inside: avoid; }
+            .code-block { border-left: 5px solid #000; }
+            .syn-kw, .syn-func, .syn-str, .syn-num, .syn-inc, .syn-type, .syn-comment { color: black !important; font-weight: bold; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .grid, .flex { display: block !important; }
+            .geo-code .line, .mem-code .line { opacity: 1 !important; color: black !important; background: none !important; }
+            .mem-byte { border: 1px solid black !important; background: white !important; color: black !important; }
+            .mem-byte.filled .val { opacity: 1 !important; color: black !important;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn" title="Anterior">←</button>
+        <button class="btn-nav" id="nextBtn" title="Próximo">→</button>
+        <button class="btn-nav" id="fsBtn" title="Tela Cheia">⛶</button>
+        <button class="btn-nav" onclick="window.print()" title="Imprimir">🖨️</button>
+    </div>
+    <div id="counter" class="counter">1 / 21</div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide">
+            <h1>Lógica de Programação</h1>
+            <h2 style="border: none; font-size: 2.5rem; color: var(--color-2);">Aula 03: Introdução ao C e Variáveis</h2>
+            
+            <div class="card mt-8 p-8 flex flex-col items-center border-2" style="border-color: var(--color-4);">
+                <div style="font-size: 5rem;">🚀 💻 📦</div>
+                <p class="mt-4 font-bold text-xl" style="color: var(--color-1);">Saindo do papel e entrando na máquina!</p>
+            </div>
+
+            <p class="mt-12 font-bold" style="color: var(--color-1);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: O que é a Linguagem C -->
+        <section class="slide">
+            <h2>A Famosa Linguagem C</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mt-8">
+                <div class="card flex flex-col justify-center">
+                    <p class="text-left font-bold text-xl mb-4" style="color: var(--color-2);">Por que C?</p>
+                    <p class="text-left text-lg">A Linguagem C foi criada na década de 1970, mas até hoje é a base da computação mundial. Ela é rápida, poderosa e exige que você entenda como o computador realmente funciona por baixo dos panos.</p>
+                    <p class="text-left text-lg mt-4">Sistemas operacionais (Windows, Linux), a maioria dos jogos, e até a eletrônica da sua casa rodam C!</p>
+                </div>
+                <div class="flex items-center justify-center">
+                    <div class="text-[10rem]">⚙️</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Olá Mundo (O Código) -->
+        <section class="slide">
+            <h2>O Clássico: Olá, Mundo!</h2>
+            <p>Em programação, é tradição que o seu primeiro código seja fazer o computador cumprimentá-lo. Isso testa se tudo está pronto para começarmos.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg>
+                    <span>Copiar</span>
+                </button>
+                <div class="code-block">
+                    <span class="syn-inc">#include &lt;stdio.h&gt;</span><br><br>
+                    <span class="syn-type">int</span> <span class="syn-func">main</span>() {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Ola, Mundo!\n"</span>);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-kw">return</span> <span class="syn-num">0</span>;<br>
+                    }
+                </div>
+            </div>
+            
+            <p class="mt-6 text-xl font-bold">Parece complexo? Não se preocupe! Vamos dissecar linha por linha agora.</p>
+        </section>
+
+        <!-- Slide 4: Dissecando #include -->
+        <section class="slide">
+            <h2>1. A Caixa de Ferramentas (<code class="inline-code">#include</code>)</h2>
+            <div class="highlight-code-box">
+                <span class="font-mono text-3xl font-bold" style="color: #ffb86c;">#include &lt;stdio.h&gt;</span>
+            </div>
+            <div class="card w-full max-w-5xl mt-8 text-left border-l-8" style="border-color: var(--color-4);">
+                <p class="text-lg mb-4">A linguagem C é muito "enxuta". Por padrão, ela não sabe nem como exibir textos no seu monitor!</p>
+                <p class="text-lg mb-4">Para isso, precisamos pedir emprestada uma "caixa de ferramentas".</p>
+                <ul class="list-disc pl-8 space-y-2 text-lg">
+                    <li><code class="inline-code">#include</code>: Significa "Incluir".</li>
+                    <li><code class="inline-code">stdio.h</code>: Significa <strong>St</strong>andar<strong>d</strong> <strong>I</strong>nput <strong>O</strong>utput (Entrada e Saída Padrão).</li>
+                </ul>
+                <p class="mt-4 font-bold text-gray-500">Resumo: "Ei compilador, traga as ferramentas de ler o teclado e de exibir na tela!"</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: Dissecando int main -->
+        <section class="slide">
+            <h2>2. A Porta de Entrada (<code class="inline-code">int main</code>)</h2>
+            <div class="highlight-code-box">
+                <span class="font-mono text-3xl font-bold" style="color: #8be9fd;">int</span> 
+                <span class="font-mono text-3xl font-bold" style="color: #50fa7b;">main</span>
+                <span class="font-mono text-3xl font-bold text-white">()</span>
+            </div>
+            <div class="card w-full max-w-5xl mt-8 text-left border-l-8" style="border-color: var(--color-3);">
+                <p class="text-lg mb-4">Seu programa pode ter milhares de arquivos e funções. Como o computador sabe por onde começar a ler?</p>
+                <p class="text-lg mb-4">A resposta é a função <strong>main</strong> (principal, em inglês). O sistema operacional vai procurar <em>exatamente</em> essa palavra para dar o pontapé inicial.</p>
+                <p class="text-lg font-bold text-red-600 mt-4">Todo programa em C PRECISA ter um <code>main()</code>. Se não tiver, não roda.</p>
+            </div>
+        </section>
+
+        <!-- Slide 6: Dissecando Chaves e Ponto e Vírgula -->
+        <section class="slide">
+            <h2>3. Chaves <code class="inline-code">{ }</code> e Ponto e Vírgula <code class="inline-code">;</code></h2>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card text-center" style="border-color: var(--color-2);">
+                    <div class="text-6xl mb-4 font-mono font-bold" style="color: var(--color-2);">{ ... }</div>
+                    <h3 class="font-bold text-xl mb-2">As Chaves (Blocos)</h3>
+                    <p class="text-sm text-left">As chaves delimitam onde uma coisa <strong>começa</strong> e onde ela <strong>termina</strong>. Tudo que está dentro das chaves do <code>main()</code> pertence ao seu programa.</p>
+                    <p class="text-sm text-left mt-2">Abriu uma chave <code>{</code>, você <strong>obrigatoriamente</strong> tem que fechar <code>}</code> depois!</p>
+                </div>
+                
+                <div class="card text-center" style="border-color: #ef4444;">
+                    <div class="text-6xl mb-4 font-mono font-bold text-red-600">;</div>
+                    <h3 class="font-bold text-xl mb-2 text-red-600">O Ponto e Vírgula</h3>
+                    <p class="text-sm text-left">Na escola, usamos o ponto final para terminar uma frase. Em C, usamos o ponto e vírgula <code>;</code> para avisar o computador que a nossa <strong>instrução terminou</strong>.</p>
+                    <p class="text-sm text-left font-bold mt-2">Esquecer o <code>;</code> é a causa nº 1 de erros em programadores iniciantes!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Dissecando printf e return -->
+        <section class="slide">
+            <h2>4. Ação e Finalização (<code class="inline-code">printf</code> e <code class="inline-code">return</code>)</h2>
+            <div class="highlight-code-box">
+                <span class="font-mono text-xl text-white">
+                &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #50fa7b; font-weight: bold;">printf</span>(<span style="color: #f1fa8c;">"Ola, Mundo!\n"</span>);<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #ff79c6; font-weight: bold;">return</span> <span style="color: #bd93f9;">0</span>;
+                </span>
+            </div>
+            <div class="card w-full max-w-5xl mt-6 text-left border-l-8" style="border-color: var(--color-4);">
+                <ul class="list-disc pl-6 space-y-4 text-lg">
+                    <li><code class="inline-code">printf("texto");</code>: É a instrução de <strong>ação</strong>. Ela diz "exiba formatado na tela". Tudo que está entre as aspas duplas vai aparecer no monitor. O <code>\n</code> é um código secreto que significa "Enter" (pular linha).</li>
+                    <li><code class="inline-code">return 0;</code>: É a última coisa que o programa faz. Retornar o número zero para o Windows/Linux é a forma do seu programa dizer: <strong>"Acabei e deu tudo certo, nenhum erro aconteceu!"</strong>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 8: Compilando o Código -->
+        <section class="slide">
+            <h2>Do Texto para o Computador</h2>
+            <p>O computador não entende as palavras que acabamos de aprender. Ele só lê zeros e uns. Precisamos de um tradutor chamado <strong>Compilador (GCC)</strong>.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mt-6">
+                <div class="card flex flex-col items-center text-center">
+                    <div class="text-6xl mb-4">📄</div>
+                    <h3 class="font-bold text-xl mb-2" style="color: var(--color-1);">Código Fonte (.c)</h3>
+                    <p class="text-sm">O texto que escrevemos no editor. É legível para nós, mas não para a máquina.</p>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <div class="text-4xl text-gray-400 mb-2 rotate-90 md:rotate-0">➡️</div>
+                    <div class="card border-2 p-4 text-center w-full shadow-md" style="border-color: var(--color-3); background: #e0f2fe;">
+                        <h3 class="font-bold text-lg" style="color: var(--color-3);">Compilador (GCC)</h3>
+                        <p class="text-xs">O "Tradutor". Transforma o nosso texto em instruções de máquina (0s e 1s).</p>
+                    </div>
+                    <div class="text-4xl text-gray-400 mt-2 rotate-90 md:rotate-0">➡️</div>
+                </div>
+                <div class="card flex flex-col items-center text-center border-l-8" style="border-left-color: var(--color-2);">
+                    <div class="text-6xl mb-4">🚀</div>
+                    <h3 class="font-bold text-xl mb-2" style="color: var(--color-2);">Executável</h3>
+                    <p class="text-sm">O programa final, pronto para rodar. No Windows é um arquivo <code>.exe</code>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Terminal -->
+        <section class="slide">
+            <h2>O Terminal: Compilando e Executando</h2>
+            <p>Para usar o compilador, nós abrimos o <strong>Terminal</strong> (Linha de Comando) na pasta onde salvamos o arquivo e digitamos as instruções.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <!-- Windows -->
+                <div class="card" style="background-color: var(--color-1); color: white;">
+                    <div class="flex items-center gap-2 border-b border-gray-600 pb-2 mb-4">
+                        <div class="text-3xl">🪟</div>
+                        <h3 class="font-bold text-white text-2xl">Windows (CMD)</h3>
+                    </div>
+                    <p class="text-gray-300 text-lg mb-1 font-bold">1. Traduzir (Compilar):</p>
+                    <code class="block font-mono bg-black p-4 text-lg rounded mb-6 shadow-inner" style="color: var(--color-4);">gcc ola.c -o programa.exe</code>
+                    <p class="text-gray-300 text-lg mb-1 font-bold">2. Executar (Rodar):</p>
+                    <code class="block font-mono bg-black p-4 text-lg rounded shadow-inner" style="color: var(--color-4);">programa.exe</code>
+                </div>
+
+                <!-- Linux/Mac -->
+                <div class="card" style="background-color: var(--color-1); color: white;">
+                    <div class="flex items-center gap-2 border-b border-gray-600 pb-2 mb-4">
+                        <div class="text-3xl">🐧</div>
+                        <h3 class="font-bold text-white text-2xl">Linux / macOS</h3>
+                    </div>
+                    <p class="text-gray-300 text-lg mb-1 font-bold">1. Traduzir (Compilar):</p>
+                    <code class="block font-mono bg-black p-4 text-lg rounded mb-6 shadow-inner" style="color: var(--color-4);">gcc ola.c -o programa</code>
+                    <p class="text-gray-300 text-lg mb-1 font-bold">2. Executar (Rodar):</p>
+                    <code class="block font-mono bg-black p-4 text-lg rounded shadow-inner" style="color: var(--color-4);">./programa</code>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-white border-l-8 p-4 w-full max-w-5xl rounded text-left shadow-sm" style="border-color: var(--color-3);">
+                <p><strong>Explicando o comando de compilação:</strong> <br>
+                👉 <code class="font-mono font-bold bg-gray-200 px-1 rounded">gcc</code>: Chama o programa que faz a tradução (o compilador).<br>
+                👉 <code class="font-mono font-bold bg-gray-200 px-1 rounded">-o</code>: Significa "Output" (Saída). Estamos dizendo: "o nome do arquivo final gerado deve ser esse aqui".</p>
+            </div>
+        </section>
+
+        <!-- Slide 10: Variáveis e Tipos -->
+        <section class="slide" style="border:none; background-color: var(--color-1);">
+            <h1 style="color: var(--color-4); background: none; -webkit-text-fill-color: var(--color-4);">Onde guardamos as coisas?</h1>
+            <p style="color: white; opacity: 0.9; font-size: 1.5rem;" class="mt-4">Para um programa ser útil, ele precisa memorizar informações (nomes, notas, níveis, senhas).</p>
+            <p style="color: white; opacity: 0.9; font-weight: bold;" class="mt-4 text-2xl">Vamos falar de VARIÁVEIS.</p>
+            <div class="text-9xl mt-8">📦</div>
+        </section>
+
+        <!-- Slide 11: O Encaixe Perfeito (Analogia) -->
+        <section class="slide">
+            <h2>A Regra do Encaixe (Tipos de Dados)</h2>
+            <p>Uma variável é um espaço (caixa) na memória. Mas em C, a caixa <strong>tem formato específico</strong>. Você não pode colocar um número decimal numa caixa feita para letras.</p>
+            
+            <div class="w-full max-w-6xl mt-8 flex flex-col gap-8">
+                <!-- Correto -->
+                <div class="flex items-center justify-around card bg-green-50 border-green-300">
+                    <div class="text-center w-1/3">
+                        <p class="font-bold text-xl mb-2 text-green-800">Dado: Caractere 'A'</p>
+                        <svg class="shape shape-char mx-auto" viewBox="0 0 100 100">
+                            <polygon points="50,10 90,90 10,90" />
+                        </svg>
+                    </div>
+                    <div class="text-4xl text-green-600">➡️</div>
+                    <div class="text-center w-1/3">
+                        <p class="font-bold text-xl mb-2 text-green-800">Memória: Formato <code class="inline-code">char</code></p>
+                        <div class="slot mx-auto border-green-500">
+                            <svg class="shape shape-char" viewBox="0 0 100 100" style="opacity: 0.3; stroke: var(--color-1); fill: none;"><polygon points="50,10 90,90 10,90" /></svg>
+                        </div>
+                    </div>
+                    <div class="text-center w-1/3">
+                        <p class="font-bold text-3xl text-green-600">✅ Encaixa!</p>
+                    </div>
+                </div>
+
+                <!-- Errado -->
+                <div class="flex items-center justify-around card bg-red-50 border-red-300">
+                    <div class="text-center w-1/3">
+                        <p class="font-bold text-xl mb-2 text-red-800">Dado: Decimal 3.14</p>
+                        <svg class="shape shape-float mx-auto" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="40" />
+                        </svg>
+                    </div>
+                    <div class="text-4xl text-red-600">➡️</div>
+                    <div class="text-center w-1/3">
+                        <p class="font-bold text-xl mb-2 text-red-800">Memória: Formato <code class="inline-code">int</code></p>
+                        <div class="slot mx-auto border-red-500">
+                            <svg class="shape shape-int" viewBox="0 0 100 100" style="opacity: 0.3; stroke: var(--color-1); fill: none;"><rect x="10" y="10" width="80" height="80" /></svg>
+                        </div>
+                    </div>
+                    <div class="text-center w-1/3">
+                        <p class="font-bold text-3xl text-red-600">❌ ERRO!</p>
+                        <p class="text-sm text-red-800 mt-2">Um decimal perde a vírgula numa caixa inteira!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: DEPURADOR GEOMÉTRICO -->
+        <section class="slide" id="slide-debug-geo" data-interactive="true">
+            <h2>Declarando e Atribuindo Valores</h2>
+            <p class="text-lg text-gray-500 mb-4">(Use a <strong>Seta →</strong> para ver a criação do espaço na memória e a atribuição de valor)</p>
+            
+            <div class="geo-debugger">
+                <div class="geo-code" id="geo-code">
+                    <div class="line" data-step="1"><span class="syn-type">int</span> idade; <span class="syn-comment">// Cria o espaço</span></div>
+                    <div class="line" data-step="2">idade = <span class="syn-num">18</span>; <span class="syn-comment">// Coloca valor no espaço</span></div>
+                    <div class="line mt-4" data-step="3"><span class="syn-type">char</span> letra;</div>
+                    <div class="line" data-step="4">letra = <span class="syn-str">'A'</span>; <span class="syn-comment">// Aspas simples!</span></div>
+                    <div class="line mt-4" data-step="5"><span class="syn-type">float</span> peso;</div>
+                    <div class="line" data-step="6">peso = <span class="syn-num">70.5</span>; <span class="syn-comment">// Ponto, não vírgula!</span></div>
+                </div>
+                
+                <div class="geo-memory">
+                    <!-- Espaço INT -->
+                    <div id="geo-int" class="geo-item">
+                        <svg class="shape shape-int" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="5" y="5" width="90" height="90" rx="10"/></svg>
+                        <span class="geo-val"></span>
+                        <span class="geo-label">int idade</span>
+                    </div>
+                    <!-- Espaço CHAR -->
+                    <div id="geo-char" class="geo-item">
+                        <svg class="shape shape-char" viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="50,5 95,90 5,90" stroke-linejoin="round"/></svg>
+                        <span class="geo-val" style="margin-top: 20px;"></span>
+                        <span class="geo-label" style="top: 30px;">char letra</span>
+                    </div>
+                    <!-- Espaço FLOAT -->
+                    <div id="geo-float" class="geo-item">
+                        <svg class="shape shape-float" viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="50" cy="50" r="45"/></svg>
+                        <span class="geo-val"></span>
+                        <span class="geo-label">float peso</span>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-6 text-lg font-bold" id="geo-explanation">Aguardando execução...</p>
+        </section>
+
+        <!-- Slide 13: Tipo INT -->
+        <section class="slide">
+            <h2>O Tipo <code class="inline-code">int</code> (Inteiro)</h2>
+            <div class="card w-full max-w-5xl flex items-center gap-8 border-l-8" style="border-left-color: var(--color-3);">
+                <svg class="shape-int w-32 h-32 flex-shrink-0" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" rx="10"/></svg>
+                <div class="text-left">
+                    <p class="text-xl mb-4">Utilizado para armazenar <strong>números inteiros</strong>, positivos ou negativos, sem casas decimais.</p>
+                    <ul class="list-disc pl-6 space-y-2 text-lg">
+                        <li><strong>Exemplos:</strong> <code class="inline-code">0</code>, <code class="inline-code">42</code>, <code class="inline-code">-15</code>, <code class="inline-code">2026</code>.</li>
+                        <li><strong>Uso comum:</strong> Idades, contadores, quantidades, anos.</li>
+                        <li><strong>Tamanho na memória:</strong> Geralmente ocupa <strong>4 bytes</strong> (32 bits).</li>
+                        <li><strong>Como exibir na tela?</strong> Usamos o marcador <code class="inline-code">%d</code> dentro do printf.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Tipo FLOAT/DOUBLE -->
+        <section class="slide">
+            <h2>O Tipo <code class="inline-code">float</code> e <code class="inline-code">double</code> (Reais)</h2>
+            <div class="card w-full max-w-5xl flex items-center gap-8 border-l-8" style="border-left-color: var(--color-2);">
+                <svg class="shape-float w-32 h-32 flex-shrink-0" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg>
+                <div class="text-left">
+                    <p class="text-xl mb-4">Utilizados para armazenar <strong>números com casas decimais</strong> (ponto flutuante).</p>
+                    <ul class="list-disc pl-6 space-y-2 text-lg">
+                        <li><strong>Exemplos:</strong> <code class="inline-code">3.14</code>, <code class="inline-code">-0.5</code>, <code class="inline-code">19.99</code>. <em class="text-red-500 font-bold">Atenção: Use PONTO, não vírgula!</em></li>
+                        <li><strong>Diferença:</strong> O <code>float</code> ocupa <strong>4 bytes</strong>. O <code>double</code> tem o dobro de precisão e ocupa <strong>8 bytes</strong>.</li>
+                        <li><strong>Uso comum:</strong> Preços, salários, altura, médias de notas.</li>
+                        <li><strong>Como exibir na tela?</strong> Usamos o marcador <code class="inline-code">%f</code> (ou <code class="inline-code">%.2f</code> para 2 casas).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Tipo CHAR -->
+        <section class="slide">
+            <h2>O Tipo <code class="inline-code">char</code> (Caractere)</h2>
+            <div class="card w-full max-w-5xl flex items-center gap-8 border-l-8" style="border-left-color: var(--color-4);">
+                <svg class="shape-char w-32 h-32 flex-shrink-0" viewBox="0 0 100 100"><polygon points="50,5 95,90 5,90" stroke-linejoin="round"/></svg>
+                <div class="text-left">
+                    <p class="text-xl mb-4">Utilizado para armazenar <strong>um único caractere</strong> (letra, número como texto, ou símbolo).</p>
+                    <ul class="list-disc pl-6 space-y-2 text-lg">
+                        <li><strong>Exemplos:</strong> <code class="inline-code">'A'</code>, <code class="inline-code">'5'</code>, <code class="inline-code">'@'</code>, <code class="inline-code">' '</code> (espaço).</li>
+                        <li><strong>Regra de Ouro:</strong> O valor DEVE estar sempre entre <strong>aspas simples</strong>.</li>
+                        <li><strong>Tamanho na memória:</strong> É muito leve, ocupa apenas <strong>1 byte</strong>.</li>
+                        <li><strong>Como exibir na tela?</strong> Usamos o marcador <code class="inline-code">%c</code>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 16: Depurador de Memória FÍSICA -->
+        <section class="slide" id="slide-debug-mem" data-interactive="true">
+            <h2>O Tamanho Real na Memória</h2>
+            <p class="text-lg text-gray-500 mb-4">(Veja como a Memória RAM física é dividida em blocos chamados BYTES)</p>
+            
+            <div class="memory-debugger">
+                <!-- Código Passo a Passo -->
+                <div class="mem-code" id="mem-code">
+                    <div class="line" data-step="1"><span class="syn-type">char</span> letra = <span class="syn-str">'X'</span>; <span class="syn-comment">// Precisa de 1 Byte</span></div>
+                    <div class="line mt-4" data-step="2"><span class="syn-type">int</span> vidas = <span class="syn-num">99</span>;  <span class="syn-comment">// Precisa de 4 Bytes</span></div>
+                    <div class="line mt-4" data-step="3"><span class="syn-type">float</span> pi = <span class="syn-num">3.14</span>; <span class="syn-comment"> // Precisa de 4 Bytes</span></div>
+                    <div class="line mt-8" data-step="4"><span class="syn-comment">// O computador sabe buscar no endereço exato!</span></div>
+                </div>
+                
+                <!-- Matriz de Memória (16 bytes = 4x4) -->
+                <div class="mem-grid" id="mem-grid">
+                    <!-- Linha 1 -->
+                    <div class="mem-byte" id="byte-0"><span class="addr">0x00</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-1"><span class="addr">0x01</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-2"><span class="addr">0x02</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-3"><span class="addr">0x03</span><span class="val"></span></div>
+                    <!-- Linha 2 -->
+                    <div class="mem-byte" id="byte-4"><span class="addr">0x04</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-5"><span class="addr">0x05</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-6"><span class="addr">0x06</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-7"><span class="addr">0x07</span><span class="val"></span></div>
+                    <!-- Linha 3 -->
+                    <div class="mem-byte" id="byte-8"><span class="addr">0x08</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-9"><span class="addr">0x09</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-10"><span class="addr">0x0A</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-11"><span class="addr">0x0B</span><span class="val"></span></div>
+                    <!-- Linha 4 -->
+                    <div class="mem-byte" id="byte-12"><span class="addr">0x0C</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-13"><span class="addr">0x0D</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-14"><span class="addr">0x0E</span><span class="val"></span></div>
+                    <div class="mem-byte" id="byte-15"><span class="addr">0x0F</span><span class="val"></span></div>
+                </div>
+            </div>
+            <p class="mt-6 text-lg font-bold" id="mem-explanation">Aguardando execução...</p>
+        </section>
+
+        <!-- Slide 17: Exemplo 1 - RPG -->
+        <section class="slide">
+            <h2>Exemplo 1: Personagem de RPG</h2>
+            <p>Crie o arquivo <code class="inline-code">heroi.c</code>. Neste exemplo, declaramos variáveis, atribuímos valores e mostramos na tela.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg>
+                    <span>Copiar</span>
+                </button>
+                <div class="code-block" style="max-width: 900px;">
+                    <span class="syn-inc">#include &lt;stdio.h&gt;</span><br><br>
+                    <span class="syn-type">int</span> <span class="syn-func">main</span>() {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-comment">// Declarando e atribuindo na mesma linha!</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-type">int</span> nivel = <span class="syn-num">10</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-type">float</span> vida = <span class="syn-num">99.5</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-type">char</span> classe = <span class="syn-str">'G'</span>; <span class="syn-comment">// 'G' de Guerreiro</span><br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-comment">// Não se preocupe com o %d e %f agora. Eles apenas</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-comment">// guardam o lugar para a variável aparecer na tela.</span><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Classe: %c\n"</span>, classe);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Nivel : %d\n"</span>, nivel);<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Vida  : %f\n"</span>, vida);<br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-kw">return</span> <span class="syn-num">0</span>;<br>
+                    }
+                </div>
+            </div>
+            <p class="text-sm font-bold bg-green-100 text-green-800 p-2 rounded inline-block mt-4">Compile no terminal: gcc heroi.c -o heroi</p>
+        </section>
+
+        <!-- Slide 18: Exemplo 2 - Planeta -->
+        <section class="slide">
+            <h2>Exemplo 2: Explorador Espacial</h2>
+            <p>Crie o arquivo <code class="inline-code">planeta.c</code>. Vamos criar dados para o sistema estelar.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg>
+                    <span>Copiar</span>
+                </button>
+                <div class="code-block" style="max-width: 900px;">
+                    <span class="syn-inc">#include &lt;stdio.h&gt;</span><br><br>
+                    <span class="syn-type">int</span> <span class="syn-func">main</span>() {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-type">int</span> luas;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-type">float</span> gravidade;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-type">char</span> categoria;<br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;luas = <span class="syn-num">4</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;gravidade = <span class="syn-num">1.25</span>;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;categoria = <span class="syn-str">'A'</span>; <span class="syn-comment">// Planeta Habitável</span><br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Cat: %c | Luas: %d | Grav: %.2f\n"</span>, categoria, luas, gravidade);<br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-kw">return</span> <span class="syn-num">0</span>;<br>
+                    }
+                </div>
+            </div>
+            <p class="text-sm font-bold text-gray-500 mt-4">Dica: O <code>%.2f</code> no printf serve para exibir apenas 2 casas decimais na tela!</p>
+        </section>
+
+        <!-- Slide 19: Cabeçalho Exercícios -->
+        <section class="slide" style="border:none; background-color: var(--color-1);">
+            <h1 style="color: var(--color-4); background: none; -webkit-text-fill-color: var(--color-4);">Hora de Praticar!</h1>
+            <p style="color: white; opacity: 0.9;">10 Exercícios para fixar tipos e regras de memória e sintaxe.</p>
+            
+            <div class="mt-8 p-6 card w-full max-w-4xl text-left bg-white border-l-8" style="border-color: var(--color-3);">
+                <p class="font-bold mb-4 text-xl" style="color: var(--color-1);">Instruções para a Lista:</p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li>1. Crie uma pasta no seu computador chamada <strong>"aula03"</strong>.</li>
+                    <li>2. Para exercícios teóricos, crie um arquivo de texto. Exemplo: <code class="inline-code">ex1.txt</code>.</li>
+                    <li>3. Para códigos, crie arquivos de código-fonte. Exemplo: <code class="inline-code">ex8.c</code>.</li>
+                    <li>4. Compile e execute os códigos pelo Terminal.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 1 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Tipos e Memória)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6 border-l-8" style="border-color: var(--color-2);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-2);">1. Tipos em C</h3>
+                    <p class="text-sm">No arquivo <code>ex1.txt</code>, escreva quais são os tipos de dados em C corretos (int, float ou char) para armazenar: a) Uma nota de prova (ex: 8.5), b) A quantidade de pneus de um carro, c) O símbolo do seu gênero (M ou F).</p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-2);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-2);">2. A Memória Física</h3>
+                    <p class="text-sm">No arquivo <code>ex2.txt</code>, responda: De acordo com o que vimos no depurador de memória, quantos "quadradinhos" (Bytes) a variável do tipo <code>char</code> ocupa? E a do tipo <code>int</code>?</p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-2);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-2);">3. Múltiplas Declarações</h3>
+                    <p class="text-sm">Sabia que podemos declarar várias variáveis do mesmo tipo de uma vez? No arquivo <code>ex3.txt</code>, crie uma única linha de código que declare três variáveis inteiras chamadas <code>dia</code>, <code>mes</code> e <code>ano</code>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 2 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Caçando Erros)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6 border-l-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl text-red-600">4. Caçando Erros de Sintaxe</h3>
+                    <p class="text-sm mb-2">O código abaixo tenta compilar, mas o GCC vai gritar. Baseado no que você aprendeu sobre a estrutura básica do C (início, fim e pontuação), encontre os 3 erros de sintaxe e escreva o código corrigido no arquivo <code>ex4.c</code>.</p>
+                    <code class="block bg-gray-100 p-2 text-sm text-black">
+                        #include &lt;stdio.h&gt;<br>
+                        int main() <br>
+                        &nbsp;&nbsp;int idade = 20<br>
+                        &nbsp;&nbsp;printf("Idade: %d", idade);<br>
+                        &nbsp;&nbsp;return 0;<br>
+                    </code>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl text-red-600">5. A Regra da Atribuição</h3>
+                    <p class="text-sm mb-2">O aluno queria guardar o número 100 na variável X. O que está errado nesta atribuição e por quê? Responda no arquivo <code>ex5.txt</code>.</p>
+                    <code class="block bg-gray-100 p-2 text-sm text-black">
+                        int x;<br>
+                        100 = x;
+                    </code>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl text-red-600">6. O Encaixe Errado</h3>
+                    <p class="text-sm mb-2">Explique o que vai acontecer (ou dar errado) ao tentar fazer a atribuição abaixo. Pense na analogia das formas geométricas. Responda no arquivo <code>ex6.txt</code>.</p>
+                    <code class="block bg-gray-100 p-2 text-sm text-black">
+                        int numero_da_sorte;<br>
+                        numero_da_sorte = 3.1415;
+                    </code>
+                </div>
+                
+                 <div class="card p-6 border-l-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl text-red-600">7. Citações e Aspas</h3>
+                    <p class="text-sm mb-2">Qual a diferença entre usar aspas simples (<code>' '</code>) e usar aspas duplas (<code>" "</code>) na linguagem C? Responda no arquivo <code>ex7.txt</code> indicando onde usamos cada uma.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 3 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Mão na Massa)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6 border-l-8" style="border-color: var(--color-4); background: var(--color-1); color: white;">
+                    <h3 class="font-bold text-xl" style="color: var(--color-4);">8. Compilando: A Loja</h3>
+                    <p class="text-sm text-gray-300 mb-2">Crie um programa completo (<code>ex8.c</code>). Nele, declare um inteiro <code>estoque</code> valendo 50, e um float <code>preco</code> valendo 19.99. Use o <code>printf</code> para exibir as duas variáveis na tela (use <code>%d</code> para o int e <code>%.2f</code> para o float). Compile via terminal e rode!</p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-4); background: var(--color-1); color: white;">
+                    <h3 class="font-bold text-xl" style="color: var(--color-4);">9. Atualizando o Valor</h3>
+                    <p class="text-sm text-gray-300">Crie o arquivo <code>ex9.c</code>. Declare uma variável <code>int pontos = 0;</code>. Exiba o valor dela na tela. Na linha de baixo, atribua o valor <code>100</code> à variável <code>pontos</code> (sem recriá-la, só atualizando a caixa). Exiba a variável de novo na tela. Compile e execute.</p>
+                </div>
+                
+                <div class="card p-6 border-l-8" style="border-color: var(--color-4); background: var(--color-1); color: white;">
+                    <h3 class="font-bold text-xl" style="color: var(--color-4);">10. Formatação Cuidadosa</h3>
+                    <p class="text-sm text-gray-300">Crie o arquivo <code>ex10.c</code>. Declare uma variável char para sua inicial, um inteiro para sua idade, e um float para sua altura. Use uma <strong>única função <code>printf</code></strong> para exibir uma frase completa na tela com todos esses dados (Ex: "Eu sou o W, tenho 30 anos e 1.75m"). Dica: Coloque as variáveis separadas por vírgula na ordem em que os <code>%</code> aparecem no texto.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+        const counterElement = document.getElementById('counter');
+        
+        let currentSlide = 0;
+
+        function updateCounter() {
+            if (counterElement) {
+                counterElement.textContent = `${currentSlide + 1} / ${slides.length}`;
+            }
+        }
+
+        // --- LÓGICA DE COPIAR CÓDIGO ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('.code-block, .code-box');
+                const codeText = codeEl.innerText;
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    span.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        span.textContent = 'Copiar';
+                    }, 2000);
+                }).catch(err => {
+                    console.error("Falha ao copiar texto: ", err);
+                });
+            });
+        });
+
+        // --- DEPURADOR GEOMÉTRICO ---
+        const geoSteps = [
+            { line: 0, intVis: false, intVal: '', charVis: false, charVal: '', floatVis: false, floatVal: '', msg: "A memória está limpa. O programa vai começar." },
+            { line: 1, intVis: true, intVal: '', charVis: false, charVal: '', floatVis: false, floatVal: '', msg: "Declaramos 'int idade'. Um espaço (quadrado) foi reservado na memória, mas está vazio." },
+            { line: 2, intVis: true, intVal: '18', charVis: false, charVal: '', floatVis: false, floatVal: '', msg: "Atribuímos 18. O valor encaixa perfeitamente na caixa do tipo 'int'." },
+            { line: 3, intVis: true, intVal: '18', charVis: true, charVal: '', floatVis: false, floatVal: '', msg: "Declaramos 'char letra'. Uma nova caixa com formato diferente (triângulo) foi criada." },
+            { line: 4, intVis: true, intVal: '18', charVis: true, charVal: "'A'", floatVis: false, floatVal: '', msg: "Atribuímos 'A' (entre aspas simples!). Ele foi para dentro da caixa char." },
+            { line: 5, intVis: true, intVal: '18', charVis: true, charVal: "'A'", floatVis: true, floatVal: '', msg: "Declaramos 'float peso'. Mais um espaço reservado, agora em formato de círculo para decimais." },
+            { line: 6, intVis: true, intVal: '18', charVis: true, charVal: "'A'", floatVis: true, floatVal: '70.5', msg: "Atribuímos 70.5 ao peso." }
+        ];
+
+        let currentGeoStep = 0;
+
+        function updateGeoDebugger() {
+            const step = geoSteps[currentGeoStep];
+            
+            // Texto
+            document.getElementById('geo-explanation').innerText = step.msg;
+
+            // Linhas de código
+            document.querySelectorAll('#geo-code .line').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.step) === step.line) {
+                    el.classList.add('active');
+                }
+            });
+
+            // Shapes
+            const intBox = document.getElementById('geo-int');
+            const charBox = document.getElementById('geo-char');
+            const floatBox = document.getElementById('geo-float');
+
+            if(step.intVis) intBox.classList.add('visible'); else intBox.classList.remove('visible');
+            if(step.charVis) charBox.classList.add('visible'); else charBox.classList.remove('visible');
+            if(step.floatVis) floatBox.classList.add('visible'); else floatBox.classList.remove('visible');
+
+            // Values
+            const intValEl = intBox.querySelector('.geo-val');
+            const charValEl = charBox.querySelector('.geo-val');
+            const floatValEl = floatBox.querySelector('.geo-val');
+
+            intValEl.innerText = step.intVal;
+            if(step.intVal !== '') intBox.classList.add('filled'); else intBox.classList.remove('filled');
+
+            charValEl.innerText = step.charVal;
+            if(step.charVal !== '') charBox.classList.add('filled'); else charBox.classList.remove('filled');
+
+            floatValEl.innerText = step.floatVal;
+            if(step.floatVal !== '') floatBox.classList.add('filled'); else floatBox.classList.remove('filled');
+        }
+
+        // --- DEPURADOR DE MEMÓRIA MATRIX ---
+        const memSteps = [
+            { 
+                line: 0, 
+                msg: "A memória RAM física. O programa vai ser executado de cima para baixo.",
+                bytes: [] 
+            },
+            { 
+                line: 1, 
+                msg: "O tipo 'char' é muito pequeno. O computador reserva apenas 1 Byte (1 quadradinho) e guarda o código da letra 'X'.",
+                bytes: [ { id: 0, class: 'byte-char', val: "'X'" } ]
+            },
+            { 
+                line: 2, 
+                msg: "O tipo 'int' exige mais espaço. O computador reserva 4 Bytes seguidos (quadradinhos azuis) para guardar o número 99.",
+                bytes: [
+                    { id: 0, class: 'byte-char', val: "'X'" },
+                    { id: 1, class: 'byte-int', val: "0" },
+                    { id: 2, class: 'byte-int', val: "0" },
+                    { id: 3, class: 'byte-int', val: "0" },
+                    { id: 4, class: 'byte-int', val: "99" }
+                ]
+            },
+            { 
+                line: 3, 
+                msg: "O tipo 'float' também precisa de 4 Bytes para conseguir guardar o número e sua vírgula matemática.",
+                bytes: [
+                    { id: 0, class: 'byte-char', val: "'X'" },
+                    { id: 1, class: 'byte-int', val: "0" },
+                    { id: 2, class: 'byte-int', val: "0" },
+                    { id: 3, class: 'byte-int', val: "0" },
+                    { id: 4, class: 'byte-int', val: "99" },
+                    { id: 5, class: 'byte-float', val: "" },
+                    { id: 6, class: 'byte-float', val: "3" },
+                    { id: 7, class: 'byte-float', val: ".1" },
+                    { id: 8, class: 'byte-float', val: "4" }
+                ]
+            },
+            { 
+                line: 4, 
+                msg: "Fim do programa! Assim que os dados estão salvos nas gavetas certas, o computador sabe onde buscá-los.",
+                bytes: [
+                    { id: 0, class: 'byte-char', val: "'X'" },
+                    { id: 1, class: 'byte-int', val: "0" },
+                    { id: 2, class: 'byte-int', val: "0" },
+                    { id: 3, class: 'byte-int', val: "0" },
+                    { id: 4, class: 'byte-int', val: "99" },
+                    { id: 5, class: 'byte-float', val: "" },
+                    { id: 6, class: 'byte-float', val: "3" },
+                    { id: 7, class: 'byte-float', val: ".1" },
+                    { id: 8, class: 'byte-float', val: "4" }
+                ]
+            }
+        ];
+
+        let currentMemStep = 0;
+
+        function updateMemoryDebugger() {
+            const step = memSteps[currentMemStep];
+            
+            document.getElementById('mem-explanation').innerText = step.msg;
+
+            document.querySelectorAll('#mem-code .line').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.step) === step.line) {
+                    el.classList.add('active');
+                }
+            });
+
+            for(let i=0; i<16; i++) {
+                const byteEl = document.getElementById(`byte-${i}`);
+                byteEl.className = 'mem-byte'; 
+                byteEl.querySelector('.val').innerText = '';
+            }
+
+            step.bytes.forEach(b => {
+                const byteEl = document.getElementById(`byte-${b.id}`);
+                byteEl.className = `mem-byte filled ${b.class}`;
+                byteEl.querySelector('.val').innerText = b.val;
+            });
+        }
+
+        // --- NAVEGAÇÃO GERAL ---
+        function scrollToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+                updateCounter();
+                
+                // Resets de estado ao entrar
+                if(slides[index].id === 'slide-debug-geo') {
+                    currentGeoStep = 0;
+                    updateGeoDebugger();
+                }
+                if(slides[index].id === 'slide-debug-mem') {
+                    currentMemStep = 0;
+                    updateMemoryDebugger();
+                }
+            }
+        }
+
+        function next() {
+            // Depurador Geométrico
+            if (slides[currentSlide].id === 'slide-debug-geo') {
+                if (currentGeoStep < geoSteps.length - 1) {
+                    currentGeoStep++;
+                    updateGeoDebugger();
+                    return; 
+                }
+            }
+            // Depurador de Memória
+            if (slides[currentSlide].id === 'slide-debug-mem') {
+                if (currentMemStep < memSteps.length - 1) {
+                    currentMemStep++;
+                    updateMemoryDebugger();
+                    return; 
+                }
+            }
+            
+            scrollToSlide(currentSlide + 1);
+        }
+
+        function prev() {
+            if (slides[currentSlide].id === 'slide-debug-geo' && currentGeoStep > 0) {
+                currentGeoStep--;
+                updateGeoDebugger();
+                return;
+            }
+            if (slides[currentSlide].id === 'slide-debug-mem' && currentMemStep > 0) {
+                currentMemStep--;
+                updateMemoryDebugger();
+                return;
+            }
+            scrollToSlide(currentSlide - 1);
+        }
+
+        // Eventos
+        nextBtn.addEventListener('click', next);
+        prevBtn.addEventListener('click', prev);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+        });
+
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Observer para controle do scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlide = index;
+                    updateCounter();
+                }
+            });
+        }, { threshold: 0.5 }); 
+
+        slides.forEach(slide => observer.observe(slide));
+        
+        // Init
+        updateCounter();
+
+    </script>
+</body>
+</html>

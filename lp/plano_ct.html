@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Ensino - Lógica de Programação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 21cm;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        @media print {
+            body { background: white; }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+            .evaluation-box {
+                page-break-inside: avoid;
+            }
+            /* Esconde os botões de aba na impressão */
+            .tabs-nav {
+                display: none;
+            }
+            /* Mostra ambos os semestres na impressão ou força quebra? 
+               Por padrão, vamos imprimir o que está visível, ou podemos forçar display block.
+               Vou deixar imprimir o que está ativo para não bagunçar o layout. */
+        }
+        h1 {
+            color: #111827;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 0.5rem;
+        }
+        .module-header {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .week-row:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .exam-row {
+            background-color: #fef2f2 !important;
+            border-left: 4px solid #ef4444;
+        }
+        .exam-text {
+            color: #991b1b;
+            font-weight: 600;
+        }
+        .lab-row {
+            background-color: #f0fdf4 !important;
+        }
+        .project-row {
+            background-color: #fffbeb !important; /* Amarelo claro para projetos */
+            border-left: 4px solid #d97706;
+        }
+        
+        /* Estilos das Abas */
+        .tab-btn {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e5e7eb;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            color: #4b5563;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background-color: white;
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold">Plano de Ensino: Lógica de Programação</h1>
+            <div class="flex justify-between mt-2 text-gray-600">
+                <p><strong>Disciplina:</strong> Fundamentos de Algoritmos</p>
+                <p><strong>Duração:</strong> Anual (17 Semanas por semestre)</p>
+                <p><strong>Prof. William Paiva</strong></p>
+            </div>
+        </header>
+
+        <!-- Navegação de Abas -->
+        <div class="tabs-nav flex border-b border-gray-300 mb-6">
+            <button class="tab-btn active" onclick="openTab(event, 'semestre1')">1º Semestre (Lógica Básica)</button>
+            <button class="tab-btn" onclick="openTab(event, 'semestre2')">2º Semestre (Linguagem C Avançada)</button>
+        </div>
+
+        <!-- CONTEÚDO 1º SEMESTRE -->
+        <div id="semestre1" class="tab-content active">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="p-3 border-b-2 border-gray-300 w-24">Semana</th>
+                            <th class="p-3 border-b-2 border-gray-300 w-1/3">Tópico Principal</th>
+                            <th class="p-3 border-b-2 border-gray-300">Detalhamento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- MÓDULO 1 -->
+                        <tr><td colspan="3" class="p-4 module-header text-center">Módulo 1: Introdução e Sequenciação</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 1</td><td class="p-3 font-semibold">Introdução à Lógica</td><td class="p-3 text-sm">Conceito de Algoritmo (analogias). Lógica sequencial. Representação: Narrativa, Fluxograma e Pseudocódigo.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 2</td><td class="p-3 font-semibold">Variáveis e Tipos</td><td class="p-3 text-sm">Conceito de memória. Tipos primitivos (Inteiro, Real, Caractere, Lógico). Regras de nomenclatura. Declaração.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 3</td><td class="p-3 font-semibold">Atribuição e Aritmética</td><td class="p-3 text-sm">Comando de atribuição. Operadores Aritméticos (+, -, *, /, %). Precedência e parênteses. Expressões matemáticas.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 4</td><td class="p-3 font-semibold">Entrada, Saída e Processamento</td><td class="p-3 text-sm">Comandos de leitura e escrita. Interação com usuário. Estrutura de programa completo (Início > Variaveis > I/O > Fim).</td></tr>
+                        <tr class="week-row border-b border-gray-200 exam-row"><td class="p-3 font-bold text-red-700">Semana 5</td><td class="p-3 exam-text">Revisão e AVALIAÇÃO 1</td><td class="p-3 text-sm">Revisão de algoritmos sequenciais. <strong>Prova:</strong> Lógica sequencial, variáveis, operadores e I/O.</td></tr>
+
+                        <!-- MÓDULO 2 -->
+                        <tr><td colspan="3" class="p-4 module-header text-center">Módulo 2: Tomada de Decisão</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 6</td><td class="p-3 font-semibold">Condicional Simples</td><td class="p-3 text-sm">Tomada de decisão. Operadores Relacionais. Estrutura SE (IF) simples.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 7</td><td class="p-3 font-semibold">Condicional Composta e Lógica</td><td class="p-3 text-sm">Estrutura SE...SENÃO (IF/ELSE). Operadores Lógicos (E, OU, NÃO). Tabela Verdade.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 8</td><td class="p-3 font-semibold">Aninhamento de Condicionais</td><td class="p-3 text-sm">Estruturas aninhadas (SE dentro de SE). Resolução de problemas com múltiplos caminhos.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 9</td><td class="p-3 font-semibold">Múltipla Escolha</td><td class="p-3 text-sm">Estrutura ESCOLHA-CASO (Switch). Menus de opções. Comparação SE vs. ESCOLHA.</td></tr>
+                        <tr class="week-row border-b border-gray-200 lab-row"><td class="p-3 font-bold">Semana 10</td><td class="p-3 font-semibold">Laboratório de Lógica</td><td class="p-3 text-sm">Aula dedicada inteiramente à resolução de problemas complexos de decisão e aninhamento para fixação.</td></tr>
+                        <tr class="week-row border-b border-gray-200 exam-row"><td class="p-3 font-bold text-red-700">Semana 11</td><td class="p-3 exam-text">Revisão e AVALIAÇÃO 2</td><td class="p-3 text-sm">Correção de exercícios. <strong>Prova:</strong> Estruturas condicionais, operadores relacionais e lógicos.</td></tr>
+
+                        <!-- MÓDULO 3 -->
+                        <tr><td colspan="3" class="p-4 module-header text-center">Módulo 3: Estruturas de Repetição</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 12</td><td class="p-3 font-semibold">Introdução a Loops (Enquanto)</td><td class="p-3 text-sm">Conceito de repetição. Contadores e Acumuladores. Loop com teste no início (WHILE).</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 13</td><td class="p-3 font-semibold">Repetição com Teste Final</td><td class="p-3 text-sm">Loop FAÇA...ENQUANTO (DO-WHILE). Validação de entrada de dados.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 14</td><td class="p-3 font-semibold">Repetição Controlada (Para)</td><td class="p-3 text-sm">Loop PARA (FOR). Uso quando o número de repetições é conhecido. Incremento e decremento.</td></tr>
+                        <tr class="week-row border-b border-gray-200 lab-row"><td class="p-3 font-bold">Semana 15</td><td class="p-3 font-semibold">Repetições Aninhadas</td><td class="p-3 text-sm">Laços dentro de laços (ex: tabuadas). Conceito fundamental para matrizes no futuro.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 16</td><td class="p-3 font-semibold">Teste de Mesa e Depuração</td><td class="p-3 text-sm">Execução passo a passo de algoritmos de repetição complexos. Revisão Geral.</td></tr>
+                        <tr class="week-row border-b border-gray-200 exam-row"><td class="p-3 font-bold text-red-700">Semana 17</td><td class="p-3 exam-text">AVALIAÇÃO FINAL</td><td class="p-3 text-sm"><strong>Prova:</strong> Ênfase em Loops combinados com Condicionais.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO 2º SEMESTRE -->
+        <div id="semestre2" class="tab-content">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="p-3 border-b-2 border-gray-300 w-24">Semana</th>
+                            <th class="p-3 border-b-2 border-gray-300 w-1/3">Tópico Principal</th>
+                            <th class="p-3 border-b-2 border-gray-300">Detalhamento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- MÓDULO 4 -->
+                        <tr><td colspan="3" class="p-4 module-header text-center">Módulo 4: Estruturas de Dados Homogêneas</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 1</td><td class="p-3 font-semibold">Revisão e Ambiente C</td><td class="p-3 text-sm">Revisão de Lógica. Introdução à sintaxe da Linguagem C. Compilação e execução.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 2</td><td class="p-3 font-semibold">Vetores (Arrays Unidimensionais)</td><td class="p-3 text-sm">Conceito de vetor. Declaração, inicialização e acesso por índice. Laços para percorrer vetores.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 3</td><td class="p-3 font-semibold">Operações com Vetores</td><td class="p-3 text-sm">Busca sequencial, encontrar maior/menor, média de valores. Introdução à ordenação (Bubble Sort).</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 4</td><td class="p-3 font-semibold">Matrizes (Arrays Multidimensionais)</td><td class="p-3 text-sm">Conceito de matriz (linhas e colunas). Laços aninhados para leitura e escrita.</td></tr>
+                        <tr class="week-row border-b border-gray-200 lab-row"><td class="p-3 font-bold">Semana 5</td><td class="p-3 font-semibold">Prática com Matrizes</td><td class="p-3 text-sm">Exercícios práticos: soma de matrizes, diagonal principal, mapa de assentos/jogos simples.</td></tr>
+                        <tr class="week-row border-b border-gray-200 exam-row"><td class="p-3 font-bold text-red-700">Semana 6</td><td class="p-3 exam-text">Revisão e AVALIAÇÃO 1</td><td class="p-3 text-sm"><strong>Prova:</strong> Linguagem C básica, Vetores e Matrizes.</td></tr>
+
+                        <!-- MÓDULO 5 -->
+                        <tr><td colspan="3" class="p-4 module-header text-center">Módulo 5: Estruturas Heterogêneas e Modularização</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 7</td><td class="p-3 font-semibold">Structs (Registros)</td><td class="p-3 text-sm">Conceito de dados heterogêneos. Definição de <code>struct</code>. Criação e acesso a campos.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 8</td><td class="p-3 font-semibold">Vetores de Structs</td><td class="p-3 text-sm">Combinação de arrays e structs para criar cadastros simples (ex: lista de alunos, estoque).</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 9</td><td class="p-3 font-semibold">Funções</td><td class="p-3 text-sm">Conceito de sub-rotinas. Tipos de retorno, parâmetros por valor e escopo de variáveis.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 10</td><td class="p-3 font-semibold">Ponteiros e Passagem por Referência</td><td class="p-3 text-sm">Endereços de memória. Operadores <code>&</code> e <code>*</code>. Funções que alteram variáveis externas.</td></tr>
+                        <tr class="week-row border-b border-gray-200 exam-row"><td class="p-3 font-bold text-red-700">Semana 11</td><td class="p-3 exam-text">Revisão e AVALIAÇÃO 2</td><td class="p-3 text-sm"><strong>Prova:</strong> Structs, Funções e Ponteiros básicos.</td></tr>
+
+                        <!-- MÓDULO 6 -->
+                        <tr><td colspan="3" class="p-4 module-header text-center">Módulo 6: Técnicas Avançadas e Projeto Final</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 12</td><td class="p-3 font-semibold">Recursividade</td><td class="p-3 text-sm">Conceito de função que chama a si mesma. Caso base e caso recursivo. Fatorial e Fibonacci.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 13</td><td class="p-3 font-semibold">Modularização (.c e .h)</td><td class="p-3 text-sm">Separando o código em arquivos de cabeçalho e implementação. Compilação de múltiplos arquivos.</td></tr>
+                        <tr class="week-row border-b border-gray-200"><td class="p-3 font-bold">Semana 14</td><td class="p-3 font-semibold">Projeto: Planejamento e Arquivos</td><td class="p-3 text-sm">Introdução à manipulação de arquivos (<code>FILE*</code>). Definição dos grupos e escopo do Projeto Final.</td></tr>
+                        <tr class="week-row border-b border-gray-200 project-row"><td class="p-3 font-bold">Semana 15</td><td class="p-3 font-semibold">Desenvolvimento do Projeto</td><td class="p-3 text-sm">Aula prática dedicada ao desenvolvimento supervisionado do projeto. Integração com GitHub.</td></tr>
+                        <tr class="week-row border-b border-gray-200 project-row"><td class="p-3 font-bold">Semana 16</td><td class="p-3 font-semibold">Desenvolvimento do Projeto</td><td class="p-3 text-sm">Aula prática final para ajustes, correção de bugs e finalização da documentação.</td></tr>
+                        <tr class="week-row border-b border-gray-200 exam-row"><td class="p-3 font-bold text-red-700">Semana 17</td><td class="p-3 exam-text">AVALIAÇÃO 3 (Projeto)</td><td class="p-3 text-sm"><strong>Apresentação dos Projetos:</strong> Demonstração funcional e explicação do código pelos grupos.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Seção de Critérios de Avaliação -->
+        <div class="evaluation-box mt-8 p-6 bg-slate-50 border border-slate-200 rounded-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b border-gray-300 pb-2">Critérios de Avaliação</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Composição da Nota -->
+                <div>
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Composição da Nota (Total 10,0)</h3>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                        <li><strong>Avaliação 1:</strong> 3,0 pontos</li>
+                        <li><strong>Avaliação 2:</strong> 3,0 pontos</li>
+                        <li><strong>Avaliação 3:</strong> 3,0 pontos <br>
+                            <span class="text-sm italic text-gray-500">
+                                (1º Sem: Prova| 2º Sem: Projeto Prático)
+                            </span>
+                        </li>
+                        <li><strong>Exercícios em Sala:</strong> 1,0 ponto <br><span class="text-sm italic text-gray-500">(Soma das atividades entregues durante as aulas)</span></li>
+                    </ul>
+                </div>
+                
+                <!-- Bônus de Tutoria -->
+                <div>
+                    <h3 class="font-bold text-lg text-green-800 mb-2">Bônus de Tutoria (+0,3 por prova)</h3>
+                    <div class="bg-green-50 p-4 rounded border border-green-200 text-sm text-gray-700">
+                        <p class="mb-2"><strong>Oportunidade:</strong> Alunos que terminarem suas tarefas podem se oferecer como tutores para auxiliar colegas indicados pelo professor.</p>
+                        <p class="mb-2"><strong>Recompensa:</strong> Adicional de até 0,3 ponto, somado à nota da prova vigente caso necessário.</p>
+                        <p class="mb-0"><strong>Regra:</strong> Os pontos são <em>cumulativos</em> (podem ser guardados para a próxima prova se não usados), mas expiram ao final de cada semestre.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-center text-sm text-gray-500">
+            <p>Plano sujeito a alterações conforme o desenvolvimento da turma.</p>
+        </footer>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            // Esconde todo o conteúdo das abas
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Remove a classe "active" de todos os botões
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Mostra a aba atual e adiciona a classe "active" ao botão clicado
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>
