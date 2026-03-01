@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 04 - Entrada e Saída (I/O)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES ELEGANTE --- */
+        :root {
+            --color-1: #222831; /* Escuro profundo / Textos principais */
+            --color-2: #393e46; /* Cinza escuro / Subtítulos */
+            --color-3: #948979; /* Oliva acinzentado / Destaques e Bordas */
+            --color-4: #dfd0b8; /* Bege claro / Textos em fundos escuros */
+            --bg-light: #f8f6f3; /* Fundo bege muito claro para leitura suave */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--color-1);
+            overflow-x: hidden;
+            padding-top: 50px; /* Espaço para o header fixo */
+        }
+
+        /* Top Bar Fixo */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--color-1);
+            color: white;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1.25rem;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            font-weight: 700;
+        }
+        .top-bar a {
+            color: var(--color-4);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .top-bar a:hover {
+            color: var(--color-3);
+            text-decoration: underline;
+        }
+
+        /* Slide Base */
+        .slide {
+            min-height: calc(100vh - 40px);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            border-bottom: 8px solid var(--color-2);
+            position: relative;
+        }
+
+        /* Tipografia */
+        h1 { 
+            font-size: 4rem; 
+            font-weight: 900; 
+            color: var(--color-1);
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        h2 { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            color: var(--color-2); 
+            margin-bottom: 2rem; 
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 6px;
+            background-color: var(--color-3);
+            margin: 0.5rem auto 0;
+            border-radius: 4px;
+        }
+
+        p, li { font-size: 1.3rem; line-height: 1.6; color: #393e46; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* Elementos Gráficos */
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(54, 47, 79, 0.15);
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 2rem; right: 2rem;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-2), var(--color-3));
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Botão de Copiar e Wrapper */
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1rem auto; }
+        .copy-button {
+            position: absolute; top: 0.75rem; right: 0.75rem;
+            background-color: var(--color-1); color: var(--color-4);
+            border: 1px solid var(--color-4); padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease-in-out;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--color-4); color: var(--color-1); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+
+        /* Blocos de Código Escuros (Alto Contraste) */
+        .code-block {
+            background-color: var(--color-1); color: white; padding: 1.5rem;
+            border-radius: 1rem; font-family: 'Fira Code', monospace;
+            font-size: 1.3rem; text-align: left; border-left: 5px solid var(--color-4);
+            width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.2); margin: 0;
+        }
+        
+        .highlight-code-box {
+            background-color: #262138; border: 2px dashed var(--color-4);
+            padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: center;
+        }
+
+        code.inline-code {
+            background-color: #e2e8f0; padding: 0.2em 0.4em; margin: 0;
+            font-size: 85%; border-radius: 3px; font-family: 'Fira Code', monospace;
+            color: var(--color-2); font-weight: bold;
+        }
+        
+        /* Sintaxe C Colorida (Tema Escuro Neon) */
+        .syn-kw { color: #ff79c6; font-weight: bold; }
+        .syn-type { color: #8be9fd; font-weight: bold; }
+        .syn-func { color: #50fa7b; font-weight: bold; }
+        .syn-str { color: #f1fa8c; }
+        .syn-num { color: #bd93f9; }
+        .syn-inc { color: #ffb86c; }
+        .syn-comment { color: #6272a4; font-style: italic; }
+
+        /* --- DEPURADOR I/O --- */
+        .io-debugger {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--color-3);
+            box-shadow: 0 10px 30px rgba(0, 139, 255, 0.1);
+        }
+        .io-code { flex: 1; font-family: 'Fira Code', monospace; font-size: 1.1rem; line-height: 1.8; background: var(--color-1); color: white; padding: 1.5rem; border-radius: 8px; }
+        .io-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.4; }
+        .io-code .line.active { background-color: var(--color-4); color: var(--color-1); font-weight: bold; opacity: 1; transform: scale(1.02); }
+        
+        .io-panel { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+        
+        /* Terminal Simulado */
+        .terminal-box {
+            background-color: #0f172a; color: #4ade80; font-family: 'Fira Code', monospace;
+            padding: 1rem; border-radius: 8px; min-height: 120px; text-align: left;
+            border: 2px solid #334155; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .terminal-box::before {
+            content: 'Terminal / Console'; position: absolute; top: -12px; left: 10px;
+            background: #334155; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
+        }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Memória Visual */
+        .mem-visual {
+            border: 2px dashed #94a3b8; padding: 1rem; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; gap: 1rem;
+            background: #f8fafc; position: relative;
+        }
+        .mem-visual::before {
+            content: 'Memória (RAM)'; position: absolute; top: -12px; left: 10px;
+            background: #94a3b8; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
+        }
+        .mem-slot {
+            width: 80px; height: 80px; border: 3px solid var(--color-2); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            font-weight: bold; font-family: 'Fira Code', monospace; background: white;
+            transition: all 0.3s; position: relative;
+        }
+        .mem-slot::after {
+            content: attr(data-var); position: absolute; bottom: -25px;
+            font-size: 0.9rem; color: var(--color-1); font-family: 'Poppins', sans-serif;
+        }
+        .mem-slot.highlight { transform: scale(1.1); box-shadow: 0 0 15px var(--color-3); border-color: var(--color-3); background-color: var(--color-1); color: var(--color-4);}
+
+        /* Navegação Fixa */
+        .nav-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-nav { background-color: var(--color-1); color: var(--color-4); width: 3.5rem; height: 3.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s, background-color 0.2s; border: 2px solid var(--color-4); font-size: 1.2rem; }
+        .btn-nav:hover { background-color: var(--color-2); color: white; border-color: var(--color-2); transform: scale(1.1); }
+        .counter { position: fixed; bottom: 2rem; left: 2rem; background-color: var(--color-1); padding: 0.5rem 1.5rem; border-radius: 2rem; font-weight: 800; border: 2px solid var(--color-4); color: var(--color-4); z-index: 50; }
+
+        /* Impressão */
+        @media print {
+            body { background: white; color: black; counter-reset: page-counter; padding-top: 0; }
+            .top-bar { display: none !important; }
+            .slide { height: auto; min-height: 29.7cm; border-bottom: none; page-break-after: always; padding: 1cm; align-items: flex-start; position: relative; counter-increment: page-counter; }
+            .slide:last-child { page-break-after: avoid; }
+            .slide::after { content: "Página " counter(page-counter); position: absolute; bottom: 1.5cm; right: 1.5cm; font-size: 11pt; color: #555; font-family: 'Inter', sans-serif; }
+            .nav-controls, .counter, .copy-button { display: none !important; }
+            h1 { font-size: 3rem; color: black; background: none; -webkit-text-fill-color: black; }
+            h2 { color: black; text-align: left; border-bottom: 1px solid black; width: 100%; }
+            h2::after { display: none; }
+            .card, .code-block, .io-debugger, .io-code, .highlight-code-box { box-shadow: none !important; border: 1px solid #ccc !important; background: white !important; color: black !important; page-break-inside: avoid; }
+            .code-block { border-left: 5px solid #000; }
+            .syn-kw, .syn-func, .syn-str, .syn-num, .syn-inc, .syn-type, .syn-comment { color: black !important; font-weight: bold; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .terminal-box { background: #fff !important; color: #000 !important; border: 1px dashed #000; }
+            .io-code .line { opacity: 1 !important; color: black !important; background: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Fixo -->
+    <div class="top-bar">
+        <a href="https://willcotil.github.io/aulas2026/" target="_blank">https://willcotil.github.io/aulas2026/</a>
+    </div>
+
+    <!-- Navegação e Contador -->
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn" title="Anterior">←</button>
+        <button class="btn-nav" id="nextBtn" title="Próximo">→</button>
+        <button class="btn-nav" id="fsBtn" title="Tela Cheia">⛶</button>
+        <button class="btn-nav" onclick="window.print()" title="Imprimir">🖨️</button>
+    </div>
+    <div id="counter" class="counter">1 / 14</div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide">
+            <h1>Lógica de Programação</h1>
+            <h2 style="border: none; font-size: 2.5rem; color: var(--color-2);">Aula 04: Entrada e Saída (I/O)</h2>
+            
+            <div class="card mt-8 p-8 flex flex-col items-center border-2" style="border-color: var(--color-3);">
+                <div style="font-size: 5rem;">🗣️ 💻 👂</div>
+                <p class="mt-4 font-bold text-xl" style="color: var(--color-1);">Ensinando o computador a falar e ouvir!</p>
+            </div>
+
+            <p class="mt-12 font-bold" style="color: var(--color-1);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: A Comunicação -->
+        <section class="slide">
+            <h2>Por que precisamos de I/O?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mt-8">
+                <div class="card flex flex-col items-center justify-center text-center">
+                    <div class="text-6xl mb-4">🔇</div>
+                    <p class="font-bold text-xl text-red-600 mb-2">Sem Saída (Output)</p>
+                    <p class="text-base text-gray-700">O computador pode fazer o cálculo mais complexo do mundo, mas se ele não tiver como exibir a resposta no ecrã (tela), não serve para nada.</p>
+                </div>
+                <div class="card flex flex-col items-center justify-center text-center">
+                    <div class="text-6xl mb-4">🙉</div>
+                    <p class="font-bold text-xl text-red-600 mb-2">Sem Entrada (Input)</p>
+                    <p class="text-base text-gray-700">Se o programa não consegue ler o teclado, ele fará sempre exatamente o mesmo cálculo toda vez que rodar. Ele precisa de dados novos!</p>
+                </div>
+            </div>
+            <p class="mt-8 font-bold text-2xl" style="color: var(--color-2);">I/O = Input / Output (Entrada e Saída).</p>
+        </section>
+
+        <!-- Slide 3: O printf -->
+        <section class="slide">
+            <h2>O Alto-falante: <code class="inline-code">printf</code></h2>
+            <p>O <strong>printf</strong> significa "Print Formatted" (Imprimir Formatado). Ele exibe dados no terminal.</p>
+            
+            <div class="highlight-code-box w-full max-w-4xl">
+                <span class="font-mono text-3xl font-bold" style="color: #50fa7b;">printf</span>
+                <span class="font-mono text-3xl font-bold text-white">(</span>
+                <span class="font-mono text-3xl font-bold" style="color: #f1fa8c;">"O texto vai aqui"</span>
+                <span class="font-mono text-3xl font-bold text-white">);</span>
+            </div>
+            
+            <div class="mt-8 p-6 card w-full max-w-4xl text-left bg-white border-l-8" style="border-color: var(--color-3);">
+                <p class="font-bold mb-4 text-xl">Regras de Ouro:</p>
+                <ul class="space-y-3 text-lg">
+                    <li>1. Tudo o que você quer exibir deve estar entre <strong>aspas duplas</strong> <code>" "</code>.</li>
+                    <li>2. O computador <strong>não pula linha sozinho</strong>. Temos de obrigá-lo a fazer isso usando o código especial <code>\n</code> no final do texto.</li>
+                    <li>3. Para usar esta função, a biblioteca <code>&lt;stdio.h&gt;</code> tem de estar no topo do arquivo.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 4: Marcadores de Posição -->
+        <section class="slide">
+            <h2>Exibindo Variáveis (Os Marcadores)</h2>
+            <p>Como inserimos o valor de uma variável no meio do nosso texto? Nós deixamos um <strong>"espaço reservado"</strong> (um marcador) no texto.</p>
+            
+            <div class="grid grid-cols-3 gap-6 w-full max-w-5xl mt-6">
+                <div class="card text-center border-t-8" style="border-top-color: var(--color-2);">
+                    <div class="text-4xl my-2 font-bold font-mono text-gray-800">%d</div>
+                    <h3 class="font-bold text-lg mb-2" style="color: var(--color-1);">Inteiros (int)</h3>
+                    <p class="text-sm">"d" vem de Decimal (base 10).</p>
+                </div>
+                <div class="card text-center border-t-8" style="border-top-color: var(--color-3);">
+                    <div class="text-4xl my-2 font-bold font-mono text-gray-800">%f</div>
+                    <h3 class="font-bold text-lg mb-2" style="color: var(--color-1);">Reais (float)</h3>
+                    <p class="text-sm">"f" vem de Floating point. Use <code>%.2f</code> para duas casas.</p>
+                </div>
+                <div class="card text-center border-t-8" style="border-top-color: var(--color-1);">
+                    <div class="text-4xl my-2 font-bold font-mono text-gray-800">%c</div>
+                    <h3 class="font-bold text-lg mb-2" style="color: var(--color-1);">Caracteres (char)</h3>
+                    <p class="text-sm">"c" vem de Character.</p>
+                </div>
+            </div>
+
+            <div class="code-block-wrapper mt-6">
+                <button class="copy-button">Copiar</button>
+                <pre class="code-block">
+<span class="syn-type">int</span> idade = <span class="syn-num">20</span>;
+<span class="syn-func">printf</span>(<span class="syn-str">"Eu tenho %d anos.\n"</span>, idade);
+<span class="syn-comment">// O %d desaparece e a variável 'idade' entra no lugar dele!</span></pre>
+            </div>
+        </section>
+
+        <!-- Slide 5: Depurador PRINTF -->
+        <section class="slide" id="slide-debug-out" data-interactive="true">
+            <h2>Depurador: Vendo o <code class="inline-code">printf</code> agir</h2>
+            <p class="text-lg text-gray-500 mb-4">(Use a <strong>Seta →</strong> para ver como o texto é montado e enviado para o terminal)</p>
+            
+            <div class="io-debugger">
+                <div class="io-code" id="out-code">
+                    <div class="line" data-step="1"><span class="syn-type">int</span> vidas = <span class="syn-num">3</span>;</div>
+                    <div class="line" data-step="2"><span class="syn-type">float</span> moeda = <span class="syn-num">1.50</span>;</div>
+                    <div class="line mt-4" data-step="3"><span class="syn-func">printf</span>(<span class="syn-str">"Iniciando jogo...\n"</span>);</div>
+                    <div class="line" data-step="4"><span class="syn-func">printf</span>(<span class="syn-str">"Vidas restantes: %d\n"</span>, vidas);</div>
+                    <div class="line" data-step="5"><span class="syn-func">printf</span>(<span class="syn-str">"Dinheiro: R$ %.2f"</span>, moeda);</div>
+                </div>
+                
+                <div class="io-panel">
+                    <div class="terminal-box" id="out-term">
+                        <!-- Terminal Output -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: O scanf -->
+        <section class="slide">
+            <h2>O Ouvido: <code class="inline-code">scanf</code></h2>
+            <p>O <strong>scanf</strong> significa "Scan Formatted" (Ler Formatado). Ele pausa o programa, pisca o cursor e fica à espera que o usuário digite algo no teclado.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button">Copiar</button>
+                <pre class="code-block">
+<span class="syn-type">int</span> senha;
+<span class="syn-func">printf</span>(<span class="syn-str">"Digite a senha: "</span>); 
+<span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &senha); <span class="syn-comment">// O programa para aqui e espera!</span></pre>
+            </div>
+            
+            <div class="mt-6 p-6 card w-full max-w-4xl text-left bg-white border-l-8" style="border-color: var(--color-2);">
+                <p class="font-bold mb-4 text-xl">Como funciona?</p>
+                <ul class="space-y-2 text-lg">
+                    <li>1. Avisamos ao computador O QUE vamos ler através dos marcadores (<code>%d</code> para ler um número inteiro).</li>
+                    <li>2. Dizemos PARA ONDE esse valor deve ir (para a variável <code>senha</code>).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 7: O misterioso & -->
+        <section class="slide" style="border:none; background-color: var(--color-1);">
+            <h1 style="color: var(--color-4); background: none; -webkit-text-fill-color: var(--color-4);">O Misterioso Operador &</h1>
+            <p style="color: white; opacity: 0.9; font-size: 1.5rem;" class="mt-4 max-w-4xl">Reparou que no <code>printf</code> usamos apenas <code>idade</code>, mas no <code>scanf</code> usamos <code>&idade</code>?</p>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl mt-8">
+                <div class="card text-center">
+                    <p class="text-3xl mb-4">🗣️</p>
+                    <p class="font-bold text-xl text-green-700">No <code>printf</code>...</p>
+                    <p class="text-gray-700">A função só precisa saber qual é o <strong>valor</strong> que está dentro da caixa para poder exibi-lo.</p>
+                </div>
+                <div class="card text-center">
+                    <p class="text-3xl mb-4">📦</p>
+                    <p class="font-bold text-xl text-red-600">No <code>scanf</code>...</p>
+                    <p class="text-gray-700">A função precisa GUARDAR o que o utilizador digitou. Para isso, ela precisa saber <strong>ONDE</strong> a caixa está fisicamente na memória.</p>
+                </div>
+            </div>
+            <p class="mt-8 font-bold text-2xl" style="color: var(--color-3);">O <code>&</code> significa "O Endereço de...".</p>
+        </section>
+
+        <!-- Slide 8: Depurador SCANF -->
+        <section class="slide" id="slide-debug-in" data-interactive="true">
+            <h2>Depurador: Lendo do Teclado</h2>
+            <p class="text-lg text-gray-500 mb-4">(Use a <strong>Seta →</strong> para simular o usuário digitando e o valor viajando para a RAM)</p>
+            
+            <div class="io-debugger">
+                <div class="io-code" id="in-code">
+                    <div class="line" data-step="1"><span class="syn-type">int</span> anoNascimento;</div>
+                    <div class="line mt-4" data-step="2"><span class="syn-func">printf</span>(<span class="syn-str">"Que ano voce nasceu? "</span>);</div>
+                    <div class="line" data-step="3"><span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &anoNascimento);</div>
+                    <div class="line mt-4" data-step="4"><span class="syn-func">printf</span>(<span class="syn-str">"Registado: %d"</span>, anoNascimento);</div>
+                </div>
+                
+                <div class="io-panel">
+                    <div class="terminal-box" id="in-term">
+                        <!-- Terminal Output -->
+                    </div>
+                    <div class="mem-visual mt-4">
+                        <div class="mem-slot" id="mem-ano" data-var="anoNascimento">?</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: O Perigo dos Espaços no scanf -->
+        <section class="slide">
+            <h2>Cuidados com o formato <code class="inline-code">char</code></h2>
+            <p>Quando lemos números com o <code>scanf</code> (usando <code>%d</code> ou <code>%f</code>), ele ignora espaços ou "Enters" (mudanças de linha) soltos. Mas o <code>%c</code> lê literalmente o primeiro caractere que apanhar pela frente, mesmo que seja um Enter vazio!</p>
+            
+            <div class="card w-full max-w-4xl border-l-8 mt-6" style="border-color: #ef4444;">
+                <p class="text-xl font-bold text-red-600 mb-2">O Problema (Lixo de Buffer):</p>
+                <code class="inline-code text-lg">scanf("%d", &idade);</code><br>
+                <code class="inline-code text-lg mt-2">scanf("%c", &letra); // O programa salta e não deixa digitar!</code>
+                <p class="text-sm mt-4 text-gray-600">Isso acontece porque o "Enter" que você apertou depois da idade ficou na memória e o %c engoliu ele.</p>
+            </div>
+
+            <div class="card w-full max-w-4xl border-l-8 mt-6" style="border-color: #10b981;">
+                <p class="text-xl font-bold text-green-600 mb-2">A Solução Mágica (O Espaço):</p>
+                <code class="inline-code text-lg">scanf(" %c", &letra);</code>
+                <p class="text-sm mt-4 text-gray-600">Colocar um espaço ANTES do <code>%c</code> diz ao computador: "Ignore todos os espaços e Enters perdidos e leia apenas a próxima letra real". Acostume-se a fazer isso!</p>
+            </div>
+        </section>
+
+        <!-- Slide 10: Exemplo Completo -->
+        <section class="slide">
+            <h2>Exemplo Completo: Calculadora Simples</h2>
+            <p>Juntando tudo: declaração, leitura (scanf), processamento (matemática) e saída (printf).</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button">Copiar</button>
+                <pre class="code-block" style="max-height: 500px;">
+<span class="syn-inc">#include &lt;stdio.h&gt;</span>
+
+<span class="syn-type">int</span> <span class="syn-func">main</span>() {
+    <span class="syn-type">float</span> n1, n2, media;
+
+    <span class="syn-comment">// 1. ENTRADA DE DADOS</span>
+    <span class="syn-func">printf</span>(<span class="syn-str">"--- Calculadora de Media ---\n"</span>);
+    <span class="syn-func">printf</span>(<span class="syn-str">"Digite a primeira nota: "</span>);
+    <span class="syn-func">scanf</span>(<span class="syn-str">"%f"</span>, &n1);
+    
+    <span class="syn-func">printf</span>(<span class="syn-str">"Digite a segunda nota: "</span>);
+    <span class="syn-func">scanf</span>(<span class="syn-str">"%f"</span>, &n2);
+
+    <span class="syn-comment">// 2. PROCESSAMENTO (Com parênteses corretos!)</span>
+    media = (n1 + n2) / <span class="syn-num">2.0</span>;
+
+    <span class="syn-comment">// 3. SAÍDA DE DADOS</span>
+    <span class="syn-func">printf</span>(<span class="syn-str">"\nA media do aluno e: %.2f\n"</span>, media);
+
+    <span class="syn-kw">return</span> <span class="syn-num">0</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- Slide 11: Cabeçalho Exercícios -->
+        <section class="slide" style="border:none; background-color: var(--color-1);">
+            <h1 style="color: var(--color-4); background: none; -webkit-text-fill-color: var(--color-4);">Hora de Praticar!</h1>
+            <p style="color: white; opacity: 0.9;">10 Exercícios para dominar a comunicação com a máquina.</p>
+            
+            <div class="mt-8 p-6 card w-full max-w-4xl text-left bg-white border-l-8" style="border-color: var(--color-3);">
+                <p class="font-bold mb-4 text-xl" style="color: var(--color-1);">Instruções para a Lista:</p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li>1. Crie uma pasta chamada <strong>"aula04"</strong>.</li>
+                    <li>2. Para exercícios teóricos (1 ao 6), crie um arquivo <code class="inline-code">teoria.txt</code>.</li>
+                    <li>3. Para os desafios práticos (7 ao 10), crie arquivos de código-fonte separados (ex: <code class="inline-code">ex7.c</code>).</li>
+                    <li>4. Compile e execute os códigos no Terminal para ter certeza de que funcionam.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 1 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Teoria de I/O)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6 border-l-8" style="border-color: var(--color-2);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-2);">1. Qual é a Função?</h3>
+                    <p class="text-sm">Em C, qual função é utilizada exclusivamente para <strong>enviar dados</strong> para a tela do terminal? E qual é utilizada para <strong>receber dados</strong> digitados pelo utilizador?</p>
+                </div>
+                
+                <div class="card p-6 border-l-8" style="border-color: var(--color-2);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-2);">2. Os Marcadores</h3>
+                    <p class="text-sm">Associe corretamente o tipo de dado ao seu marcador de formatação correspondente usado no <code>printf</code>/<code>scanf</code>:<br>
+                    a) <code>int</code> <br>b) <code>float</code> <br>c) <code>char</code> <br>
+                    ( ) <code>%f</code> <br>( ) <code>%c</code> <br>( ) <code>%d</code></p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl text-red-600">3. Encontre o Erro</h3>
+                    <p class="text-sm mb-2">O programador queria ler a altura da pessoa, mas o programa está a estoirar ("crash"). Identifique o erro no <code>scanf</code> e reescreva a linha correta:</p>
+                    <code class="block bg-gray-100 p-2 text-sm text-black">
+                        float altura;<br>
+                        printf("Digite a sua altura: ");<br>
+                        scanf("%f", altura);
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 2 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Leitura de Código)</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6 border-l-8" style="border-color: var(--color-3);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-3);">4. Previsão de Saída</h3>
+                    <p class="text-sm mb-2">Considerando que as variáveis têm os seguintes valores: <code>vidas = 5</code> e <code>nivel = 2</code>. O que exatamente será impresso na tela pela linha de código abaixo?</p>
+                    <code class="block bg-gray-100 p-2 text-sm text-black">
+                        printf("O jogador esta no nivel %d e tem %d vidas restantes.", nivel, vidas);
+                    </code>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-3);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-3);">5. Tradução Lógica</h3>
+                    <p class="text-sm mb-2">Escreva apenas as linhas de código C necessárias para realizar as seguintes ações:</p>
+                    <ol class="list-decimal pl-5 text-sm space-y-2 mt-2">
+                        <li>Declarar uma variável chamada <code>peso</code> para guardar números com casas decimais.</li>
+                        <li>Exibir na tela a frase: "Qual é o seu peso?".</li>
+                        <li>Ler o valor digitado no teclado e guardar na variável que você criou.</li>
+                    </ol>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-3);">
+                    <h3 class="font-bold text-xl" style="color: var(--color-3);">6. Leitura Múltipla</h3>
+                    <p class="text-sm mb-2">Sabia que é possível ler dois dados com um único <code>scanf</code>? Sabendo que temos <code>int dia;</code> e <code>int mes;</code>, a sintaxe correta seria: <code>scanf("%d %d", &dia, &mes);</code>. Qual é a vantagem de se fazer isto em relação a usar dois <code>scanf</code> separados?</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios Parte 3 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Mão na Massa - Prática)</h2>
+            <p class="text-sm mb-4">Crie arquivos <code>.c</code> para estes exercícios, compile no terminal e teste o resultado.</p>
+            <div class="w-full max-w-5xl space-y-6">
+                <div class="card p-6 border-l-8" style="border-color: var(--color-4); background: var(--color-1); color: white;">
+                    <h3 class="font-bold text-xl" style="color: var(--color-4);">7. Soma Interativa (ex7.c)</h3>
+                    <p class="text-sm text-gray-300 mb-2">Crie um programa que peça ao utilizador para digitar dois números inteiros separados. O programa deve ler ambos, calcular a soma matemática deles e imprimir: <code>"A soma de X e Y e: Z"</code> (onde X, Y e Z são os valores reais).</p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-4); background: var(--color-1); color: white;">
+                    <h3 class="font-bold text-xl" style="color: var(--color-4);">8. Formatação Elegante (ex8.c)</h3>
+                    <p class="text-sm text-gray-300">Crie um programa que leia o preço de um produto (ex: 45.678) usando <code>scanf</code>. Depois, imprima na tela o valor como uma moeda usando <code>printf</code>, forçando a exibição de apenas duas casas decimais. A saída deve ser exatamente: <code>"O valor a pagar e R$ 45.68"</code>.</p>
+                </div>
+                
+                <div class="card p-6 border-l-8" style="border-color: var(--color-4); background: var(--color-1); color: white;">
+                    <h3 class="font-bold text-xl" style="color: var(--color-4);">9. Ficha de Registo (ex9.c)</h3>
+                    <p class="text-sm text-gray-300">Crie um programa que peça três dados de um atleta nesta ordem: 1) A letra inicial do nome (char), 2) A idade (int) e 3) A altura (float). Cuidado com o espaço antes do <code>%c</code> no scanf! Ao final, imprima uma frase única contendo todas as informações formatadas (ex: <code>"Atleta J, 25 anos, 1.82m de altura"</code>).</p>
+                </div>
+
+                <div class="card p-6 border-l-8 border-t-4" style="border-color: #f59e0b; background: #fffbeb; color: var(--color-1);">
+                    <h3 class="font-bold text-xl text-amber-600">10. Desafio Calculadora de IMC (ex10.c)</h3>
+                    <p class="text-sm mt-2 font-bold text-gray-700">Vamos juntar a matemática da Aula 3 com o I/O da Aula 4!</p>
+                    <p class="text-sm text-gray-700 mt-2">O Índice de Massa Corporal é calculado dividindo o peso (em kg) pela altura (em metros) elevada ao quadrado. Fórmula: <code>IMC = Peso / (Altura * Altura)</code>.</p>
+                    <p class="text-sm mt-2 text-gray-700">Crie um programa que converse com o utilizador, pedindo o seu peso e a sua altura. Calcule o IMC e imprima o resultado na tela com duas casas decimais.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- LOGICA DE COPIAR CÓDIGO ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('.code-block, .code-box');
+                const codeText = codeEl.innerText.replace(/\u00A0/g, ' ');
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span') || button;
+                    const originalText = span.textContent;
+                    span.textContent = 'Copiado!';
+                    setTimeout(() => { span.textContent = originalText; }, 2000);
+                }).catch(err => console.error("Falha ao copiar texto: ", err));
+            });
+        });
+
+        // --- NAVEGAÇÃO DOS SLIDES ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const counterElement = document.getElementById('counter');
+        let currentSlide = 0;
+
+        function updateCounter() {
+            if (counterElement) {
+                counterElement.textContent = `${currentSlide + 1} / ${slides.length}`;
+            }
+        }
+
+        function scrollToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                // Calcula o offset do top-bar para não cobrir o título
+                const topOffset = 50; 
+                const elementPosition = slides[index].getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - topOffset;
+  
+                window.scrollTo({
+                     top: offsetPosition,
+                     behavior: "smooth"
+                });
+                updateCounter();
+                
+                if(slides[index].id === 'slide-debug-out') { currentOutStep = 0; updateOutDebugger(); }
+                if(slides[index].id === 'slide-debug-in') { currentInStep = 0; updateInDebugger(); }
+            }
+        }
+
+        function next() {
+            if (slides[currentSlide].id === 'slide-debug-out') {
+                if (currentOutStep < outSteps.length - 1) { currentOutStep++; updateOutDebugger(); return; }
+            }
+            if (slides[currentSlide].id === 'slide-debug-in') {
+                if (currentInStep < inSteps.length - 1) { currentInStep++; updateInDebugger(); return; }
+            }
+            scrollToSlide(currentSlide + 1);
+        }
+
+        function prev() {
+            if (slides[currentSlide].id === 'slide-debug-out' && currentOutStep > 0) {
+                currentOutStep--; updateOutDebugger(); return;
+            }
+            if (slides[currentSlide].id === 'slide-debug-in' && currentInStep > 0) {
+                currentInStep--; updateInDebugger(); return;
+            }
+            scrollToSlide(currentSlide - 1);
+        }
+
+        nextBtn.addEventListener('click', next);
+        prevBtn.addEventListener('click', prev);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlide = index;
+                    updateCounter();
+                }
+            });
+        }, { threshold: 0.5 }); 
+        slides.forEach(slide => observer.observe(slide));
+        updateCounter();
+
+        // --- DEPURADOR PRINTF (OUT) ---
+        const outSteps = [
+            { line: 0, term: "" },
+            { line: 1, term: "" },
+            { line: 2, term: "" },
+            { line: 3, term: "> Iniciando jogo...<br>" },
+            { line: 4, term: "> Iniciando jogo...<br>> Vidas restantes: <span class='text-white'>3</span><br>" },
+            { line: 5, term: "> Iniciando jogo...<br>> Vidas restantes: <span class='text-white'>3</span><br>> Dinheiro: R$ <span class='text-white'>1.50</span>" }
+        ];
+        let currentOutStep = 0;
+        function updateOutDebugger() {
+            const step = outSteps[currentOutStep];
+            document.querySelectorAll('#out-code .line').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.step) === step.line) el.classList.add('active');
+            });
+            document.getElementById('out-term').innerHTML = step.term + (currentOutStep > 0 ? "<span class='cursor-blink'>_</span>" : "");
+        }
+
+        // --- DEPURADOR SCANF (IN) ---
+        const inSteps = [
+            { line: 0, term: "", mem: "?", memHl: false },
+            { line: 1, term: "", mem: "?", memHl: false },
+            { line: 2, term: "> Que ano voce nasceu? ", mem: "?", memHl: false },
+            { line: 3, term: "> Que ano voce nasceu? <span class='text-white'>2005</span>", mem: "?", memHl: false },
+            { line: 3, term: "> Que ano voce nasceu? <span class='text-white'>2005</span><br>", mem: "2005", memHl: true }, // Internamente o dado viaja
+            { line: 4, term: "> Que ano voce nasceu? <span class='text-white'>2005</span><br>> Registado: <span class='text-white'>2005</span>", mem: "2005", memHl: false }
+        ];
+        let currentInStep = 0;
+        function updateInDebugger() {
+            const step = inSteps[currentInStep];
+            document.querySelectorAll('#in-code .line').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.step) === step.line) el.classList.add('active');
+            });
+            
+            let termHtml = step.term;
+            if(currentInStep === 2) termHtml += "<span class='cursor-blink'>_</span>"; // esperando input
+            document.getElementById('in-term').innerHTML = termHtml;
+
+            const memEl = document.getElementById('mem-ano');
+            memEl.innerText = step.mem;
+            if(step.memHl) memEl.classList.add('highlight'); else memEl.classList.remove('highlight');
+        }
+
+        // Init Debuggers
+        updateOutDebugger();
+        updateInDebugger();
+
+    </script>
+</body>
+</html>

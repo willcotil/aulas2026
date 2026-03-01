@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 04: Objetos e Listas (Map/Filter)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta: https://colorhunt.co/palette/222831393e46948979dfd0b8 */
+            --bg: #dfd0b8;         /* Bege Claro (Fundo externo) */
+            --slide-bg: #ffffff;   /* Branco (Fundo do Slide) */
+            --text: #222831;       /* Cinza Muito Escuro (Texto principal) */
+            --primary: #393e46;    /* Cinza Escuro (Títulos e Botões Principais) */
+            --accent: #948979;     /* Oliva/Sépia (Destaques e Bordas) */
+            --highlight: #f5f2eb;  /* Bege super claro (Fundos de destaque/cards) */
+            
+            --code-bg: #222831;    /* Fundo Código */
+            --code-text: #dfd0b8;  /* Texto Código */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link Fixa */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--primary);
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+        .fixed-link-bar a:hover { text-decoration: underline; color: var(--accent); }
+
+        /* Slides */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px; /* Mais padding no topo por causa da barra fixa maior */
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: var(--text);
+            color: var(--bg);
+            text-align: center;
+            border: 10px solid var(--primary);
+        }
+        .slide.topic h1, .slide.topic h2, .slide.topic p { color: var(--bg); }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); }
+
+        .slide-content-wrapper { max-width: 1000px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 50px; right: 40px; font-size: 1.2rem; color: var(--accent); font-weight: 800; opacity: 0.5; }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; border-bottom: 4px solid var(--accent); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-variant-ligatures: none;
+        }
+        code { 
+            font-family: 'Fira Code', monospace; 
+            background: var(--highlight); 
+            color: var(--primary);
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border: 1px solid var(--bg);
+        }
+        pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+        /* Layouts */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .col { background: var(--highlight); padding: 25px; border-radius: 12px; border: 2px solid var(--bg); }
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; }
+
+        /* Exercises */
+        .micro-challenge {
+            border: 2px solid var(--accent);
+            background-color: var(--highlight);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .micro-challenge h3 { color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .micro-challenge pre { background: white; color: var(--text); border: 1px solid #ccc; }
+
+        /* Interactive Elements */
+        .interactive-area {
+            background: #fff;
+            border: 2px solid var(--primary);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 6px 6px 0px var(--bg);
+        }
+        
+        .array-display {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .array-item {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .array-item.mapped {
+            background: var(--accent);
+            transform: scale(1.1);
+            color: white;
+        }
+        
+        .array-item.filtered-out {
+            opacity: 0.3;
+            text-decoration: line-through;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .interactive-btn {
+            background: var(--text);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .interactive-btn:hover { background: var(--accent); }
+
+        /* Final List */
+        .final-list ol { counter-reset: item; list-style: none; padding: 0; }
+        .final-list li { 
+            background: white; margin-bottom: 10px; padding: 15px 15px 15px 60px; 
+            border-radius: 8px; position: relative; border: 2px solid var(--highlight); font-size: 1rem; 
+        }
+        .final-list li::before {
+            content: counter(item); counter-increment: item; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: var(--accent); color: white; width: 30px; height: 30px; border-radius: 50%; 
+            text-align: center; font-size: 1rem; line-height: 30px; font-weight: bold;
+        }
+
+        /* Controls */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--primary); }
+        .btn { background: white; border: 2px solid var(--primary); color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; }
+        .btn:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; }
+            .controls, .progress-bar, .interactive-area button { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; text-shadow: none; }
+            pre, .col, .interactive-area { border: 1px solid #000; color: black; background: #fff; box-shadow: none; }
+            h1, h2, p, li { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BARRA DE LINK FIXA -->
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <h1>Aula 04: Objetos e Listas</h1>
+            <h2>Dominando os Dados (Map & Filter)</h2>
+            <br>
+            <p><strong>Agenda do Dia:</strong></p>
+            <ol>
+                <li><strong>Objetos (JSON):</strong> A evolução das Structs do C.</li>
+                <li><strong>Arrays:</strong> Listas dinâmicas e sem limites.</li>
+                <li><strong>Callback Functions:</strong> Funções passadas como variáveis.</li>
+                <li><strong>Métodos Modernos:</strong> Como usar <code>map</code> e <code>filter</code> (O coração do JS/React).</li>
+            </ol>
+            <div style="margin-top: 40px; color: var(--primary); font-weight: 600;">
+                Técnico em Informática • 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: OBJETOS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-box-open"></i>
+            <h1>Parte 1: Objetos</h1>
+            <p>Adeus Structs, Olá JSON</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: STRUCTS VS OBJETOS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">03</div>
+            <h2>Structs no C vs Objetos no JS</h2>
+            <p>Em C, para agrupar dados diferentes de uma mesma entidade (ex: Aluno), criávamos uma <code>struct</code>. Dava muito trabalho.</p>
+            <p>No JS, usamos <strong>Objetos Literais</strong> (formato JSON). Criamos os dados diretamente, sem precisar de um "molde" prévio.</p>
+            <div class="comparison">
+                <div class="col">
+                    <h3>C (Struct)</h3>
+                    <pre>
+struct Aluno {
+    char nome[50];
+    int idade;
+};
+
+struct Aluno a1;
+strcpy(a1.nome, "Carlos");
+a1.idade = 18;</pre>
+                </div>
+                <div class="col">
+                    <h3>JS (Objeto Literal)</h3>
+                    <pre>
+const aluno = {
+    nome: "Carlos",
+    idade: 18
+};
+
+// Pronto. Simples assim.</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: MANIPULANDO OBJETOS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>Lendo e Modificando Objetos</h2>
+            <p>Objetos em JS são extremamente flexíveis. Você pode adicionar ou remover propriedades (chaves) em tempo de execução.</p>
+            <pre>
+const usuario = {
+    username: "gamer123",
+    level: 10
+};
+
+// Lendo dados (Notação de ponto)
+console.log(usuario.username);
+
+// Modificando dados
+usuario.level = 11;
+
+// Criando uma propriedade nova do nada!
+usuario.guilda = "Os Imortais";
+
+console.log(usuario); 
+// { username: 'gamer123', level: 11, guilda: 'Os Imortais' }</pre>
+        </div>
+    </div>
+
+    <!-- EXERCÍCIO 1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">05</div>
+            <div class="micro-challenge">
+                <h3><i class="fa-solid fa-code"></i> Exercício 1: Ficha de RPG</h3>
+                <ol>
+                    <li>Crie um objeto chamado <code>personagem</code>.</li>
+                    <li>Ele deve ter <code>nome</code> (texto), <code>classe</code> (texto) e <code>hp</code> (número).</li>
+                    <li>Usando JS, diminua o HP do personagem em 20 (Simulando um dano).</li>
+                    <li>Adicione uma nova propriedade a ele chamada <code>status</code> com o valor "Ferido".</li>
+                    <li>Imprima o objeto inteiro no console.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: ARRAYS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-layer-group"></i>
+            <h1>Parte 2: Arrays</h1>
+            <p>Listas Dinâmicas</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: ARRAYS C VS JS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">07</div>
+            <h2>Vetores no C vs Arrays no JS</h2>
+            <p>Em C, um vetor tem <strong>tamanho fixo</strong> e guarda apenas <strong>um tipo</strong> de dado.</p>
+            <p>No JS, o Array cresce sozinho (não precisa de <code>malloc</code> ou <code>realloc</code>) e pode misturar textos, números e objetos!</p>
+            <div class="comparison">
+                <div class="col">
+                    <h3>C (Fixo e Tipado)</h3>
+                    <pre>
+int notas[3] = {8, 9, 7};
+// Não dá pra colocar mais!
+// notas[3] = 10; -> ERRO (Estoura a memória)</pre>
+                </div>
+                <div class="col">
+                    <h3>JS (Dinâmico e Misto)</h3>
+                    <pre>
+const mochila = ["Espada", 100, true];
+
+// Adiciona no final sem medo
+mochila.push("Poção");
+
+console.log(mochila.length); // 4</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: ARRAY DE OBJETOS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">08</div>
+            <h2>O Padrão Ouro: Array de Objetos</h2>
+            <p>Na vida real (sistemas web, bancos de dados, Electron), quase sempre lidamos com <strong>Listas de Objetos</strong>. Essa é a estrutura mais importante do JS.</p>
+            <pre>
+const produtos = [
+    { id: 1, nome: "Teclado", preco: 150 },
+    { id: 2, nome: "Mouse", preco: 80 },
+    { id: 3, nome: "Monitor", preco: 900 }
+];
+
+// Como pegar o preço do Mouse?
+console.log(produtos[1].preco); // 80</pre>
+            <p class="highlight" style="color: var(--primary); font-weight: bold;">Toda vez que você consultar uma API ou Banco de Dados, é isso que você vai receber.</p>
+        </div>
+    </div>
+
+    <!-- EXERCÍCIO 2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">09</div>
+            <div class="micro-challenge">
+                <h3><i class="fa-solid fa-code"></i> Exercício 2: O Banco de Dados Fake</h3>
+                <ol>
+                    <li>Crie um array chamado <code>turma</code>.</li>
+                    <li>Dentro dele, coloque 3 objetos representando alunos. Cada aluno deve ter <code>nome</code> e <code>nota</code>.</li>
+                    <li>Use a função <code>push()</code> para adicionar um quarto aluno no array.</li>
+                    <li>Acesse e imprima apenas o nome do segundo aluno da lista.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: MAP E FILTER -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-filter"></i>
+            <h1>Parte 3: Map & Filter</h1>
+            <p>O Poder Funcional do JS Moderno</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: O CONCEITO DE CALLBACK E FOREACH -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">11</div>
+            <h2>O Ponto de Partida: <code>forEach()</code></h2>
+            <p>Em JS, podemos passar uma <strong>função como parâmetro</strong> (Callback). O método <code>forEach</code> usa isso para percorrer o array no lugar do <code>for</code> tradicional.</p>
+            <p><strong>Atenção:</strong> Ele apenas executa a função para cada item. Ele não retorna nada (não cria um novo array).</p>
+            <pre>
+const frutas = ["Maçã", "Banana", "Uva"];
+
+// Para cada 'fruta' no array, execute esta Arrow Function:
+frutas.forEach( fruta => {
+    console.log(`Eu gosto de ${fruta}`);
+});</pre>
+            <p class="highlight" style="color: var(--primary); font-weight: bold; margin-top: 15px;">Ele apenas "faz algo" com cada item. Se você quiser TRANSFORMAR os dados e salvar, precisaremos do próximo método.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: MAP -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">12</div>
+            <h2>O Método <code>map()</code></h2>
+            <p>O <code>map</code> passa por todos os itens do array, aplica a sua função, e <strong>cria um NOVO array</strong> com os resultados.</p>
+            <p><strong>Uso principal:</strong> Transformar dados (ex: converter preços, extrair apenas nomes de uma lista de objetos, gerar HTML).</p>
+            <pre>
+const precos = [10, 20, 30];
+
+// Cria um novo array onde cada preço é multiplicado por 2
+const dobro = precos.map( preco => preco * 2 );
+
+console.log(dobro); // [20, 40, 60]
+console.log(precos); // [10, 20, 30] (O original NÃO muda!)</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: MAP INTERATIVO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">13</div>
+            <h2>Visualizador: <code>map()</code></h2>
+            <p>Abaixo temos um array original: <code>[10, 20, 30, 40]</code></p>
+            
+            <div class="interactive-area">
+                <div id="mapOriginal" class="array-display">
+                    <div class="array-item">10</div>
+                    <div class="array-item">20</div>
+                    <div class="array-item">30</div>
+                    <div class="array-item">40</div>
+                </div>
+                
+                <button class="interactive-btn" onclick="runMapViz()">Executar: arr.map(x => x * 2)</button>
+                
+                <h3 style="margin-top: 20px;">Novo Array Gerado:</h3>
+                <div id="mapResult" class="array-display">
+                    <!-- Results here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXERCÍCIO 3 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">14</div>
+            <div class="micro-challenge">
+                <h3><i class="fa-solid fa-code"></i> Exercício 3: Inflação</h3>
+                <ol>
+                    <li>Dado o array: <code>const valores = [50, 100, 250];</code></li>
+                    <li>Use o método <code>map()</code> para criar um novo array chamado <code>valoresComTaxa</code>.</li>
+                    <li>A regra do map deve ser: somar 10% a cada valor (multiplicar por 1.1).</li>
+                    <li>Imprima o novo array.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 15: FILTER -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">15</div>
+            <h2>O Método <code>filter()</code></h2>
+            <p>O <code>filter</code> passa por todos os itens e joga eles numa condição (If). Se retornar <code>true</code>, o item entra no <strong>novo array</strong>. Se for <code>false</code>, ele é ignorado.</p>
+            <p><strong>Uso principal:</strong> Buscas, remover itens indesejados, filtrar categorias.</p>
+            <pre>
+const notas = [8, 4, 9, 3, 10];
+
+// A função de callback DEVE retornar um teste lógico (true/false)
+const aprovados = notas.filter( nota => nota >= 7 );
+
+console.log(aprovados); // [8, 9, 10]</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 16: FILTER INTERATIVO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">16</div>
+            <h2>Visualizador: <code>filter()</code></h2>
+            <p>Array original de idades: <code>[15, 22, 12, 30]</code></p>
+            
+            <div class="interactive-area">
+                <div id="filterOriginal" class="array-display">
+                    <div class="array-item" id="f1">15</div>
+                    <div class="array-item" id="f2">22</div>
+                    <div class="array-item" id="f3">12</div>
+                    <div class="array-item" id="f4">30</div>
+                </div>
+                
+                <button class="interactive-btn" onclick="runFilterViz()">Executar: arr.filter(x => x >= 18)</button>
+                
+                <h3 style="margin-top: 20px;">Novo Array Filtrado:</h3>
+                <div id="filterResult" class="array-display" style="min-height: 40px;">
+                    <!-- Results here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXERCÍCIO 4 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">17</div>
+            <div class="micro-challenge">
+                <h3><i class="fa-solid fa-code"></i> Exercício 4: Limpando os baratinhos</h3>
+                <pre>
+const produtos = [
+  { nome: "Caneta", preco: 25 },
+  { nome: "Monitor", preco: 800 },
+  { nome: "Cabo", preco: 15 }
+];</pre>
+                <ol>
+                    <li>Use <code>filter()</code> para criar um array contendo <strong>apenas</strong> os produtos que custam 50 ou mais.</li>
+                    <li>Dica: O callback do filter vai receber o objeto inteiro `p`, então você testa `p.preco >= 50`.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 18: LISTA FINAL -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">18</div>
+            <h2>Lista de Exercícios (O Pesadelo do JS)</h2>
+            <div class="final-list">
+                <ol>
+                    <li>Crie um array de palavras. Use <code>map()</code> para retornar um novo array com todas as palavras em maiúsculas (use <code>toUpperCase()</code>).</li>
+                    <li>Dado <code>[1, 2, 3, 4, 5, 6]</code>, use <code>filter()</code> para criar um array só de números ímpares.</li>
+                    <li>Crie um array de objetos <code>pessoas = [{nome: "A", idade: 15}, {nome: "B", idade: 20}]</code>. Primeiro, use <code>filter()</code> para criar uma lista <code>adultos</code>. Depois, use <code>map()</code> na lista <code>adultos</code> para criar um array apenas com os <strong>nomes</strong> deles.</li>
+                    <li>Dado <code>const notas = [6.5, 7.0, 5.5, 8.5]</code>, use <code>map()</code> para somar 1 ponto em todas as notas. Se a nota nova passar de 10, deixe como 10 (use operador ternário dentro do map).</li>
+                    <li>Crie um array de nomes (alguns repetidos). Crie um novo array com <code>filter()</code> pegando apenas os nomes que começam com a letra "A" (dica: verifique o índice 0 da string).</li>
+                    <li>Crie uma lista de produtos (nome, preco). Primeiro, faça um <code>filter</code> para pegar os produtos de luxo (> R$1000). Salve numa variável. Depois, aplique <code>map</code> para criar uma string formatada: "O [nome] é artigo de luxo!".</li>
+                    <li>Escreva uma função que recebe um array de números e usa <code>filter</code> para retornar todos que são divisíveis por 3 e por 5 ao mesmo tempo.</li>
+                    <li>Dado um array de strings com lixo: <code>["olá", "", "teste", null, "fim", undefined]</code>. Use <code>filter</code> para limpar tudo que é <em>Falsy</em>, deixando apenas strings válidas.</li>
+                    <li>Dado <code>[{nome: "João", notas: [8,7]}, {nome: "Ana", notas: [10,9]}]</code>. Use <code>map</code> para transformar neste objeto: <code>{nome: "João", media: 7.5}</code>.</li>
+                    <li><strong>Boss Final:</strong> Você tem <code>carrinho = [{nome: "A", qtd: 2, preco: 10}, {nome: "B", qtd: 1, preco: 30}]</code>. Use <code>map()</code> para calcular o subtotal de cada item (qtd * preco). Salve esse novo array e, usando o <code>forEach()</code>, some todos os subtotais para achar o total final da compra.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    // Slide Nav
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    // --- Interactive Map Viz ---
+    function runMapViz() {
+        const originalArr = [10, 20, 30, 40];
+        const resultContainer = document.getElementById('mapResult');
+        resultContainer.innerHTML = '';
+        
+        originalArr.forEach((val, i) => {
+            setTimeout(() => {
+                const item = document.createElement('div');
+                item.className = 'array-item mapped';
+                item.innerText = val * 2;
+                resultContainer.appendChild(item);
+                
+                // Animate original
+                document.getElementById('mapOriginal').children[i].style.opacity = '0.5';
+            }, i * 600); // Stagger animation
+        });
+    }
+
+    // --- Interactive Filter Viz ---
+    function runFilterViz() {
+        const originalArr = [15, 22, 12, 30];
+        const resultContainer = document.getElementById('filterResult');
+        resultContainer.innerHTML = '';
+        
+        originalArr.forEach((val, i) => {
+            setTimeout(() => {
+                const origNode = document.getElementById(`f${i+1}`);
+                if (val >= 18) {
+                    // Passed filter
+                    const item = document.createElement('div');
+                    item.className = 'array-item';
+                    item.innerText = val;
+                    resultContainer.appendChild(item);
+                    origNode.style.boxShadow = '0 0 10px #393e46';
+                } else {
+                    // Failed filter
+                    origNode.className = 'array-item filtered-out';
+                }
+            }, i * 600); // Stagger animation
+        });
+    }
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

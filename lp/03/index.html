@@ -449,6 +449,12 @@
                 👉 <code class="font-mono font-bold bg-gray-200 px-1 rounded">gcc</code>: Chama o programa que faz a tradução (o compilador).<br>
                 👉 <code class="font-mono font-bold bg-gray-200 px-1 rounded">-o</code>: Significa "Output" (Saída). Estamos dizendo: "o nome do arquivo final gerado deve ser esse aqui".</p>
             </div>
+
+            <!-- NOVA CAIXA: Dica de Compiladores Online -->
+            <div class="mt-4 border-l-8 p-4 w-full max-w-5xl rounded text-left shadow-sm" style="background-color: #fefce8; border-color: var(--color-4); color: var(--color-1);">
+                <p><strong>💡 Alternativa Online:</strong> O seu GCC no Windows deu erro ou ainda não foi configurado? Não se preocupe!<br>
+                Pode acompanhar a aula e testar os seus códigos diretamente no navegador utilizando sites como o <a href="https://www.onlinegdb.com/online_c_compiler" target="_blank" class="font-bold underline" style="color: var(--color-3);">OnlineGDB</a> ou o <a href="https://replit.com/languages/c" target="_blank" class="font-bold underline" style="color: var(--color-3);">Replit</a>.</p>
+            </div>
         </section>
 
         <!-- Slide 10: Variáveis e Tipos -->
@@ -816,7 +822,9 @@
             button.addEventListener('click', (e) => {
                 const container = e.currentTarget.closest('.code-block-wrapper');
                 const codeEl = container.querySelector('.code-block, .code-box');
-                const codeText = codeEl.innerText;
+                
+                // Pega o texto e substitui todos os non-breaking spaces (\u00A0) por espaços normais
+                const codeText = codeEl.innerText.replace(/\u00A0/g, ' ');
                 
                 navigator.clipboard.writeText(codeText).then(() => {
                     const span = button.querySelector('span');
