@@ -171,6 +171,8 @@
     <button class="btn" onclick="nextSlide()" title="Próximo (→)">
         <i class="fa-solid fa-arrow-right"></i>
     </button>
+    <button class="btn" onclick="lastSlide()" title="Último (→)">
+        <i class="fa-solid fa-dumbbell"></i>    </button>
     <button class="btn" onclick="window.print()" title="Imprimir Apostila">
         <i class="fa-solid fa-print"></i>
     </button>
@@ -473,6 +475,8 @@ function somar(...nums) {
 
     function nextSlide() { showSlide(currentSlide + 1); }
     function prevSlide() { showSlide(currentSlide - 1); }
+    function lastSlide() { showSlide(totalSlides - 1); }
+
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
