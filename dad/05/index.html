@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 05: Prática Intensiva - Arrays & DOM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta: https://colorhunt.co/palette/ff65001e3e620b192c000000 - Adaptada para Fundo Branco */
+            --bg: #ffffff;         /* Fundo Branco */
+            --slide-bg: #ffffff;   /* Branco (Fundo do Slide) */
+            --text: #000000;       /* Preto (Texto principal) */
+            --text-muted: #0b192c; /* Azul Muito Escuro (Texto secundário) */
+            --primary: #1e3e62;    /* Azul Médio (Cards, Código, Bordas) */
+            --accent: #ff6500;     /* Laranja Vibrante (Destaques, Títulos) */
+            
+            --code-bg: #0b192c;    /* Fundo Código Escuro para contraste */
+            --code-text: #e2e8f0;  /* Texto Código */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link Fixa */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--accent);
+        }
+        .fixed-link-bar a { 
+            color: var(--primary); 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .fixed-link-bar a:hover { color: var(--accent); }
+
+        /* Slides */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: #ffffff;
+            text-align: center;
+            border: 5px solid var(--accent);
+        }
+        .slide.topic h1, .slide.topic p { color: var(--text); }
+        .slide.topic h2 { color: var(--accent); border: none; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); text-shadow: none; }
+
+        .slide-content-wrapper { max-width: 1100px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 70px; right: 40px; font-size: 1.5rem; color: var(--primary); font-weight: 800; opacity: 0.8; }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        
+        strong { color: var(--text); }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-variant-ligatures: none;
+        }
+        code { 
+            font-family: 'Fira Code', monospace; 
+            background: var(--primary); 
+            color: #ffffff;
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+        /* Layouts */
+        .exercise-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 30px; margin-top: 20px; }
+        .req-box { background: #f8fafc; padding: 25px; border-radius: 12px; border-left: 4px solid var(--accent); border-right: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+        .req-box h3 { font-size: 1.2rem; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; }
+        .req-box ul { margin-left: 20px; }
+        .req-box li { font-size: 1rem; margin-bottom: 10px; color: var(--text); }
+
+        .mockup-box { background: #ffffff; padding: 25px; border-radius: 12px; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .mockup-box h3 { color: var(--primary); margin-bottom: 15px; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;}
+        .mockup-element { border: 2px dashed #ccc; padding: 15px; width: 100%; border-radius: 8px; background: #f8fafc; }
+
+        /* Controls */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .btn { background: var(--primary); border: none; color: #ffffff; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; }
+        .btn:hover { background: var(--accent); transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        /* Tag for Difficulty */
+        .diff-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; vertical-align: middle; margin-left: 15px; }
+        .diff-aula { background: var(--primary); color: white; }
+        .diff-casa { background: var(--accent); color: white; }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
+            .fixed-link-bar a { color: black; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
+            .controls, .progress-bar { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
+            pre, .req-box { border: 1px solid #000; color: black; background: #fff; box-shadow: none; }
+            h1, h2, p, li, strong { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+            .diff-aula, .diff-casa { background: #eee; color: black; border: 1px solid black; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BARRA DE LINK FIXA -->
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <h1>Aula 05: Prática Intensiva</h1>
+            <h2>Do Array para a Tela (DOM)</h2>
+            <br>
+            <p><strong>Dinâmica de Hoje:</strong></p>
+            <ol>
+                <li>Faremos <strong>5 exercícios juntos</strong> na sala para entender a mecânica visual.</li>
+                <li>Vocês terão <strong>5 exercícios similares</strong> para resolver em casa/laboratório.</li>
+            </ol>
+            <p style="margin-top: 20px; color: var(--accent);"><strong>Regra de Ouro:</strong> É OBRIGATÓRIO o uso de Arrow Functions (`=>`) em todas as funções ou callbacks.</p>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: EM AULA -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            <h1>Exercícios de Sala</h1>
+            <h2>Fazemos Juntos</h2>
+            <p>Acompanhe o professor e crie os códigos na sua máquina.</p>
+        </div>
+    </div>
+
+    <!-- EX 1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 01</div>
+            <h2>1. Gerador de Lista <span class="diff-tag diff-aula">Em Aula</span></h2>
+            <p>O dado mais básico que recebemos de um backend é um array de textos. Vamos criar uma lista no HTML.</p>
+            
+            <pre>const alunos = ["Ana", "Bruno", "Carlos", "Daniela"];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie uma <code>&lt;ul id="lista"&gt;&lt;/ul&gt;</code> no HTML.</li>
+                        <li>Crie uma <strong>Arrow Function</strong> chamada <code>renderizarLista()</code>.</li>
+                        <li>Use <code>map()</code> para transformar cada nome numa string <code>"&lt;li&gt;Nome&lt;/li&gt;"</code>.</li>
+                        <li>Una o array resultante (pesquise sobre o método <code>.join("")</code>) e insira no <code>innerHTML</code> da ul.</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <div class="mockup-element" style="text-align: left;">
+                        <ul style="color: black; margin-left: 20px;">
+                            <li>Ana</li>
+                            <li>Bruno</li>
+                            <li>Carlos</li>
+                            <li>Daniela</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 02</div>
+            <h2>2. Filtro de Produtos <span class="diff-tag diff-aula">Em Aula</span></h2>
+            <p>Combinando <code>filter()</code> e <code>map()</code> em Objetos.</p>
+            
+            <pre>const produtos = [
+  { nome: "Mouse", preco: 50 },
+  { nome: "Teclado", preco: 150 },
+  { nome: "Monitor", preco: 900 }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie um botão "Filtrar > R$100" no HTML e uma div vazia.</li>
+                        <li>Adicione um evento de clique no botão (usando arrow function).</li>
+                        <li>No clique, faça um <code>filter()</code> para pegar produtos com preço maior que 100.</li>
+                        <li>Depois aplique <code>map()</code> para gerar parágrafos exibindo o Nome e o Preço, e jogue na div.</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <button style="padding: 5px; margin-bottom: 10px;">Filtrar > R$100</button>
+                    <div class="mockup-element">
+                        <p style="margin:0;">Teclado - R$ 150</p>
+                        <p style="margin:0;">Monitor - R$ 900</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 3 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 03</div>
+            <h2>3. Totalizador de Carrinho <span class="diff-tag diff-aula">Em Aula</span></h2>
+            <p>Cálculos baseados em Arrays de Objetos.</p>
+            
+            <pre>const carrinho = [
+  { item: "Livro", qtd: 2, valor: 30 },
+  { item: "Caneta", qtd: 5, valor: 2 }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Use uma <strong>Arrow Function</strong> chamada <code>calcularTotal()</code>.</li>
+                        <li>Crie uma variável `total = 0`.</li>
+                        <li>Use <code>forEach()</code> ou <code>map()</code> para multiplicar a <code>qtd</code> pelo <code>valor</code> de cada item e somar ao `total`.</li>
+                        <li>Exiba o resultado num <code>&lt;h2&gt;</code> no HTML (Ex: "Total: R$ 70,00").</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <div class="mockup-element">
+                        <h2 style="color: green; margin:0;">Total: R$ 70,00</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 4 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 04</div>
+            <h2>4. Renderização Condicional <span class="diff-tag diff-aula">Em Aula</span></h2>
+            <p>O HTML deve mudar dependendo do valor booleano do objeto.</p>
+            
+            <pre>const tarefas = [
+  { desc: "Estudar JS", feita: true },
+  { desc: "Fazer exercícios", feita: false }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie uma lista (ul).</li>
+                        <li>Use <code>map()</code> para gerar os <code>&lt;li&gt;</code>.</li>
+                        <li>Dentro do map, use um <strong>Operador Ternário</strong>: Se <code>feita</code> for true, adicione uma classe CSS que deixa o texto verde e <s>riscado</s>. Senão, classe normal.</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <div class="mockup-element" style="text-align: left;">
+                        <ul style="color: black; margin-left: 20px;">
+                            <li style="color: green; text-decoration: line-through;">Estudar JS</li>
+                            <li>Fazer exercícios</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 5 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 05</div>
+            <h2>5. Busca Dinâmica (Search) <span class="diff-tag diff-aula">Em Aula</span></h2>
+            <p>Filtrando em tempo real conforme o usuário digita.</p>
+            
+            <pre>const contatos = [
+  { nome: "João Silva", tel: "123" },
+  { nome: "Maria Sousa", tel: "456" }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie um <code>&lt;input type="text" id="busca"&gt;</code>.</li>
+                        <li>Adicione um evento <code>input</code> ao campo.</li>
+                        <li>No callback (arrow function), pegue o valor digitado.</li>
+                        <li>Use <code>filter()</code> para achar os nomes que contêm (<code>includes()</code>) o texto digitado e mostre o resultado abaixo.</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <input type="text" placeholder="Digite 'Mar'..." style="margin-bottom:10px; width: 90%;">
+                    <div class="mockup-element">
+                        <p style="margin:0;">Maria Sousa - 456</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: PARA CASA -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-house-laptop"></i>
+            <h1>Exercícios de Casa</h1>
+            <h2>Sua vez de codar</h2>
+            <p>Problemas similares aos de sala para fixação.</p>
+        </div>
+    </div>
+
+    <!-- EX 6 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 06</div>
+            <h2>6. Gerador de Botões <span class="diff-tag diff-casa">Para Casa</span></h2>
+            <p>Similar ao Ex 1, mas gerando botões.</p>
+            
+            <pre>const linguagens = ["Javascript", "Python", "C", "Java"];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie uma <code>&lt;div id="botoes"&gt;&lt;/div&gt;</code> no HTML.</li>
+                        <li>Crie uma <strong>Arrow Function</strong>.</li>
+                        <li>Use <code>map()</code> para transformar cada linguagem numa string de botão: <code>"&lt;button&gt;Linguagem&lt;/button&gt;"</code>.</li>
+                        <li>Insira os botões gerados na div usando <code>innerHTML</code>.</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <div class="mockup-element" style="display:flex; gap:5px; flex-wrap:wrap; justify-content: center;">
+                        <button>Javascript</button>
+                        <button>Python</button>
+                        <button>C</button>
+                        <button>Java</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 7 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 07</div>
+            <h2>7. Filtro de Filmes (Top Tier) <span class="diff-tag diff-casa">Para Casa</span></h2>
+            <p>Similar ao Ex 2.</p>
+            
+            <pre>const filmes = [
+  { titulo: "Matrix", nota: 9 },
+  { titulo: "Batman", nota: 6 },
+  { titulo: "Avatar", nota: 8.5 }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie um botão "Ver Melhores Filmes".</li>
+                        <li>Adicione um evento de clique (arrow function).</li>
+                        <li>Faça um <code>filter()</code> para pegar apenas filmes com <code>nota &gt;= 8</code>.</li>
+                        <li>Use <code>map()</code> para gerar e exibir uma lista na tela com "Título - Nota".</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <button style="padding: 5px; margin-bottom: 10px;">Ver Melhores Filmes</button>
+                    <div class="mockup-element">
+                        <p style="margin:0;">Matrix - 9</p>
+                        <p style="margin:0;">Avatar - 8.5</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 8 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 08</div>
+            <h2>8. Fechando a Conta <span class="diff-tag diff-casa">Para Casa</span></h2>
+            <p>Similar ao Ex 3 (Cálculo de array).</p>
+            
+            <pre>const conta = [
+  { pedido: "Pizza", preco: 40 },
+  { pedido: "Refri", preco: 10 }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie uma <strong>Arrow Function</strong>.</li>
+                        <li>Calcule a soma dos preços de todos os pedidos.</li>
+                        <li>Calcule os 10% do garçom sobre esse total.</li>
+                        <li>Exiba no HTML um extrato: <br>Subtotal: R$ 50<br>Gorjeta: R$ 5<br><strong>Total Pago: R$ 55</strong></li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <div class="mockup-element">
+                        <p style="margin:0; font-size:0.9rem;">Subtotal: R$ 50</p>
+                        <p style="margin:0; font-size:0.9rem;">Gorjeta: R$ 5</p>
+                        <h3 style="color: black; margin-top: 5px;">Total Pago: R$ 55</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 9 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 09</div>
+            <h2>9. Status do Servidor <span class="diff-tag diff-casa">Para Casa</span></h2>
+            <p>Similar ao Ex 4 (Condicional com Ternário).</p>
+            
+            <pre>const servers = [
+  { nome: "Servidor Alpha", online: true },
+  { nome: "Servidor Beta", online: false }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Renderize os servidores na tela usando <code>map()</code>.</li>
+                        <li>Se o atributo <code>online</code> for true, adicione "🟢 Online" ao lado do nome.</li>
+                        <li>Se for false, adicione "🔴 Offline".</li>
+                        <li>(Bônus: Mude a cor do texto do servidor Offline para cinza usando estilo inline/classes).</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <div class="mockup-element" style="text-align: left;">
+                        <p style="margin:5px 0;"><strong>Servidor Alpha</strong> 🟢 Online</p>
+                        <p style="margin:5px 0; color:gray;"><strong>Servidor Beta</strong> 🔴 Offline</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EX 10 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Ex 10</div>
+            <h2>10. Pokédex Search <span class="diff-tag diff-casa">Para Casa</span></h2>
+            <p>Similar ao Ex 5 (Filtro via Input).</p>
+            
+            <pre>const pokemons = [
+  { nome: "Pikachu", tipo: "Elétrico" },
+  { nome: "Charmander", tipo: "Fogo" },
+  { nome: "Magnemite", tipo: "Planta" }
+];</pre>
+            
+            <div class="exercise-grid">
+                <div class="req-box">
+                    <h3>Requisitos</h3>
+                    <ul>
+                        <li>Crie um campo de input.</li>
+                        <li>Adicione o evento <code>input</code> a ele com Arrow Function.</li>
+                        <li>Filtre a lista para exibir APENAS os pokémons que correspondam ao <strong>tipo</strong> digitado (ex: digita "Fogo", aparece o Charmander).</li>
+                        <li>Renderize o resultado abaixo do input.</li>
+                    </ul>
+                </div>
+                <div class="mockup-box">
+                    <h3>Resultado Visual</h3>
+                    <input type="text" placeholder="Tipo (ex: Fogo)" style="margin-bottom:10px; width: 90%;">
+                    <div class="mockup-element">
+                        <p style="margin:0; font-weight:bold; color:red;">Charmander</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

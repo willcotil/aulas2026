@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 03: Entidade, Atributo e Tupla</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#222831',    // Cinzento Muito Escuro
+                            medium: '#393E46',  // Cinzento Médio
+                            accent: '#948979',  // Verde Oliva/Sépia
+                            light: '#DFD0B8',   // Bege/Areia
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Fundo principal sempre branco */
+            color: #222831; /* brand-dark */
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { 
+                display: block !important; 
+                page-break-after: auto; 
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .print-break { page-break-after: always; }
+            .resposta-gabarito { display: block !important; } /* Na impressão as respostas aparecem */
+        }
+
+        /* SVG Styles */
+        .node-rect { fill: #DFD0B8; stroke: #222831; stroke-width: 2; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #222831; }
+        .edge { stroke: #393E46; stroke-width: 2; fill: none; }
+        
+        code { font-family: 'JetBrains Mono', monospace; background: #393E46; padding: 2px 6px; border-radius: 4px; color: #DFD0B8; font-size: 0.9em; font-weight: bold;}
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #948979; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #393E46; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <!-- Header Fixo -->
+    <header class="no-print h-16 bg-brand-dark text-brand-light border-b border-brand-medium px-6 flex items-center justify-between sticky top-0 z-50 shadow-md">
+        <div class="flex items-center gap-3 z-10">
+            <div class="bg-brand-accent text-white p-2 rounded-lg">
+                <i class="fas fa-layer-group text-sm"></i>
+            </div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">Base de Dados I <span class="text-brand-accent">Modelagem</span></h1>
+        </div>
+        
+        <!-- Link Centrado -->
+        <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none hidden md:flex">
+            <a href="https://willcotil.github.io/aulas2026/" target="_blank" class="pointer-events-auto text-brand-accent hover:text-white font-extrabold text-lg transition tracking-wide">
+                willcotil.github.io/aulas2026
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-medium hover:bg-brand-accent hover:text-white rounded-lg text-brand-light text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-light hover:text-brand-accent transition">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Barra de Progresso -->
+    <div class="no-print h-1.5 w-full bg-brand-medium overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-accent transition-all duration-500 w-0 shadow-[0_0_10px_#948979]"></div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl">
+            <!-- Os passos serão injetados aqui via JS -->
+        </div>
+    </main>
+
+    <!-- Navegação Inferior -->
+    <footer class="no-print h-20 bg-brand-dark border-t border-brand-medium px-6 flex items-center justify-between sticky bottom-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-brand-medium text-brand-light rounded-xl font-bold hover:bg-brand-accent hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-medium disabled:hover:text-brand-light">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+        
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-xs font-black text-brand-accent uppercase tracking-widest">Tópico 1 / X</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-accent text-white rounded-xl font-bold hover:bg-brand-light hover:text-brand-dark transition shadow-lg">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            {
+                title: "Estrutura dos Dados",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-6 bg-brand-medium rounded-full text-brand-accent mb-4">
+                            <i class="fas fa-cubes text-7xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 03: A Anatomia</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto italic leading-relaxed">Entidades, Atributos e Tuplas. Os blocos de construção da sua Base de Dados.</p>
+                        <div class="flex justify-center gap-4 text-brand-dark/50 text-sm mt-10">
+                            <span class="px-3 py-1 bg-white border border-brand-medium rounded shadow-sm"><i class="fas fa-arrow-left mr-2"></i>SETAS</span>
+                            <span class="px-3 py-1 bg-white border border-brand-medium rounded shadow-sm">ESPAÇO</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Recapitulando o MER",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">Na última aula, vimos que o <strong>Modelo Entidade-Relacionamento (MER)</strong> é a nossa "planta de construção".</p>
+                            <p class="text-lg">Hoje, vamos focar a nossa visão e dissecar a parte mais importante deste desenho: a estrutura exata do dado que será guardado.</p>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex flex-col items-center justify-center border-2 border-dashed border-brand-medium text-brand-accent shadow-xl">
+                            <i class="fas fa-microscope text-6xl mb-4"></i>
+                            <span class="font-bold uppercase text-xs tracking-widest text-brand-dark">Aproximando a visão</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "1. A Entidade",
+                content: `
+                    <div class="space-y-8">
+                        <div class="p-8 bg-brand-dark text-brand-light rounded-3xl shadow-lg border-l-8 border-brand-accent">
+                            <p class="text-2xl leading-relaxed">Representa um "objeto" do mundo real, abstrato ou concreto, sobre o qual a empresa deseja guardar informações.</p>
+                        </div>
+                        <div class="grid md:grid-cols-4 gap-4 text-center">
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm"><i class="fas fa-user text-brand-accent text-3xl mb-3"></i><p class="font-bold">Pessoa</p><p class="text-xs text-brand-dark/60">Aluno, Cliente</p></div>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm"><i class="fas fa-box text-brand-accent text-3xl mb-3"></i><p class="font-bold">Coisa</p><p class="text-xs text-brand-dark/60">Produto, Carro</p></div>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm"><i class="fas fa-map-marker-alt text-brand-accent text-3xl mb-3"></i><p class="font-bold">Lugar</p><p class="text-xs text-brand-dark/60">Filial, Cidade</p></div>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm"><i class="fas fa-calendar-check text-brand-accent text-3xl mb-3"></i><p class="font-bold">Evento</p><p class="text-xs text-brand-dark/60">Venda, Consulta</p></div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "A Representação Visual",
+                content: `
+                    <div class="flex flex-col items-center space-y-10">
+                        <p class="text-xl">No diagrama (DER), a entidade é sempre representada por um <strong>Retângulo</strong>.</p>
+                        <div class="bg-white p-12 rounded-3xl shadow-xl border border-brand-medium">
+                            <svg width="200" height="80" viewBox="0 0 200 80">
+                                <rect x="10" y="10" width="180" height="60" fill="white" stroke="#222831" stroke-width="3" />
+                                <text x="100" y="45" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#222831">CLIENTE</text>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-bold bg-brand-accent text-white px-4 py-2 rounded-full uppercase tracking-widest">Nomes sempre no singular e sem acento!</p>
+                    </div>
+                `
+            },
+            {
+                title: "2. O Atributo",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">Se a entidade é o "objeto", os atributos são as suas <strong>características ou propriedades</strong>.</p>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm">
+                                <p class="font-bold text-brand-dark">Para a Entidade CARRO, o que queremos saber?</p>
+                                <ul class="mt-4 space-y-2 text-brand-accent font-bold">
+                                    <li>&rarr; Matrícula (Placa)</li>
+                                    <li>&rarr; Modelo</li>
+                                    <li>&rarr; Ano</li>
+                                    <li>&rarr; Cor</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex items-center justify-center p-4 shadow-lg border border-brand-medium">
+                            <svg width="300" height="200" viewBox="0 0 300 200">
+                                <line x1="150" y1="100" x2="80" y2="50" class="edge" />
+                                <line x1="150" y1="100" x2="220" y2="50" class="edge" />
+                                <line x1="150" y1="100" x2="150" y2="160" class="edge" />
+                                
+                                <rect x="100" y="85" width="100" height="30" class="node-rect" />
+                                <text x="150" y="105" text-anchor="middle" class="node-text">CARRO</text>
+                                
+                                <ellipse cx="80" cy="50" rx="35" ry="15" fill="white" stroke="#948979" stroke-width="2" />
+                                <text x="80" y="54" text-anchor="middle" font-size="10" font-weight="bold" fill="#393E46">Cor</text>
+                                
+                                <ellipse cx="220" cy="50" rx="35" ry="15" fill="white" stroke="#948979" stroke-width="2" />
+                                <text x="220" y="54" text-anchor="middle" font-size="10" font-weight="bold" fill="#393E46">Modelo</text>
+                                
+                                <ellipse cx="150" cy="160" rx="40" ry="15" fill="white" stroke="#948979" stroke-width="2" />
+                                <text x="150" y="164" text-anchor="middle" font-size="10" font-weight="bold" fill="#393E46">Ano</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Tipos: Atributo Simples (Atómico)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">É o tipo mais básico. Um atributo simples é <strong>indivisível</strong> e representa um dado único e direto.</p>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm">
+                                <p class="font-bold text-brand-dark mb-4">Exemplos comuns:</p>
+                                <code>Idade, Sexo, Estado Civil, Peso</code>
+                            </div>
+                            <p class="text-sm text-brand-dark/60 italic">No modelo relacional, é o equivalente a uma coluna simples e direta.</p>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex items-center justify-center p-4 shadow-lg border border-brand-medium">
+                            <svg width="250" height="150" viewBox="0 0 250 150">
+                                <line x1="125" y1="120" x2="125" y2="70" class="edge" />
+                                <rect x="75" y="120" width="100" height="30" class="node-rect" />
+                                <text x="125" y="140" text-anchor="middle" class="node-text">PESSOA</text>
+                                
+                                <ellipse cx="125" cy="70" rx="35" ry="15" fill="white" stroke="#948979" stroke-width="2" />
+                                <text x="125" y="74" text-anchor="middle" font-size="10" font-weight="bold" fill="#393E46">Idade</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Tipos: Atributo Composto",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">Ao contrário do simples, este atributo pode ser <strong>dividido em partes menores</strong>, em que cada parte tem o seu próprio significado independente.</p>
+                            <div class="p-6 bg-brand-light/30 border border-brand-accent rounded-xl shadow-sm">
+                                <p class="font-bold text-brand-dark mb-2">Exemplo Clássico:</p>
+                                <p class="text-sm text-brand-dark">A <strong>Morada</strong> é composta por várias partes: <code>Rua, Número, Código Postal, Localidade</code>.</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex items-center justify-center p-4 shadow-lg border border-brand-medium relative">
+                            <svg width="250" height="150" viewBox="0 0 250 150">
+                                <line x1="125" y1="120" x2="125" y2="70" class="edge" />
+                                <rect x="75" y="120" width="100" height="30" class="node-rect" />
+                                <text x="125" y="140" text-anchor="middle" class="node-text">CLIENTE</text>
+                                
+                                <ellipse cx="125" cy="70" rx="40" ry="15" fill="white" stroke="#948979" stroke-width="2" />
+                                <text x="125" y="74" text-anchor="middle" font-size="10" font-weight="bold" fill="#393E46">Morada</text>
+                                
+                                <line x1="125" y1="55" x2="80" y2="25" class="edge" />
+                                <line x1="125" y1="55" x2="170" y2="25" class="edge" />
+                                
+                                <ellipse cx="80" cy="25" rx="30" ry="12" fill="white" stroke="#393E46" stroke-width="2" />
+                                <text x="80" y="29" text-anchor="middle" font-size="9" fill="#393E46">Rua</text>
+                                
+                                <ellipse cx="170" cy="25" rx="35" ry="12" fill="white" stroke="#393E46" stroke-width="2" />
+                                <text x="170" y="29" text-anchor="middle" font-size="9" fill="#393E46">C.Postal</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Tipos: Atributo Monovalorado",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">Uma entidade possui <strong>apenas um único valor</strong> para este atributo.</p>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm">
+                                <p class="font-bold text-brand-dark mb-4">Exemplos fáceis:</p>
+                                <ul class="space-y-3 text-sm text-brand-dark/80">
+                                    <li>• Uma pessoa só tem <strong>uma</strong> Data de Nascimento.</li>
+                                    <li>• Um carro só tem <strong>um</strong> Ano de Fabrico.</li>
+                                    <li>• Um cidadão tem <strong>um</strong> NIF.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bg-brand-medium text-brand-light rounded-3xl h-64 flex flex-col items-center justify-center p-8 shadow-lg text-center">
+                            <i class="fas fa-1 text-6xl text-brand-accent mb-4"></i>
+                            <p class="font-bold text-xl uppercase tracking-widest">Valor Único</p>
+                            <p class="text-sm opacity-70 mt-2">Não há espaço para duas respostas simultâneas.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Tipos: Atributo Multivalorado",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">O oposto do monovalorado. A mesma entidade pode ter <strong>vários valores diferentes</strong> para este atributo.</p>
+                            <div class="p-6 bg-white border border-brand-medium rounded-xl shadow-sm">
+                                <p class="font-bold text-brand-dark mb-4">Exemplos práticos:</p>
+                                <ul class="space-y-3 text-sm text-brand-dark/80">
+                                    <li>• Um cliente pode ter vários <strong>Telefones</strong>.</li>
+                                    <li>• Uma empresa pode ter vários <strong>E-mails</strong>.</li>
+                                </ul>
+                            </div>
+                            <p class="text-sm text-brand-dark/60 font-bold italic">* No diagrama, é sempre desenhado com uma linha dupla.</p>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex items-center justify-center p-4 shadow-lg border border-brand-medium relative">
+                            <svg width="250" height="150" viewBox="0 0 250 150">
+                                <line x1="125" y1="100" x2="125" y2="50" class="edge" />
+                                <rect x="75" y="100" width="100" height="30" class="node-rect" />
+                                <text x="125" y="120" text-anchor="middle" class="node-text">EMPRESA</text>
+                                
+                                <!-- Dupla elipse -->
+                                <ellipse cx="125" cy="50" rx="45" ry="20" fill="white" stroke="#948979" stroke-width="2" />
+                                <ellipse cx="125" cy="50" rx="38" ry="15" fill="white" stroke="#948979" stroke-width="2" />
+                                <text x="125" y="54" text-anchor="middle" font-size="10" font-weight="bold" fill="#393E46">Telefone</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "3. O que é uma Tupla?",
+                content: `
+                    <div class="space-y-8">
+                        <div class="text-center">
+                            <p class="text-2xl leading-relaxed max-w-3xl mx-auto">Tupla é o nome académico/técnico para um <strong>Registo</strong> ou uma <strong>Linha</strong> dentro de uma tabela.</p>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-brand-medium text-brand-light rounded-3xl shadow-xl flex flex-col justify-center">
+                                <h4 class="text-2xl font-bold mb-4 text-brand-accent">A Instância</h4>
+                                <p class="leading-relaxed">Se a "Entidade" é o molde (a planta da casa), a "Tupla" é a casa construída. É o dado real, preenchido e gravado na base de dados.</p>
+                            </div>
+                            <div class="flex items-center justify-center p-8 bg-white rounded-3xl shadow-sm border border-brand-medium">
+                                <div class="text-center">
+                                    <i class="fas fa-list text-6xl text-brand-accent mb-4"></i>
+                                    <p class="font-bold text-brand-dark text-lg">Tupla = Linha (Row)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "A Grande Tradução Visual",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-center">Como o Modelo (Desenho) vira a Base de Dados (Físico)?</p>
+                        <div class="overflow-x-auto bg-white p-6 rounded-3xl shadow-xl border border-brand-medium relative">
+                            <!-- Anotação Entidade -->
+                            <div class="absolute top-2 left-6 text-brand-accent font-bold text-sm tracking-widest"><i class="fas fa-arrow-right mr-1"></i> ENTIDADE: PRODUTO</div>
+                            
+                            <table class="w-full text-left mt-8 border-collapse">
+                                <thead>
+                                    <!-- Anotação Atributos -->
+                                    <tr>
+                                        <th colspan="3" class="text-center text-xs font-black text-brand-dark/50 bg-brand-light/50 py-1 border-b border-brand-medium/20">ATRIBUTOS (Colunas) &darr;</th>
+                                    </tr>
+                                    <tr class="bg-brand-dark text-brand-light">
+                                        <th class="p-4 border-r border-brand-medium border-b-4 border-brand-accent">ID</th>
+                                        <th class="p-4 border-r border-brand-medium border-b-4 border-brand-accent">NOME</th>
+                                        <th class="p-4 border-b-4 border-brand-accent">PREÇO</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-brand-accent/20 border-b border-brand-medium/20 relative group">
+                                        <td class="p-4 font-mono font-bold text-brand-dark border-r border-brand-medium/20">1</td>
+                                        <td class="p-4 font-bold">Teclado Mecânico</td>
+                                        <td class="p-4 text-brand-dark/80">250,00 €</td>
+                                        <!-- Anotação Tupla -->
+                                        <div class="absolute right-2 top-4 opacity-0 group-hover:opacity-100 transition duration-300 font-bold text-brand-dark text-sm bg-brand-accent px-2 py-1 rounded shadow-lg pointer-events-none">
+                                            &larr; TUPLA 1
+                                        </div>
+                                    </tr>
+                                    <tr class="bg-white border-b border-brand-medium/20 relative group">
+                                        <td class="p-4 font-mono font-bold text-brand-dark border-r border-brand-medium/20">2</td>
+                                        <td class="p-4 font-bold">Rato Gamer</td>
+                                        <td class="p-4 text-brand-dark/80">120,00 €</td>
+                                        <div class="absolute right-2 top-4 opacity-0 group-hover:opacity-100 transition duration-300 font-bold text-brand-dark text-sm bg-brand-accent px-2 py-1 rounded shadow-lg pointer-events-none">
+                                            &larr; TUPLA 2
+                                        </div>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="text-center text-xs text-brand-dark/50 mt-4 italic">Passe o rato sobre as linhas.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 1: A Clínica",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-medium rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "Uma clínica necessita de um sistema para gerir as suas marcações. O sistema deve registar os <strong>Pacientes</strong> (nome, NIF, telefones de contacto, morada completa) e os <strong>Médicos</strong> (nome, número da cédula profissional, especialidade). Além disso, é preciso arquivar cada <strong>Consulta</strong> realizada (data, hora, observações do médico)."
+                        </div>
+                        <p class="font-bold text-brand-dark">Identifique as Entidades, os Atributos e os tipos de cada atributo. <span class="italic text-brand-dark/60">(Não é necessário fazer os relacionamentos ainda)</span>.</p>
+                        
+                        <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="no-print mt-4 px-6 py-2 bg-brand-dark text-brand-light rounded-lg font-bold hover:bg-brand-accent hover:text-white transition shadow-md">
+                            <i class="fas fa-eye mr-2"></i> Ver Resposta (Prática Guiada)
+                        </button>
+                        
+                        <div class="hidden resposta-gabarito bg-brand-light/30 p-6 rounded-xl border border-brand-medium/30 mt-4 animate-in slide-in-from-top-2 grid md:grid-cols-3 gap-6">
+                            <div>
+                                <p class="font-black text-brand-accent border-b border-brand-medium pb-2 mb-2">Entidade: PACIENTE</p>
+                                <ul class="space-y-1 text-sm text-brand-dark">
+                                    <li>• <strong>ID:</strong> Simples</li>
+                                    <li>• <strong>Nome:</strong> Simples</li>
+                                    <li>• <strong>NIF:</strong> Simples</li>
+                                    <li>• <strong>Telefones:</strong> Multivalorado</li>
+                                    <li>• <strong>Morada:</strong> Composto</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-black text-brand-accent border-b border-brand-medium pb-2 mb-2">Entidade: MEDICO</p>
+                                <ul class="space-y-1 text-sm text-brand-dark">
+                                    <li>• <strong>ID:</strong> Simples</li>
+                                    <li>• <strong>Nome:</strong> Simples</li>
+                                    <li>• <strong>Cédula:</strong> Simples</li>
+                                    <li>• <strong>Especialidade:</strong> Simples</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-black text-brand-accent border-b border-brand-medium pb-2 mb-2">Entidade: CONSULTA</p>
+                                <ul class="space-y-1 text-sm text-brand-dark">
+                                    <li>• <strong>ID:</strong> Simples</li>
+                                    <li>• <strong>Data:</strong> Simples</li>
+                                    <li>• <strong>Hora:</strong> Simples</li>
+                                    <li>• <strong>Observações:</strong> Simples</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 2: A Biblioteca",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-medium rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "A biblioteca da universidade quer digitalizar o seu acervo. Precisam de cadastrar os <strong>Livros</strong> (título, ano de publicação, ISBN) e os <strong>Autores</strong> (nome completo, nacionalidade, data de nascimento). Também é necessário manter um registo dos <strong>Alunos</strong> que frequentam a biblioteca (número de matrícula estudantil, nome, e-mails de contacto)."
+                        </div>
+                        <p class="font-bold text-brand-dark">Identifique as Entidades, os Atributos e os seus respetivos tipos. Deixe os relacionamentos para a próxima aula.</p>
+                        
+                        <div class="mt-8 p-10 border-2 border-dashed border-brand-medium/30 rounded-2xl bg-brand-light/10 flex flex-col items-center justify-center text-brand-dark/50">
+                            <i class="fas fa-pen-alt text-4xl mb-4 opacity-50"></i>
+                            <p class="italic font-bold">Resolução individual no caderno</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 3: O E-commerce",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-medium rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "Uma plataforma de e-commerce precisa de reestruturar a sua base de dados. Devem armazenar informações sobre os <strong>Produtos</strong> (código de barras, nome, preço, descrição), sobre os <strong>Clientes</strong> (nome, NIF, morada de entrega, data de registo) e sobre as <strong>Categorias</strong> dos produtos (nome da categoria, descrição detalhada)."
+                        </div>
+                        <p class="font-bold text-brand-dark">Identifique as Entidades, os Atributos e os seus tipos.</p>
+                        
+                        <div class="mt-8 p-10 border-2 border-dashed border-brand-medium/30 rounded-2xl bg-brand-light/10 flex flex-col items-center justify-center text-brand-dark/50">
+                            <i class="fas fa-book-open text-4xl mb-4 opacity-50"></i>
+                            <p class="italic font-bold">Resolução individual no caderno</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 4: Transportes",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-medium rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "Uma empresa de logística precisa de controlar a sua frota. Devem ser registados os <strong>Motoristas</strong> (nome, número da carta de condução, data de validade da carta), os <strong>Veículos</strong> (matrícula, marca, modelo, ano de fabrico) e as <strong>Rotas</strong> diárias planeadas (cidade de origem, cidade de destino, distância em km)."
+                        </div>
+                        <p class="font-bold text-brand-dark">Identifique as Entidades, os Atributos e os seus tipos. Modele as entidades separadamente no seu caderno.</p>
+                        
+                        <div class="mt-8 p-10 border-2 border-dashed border-brand-medium/30 rounded-2xl bg-brand-light/10 flex flex-col items-center justify-center text-brand-dark/50">
+                            <i class="fas fa-truck text-4xl mb-4 opacity-50"></i>
+                            <p class="italic font-bold">Resolução individual no caderno</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Resumo da Aula 03",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-8 bg-brand-dark text-brand-light rounded-3xl shadow-lg">
+                            <h4 class="text-brand-accent font-bold text-xl mb-4 border-b border-brand-medium pb-2">Vocabulário Técnico</h4>
+                            <ul class="space-y-4">
+                                <li><strong class="text-white">Entidade:</strong> A tabela. O assunto principal.</li>
+                                <li><strong class="text-white">Atributo:</strong> A coluna. As características.</li>
+                                <li><strong class="text-white">Tupla:</strong> A linha. O registo real na base de dados.</li>
+                            </ul>
+                        </div>
+                        <div class="p-8 bg-white border border-brand-medium rounded-3xl shadow-sm">
+                            <h4 class="text-brand-dark font-bold text-xl mb-4 border-b border-brand-light pb-2">Tipos de Atributos</h4>
+                            <ul class="space-y-4 text-brand-dark/80">
+                                <li><i class="fas fa-dot-circle text-brand-accent mr-2"></i> <strong>Simples:</strong> Único e indivisível.</li>
+                                <li><i class="fas fa-layer-group text-brand-accent mr-2"></i> <strong>Composto:</strong> Possui sub-partes (ex: Morada).</li>
+                                <li><i class="fas fa-list-ol text-brand-accent mr-2"></i> <strong>Multivalorado:</strong> Pode ter vários valores (ex: Telefones).</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-accent tracking-widest mb-4">Tópico ${currentStep + 1}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>' : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Base de Dados I</h1>
+                <p>Aula 03 - Entidade, Atributo e Tupla</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand-accent pl-2">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

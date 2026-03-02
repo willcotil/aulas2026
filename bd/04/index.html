@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 04: Tipos de Dados e Chaves</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#000000',     // Pure Black
+                            dark: '#0B192C',      // Very Dark Navy
+                            secondary: '#1E3E62', // Medium Dark Blue
+                            accent: '#FF6500',    // Vibrant Orange
+                            light: '#ffffff',     // White
+                            muted: '#f8fafc',     // Off-white for subtle backgrounds
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Fundo principal sempre branco */
+            color: #000000; /* brand-black */
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { 
+                display: block !important; 
+                page-break-after: auto; 
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .print-break { page-break-after: always; }
+            .resposta-gabarito { display: block !important; }
+        }
+
+        /* SVG Styles atualizados para a nova paleta */
+        .node-rect { fill: #ffffff; stroke: #1E3E62; stroke-width: 2; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #0B192C; }
+        .edge { stroke: #1E3E62; stroke-width: 2; fill: none; }
+        
+        code { font-family: 'JetBrains Mono', monospace; background: #0B192C; padding: 2px 6px; border-radius: 4px; color: #FF6500; font-size: 0.9em; font-weight: bold;}
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1E3E62; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #FF6500; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <header class="no-print h-16 bg-white text-brand-dark border-b border-brand-secondary/20 px-6 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3 z-10">
+            <div class="bg-brand-accent text-white p-2 rounded-lg">
+                <i class="fas fa-key text-sm"></i>
+            </div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">Base de Dados I <span class="text-brand-accent">Modelagem</span></h1>
+        </div>
+        
+        <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none hidden md:flex">
+            <a href="https://willcotil.github.io/aulas2026/" target="_blank" class="pointer-events-auto text-brand-secondary hover:text-brand-accent font-extrabold text-lg transition tracking-wide">
+                willcotil.github.io/aulas2026
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-muted hover:bg-brand-secondary hover:text-white rounded-lg text-brand-secondary text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-secondary hover:text-brand-accent transition">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="no-print h-1.5 w-full bg-brand-muted overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-accent transition-all duration-500 w-0 shadow-[0_0_10px_#FF6500]"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl"></div>
+    </main>
+
+    <footer class="no-print h-20 bg-white border-t border-brand-secondary/20 px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-brand-muted text-brand-secondary rounded-xl font-bold hover:bg-brand-secondary hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-secondary">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+        
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-xs font-black text-brand-accent uppercase tracking-widest">Tópico 1 / X</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-accent text-white rounded-xl font-bold hover:bg-brand-dark transition shadow-lg shadow-brand-accent/30">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            {
+                title: "Tipos de Dados e Chaves",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-6 bg-brand-muted rounded-full text-brand-accent mb-4">
+                            <i class="fas fa-fingerprint text-7xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 04: Estrutura Físico-Lógica</h2>
+                        <p class="text-2xl text-brand-secondary max-w-2xl mx-auto italic leading-relaxed">Como o computador entende os dados e como as tabelas conversam entre si.</p>
+                        <div class="flex justify-center gap-4 text-brand-secondary/50 text-sm mt-10">
+                            <span class="px-3 py-1 bg-white border border-brand-secondary/20 rounded shadow-sm">SETAS</span>
+                            <span class="px-3 py-1 bg-white border border-brand-secondary/20 rounded shadow-sm">ESPAÇO</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Do Desenho à Máquina",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">Na última aula, modelámos a "ideia" do dado (Entidades e Atributos). Agora, temos de dizer à máquina <strong>exatamente o que vai dentro de cada atributo</strong>.</p>
+                            <p class="text-lg">O SGBD precisa de saber de antemão se um atributo vai guardar texto, números, dinheiro ou datas. Ele não adivinha.</p>
+                        </div>
+                        <div class="bg-brand-muted rounded-3xl h-64 flex flex-col items-center justify-center border-2 border-dashed border-brand-secondary/30 text-brand-accent shadow-sm">
+                            <i class="fas fa-cogs text-6xl mb-4"></i>
+                            <span class="font-bold uppercase text-xs tracking-widest text-brand-dark">Tipagem Forte</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "1. Tipos de Dados",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl">O "Tipo de Dado" (Data Type) define a natureza do valor que uma coluna pode guardar. Isto afeta a validação, a memória ocupada e a performance.</p>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-dark text-lg mb-2"><i class="fas fa-font text-brand-accent mr-2"></i>Texto</h4>
+                                <p class="text-sm">Nomes, moradas, e-mails.</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-dark text-lg mb-2"><i class="fas fa-hashtag text-brand-accent mr-2"></i>Números</h4>
+                                <p class="text-sm">Idades, quantidades, IDs.</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-dark text-lg mb-2"><i class="fas fa-calendar-alt text-brand-accent mr-2"></i>Datas</h4>
+                                <p class="text-sm">Nascimentos, registos, vendas.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Principais Tipos Numéricos",
+                content: `
+                    <div class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl">
+                                <h4 class="text-2xl font-bold mb-4 text-brand-accent">INT (Integer)</h4>
+                                <p class="leading-relaxed">Números inteiros, sem casas decimais.</p>
+                                <p class="mt-4 text-sm font-mono opacity-80">Ex: 1, 100, 5000, -45</p>
+                                <p class="mt-2 text-xs text-brand-accent font-bold">Ideal para: IDs, Idades, Quantidades.</p>
+                            </div>
+                            <div class="p-8 bg-white border border-brand-secondary/30 rounded-3xl shadow-sm">
+                                <h4 class="text-2xl font-bold mb-4 text-brand-dark">DECIMAL / NUMERIC</h4>
+                                <p class="leading-relaxed text-brand-dark/80">Números exatos com precisão e escala (casas decimais). <code>DECIMAL(10,2)</code> significa até 10 dígitos no total, sendo 2 decimais.</p>
+                                <p class="mt-4 text-sm font-mono text-brand-secondary">Ex: 19.99, 1500.50</p>
+                                <p class="mt-2 text-xs font-bold text-brand-accent">Ideal para: Preços, Salários, Moeda.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Principais Tipos de Texto",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-8 bg-white border border-brand-secondary/30 rounded-3xl shadow-sm">
+                            <h4 class="text-2xl font-bold mb-4 text-brand-dark">VARCHAR(n)</h4>
+                            <p class="leading-relaxed text-brand-dark/80">Texto de tamanho variável. O 'n' é o limite máximo. Se definir <code>VARCHAR(50)</code> e inserir "Ana", ocupará apenas o espaço de "Ana" e libertará o resto.</p>
+                            <p class="mt-4 text-xs font-bold text-brand-accent">Ideal para: Nomes, E-mails, Moradas.</p>
+                        </div>
+                        <div class="p-8 bg-brand-muted border border-brand-secondary/20 rounded-3xl shadow-sm">
+                            <h4 class="text-2xl font-bold mb-4 text-brand-dark">CHAR(n)</h4>
+                            <p class="leading-relaxed text-brand-dark/80">Texto de tamanho fixo. Se definir <code>CHAR(2)</code> e inserir "A", o banco preencherá o resto com um espaço vazio para atingir sempre 2 caracteres.</p>
+                            <p class="mt-4 text-xs font-bold text-brand-accent">Ideal para: Siglas de Estados (PT, SP, RJ), Sexo (M, F).</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Tipos de Data e Hora",
+                content: `
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm">
+                            <h4 class="font-bold text-lg mb-2 text-brand-dark">DATE</h4>
+                            <p class="text-sm text-brand-secondary mb-4">Guarda apenas a data.</p>
+                            <code class="text-xs">YYYY-MM-DD (2024-03-25)</code>
+                        </div>
+                        <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm">
+                            <h4 class="font-bold text-lg mb-2 text-brand-dark">TIME</h4>
+                            <p class="text-sm text-brand-secondary mb-4">Guarda apenas a hora.</p>
+                            <code class="text-xs">HH:MM:SS (14:30:00)</code>
+                        </div>
+                        <div class="p-6 bg-brand-primary text-white rounded-2xl shadow-lg border-b-4 border-brand-accent">
+                            <h4 class="font-bold text-brand-accent text-lg mb-2">DATETIME</h4>
+                            <p class="text-sm opacity-90 mb-4">Data e hora juntos (muito comum).</p>
+                            <code class="text-xs bg-brand-dark text-brand-accent border-none">2024-03-25 14:30:00</code>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "2. Chave Primária (Primary Key - PK)",
+                content: `
+                    <div class="space-y-8">
+                        <div class="p-8 bg-brand-accent/10 border-l-8 border-brand-accent rounded-r-3xl">
+                            <p class="text-2xl leading-relaxed text-brand-dark">A <strong>Chave Primária</strong> é o atributo mestre de uma tabela. É a "âncora" que permite identificar de forma única e inequívoca uma tupla (registo).</p>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border border-brand-secondary/20 rounded-xl text-center shadow-sm">
+                                <i class="fas fa-fingerprint text-3xl text-brand-accent mb-4"></i>
+                                <h5 class="font-bold mb-2">Única</h5>
+                                <p class="text-xs text-brand-secondary">Não podem existir dois valores iguais na coluna.</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary/20 rounded-xl text-center shadow-sm">
+                                <i class="fas fa-ban text-3xl text-brand-accent mb-4"></i>
+                                <h5 class="font-bold mb-2">Not Null</h5>
+                                <p class="text-xs text-brand-secondary">Nunca pode ficar vazia/nula.</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary/20 rounded-xl text-center shadow-sm">
+                                <i class="fas fa-lock text-3xl text-brand-accent mb-4"></i>
+                                <h5 class="font-bold mb-2">Imutável</h5>
+                                <p class="text-xs text-brand-secondary">O seu valor não deve ser alterado ao longo do tempo.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Surrogate Keys (A Boa Prática)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark">Chaves Artificiais</h4>
+                            <p class="text-lg leading-relaxed">Na indústria, <strong>evitamos usar atributos naturais</strong> (como NIF ou Email) como Chave Primária. Em vez disso, o SGBD cria um atributo <code>id</code> do tipo <code>INT</code>.</p>
+                            <ul class="space-y-3 text-sm text-brand-secondary">
+                                <li><i class="fas fa-bolt text-brand-accent mr-2"></i> <strong>Performance:</strong> O CPU processa Inteiros mais rápido que Textos.</li>
+                                <li><i class="fas fa-shield-alt text-brand-accent mr-2"></i> <strong>Segurança contra erros:</strong> Se alguém se enganar no NIF, altera-se. O <code>id</code> é invisível ao erro humano.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-brand-primary rounded-3xl h-64 flex flex-col items-center justify-center p-6 shadow-xl border-t-4 border-brand-accent">
+                            <code class="text-xl text-brand-accent bg-transparent mb-4">id INT AUTO_INCREMENT</code>
+                            <p class="text-white text-center">O banco gera "1, 2, 3..." automaticamente.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "3. Chave Única (Unique Key)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl">Se o <code>id</code> é a PK, o que fazemos com o NIF ou com o Email que também não se podem repetir?</p>
+                            <p class="text-lg text-brand-secondary">Marcamo-los como <strong>UNIQUE</strong>.</p>
+                            <div class="p-4 bg-brand-muted border border-brand-secondary/30 rounded-lg text-sm">
+                                <p><strong>PK:</strong> Identifica a linha para a máquina (ex: <code>id: 150</code>).</p>
+                                <p class="mt-2"><strong>UNIQUE:</strong> Impede duplicações de negócio (ex: <code>Não deixar cadastrar 2 e-mails iguais</code>).</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex items-center justify-center p-4 shadow-sm border border-brand-secondary/20">
+                             <svg width="250" height="150" viewBox="0 0 250 150">
+                                <rect x="75" y="100" width="100" height="30" class="node-rect" />
+                                <text x="125" y="120" text-anchor="middle" class="node-text">ALUNO</text>
+                                
+                                <!-- PK -->
+                                <line x1="125" y1="100" x2="60" y2="40" stroke="#1E3E62" stroke-width="2" />
+                                <ellipse cx="60" cy="40" rx="30" ry="15" fill="#0B192C" stroke="#0B192C" stroke-width="2" />
+                                <text x="60" y="44" text-anchor="middle" font-size="10" fill="#ffffff" style="text-decoration: underline;">id</text>
+
+                                <!-- Unique -->
+                                <line x1="125" y1="100" x2="190" y2="40" stroke="#1E3E62" stroke-width="2" />
+                                <ellipse cx="190" cy="40" rx="35" ry="15" fill="#ffffff" stroke="#FF6500" stroke-width="2" />
+                                <text x="190" y="44" text-anchor="middle" font-size="10" fill="#000000" style="text-decoration: underline; text-decoration-style: dashed;">Email</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "4. Chave Estrangeira (Foreign Key - FK)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-brand-primary text-white rounded-3xl shadow-xl border-b-4 border-brand-accent">
+                            <h4 class="text-2xl font-bold mb-4 text-brand-accent">A Ponte entre Tabelas</h4>
+                            <p class="text-lg leading-relaxed">As bases de dados relacionais têm este nome porque as tabelas "relacionam-se". A <strong>Chave Estrangeira (FK)</strong> é um atributo numa tabela que aponta/referencia a Chave Primária (PK) de outra tabela.</p>
+                        </div>
+                        <div class="text-center text-brand-secondary italic text-lg mt-8 font-bold">
+                            "É a FK que diz que a encomenda N.º 55 pertence ao cliente com ID 12."
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Representação Visual (PK e FK)",
+                content: `
+                    <div class="flex justify-center items-center py-8">
+                        <div class="bg-white p-8 rounded-3xl shadow-lg border border-brand-secondary/20 w-full max-w-3xl overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr><th colspan="2" class="bg-brand-primary text-brand-accent p-2 rounded-t-lg">Tabela: CLIENTES</th></tr>
+                                    <tr class="bg-brand-muted"><th class="p-2 border-b border-brand-secondary/20">ID (PK)</th><th class="p-2 border-b border-brand-secondary/20">Nome</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-brand-accent/10 font-bold"><td class="p-2 border-b border-brand-secondary/10 text-brand-dark">1</td><td class="p-2 border-b border-brand-secondary/10">João Silva</td></tr>
+                                    <tr><td class="p-2 text-brand-dark">2</td><td class="p-2">Maria Lima</td></tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="flex justify-center my-4">
+                                <i class="fas fa-link text-brand-accent text-2xl"></i>
+                            </div>
+
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr><th colspan="3" class="bg-brand-dark text-brand-accent p-2 rounded-t-lg">Tabela: PEDIDOS</th></tr>
+                                    <tr class="bg-brand-muted"><th class="p-2 border-b border-brand-secondary/20">ID_Pedido (PK)</th><th class="p-2 border-b border-brand-secondary/20">Total</th><th class="p-2 border-b border-brand-secondary/20 text-brand-accent font-black">Cliente_ID (FK)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td class="p-2 border-b border-brand-secondary/10">101</td><td class="p-2 border-b border-brand-secondary/10">150.00</td><td class="p-2 border-b border-brand-secondary/10 bg-brand-accent/10 font-bold text-brand-dark text-center">1</td></tr>
+                                    <tr><td class="p-2 border-b border-brand-secondary/10">102</td><td class="p-2 border-b border-brand-secondary/10">30.00</td><td class="p-2 border-b border-brand-secondary/10 text-center">2</td></tr>
+                                    <tr><td class="p-2 border-b border-brand-secondary/10">103</td><td class="p-2 border-b border-brand-secondary/10">450.00</td><td class="p-2 border-b border-brand-secondary/10 bg-brand-accent/10 font-bold text-brand-dark text-center">1</td></tr>
+                                </tbody>
+                            </table>
+                            <p class="text-xs text-center mt-4 text-brand-secondary font-bold">Repare que o João Silva (ID 1) tem dois pedidos apontados para ele.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Resumo Técnico da Aula",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-lg">
+                            <h4 class="text-brand-accent font-bold text-xl mb-4 border-b border-brand-secondary pb-2">Tipos de Dados Frequentes</h4>
+                            <ul class="space-y-4">
+                                <li><strong class="text-white">INT:</strong> Números Inteiros.</li>
+                                <li><strong class="text-white">VARCHAR(n):</strong> Texto de tamanho variável.</li>
+                                <li><strong class="text-white">DECIMAL:</strong> Valores exatos/dinheiro.</li>
+                                <li><strong class="text-white">DATETIME:</strong> Datas e horas.</li>
+                            </ul>
+                        </div>
+                        <div class="p-8 bg-white border border-brand-secondary/20 rounded-3xl shadow-sm">
+                            <h4 class="text-brand-dark font-bold text-xl mb-4 border-b border-brand-muted pb-2">Arquitetura de Chaves</h4>
+                            <ul class="space-y-4 text-brand-secondary">
+                                <li><i class="fas fa-key text-brand-accent mr-2"></i> <strong>PK:</strong> Identifica a tupla (preferencialmente ID numérico).</li>
+                                <li><i class="fas fa-fingerprint text-brand-primary mr-2"></i> <strong>Unique:</strong> Impede duplicados de regras de negócio (NIF, E-mail).</li>
+                                <li><i class="fas fa-link text-brand-accent mr-2"></i> <strong>FK:</strong> Liga os registos de tabelas diferentes.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 1: Atribuindo Tipos",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "Analise a entidade <strong>LIVRO</strong>. Ela possui os atributos: <code>id</code>, <code>titulo</code>, <code>ano_publicacao</code>, <code>preco_venda</code> e <code>isbn</code> (que é um código único do livro no formato texto de 13 caracteres)."
+                        </div>
+                        <p class="font-bold text-brand-dark">Para cada atributo, defina o Tipo de Dado ideal e se é PK, Unique ou normal.</p>
+                        
+                        <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="no-print mt-4 px-6 py-2 bg-brand-primary text-white rounded-lg font-bold hover:bg-brand-accent transition shadow-md">
+                            <i class="fas fa-eye mr-2"></i> Ver Resposta (Prática Guiada)
+                        </button>
+                        
+                        <div class="hidden resposta-gabarito bg-brand-muted border border-brand-secondary/20 p-6 rounded-xl mt-4 animate-in slide-in-from-top-2">
+                            <ul class="space-y-2 text-sm text-brand-dark font-mono">
+                                <li>• <strong class="font-sans">id:</strong> INT (Primary Key)</li>
+                                <li>• <strong class="font-sans">titulo:</strong> VARCHAR(255)</li>
+                                <li>• <strong class="font-sans">ano_publicacao:</strong> INT</li>
+                                <li>• <strong class="font-sans">preco_venda:</strong> DECIMAL(10,2)</li>
+                                <li>• <strong class="font-sans">isbn:</strong> CHAR(13) ou VARCHAR(13) (Unique Key)</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 2: O Stand de Automóveis",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "O stand necessita de gerir os seus <strong>Veículos</strong>. Para cada veículo, precisamos de guardar o <code>id</code>, a <code>matricula</code> (placa - não pode haver repetidas), o <code>modelo</code>, a <code>marca</code>, o <code>ano_fabrico</code> e o <code>valor_compra</code>."
+                        </div>
+                        <p class="font-bold text-brand-dark">No seu caderno: Liste os atributos, defina o tipo de dado de cada um e indique as chaves (PK e Unique).</p>
+                        
+                        <div class="mt-8 p-10 border-2 border-dashed border-brand-secondary/30 rounded-2xl bg-brand-muted flex flex-col items-center justify-center text-brand-secondary/70">
+                            <i class="fas fa-car text-4xl mb-4 opacity-50"></i>
+                            <p class="italic font-bold">Resolução individual no caderno</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Prático 3: A Loja Online",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-secondary/20 rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "Observe o diagrama onde <strong>CLIENTE</strong> faz <strong>PEDIDOS</strong>. O Cliente tem (id, nome, email). O Pedido tem (id, data_pedido, total_pago)."
+                        </div>
+                        <p class="font-bold text-brand-dark">No seu caderno: Como faria a ligação entre estas duas tabelas? Crie o atributo necessário (FK) e diga em que tabela ele deve ficar.</p>
+                        
+                        <div class="mt-8 p-10 border-2 border-dashed border-brand-secondary/30 rounded-2xl bg-brand-muted flex flex-col items-center justify-center text-brand-secondary/70">
+                            <i class="fas fa-link text-4xl mb-4 opacity-50"></i>
+                            <p class="italic font-bold">Resolução individual no caderno</p>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-accent tracking-widest mb-4">Tópico ${currentStep + 1}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>' : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Base de Dados I</h1>
+                <p>Aula 04 - Tipos de Dados e Chaves</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand-accent pl-2">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

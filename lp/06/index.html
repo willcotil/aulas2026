@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 05 - Operadores Aritméticos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES ELEGANTE --- */
+        :root {
+            --color-header-bg: #222831;
+            --color-header-text: #dfd0b8;
+            --color-btn: #948979;
+            --color-btn-hover: #dfd0b8;
+            --color-btn-hover-text: #222831;
+            --color-bg: #f8f6f3;
+            --color-text: #393e46;
+            --color-accent: #948979;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        /* --- LAYOUT E SLIDES --- */
+        .slide {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 8rem); /* Altura da tela menos header e footer */
+            padding: 2rem 4rem;
+            animation: fadeIn 0.4s ease-out;
+            width: 100%;
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TIPOGRAFIA E COMPONENTES --- */
+        h1.slide-title { 
+            font-size: 3.5rem; 
+            font-weight: 800; 
+            color: var(--color-header-bg);
+            margin-bottom: 1rem;
+            text-align: center;
+            line-height: 1.1;
+        }
+        h2.slide-subtitle { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            color: var(--color-accent); 
+            margin-bottom: 2rem; 
+            text-align: center;
+            border-bottom: 4px solid var(--color-header-text);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .slide p { font-size: 1.25rem; line-height: 1.6; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e5e7eb;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- CÓDIGO --- */
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1rem auto; }
+        .copy-button {
+            position: absolute; top: 0.75rem; right: 0.75rem;
+            background-color: var(--color-header-bg); color: var(--color-header-text);
+            border: 1px solid var(--color-header-text); padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease-in-out;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--color-header-text); color: var(--color-header-bg); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+
+        pre.code-block {
+            background-color: var(--color-header-bg); color: white; padding: 1.5rem;
+            border-radius: 1rem; font-family: 'Fira Code', monospace;
+            font-size: 1.2rem; text-align: left; border-left: 5px solid var(--color-accent);
+            width: 100%; margin: 0; overflow-x: auto;
+        }
+        
+        code.inline-code {
+            background-color: #e2e8f0; padding: 0.2em 0.4em; margin: 0;
+            font-size: 85%; border-radius: 3px; font-family: 'Fira Code', monospace;
+            color: #b91c1c; font-weight: bold;
+        }
+        
+        .syn-type { color: #8be9fd; font-weight: bold; }
+        .syn-func { color: #50fa7b; font-weight: bold; }
+        .syn-str { color: #f1fa8c; }
+        .syn-num { color: #bd93f9; }
+        .syn-op { color: #ff79c6; font-weight: bold; }
+        .syn-comment { color: #6272a4; font-style: italic; }
+        .syn-inc { color: #ffb86c; }
+
+        /* --- DEPURADOR --- */
+        .debugger-container {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--color-accent);
+        }
+        .debug-code { flex: 1; font-family: 'Fira Code', monospace; font-size: 1.1rem; line-height: 1.8; background: var(--color-header-bg); color: white; padding: 1.5rem; border-radius: 8px; }
+        .debug-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.5; }
+        .debug-code .line.active { background-color: var(--color-header-text); color: var(--color-header-bg); font-weight: bold; opacity: 1; transform: scale(1.02); }
+        .memory-panel { flex: 1; display: flex; flex-direction: column; }
+        .memory-table { width: 100%; border-collapse: collapse; text-align: center; }
+        .memory-table th { background-color: var(--color-bg); padding: 0.75rem; border-bottom: 2px solid var(--color-accent); font-family: 'Poppins', sans-serif; }
+        .memory-table td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-family: 'Fira Code', monospace; font-size: 1.2rem; }
+        .memory-table .val-changed { color: #16a34a; font-weight: bold; animation: pop 0.5s; }
+        @keyframes pop { 50% { transform: scale(1.2); } }
+
+        /* --- IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body { background-color: #ffffff; padding: 0 !important; margin: 0 !important; color: black; }
+            header, footer, .copy-button { display: none !important; }
+            main { padding: 0 !important; margin: 0 !important; background-color: #ffffff !important; height: auto !important; overflow: visible !important; }
+            .slide {
+                display: flex !important; /* Força a exibição de todos */
+                min-height: auto !important;
+                page-break-after: always;
+                padding: 1.5cm !important;
+                align-items: flex-start !important;
+                border: none !important;
+            }
+            .slide:last-child { page-break-after: avoid; }
+            .card { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; }
+            pre.code-block, .debug-code { background-color: #f5f5f5 !important; color: #000 !important; border: 1px solid #000; page-break-inside: avoid; }
+            .syn-type, .syn-func, .syn-str, .syn-num, .syn-op, .syn-comment, .syn-inc { color: #000 !important; }
+            .debug-code .line { opacity: 1 !important; color: black !important; background: none !important; }
+            h1.slide-title, h2.slide-subtitle, p, li { text-align: left; color: black !important; max-width: 100%; }
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- HEADER FIXO -->
+    <header class="h-16 flex items-center justify-between px-6 shrink-0 z-50 shadow-md" style="background-color: var(--color-header-bg);">
+        <h1 class="font-bold text-lg md:text-xl tracking-widest uppercase" style="color: var(--color-header-text);">Lógica de Programação</h1>
+        <button onclick="window.print()" class="px-4 py-2 rounded text-sm font-bold transition-colors flex items-center gap-2 shadow-sm" style="background-color: var(--color-btn); color: white;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/><path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></svg>
+            GERAR APOSTILA
+        </button>
+    </header>
+
+    <!-- MAIN CONTENT (SLIDES) -->
+    <main class="flex-1 overflow-y-auto relative scroll-smooth w-full flex flex-col items-center" id="main-container">
+        
+        <!-- Slide 1: Capa -->
+        <section class="slide active">
+            <h1 class="slide-title">Operadores Aritméticos</h1>
+            <h2 class="slide-subtitle border-none">A Matemática do Computador</h2>
+            
+            <div class="card mt-8 p-8 flex flex-col items-center max-w-2xl border-t-8" style="border-top-color: var(--color-accent);">
+                <div style="font-size: 5rem;">➕ ➖ ✖️ ➗ </div>
+                <p class="mt-4 font-bold text-xl text-center w-full">Hoje vamos transformar o computador numa calculadora muito poderosa!</p>
+            </div>
+            
+            <p class="mt-12 font-bold" style="color: var(--color-header-bg);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: Comando de Atribuição -->
+        <section class="slide">
+            <h2 class="slide-subtitle">O Comando de Atribuição (=)</h2>
+            <p>Na matemática, o sinal de igual (<code class="inline-code">=</code>) significa que os dois lados têm o mesmo valor. Na linguagem C, o igual significa <strong>"RECEBE"</strong>.</p>
+            
+            <div class="card w-full max-w-4xl bg-white mt-6">
+                <p class="font-bold text-center text-xl mb-4" style="color: #b91c1c;">A Regra de Ouro da Atribuição:</p>
+                <p class="text-center text-lg italic text-gray-600 mb-6">"O computador resolve TUDO o que está à <strong>DIREITA</strong> primeiro, e só no final guarda o resultado na variável que está à <strong>ESQUERDA</strong>."</p>
+                
+                <div class="code-block-wrapper">
+                    <button class="copy-button"><span>Copiar</span></button>
+                    <pre class="code-block">
+<div class="line"><span class="syn-type">int</span> pontos = <span class="syn-num">10</span>;</div>
+<div class="line"><span class="syn-comment">// Em matemática, a linha abaixo seria impossível.</span></div>
+<div class="line"><span class="syn-comment">// Em C, ela significa: "Pegue os pontos atuais (10),</span></div>
+<div class="line"><span class="syn-comment">// some 5, e guarde o resultado (15) de volta na caixa pontos".</span></div>
+<div class="line">pontos = pontos <span class="syn-op">+</span> <span class="syn-num">5</span>;</div></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Operadores Básicos -->
+        <section class="slide">
+            <h2 class="slide-subtitle">Operadores Básicos</h2>
+            <p>Os três primeiros operadores são exatamente iguais aos que aprendemos na escola.</p>
+            
+            <table class="w-full max-w-4xl mt-6 border-collapse bg-white shadow-sm rounded-lg overflow-hidden">
+                <thead style="background-color: var(--color-header-bg); color: white;">
+                    <tr>
+                        <th class="p-4 text-center">Símbolo</th>
+                        <th class="p-4 text-left">Operação</th>
+                        <th class="p-4 text-left">Exemplo no Código</th>
+                    </tr>
+                </thead>
+                <tbody class="text-lg">
+                    <tr class="border-b">
+                        <td class="p-4 text-center font-mono font-bold text-2xl text-blue-600">+</td>
+                        <td class="p-4">Adição</td>
+                        <td class="p-4 font-mono"><code>soma = a + b;</code></td>
+                    </tr>
+                    <tr class="border-b bg-gray-50">
+                        <td class="p-4 text-center font-mono font-bold text-2xl text-red-600">-</td>
+                        <td class="p-4">Subtração</td>
+                        <td class="p-4 font-mono"><code>sub = 10 - 4;</code></td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 text-center font-mono font-bold text-2xl text-green-600">*</td>
+                        <td class="p-4">Multiplicação</td>
+                        <td class="p-4 font-mono"><code>mult = 4 * 5;</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="mt-6 text-sm text-gray-500">Nota: O asterisco (<code>*</code>) substitui o clássico "x" ou "·" para evitar confusão com letras.</p>
+        </section>
+
+        <!-- Slide 4: A Pegadinha da Divisão -->
+        <section class="slide">
+            <h2 class="slide-subtitle">A Pegadinha da Divisão ( / )</h2>
+            <p>A barra (<code>/</code>) faz a divisão, mas a linguagem C tem uma regra muito estrita sobre os tipos de dados que estão a ser divididos.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card border-l-8" style="border-left-color: #ef4444;">
+                    <h3 class="font-bold text-xl mb-4 text-red-700">Divisão de Inteiros</h3>
+                    <p class="text-sm mb-4">Se você divide dois <code>int</code>, o C <strong>corta</strong> as casas decimais. Ele não arredonda, ele simplesmente joga a vírgula fora!</p>
+                    <div class="bg-gray-100 p-4 rounded font-mono text-center text-lg">
+                        10 / 4 <span class="font-bold text-red-600">-> Resultado: 2</span>
+                    </div>
+                </div>
+                <div class="card border-l-8" style="border-left-color: #10b981;">
+                    <h3 class="font-bold text-xl mb-4 text-green-700">Divisão Real</h3>
+                    <p class="text-sm mb-4">Para obter um resultado decimal, pelo menos um dos números na conta <strong>precisa ser do tipo float ou double</strong> (ter ponto).</p>
+                    <div class="bg-gray-100 p-4 rounded font-mono text-center text-lg">
+                        10.0 / 4.0 <span class="font-bold text-green-600">-> Resultado: 2.5</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: O Operador Módulo -->
+        <section class="slide">
+            <h2 class="slide-subtitle">A Estrela da Aula: O Módulo ( % )</h2>
+            <p>O símbolo <code>%</code> não significa percentagem em programação! Ele significa <strong>"O RESTO DA DIVISÃO INTEIRA"</strong>.</p>
+            
+            <div class="card w-full max-w-4xl mt-6">
+                <div class="flex items-center justify-around">
+                    <div class="text-center w-1/3">
+                        <p class="text-2xl font-mono bg-gray-100 p-4 rounded text-gray-700 border border-gray-300">10 / 3</p>
+                        <p class="mt-4 font-bold text-lg text-gray-700">A divisão dá 3</p>
+                        <p class="text-sm text-gray-500">(Pois 3 x 3 = 9)</p>
+                    </div>
+                    <div class="text-5xl text-gray-300">🤔</div>
+                    <div class="text-center w-1/3">
+                        <p class="text-2xl font-mono p-4 rounded border-4 font-bold" style="background: var(--color-header-bg); color: var(--color-header-text); border-color: var(--color-accent);">10 % 3</p>
+                        <p class="mt-4 font-bold text-2xl text-blue-600">O Resto é 1</p>
+                        <p class="text-sm text-gray-500">(10 menos 9 = 1)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="mt-8 font-bold text-red-600">CUIDADO MÁXIMO: O operador Módulo (<code>%</code>) SÓ FUNCIONA com variáveis do tipo inteiro (<code>int</code>).</p>
+        </section>
+
+        <!-- Slide 6: Utilidades do Módulo -->
+        <section class="slide">
+            <h2 class="slide-subtitle">Para que serve o Módulo?</h2>
+            <p>Saber o que sobra de uma divisão é um dos truques mais usados na programação lógica.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl mt-6">
+                <div class="card bg-blue-50 border-blue-200">
+                    <h3 class="font-bold text-blue-800 text-lg mb-2">1. Descobrir se é PAR ou ÍMPAR</h3>
+                    <p class="text-sm mb-4">Qualquer número par dividido por 2 não tem resto (sobra 0). Se sobrar 1, é ímpar!</p>
+                    <code class="block bg-white p-2 border rounded font-mono text-sm text-center">
+                        se (numero % 2 == 0) -> PAR
+                    </code>
+                </div>
+                <div class="card bg-green-50 border-green-200">
+                    <h3 class="font-bold text-green-800 text-lg mb-2">2. Encontrar Múltiplos</h3>
+                    <p class="text-sm mb-4">Para saber se um número é divisível por outro (ex: anos bissextos são divisíveis por 4).</p>
+                    <code class="block bg-white p-2 border rounded font-mono text-sm text-center">
+                        se (ano % 4 == 0) -> BISSEXTO
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Precedência -->
+        <section class="slide">
+            <h2 class="slide-subtitle">A Ordem de Precedência</h2>
+            <p>O computador não lê a matemática de forma cega. Ele resolve primeiro os operadores mais "fortes".</p>
+            
+            <div class="flex flex-col gap-4 w-full max-w-4xl mt-6">
+                <div class="p-4 bg-white border-l-8 border-gray-800 shadow flex items-center gap-6">
+                    <div class="text-3xl font-bold font-mono">1º</div>
+                    <div class="text-2xl font-mono bg-gray-100 px-4 py-1 rounded">( )</div>
+                    <p class="text-lg">Parênteses (A força suprema para quebrar as regras)</p>
+                </div>
+                <div class="p-4 bg-white border-l-8 shadow flex items-center gap-6" style="border-color: var(--color-btn);">
+                    <div class="text-3xl font-bold font-mono">2º</div>
+                    <div class="text-2xl font-mono bg-gray-100 px-4 py-1 rounded">* / %</div>
+                    <p class="text-lg">Multiplicação, Divisão e Módulo (Da esquerda para a direita)</p>
+                </div>
+                <div class="p-4 bg-white border-l-8 border-gray-300 shadow flex items-center gap-6">
+                    <div class="text-3xl font-bold font-mono text-gray-500">3º</div>
+                    <div class="text-2xl font-mono bg-gray-100 px-4 py-1 rounded">+ -</div>
+                    <p class="text-lg text-gray-600">Adição e Subtração</p>
+                </div>
+            </div>
+            <p class="mt-8 text-xl font-mono">Ex: <code>5 + 3 * 2</code> resulta em <strong>11</strong>, e não 16!</p>
+        </section>
+
+        <!-- Slide 8: Atribuição Composta (Bônus) -->
+        <section class="slide">
+            <h2 class="slide-subtitle">Bônus: Atribuições Compostas</h2>
+            <p>Programadores são preguiçosos e gostam de digitar menos. O C oferece atalhos para atualizar o valor de uma variável usando a própria variável.</p>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card text-center">
+                    <p class="font-bold text-gray-500 mb-2">Em vez de escrever:</p>
+                    <code class="text-xl font-mono bg-gray-100 p-2 rounded">x = x + 5;</code>
+                </div>
+                <div class="card text-center border-2" style="border-color: var(--color-header-bg);">
+                    <p class="font-bold mb-2" style="color: var(--color-btn);">Você pode escrever:</p>
+                    <code class="text-xl font-mono p-2 rounded text-white" style="background-color: var(--color-header-bg);">x += 5;</code>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-left w-full max-w-4xl bg-yellow-50 p-6 border-l-4 border-yellow-400 rounded">
+                <p class="font-bold text-yellow-800 mb-2">O Atalho Supremo de +1 e -1:</p>
+                <p class="text-lg">Para somar exatamente 1, use: <code class="font-mono font-bold bg-white px-2 py-1 rounded">x++;</code></p>
+                <p class="text-lg mt-2">Para subtrair exatamente 1, use: <code class="font-mono font-bold bg-white px-2 py-1 rounded">x--;</code></p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Depurador Interativo -->
+        <section class="slide" id="slide-debug" data-interactive="true">
+            <h2 class="slide-subtitle">Depurador: Vendo a Matemática Acontecer</h2>
+            <p class="text-gray-500 mb-4">(Use a <strong>Seta →</strong> do teclado para simular o processador resolvendo as linhas)</p>
+            
+            <div class="debugger-container">
+                <div class="debug-code" id="debug-code">
+                    <div class="line" data-step="1"><span class="syn-type">int</span> a = <span class="syn-num">15</span>;</div>
+                    <div class="line" data-step="2"><span class="syn-type">int</span> b = <span class="syn-num">4</span>;</div>
+                    <div class="line mt-4" data-step="3"><span class="syn-type">int</span> div = a <span class="syn-op">/</span> b;</div>
+                    <div class="line" data-step="4"><span class="syn-type">int</span> resto = a <span class="syn-op">%</span> b;</div>
+                    <div class="line mt-4" data-step="5">a<span class="syn-op">++</span>; <span class="syn-comment">// a = a + 1</span></div>
+                    <div class="line" data-step="6">b <span class="syn-op">+=</span> <span class="syn-num">2</span>; <span class="syn-comment">// b = b + 2</span></div>
+                </div>
+                
+                <div class="memory-panel">
+                    <table class="memory-table">
+                        <thead>
+                            <tr>
+                                <th>Variável</th>
+                                <th>Valor</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mem-tbody">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Exemplo Completo -->
+        <section class="slide">
+            <h2 class="slide-subtitle">O Código Completo: Calculadora</h2>
+            <p>Veja como tudo funciona junto. O programa abaixo lê dois números e calcula tudo de uma vez.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button"><span>Copiar</span></button>
+                <pre class="code-block" style="max-height: 450px;">
+<div class="line"><span class="syn-inc">#include &lt;stdio.h&gt;</span></div>
+<div class="line"><span class="syn-type">int</span> <span class="syn-func">main</span>() {</div>
+<div class="line">    <span class="syn-type">int</span> n1, n2;</div>
+<div class="line">    <span class="syn-func">printf</span>(<span class="syn-str">"Digite o valor de N1: "</span>);</div>
+<div class="line">    <span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &n1);</div>
+<div class="line">    <span class="syn-func">printf</span>(<span class="syn-str">"Digite o valor de N2: "</span>);</div>
+<div class="line">    <span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &n2);</div>
+<div class="line"></div>
+<div class="line">    <span class="syn-comment">// Fazendo os cálculos</span></div>
+<div class="line">    <span class="syn-type">int</span> soma = n1 <span class="syn-op">+</span> n2;</div>
+<div class="line">    <span class="syn-type">int</span> sub = n1 <span class="syn-op">-</span> n2;</div>
+<div class="line">    <span class="syn-type">int</span> mult = n1 <span class="syn-op">*</span> n2;</div>
+<div class="line">    <span class="syn-type">int</span> divInteira = n1 <span class="syn-op">/</span> n2;</div>
+<div class="line">    <span class="syn-type">int</span> resto = n1 <span class="syn-op">%</span> n2;</div>
+<div class="line"></div>
+<div class="line">    <span class="syn-func">printf</span>(<span class="syn-str">"\n--- Resultados ---\n"</span>);</div>
+<div class="line">    <span class="syn-func">printf</span>(<span class="syn-str">"Soma: %d\n"</span>, soma);</div>
+<div class="line">    <span class="syn-func">printf</span>(<span class="syn-str">"Divisao Inteira: %d\n"</span>, divInteira);</div>
+<div class="line">    <span class="syn-func">printf</span>(<span class="syn-str">"Resto (Modulo): %d\n"</span>, resto);</div>
+<div class="line"></div>
+<div class="line">    <span class="syn-kw">return</span> <span class="syn-num">0</span>;</div>
+<div class="line">}</div></pre>
+            </div>
+        </section>
+
+        <!-- Slide 11: Hora de Praticar -->
+        <section class="slide" style="background-color: var(--color-header-bg); border: none;">
+            <h1 class="slide-title" style="color: var(--color-header-text);">Hora de Praticar!</h1>
+            <p class="text-white opacity-90">5 Exercícios para fixar Operadores e Expressões.</p>
+            
+            <div class="mt-8 p-6 card w-full max-w-4xl text-left bg-white border-l-8" style="border-color: var(--color-accent);">
+                <p class="font-bold mb-4 text-xl" style="color: var(--color-header-bg);">Instruções para a Lista:</p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li>1. Crie os arquivos de texto para teoria (ex: <code>ex1.txt</code>) e os arquivos C (ex: <code>ex4.c</code>) na sua pasta da aula de hoje.</li>
+                    <li>2. Lembre-se: O Módulo (<code>%</code>) só funciona com tipo <code>int</code>!</li>
+                    <li>3. Compile pelo terminal para ter certeza de que não há erros de sintaxe (<code>gcc arquivo.c -o programa</code>).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 12: Exercícios -->
+        <section class="slide items-start text-left">
+            <h2 class="slide-subtitle">Exercícios</h2>
+            <div class="w-full max-w-5xl space-y-6">
+                
+                <div class="card p-6 border-l-8" style="border-color: var(--color-accent);">
+                    <h3 class="font-bold text-xl mb-2" style="color: var(--color-header-bg);">1. Teste de Mesa (Mental)</h3>
+                    <p class="text-sm mb-2">Qual será o valor impresso no final? (Anote o passo a passo no seu arquivo de resposta).</p>
+                    <code class="block bg-gray-100 p-2 text-sm text-black">
+                        int x = 10;<br>
+                        int y = x % 3;<br>
+                        x += y;<br>
+                        printf("X = %d", x);
+                    </code>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-accent);">
+                    <h3 class="font-bold text-xl mb-2" style="color: var(--color-header-bg);">2. Divisão Quebrada</h3>
+                    <p class="text-sm">Um programador escreveu <code>float media = 15 / 2;</code> e ficou confuso porque o resultado impresso foi <code>7.000000</code> em vez de <code>7.5</code>. Explique, com base na aula, por que isso aconteceu e como consertar a linha de código.</p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-header-bg); background-color: white;">
+                    <h3 class="font-bold text-xl mb-2" style="color: var(--color-header-bg);">3. Média Ponderada (Código)</h3>
+                    <p class="text-sm mb-2">Crie um programa em C que calcule a média ponderada de duas notas. Peça ao usuário a <code>nota1</code> (peso 2) e a <code>nota2</code> (peso 3). <br> A fórmula matemática é: <strong>Média = (nota1 * 2 + nota2 * 3) / 5.0</strong>. Exiba a média final.</p>
+                </div>
+
+                <div class="card p-6 border-l-8" style="border-color: var(--color-header-bg); background-color: white;">
+                    <h3 class="font-bold text-xl mb-2" style="color: var(--color-header-bg);">4. A Caçamba de Maçãs (Código)</h3>
+                    <p class="text-sm">Uma fazenda embala maçãs em caixas que cabem exatamente 12 unidades. Crie um programa que pergunte ao usuário o número total de maçãs colhidas. O programa deve calcular e exibir: <br>a) Quantas caixas completas foram formadas. (Dica: Divisão inteira)<br>b) Quantas maçãs sobraram fora da caixa. (Dica: Módulo)</p>
+                </div>
+
+                 <div class="card p-6 border-l-8 border-t-4" style="border-left-color: #f59e0b; border-top-color: #f59e0b; background: #fffbeb;">
+                    <h3 class="font-bold text-xl text-amber-700 mb-2">5. Desafio: Inversor de Dois Dígitos</h3>
+                    <p class="text-sm">Crie um programa que pede ao usuário um número inteiro de exatamente dois dígitos (ex: 74). O programa deve separar o número na dezena (7) e unidade (4) usando divisão inteira por 10 e módulo de 10. Por fim, exiba o número invertido (ex: 47).</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER NAV -->
+    <footer class="h-16 bg-white border-t border-gray-200 flex items-center justify-between px-6 shrink-0 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] relative">
+        <button id="prevBtn" class="px-4 md:px-6 py-2 bg-gray-200 text-gray-700 font-bold rounded hover:bg-gray-300 transition-colors uppercase text-sm md:text-base cursor-pointer">Anterior</button>
+        <span id="counter" class="text-gray-500 font-semibold tracking-widest text-sm md:text-base uppercase absolute left-1/2 transform -translate-x-1/2">Tópico 1 / 12</span>
+        <button id="nextBtn" class="px-4 md:px-6 py-2 font-bold rounded transition-colors uppercase text-sm md:text-base cursor-pointer" style="background-color: var(--color-header-bg); color: var(--color-header-text);">Próximo</button>
+    </footer>
+
+    <script>
+        // --- CÓPIA DE CÓDIGO (PRESERVANDO ESPAÇOS E LINHAS) ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('pre');
+                
+                let codeText = '';
+                const lines = codeEl.querySelectorAll('.line');
+                
+                if (lines.length > 0) {
+                    lines.forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+                } else {
+                    codeText = codeEl.innerText;
+                }
+
+                // Limpa o &nbsp; para espaços normais garantindo que compile no C
+                codeText = codeText.replace(/\u00A0/g, ' ');
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    const originalText = span.textContent;
+                    span.textContent = 'Copiado!';
+                    setTimeout(() => { span.textContent = originalText; }, 2000);
+                }).catch(err => console.error("Falha ao copiar: ", err));
+            });
+        });
+
+        // --- CONTROLE DE SLIDES ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const counterElement = document.getElementById('counter');
+        const mainContainer = document.getElementById('main-container');
+        let currentSlide = 0;
+
+        function updateCounter() {
+            if (counterElement) {
+                counterElement.textContent = `Tópico ${currentSlide + 1} / ${slides.length}`;
+            }
+            
+            // Controle de estado dos botões
+            if (currentSlide === 0) {
+                prevBtn.style.opacity = '0.5';
+                prevBtn.style.pointerEvents = 'none';
+            } else {
+                prevBtn.style.opacity = '1';
+                prevBtn.style.pointerEvents = 'auto';
+            }
+            
+            if (currentSlide === slides.length - 1) {
+                nextBtn.style.opacity = '0.5';
+                nextBtn.style.pointerEvents = 'none';
+            } else {
+                nextBtn.style.opacity = '1';
+                nextBtn.style.pointerEvents = 'auto';
+            }
+        }
+
+        function showSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                slides.forEach((s, i) => {
+                    s.classList.remove('active');
+                });
+                slides[index].classList.add('active');
+                currentSlide = index;
+                mainContainer.scrollTop = 0; // Reseta o scroll para o topo do slide
+                updateCounter();
+
+                // Dispara resets de debuggers se entrar no slide deles
+                if(slides[index].id === 'slide-debug') {
+                    currentDebugStep = 0;
+                    updateDebugger();
+                }
+            }
+        }
+
+        function nextSlide() {
+            // Intercepta a navegação se o depurador não terminou
+            if (slides[currentSlide].id === 'slide-debug') {
+                if (currentDebugStep < debugSteps.length - 1) {
+                    currentDebugStep++;
+                    updateDebugger();
+                    return; // Retorna cedo para não mudar o slide
+                }
+            }
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (slides[currentSlide].id === 'slide-debug') {
+                if (currentDebugStep > 0) {
+                    currentDebugStep--;
+                    updateDebugger();
+                    return;
+                }
+            }
+            showSlide(currentSlide - 1);
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // --- DEPURADOR MATEMÁTICO ---
+        const debugSteps = [
+            { line: 0, mem: [], msg: "Aguardando..." },
+            { line: 1, mem: [{name: 'a', val: '15', note: 'Criou gaveta', changed: true}] },
+            { line: 2, mem: [{name: 'a', val: '15', note: ''}, {name: 'b', val: '4', note: 'Criou gaveta', changed: true}] },
+            { line: 3, mem: [{name: 'a', val: '15', note: ''}, {name: 'b', val: '4', note: ''}, {name: 'div', val: '3', note: '15/4 = 3 (Int corta a vírgula!)', changed: true}] },
+            { line: 4, mem: [{name: 'a', val: '15', note: ''}, {name: 'b', val: '4', note: ''}, {name: 'div', val: '3', note: ''}, {name: 'resto', val: '3', note: '15 - (3*4) = 3', changed: true}] },
+            { line: 5, mem: [{name: 'a', val: '16', note: 'Atualizou valor! (+1)', changed: true}, {name: 'b', val: '4', note: ''}, {name: 'div', val: '3', note: ''}, {name: 'resto', val: '3', note: ''}] },
+            { line: 6, mem: [{name: 'a', val: '16', note: ''}, {name: 'b', val: '6', note: 'Atualizou valor! (+2)', changed: true}, {name: 'div', val: '3', note: ''}, {name: 'resto', val: '3', note: ''}] }
+        ];
+
+        let currentDebugStep = 0;
+
+        function updateDebugger() {
+            const step = debugSteps[currentDebugStep];
+            
+            // 1. Atualizar Linhas de Código
+            document.querySelectorAll('#debug-code .line').forEach(el => {
+                el.classList.remove('active');
+                if (parseInt(el.dataset.step) === step.line) {
+                    el.classList.add('active');
+                }
+            });
+
+            // 2. Renderizar Memória
+            const tbody = document.getElementById('mem-tbody');
+            tbody.innerHTML = ''; // Limpa
+
+            if (step.mem.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-gray-400 italic">Memória vazia</td></tr>`;
+                return;
+            }
+
+            step.mem.forEach(item => {
+                const tr = document.createElement('tr');
+                const valClass = item.changed ? 'val-changed' : '';
+                tr.innerHTML = `
+                    <td class="font-bold">${item.name}</td>
+                    <td class="${valClass}">${item.val}</td>
+                    <td class="text-sm text-gray-500 font-sans">${item.note}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Inicializa o estado
+        updateCounter();
+        showSlide(0);
+
+    </script>
+</body>
+</html>

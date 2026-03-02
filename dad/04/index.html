@@ -231,6 +231,9 @@
     <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
         <i class="fa-solid fa-expand"></i>
     </button>
+    <button class="btn" onclick="goToExercises()" title="Ir para os Exercícios">
+        <i class="fa-solid fa-clipboard-list"></i>
+    </button>
     <button class="btn" onclick="prevSlide()" title="Anterior (←)">
         <i class="fa-solid fa-arrow-left"></i>
     </button>
@@ -575,19 +578,15 @@ const produtos = [
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">18</div>
-            <h2>Lista de Exercícios (O Pesadelo do JS)</h2>
+            <h2>Lista de Exercícios (Visual e Prática)</h2>
+            <p style="margin-bottom: 20px;">Crie um ficheiro <code>index.html</code> e um <code>script.js</code>. Resolva os exercícios fazendo os resultados aparecerem <strong>na tela do navegador</strong>, e não apenas no console!</p>
             <div class="final-list">
                 <ol>
-                    <li>Crie um array de palavras. Use <code>map()</code> para retornar um novo array com todas as palavras em maiúsculas (use <code>toUpperCase()</code>).</li>
-                    <li>Dado <code>[1, 2, 3, 4, 5, 6]</code>, use <code>filter()</code> para criar um array só de números ímpares.</li>
-                    <li>Crie um array de objetos <code>pessoas = [{nome: "A", idade: 15}, {nome: "B", idade: 20}]</code>. Primeiro, use <code>filter()</code> para criar uma lista <code>adultos</code>. Depois, use <code>map()</code> na lista <code>adultos</code> para criar um array apenas com os <strong>nomes</strong> deles.</li>
-                    <li>Dado <code>const notas = [6.5, 7.0, 5.5, 8.5]</code>, use <code>map()</code> para somar 1 ponto em todas as notas. Se a nota nova passar de 10, deixe como 10 (use operador ternário dentro do map).</li>
-                    <li>Crie um array de nomes (alguns repetidos). Crie um novo array com <code>filter()</code> pegando apenas os nomes que começam com a letra "A" (dica: verifique o índice 0 da string).</li>
-                    <li>Crie uma lista de produtos (nome, preco). Primeiro, faça um <code>filter</code> para pegar os produtos de luxo (> R$1000). Salve numa variável. Depois, aplique <code>map</code> para criar uma string formatada: "O [nome] é artigo de luxo!".</li>
-                    <li>Escreva uma função que recebe um array de números e usa <code>filter</code> para retornar todos que são divisíveis por 3 e por 5 ao mesmo tempo.</li>
-                    <li>Dado um array de strings com lixo: <code>["olá", "", "teste", null, "fim", undefined]</code>. Use <code>filter</code> para limpar tudo que é <em>Falsy</em>, deixando apenas strings válidas.</li>
-                    <li>Dado <code>[{nome: "João", notas: [8,7]}, {nome: "Ana", notas: [10,9]}]</code>. Use <code>map</code> para transformar neste objeto: <code>{nome: "João", media: 7.5}</code>.</li>
-                    <li><strong>Boss Final:</strong> Você tem <code>carrinho = [{nome: "A", qtd: 2, preco: 10}, {nome: "B", qtd: 1, preco: 30}]</code>. Use <code>map()</code> para calcular o subtotal de cada item (qtd * preco). Salve esse novo array e, usando o <code>forEach()</code>, some todos os subtotais para achar o total final da compra.</li>
+                    <li><strong>Gerador de Cards (Objetos):</strong> Crie um objeto <code>filme = {titulo: "Matrix", diretor: "Wachowski", ano: 1999}</code>. Use JS (<code>document.createElement</code>) para criar um <code>div</code> na tela que exiba essas informações formatadas.</li>
+                    <li><strong>Lista Dinâmica (forEach):</strong> Crie um array <code>compras = ["Maçã", "Pão", "Leite"]</code>. Crie uma <code>&lt;ul&gt;</code> vazia no HTML. Use <code>forEach()</code> para percorrer o array, criar um <code>&lt;li&gt;</code> para cada item e adicioná-lo à lista na tela.</li>
+                    <li><strong>O Dobrador (Map):</strong> Crie um array <code>numeros = [2, 4, 6, 8]</code>. Use <code>map()</code> para gerar um novo array contendo o dobro de cada número. Exiba o array original numa cor e o novo array noutra cor na tela.</li>
+                    <li><strong>Filtro de Preços (Filter):</strong> Crie um array de objetos <code>produtos = [{nome: "Mouse", preco: 50}, {nome: "Monitor", preco: 800}, {nome: "Cabo", preco: 20}]</code>. Crie um botão "Mostrar Promoções". Ao clicar, use <code>filter()</code> para pegar nos produtos &lt; R$100 e exiba-os na tela.</li>
+                    <li><strong>Mini E-commerce (Boss Final):</strong> Dado um <code>carrinho = [{item: "Livro", qtd: 2, valor: 30}, {item: "Caneta", qtd: 5, valor: 2}]</code>. Use <code>map()</code> para calcular o subtotal de cada item (qtd * valor). Exiba uma lista na tela com "Item - Subtotal" e, no final, adicione um elemento com o Valor Total da compra.</li>
                 </ol>
             </div>
         </div>
@@ -616,6 +615,7 @@ const produtos = [
 
     function nextSlide() { showSlide(currentSlide + 1); }
     function prevSlide() { showSlide(currentSlide - 1); }
+    function goToExercises() { showSlide(totalSlides - 1); }
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();

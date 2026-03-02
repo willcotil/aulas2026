@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI_II - Aula 01: Git e GitHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#000000',     // Pure Black
+                            dark: '#0B192C',      // Very Dark Navy
+                            secondary: '#1E3E62', // Medium Dark Blue
+                            accent: '#FF6500',    // Vibrant Orange
+                            light: '#ffffff',     // White
+                            muted: '#f8fafc',     // Off-white for subtle backgrounds
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Fundo principal sempre branco */
+            color: #000000; /* brand-black */
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { 
+                display: block !important; 
+                page-break-after: auto; 
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .print-break { page-break-after: always; }
+            .resposta-gabarito { display: block !important; }
+        }
+
+        /* SVG Styles */
+        .node-rect { fill: #ffffff; stroke: #1E3E62; stroke-width: 2; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #0B192C; }
+        .edge { stroke: #1E3E62; stroke-width: 2; fill: none; }
+        
+        code { font-family: 'JetBrains Mono', monospace; background: #0B192C; padding: 2px 6px; border-radius: 4px; color: #FF6500; font-size: 0.9em; font-weight: bold;}
+        .cmd { color: #38bdf8; } /* Cor específica para os comandos no terminal */
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1E3E62; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #FF6500; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <header class="no-print h-16 bg-white text-brand-dark border-b border-brand-secondary/20 px-6 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3 z-10">
+            <div class="bg-brand-accent text-white p-2 rounded-lg">
+                <i class="fab fa-git-alt text-sm"></i>
+            </div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">Projeto Integrador II <span class="text-brand-accent">Versionamento</span></h1>
+        </div>
+        
+        <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none hidden md:flex">
+            <a href="https://willcotil.github.io/aulas2026/" target="_blank" class="pointer-events-auto text-brand-secondary hover:text-brand-accent font-extrabold text-lg transition tracking-wide">
+                willcotil.github.io/aulas2026
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-muted hover:bg-brand-secondary hover:text-white rounded-lg text-brand-secondary text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-secondary hover:text-brand-accent transition">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="no-print h-1.5 w-full bg-brand-muted overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-accent transition-all duration-500 w-0 shadow-[0_0_10px_#FF6500]"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl"></div>
+    </main>
+
+    <footer class="no-print h-20 bg-white border-t border-brand-secondary/20 px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-brand-muted text-brand-secondary rounded-xl font-bold hover:bg-brand-secondary hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-secondary">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+        
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-xs font-black text-brand-accent uppercase tracking-widest">Tópico 1 / X</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-accent text-white rounded-xl font-bold hover:bg-brand-dark transition shadow-lg shadow-brand-accent/30">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            {
+                title: "Introdução ao Versionamento",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-6 bg-brand-muted rounded-full text-brand-accent mb-4">
+                            <i class="fab fa-git-alt text-7xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 01: Git & GitHub</h2>
+                        <p class="text-2xl text-brand-secondary max-w-2xl mx-auto italic leading-relaxed">A Oficina, as Cápsulas e o Armazém Central.</p>
+                        <div class="flex justify-center gap-4 text-brand-secondary/50 text-sm mt-10">
+                            <span class="px-3 py-1 bg-white border border-brand-secondary/20 rounded shadow-sm">SETAS</span>
+                            <span class="px-3 py-1 bg-white border border-brand-secondary/20 rounded shadow-sm">ESPAÇO</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "O Problema",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">Trabalhar com código sem controle de versão é como <strong>construir um motor de carro na sala de estar</strong>.</p>
+                            <ul class="space-y-3 text-lg text-brand-secondary">
+                                <li><i class="fas fa-times-circle text-brand-accent mr-2"></i> Peças ficam espalhadas.</li>
+                                <li><i class="fas fa-times-circle text-brand-accent mr-2"></i> Você perde arquivos importantes.</li>
+                                <li><i class="fas fa-times-circle text-brand-accent mr-2"></i> Se alguém tropeçar (um bug), o trabalho de semanas é destruído.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-red-50 rounded-3xl h-64 flex flex-col items-center justify-center border-2 border-dashed border-red-300 text-red-500 shadow-sm p-6">
+                            <i class="fas fa-folder-open text-6xl mb-4 opacity-50"></i>
+                            <div class="font-mono text-sm space-y-2 text-center">
+                                <p>projeto_final_v2.zip</p>
+                                <p>projeto_final_agoraVai.zip</p>
+                                <p class="font-bold">projeto_final_definitivo_v3_mesmo.zip</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "1. git init (Inaugurando a Oficina)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark">A Mágica Inicial</h4>
+                            <p class="text-lg leading-relaxed">O comando <code>git init</code> transforma uma pasta comum do seu computador em um <strong>Repositório Git</strong> (a nossa oficina profissional).</p>
+                            <p class="text-lg text-brand-secondary">Ele cria uma pasta oculta chamada <code>.git</code>. É lá dentro que ele vai guardar todo o histórico do seu projeto, como uma caixa-preta de avião.</p>
+                            
+                            <div class="p-4 bg-brand-muted border-l-4 border-brand-accent rounded-r-lg mt-4">
+                                <h5 class="font-bold text-brand-dark mb-1">No Dia a Dia:</h5>
+                                <p class="text-sm text-brand-secondary">Você usa este comando <strong>apenas na primeira aula</strong>, quando o projeto ainda não existe no GitHub. Nas aulas seguintes, usaremos outro comando.</p>
+                            </div>
+                        </div>
+                        <div class="bg-brand-dark rounded-3xl p-8 shadow-xl text-white flex flex-col justify-center h-full">
+                            <div class="font-mono text-sm space-y-4">
+                                <p class="text-brand-accent">C:\\MeusProjetos\\PI_II></p>
+                                <p>$ <span class="cmd">git init</span></p>
+                                <p class="opacity-70 text-xs">Initialized empty Git repository in C:/MeusProjetos/PI_II/.git/</p>
+                            </div>
+                            <div class="mt-8 flex justify-center opacity-50">
+                                <i class="fas fa-hammer text-6xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "2. O Link com o Armazém (Remote vs Clone)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark">Como o Git acha o GitHub?</h4>
+                            <p class="text-lg leading-relaxed">Você precisa informar à sua oficina qual é o link (URL) do projeto na nuvem. Existem duas formas:</p>
+
+                            <div class="p-4 bg-white border border-brand-secondary/30 rounded-lg shadow-sm">
+                                <h5 class="font-bold text-brand-accent mb-1">Cenário A: O Caminho Longo (Primeiro Dia)</h5>
+                                <p class="text-sm text-brand-dark">Se você começou do zero com o <code>git init</code>, você precisa "amarrar" o link manualmente com o comando remote:<br>
+                                <code class="bg-brand-muted text-brand-secondary border-none px-2 mt-2 block w-full truncate">git remote add origin https://github.com/...</code></p>
+                            </div>
+                        </div>
+                        <div class="bg-brand-primary rounded-3xl p-8 shadow-xl text-white flex flex-col justify-center h-full border-b-4 border-brand-accent">
+                            <h4 class="font-bold text-brand-accent mb-4"><i class="fas fa-magic mr-2"></i> Cenário B: O Clone Basta!</h4>
+                            <p class="text-sm opacity-90 leading-relaxed mb-4">Como os PCs do laboratório são formatados toda aula, o seu projeto já existe no GitHub. <strong>Você não precisa dar init nem remote!</strong></p>
+                            <p class="text-sm opacity-90 leading-relaxed mb-4">O <strong>Clone</strong> faz tudo: baixa a pasta, faz o init e já salva o link do remote automaticamente.</p>
+                            <div class="font-mono text-xs bg-brand-dark p-3 rounded">
+                                $ <span class="cmd">git clone https://github.com/...</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "3. Identificação (O Crachá da Aula)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark">Quem está trabalhando hoje?</h4>
+                            <p class="text-lg leading-relaxed">Após baixar o projeto com o <em>clone</em>, você precisa "bater o ponto" e se identificar para o Git, pois as máquinas são compartilhadas.</p>
+                            
+                            <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg mt-4">
+                                <h5 class="font-bold text-red-700 mb-1"><i class="fas fa-exclamation-triangle mr-2"></i>Atenção: Sem Global!</h5>
+                                <p class="text-sm text-red-600"><strong>Não use</strong> o comando com a palavra <code>--global</code>. Usando apenas a versão local (abaixo), sua identificação fica salva apenas nesta pasta, evitando misturar seus commits com os de alunos de outras turmas que usem o mesmo PC.</p>
+                            </div>
+                        </div>
+                        <div class="bg-brand-dark rounded-3xl p-8 shadow-xl text-white flex flex-col justify-center h-full">
+                            <div class="font-mono text-sm space-y-4">
+                                <p class="text-brand-accent"># Coloca o seu nome na cápsula</p>
+                                <p>$ <span class="cmd">git config user.name "Seu Nome"</span></p>
+                                <br>
+                                <p class="text-brand-accent"># Coloca o seu email de contato</p>
+                                <p>$ <span class="cmd">git config user.email "seu@email.com"</span></p>
+                            </div>
+                            <div class="mt-8 flex justify-center opacity-30">
+                                <i class="fas fa-id-badge text-6xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "4. git status (O Radar do Desenvolvedor)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl">O <code>git status</code> é o seu radar. Ele responde à pergunta: <em>"O que está acontecendo na minha oficina agora?"</em>.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="bg-brand-muted p-6 rounded-2xl border border-brand-secondary/20">
+                                <h4 class="font-bold text-brand-dark mb-4"><i class="fas fa-search text-brand-accent mr-2"></i> O que ele mostra?</h4>
+                                <ul class="space-y-2 text-sm text-brand-secondary">
+                                    <li><span class="text-red-500 font-bold">Vermelho:</span> Arquivos que você alterou ou criou, mas que estão soltos na bancada (Untracked / Modified).</li>
+                                    <li><span class="text-green-500 font-bold">Verde:</span> Arquivos que já foram separados e estão prontos para ir para a cápsula (Staged).</li>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-brand-dark rounded-2xl shadow-xl text-white font-mono text-xs">
+                                <p>$ <span class="cmd">git status</span></p>
+                                <p class="mt-2 opacity-80">On branch main</p>
+                                <p class="mt-2 opacity-80">Changes not staged for commit:</p>
+                                <p class="text-red-400 mt-1">&nbsp;&nbsp;modified: index.html</p>
+                                <p class="text-red-400">&nbsp;&nbsp;modified: style.css</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-brand-accent/10 border-l-4 border-brand-accent rounded-r-lg mt-4">
+                            <h5 class="font-bold text-brand-dark mb-1">No Dia a Dia:</h5>
+                            <p class="text-sm text-brand-dark">É o comando mais usado! Use o <code>git status</code> <strong>obsessivamente</strong>. Antes de adicionar arquivos, use para ver o que alterou. Depois de adicionar, use para confirmar se adicionou os arquivos certos. É a sua garantia de que não está fazendo besteira às cegas.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "5. git add (A Bancada de Separação)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark">Colocando na Cápsula</h4>
+                            <p class="text-lg leading-relaxed">O <code>git add</code> pega os arquivos modificados (vermelhos) e os coloca em uma área de preparação chamada <strong>Staging Area</strong> (ficam verdes). A cápsula está aberta e você está colocando as coisas lá dentro.</p>
+                            
+                            <ul class="space-y-4 font-mono text-sm mt-4">
+                                <li class="bg-brand-muted p-3 rounded border border-brand-secondary/20">
+                                    <span class="text-brand-dark font-bold">git add .</span> <br>
+                                    <span class="font-sans text-brand-secondary text-xs">O ponto final significa "TUDO". Pega tudo que mudou e coloca na cápsula.</span>
+                                </li>
+                                <li class="bg-brand-muted p-3 rounded border border-brand-secondary/20">
+                                    <span class="text-brand-dark font-bold">git add login.html</span> <br>
+                                    <span class="font-sans text-brand-secondary text-xs">Coloca apenas este arquivo específico na cápsula.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-secondary/20 h-full flex flex-col justify-center">
+                            <div class="p-4 bg-brand-accent/10 border-l-4 border-brand-accent rounded-r-lg">
+                                <h5 class="font-bold text-brand-dark mb-1">No Dia a Dia:</h5>
+                                <p class="text-sm text-brand-dark leading-relaxed">Imagine que você passou a tarde trabalhando e fez duas coisas: <strong>corrigiu um erro no banco</strong> e <strong>mudou a cor do CSS</strong>.</p>
+                                <p class="text-sm text-brand-dark leading-relaxed mt-2">Em vez de mandar tudo junto (<code>git add .</code>), faça dois envios separados para manter o histórico limpo. Primeiro <code>git add banco.sql</code> (e feche a cápsula), e depois <code>git add estilo.css</code> (para a segunda cápsula).</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "6. git commit (Selando a Cápsula)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl">O <code>git commit</code> sela a cápsula fechando a tampa e <strong>colando um rótulo nela</strong>. Uma vez "commitado", o seu trabalho virou um ponto seguro no histórico do projeto.</p>
+                        
+                        <div class="bg-brand-dark p-6 rounded-2xl shadow-xl text-white font-mono text-sm text-center">
+                            $ <span class="cmd">git commit</span> -m <span class="text-brand-accent">"Cria a tela de login"</span>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div class="bg-white p-6 rounded-2xl border border-brand-secondary/20">
+                                <h4 class="font-bold text-brand-dark mb-2"><i class="fas fa-tag text-brand-accent mr-2"></i> A Importância da Mensagem</h4>
+                                <p class="text-sm text-brand-secondary leading-relaxed">O parâmetro <code>-m</code> significa "message". É o texto do rótulo da cápsula. Mensagens como <em>"atualizei coisas"</em> ou <em>"asdfgh"</em> arruínam o projeto. Diga <strong>exatamente o que</strong> a cápsula faz.</p>
+                            </div>
+                            <div class="p-4 bg-brand-accent/10 border-l-4 border-brand-accent rounded-r-lg">
+                                <h5 class="font-bold text-brand-dark mb-1">No Dia a Dia:</h5>
+                                <p class="text-sm text-brand-dark leading-relaxed">O <code>commit</code> é o seu <strong>"Save Point"</strong> (ponto de salvamento do jogo). Se amanhã você tentar adicionar uma função nova e acabar quebrando o site inteiro, não entre em pânico. Você apenas diz ao Git: <em>"Volte o código para a cápsula de ontem"</em>. O seu trabalho está a salvo!</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "7. GitHub (O Armazém Central)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl">Tudo o que fizemos até agora aconteceu <strong>apenas no seu computador local</strong> (na sua garagem).</p>
+                            <p class="text-lg text-brand-secondary">Se o seu computador reiniciar agora, você perde tudo. É para isso que usamos o <strong>GitHub</strong>.</p>
+                            <ul class="space-y-3 text-sm text-brand-dark font-bold mt-4">
+                                <li><i class="fas fa-cloud text-brand-accent mr-2"></i> É um "armazém" na nuvem.</li>
+                                <li><i class="fas fa-users text-brand-accent mr-2"></i> Permite que toda a equipe trabalhe no mesmo projeto.</li>
+                                <li><i class="fas fa-history text-brand-accent mr-2"></i> Mantém um backup seguro de todas as suas cápsulas.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-brand-muted rounded-3xl h-64 flex flex-col items-center justify-center border-2 border-brand-secondary/20 shadow-sm text-brand-dark">
+                            <i class="fab fa-github text-8xl mb-4"></i>
+                            <span class="font-bold uppercase tracking-widest">GitHub</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "8. A Chave do Armazém (Token)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-accent rounded-r-3xl flex items-center gap-6">
+                            <i class="fas fa-key text-4xl text-brand-accent"></i>
+                            <div>
+                                <h4 class="text-xl font-bold text-brand-dark mb-2">O GitHub não aceita a sua senha normal!</h4>
+                                <p class="text-brand-secondary">Para enviar código para a nuvem usando as máquinas do laboratório, você precisará gerar uma chave especial de segurança chamada <strong>Personal Access Token (PAT)</strong>.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mt-6">
+                            <div class="bg-white p-6 rounded-2xl border border-brand-secondary/20 shadow-sm">
+                                <h4 class="font-bold text-brand-dark mb-4"><i class="fas fa-route text-brand-accent mr-2"></i> Como criar no site:</h4>
+                                <ol class="space-y-3 text-sm text-brand-secondary list-decimal list-inside font-medium">
+                                    <li>Vá em <strong>Settings</strong> do seu perfil GitHub.</li>
+                                    <li>Role até o final e clique em <strong>Developer settings</strong>.</li>
+                                    <li>Vá em <strong>Personal access tokens &gt; Tokens (classic)</strong>.</li>
+                                    <li>Clique em <strong>Generate new token (classic)</strong>.</li>
+                                    <li>Dê um nome, marque a caixinha <strong class="text-brand-dark bg-brand-muted px-1 rounded">repo</strong> e gere a chave!</li>
+                                </ol>
+                            </div>
+                            <div class="p-6 bg-brand-dark rounded-2xl shadow-xl text-white flex flex-col justify-center">
+                                <h4 class="font-bold text-brand-accent mb-2"><i class="fas fa-copy mr-2"></i> Copie e Guarde</h4>
+                                <p class="text-sm opacity-90 leading-relaxed mb-4">O GitHub só vai exibir essa chave comprida <strong>uma vez</strong>. Copie-a! Quando você enviar os arquivos e ele pedir a <em>"Password"</em> no terminal, cole essa chave.</p>
+                                <p class="text-xs text-brand-accent bg-brand-black p-2 rounded italic">Obs: Ao colar senhas no terminal, nada aparece escrito. Apenas clique com o botão direito (ou Ctrl+V) e aperte Enter.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "9. git pull e git push (A Sincronia)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark"><i class="fas fa-download text-brand-secondary mr-2"></i> <code>git pull</code></h4>
+                            <p class="text-base leading-relaxed text-brand-secondary">Baixa as novidades do armazém. O <code>git clone</code> já faz o primeiro <em>pull</em>. Porém, se alguém do seu grupo enviar código durante a aula, você precisará rodar <code>git pull</code> para atualizar a sua máquina.</p>
+                            
+                            <h4 class="text-2xl font-bold text-brand-dark mt-6"><i class="fas fa-upload text-brand-accent mr-2"></i> <code>git push</code></h4>
+                            <p class="text-base leading-relaxed text-brand-secondary">Pega as suas cápsulas seladas e manda para a nuvem. Sem esse comando, o professor não consegue ver o seu trabalho!</p>
+                            <div class="bg-brand-dark p-3 rounded-xl text-white font-mono text-xs shadow-lg">
+                                $ <span class="cmd">git push origin main</span>
+                            </div>
+                        </div>
+                        <div class="bg-brand-muted rounded-3xl p-8 flex flex-col items-center justify-center text-center h-full border border-brand-secondary/20">
+                            <i class="fas fa-sync-alt text-8xl text-brand-secondary mb-6 animate-spin-slow" style="animation: spin 6s linear infinite;"></i>
+                            <p class="text-sm font-bold text-brand-dark">A dança perfeita do versionamento.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Dica de Ouro: Automatize o Setup!",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <h4 class="text-2xl font-bold text-brand-dark">Não seja um robô!</h4>
+                            <p class="text-lg leading-relaxed text-brand-secondary">Como os computadores do laboratório desconfiguram toda aula, você terá que rodar a identificação (Crachá) <strong>sempre</strong>. Para não perder tempo, crie um script executável.</p>
+                            
+                            <div class="p-4 bg-brand-accent/10 border-l-4 border-brand-accent rounded-r-lg">
+                                <h5 class="font-bold text-brand-dark mb-1"><i class="fas fa-magic mr-2"></i> O Script de Configuração:</h5>
+                                <p class="text-sm text-brand-dark">Dentro da pasta do projeto (após o clone), crie um arquivo chamado <code>configurar.bat</code> e coloque o código ao lado. Agora, toda aula, basta dar <strong>dois cliques</strong> nele para colocar o "Crachá" em 1 segundo!</p>
+                            </div>
+                        </div>
+                        <div class="bg-brand-dark rounded-3xl p-6 shadow-xl text-white flex flex-col justify-center h-full font-mono text-sm leading-relaxed">
+                            <div class="flex items-center justify-between bg-brand-black/50 p-2 rounded-t-lg border-b border-brand-secondary/30 mb-4">
+                                <span class="text-brand-secondary text-xs">configurar.bat</span>
+                                <i class="fas fa-file-code text-brand-accent"></i>
+                            </div>
+                            <p class="text-brand-accent opacity-80">@echo off</p>
+                            <p class="mt-2 text-brand-secondary"># Identifica você no PC</p>
+                            <p>git config user.name "Seu Nome"</p>
+                            <p>git config user.email "seu@email.com"</p>
+                            <p class="mt-4 text-brand-accent">echo <span class="text-white">"Identificacao Concluida. Bom trabalho!"</span></p>
+                            <p>pause</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Resumo: A Rotina no Laboratório",
+                content: `
+                    <div class="grid md:grid-cols-1 gap-8">
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-lg">
+                            <h4 class="text-brand-accent font-bold text-xl mb-6 border-b border-brand-secondary pb-2">O Checklist de Toda Aula</h4>
+                            <ol class="space-y-5 text-base">
+                                <li class="flex items-center gap-4">
+                                    <span class="bg-brand-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">1</span>
+                                    <span><strong>O Início:</strong> <code class="bg-brand-black border-none text-brand-accent px-3 py-1 text-xs">git clone &lt;link&gt;</code> para baixar a oficina na máquina formatada.</span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <span class="bg-brand-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">2</span>
+                                    <span><strong>Setup Automático:</strong> Dê 2 cliques no seu <code>configurar.bat</code> para pôr o crachá!</span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <span class="bg-brand-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">3</span>
+                                    <span>Trabalhou no código? Verifique o radar: <code class="bg-brand-black border-none text-brand-accent px-3 py-1 text-xs">git status</code></span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <span class="bg-brand-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">4</span>
+                                    <span>Coloque na cápsula: <code class="bg-brand-black border-none text-brand-accent px-3 py-1 text-xs">git add .</code></span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <span class="bg-brand-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">5</span>
+                                    <span>Rotule a cápsula: <code class="bg-brand-black border-none text-brand-accent px-3 py-1 text-xs">git commit -m "mensagem"</code></span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <span class="bg-brand-secondary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">6</span>
+                                    <span>Mande para a nuvem usando seu Token: <code class="bg-brand-black border-none text-brand-accent px-3 py-1 text-xs">git push</code></span>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-accent tracking-widest mb-4">Tópico ${currentStep + 1}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>' : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Projeto Integrador II</h1>
+                <p>Aula 01 - Git e GitHub</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand-accent pl-2">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

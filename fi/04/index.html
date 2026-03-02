@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 04 - Armazenamento e Barramentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Personalizada */
+        :root {
+            --color-orange: #FF6500;
+            --color-blue-light: #1E3E62;
+            --color-blue-dark: #0B192C;
+            --color-black: #000000;
+            --color-text: #333333; /* Alterado para texto escuro */
+            --color-bg: #FFFFFF;   /* Fundo branco */
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: var(--color-bg); 
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-bg);
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            opacity: 0;
+            transform: translateX(50px);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: translateX(0);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor */
+        .text-orange { color: var(--color-orange); }
+        .text-blue-light { color: var(--color-blue-light); }
+        .text-blue-dark { color: var(--color-blue-dark); }
+        .text-black { color: var(--color-black); }
+        
+        .bg-orange { background-color: var(--color-orange); }
+        .bg-blue-light { background-color: var(--color-blue-light); }
+        .bg-blue-dark { background-color: var(--color-blue-dark); }
+        .bg-black { background-color: var(--color-black); }
+        
+        .border-orange { border-color: var(--color-orange); }
+        .border-blue-light { border-color: var(--color-blue-light); }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-orange); box-shadow: 0 15px 35px rgba(255, 101, 0, 0.2); }
+        
+        .img-placeholder {
+            background: #f9fafb;
+            border: 2px dashed var(--color-blue-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-blue-light);
+            opacity: 0.8;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                color: black !important;
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+                background: white !important;
+            }
+
+            .slide { 
+                position: relative !important; 
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                display: block !important; 
+                page-break-inside: avoid;
+                page-break-after: always; 
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                color: black !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            h1, h2, h3, h4 { color: black !important; }
+            h2 { border-bottom: 2px solid var(--color-orange); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li { font-size: 11pt !important; color: #000 !important; line-height: 1.5; }
+            
+            .card {
+                background: white !important;
+                border: 1px solid #333 !important;
+                box-shadow: none !important;
+                color: black !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            /* Inverter cores escuras para branco na impressão */
+            .bg-blue-light, .bg-blue-dark, .bg-black { background-color: white !important; color: black !important; }
+            .text-text { color: black !important; }
+            .img-placeholder { background: #f0f0f0 !important; border-color: #999 !important; color: #333 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur-md border-b border-blue-light shadow-sm">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <span class="font-black text-orange tracking-widest text-lg md:text-xl">AULA 04</span>
+            <div class="h-3 w-24 md:w-48 lg:w-64 bg-gray-200 rounded-full overflow-hidden border border-blue-light">
+                <div id="progressBar" class="h-full bg-orange transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-xs font-mono text-gray-600 font-bold tracking-wider">00 / 00</span>
+            
+            <!-- Link reposicionado após o contador -->
+            <a href="https://willcotil.github.io/aulas2026" target="_blank" class="hidden sm:inline-block text-blue-dark font-black text-sm lg:text-base hover:text-orange transition" style="text-decoration: none;">willcotil.github.io/aulas2026</a>
+        </div>
+
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-100 rounded text-blue-dark transition border border-transparent hover:border-orange" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-orange text-white rounded hover:bg-orange/80 transition flex items-center gap-2 font-bold shadow-md" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Apostila PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-blue-light text-white px-6 py-2 rounded-full text-xs font-bold tracking-widest uppercase mb-8 inline-block border border-orange shadow-[0_0_15px_rgba(255,101,0,0.5)]">Hardware: Módulo 3</span>
+                <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight text-blue-dark">
+                    Armazenamento &<br><span class="text-orange">Barramentos</span>
+                </h1>
+                <p class="text-xl font-mono text-gray-600 max-w-2xl mx-auto mt-6">Onde os dados vivem e por onde eles viajam.</p>
+            </div>
+            <div class="mt-16 animate-pulse text-orange no-print">
+                <p class="text-[10px] uppercase tracking-widest mb-2 opacity-50 text-center">Navegue</p>
+                <i data-lucide="chevrons-down" class="mx-auto w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-orange mb-10 border-l-4 border-orange pl-4">Estradas e Garagens</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+                <div class="card p-8">
+                    <div class="text-orange mb-4"><i data-lucide="hard-drive" class="w-12 h-12"></i></div>
+                    <h3 class="font-bold text-2xl mb-2">1. Armazenamento</h3>
+                    <p class="text-sm opacity-80 mb-4">A "garagem" dos dados. Memória não volátil.</p>
+                    <ul class="text-sm list-disc pl-5 space-y-2 font-mono">
+                        <li>Discos Rígidos (HDDs)</li>
+                        <li>Estado Sólido (SSDs)</li>
+                        <li>Mídias Ópticas e Flash</li>
+                    </ul>
+                </div>
+                <div class="card p-8">
+                    <div class="text-orange mb-4"><i data-lucide="git-merge" class="w-12 h-12"></i></div>
+                    <h3 class="font-bold text-2xl mb-2">2. Barramentos (Buses)</h3>
+                    <p class="text-sm opacity-80 mb-4">As "estradas" por onde a informação corre.</p>
+                    <ul class="text-sm list-disc pl-5 space-y-2 font-mono">
+                        <li>O que são Barramentos?</li>
+                        <li>SATA vs PCIe</li>
+                        <li>Gargalos (Bottlenecks)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 1: ARMAZENAMENTO -->
+
+        <!-- SLIDE 3: O papel do Armazenamento -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-orange text-black p-2 rounded font-black text-xl">01</span>
+                <h2 class="text-4xl font-bold">Armazenamento (Memória Secundária)</h2>
+            </div>
+            <div class="card p-8 max-w-4xl text-center border-t-4 border-orange">
+                <p class="text-xl mb-4">A RAM esquece tudo quando a luz acaba.</p>
+                <p class="text-lg opacity-80">O Armazenamento é a <strong>Memória Não Volátil</strong>. É onde instalamos o Windows, guardamos nossos jogos, fotos e trabalhos para que eles sobrevivam ao desligamento da máquina.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: HDD -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">Disco Rígido (HDD - Hard Disk Drive)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-5xl">
+                <div class="img-placeholder w-full h-64 border-blue-light border-2">
+                    [Imagem: HD aberto mostrando o disco magnético e a agulha de leitura]
+                </div>
+                <div class="space-y-4">
+                    <h3 class="font-bold text-xl text-blue-dark">O Veterano Mecânico</h3>
+                    <p class="text-sm text-gray-600">Funciona exatamente como um <strong>toca-discos (vitrola)</strong>.</p>
+                    <ul class="list-disc pl-5 text-sm space-y-2 mt-4 font-mono bg-gray-100 text-gray-800 p-4 rounded border border-blue-light">
+                        <li>Discos de metal girando em alta velocidade (ex: 7200 RPM).</li>
+                        <li>Uma agulha magnética lê e grava os 0s e 1s.</li>
+                        <li><strong>Vantagem:</strong> Muito espaço por pouco dinheiro.</li>
+                        <li><strong>Desvantagem:</strong> Lento e frágil (se cair, a agulha risca o disco e você perde tudo).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: SSD -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">SSD (Solid State Drive)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-5xl">
+                <div class="space-y-4">
+                    <h3 class="font-bold text-xl text-blue-dark">A Revolução Silenciosa</h3>
+                    <p class="text-sm text-gray-600">Significa "Unidade de Estado Sólido". Não tem NENHUMA peça móvel girando lá dentro.</p>
+                    <ul class="list-disc pl-5 text-sm space-y-2 mt-4 font-mono bg-gray-100 text-gray-800 p-4 rounded border border-blue-light">
+                        <li>Funciona com chips de memória Flash (NAND).</li>
+                        <li>Pense nele como um Pen-drive gigante e super potente.</li>
+                        <li><strong>Vantagem:</strong> Extremamente rápido, silencioso e resistente a quedas.</li>
+                        <li><strong>Desvantagem:</strong> Mais caro por Gigabyte que o HD.</li>
+                    </ul>
+                </div>
+                <div class="img-placeholder w-full h-64 border-blue-light border-2">
+                    [Imagem: SSD SATA 2.5" aberto mostrando os chips de memória flash pretos]
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Batalha: HD vs SSD -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-center mb-10">O Confronto: <span class="text-blue-light bg-gray-100 px-2 rounded">HD</span> vs <span class="text-orange">SSD</span></h2>
+            <div class="flex flex-col md:flex-row gap-6 w-full max-w-4xl font-mono text-sm">
+                <!-- HD Card -->
+                <div class="card p-6 flex-1 text-center border-t-8 border-blue-light opacity-80">
+                    <i data-lucide="database" class="w-12 h-12 mx-auto mb-4 text-blue-light"></i>
+                    <h3 class="font-bold text-xl mb-4">HDD</h3>
+                    <p class="mb-2">Velocidade: ~100 MB/s</p>
+                    <p class="mb-2">Barulho: Faz ruído (tec-tec)</p>
+                    <p class="mb-2">Resistência: Frágil</p>
+                    <p class="mt-4 text-xs bg-gray-200 text-blue-dark p-2 rounded font-bold">Uso: Guardar arquivos pesados (Vídeos, Backup)</p>
+                </div>
+                <!-- VS -->
+                <div class="flex items-center justify-center font-black text-4xl text-gray-300">VS</div>
+                <!-- SSD Card -->
+                <div class="card p-6 flex-1 text-center border-t-8 border-orange transform scale-105">
+                    <i data-lucide="zap" class="w-12 h-12 mx-auto mb-4 text-orange"></i>
+                    <h3 class="font-bold text-xl mb-4">SSD</h3>
+                    <p class="mb-2">Velocidade: 500 MB/s a 7000+ MB/s</p>
+                    <p class="mb-2">Barulho: 100% Silencioso</p>
+                    <p class="mb-2">Resistência: Resistente a impactos</p>
+                    <p class="mt-4 text-xs bg-orange text-black p-2 rounded font-bold">Uso: Sistema Operacional, Programas, Jogos</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Formatos de SSD -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">Formatos de SSD (Form Factors)</h2>
+            <p class="mb-8 max-w-2xl text-center">Os SSDs evoluíram não só em velocidade, mas em formato.</p>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">SSD 2.5" (SATA)</h3>
+                    <div class="img-placeholder h-32 mb-4">[Imagem: SSD formato caixinha 2.5 polegadas]</div>
+                    <p class="text-xs">Tem o mesmo tamanho dos HDs de notebook. Precisa de cabos de energia e de dados conectados à placa-mãe.</p>
+                </div>
+                <div class="card p-6 border-2 border-orange relative">
+                    <div class="absolute -top-3 -right-3 bg-orange text-black font-bold text-[10px] px-2 py-1 rounded rotate-12">Mais Moderno!</div>
+                    <h3 class="font-bold text-lg mb-2 text-orange">SSD M.2 (NVMe)</h3>
+                    <div class="img-placeholder h-32 mb-4">[Imagem: SSD M.2 NVMe, parece um pente de memória pequeno]</div>
+                    <p class="text-xs">Parece uma placa de chiclete. É parafusado <strong>DIRETO na placa-mãe</strong>. Sem cabos, sem bagunça, e absurdamente mais rápido.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Mídias Ópticas e Flash -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-8">Outras Mídias de Armazenamento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+                <!-- Óptico -->
+                <div class="card p-6 bg-white border border-blue-light">
+                    <div class="flex items-center mb-4">
+                        <i data-lucide="disc" class="w-8 h-8 text-blue-light mr-3"></i>
+                        <h3 class="font-bold text-lg text-blue-dark">Mídia Óptica</h3>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">CDs, DVDs, Blu-Rays.</p>
+                    <p class="text-xs font-mono text-gray-500">Dados gravados a laser através de ranhuras microscópicas no disco. Estão em desuso devido à internet rápida e pendrives.</p>
+                </div>
+                <!-- Flash Portátil -->
+                <div class="card p-6 bg-white border border-orange">
+                    <div class="flex items-center mb-4">
+                        <i data-lucide="usb" class="w-8 h-8 text-orange mr-3"></i>
+                        <h3 class="font-bold text-lg text-blue-dark">Mídia Flash Portátil</h3>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">Pen Drives e Cartões SD.</p>
+                    <p class="text-xs font-mono text-gray-500">Mesma tecnologia do SSD, porém otimizada para portabilidade e baixo custo, com velocidades menores.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 2: BARRAMENTOS -->
+
+        <!-- SLIDE 9 -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-orange text-black p-2 rounded font-black text-xl">02</span>
+                <h2 class="text-4xl font-bold">Barramentos (Buses)</h2>
+            </div>
+            <div class="card p-8 max-w-4xl text-center border-t-4 border-blue-light">
+                <p class="text-xl mb-4 font-bold text-orange">O que é um Barramento?</p>
+                <p class="text-lg opacity-80">São as <strong>estradas, vias e rodovias</strong> dentro do computador.</p>
+                <p class="text-sm mt-4 text-left p-4 bg-black/40 rounded border border-blue-light font-mono">
+                    Não adianta você ter o processador mais rápido do mundo (uma Ferrari) e o SSD mais rápido do mundo (outra Ferrari) se a rua que liga os dois for de terra e cheia de buracos. O barramento define a velocidade do trânsito.
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: SATA vs PCIe -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">As Principais Estradas</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl items-stretch">
+                <!-- SATA -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-blue-light mb-2">SATA</h3>
+                    <p class="text-xs uppercase bg-gray-200 text-blue-dark font-bold inline-block px-2 py-1 rounded mb-4">A Avenida da Cidade</p>
+                    <div class="img-placeholder h-24 mb-4">[Imagem: Cabo SATA vermelho/preto]</div>
+                    <ul class="text-sm space-y-2 opacity-80">
+                        <li>• Limite prático: ~600 MB/s.</li>
+                        <li>• Conecta HDs e SSDs formato 2.5".</li>
+                        <li>• Tecnologicamente defasado para as necessidades atuais, mas barato.</li>
+                    </ul>
+                </div>
+                <!-- PCIe -->
+                <div class="card p-6 border-2 border-orange">
+                    <h3 class="text-xl font-bold text-orange mb-2">PCI Express (PCIe)</h3>
+                    <p class="text-xs uppercase bg-orange text-black font-bold inline-block px-2 py-1 rounded mb-4">A Via Expressa (Autobahn)</p>
+                    <div class="img-placeholder h-24 mb-4">[Imagem: Slot PCIe na placa mãe]</div>
+                    <ul class="text-sm space-y-2 opacity-80">
+                        <li>• Limite prático: Pode passar de 15.000 MB/s!</li>
+                        <li>• Conecta <strong>Placas de Vídeo (GPU)</strong> e os <strong>SSDs M.2 NVMe</strong>.</li>
+                        <li>• Trabalha com "Pistas" (Lanes) - x1, x4, x8, x16.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: O Segredo do PCIe (Lanes) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-8">PCIe: O Segredo das "Pistas" (Lanes)</h2>
+            <p class="max-w-3xl text-center mb-8">Pense no PCI Express como uma rodovia. O número na frente do "x" significa quantas faixas de trânsito aquela rodovia tem.</p>
+            
+            <div class="space-y-4 w-full max-w-3xl font-mono text-sm">
+                <div class="flex items-center bg-blue-light p-3 rounded shadow">
+                    <div class="w-16 font-bold text-orange">x1</div>
+                    <div class="flex-1 ml-4"><div class="h-2 bg-gray-400 w-1/6 rounded"></div></div>
+                    <div class="text-xs opacity-70">Placas de Wi-Fi/Som</div>
+                </div>
+                <div class="flex items-center bg-blue-light p-3 rounded shadow">
+                    <div class="w-16 font-bold text-orange">x4</div>
+                    <div class="flex-1 ml-4"><div class="h-2 bg-green-500 w-2/6 rounded"></div></div>
+                    <div class="text-xs opacity-70">SSDs M.2 NVMe super rápidos</div>
+                </div>
+                <div class="flex items-center bg-blue-light p-3 rounded shadow border border-orange">
+                    <div class="w-16 font-bold text-orange text-lg">x16</div>
+                    <div class="flex-1 ml-4"><div class="h-4 bg-orange w-full rounded shadow-[0_0_10px_#FF6500]"></div></div>
+                    <div class="text-xs font-bold text-orange ml-2">PLACAS DE VÍDEO (GPU)</div>
+                </div>
+            </div>
+            <p class="mt-8 text-xs opacity-60 text-center max-w-lg">Quanto mais pistas, mais dados trafegam ao mesmo tempo sem trânsito.</p>
+        </section>
+
+        <!-- SLIDE 12: NVMe - O casamento do SSD com o PCIe -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">A Mágica do protocolo NVMe</h2>
+            <div class="card p-8 max-w-4xl text-center border-t-8 border-orange bg-gray-50">
+                <p class="text-lg mb-6 text-blue-dark">Por muito tempo, os SSDs eram limitados pela velocidade do cabo SATA (600 MB/s).</p>
+                <div class="bg-white p-6 rounded-xl border border-blue-light mb-6 font-mono text-sm text-gray-700 shadow-inner">
+                    NVMe (Non-Volatile Memory Express) não é um formato físico, é um <strong>idioma</strong>.
+                </div>
+                <p class="text-sm text-gray-600">Ele permitiu que o SSD M.2 usasse as pistas do PCI Express (x4). O resultado? A velocidade pulou de 600 para mais de <strong>7.000 MB/s</strong> nos modelos atuais (PCIe 4.0).</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: USB -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-orange mb-6">USB (Universal Serial Bus)</h2>
+            <p class="max-w-2xl text-center mb-8">A estrada para o lado de fora do computador. Antes do USB, cada aparelho (mouse, impressora, controle) tinha um plug diferente.</p>
+            
+            <div class="grid grid-cols-3 gap-4 w-full max-w-4xl text-center">
+                <div class="card p-4 border-b-4 border-gray-500">
+                    <h4 class="font-bold text-lg">USB 2.0</h4>
+                    <p class="text-xs font-mono text-gray-400 my-2">Preto</p>
+                    <p class="text-xs">Lento (480 Mbps). Bom para mouse e teclado.</p>
+                </div>
+                <div class="card p-4 border-b-4 border-blue-500">
+                    <h4 class="font-bold text-lg">USB 3.0+</h4>
+                    <p class="text-xs font-mono text-blue-400 my-2">Azul / Vermelho</p>
+                    <p class="text-xs">Rápido (5 a 20 Gbps). Ideal para HDs externos e Pen Drives.</p>
+                </div>
+                <div class="card p-4 border-b-4 border-orange">
+                    <h4 class="font-bold text-lg">USB-C</h4>
+                    <p class="text-xs font-mono text-orange my-2">Formato Oval</p>
+                    <p class="text-xs">O padrão moderno. Reversível (encaixa dos dois lados) e altíssima velocidade/energia.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: O Gargalo (Bottleneck) -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-red-500 mb-6">O Gargalo (Bottleneck)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center max-w-5xl">
+                <div class="img-placeholder w-full h-64 border-red-500 border-2">
+                    [Imagem: Uma rodovia de 6 faixas que subitamente vira 1 faixa só, causando engarrafamento]
+                </div>
+                <div class="space-y-4 text-left">
+                    <p class="text-lg">O computador é tão rápido quanto sua peça mais lenta.</p>
+                    <div class="card p-4 bg-red-50 border border-red-500">
+                        <p class="font-bold text-orange mb-2">Exemplo Clássico:</p>
+                        <p class="text-sm font-mono text-gray-800">Processador Core i9 de última geração + Placa de Vídeo RTX 4090 + <strong class="text-red-600">HD mecânico velho</strong>.</p>
+                        <p class="text-xs mt-2 text-gray-600">O jogo vai demorar 5 minutos para carregar porque o HD não consegue entregar os dados na velocidade que a CPU e a GPU pedem.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Interativo - Resolva o Gargalo -->
+        <section class="slide no-print">
+            <h2 class="text-3xl font-bold text-orange mb-8">Jogo: Encontre o Gargalo 🕵️</h2>
+            <p class="mb-6 text-blue-dark">O PC do cliente está muito lento para iniciar o Windows e abrir o Word. Qual peça você troca?</p>
+            
+            <div class="flex gap-6 w-full max-w-4xl justify-center">
+                <!-- PC Setup -->
+                <div class="card p-6 w-64 bg-gray-50 border-blue-light">
+                    <h4 class="font-bold text-center mb-4 border-b pb-2 text-blue-dark">Setup Atual</h4>
+                    <ul class="text-sm space-y-3 font-mono text-gray-600">
+                        <li>CPU: Intel Core i5</li>
+                        <li>RAM: 16GB DDR4</li>
+                        <li>GPU: Integrada</li>
+                        <li class="text-red-500 font-bold">Armaz.: HD 1TB (5400 RPM)</li>
+                    </ul>
+                </div>
+
+                <!-- Opções -->
+                <div class="flex flex-col gap-4 justify-center">
+                    <button onclick="alert('Errado! O i5 já é suficiente para abrir o Word rápido.')" class="bg-blue-light hover:bg-blue-light/90 text-white px-6 py-3 rounded font-bold border border-blue-light transition">Trocar CPU para i9</button>
+                    <button onclick="alert('Errado! 16GB de RAM é mais que o suficiente para uso básico.')" class="bg-blue-light hover:bg-blue-light/90 text-white px-6 py-3 rounded font-bold border border-blue-light transition">Colocar 32GB de RAM</button>
+                    <button onclick="alert('CORRETO! O HD mecânico é o gargalo. Um SSD fará o PC iniciar em 10 segundos!')" class="bg-orange text-white px-6 py-3 rounded font-black shadow-[0_0_15px_rgba(255,101,0,0.4)] hover:scale-105 transition">Trocar HD por SSD</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: Mapa Mental Resumo -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold mb-8 text-orange">Mapa Mental da Aula</h2>
+            <div class="flex flex-col items-center gap-4 w-full max-w-4xl text-sm font-mono">
+                <div class="bg-orange text-white px-8 py-3 rounded-xl font-bold text-lg shadow">DADOS E CONEXÕES</div>
+                
+                <div class="flex w-full gap-8 mt-4">
+                    <div class="flex-1 flex flex-col gap-3">
+                        <div class="bg-blue-light text-white px-4 py-2 rounded text-center font-bold border-b-4 border-blue-dark shadow">ARMAZENAMENTO (Garagem)</div>
+                        <div class="bg-white p-3 rounded text-center border border-blue-light text-xs text-gray-700 shadow-sm"><strong>HDD:</strong> Magnético, barato, lento.</div>
+                        <div class="bg-white p-3 rounded text-center border border-blue-light text-xs text-gray-700 shadow-sm"><strong>SSD SATA:</strong> Flash, rápido, usa cabos.</div>
+                        <div class="bg-white p-3 rounded text-center border border-blue-light text-xs border-l-4 border-l-orange text-gray-700 shadow-sm"><strong>SSD M.2 NVMe:</strong> O mais rápido, sem cabos.</div>
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col gap-3">
+                        <div class="bg-blue-light text-white px-4 py-2 rounded text-center font-bold border-b-4 border-blue-dark shadow">BARRAMENTOS (Estradas)</div>
+                        <div class="bg-white p-3 rounded text-center border border-blue-light text-xs text-gray-700 shadow-sm"><strong>SATA:</strong> Limite de ~600MB/s.</div>
+                        <div class="bg-white p-3 rounded text-center border border-blue-light text-xs border-l-4 border-l-orange text-gray-700 shadow-sm"><strong>PCIe:</strong> Via expressa (x16 para GPU, x4 para NVMe).</div>
+                        <div class="bg-white p-3 rounded text-center border border-blue-light text-xs text-gray-700 shadow-sm"><strong>USB:</strong> Padrão externo universal.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MÓDULO DE EXERCÍCIOS -->
+
+        <!-- SLIDE 17: Exercícios 1-5 -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-orange mb-6 border-b-2 border-orange pb-2">Exercícios de Fixação (1-5)</h2>
+            <p class="text-sm text-gray-500 mb-6 font-mono">Responda no seu caderno ou arquivo digital.</p>
+            <ol class="space-y-4 text-left max-w-3xl text-sm font-medium w-full list-decimal pl-8 text-gray-800">
+                <li class="pl-2">Explique a principal diferença física de funcionamento entre um HDD (Disco Rígido) e um SSD.</li>
+                <li class="pl-2">Por que o SSD é muito mais resistente a choques e quedas em comparação ao HD mecânico?</li>
+                <li class="pl-2">Cite uma vantagem de utilizar um SSD no formato M.2 NVMe em vez do formato padrão SATA 2.5".</li>
+                <li class="pl-2">O que é um "Barramento" no contexto da arquitetura de computadores? Use a analogia de trânsito para explicar.</li>
+                <li class="pl-2">Qual barramento (SATA ou PCI Express) é utilizado pelas Placas de Vídeo modernas e por quê?</li>
+            </ol>
+        </section>
+
+        <!-- SLIDE 18: Exercícios 6-10 -->
+        <section class="slide bg-white">
+            <h2 class="text-3xl font-bold text-orange mb-6 border-b-2 border-orange pb-2">Exercícios de Fixação (6-10)</h2>
+            <ol start="6" class="space-y-4 text-left max-w-3xl text-sm font-medium w-full list-decimal pl-8 text-gray-800">
+                <li class="pl-2">No barramento PCI Express, o que significam os identificadores "x1", "x4" e "x16"?</li>
+                <li class="pl-2">O que significa a sigla USB e qual foi a grande vantagem que este padrão trouxe para os periféricos?</li>
+                <li class="pl-2">Explique o conceito de "Gargalo" (Bottleneck) em um sistema computacional.</li>
+                <li class="pl-2">Se um computador possui um processador i9 super rápido, mas usa apenas um HD magnético antigo, como isso afeta o carregamento de programas? Justifique.</li>
+                <li class="pl-2">Para baratear os custos na montagem de um PC, é comum usar um SSD pequeno junto com um HD grande. Como você dividiria a instalação do Windows, Programas e Arquivos (Fotos/Vídeos) nesses dois discos?</li>
+            </ol>
+        </section>
+
+        <!-- SLIDE 19: Próxima Aula -->
+        <section class="slide">
+            <h2 class="text-2xl font-mono text-orange mb-4 opacity-80">Finalizando o Hardware...</h2>
+            <h1 class="text-5xl font-black text-blue-dark mb-8 text-center leading-tight">Periféricos, Redes<br>& Montagem Virtual</h1>
+            <p class="text-lg max-w-2xl text-center text-gray-600 mb-10">Na próxima aula, vamos conectar o PC ao mundo externo, falar de placas de rede e simular a montagem completa da máquina!</p>
+            <div class="flex gap-6 justify-center text-blue-light opacity-50">
+                <i data-lucide="wifi" class="w-16 h-16"></i>
+                <i data-lucide="mouse" class="w-16 h-16"></i>
+                <i data-lucide="settings-2" class="w-16 h-16"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Conclusão -->
+        <section class="slide bg-white text-blue-dark">
+            <div class="text-center">
+                <i data-lucide="check-circle" class="w-20 h-20 mx-auto text-orange mb-6"></i>
+                <h1 class="text-6xl font-black mb-4">FIM DA AULA 04</h1>
+                <p class="text-xl text-gray-600 mb-12 font-mono">Você domina os caminhos da placa-mãe.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-orange text-white px-10 py-4 rounded-full font-black shadow-[0_0_20px_rgba(255,101,0,0.5)] hover:scale-105 transition flex items-center gap-3">
+                        <i data-lucide="download"></i> Gerar PDF da Apostila
+                    </button>
+                </div>
+                
+                <p class="mt-20 text-xs text-gray-400 font-mono tracking-widest">COTIL - FUNDAMENTOS DE INFORMÁTICA</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-4 bg-blue-dark/90 backdrop-blur rounded-full shadow-lg border border-blue-light text-text hover:bg-blue-light transition transform active:scale-95">
+            <i data-lucide="arrow-left"></i>
+        </button>
+        <button id="nextBtn" class="p-4 bg-orange rounded-full shadow-[0_0_15px_rgba(255,101,0,0.4)] text-black font-bold hover:bg-orange/90 transition transform active:scale-95">
+            <i data-lucide="arrow-right"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica dos Slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            // Progress Bar
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Decimal Counter (Updated from Binary)
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        // Init
+        updateSlides();
+
+        // Controls
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
