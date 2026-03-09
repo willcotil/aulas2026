@@ -67,6 +67,29 @@
         li { margin-bottom: 15px; padding-left: 35px; position: relative; }
         li::before { content: '➤'; color: var(--secondary); font-size: 1.5rem; position: absolute; left: 0; top: 2px; }
 
+
+        .img-placeholder {
+            background: #fff;
+            border: 2px dashed var(--color-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-blue);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+        .img-placeholder::after {
+            content: '📸 Inserir Imagem';
+            position: absolute;
+            opacity: 0.3;
+            font-weight: bold;
+        }
+
         .cols { display: flex; gap: 50px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap; }
         .col { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center; }
 
@@ -85,7 +108,7 @@
         /* DIAGRAMAS (Nós e SVGs) */
         .node { 
             width: 44px; height: 44px; background: var(--primary); border-radius: 50%; 
-            position: absolute; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            position: absolute; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             display: grid; place-items: center; color: white; font-weight: bold; z-index: 2;
             /* Centraliza o ponto de âncora do nó */
             transform: translate(-50%, -50%);
@@ -258,18 +281,7 @@
                     <p>Os dados viajam por todo o cabo e "passam na porta" de todos os computadores.</p>
                 </div>
                 <div class="col">
-                    <div class="visual-box">
-                        <div class="bus-main-wire"></div>
-                        
-                        <div class="node" style="top: 50px; left: 20%;">A</div>
-                        <div class="bus-drop-line" style="left: 20%; transform: translateX(-50%); height: calc(100% - 60px - 50px - 22px);"></div>
-                        
-                        <div class="node" style="top: 50px; left: 50%;">B</div>
-                        <div class="bus-drop-line" style="left: 50%; transform: translateX(-50%); height: calc(100% - 60px - 50px - 22px);"></div>
-                        
-                        <div class="node" style="top: 50px; left: 80%;">C</div>
-                        <div class="bus-drop-line" style="left: 80%; transform: translateX(-50%); height: calc(100% - 60px - 50px - 22px);"></div>
-                    </div>
+                <img src="barramento.png" alt="Evolução da Tecnologia" style="width:40vh">
                 </div>
             </div>
         </section>
@@ -282,9 +294,7 @@
                 <li>Conectores do tipo "T" (BNC).</li>
                 <li><strong>Broadcast:</strong> Se A envia para C, B também "ouve" (mas ignora).</li>
             </ul>
-            <div class="visual-box" style="height: 200px; margin-top: 20px;">
-                <p style="color: #999;">[Placeholder: Foto de conector BNC e cabo coaxial]</p>
-            </div>
+                <img src="bnc.jpg" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
         </section>
 
         <section class="slide" id="slide-8">
@@ -307,7 +317,8 @@
                     <p>É necessário usar <strong>Terminadores</strong> (resistor de 50 Ohm) nas extremidades.</p>
                     <p>Se não usar, o sinal bate na ponta e volta (reflexão), sujando a rede.</p>
                 </div>
-                <div class="col"><div class="visual-box"><span class="emoji-icon">🧱</span><span>Muro de absorção</span></div></div>
+
+                <img src="terminador.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
             </div>
         </section>
 
@@ -350,22 +361,7 @@
                     <p>O dado viaja em <strong>uma direção</strong> passando de mão em mão.</p>
                 </div>
                 <div class="col">
-                    <div class="visual-box">
-                        <!-- SVG para o anel -->
-                        <svg class="connections-layer" viewBox="0 0 300 350">
-                            <circle cx="50%" cy="50%" r="110" />
-                        </svg>
-                        
-                        <!-- Nós posicionados -->
-                        <!-- Topo: 50% height = 175px. r=110. Top = 175-110 = 65px -->
-                        <div class="node" style="top: calc(50% - 110px); left: 50%;">A</div> 
-                        <!-- Baixo: Top = 175+110 = 285px -->
-                        <div class="node" style="top: calc(50% + 110px); left: 50%;">C</div> 
-                        <!-- Esquerda: 50% width. Left = 50% - 110px -->
-                        <div class="node" style="top: 50%; left: calc(50% - 110px);">D</div> 
-                        <!-- Direita -->
-                        <div class="node" style="top: 50%; left: calc(50% + 110px);">B</div> 
-                    </div>
+                <img src="anel.png" alt="Evolução da Tecnologia" style="width:40vh">
                 </div>
             </div>
         </section>
@@ -419,24 +415,7 @@
                     <p>O ponto central pode ser um <strong>Hub</strong> ou um <strong>Switch</strong>.</p>
                 </div>
                 <div class="col">
-                    <div class="visual-box">
-                        <!-- Conexões SVG saindo do centro -->
-                        <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <!-- A: Center to Top (20%) -->
-                            <line x1="50%" y1="50%" x2="50%" y2="20%" />
-                            <!-- B: Center to Bottom Left (20%, 80%) -->
-                            <line x1="50%" y1="50%" x2="20%" y2="80%" />
-                            <!-- C: Center to Bottom Right (80%, 80%) -->
-                            <line x1="50%" y1="50%" x2="80%" y2="80%" />
-                        </svg>
-
-                        <div class="star-hub">HUB</div>
-                        
-                        <!-- Nós posicionados exatamentes nas coordenadas do SVG -->
-                        <div class="node" style="top: 20%; left: 50%;">A</div>
-                        <div class="node" style="top: 80%; left: 20%;">B</div>
-                        <div class="node" style="top: 80%; left: 80%;">C</div>
-                    </div>
+                <img src="star.png" alt="Evolução da Tecnologia" style="width:40vh">
                 </div>
             </div>
         </section>
@@ -457,6 +436,7 @@
                     <p>Ninguém mais ouve a conversa.</p>
                 </div>
             </div>
+                <img src="switch.png" alt="Evolução da Tecnologia" class="w-full max-w-xl rounded-2xl shadow-2xl border-4 border-white/20">
         </section>
 
         <section class="slide" id="slide-19">
@@ -467,7 +447,7 @@
                     <p>Se o cabo do computador A quebrar...</p>
                     <p>Apenas o computador A cai. O resto da rede (B, C, D) continua funcionando perfeitamente!</p>
                 </div>
-                <div class="col"><div class="visual-box"><span class="emoji-icon">🛡️</span><span>Proteção</span></div></div>
+                <img src="estrela.png" alt="Evolução da Tecnologia" style="width:50vh">
             </div>
         </section>
 
@@ -477,6 +457,7 @@
             <p>Se o <strong>Concentrador (Switch)</strong> queimar...</p>
             <h2 style="color: var(--danger);">💀 GAME OVER 💀</h2>
             <p>A rede inteira para.</p>
+                <img src="falha_estrela.png" alt="Evolução da Tecnologia" style="width:50vh">
         </section>
 
         <section class="slide" id="slide-21">
@@ -487,6 +468,7 @@
                 <li>Permite cobrir distâncias maiores e adicionar mais usuários.</li>
                 <li>É a estrutura típica de um prédio (Switch de andar -> Switch do prédio).</li>
             </ul>
+                <img src="estrela_estendida.png" alt="Evolução da Tecnologia" style="width:50vh">
         </section>
 
         <section class="slide" id="slide-22">
@@ -527,25 +509,7 @@
                     <p>Não há centro. É uma teia.</p>
                 </div>
                 <div class="col">
-                    <div class="visual-box">
-                        <!-- Conexões SVG -->
-                        <svg class="connections-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <!-- Quadrado -->
-                            <line x1="25%" y1="25%" x2="75%" y2="25%" />
-                            <line x1="75%" y1="25%" x2="75%" y2="75%" />
-                            <line x1="75%" y1="75%" x2="25%" y2="75%" />
-                            <line x1="25%" y1="75%" x2="25%" y2="25%" />
-                            <!-- Cruzamento (Diagonais) -->
-                            <line x1="25%" y1="25%" x2="75%" y2="75%" />
-                            <line x1="75%" y1="25%" x2="25%" y2="75%" />
-                        </svg>
-
-                        <!-- Nós posicionados nas coordenadas (25% e 75%) -->
-                        <div class="node" style="top: 25%; left: 25%;">A</div>
-                        <div class="node" style="top: 25%; left: 75%;">B</div>
-                        <div class="node" style="top: 75%; left: 25%;">C</div>
-                        <div class="node" style="top: 75%; left: 75%;">D</div>
-                    </div>
+                <img src="mesh.png" alt="Evolução da Tecnologia" style="width:40vh">
                 </div>
             </div>
         </section>
@@ -602,7 +566,7 @@
                     <p>Existe uma hierarquia: Um nó raiz conecta outros hubs/switches, que conectam os computadores.</p>
                     <p>Parece uma árvore genealógica ou organograma de empresa.</p>
                 </div>
-                <div class="col"><div class="visual-box"><span class="emoji-icon">🌳</span><span>Hierarquia</span></div></div>
+                <img src="arvore.png" alt="Evolução da Tecnologia" style="width:50vh">
             </div>
         </section>
 
@@ -624,7 +588,9 @@
                 <div class="col">
                     <p>Exemplo: Várias redes em <strong>Estrela</strong> (departamentos) interligadas por um <strong>Barramento</strong> ou <strong>Anel</strong> de fibra óptica.</p>
                 </div>
-                <div class="col"><div class="visual-box"><span class="emoji-icon">🧬</span><span>Mistura</span></div></div>
+                <div class="col">
+                    <img src="hibrida.png" alt="Evolução da Tecnologia" style="width:40vh">
+                </div>
             </div>
         </section>
 
@@ -637,7 +603,9 @@
                     <p>Ex: Conectar dois roteadores via fibra em longa distância.</p>
                     <p>Ex: Cabo Cross-over entre dois PCs.</p>
                 </div>
-                <div class="col"><div class="visual-box"><span class="emoji-icon">🤝</span><span>Direto</span></div></div>
+                <div class="col">
+                    <img src="ponto.png" alt="Evolução da Tecnologia" style="width:40vh">
+                </div>
             </div>
         </section>
 
