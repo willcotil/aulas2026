@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 06 - Sistemas Operacionais e o Kernel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Tema Software: Light Mode Alto Contraste */
+        :root {
+            --bg-light: #ffffff; 
+            --bg-panel: #f8fafc; /* slate-50 */
+            --accent-cyan: #0891b2; /* cyan-600 */
+            --accent-purple: #7c3aed; /* violet-600 */
+            --text-dark: #0f172a; /* slate-900 */
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-light);
+            background-image: 
+                linear-gradient(rgba(8, 145, 178, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(8, 145, 178, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            opacity: 0;
+            transform: scale(0.95);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Componentes Customizados */
+        .card {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent-cyan); box-shadow: 0 15px 30px rgba(8, 145, 178, 0.15); }
+        
+        .img-placeholder {
+            background: #f1f5f9;
+            border: 2px dashed var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+            font-weight: bold;
+        }
+
+        .text-cyan { color: var(--accent-cyan); }
+        .text-purple { color: var(--accent-purple); }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                color: black !important;
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+                background: white !important;
+            }
+
+            .slide { 
+                position: relative !important; 
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                display: block !important; 
+                page-break-inside: avoid;
+                page-break-after: always; 
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                color: black !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            h1, h2, h3, h4 { color: black !important; }
+            h2 { border-bottom: 2px solid var(--accent-cyan); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li, td, th { font-size: 11pt !important; color: #000 !important; line-height: 1.5; }
+            
+            .card {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+                color: black !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur-md border-b border-cyan-200 shadow-sm">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <span class="font-black text-cyan-700 tracking-widest text-lg md:text-xl">AULA 06</span>
+            <div class="h-3 w-24 md:w-32 lg:w-48 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
+                <div id="progressBar" class="h-full bg-cyan-500 transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-xs font-mono text-slate-500 font-bold tracking-wider">00 / 00</span>
+        </div>
+        
+        <!-- Link Centralizado -->
+        <a href="https://willcotil.github.io/aulas2026" target="_blank" class="absolute left-1/2 transform -translate-x-1/2 text-slate-700 font-black text-sm lg:text-base hover:text-cyan-600 transition" style="text-decoration: none;">willcotil.github.io/aulas2026</a>
+
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-slate-100 rounded text-slate-600 transition border border-transparent hover:border-cyan-500" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-cyan-600 text-white rounded hover:bg-cyan-700 transition flex items-center gap-2 font-bold shadow-sm" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Apostila PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-violet-100 text-violet-700 px-6 py-2 rounded-full text-xs font-bold tracking-widest uppercase mb-8 inline-block border border-violet-300">Software de Sistema</span>
+                <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight text-slate-900">
+                    Sistemas Operacionais<br>& O <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">Kernel</span>
+                </h1>
+                <p class="text-xl font-mono text-slate-600 max-w-2xl mx-auto mt-6">A ponte vital entre o Hardware e o Usuário.</p>
+            </div>
+            <div class="mt-16 animate-pulse text-cyan-600 no-print">
+                <p class="text-[10px] uppercase tracking-widest mb-2 opacity-50 text-center">Avançar</p>
+                <i data-lucide="chevrons-down" class="mx-auto w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-cyan-700 mb-10 border-l-4 border-cyan-500 pl-4">Roteiro da Aula</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+                <div class="card p-6 border-t-4 border-violet-600 bg-white">
+                    <div class="text-violet-600 mb-4"><i data-lucide="binary" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">1. A Evolução</h3>
+                    <p class="text-sm text-slate-600 mb-4">Como chegamos até aqui.</p>
+                    <ul class="text-sm list-disc pl-5 space-y-1 font-mono text-slate-700">
+                        <li>Linguagem de Máquina</li>
+                        <li>Assembly</li>
+                        <li>A necessidade de um SO</li>
+                    </ul>
+                </div>
+                <div class="card p-6 border-t-4 border-cyan-600 bg-white">
+                    <div class="text-cyan-600 mb-4"><i data-lucide="cpu" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">2. O Kernel</h3>
+                    <p class="text-sm text-slate-600 mb-4">O núcleo do sistema.</p>
+                    <ul class="text-sm list-disc pl-5 space-y-1 font-mono text-slate-700">
+                        <li>O que é o Kernel?</li>
+                        <li>Modo Usuário vs Kernel</li>
+                        <li>System Calls</li>
+                    </ul>
+                </div>
+                <div class="card p-6 border-t-4 border-blue-600 bg-white">
+                    <div class="text-blue-600 mb-4"><i data-lucide="monitor-speaker" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-xl mb-2 text-slate-900">3. SOs Modernos</h3>
+                    <p class="text-sm text-slate-600 mb-4">A Guerra dos Mundos.</p>
+                    <ul class="text-sm list-disc pl-5 space-y-1 font-mono text-slate-700">
+                        <li>Windows</li>
+                        <li>Linux & Open Source</li>
+                        <li>Tabela Comparativa</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MÓDULO 1: EVOLUÇÃO ================= -->
+
+        <!-- SLIDE 3 -->
+        <section class="slide">
+            <h2 class="text-4xl font-black text-slate-900 mb-6">A Máquina "Burra"</h2>
+            <div class="card p-8 max-w-4xl text-center bg-white">
+                <p class="text-xl mb-6 text-slate-800">Lembre-se: O Processador só entende duas coisas: <strong class="text-cyan-700 font-mono">0 e 1 (Tensão Baixa e Alta)</strong>.</p>
+                <p class="text-slate-600">Se você comprar as melhores peças do mundo e montá-las, o que acontece ao ligar a tomada?</p>
+                <div class="mt-6 p-4 bg-slate-100 rounded border border-slate-300 font-mono text-red-600 font-bold text-lg">
+                    ABSOLUTAMENTE NADA.
+                </div>
+                <p class="mt-6 text-sm text-slate-600">O Hardware precisa de instruções precisas para realizar qualquer tarefa.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Linguagem de Máquina -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-6">Fase 1: Linguagem de Máquina</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full max-w-5xl">
+                <div class="space-y-4">
+                    <p class="text-slate-800">Nos primórdios (ENIAC), os programadores precisavam escrever o código diretamente em <strong>binário</strong> ou conectando cabos físicos.</p>
+                    <p class="text-sm text-slate-600">Imagine ter que escrever 100 páginas de zeros e uns só para fazer o computador somar 2 + 2. O índice de erro era gigantesco.</p>
+                </div>
+                <!-- O terminal fica escuro para manter a estética clássica -->
+                <div class="card p-6 bg-slate-900 font-mono text-green-400 text-sm overflow-hidden h-48 flex items-center shadow-lg border-slate-700">
+                    01010111 01100101 01101100 01100011 01101111 01101101 01100101 00100000 01110100 01101111 00100000 01001000 01100101 01101100 01101100
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Assembly -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-violet-700 mb-6">Fase 2: Assembly (A 1ª Abstração)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full max-w-5xl">
+                <div class="card p-6 bg-slate-100 border-2 border-violet-500 font-mono text-violet-800 text-sm">
+                    MOV AX, 5<br>
+                    ADD AX, 3<br>
+                    INT 80h
+                </div>
+                <div class="space-y-4">
+                    <p class="text-slate-800">Criamos códigos mnemônicos (palavras curtas) para substituir os números binários. Um programa chamado <strong>Assembler</strong> traduzia essas palavras para 0 e 1.</p>
+                    <p class="text-sm text-slate-600 border-l-4 border-violet-500 pl-4 bg-violet-50 p-3">Facilitou, mas ainda era terrível: cada tipo de processador tinha um Assembly diferente. O código feito para Intel não rodava em AMD.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Linguagens de Alto Nível -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-6">Fase 3: Linguagens de Alto Nível</h2>
+            <div class="flex flex-col items-center max-w-4xl text-center w-full space-y-6">
+                <p class="text-slate-800">Criamos linguagens que parecem com o inglês (C, Java, Python). Elas são traduzidas para a máquina por <strong>Compiladores</strong>.</p>
+                <div class="w-full card p-6 bg-slate-100 border-2 border-cyan-600 font-mono text-cyan-800 text-left text-sm">
+                    if (nota >= 6) {<br>
+                    &nbsp;&nbsp;print("Aprovado");<br>
+                    }
+                </div>
+                <p class="text-sm text-slate-700 bg-red-50 border border-red-200 p-4 rounded w-full"><strong>O Grande Problema:</strong> Cada programa que você escrevia tinha que ter um código gigante para controlar a impressora, a tela, o teclado, a memória... Era reinventar a roda toda vez!</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: O Nascimento do SO -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-slate-900 mb-6">O Nascimento do S.O.</h2>
+            <div class="card p-8 max-w-4xl text-center border-t-8 border-cyan-600 bg-white">
+                <p class="text-xl mb-6 text-slate-800">Por que não criar <strong>um único programa mestre</strong> que saiba conversar com todas as peças do hardware?</p>
+                <p class="text-slate-600">Assim, se eu criar um jogo, eu não preciso programar como o jogo acende o monitor. O jogo apenas "pede" para o programa mestre: <em>"Ei, desenha esse boneco na tela pra mim?"</em></p>
+                <p class="mt-6 font-black text-2xl text-cyan-700">Este programa mestre é o Sistema Operacional (OS).</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: As Camadas da Computação -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-8">As Camadas de Abstração</h2>
+            <div class="flex flex-col w-full max-w-2xl font-bold text-center space-y-2">
+                <div class="bg-slate-200 text-slate-800 p-4 rounded-t-xl border border-slate-300">Usuário (Você)</div>
+                <div class="bg-violet-500 text-white p-4">Aplicações (Chrome, Excel, Jogos)</div>
+                <div class="bg-cyan-600 text-white p-5 shadow-lg text-xl border-y-4 border-white">SISTEMA OPERACIONAL</div>
+                <div class="bg-slate-300 text-slate-800 p-4">Firmware / Drivers</div>
+                <div class="bg-slate-800 text-orange-400 p-4 rounded-b-xl">Hardware (CPU, RAM, Discos)</div>
+            </div>
+            <p class="mt-6 text-sm text-slate-600 text-center max-w-xl">O S.O. fica no meio. Ele protege o hardware de usuários inexperientes e protege os programas das complexidades eletrônicas da máquina.</p>
+        </section>
+
+        <!-- ================= MÓDULO 2: O KERNEL ================= -->
+
+        <!-- SLIDE 9 -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-violet-600 text-white px-4 py-2 rounded font-black text-xl">02</span>
+                <h2 class="text-4xl font-bold text-slate-900">Entrando no Kernel</h2>
+            </div>
+            <p class="text-xl text-center max-w-3xl text-slate-600">O Sistema Operacional é gigante (calculadora, interface gráfica, relógio). Mas existe um "núcleo" duro, que tem poder absoluto sobre a máquina.</p>
+            <h1 class="text-6xl font-black text-violet-700 mt-8 tracking-widest">KERNEL</h1>
+        </section>
+
+        <!-- SLIDE 10: O que é o Kernel? -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-violet-700 mb-6">O que é o Kernel?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl items-center">
+                <div class="img-placeholder w-full h-64 border-violet-500 bg-violet-50">
+                    [Imagem: Ilustração de uma Semente/Caroço (Kernel significa núcleo/semente em inglês)]
+                </div>
+                <div class="space-y-4 text-slate-800">
+                    <p>O Kernel é o componente central do S.O. Ele é o primeiro programa a ser carregado na RAM (após o boot da placa-mãe) e fica lá ativo até o PC desligar.</p>
+                    <div class="card p-4 border-l-4 border-violet-600 bg-white text-sm">
+                        <p class="font-bold text-violet-800 mb-2">Poder Absoluto:</p>
+                        <p class="text-slate-600">Ele é a única coisa no computador que tem permissão para acessar a CPU, a RAM e o Hardware diretamente e sem restrições.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Gerenciamento de Processos -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-8">Funções do Kernel: 1. Processos</h2>
+            <div class="card p-8 w-full max-w-4xl text-center bg-white">
+                <i data-lucide="activity" class="w-12 h-12 mx-auto text-cyan-600 mb-4"></i>
+                <p class="text-lg mb-4 text-slate-800">O computador tem 1 processador, mas você escuta Spotify, usa o Chrome e baixa um arquivo <strong>ao mesmo tempo</strong>.</p>
+                <p class="text-sm text-slate-600 mb-6">Quem faz a mágica? O Kernel! Ele fatia o tempo do processador em milissegundos e distribui entre os programas. Ele troca as tarefas tão rápido que parece simultâneo (Multitarefa Preemptiva).</p>
+                <div class="flex justify-center gap-2">
+                    <div class="h-4 w-12 bg-green-500 rounded animate-pulse"></div>
+                    <div class="h-4 w-12 bg-blue-500 rounded animate-pulse" style="animation-delay: 0.1s"></div>
+                    <div class="h-4 w-12 bg-yellow-500 rounded animate-pulse" style="animation-delay: 0.2s"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Gerenciamento de Memória -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-8">Funções do Kernel: 2. Memória RAM</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                <div class="card p-6 bg-white border-t-4 border-cyan-600">
+                    <h3 class="font-bold text-slate-900 mb-2">O Porteiro da RAM</h3>
+                    <p class="text-sm text-slate-600">O Chrome pede 2GB de RAM. O Kernel procura espaço vazio, reserva e entrega ao Chrome.</p>
+                    <p class="text-sm text-slate-600 mt-2"><strong>Isolamento:</strong> Ele garante que o Chrome não leia a área de memória onde está a sua senha do Banco digitada em outro app. Segurança em primeiro lugar.</p>
+                </div>
+                <div class="card p-6 border-t-4 border-orange-500 bg-orange-50">
+                    <h3 class="font-bold text-orange-700 mb-2">Memória Virtual (Paging)</h3>
+                    <p class="text-sm text-slate-700">Acabou a RAM física? O Kernel pega um pedaço do HD/SSD e "finge" que é RAM para o PC não travar. O sistema fica mais lento, mas não crasha (Página de Swap).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: Gerenciamento de Arquivos e Dispositivos -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-8">Funções: Arquivos e Hardware</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-5xl">
+                <div class="card p-6 text-center bg-white border border-slate-200">
+                    <i data-lucide="folder-tree" class="w-10 h-10 mx-auto text-blue-600 mb-4"></i>
+                    <h3 class="font-bold text-slate-900 mb-2">Sistemas de Arquivos</h3>
+                    <p class="text-sm text-slate-600">O HD é só um mar de magnetismo ou transistores. O Kernel organiza isso em Pastas, Arquivos, e gerencia as permissões de leitura/escrita (ex: NTFS no Windows, EXT4 no Linux).</p>
+                </div>
+                <div class="card p-6 text-center bg-white border border-slate-200">
+                    <i data-lucide="printer" class="w-10 h-10 mx-auto text-purple-600 mb-4"></i>
+                    <h3 class="font-bold text-slate-900 mb-2">Device Drivers (E/S)</h3>
+                    <p class="text-sm text-slate-600">O Kernel usa pequenos programas chamados <em>Drivers</em> para saber exatamente como conversar com a placa de vídeo, a impressora, a placa de rede e o mouse de marcas diferentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: User Space vs Kernel Space -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-slate-900 mb-6">A Divisão de Poder (Anéis de Proteção)</h2>
+            <p class="text-center text-slate-600 max-w-2xl mb-8">Para o PC não explodir com qualquer aplicativo mal feito, o Processador possui níveis de privilégio de segurança (Rings).</p>
+            
+            <div class="relative w-64 h-64 mx-auto rounded-full border-4 border-slate-300 flex items-center justify-center p-4 bg-white">
+                <span class="absolute top-2 text-xs text-slate-500 font-bold">Ring 3 (User Space)</span>
+                
+                <div class="w-48 h-48 rounded-full border-4 border-cyan-500 flex items-center justify-center p-4 bg-cyan-50">
+                    <span class="absolute top-8 text-xs text-cyan-700 font-bold text-center">Ring 1 & 2<br>(Drivers)</span>
+                    
+                    <div class="w-24 h-24 rounded-full bg-violet-600 flex items-center justify-center text-white font-black text-sm text-center shadow-lg">
+                        Ring 0<br>KERNEL
+                    </div>
+                </div>
+            </div>
+            <p class="mt-8 text-sm text-center max-w-xl text-slate-700 bg-slate-100 p-4 rounded-lg">Seus jogos e apps rodam no <strong>Ring 3 (Modo Usuário)</strong>. Eles não podem tocar na memória física. Se tentarem, o Kernel (Ring 0) intervém e "mata" o programa (Fecha sozinho).</p>
+        </section>
+
+        <!-- SLIDE 15: System Calls (Syscalls) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-violet-700 mb-6">System Calls (Syscalls)</h2>
+            <div class="card p-8 max-w-4xl border-t-4 border-violet-600 text-center bg-white">
+                <p class="text-lg mb-4 text-slate-800">Se o aplicativo (Ring 3) não pode acessar o disco, como você salva um arquivo no Word?</p>
+                <div class="text-xl font-bold text-cyan-700 my-6 bg-cyan-50 p-4 rounded border border-cyan-200">
+                    Ele faz um pedido oficial e educado chamado <span class="text-violet-700">System Call</span>.
+                </div>
+                <p class="text-sm text-slate-600">O Word diz: <em>"Sr. Kernel, por favor, salve estes dados no disco Rígido."</em> O Kernel verifica se o usuário tem permissão, faz o trabalho de forma segura, e avisa o Word que terminou com sucesso.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: Interativo - A Analogia do Restaurante -->
+        <section class="slide no-print">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-8">Analogia: O Restaurante 🍽️</h2>
+            <div class="grid grid-cols-4 gap-4 w-full max-w-5xl text-center text-sm font-bold">
+                <!-- Cliente -->
+                <div class="card bg-white p-4 flex flex-col items-center border-b-4 border-slate-400">
+                    <div class="text-4xl mb-2">👤</div>
+                    <h3 class="text-slate-800">O Cliente</h3>
+                    <p class="text-xs font-normal text-slate-500 mt-2">O Aplicativo (ex: Chrome).</p>
+                    <p class="text-[10px] mt-2 font-normal">Não pode entrar na cozinha.</p>
+                </div>
+                <!-- Garçom -->
+                <div class="card bg-white p-4 flex flex-col items-center border-b-4 border-cyan-500">
+                    <div class="text-4xl mb-2">📝</div>
+                    <h3 class="text-slate-800">O Pedido</h3>
+                    <p class="text-xs font-normal text-slate-500 mt-2">System Call (Syscall).</p>
+                    <p class="text-[10px] mt-2 font-normal">Leva a mensagem autorizada.</p>
+                </div>
+                <!-- Chef -->
+                <div class="card bg-white p-4 flex flex-col items-center border-b-4 border-violet-600 transform scale-110 shadow-lg">
+                    <div class="text-4xl mb-2">👨‍🍳</div>
+                    <h3 class="text-slate-800">O Chef</h3>
+                    <p class="text-xs font-normal text-slate-500 mt-2">O Kernel (Ring 0).</p>
+                    <p class="text-[10px] mt-2 font-normal">O único que acessa a despensa e prepara o prato.</p>
+                </div>
+                <!-- Despensa -->
+                <div class="card bg-white p-4 flex flex-col items-center border-b-4 border-orange-500">
+                    <div class="text-4xl mb-2">🥩</div>
+                    <h3 class="text-slate-800">Despensa/Fogão</h3>
+                    <p class="text-xs font-normal text-slate-500 mt-2">O Hardware (RAM/HD).</p>
+                    <p class="text-[10px] mt-2 font-normal">Os recursos físicos brutos.</p>
+                </div>
+            </div>
+            <button onclick="alert('Se o cliente fosse direto no fogão, ele poderia botar fogo no restaurante (queimar o PC). O Chef (Kernel) garante a segurança, a ordem e evita conflitos entre clientes querendo usar o mesmo fogão!')" class="mt-10 px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm text-white font-bold transition">Por que isso é necessário?</button>
+        </section>
+
+        <!-- SLIDE 17: O que acontece se o Kernel falha? -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-red-600 mb-6">Quando o Chef desmaia...</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full max-w-5xl">
+                <div class="space-y-4">
+                    <p class="text-slate-800">Se o Chrome trava (Modo Usuário), você aperta `Ctrl+Alt+Del` e o fecha. O Kernel continua vivo administrando o resto.</p>
+                    <p class="font-bold text-red-600">Mas e se o problema for no Kernel ou em um Driver essencial (Ring 0)?</p>
+                    <p class="text-sm text-slate-600">O sistema inteiro para imediatamente para evitar que o Hardware seja danificado fisicamente ou que os dados do HD sejam corrompidos permanentemente.</p>
+                </div>
+                <!-- Tela Azul de erro clássica (mantida escura por ser a tela de erro original) -->
+                <div class="card bg-blue-700 text-white p-6 font-mono text-sm shadow-lg border-4 border-blue-800">
+                    <p class="mb-4 text-4xl">:(</p>
+                    <p>Your PC ran into a problem and needs to restart.</p>
+                    <p class="mt-4 opacity-80 text-xs">Stop Code: KERNEL_PANIC / BSOD (Blue Screen of Death)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MÓDULO 3: SOs MODERNOS ================= -->
+
+        <!-- SLIDE 18 -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-8">
+                <span class="bg-cyan-600 text-white px-4 py-2 rounded font-black text-xl">03</span>
+                <h2 class="text-4xl font-bold text-slate-900">Sistemas Operacionais Modernos</h2>
+            </div>
+            <p class="text-xl max-w-2xl text-center text-slate-600">A Guerra das Filosofias: O Fechado, o Aberto e o Bonito.</p>
+        </section>
+
+        <!-- SLIDE 19: Windows -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-[#00a4ef] mb-6 flex items-center justify-center gap-3">
+                <i data-lucide="layout-dashboard"></i> Microsoft Windows
+            </h2>
+            <div class="card p-8 w-full max-w-4xl border-t-4 border-[#00a4ef] bg-white">
+                <ul class="list-disc pl-6 space-y-4 text-slate-700">
+                    <li><strong>Modelo:</strong> Código Fechado (Proprietário). Licença paga.</li>
+                    <li><strong>Kernel:</strong> Windows NT (Híbrido).</li>
+                    <li><strong>Foco:</strong> Interface Gráfica (GUI) integrada profundamente. Foco extremo na facilidade de uso para o usuário final doméstico e retrocompatibilidade.</li>
+                    <li><strong>Domínio:</strong> Domina cerca de 70% do mercado de computadores Desktop. É a plataforma principal e absoluta para Gamers e softwares corporativos padronizados (Office, Adobe).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: A Origem do Windows -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-[#00a4ef] mb-6">A Evolução do Windows</h2>
+            <div class="grid grid-cols-2 gap-8 items-center w-full max-w-5xl">
+                <div class="img-placeholder h-48 border-[#00a4ef] bg-slate-100">
+                    [Imagem: Windows 95 interface clássica com o botão Iniciar]
+                </div>
+                <div class="space-y-4 text-sm text-slate-700">
+                    <p>O primeiro Windows (1985) não era um Sistema Operacional completo, era apenas uma "casca gráfica" que rodava em cima do MS-DOS (sistema de linha de comando preta).</p>
+                    <p>Apenas nos anos 90, e consolidadamente com o Windows XP, a Microsoft desenvolveu um Kernel moderno, robusto e com multitarefa real que não dependia mais do DOS como base.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 21: Linux -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-[#f5af00] mb-6 flex items-center justify-center gap-3">
+                <i data-lucide="terminal-square"></i> GNU / Linux
+            </h2>
+            <div class="card p-8 w-full max-w-4xl border-t-4 border-[#f5af00] bg-white">
+                <ul class="list-disc pl-6 space-y-4 text-slate-700">
+                    <li><strong>Modelo:</strong> Código Aberto (Open Source / Licença GPL). Gratuito e feito por milhares de colaboradores globais.</li>
+                    <li><strong>Kernel:</strong> Linux (Monolítico, criado pelo estudante Linus Torvalds em 1991).</li>
+                    <li><strong>Foco:</strong> Estabilidade extrema, segurança, customização ilimitada e linha de comando (Terminal/CLI) poderosa.</li>
+                    <li><strong>Domínio:</strong> Domina a Internet! Roda em mais de 90% dos Servidores WEB do mundo, em 100% dos Supercomputadores e é o núcleo base do Android (Smartphones).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 22: O que é uma Distribuição (Distro)? -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-6">O que é uma Distro Linux?</h2>
+            <p class="max-w-3xl text-center mb-8 text-slate-600">"Linux" na verdade é só o nome do Kernel (o motor do carro). Para ter um sistema completo que você possa usar, você precisa adicionar o chassi, volante e bancos.</p>
+            
+            <div class="flex items-center justify-center gap-4 w-full max-w-4xl text-sm font-bold text-center">
+                <div class="card p-4 bg-slate-100 text-slate-800 w-40 border border-slate-300">Kernel Linux<br><span class="font-normal text-[10px] text-slate-500">(O Motor)</span></div>
+                <div class="text-2xl text-slate-400">+</div>
+                <div class="card p-4 bg-slate-100 text-slate-800 w-40 border border-slate-300">Softwares GNU<br><span class="font-normal text-[10px] text-slate-500">(As Ferramentas)</span></div>
+                <div class="text-2xl text-slate-400">+</div>
+                <div class="card p-4 bg-slate-100 text-slate-800 w-40 border border-slate-300">Interface Gráfica<br><span class="font-normal text-[10px] text-slate-500">(A Carroceria - Gnome)</span></div>
+                <div class="text-2xl text-cyan-600">=</div>
+                <div class="card p-4 bg-cyan-600 text-white w-48 shadow-lg">Ubuntu, Mint, Debian<br><span class="font-normal text-xs text-cyan-100">(Distribuição)</span></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 23: macOS (Menção Honrosa) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-slate-900 mb-6 flex items-center justify-center gap-3">
+                <i data-lucide="apple"></i> Apple macOS
+            </h2>
+            <div class="grid grid-cols-2 gap-8 items-center w-full max-w-5xl">
+                <div class="space-y-4 text-sm text-slate-700">
+                    <p><strong>Kernel:</strong> Darwin (Baseado em UNIX, o "avô" do Linux).</p>
+                    <p><strong>Modelo:</strong> Sistema Fechado, atrelado estritamente à venda de hardware exclusivo da Apple (MacBooks, iMacs).</p>
+                    <p>Ele une a estabilidade feroz e os comandos de um terminal UNIX com a interface gráfica mais polida, intuitiva e controlada do mercado. Altamente adotado por designers, editores de vídeo e desenvolvedores de software.</p>
+                </div>
+                <div class="img-placeholder h-48 border-slate-400">
+                    [Imagem: Interface visual moderna e limpa do macOS]
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 24: A Tabela Comparativa Definitiva -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-6">Comparativo Direto: Windows vs Linux</h2>
+            <div class="w-full max-w-5xl overflow-hidden rounded-xl border border-slate-300 shadow-lg text-sm bg-white">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800 text-white">
+                            <th class="p-4 border-b border-slate-600 w-1/4">Característica</th>
+                            <th class="p-4 border-b border-slate-600 border-l border-slate-600 text-cyan-300">Windows</th>
+                            <th class="p-4 border-b border-slate-600 border-l border-slate-600 text-orange-300">Linux</th>
+                        </tr>
+                    </thead>
+                    <tr class="text-slate-800">
+                        <td class="p-4 font-bold border-b border-slate-200">Licença / Preço</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200">Proprietário (Pago)</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200">GPL / Open Source (Grátis)</td>
+                    </tr>
+                    <tr class="bg-slate-50 text-slate-800">
+                        <td class="p-4 font-bold border-b border-slate-200">Acesso ao Código</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200 text-red-600">Fechado (Segredo da Microsoft)</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200 text-green-700">Aberto (Qualquer um pode auditar)</td>
+                    </tr>
+                    <tr class="text-slate-800">
+                        <td class="p-4 font-bold border-b border-slate-200">Sistema de Arquivos</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200">NTFS, Letras de disco (C:, D:)</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200">EXT4, Árvore Única (Root: /)</td>
+                    </tr>
+                    <tr class="bg-slate-50 text-slate-800">
+                        <td class="p-4 font-bold border-b border-slate-200">Maior Foco / Público</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200">Usuários comuns, Gamers, Office</td>
+                        <td class="p-4 border-b border-slate-200 border-l border-slate-200">Servidores, Programadores, IoT</td>
+                    </tr>
+                    <tr class="text-slate-800">
+                        <td class="p-4 font-bold">Variedade de Interface</td>
+                        <td class="p-4 border-l border-slate-200">Uma única interface padrão do sistema</td>
+                        <td class="p-4 border-l border-slate-200">Múltiplas escolhas (Gnome, KDE, XFCE)</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- SLIDE 25: A Linha de Comando (CLI) -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-violet-700 mb-6">A Interface de Linha de Comando (CLI)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl items-center">
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-700">No Windows doméstico, você faz quase tudo com o mouse (GUI - Interface Gráfica). No universo Linux profissional e de servidores, o poder verdadeiro reside no <strong>Terminal</strong>.</p>
+                    <p class="text-sm text-slate-700">O Terminal (Shell) permite conversar diretamente com o sistema usando comandos de texto curtos, rápidos e precisos.</p>
+                    <div class="card bg-slate-50 p-4 border-l-4 border-cyan-600">
+                        <p class="text-xs text-cyan-800 font-bold mb-1">Por que aprender a usar o Terminal?</p>
+                        <p class="text-xs text-slate-600">Ele é incomparavelmente mais rápido para tarefas repetitivas, permite a criação de Scripts (automação) e consome muito menos memória e processamento da máquina.</p>
+                    </div>
+                </div>
+                <!-- Terminal block remains dark for terminal aesthetics -->
+                <div class="card bg-slate-900 p-4 font-mono text-xs text-green-400 shadow-md border border-slate-700">
+                    user@linux-server:~$ sudo apt update<br>
+                    [sudo] password for user:<br>
+                    Hit:1 http://br.archive.ubuntu.com/ubuntu focal InRelease<br>
+                    Get:2 http://br.archive.ubuntu.com/ubuntu focal-updates InRelease<br>
+                    Fetched 2,130 kB in 2s (1,065 kB/s)<br>
+                    user@linux-server:~$ _<span class="animate-pulse">█</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 26: O papel do BIOS/UEFI com o SO -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-6">Como o Hardware chama o S.O.?</h2>
+            <div class="card p-8 max-w-4xl text-center border-t-4 border-cyan-600 bg-white">
+                <p class="text-lg mb-6 text-slate-800">O Processo de Bootloader (A passagem do bastão)</p>
+                <div class="flex justify-center items-center gap-3 text-xs md:text-sm font-bold">
+                    <div class="p-3 bg-slate-200 rounded-lg text-slate-800 border border-slate-300">Botão Power</div>
+                    <i data-lucide="arrow-right" class="text-slate-400"></i>
+                    <div class="p-3 bg-orange-500 rounded-lg text-white shadow">Placa Mãe (UEFI)</div>
+                    <i data-lucide="arrow-right" class="text-slate-400"></i>
+                    <div class="p-3 bg-violet-600 rounded-lg text-white text-center shadow">Bootloader (GRUB)<br><span class="text-[10px] font-normal opacity-80">(Lê o HD/SSD)</span></div>
+                    <i data-lucide="arrow-right" class="text-slate-400"></i>
+                    <div class="p-3 bg-cyan-600 rounded-lg text-white shadow-lg border-2 border-cyan-300">KERNEL carregado na RAM</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 27: Interativo - Escolha seu Sistema -->
+        <section class="slide no-print">
+            <h2 class="text-3xl font-bold text-slate-900 mb-8">Jogo Rápido: Qual S.O. Escolher? 🤔</h2>
+            <p class="mb-6 text-slate-700 text-center max-w-2xl bg-white p-4 rounded-lg border border-slate-200">"Preciso montar um servidor web na minha empresa, super estável, que não precisa de monitor (rodará só no terminal), e nossa verba é zero (não podemos pagar licença)."</p>
+            
+            <div class="flex gap-6 w-full max-w-3xl justify-center">
+                <button onclick="alert('Incorreto! O Windows Server requer o pagamento de uma licença cara e seu foco gráfico consome recursos desnecessários para um servidor web que precisa de economia.')" class="card bg-white p-6 flex-1 hover:bg-blue-50 border-2 border-slate-200 hover:border-[#00a4ef] transition text-center cursor-pointer shadow-sm">
+                    <i data-lucide="layout-dashboard" class="w-12 h-12 mx-auto mb-2 text-[#00a4ef]"></i>
+                    <span class="font-bold text-slate-800">Windows Server</span>
+                </button>
+                <button onclick="alert('Exatamente! O Linux é 100% gratuito (Open Source), é famoso por sua estabilidade extrema em servidores e foi feito para funcionar perfeitamente apenas via linha de comando (CLI).')" class="card bg-white p-6 flex-1 hover:bg-orange-50 border-2 border-slate-200 hover:border-[#f5af00] transition text-center cursor-pointer shadow-sm">
+                    <i data-lucide="terminal-square" class="w-12 h-12 mx-auto mb-2 text-[#f5af00]"></i>
+                    <span class="font-bold text-slate-800">Linux (ex: Ubuntu Server)</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- SLIDE 28: Resumo/Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-3xl font-bold text-cyan-700 mb-8">Mapa Mental da Aula</h2>
+            <div class="flex flex-col items-center gap-4 w-full max-w-3xl text-sm font-mono">
+                <div class="bg-cyan-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-md border-2 border-cyan-400">SISTEMA OPERACIONAL</div>
+                
+                <div class="flex w-full gap-6 mt-2">
+                    <div class="flex-1 flex flex-col gap-2">
+                        <div class="bg-slate-200 text-slate-900 px-4 py-2 rounded text-center font-bold border border-slate-300">O KERNEL (Ring 0)</div>
+                        <div class="bg-white p-2 rounded text-center border border-slate-300 text-slate-700 text-xs shadow-sm">Gerencia Processos da CPU</div>
+                        <div class="bg-white p-2 rounded text-center border border-slate-300 text-slate-700 text-xs shadow-sm">Gerencia Memória RAM</div>
+                        <div class="bg-white p-2 rounded text-center border border-slate-300 text-slate-700 text-xs shadow-sm">Isolamento e Segurança (Drivers)</div>
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col gap-2">
+                        <div class="bg-slate-200 text-slate-900 px-4 py-2 rounded text-center font-bold border border-slate-300">USER SPACE (Ring 3)</div>
+                        <div class="bg-white p-2 rounded text-center border border-slate-300 text-slate-700 text-xs shadow-sm">Aplicativos (Chrome, Jogos)</div>
+                        <div class="bg-violet-50 p-2 rounded text-center border border-violet-200 text-violet-800 text-xs font-bold shadow-sm">Falam com o Kernel via SYSCALL</div>
+                        <div class="bg-white p-2 rounded text-center border border-slate-300 text-slate-700 text-xs shadow-sm">Interface Gráfica (GUI)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 29: Próxima Aula -->
+        <section class="slide">
+            <h2 class="text-2xl font-mono text-cyan-600 mb-4 font-bold uppercase tracking-wider">Próximo Nível...</h2>
+            <h1 class="text-5xl font-black text-slate-900 mb-8 text-center leading-tight">Comandos Básicos<br>de Linux</h1>
+            <p class="text-lg max-w-2xl text-center text-slate-600 mb-10">É hora de sujar as mãos. Na próxima aula, abandonaremos o conforto do mouse e vamos controlar o Kernel diretamente usando os poderes do Terminal.</p>
+            <div class="flex gap-6 justify-center text-cyan-600 opacity-60">
+                <i data-lucide="terminal" class="w-16 h-16"></i>
+                <i data-lucide="folder-open" class="w-16 h-16"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 30: Conclusão -->
+        <section class="slide bg-white border-t-8 border-cyan-600 shadow-[inset_0_20px_50px_rgba(0,0,0,0.02)]">
+            <div class="text-center">
+                <i data-lucide="code-2" class="w-20 h-20 mx-auto text-cyan-600 mb-6"></i>
+                <h1 class="text-6xl font-black mb-4 text-slate-900">FIM DA AULA 06</h1>
+                <p class="text-xl text-slate-600 mb-12 font-mono">Você acaba de compreender a alma da máquina.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-cyan-600 text-white px-10 py-4 rounded-full font-black shadow-lg hover:bg-cyan-700 transition flex items-center gap-3 hover:scale-105">
+                        <i data-lucide="download"></i> Gerar Apostila de Estudo (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-20 text-xs text-slate-400 font-mono tracking-widest uppercase font-bold">COTIL - Fundamentos de Informática</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-4 bg-white/90 backdrop-blur rounded-full shadow-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition transform active:scale-95">
+            <i data-lucide="arrow-left"></i>
+        </button>
+        <button id="nextBtn" class="p-4 bg-cyan-600 rounded-full shadow-lg text-white font-bold hover:bg-cyan-700 transition transform active:scale-95 border border-cyan-700">
+            <i data-lucide="arrow-right"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica dos Slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            // Progress Bar
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Decimal Counter
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        // Init
+        updateSlides();
+
+        // Controls
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>

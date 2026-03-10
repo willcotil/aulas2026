@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Exercícios 01 - Banco de Dados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0B192C',
+                            secondary: '#1E3E62',
+                            accent: '#FF6500',
+                            light: '#ffffff',
+                            muted: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0B192C;
+        }
+
+        @media print {
+            body { background-color: #ffffff; }
+            .no-print { display: none !important; }
+            main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; box-shadow: none !important; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+    <!-- Controles Flutuantes -->
+    <div class="no-print fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+        <button onclick="window.print()" class="bg-brand-accent text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-orange-600 transition flex items-center justify-center gap-2">
+            <i class="fas fa-print"></i> IMPRIMIR LISTA
+        </button>
+    </div>
+
+    <main class="max-w-4xl mx-auto bg-white p-8 md:p-12 shadow-xl rounded-xl">
+        
+        <!-- Cabeçalho -->
+        <header class="border-b-4 border-brand-secondary pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-brand-dark mb-1">Base de Dados I</h1>
+                <h2 class="text-lg text-brand-accent font-bold uppercase tracking-widest">Lista de Exercícios 01</h2>
+                <p class="text-sm text-slate-500 mt-1">Conteúdo: Fundamentos, MER, Entidades, Atributos e Chaves (Aulas 1 a 4)</p>
+            </div>
+        </header>
+
+        <div class="space-y-10">
+
+            <!-- Questão 1 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">01.</span> Dado vs. Informação
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Explique a diferença fundamental entre "Dado" e "Informação". Crie um exemplo prático (diferente dos vistos em aula) ilustrando como um dado se transforma numa informação útil.
+                </p>
+            </div>
+
+            <!-- Questão 2 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">02.</span> O Papel do SGBD
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Antes dos SGBDs, as empresas utilizavam arquivos de texto simples (como planilhas ou TXT) para guardar dados. Cite e explique brevemente dois problemas graves dessa abordagem antiga que foram resolvidos pelos SGBDs modernos.
+                </p>
+            </div>
+
+            <!-- Questão 3 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">03.</span> Arquitetura e Independência
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Na arquitetura de três níveis (ANSI/SPARC), o que significa a "Independência Lógica de Dados"? Dê um exemplo de uma alteração que ilustre este conceito.
+                </p>
+            </div>
+
+            <!-- Questão 4 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">04.</span> Entidade e Tupla
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Qual a diferença entre uma <strong>Entidade</strong> (ou Tipo de Entidade) e uma <strong>Instância</strong> (ou Tupla)? Utilize a entidade <code>CARRO</code> para exemplificar.
+                </p>
+            </div>
+
+            <!-- Questão 5 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">05.</span> Classificação de Atributos
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Para um sistema de gestão de Recursos Humanos, foi criada a entidade <code>FUNCIONÁRIO</code>. Classifique os atributos abaixo como <strong>Simples</strong>, <strong>Composto</strong> ou <strong>Multivalorado</strong>:
+                </p>
+                <ul class="mt-2 space-y-1 ml-8 list-disc text-slate-700">
+                    <li>Morada (Rua, Número, Código Postal)</li>
+                    <li>Telefones de Contacto</li>
+                    <li>Data de Nascimento</li>
+                </ul>
+            </div>
+
+            <!-- Questão 6 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">06.</span> Tipos de Dados
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    A escolha correta do tipo de dado otimiza o desempenho do banco de dados. Qual o tipo de dado SQL mais indicado (INT, VARCHAR, DECIMAL ou DATETIME) para cada informação abaixo?
+                </p>
+                <ul class="mt-2 space-y-1 ml-8 list-disc text-slate-700">
+                    <li>O preço de um produto (Ex: 149.90)</li>
+                    <li>A quantidade de itens em stock (Ex: 50)</li>
+                    <li>O nome de um cliente (Ex: "Ana Silva")</li>
+                    <li>A data e hora exata de uma venda</li>
+                </ul>
+            </div>
+
+            <!-- Questão 7 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">07.</span> Surrogate Key vs. Chave Natural
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Muitos iniciantes colocam o NIF (ou CPF) como Chave Primária (PK) na tabela de Clientes, afinal, é um documento único. No entanto, no mercado profissional, ensinamos a usar uma <em>Surrogate Key</em> (um campo <code>id</code> numérico com Auto-Incremento). Por que razão o <code>id</code> é considerado uma prática melhor? (Cite pelo menos 2 motivos).
+                </p>
+            </div>
+
+            <!-- Questão 8 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">08.</span> Chaves Únicas e Estrangeiras
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Tendo em conta a resposta da questão anterior, se o <code>id</code> é a Chave Primária, o que devemos fazer com o campo <code>NIF</code> para garantir que o banco de dados não aceite dois clientes com o mesmo documento? Além disso, explique brevemente qual é a função de uma <strong>Chave Estrangeira (FK)</strong>.
+                </p>
+            </div>
+
+            <!-- Questão 9 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">09.</span> Cardinalidade no MER
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    A cardinalidade define o número de ocorrências num relacionamento. Identifique a cardinalidade ideal (1:1, 1:N ou N:N) para os cenários abaixo, considerando as regras de negócio tradicionais:
+                </p>
+                <ul class="mt-2 space-y-1 ml-8 list-disc text-slate-700">
+                    <li>Uma Pessoa e o seu Passaporte</li>
+                    <li>Um Cliente e os seus Pedidos de Compra</li>
+                    <li>Um Estudante e as Disciplinas em que está matriculado</li>
+                </ul>
+            </div>
+
+            <!-- Questão 10 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
+                    <span class="text-brand-accent">10.</span> Análise e Modelagem
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    "Um hospital precisa gerir os médicos e os pacientes. Um médico pode atender vários pacientes ao longo do dia. Um paciente, por sua vez, pode ser atendido por vários médicos diferentes durante o seu internamento. Queremos guardar o Nome e a Especialidade do médico, e o Nome e o Quarto do paciente."
+                </p>
+                <p class="mt-4 text-slate-800 font-bold">
+                    No seu caderno, identifique as Entidades, os seus atributos e defina qual é a Cardinalidade entre elas.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-16 no-print text-slate-400 text-sm italic">
+            "A prática é o único caminho para a mestria em banco de dados."
+        </div>
+
+    </main>
+
+</body>
+</html>
