@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Acompanhamento - PI II</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#000000',
+                            dark: '#0B192C',
+                            secondary: '#1E3E62',
+                            accent: '#FF6500',
+                            light: '#ffffff',
+                            muted: '#f8fafc',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Fundo cinza claro fora do papel */
+            color: #0B192C;
+        }
+
+        /* Estilização do Slider (Range) */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #FF6500;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 3px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Regras para Impressão / Geração de PDF */
+        @media print {
+            body { 
+                background-color: white !important; 
+                margin: 0; 
+                padding: 0;
+                font-size: 11pt; /* Reduz a fonte base para caber na página */
+            }
+            .no-print { display: none !important; }
+            #document-container {
+                box-shadow: none !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+            }
+            input, textarea, select {
+                border: 1px solid #cbd5e1 !important;
+                background-color: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                padding: 4px !important;
+                font-size: 10pt !important;
+            }
+            /* Oculta o range e mostra só o valor em texto na impressão */
+            .range-container { display: none !important; }
+            .print-progress { display: block !important; font-weight: bold; color: #1E3E62; }
+            
+            /* Ajustes severos de espaçamento para forçar 1 página A4 */
+            .mb-10 { margin-bottom: 12px !important; }
+            .mb-8 { margin-bottom: 12px !important; }
+            .mb-6 { margin-bottom: 8px !important; }
+            .pb-6 { padding-bottom: 8px !important; }
+            .p-5 { padding: 8px !important; }
+            .p-8, .md\:p-12 { padding: 0 !important; }
+            .mt-20 { margin-top: 20px !important; }
+            .pt-10 { padding-top: 10px !important; }
+            h1 { font-size: 16pt !important; }
+            h2 { font-size: 12pt !important; margin-bottom: 8px !important; }
+            .gap-6 { gap: 8px !important; }
+            .gap-4 { gap: 4px !important; }
+            textarea { height: 60px !important; } /* Reduz a caixa de texto na impressão */
+        }
+
+        /* Esconde texto de progresso na tela (usado só na impressão) */
+        .print-progress { display: none; }
+    </style>
+</head>
+<body class="py-10 px-4">
+
+    <!-- Container do Documento (Página A4) -->
+    <div id="document-container" class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl p-8 md:p-12 border-t-8 border-brand-accent">
+        
+        <!-- Cabeçalho -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-brand-secondary/20 pb-6 mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-brand-dark uppercase tracking-tight">Projeto Integrador II</h1>
+                <p class="text-brand-secondary text-lg font-medium">Relatório de Acompanhamento</p>
+            </div>
+            <div class="flex flex-col items-end">
+                <div class="bg-brand-muted px-4 py-2 rounded-lg border border-brand-secondary/20 text-sm font-bold text-brand-dark mb-2">
+                    Data: <input type="date" class="bg-transparent outline-none ml-2 text-brand-accent" value="">
+                </div>
+                <button onclick="window.print()" class="no-print bg-brand-secondary hover:bg-brand-dark text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md">
+                    <i class="fas fa-file-pdf"></i> Salvar / Imprimir PDF
+                </button>
+            </div>
+        </header>
+
+        <form>
+            <!-- 1. IDENTIFICAÇÃO DO PROJETO -->
+            <section class="mb-10">
+                <h2 class="text-xl font-bold text-brand-dark mb-6 flex items-center gap-3">
+                    <span class="bg-brand-accent text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span>
+                    Identificação do Projeto
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="md:col-span-3">
+                        <label class="block text-sm font-bold text-brand-secondary mb-2 uppercase tracking-wide">Título do Projeto</label>
+                        <input type="text" placeholder="Ex: Sistema de Gestão Inteligente..." class="w-full p-3 rounded-lg border border-brand-secondary/20 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 outline-none transition bg-brand-muted/30 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-brand-secondary mb-2 uppercase tracking-wide">Turma</label>
+                        <input type="text" placeholder="Ex: Info 3A" class="w-full p-3 rounded-lg border border-brand-secondary/20 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 outline-none transition bg-brand-muted/30 font-medium text-center">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-brand-secondary mb-2 uppercase tracking-wide">Equipe (4 Integrantes)</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3 bg-brand-muted/30 p-2 rounded-lg border border-brand-secondary/20">
+                            <i class="fas fa-user text-brand-secondary/50 ml-2"></i>
+                            <input type="text" placeholder="Nome do Aluno 1" class="w-full bg-transparent outline-none p-1 font-medium">
+                        </div>
+                        <div class="flex items-center gap-3 bg-brand-muted/30 p-2 rounded-lg border border-brand-secondary/20">
+                            <i class="fas fa-user text-brand-secondary/50 ml-2"></i>
+                            <input type="text" placeholder="Nome do Aluno 2" class="w-full bg-transparent outline-none p-1 font-medium">
+                        </div>
+                        <div class="flex items-center gap-3 bg-brand-muted/30 p-2 rounded-lg border border-brand-secondary/20">
+                            <i class="fas fa-user text-brand-secondary/50 ml-2"></i>
+                            <input type="text" placeholder="Nome do Aluno 3" class="w-full bg-transparent outline-none p-1 font-medium">
+                        </div>
+                        <div class="flex items-center gap-3 bg-brand-muted/30 p-2 rounded-lg border border-brand-secondary/20">
+                            <i class="fas fa-user text-brand-secondary/50 ml-2"></i>
+                            <input type="text" placeholder="Nome do Aluno 4" class="w-full bg-transparent outline-none p-1 font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-brand-secondary mb-2 uppercase tracking-wide">Descrição Sucinta (O que o sistema faz?)</label>
+                    <textarea rows="3" placeholder="Descreva brevemente o objetivo principal do projeto..." class="w-full p-3 rounded-lg border border-brand-secondary/20 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 outline-none transition bg-brand-muted/30 font-medium resize-none"></textarea>
+                </div>
+            </section>
+
+            <!-- 2. AVALIAÇÃO DE ANDAMENTO -->
+            <section class="mb-10">
+                <h2 class="text-xl font-bold text-brand-dark mb-6 flex items-center gap-3">
+                    <span class="bg-brand-accent text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span>
+                    Andamento das Vertentes
+                </h2>
+                
+                <div class="space-y-4">
+                    
+                    <!-- Banco de Dados -->
+                    <div class="p-5 border border-brand-secondary/20 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <div class="flex items-center gap-4 md:w-1/4">
+                            <div class="bg-brand-dark text-brand-accent w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h3 class="font-bold text-brand-dark leading-tight">Banco de<br>Dados</h3>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <select class="w-full p-2 text-sm rounded-lg border border-brand-secondary/30 outline-none bg-brand-muted font-bold text-brand-secondary">
+                                <option>Não Iniciado</option>
+                                <option>Em Modelagem (MER/DER)</option>
+                                <option>Tabelas Criadas</option>
+                                <option>Concluído / Populado</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-2/4">
+                            <div class="flex justify-between mb-1 text-xs font-bold text-brand-secondary">
+                                <span>Progresso Estimado</span>
+                                <span id="val-db">0%</span>
+                            </div>
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="0" oninput="document.getElementById('val-db').innerText = this.value + '%'; document.getElementById('print-db').innerText = this.value + '%';">
+                            </div>
+                            <span id="print-db" class="print-progress">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- API -->
+                    <div class="p-5 border border-brand-secondary/20 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <div class="flex items-center gap-4 md:w-1/4">
+                            <div class="bg-brand-dark text-brand-accent w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            <h3 class="font-bold text-brand-dark leading-tight">API<br>Restful</h3>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <select class="w-full p-2 text-sm rounded-lg border border-brand-secondary/30 outline-none bg-brand-muted font-bold text-brand-secondary">
+                                <option>Não Iniciado</option>
+                                <option>Estrutura Criada</option>
+                                <option>Conectado ao Banco</option>
+                                <option>Endpoints Prontos</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-2/4">
+                            <div class="flex justify-between mb-1 text-xs font-bold text-brand-secondary">
+                                <span>Progresso Estimado</span>
+                                <span id="val-api">0%</span>
+                            </div>
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="0" oninput="document.getElementById('val-api').innerText = this.value + '%'; document.getElementById('print-api').innerText = this.value + '%';">
+                            </div>
+                            <span id="print-api" class="print-progress">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Desktop -->
+                    <div class="p-5 border border-brand-secondary/20 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <div class="flex items-center gap-4 md:w-1/4">
+                            <div class="bg-brand-dark text-brand-accent w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            <h3 class="font-bold text-brand-dark leading-tight">Versão<br>Desktop</h3>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <select class="w-full p-2 text-sm rounded-lg border border-brand-secondary/30 outline-none bg-brand-muted font-bold text-brand-secondary">
+                                <option>Não Iniciado</option>
+                                <option>Telas Desenhadas (UI)</option>
+                                <option>Consumindo API</option>
+                                <option>Funcional / Finalizado</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-2/4">
+                            <div class="flex justify-between mb-1 text-xs font-bold text-brand-secondary">
+                                <span>Progresso Estimado</span>
+                                <span id="val-desk">0%</span>
+                            </div>
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="0" oninput="document.getElementById('val-desk').innerText = this.value + '%'; document.getElementById('print-desk').innerText = this.value + '%';">
+                            </div>
+                            <span id="print-desk" class="print-progress">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Web -->
+                    <div class="p-5 border border-brand-secondary/20 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <div class="flex items-center gap-4 md:w-1/4">
+                            <div class="bg-brand-dark text-brand-accent w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <h3 class="font-bold text-brand-dark leading-tight">Versão<br>Web</h3>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <select class="w-full p-2 text-sm rounded-lg border border-brand-secondary/30 outline-none bg-brand-muted font-bold text-brand-secondary">
+                                <option>Não Iniciado</option>
+                                <option>Telas Desenhadas (UI)</option>
+                                <option>Consumindo API</option>
+                                <option>Funcional / Finalizado</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-2/4">
+                            <div class="flex justify-between mb-1 text-xs font-bold text-brand-secondary">
+                                <span>Progresso Estimado</span>
+                                <span id="val-web">0%</span>
+                            </div>
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="0" oninput="document.getElementById('val-web').innerText = this.value + '%'; document.getElementById('print-web').innerText = this.value + '%';">
+                            </div>
+                            <span id="print-web" class="print-progress">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Mobile -->
+                    <div class="p-5 border border-brand-secondary/20 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <div class="flex items-center gap-4 md:w-1/4">
+                            <div class="bg-brand-dark text-brand-accent w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0">
+                                <i class="fas fa-mobile-screen"></i>
+                            </div>
+                            <h3 class="font-bold text-brand-dark leading-tight">Versão<br>Mobile</h3>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <select class="w-full p-2 text-sm rounded-lg border border-brand-secondary/30 outline-none bg-brand-muted font-bold text-brand-secondary">
+                                <option>Não Iniciado</option>
+                                <option>Telas Desenhadas (UI)</option>
+                                <option>Consumindo API</option>
+                                <option>Funcional / Finalizado</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-2/4">
+                            <div class="flex justify-between mb-1 text-xs font-bold text-brand-secondary">
+                                <span>Progresso Estimado</span>
+                                <span id="val-mob">0%</span>
+                            </div>
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="0" oninput="document.getElementById('val-mob').innerText = this.value + '%'; document.getElementById('print-mob').innerText = this.value + '%';">
+                            </div>
+                            <span id="print-mob" class="print-progress">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Embarcada -->
+                    <div class="p-5 border border-brand-secondary/20 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <div class="flex items-center gap-4 md:w-1/4">
+                            <div class="bg-brand-dark text-brand-accent w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <h3 class="font-bold text-brand-dark leading-tight">Versão<br>Embarcada</h3>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <select class="w-full p-2 text-sm rounded-lg border border-brand-secondary/30 outline-none bg-brand-muted font-bold text-brand-secondary">
+                                <option>Não Aplicável / Não Iniciado</option>
+                                <option>Protótipo no Simulador</option>
+                                <option>Código C/C++ Pronto</option>
+                                <option>Integrado (Hardware+API)</option>
+                            </select>
+                        </div>
+                        <div class="w-full md:w-2/4">
+                            <div class="flex justify-between mb-1 text-xs font-bold text-brand-secondary">
+                                <span>Progresso Estimado</span>
+                                <span id="val-iot">0%</span>
+                            </div>
+                            <div class="range-container">
+                                <input type="range" min="0" max="100" value="0" oninput="document.getElementById('val-iot').innerText = this.value + '%'; document.getElementById('print-iot').innerText = this.value + '%';">
+                            </div>
+                            <span id="print-iot" class="print-progress">0%</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 3. DIFICULDADES E OBSERVAÇÕES -->
+            <section class="mb-4">
+                <h2 class="text-xl font-bold text-brand-dark mb-4 flex items-center gap-3 border-b-2 border-brand-secondary/10 pb-4">
+                    <span class="bg-brand-accent text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span>
+                    Dificuldades Encontradas e Próximos Passos
+                </h2>
+                
+                <div class="bg-brand-muted/30 p-1 rounded-xl">
+                    <textarea rows="4" placeholder="Relate as principais dificuldades técnicas, problemas com a equipe ou bloqueios de infraestrutura. Liste também o que o grupo pretende resolver na próxima semana..." class="w-full p-4 rounded-lg border border-brand-secondary/20 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/20 outline-none transition font-medium resize-none"></textarea>
+                </div>
+            </section>
+            
+            <!-- Assinatura (Aparece mais limpo na impressão) -->
+            <div class="hidden print:block mt-8 pt-4 border-t border-dashed border-gray-400">
+                <div class="flex justify-between px-10">
+                    <div class="text-center w-64">
+                        <div class="border-b border-black mb-2"></div>
+                        <span class="text-sm font-bold">Assinatura do Representante</span>
+                    </div>
+                    <div class="text-center w-64">
+                        <div class="border-b border-black mb-2"></div>
+                        <span class="text-sm font-bold">Visto do Professor</span>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        // O script automático que preenchia a data foi removido.
+    </script>
+</body>
+</html>
