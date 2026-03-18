@@ -38,6 +38,16 @@
             main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; box-shadow: none !important; }
             .page-break { page-break-before: always; }
         }
+
+        .case-box {
+            background: #f8fafc;
+            border-left: 4px solid #1E3E62;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            font-style: italic;
+            color: #475569;
+        }
     </style>
 </head>
 <body class="p-6 md:p-10">
@@ -55,8 +65,8 @@
         <header class="border-b-4 border-brand-secondary pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-black text-brand-dark mb-1">Base de Dados I</h1>
-                <h2 class="text-lg text-brand-accent font-bold uppercase tracking-widest">Lista de Exercícios 01</h2>
-                <p class="text-sm text-slate-500 mt-1">Conteúdo: Fundamentos, MER, Entidades, Atributos e Chaves (Aulas 1 a 4)</p>
+                <h2 class="text-lg text-brand-accent font-bold uppercase tracking-widest">Missões Práticas: Modulo 01</h2>
+                <p class="text-sm text-slate-500 mt-1">Conteúdo: Fundamentos, Entidades, Atributos, Tipos e Chaves</p>
             </div>
         </header>
 
@@ -64,127 +74,227 @@
 
             <!-- Questão 1 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">01.</span> Dado vs. Informação
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">01.</span> O Enigma do Hacker
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    Explique a diferença fundamental entre "Dado" e "Informação". Crie um exemplo prático (diferente dos vistos em aula) ilustrando como um dado se transforma numa informação útil.
+                    Um hacker invadiu o servidor de um hospital e roubou um arquivo de texto contendo milhares de linhas com valores como: <code>38.5, 12, 120/80, Positivo</code>. Contudo, o hacker não conseguiu roubar os <strong>Metadados</strong> do sistema.
+                </p>
+                <p class="mt-2 font-bold text-slate-800">
+                    No seu caderno, explique por que, sem os metadados e o contexto, o hacker possui apenas "Dados" e não "Informação". O que falta para que ele consiga chantagear o hospital?
                 </p>
             </div>
 
             <!-- Questão 2 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">02.</span> O Papel do SGBD
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">02.</span> O Desastre da Planilha do RH
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    Antes dos SGBDs, as empresas utilizavam arquivos de texto simples (como planilhas ou TXT) para guardar dados. Cite e explique brevemente dois problemas graves dessa abordagem antiga que foram resolvidos pelos SGBDs modernos.
+                    A empresa "TechGambi" controla seus 500 funcionários através de 4 planilhas do Excel diferentes (RH, Financeiro, Portaria e Benefícios). Ontem, a funcionária "Maria da Silva" casou-se e mudou o nome para "Maria Souza". Ela avisou apenas a Portaria.
+                </p>
+                <p class="mt-2 font-bold text-slate-800">
+                    Utilizando os termos técnicos aprendidos em aula (Redundância e Inconsistência), explique qual será o caos gerado no dia de pagamento e como um SGBD resolveria isso automaticamente.
                 </p>
             </div>
 
             <!-- Questão 3 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">03.</span> Arquitetura e Independência
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">03.</span> A Arquitetura Invisível
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    Na arquitetura de três níveis (ANSI/SPARC), o que significa a "Independência Lógica de Dados"? Dê um exemplo de uma alteração que ilustre este conceito.
+                    Você está acessando o aplicativo do seu banco pelo celular e vê o seu saldo atual. De acordo com a arquitetura de 3 níveis (ANSI/SPARC), essa tela do seu celular representa qual nível de abstração? Onde estão, fisicamente, os discos rígidos que guardam seus centavos?
                 </p>
             </div>
 
             <!-- Questão 4 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">04.</span> Entidade e Tupla
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">04.</span> Independência na Prática
                 </h3>
-                <p class="mt-2 text-slate-800 text-justify">
-                    Qual a diferença entre uma <strong>Entidade</strong> (ou Tipo de Entidade) e uma <strong>Instância</strong> (ou Tupla)? Utilize a entidade <code>CARRO</code> para exemplificar.
+                <div class="case-box">
+                    "A Netflix decidiu trocar todos os seus servidores antigos por servidores novos baseados em SSDs de altíssima velocidade. Nenhum usuário precisou atualizar o aplicativo na TV para continuar assistindo filmes."
+                </div>
+                <p class="mt-2 font-bold text-slate-800">
+                    Este cenário ilustra a Independência Física ou a Independência Lógica de Dados? Justifique a sua escolha.
                 </p>
             </div>
 
             <!-- Questão 5 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">05.</span> Classificação de Atributos
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">05.</span> O Código Espaguete do Estagiário
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    Para um sistema de gestão de Recursos Humanos, foi criada a entidade <code>FUNCIONÁRIO</code>. Classifique os atributos abaixo como <strong>Simples</strong>, <strong>Composto</strong> ou <strong>Multivalorado</strong>:
+                    O estagiário da empresa criou as seguintes tabelas e atributos para o novo sistema, mas ignorou completamente as boas práticas de nomenclatura.
                 </p>
-                <ul class="mt-2 space-y-1 ml-8 list-disc text-slate-700">
-                    <li>Morada (Rua, Número, Código Postal)</li>
-                    <li>Telefones de Contacto</li>
-                    <li>Data de Nascimento</li>
-                </ul>
+                <div class="mt-2 p-4 bg-slate-800 text-red-400 font-mono text-sm rounded-lg">
+                    Tabela 1: Clientes_oficiais_2024 <br>
+                    Tabela 2: tbl_Endereços <br>
+                    Tabela 3: produto Vendido <br>
+                </div>
+                <p class="mt-2 font-bold text-slate-800">
+                    Reescreva o nome dessas três entidades no seu caderno, aplicando as regras corretas de nomenclatura (singular, sem caracteres especiais, sem espaços).
+                </p>
             </div>
 
+            <div class="page-break"></div> <!-- Quebra de página na impressão -->
+
             <!-- Questão 6 -->
-            <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">06.</span> Tipos de Dados
+            <div class="questao print:mt-8">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">06.</span> Entidade vs. Tupla (O Jogo)
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    A escolha correta do tipo de dado otimiza o desempenho do banco de dados. Qual o tipo de dado SQL mais indicado (INT, VARCHAR, DECIMAL ou DATETIME) para cada informação abaixo?
+                    Muitos confundem a "planta da casa" com "a casa construída". Para provar que você entendeu, leia a lista abaixo e classifique o que é uma <strong>ENTIDADE</strong> (o molde) e o que é uma <strong>TUPLA</strong> (o dado real da linha):
                 </p>
-                <ul class="mt-2 space-y-1 ml-8 list-disc text-slate-700">
-                    <li>O preço de um produto (Ex: 149.90)</li>
-                    <li>A quantidade de itens em stock (Ex: 50)</li>
-                    <li>O nome de um cliente (Ex: "Ana Silva")</li>
-                    <li>A data e hora exata de uma venda</li>
+                <ul class="mt-2 space-y-2 ml-8 list-disc text-slate-700 font-medium">
+                    <li>150; Harry Potter; J.K. Rowling; 400 páginas</li>
+                    <li>LIVRO</li>
+                    <li>MÚSICA</li>
+                    <li>2; Bohemian Rhapsody; Queen; 05:55</li>
                 </ul>
             </div>
 
             <!-- Questão 7 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">07.</span> Surrogate Key vs. Chave Natural
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">07.</span> Dissecando o Formulário
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    Muitos iniciantes colocam o NIF (ou CPF) como Chave Primária (PK) na tabela de Clientes, afinal, é um documento único. No entanto, no mercado profissional, ensinamos a usar uma <em>Surrogate Key</em> (um campo <code>id</code> numérico com Auto-Incremento). Por que razão o <code>id</code> é considerado uma prática melhor? (Cite pelo menos 2 motivos).
+                    Ao se cadastrar num site de e-commerce, foi-lhe pedido: Seu Primeiro Nome, Sobrenome, Data de Nascimento, e uma lista com até 3 números de telefone de contato.
+                </p>
+                <p class="mt-2 font-bold text-slate-800">
+                    Classifique os atributos acima. Qual deles é um atributo claramente <strong>Multivalorado</strong>? Qual pode ser considerado a sub-parte de um atributo <strong>Composto</strong>?
                 </p>
             </div>
 
             <!-- Questão 8 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">08.</span> Chaves Únicas e Estrangeiras
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">08.</span> Consertando a Tipagem
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    Tendo em conta a resposta da questão anterior, se o <code>id</code> é a Chave Primária, o que devemos fazer com o campo <code>NIF</code> para garantir que o banco de dados não aceite dois clientes com o mesmo documento? Além disso, explique brevemente qual é a função de uma <strong>Chave Estrangeira (FK)</strong>.
+                    O mesmo estagiário da Questão 5 escolheu os Tipos de Dados (Data Types) para a entidade <code>VEICULO</code>. Encontre os três erros absurdos que ele cometeu e corrija-os, justificando qual tipo SQL (INT, VARCHAR, DECIMAL, DATETIME) deveria ter sido usado:
                 </p>
+                <div class="mt-2 p-4 bg-slate-800 text-white font-mono text-sm rounded-lg space-y-1">
+                    id_veiculo: <span class="text-red-400">VARCHAR(100)</span> <br>
+                    modelo: VARCHAR(50) <br>
+                    preco_venda: <span class="text-red-400">INT</span> <br>
+                    data_fabricacao: <span class="text-red-400">VARCHAR(50)</span>
+                </div>
             </div>
 
             <!-- Questão 9 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">09.</span> Cardinalidade no MER
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">09.</span> O Dilema do CHAR vs VARCHAR
                 </h3>
-                <p class="mt-2 text-slate-800 text-justify">
-                    A cardinalidade define o número de ocorrências num relacionamento. Identifique a cardinalidade ideal (1:1, 1:N ou N:N) para os cenários abaixo, considerando as regras de negócio tradicionais:
+                <div class="case-box">
+                    Você está criando o banco de dados do DETRAN. Você tem a <strong>Placa do Carro</strong> (que no Brasil possui sempre exatos 7 caracteres, ex: ABC1D23) e o <strong>Modelo do Carro</strong> (que pode variar de "Gol" até "Chevrolet Tracker Premier").
+                </div>
+                <p class="mt-2 font-bold text-slate-800">
+                    Qual desses dois atributos você configuraria como <code>CHAR</code> e qual como <code>VARCHAR</code>? Explique o porquê pensando na economia de espaço no HD do servidor.
                 </p>
-                <ul class="mt-2 space-y-1 ml-8 list-disc text-slate-700">
-                    <li>Uma Pessoa e o seu Passaporte</li>
-                    <li>Um Cliente e os seus Pedidos de Compra</li>
-                    <li>Um Estudante e as Disciplinas em que está matriculado</li>
-                </ul>
             </div>
 
             <!-- Questão 10 -->
             <div class="questao">
-                <h3 class="font-bold text-lg text-brand-dark flex gap-2">
-                    <span class="text-brand-accent">10.</span> Análise e Modelagem
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">10.</span> O Exame da Chave Primária (PK)
                 </h3>
                 <p class="mt-2 text-slate-800 text-justify">
-                    "Um hospital precisa gerir os médicos e os pacientes. Um médico pode atender vários pacientes ao longo do dia. Um paciente, por sua vez, pode ser atendido por vários médicos diferentes durante o seu internamento. Queremos guardar o Nome e a Especialidade do médico, e o Nome e o Quarto do paciente."
+                    Você precisa escolher a Chave Primária (PK) para a tabela <code>CIDADAO</code>. Analise os candidatos abaixo e explique por que eles <strong>NÃO</strong> servem para ser PK, lembrando das regras (Única, Not Null, Imutável):
                 </p>
-                <p class="mt-4 text-slate-800 font-bold">
-                    No seu caderno, identifique as Entidades, os seus atributos e defina qual é a Cardinalidade entre elas.
+                <ul class="mt-2 space-y-1 ml-8 list-decimal text-slate-700 font-medium">
+                    <li>Nome Completo</li>
+                    <li>Número de Telefone</li>
+                    <li>Estado Civil</li>
+                </ul>
+            </div>
+
+            <div class="page-break"></div> <!-- Quebra de página na impressão -->
+
+            <!-- Questão 11 -->
+            <div class="questao print:mt-8">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">11.</span> O Debate com o Chefe (Surrogate Key)
+                </h3>
+                <div class="case-box">
+                    Seu chefe é teimoso e insiste que o NIF (ou CPF) da empresa DEVE ser a Chave Primária da tabela de <code>CLIENTE</code>, afinal, "o documento é único para cada pessoa".
+                </div>
+                <p class="mt-2 font-bold text-slate-800">
+                    No seu caderno, rascunhe um pequeno e-mail profissional para o seu chefe. Tente convencê-lo de que usar uma Chave Artificial (Surrogate Key), como um <code>id</code> numérico gerado pelo banco, é tecnicamente mais seguro e rápido.
                 </p>
+            </div>
+
+            <!-- Questão 12 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">12.</span> A Invasão dos Clones (Unique Key)
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Você venceu o debate da questão anterior e o <code>id</code> numérico virou a PK. No entanto, ontem, um usuário mal-intencionado conseguiu criar 5 contas diferentes na sua rede social usando o mesmo endereço de e-mail!
+                </p>
+                <p class="mt-2 font-bold text-slate-800">
+                    O que faltou você configurar na coluna <code>email</code> durante a modelagem do banco de dados para evitar esse desastre? Qual a diferença entre essa configuração e a PK?
+                </p>
+            </div>
+
+            <!-- Questão 13 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">13.</span> O Dilema do Carrinho de Compras (Pensando no Futuro)
+                </h3>
+                <div class="case-box">
+                    Imagine que você tem as tabelas <strong>CLIENTE</strong> e <strong>COMPRA</strong> (a nota fiscal). Sabemos que 1 Cliente pode fazer dezenas de compras no seu site ao longo do ano. Mas cada Compra específica foi feita por apenas 1 Cliente.
+                </div>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Nós já sabemos que tabelas precisam se relacionar através de "Chaves Estrangeiras" (códigos que apontam para outra tabela). <br><br>
+                    <strong>O Desafio Lógico:</strong> Se você colocar o ID da Compra lá dentro do cadastro do Cliente, quantas compras esse cliente vai conseguir fazer na vida? Por outro lado, se você colocar o ID do Cliente dentro da Compra, funciona? <strong>Explique de que lado deve ficar o elo de ligação e o porquê.</strong>
+                </p>
+            </div>
+
+            <!-- Questão 14 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">14.</span> O Nó do Hospital (Missão Impossível?)
+                </h3>
+                <p class="mt-2 text-slate-800 text-justify">
+                    Em um hospital, a situação é mais complexa: temos a tabela <strong>MÉDICO</strong> e a tabela <strong>PACIENTE</strong>. 
+                    <br><br>
+                    Pense na realidade: Um médico atende <em>VÁRIOS</em> pacientes todos os dias. E um paciente (que está internado há semanas na UTI) é visitado e atendido por <em>VÁRIOS</em> médicos diferentes.
+                </p>
+                <p class="mt-2 font-bold text-slate-800">
+                    O Problema: Se colocarmos a Chave Estrangeira do Médico no Paciente, o paciente só poderá ter 1 médico. Se colocarmos a Chave Estrangeira do Paciente no Médico, o coitado do médico só atende 1 pessoa! <br><br>
+                    <strong>Como você resolveria esse "Nó" lógico para o banco de dados funcionar?</strong> O que você faria se fosse o arquiteto do sistema? (Tente ser criativo, não há respostas erradas nesta fase de descoberta).
+                </p>
+            </div>
+
+            <!-- Questão 15 -->
+            <div class="questao">
+                <h3 class="font-bold text-lg text-brand-dark flex gap-2 items-center">
+                    <span class="text-brand-accent text-2xl">15.</span> DESAFIO FINAL: Acampamento Zumbi
+                </h3>
+                <div class="case-box mb-4">
+                    "O mundo acabou e você é o DBA do Acampamento 'Refúgio Seguro'. Precisamos modelar o sistema para nossa sobrevivência! <br><br>
+                    Temos que cadastrar os <strong>Sobreviventes</strong> (precisamos saber o nome de guerra deles, tipo sanguíneo, idade e várias habilidades que eles possuem, como 'Tiro', 'Medicina' ou 'Cozinha'). <br>
+                    Também precisamos controlar os <strong>Suprimentos</strong> do estoque (nome do item, quantidade em caixas, peso unitário e um código de barras da embalagem que ainda é legível)."
+                </div>
+                <p class="text-slate-800 font-bold mb-2">No seu caderno, atue como o Arquiteto de Dados deste acampamento:</p>
+                <ol class="mt-2 space-y-2 ml-8 list-decimal text-slate-700 font-medium">
+                    <li>Identifique e liste as duas Entidades principais e aplique a nomenclatura correta nelas.</li>
+                    <li>Para cada entidade, crie uma Chave Artificial Profissional (Surrogate Key).</li>
+                    <li>Distribua os atributos do texto nas suas respectivas entidades.</li>
+                    <li>Identifique o atributo Multivalorado no texto e indique qual campo de Suprimento deve ser uma <em>Unique Key</em>.</li>
+                </ol>
             </div>
 
         </div>
 
-        <div class="text-center mt-16 no-print text-slate-400 text-sm italic">
-            "A prática é o único caminho para a mestria em banco de dados."
+        <div class="text-center mt-16 no-print text-slate-400 text-sm font-bold">
+            <i class="fas fa-skull-crossbones mr-2"></i> Boa sorte na modelagem. A sobrevivência dos dados depende de você!
         </div>
 
     </main>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 08: IPC - Comunicação Básica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta: https://colorhunt.co/palette/5a9cb5face68faac68fa6868 */
+            --bg: #f4f8fa;         
+            --slide-bg: #ffffff;   
+            --text: #2c4e5a;       
+            --text-muted: #6b8c9a; 
+            --primary: #5a9cb5;    
+            --accent: #faac68;     
+            --accent-light: #fff5ed; 
+            --pink: #fa6868;       
+            --yellow: #face68;     
+            
+            --code-bg: #1e343d;    
+            --code-text: #f4f8fa;  
+            
+            --main-color: #5a9cb5; 
+            --rend-color: #faac68; 
+            --preload-color: #face68; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link Fixa */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--primary);
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-bottom: 3px solid var(--accent);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .fixed-link-bar a:hover { color: var(--accent); }
+
+        /* Slides - O Coração Interativo */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: var(--primary);
+            text-align: center;
+            border: 5px solid var(--accent);
+        }
+        .slide.topic h1, .slide.topic p { color: #ffffff; }
+        .slide.topic h2 { color: var(--accent); border: none; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); }
+
+        .slide-content-wrapper { max-width: 1100px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 70px; right: 40px; font-size: 1.5rem; color: var(--primary); font-weight: 800; opacity: 0.3; }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--text); }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        code { 
+            font-family: 'Fira Code', monospace; 
+            background: #F1F5F9; 
+            color: var(--primary);
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border: 1px solid #E2E8F0;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; border: none; }
+        
+        .file-label {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px 6px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: -15px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 2px solid var(--accent);
+        }
+        .file-label.html { background: var(--pink); border-color: #fff; }
+        .file-label.preload { background: var(--preload-color); border-color: #fff; color: var(--text); }
+        .file-label.main { background: var(--main-color); border-color: #fff; }
+
+        /* Layouts */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .col { background: #F8FAFC; padding: 25px; border-radius: 12px; border: 1px solid #CBD5E1; }
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; display: flex; align-items: center; gap: 10px;}
+
+        /* Architecture Diagram */
+        .arch-diagram { display: flex; justify-content: space-between; align-items: center; margin: 40px 0; background: #fff; padding: 30px; border-radius: 12px; border: 2px dashed #CBD5E1; }
+        .arch-box { padding: 20px; border-radius: 10px; text-align: center; color: white; width: 30%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
+        .arch-main { background: var(--main-color); border: 2px solid var(--text); }
+        .arch-rend { background: var(--rend-color); border: 2px solid var(--text); color: var(--text); }
+        .arch-preload { background: var(--preload-color); border: 2px solid var(--text); color: var(--text); }
+        .arch-main h3, .arch-main i, .arch-main li, .arch-main p, .arch-main em { color: var(--text); font-weight: 600; }
+        .arch-rend h3, .arch-rend i, .arch-rend li, .arch-rend p, .arch-rend em, .arch-rend strong { color: var(--text); font-weight: 600; }
+        .arch-box h3 { font-size: 1.3rem; margin-bottom: 10px; font-weight: 800; }
+        .arch-box i { font-size: 2.5rem; margin-bottom: 15px; }
+        
+        .arrow-container { display: flex; flex-direction: column; align-items: center; width: 15%; color: var(--text-muted); font-weight: bold; }
+        .arrow-line { height: 4px; background: var(--text-muted); width: 100%; position: relative; margin: 10px 0; }
+        .arrow-line::after { content: ''; position: absolute; right: -5px; top: -6px; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 12px solid var(--text-muted); }
+
+        /* Tiled Images for Analogies */
+        .tiled-content { display: flex; gap: 20px; align-items: stretch; justify-content: center; width: 100%; margin-top: 15px;}
+        .image-tile { flex: 1; display: flex; flex-direction: column; text-align: center; background: var(--bg); padding: 15px; border-radius: 12px; border: 1px solid #CBD5E1; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .image-tile .image-wrapper { height: 180px; margin-bottom: 15px; border-radius: 8px; overflow: hidden; background: #fff; }
+        .image-tile .image-wrapper img { width: 100%; height: 100%; object-fit: cover; padding: 5px; }
+        .image-tile h3 { font-size: 1.25rem; margin-bottom: 10px; font-weight: 800; }
+        .image-tile p { font-size: 1rem; color: var(--text-muted); line-height: 1.4; margin: 0; }
+
+        /* IPC Animator */
+        .ipc-animator { background: var(--code-bg); padding: 30px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px; position: relative; overflow: hidden; }
+        .node-box { background: var(--text-muted); color: white; padding: 20px; border-radius: 8px; width: 35%; text-align: center; border: 2px solid var(--text); z-index: 2; }
+        .node-box h4 { margin-bottom: 10px; color: var(--slide-bg); }
+        .ipc-track { position: absolute; left: 35%; right: 35%; height: 2px; background: var(--text); top: 50%; z-index: 1; }
+        .ipc-packet { position: absolute; left: 35%; top: 50%; transform: translate(-50%, -50%); background: var(--preload-color); color: var(--text); padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; opacity: 0; z-index: 3; }
+        .ipc-packet.animate { animation: travel 1.5s ease-in-out forwards; }
+        @keyframes travel { 0% { left: 35%; opacity: 1; } 90% { opacity: 1; } 100% { left: 65%; opacity: 0; } }
+        
+        .console-log { background: #000; color: var(--yellow); font-family: monospace; padding: 10px; border-radius: 5px; min-height: 40px; text-align: left; font-size: 0.9rem; margin-top: 10px; border: 1px solid #333; }
+
+        /* Code Block Wrapper with Line Numbers */
+        .code-wrapper {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 15px 0;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            border-left: 5px solid var(--accent);
+            overflow-x: auto;
+            line-height: 1.6;
+            margin: 15px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .code-line { display: flex; padding: 0 15px; }
+        .line-num {
+            color: var(--text-muted);
+            min-width: 30px;
+            text-align: right;
+            margin-right: 15px;
+            padding-right: 10px;
+            border-right: 1px solid var(--code-bg);
+            user-select: none;
+            opacity: 0.6;
+        }
+        .code-content { white-space: pre; }
+        .highlight-line {
+            background-color: rgba(250, 172, 104, 0.15); /* Destaque sutil com a cor de accent */
+            border-radius: 4px;
+        }
+        .highlight-line .line-num { color: var(--accent); opacity: 1; border-right-color: var(--accent); }
+
+        /* Final List */
+        .final-list ol { counter-reset: item; list-style: none; padding: 0; }
+        .final-list li { 
+            background: white; margin-bottom: 10px; padding: 15px 15px 15px 60px; 
+            border-radius: 8px; position: relative; border: 1px solid #CBD5E1; font-size: 1.1rem; 
+        }
+        .final-list li::before {
+            content: counter(item); counter-increment: item; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; 
+            text-align: center; font-size: 1rem; line-height: 30px; font-weight: bold;
+        }
+
+        /* Controls */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--primary); }
+        .btn { background: white; border: 2px solid var(--primary); color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        .alert-box { background: #FEF2F2; border-left: 4px solid var(--pink); padding: 15px; border-radius: 0 8px 8px 0; margin: 20px 0; }
+        .alert-box h4 { color: var(--pink); margin-bottom: 5px; display: flex; align-items: center; gap: 10px;}
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
+            .fixed-link-bar a { color: black; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
+            .controls, .progress-bar { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
+            pre, .arch-box, .col, .ipc-animator, .image-tile { border: 1px solid #000; color: black; box-shadow: none; background: white !important; }
+            .arch-box { color: black !important; }
+            .arch-box h3, .arch-box i, .arch-box li { color: black !important; }
+            h1, h2, p, li, strong { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn" onclick="goToExercises()" title="Ir para os Exercícios">
+        <i class="fa-solid fa-clipboard-list"></i>
+    </button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <h1>Aula 08: IPC e Preload</h1>
+            <h2>Comunicação Básica no Electron</h2>
+            <br>
+            <p><strong>Roteiro da Aula:</strong></p>
+            <ol>
+                <li>O Grande Bloqueio (Por que o Front não acessa o PC?).</li>
+                <li>A Analogia do Restaurante (O Garçom).</li>
+                <li>O Arquivo <code>preload.js</code> e o ContextBridge.</li>
+                <li>Enviando Comandos: do Front para o Back.</li>
+                <li>Na Prática: 5 exercícios de comunicação.</li>
+            </ol>
+            <div style="margin-top: 40px; color: var(--primary); font-weight: 600;">
+                Técnico em Informática • 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: O PROBLEMA -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h1>Parte 1: O Bloqueio</h1>
+            <p>Segurança em primeiro lugar</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: REVISÃO ARQUITETURA E O PROBLEMA -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">03</div>
+            <h2>O Abismo de Segurança</h2>
+            <p>Na Aula 07 vimos que o <strong>Main Process</strong> é o Node.js (tem poderes totais) e o <strong>Renderer</strong> é o Chromium (apenas a tela).</p>
+            
+            <div class="alert-box">
+                <h4><i class="fa-solid fa-triangle-exclamation"></i> Tente imaginar:</h4>
+                <p>Se o código HTML/JS do seu botão pudesse deletar arquivos do Disco Local C: diretamente, qualquer falha no site (ou script injetado) destruiria o computador do usuário.</p>
+            </div>
+            
+            <p style="font-size: 1.3rem; font-weight: bold; text-align: center; margin-top: 30px;">
+                Por padrão de segurança, o Electron <span style="color: var(--pink);">CORTA</span> a comunicação direta entre o Front-end e o Node.js.
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: A SOLUÇÃO (IPC) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>A Solução: IPC</h2>
+            <p>Como um botão HTML (Renderer) avisa o Node.js (Main) para fechar o programa ou salvar um arquivo de texto?</p>
+            <p>Através do <strong>IPC</strong> (<em>Inter-Process Communication</em>). É um sistema de rádio-transmissor interno do Electron.</p>
+            
+            <div class="arch-diagram" style="margin-top: 20px; padding: 20px;">
+                <div class="arch-box arch-rend" style="width: 35%;">
+                    <i class="fa-brands fa-html5"></i>
+                    <h3>HTML / JS</h3>
+                    <p>Clica no Botão "Salvar"</p>
+                </div>
+                
+                <div class="arrow-container" style="width: 30%;">
+                    <p style="color: var(--primary);">Rádio (IPC)</p>
+                    <div class="arrow-line" style="background: var(--primary);"></div>
+                    <p style="font-size: 0.8rem; text-align: center;">Manda a mensagem "SALVAR_ARQUIVO"</p>
+                </div>
+
+                <div class="arch-box arch-main" style="width: 35%;">
+                    <i class="fa-brands fa-node-js"></i>
+                    <h3>Main Process</h3>
+                    <p>Ouve a mensagem e salva no Disco Rígido</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: O GARÇOM (PRELOAD) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">05</div>
+            <h2>O Arquivo <code>preload.js</code></h2>
+            <p>Para usar o rádio IPC com segurança, o Electron nos obriga a criar um terceiro arquivo: o <strong>Preload</strong>.</p>
+            <p><strong>A Analogia do Restaurante:</strong></p>
+            
+            <div class="tiled-content">
+                <!-- Tile 1: Renderer -->
+                <div class="image-tile" style="border-top: 5px solid var(--rend-color);">
+                    <div class="image-wrapper"><img src="cliente.png" alt="Cliente no Salão do Restaurante"></div>
+                    <h3 style="color: #c97f3c;">Renderer (Salão)</h3>
+                    <p>O Cliente que olha o cardápio e faz o pedido (Interface gráfica). Ele não pode entrar na cozinha.</p>
+                </div>
+                
+                <!-- Tile 2: Preload -->
+                <div class="image-tile" style="border-top: 5px solid var(--preload-color);">
+                    <div class="image-wrapper"><img src="garcom.png" alt="Garçom sorridente"></div>
+                    <h3 style="color: #e5a420;">Preload (Garçom)</h3>
+                    <p>O <u>único</u> autorizado a falar com o Cliente e a entrar na Cozinha. Leva os pedidos de um lado para o outro de forma segura.</p>
+                </div>
+
+                <!-- Tile 3: Main -->
+                <div class="image-tile" style="border-top: 5px solid var(--main-color);">
+                    <div class="image-wrapper"><img src="chef.png" alt="Chef na cozinha"></div>
+                    <h3 style="color: var(--main-color);">Main (Cozinha)</h3>
+                    <p>O Chef que tem as panelas e facas (Node.js). Prepara o prato pesado e interage com o sistema operacional.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: CONFIGURANDO -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-code-commit"></i>
+            <h1>Parte 2: Configuração</h1>
+            <p>Ajustando o Main e criando o Garçom</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: AVISANDO O MAIN -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">07</div>
+            <h2>Passo 1: Contratando o Garçom</h2>
+            <p>No nosso <code>index.js</code> (Main), precisamos dizer à janela para carregar o script <code>preload.js</code> <em>antes</em> do HTML aparecer.</p>
+            
+            <div class="file-label main">index.js (Main Process)</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">const { app, BrowserWindow } = require('electron');</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content">const path = require('path'); // Módulo do Node para caminhos</span></div>
+                <div class="code-line"><span class="line-num">3</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content">const criarJanela = () => {</span></div>
+                <div class="code-line"><span class="line-num">5</span><span class="code-content">    const janela = new BrowserWindow({</span></div>
+                <div class="code-line"><span class="line-num">6</span><span class="code-content">        width: 800, height: 600,</span></div>
+                <div class="code-line"><span class="line-num">7</span><span class="code-content">        webPreferences: {</span></div>
+                <div class="code-line highlight-line"><span class="line-num">8</span><span class="code-content">            // "Precarrega" este script antes de tudo</span></div>
+                <div class="code-line highlight-line"><span class="line-num">9</span><span class="code-content">            preload: path.join(__dirname, 'preload.js')</span></div>
+                <div class="code-line"><span class="line-num">10</span><span class="code-content">        }</span></div>
+                <div class="code-line"><span class="line-num">11</span><span class="code-content">    });</span></div>
+                <div class="code-line"><span class="line-num">12</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">13</span><span class="code-content">    janela.loadFile('index.html');</span></div>
+                <div class="code-line"><span class="line-num">14</span><span class="code-content">};</span></div>
+            </div>
+            <p style="font-size: 0.9rem;"><code>path.join(__dirname, 'preload.js')</code> garante que ele ache o arquivo independente de ser Windows ou Mac.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: CONTEXT BRIDGE -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">08</div>
+            <h2>Passo 2: O Preload e a ContextBridge</h2>
+            <p>Agora crie um arquivo vazio chamado <code>preload.js</code>.</p>
+            <p>Usaremos a ferramenta <code>contextBridge</code> para criar uma "Ponte Segura". Ela pega funções do lado de cá (Node) e expõe para o lado de lá (HTML/Window).</p>
+            
+            <div class="file-label preload">preload.js (O Garçom)</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">const { contextBridge, ipcRenderer } = require('electron');</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">3</span><span class="code-content">// "Exponha no Mundo Principal (HTML)"</span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content">contextBridge.exposeInMainWorld('api', {</span></div>
+                <div class="code-line"><span class="line-num">5</span><span class="code-content">    </span></div>
+                <div class="code-line highlight-line"><span class="line-num">6</span><span class="code-content">    // Eu crio um comando chamado "enviarMensagem"</span></div>
+                <div class="code-line highlight-line"><span class="line-num">7</span><span class="code-content">    // que o HTML vai poder usar!</span></div>
+                <div class="code-line highlight-line"><span class="line-num">8</span><span class="code-content">    enviarMensagem: (texto) => {</span></div>
+                <div class="code-line highlight-line"><span class="line-num">9</span><span class="code-content">        // Envia via Rádio IPC para o Main</span></div>
+                <div class="code-line highlight-line"><span class="line-num">10</span><span class="code-content">        ipcRenderer.send('canal-mensagem', texto);</span></div>
+                <div class="code-line highlight-line"><span class="line-num">11</span><span class="code-content">    }</span></div>
+                <div class="code-line"><span class="line-num">12</span><span class="code-content">    </span></div>
+                <div class="code-line"><span class="line-num">13</span><span class="code-content">});</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: A COMUNICAÇÃO -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-paper-plane"></i>
+            <h1>Parte 3: O Envio</h1>
+            <p>Fazendo o Rádio Funcionar</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: O RENDERER -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">10</div>
+            <h2>Passo 3: Usando a API no Front-end</h2>
+            <p>Aquele objeto <code>'api'</code> que criamos no Preload agora está injetado magicamente no nosso navegador (na variável global <code>window</code>).</p>
+            
+            <div class="file-label html">index.html (Renderer)</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">&lt;body&gt;</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content">    &lt;h1&gt;Painel de Controle&lt;/h1&gt;</span></div>
+                <div class="code-line"><span class="line-num">3</span><span class="code-content">    &lt;button id="btnAvisar"&gt;Avisar Cozinha&lt;/button&gt;</span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">5</span><span class="code-content">    &lt;script&gt;</span></div>
+                <div class="code-line"><span class="line-num">6</span><span class="code-content">        const botao = document.querySelector("#btnAvisar");</span></div>
+                <div class="code-line"><span class="line-num">7</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">8</span><span class="code-content">        botao.addEventListener("click", () => {</span></div>
+                <div class="code-line highlight-line"><span class="line-num">9</span><span class="code-content">            // Chamamos o garçom pela API que expomos!</span></div>
+                <div class="code-line highlight-line"><span class="line-num">10</span><span class="code-content">            window.api.enviarMensagem("Olá, tem um pedido novo!");</span></div>
+                <div class="code-line"><span class="line-num">11</span><span class="code-content">        });</span></div>
+                <div class="code-line"><span class="line-num">12</span><span class="code-content">    &lt;/script&gt;</span></div>
+                <div class="code-line"><span class="line-num">13</span><span class="code-content">&lt;/body&gt;</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: RECEBENDO NO MAIN -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">11</div>
+            <h2>Passo 4: Escutando no Main</h2>
+            <p>O Front enviou a mensagem pelo canal <code>'canal-mensagem'</code>. Mas o Main precisa estar "ouvindo" essa estação de rádio para agir.</p>
+            
+            <div class="file-label main">index.js (Main Process)</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">const { app, BrowserWindow, ipcMain } = require('electron');</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content">const path = require('path');</span></div>
+                <div class="code-line"><span class="line-num">3</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content">const criarJanela = () => {</span></div>
+                <div class="code-line"><span class="line-num">5</span><span class="code-content">    const janela = new BrowserWindow({</span></div>
+                <div class="code-line"><span class="line-num">6</span><span class="code-content">        width: 800, height: 600,</span></div>
+                <div class="code-line"><span class="line-num">7</span><span class="code-content">        webPreferences: { preload: path.join(__dirname, 'preload.js') }</span></div>
+                <div class="code-line"><span class="line-num">8</span><span class="code-content">    });</span></div>
+                <div class="code-line"><span class="line-num">9</span><span class="code-content">    janela.loadFile('index.html');</span></div>
+                <div class="code-line"><span class="line-num">10</span><span class="code-content">};</span></div>
+                <div class="code-line"><span class="line-num">11</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">12</span><span class="code-content">app.whenReady().then(() => {</span></div>
+                <div class="code-line"><span class="line-num">13</span><span class="code-content">    criarJanela();</span></div>
+                <div class="code-line"><span class="line-num">14</span><span class="code-content"></span></div>
+                <div class="code-line highlight-line"><span class="line-num">15</span><span class="code-content">    // Liga o rádio na estação 'canal-mensagem'</span></div>
+                <div class="code-line highlight-line"><span class="line-num">16</span><span class="code-content">    ipcMain.on('canal-mensagem', (evento, dados) => {</span></div>
+                <div class="code-line highlight-line"><span class="line-num">17</span><span class="code-content">        console.log("Mensagem recebida do HTML: ", dados);</span></div>
+                <div class="code-line highlight-line"><span class="line-num">18</span><span class="code-content">    });</span></div>
+                <div class="code-line"><span class="line-num">19</span><span class="code-content">});</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: SIMULADOR ANIMADO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">12</div>
+            <h2>O Ciclo IPC em Ação</h2>
+            
+            <div class="ipc-animator">
+                <div class="node-box" style="border-color: var(--rend-color);">
+                    <h4>Renderer (HTML)</h4>
+                    <p style="font-size: 0.8rem; margin-bottom: 10px;"><code>window.api.enviar()</code></p>
+                    <button onclick="dispararIPC()" style="padding: 5px 15px; cursor: pointer; background: var(--rend-color); color: var(--text); border: none; border-radius: 5px; font-weight: bold;">Clicar Botão</button>
+                </div>
+                
+                <div class="ipc-track"></div>
+                <div id="packet" class="ipc-packet">"Olá Main!"</div>
+                
+                <div class="node-box" style="border-color: var(--main-color);">
+                    <h4>Main Process (Node)</h4>
+                    <p style="font-size: 0.8rem;"><code>ipcMain.on(...)</code></p>
+                    <div id="mainTerminal" class="console-log">Esperando...</div>
+                </div>
+            </div>
+
+            <div class="col" style="margin-top: 20px; padding: 15px;">
+                <ol style="margin: 0 0 0 20px; font-size: 1rem;">
+                    <li>O <strong>HTML</strong> não conhece o Node. Ele só conhece o objeto <code>window.api</code>.</li>
+                    <li>O <strong>Preload</strong> (que montou a API) pega a string e dispara o <code>ipcRenderer.send()</code>.</li>
+                    <li>O <strong>Main</strong> ouve o evento via <code>ipcMain.on()</code> e executa o código pesado (console/arquivos).</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: MVC (NOVO) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">13</div>
+            <h2>A Ponte para o Padrão MVC</h2>
+            <p>Tudo isso que acabamos de montar forma a base de uma das arquiteturas mais famosas do mercado: o <strong>MVC (Model-View-Controller)</strong>.</p>
+            
+            <div class="tiled-content">
+                <div class="image-tile" style="border-top: 5px solid var(--rend-color);">
+                    <h3 style="color: var(--primary); margin-bottom: 5px;">V - View (Visão)</h3>
+                    <p style="font-size: 0.9rem;"><strong>O seu HTML/CSS.</strong> Apenas exibe os botões e interage com o utilizador. É "burra", não sabe acessar bancos de dados nem salvar arquivos.</p>
+                </div>
+                <div class="image-tile" style="border-top: 5px solid var(--preload-color);">
+                    <h3 style="color: var(--primary); margin-bottom: 5px;">C - Controller (Controle)</h3>
+                    <p style="font-size: 0.9rem;"><strong>O Preload e o IPC.</strong> Recebe os cliques da View, entende o que o usuário quer fazer, e roteia a ordem para o sistema central. É o maestro.</p>
+                </div>
+                <div class="image-tile" style="border-top: 5px solid var(--main-color);">
+                    <h3 style="color: var(--primary); margin-bottom: 5px;">M - Model (Modelo)</h3>
+                    <p style="font-size: 0.9rem;"><strong>O Main (Node.js).</strong> Onde o trabalho pesado e as regras de negócio reais acontecem. Consulta o banco de dados (MySQL) ou salva documentos no PC.</p>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 20px; font-weight: bold; color: var(--accent);">Manter as responsabilidades separadas é o segredo de um código limpo!</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: UM EXEMPLO REAL (FECHAR APP) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">14</div>
+            <h2>Exemplo Real: Botão de Sair</h2>
+            <p>Se você removeu as bordas da janela na Aula 07 (<code>frame: false</code>), como o usuário fecha o app? Criando um botão de Sair no HTML!</p>
+            
+            <div class="comparison" style="margin-top: 10px; gap: 15px;">
+                <div class="col" style="padding: 15px;">
+                    <h3 style="font-size: 0.9rem;">1. Preload.js</h3>
+                    <pre style="padding: 10px; font-size: 0.8rem;">
+contextBridge.exposeInMainWorld('api', {
+  fecharApp: () => ipcRenderer.send('fechar')
+});</pre>
+                </div>
+                <div class="col" style="padding: 15px;">
+                    <h3 style="font-size: 0.9rem;">2. index.html</h3>
+                    <pre style="padding: 10px; font-size: 0.8rem;">
+botao.addEventListener('click', () => {
+  window.api.fecharApp();
+});</pre>
+                </div>
+            </div>
+            
+            <div class="col" style="margin-top: 15px; padding: 15px; border-color: var(--main-color);">
+                <h3 style="font-size: 0.9rem;">3. index.js (Main)</h3>
+                <pre style="padding: 10px; font-size: 0.8rem;">
+ipcMain.on('fechar', () => {
+    app.quit(); // Comando poderoso do Node/Electron para matar o processo
+});</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 15: LISTA FINAL -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">15</div>
+            <h2>Lista de Exercícios (O Rádio IPC)</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Crie a estrutura completa (HTML, Preload e Main) para resolver os desafios abaixo enviando comandos <strong>Front -> Back</strong>.</p>
+            
+            <div class="final-list">
+                <ol>
+                    <li><strong>Alarme Falso:</strong> Crie um botão no HTML "Ativar Alarme". Ao clicar, envie uma mensagem IPC. O Main deve interceptar e dar um <code>console.log("ALARM ALARM ALARM")</code> três vezes no terminal do VSCode.</li>
+                    <li><strong>Botão de Pânico (Sair):</strong> Retire as bordas da janela (<code>frame: false</code>). Crie um botão HTML vermelho escrito "Fechar Sistema" que usa IPC para acionar o <code>app.quit()</code> no Main.</li>
+                    <li><strong>Janela Minimizada:</strong> Crie um botão "Minimizar" no HTML. Use IPC. No Main, você pode minimizar a janela atual usando <code>BrowserWindow.getFocusedWindow().minimize()</code>.</li>
+                    <li><strong>Redimensionador Dinâmico:</strong> Crie dois inputs no HTML (Largura e Altura) e um botão "Mudar Tamanho". Envie os <u>dois valores</u> via IPC. O Main deve usar <code>janela.setSize(largura, altura)</code>.</li>
+                    <li><strong>Modo Noturno Nativo:</strong> Crie um botão "Dark Mode". Envie um comando IPC. No Main, mude a cor de fundo da própria <code>BrowserWindow</code> para preto usando o comando <code>janela.setBackgroundColor('#000')</code>.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    // Navegação de Slides
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function goToExercises() { showSlide(totalSlides - 1); }
+    
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    // Simulador IPC Animado
+    function dispararIPC() {
+        const packet = document.getElementById('packet');
+        const terminal = document.getElementById('mainTerminal');
+        
+        // Reset state
+        packet.classList.remove('animate');
+        terminal.innerText = "Esperando...";
+        terminal.style.color = "var(--text-muted)"; // cinza
+        
+        // Trigger reflow to restart animation
+        void packet.offsetWidth;
+        
+        // Start animation
+        packet.classList.add('animate');
+        
+        // Wait for animation to finish (1.5s) to update terminal
+        setTimeout(() => {
+            terminal.innerText = "> Mensagem recebida!\n> Dados: 'Olá Main!'";
+            terminal.style.color = "var(--yellow)"; // Nova cor de sucesso
+        }, 1500);
+    }
+
+    showSlide(0);
+</script>
+
+</body>
+</html>
+```
