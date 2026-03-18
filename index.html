@@ -3,130 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prof. William Paiva - 2025 - COTIL</title>
+    <title>Prof. William Paiva - 2026 - COTIL</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* --- ESTILOS GERAIS --- */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100vh;
-            font-family: 'Roboto Mono', monospace;
-            background-color: #eef2f7;
-            color: #4a5568;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
 
-        /* --- CONTAINER PRINCIPAL --- */
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 2rem 1rem;
-            box-sizing: border-box;
-        }
 
-        /* --- TÍTULO --- */
-        .main-title {
-            color: #4a5568;
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 3rem;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
-        }
+<style>
+    :root {
+        --primary: #00d2ff;
+        --secondary: #3a7bd5;
+        --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        --text-main: #2d3748;
+        --card-bg: rgba(255, 255, 255, 0.8);
+    }
 
-        /* --- ESTILOS DA LISTA HIERÁRQUICA --- */
-        .hierarchical-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem; /* Espaçamento menor entre os itens principais */
-        }
-        
-        .folder-header {
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background-color: #ffffff;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-        }
-        
-        .folder-header:hover {
-            background-color: #f7fafc;
-        }
-        
-        /* Ícone de seta (chevron) */
-        .folder-header::before {
-            content: '';
-            display: inline-block;
-            width: 0.5em;
-            height: 0.5em;
-            border-right: 2px solid #4a5568;
-            border-bottom: 2px solid #4a5568;
-            margin-right: 1.25rem;
-            transform: rotate(-45deg); /* Aponta para a direita (fechado) */
-            transition: transform 0.3s ease;
-        }
-        
-        /* Estilo do ícone quando a pasta está aberta */
-        .folder.open > .folder-header::before {
-            transform: rotate(45deg); /* Aponta para baixo (aberto) */
-        }
+    /* --- ESTILOS GERAIS --- */
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100vh;
+        font-family: 'Roboto Mono', monospace;
+        background: var(--bg-gradient);
+        background-attachment: fixed;
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        .folder-content {
-            display: none; /* Conteúdo escondido por padrão */
-            padding-left: 1.5rem; /* Indentação do conteúdo */
-            border-left: 2px solid #e2e8f0;
-            margin-left: 1.7rem; /* Alinha com o texto do header */
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        
-        .folder.open > .folder-content {
-            display: block; /* Mostra o conteúdo quando a pasta está aberta */
-        }
+    /* --- CONTAINER PRINCIPAL --- */
+    .container {
+        width: 95%;
+        max-width: 900px;
+        padding: 3rem 1rem;
+        box-sizing: border-box;
+    }
 
-        /* Item final (link) */
-        .link-item {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: #2d3748;
-            text-decoration: none;
-            border-radius: 6px;
-            margin: 0.25rem 0;
-            transition: background-color 0.2s ease;
-        }
-        
-        .link-item:hover {
-            background-color: #e2e8f0;
-        }
+    /* --- TÍTULO --- */
+    .main-title {
+        color: #1a202c;
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 4rem;
+        letter-spacing: -1px;
+        position: relative;
+    }
 
-        /* --- MEDIA QUERIES --- */
-        @media (max-width: 768px) {
-            .main-title {
-                font-size: 1.8rem;
-                margin-bottom: 2rem;
-            }
-            .folder-header, .link-item {
-                padding: 1rem 1.25rem;
-                font-size: 1rem;
-            }
-        }
-    </style>
-</head>
+    .main-title::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        border-radius: 2px;
+    }
+
+    /* --- LISTA HIERÁRQUICA --- */
+    .hierarchical-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .folder-header {
+        display: flex;
+        align-items: center;
+        padding: 1.2rem 1.5rem;
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        font-weight: 700;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .folder-header:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        background: #ffffff;
+    }
+    
+    /* Ícone Moderno */
+    .folder-header::before {
+        content: '→';
+        display: inline-block;
+        margin-right: 1rem;
+        color: var(--secondary);
+        transition: transform 0.3s ease;
+    }
+    
+    .folder.open > .folder-header::before {
+        transform: rotate(90deg);
+        color: var(--primary);
+    }
+
+    .folder-content {
+        display: none;
+        padding-left: 1rem;
+        margin-left: 1rem;
+        border-left: 2px dashed rgba(58, 123, 213, 0.3);
+        animation: fadeIn 0.4s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .folder.open > .folder-content {
+        display: block;
+    }
+
+    /* Item de Link Estilizado */
+    .link-item {
+        display: block;
+        padding: 0.8rem 1.2rem;
+        color: #4a5568;
+        text-decoration: none;
+        border-radius: 8px;
+        margin: 0.4rem 0;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    
+    .link-item:hover {
+        background: rgba(0, 210, 255, 0.1);
+        color: var(--secondary);
+        padding-left: 1.5rem;
+        border-left: 4px solid var(--primary);
+    }
+
+    /* --- RESPONSIVIDADE --- */
+    @media (max-width: 768px) {
+        .main-title { font-size: 1.5rem; }
+        .container { padding: 1.5rem 0.5rem; }
+    }
+</style></head>
 <body>
     
     <div class="container">
-        <h1 class="main-title">Prof. William Paiva - 2025 - COTIL</h1>
+        <h1 class="main-title">Prof. William Paiva - 2026 - COTIL</h1>
         
         <div id="hierarchical-list" class="hierarchical-list"></div>
     </div>
