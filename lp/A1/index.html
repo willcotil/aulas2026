@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>...</title>
+    <style>
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Evita barras de rolagem desnecessárias */
+            cursor: default;
+        }
+
+        #link-secreto {
+            opacity: 0; /* Começa invisível mas ocupa espaço (ajuda o navegador a entender a seleção) */
+            pointer-events: none; /* Desativa cliques enquanto invisível */
+            color: #00ff00;
+            font-size: 24px;
+            text-decoration: none;
+            border: 2px solid #00ff00;
+            padding: 15px 30px;
+            transition: opacity 0.5s ease; /* Efeito suave de aparecimento */
+        }
+
+        #link-secreto.visivel {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="https://forms.gle/YxxyC777Py5GEQ9y9" id="link-secreto">https://forms.gle/YxxyC777Py5GEQ9y9</a>
+
+    <script>
+        let entradaBuffer = "";
+        const palavraChave = "ver";
+        const link = document.getElementById('link-secreto');
+
+        // Foca na janela assim que carregar para garantir que o teclado funcione
+        window.focus();
+
+        document.addEventListener('keydown', (event) => {
+            // Ignora teclas de sistema como Shift, Alt, etc.
+            if (event.key.length > 1) return;
+
+            entradaBuffer += event.key.toLowerCase();
+
+            // Mantém apenas os últimos caracteres necessários
+            if (entradaBuffer.length > palavraChave.length) {
+                entradaBuffer = entradaBuffer.slice(-palavraChave.length);
+            }
+
+            if (entradaBuffer === palavraChave) {
+                link.classList.add('visivel');
+                entradaBuffer = ""; // Limpa o buffer após o acerto
+            }
+        });
+    </script>
+</body>
+</html>
