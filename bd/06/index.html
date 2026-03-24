@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados - Aula 05: MER e DER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#2C687B',      /* Teal Escuro */
+                            primary: '#DB1A1A',   /* Vermelho */
+                            secondary: '#8CC7C4', /* Teal Claro */
+                            muted: '#FFF6F6',     /* Rosa Claro / Off-white */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Fundo branco garantido */
+            color: #2C687B;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { 
+                display: block !important; 
+                page-break-after: auto; 
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .print-break { page-break-after: always; }
+            .resposta-gabarito { display: block !important; }
+        }
+
+        /* SVG Styles - Cores Fortes para Alto Contraste */
+        .node-rect { fill: #ffffff; stroke: #2C687B; stroke-width: 3; rx: 8px; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: bold; fill: #2C687B; }
+        
+        .rel-polygon { fill: #FFF6F6; stroke: #DB1A1A; stroke-width: 3; }
+        .rel-text { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: bold; fill: #DB1A1A; }
+        
+        .edge { stroke: #2C687B; stroke-width: 3; fill: none; }
+        
+        code { font-family: 'JetBrains Mono', monospace; background: #FFF6F6; border: 1px solid #8CC7C4; padding: 2px 6px; border-radius: 4px; color: #DB1A1A; font-size: 0.9em; font-weight: bold;}
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FFF6F6; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #8CC7C4; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2C687B; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <header class="no-print h-16 bg-white text-brand-dark border-b border-brand-secondary px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-3 z-10">
+            <div class="bg-brand-primary text-white p-2 rounded-lg">
+                <i class="fas fa-project-diagram text-sm"></i>
+            </div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">Banco de Dados I <span class="text-brand-primary">Modelagem</span></h1>
+        </div>
+        
+        <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none hidden md:flex">
+            <a href="https://willcotil.github.io/aulas2026/" target="_blank" class="pointer-events-auto text-brand-dark hover:text-brand-primary font-extrabold text-lg transition tracking-wide">
+                willcotil.github.io/aulas2026
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-muted border border-brand-secondary hover:bg-brand-secondary hover:text-white rounded-lg text-brand-dark text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-dark hover:text-brand-primary transition">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="no-print h-1.5 w-full bg-brand-muted overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-primary transition-all duration-500 w-0 shadow-[0_0_10px_#DB1A1A]"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl"></div>
+    </main>
+
+    <footer class="no-print h-20 bg-white border-t border-brand-secondary px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-brand-muted text-brand-dark border border-brand-secondary rounded-xl font-bold hover:bg-brand-secondary hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+        
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-xs font-black text-brand-primary uppercase tracking-widest">Tópico 1 / X</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-primary text-white rounded-xl font-bold hover:bg-red-800 transition shadow-lg shadow-brand-primary/30">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            {
+                title: "O Modelo de Dados",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-6 bg-brand-muted border border-brand-secondary rounded-full text-brand-primary mb-4">
+                            <i class="fas fa-link text-7xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 05: MER e DER</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto italic leading-relaxed">Conectando as Ilhas de Dados: Como as tabelas conversam entre si.</p>
+                        <div class="flex justify-center gap-4 text-brand-dark/50 text-sm mt-10">
+                            <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">SETAS</span>
+                            <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">ESPAÇO</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "O Problema das Ilhas",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">Até agora, aprendemos a criar <strong>Entidades</strong> e os seus <strong>Atributos</strong>. Mas, no mundo real, as coisas não funcionam sozinhas.</p>
+                            <p class="text-lg text-brand-dark">Um <code>CLIENTE</code> sozinho não gera lucro. Um <code>PRODUTO</code> sozinho fica na prateleira. O valor real do Banco de Dados está em <strong>relacionar</strong> essas informações.</p>
+                        </div>
+                        <div class="bg-brand-muted rounded-3xl h-64 flex flex-col items-center justify-center border-2 border-dashed border-brand-dark shadow-sm relative overflow-hidden">
+                            <div class="flex gap-8 items-center">
+                                <div class="w-24 h-16 bg-white border-2 border-brand-dark flex items-center justify-center font-bold text-sm shadow-md">CLIENTE</div>
+                                <i class="fas fa-question text-4xl text-brand-primary opacity-60"></i>
+                                <div class="w-24 h-16 bg-white border-2 border-brand-dark flex items-center justify-center font-bold text-sm shadow-md">PRODUTO</div>
+                            </div>
+                            <span class="font-bold uppercase text-xs tracking-widest text-brand-dark/70 absolute bottom-4">Falta uma Ponte!</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "MER vs. DER",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-center">É muito comum confundir estas duas siglas. Vamos esclarecer:</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-white border border-brand-secondary rounded-3xl shadow-sm">
+                                <h4 class="text-2xl font-bold mb-4 text-brand-dark border-b border-brand-secondary pb-2">MER</h4>
+                                <p class="text-sm uppercase tracking-widest text-brand-dark/70 mb-2">Modelo Entidade-Relacionamento</p>
+                                <p class="text-brand-dark/80 leading-relaxed">É a <strong>teoria</strong>, o conceito. É o processo mental de abstrair o mundo real e definir que teremos entidades e que elas se relacionarão.</p>
+                            </div>
+                            <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl border-b-4 border-brand-primary">
+                                <h4 class="text-2xl font-bold mb-4 text-brand-secondary border-b border-brand-secondary pb-2">DER</h4>
+                                <p class="text-sm uppercase tracking-widest text-brand-secondary mb-2">Diagrama Entidade-Relacionamento</p>
+                                <p class="text-brand-muted leading-relaxed">É a <strong>prática</strong>, o desenho. É a representação gráfica e visual (com retângulos, losangos e elipses) do MER.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "O Losango: O Relacionamento",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">No DER, o <strong>Relacionamento</strong> é representado por um <strong>Losango</strong>.</p>
+                            <ul class="space-y-4 text-brand-dark font-medium">
+                                <li class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-check"></i></div> Ele une duas ou mais Entidades.</li>
+                                <li class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-check"></i></div> Representa uma ação, evento ou posse.</li>
+                                <li class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-check"></i></div> Geralmente, o seu nome deriva de um <strong>VERBO</strong>.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex flex-col items-center justify-center p-4 shadow-sm border border-brand-secondary text-center">
+                            <svg width="150" height="150" viewBox="0 0 150 150">
+                                <polygon points="75,20 130,75 75,130 20,75" class="rel-polygon" />
+                                <text x="75" y="79" text-anchor="middle" class="rel-text">COMPRA</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "A Representação Visual Completa",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-center">Veja como as linhas conectam o "ator" ao "objeto" através da "ação".</p>
+                        <div class="bg-brand-muted rounded-3xl h-64 flex items-center justify-center p-4 shadow-inner border border-brand-secondary">
+                            <svg width="500" height="200" viewBox="0 0 500 200">
+                                <!-- Linhas -->
+                                <line x1="120" y1="100" x2="210" y2="100" class="edge" />
+                                <line x1="290" y1="100" x2="380" y2="100" class="edge" />
+                                
+                                <!-- Entidade 1 -->
+                                <rect x="20" y="75" width="100" height="50" class="node-rect" />
+                                <text x="70" y="105" text-anchor="middle" class="node-text">CLIENTE</text>
+                                
+                                <!-- Relacionamento -->
+                                <polygon points="250,50 300,100 250,150 200,100" class="rel-polygon" />
+                                <text x="250" y="104" text-anchor="middle" class="rel-text">COMPRA</text>
+                                
+                                <!-- Entidade 2 -->
+                                <rect x="380" y="75" width="100" height="50" class="node-rect" />
+                                <text x="430" y="105" text-anchor="middle" class="node-text">PRODUTO</text>
+                            </svg>
+                        </div>
+                        <p class="text-center font-bold text-brand-dark/80 text-lg">Lê-se: "Um CLIENTE <u>COMPRA</u> um PRODUTO".</p>
+                    </div>
+                `
+            },
+            {
+                title: "Como encontrar Relacionamentos?",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed">A regra de ouro na hora de ler e interpretar os requisitos do cliente (o texto do problema) é:</p>
+                            <div class="p-6 bg-white border-l-4 border-brand-primary shadow-sm rounded-r-xl">
+                                <p class="font-bold text-brand-dark text-lg">Substantivos &rarr; Entidades</p>
+                                <p class="font-bold text-brand-dark text-lg mt-2">Verbos &rarr; Relacionamentos</p>
+                            </div>
+                        </div>
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl">
+                            <h4 class="font-bold text-brand-secondary mb-4"><i class="fas fa-search mr-2"></i> Exemplo Prático:</h4>
+                            <p class="leading-relaxed text-lg">"O <span class="bg-brand-secondary text-brand-dark px-1 rounded font-bold">MÉDICO</span> precisa <span class="bg-brand-primary text-white px-1 rounded italic font-bold">ATENDER</span> o <span class="bg-brand-secondary text-brand-dark px-1 rounded font-bold">PACIENTE</span> no hospital."</p>
+                            <p class="mt-6 text-sm text-brand-muted/80">As entidades Médico e Paciente serão interligadas pelo losango 'Atender' (ou 'Consulta').</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "O Perigo das Tabelas Órfãs",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">Um Banco de Dados <strong>Relacional</strong> vive de... relacionamentos! Uma tabela que não se liga a nenhuma outra é chamada de <strong>Tabela Órfã</strong>.</p>
+                            <div class="p-6 bg-brand-primary/10 border-l-4 border-brand-primary rounded-r-xl">
+                                <p class="text-brand-primary font-bold italic">"Uma entidade isolada no diagrama geralmente indica um erro de modelagem ou um requisito que foi esquecido."</p>
+                            </div>
+                            <p class="text-sm font-bold text-brand-primary uppercase tracking-widest mt-4"><i class="fas fa-exclamation-triangle mr-2"></i>Evite Ilhas de Dados!</p>
+                        </div>
+                        <div class="bg-brand-muted rounded-3xl h-64 flex flex-col items-center justify-center p-4 shadow-sm border-2 border-brand-primary border-dashed relative">
+                            <i class="fas fa-unlink text-6xl text-brand-primary/30 mb-4"></i>
+                            <div class="w-36 h-16 bg-white border-2 border-brand-dark flex items-center justify-center font-bold text-sm shadow-md text-brand-dark">ENTIDADE_ÓRFÃ</div>
+                            <i class="fas fa-ban absolute top-8 right-8 text-5xl text-brand-primary opacity-80"></i>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Graus de Relacionamento",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">O "Grau" de um relacionamento diz respeito a <strong>quantas entidades</strong> estão ligadas àquele mesmo losango.</p>
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center relative overflow-hidden">
+                                <div class="w-12 h-12 bg-brand-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-black text-xl shadow-md">1</div>
+                                <h4 class="font-bold text-brand-dark mb-2 text-lg">Unário</h4>
+                                <p class="text-sm text-brand-dark/70">Auto-relacionamento (A entidade liga-se a si mesma).</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center relative overflow-hidden">
+                                <div class="w-12 h-12 bg-brand-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-black text-xl shadow-md">2</div>
+                                <h4 class="font-bold text-brand-dark mb-2 text-lg">Binário</h4>
+                                <p class="text-sm text-brand-dark/70">Liga duas entidades diferentes. É o mais comum de todos!</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center relative overflow-hidden">
+                                <div class="w-12 h-12 bg-brand-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 font-black text-xl shadow-md">3</div>
+                                <h4 class="font-bold text-brand-dark mb-2 text-lg">Ternário</h4>
+                                <p class="text-sm text-brand-dark/70">Liga três entidades simultaneamente ao mesmo losango.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "1. Grau Binário",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">É o padrão da indústria. Sempre que você vir <strong>duas "caixas" (Entidades) ligadas por um "losango"</strong>, temos um grau Binário.</p>
+                            <p class="text-brand-dark font-bold">Lê-se de forma simples e direta:</p>
+                            <ul class="space-y-3 text-sm font-bold text-brand-dark/80 bg-brand-muted p-4 rounded-xl border border-brand-secondary">
+                                <li>• Professor <i class="fas fa-arrow-right text-brand-primary mx-2"></i> ENSINA <i class="fas fa-arrow-right text-brand-primary mx-2"></i> Disciplina</li>
+                                <li>• Cliente <i class="fas fa-arrow-right text-brand-primary mx-2"></i> ALUGA <i class="fas fa-arrow-right text-brand-primary mx-2"></i> Filme</li>
+                                <li>• Autor <i class="fas fa-arrow-right text-brand-primary mx-2"></i> ESCREVE <i class="fas fa-arrow-right text-brand-primary mx-2"></i> Livro</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex flex-col items-center justify-center p-4 shadow-sm border border-brand-secondary">
+                            <svg width="400" height="150" viewBox="0 0 400 150">
+                                <line x1="100" y1="75" x2="160" y2="75" class="edge" />
+                                <line x1="240" y1="75" x2="300" y2="75" class="edge" />
+                                
+                                <rect x="0" y="50" width="100" height="50" class="node-rect" />
+                                <text x="50" y="80" text-anchor="middle" class="node-text">AUTOR</text>
+                                
+                                <polygon points="200,35 240,75 200,115 160,75" class="rel-polygon" />
+                                <text x="200" y="79" text-anchor="middle" class="rel-text">ESCREVE</text>
+                                
+                                <rect x="300" y="50" width="100" height="50" class="node-rect" />
+                                <text x="350" y="80" text-anchor="middle" class="node-text">LIVRO</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exemplo 2: Grau Binário",
+                content: `
+                    <div class="flex flex-col items-center space-y-8">
+                        <p class="text-xl text-brand-dark">Neste exemplo, o <span class="font-bold text-brand-primary">MÉDICO</span> realiza um evento, que é a <span class="font-bold text-brand-primary">CONSULTA</span>, com o <span class="font-bold text-brand-primary">PACIENTE</span>.</p>
+                        <div class="bg-brand-muted rounded-3xl h-64 w-full max-w-3xl flex items-center justify-center p-4 shadow-inner border border-brand-secondary">
+                            <svg width="500" height="150" viewBox="0 0 500 150">
+                                <line x1="120" y1="75" x2="210" y2="75" class="edge" />
+                                <line x1="290" y1="75" x2="380" y2="75" class="edge" />
+                                
+                                <rect x="20" y="50" width="100" height="50" class="node-rect" />
+                                <text x="70" y="80" text-anchor="middle" class="node-text">MÉDICO</text>
+                                
+                                <polygon points="250,35 300,75 250,115 200,75" class="rel-polygon" />
+                                <text x="250" y="79" text-anchor="middle" class="rel-text">CONSULTA</text>
+                                
+                                <rect x="380" y="50" width="100" height="50" class="node-rect" />
+                                <text x="430" y="80" text-anchor="middle" class="node-text">PACIENTE</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "2. Grau Unário (Auto-Relacionamento)",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="bg-white rounded-3xl h-64 flex flex-col items-center justify-center p-4 shadow-sm border border-brand-secondary">
+                            <svg width="250" height="200" viewBox="0 0 250 200">
+                                <!-- Entidade -->
+                                <rect x="75" y="120" width="100" height="40" class="node-rect" />
+                                <text x="125" y="145" text-anchor="middle" class="node-text">FUNCIONÁRIO</text>
+                                
+                                <!-- Relacionamento Unário -->
+                                <polygon points="125,10 165,45 125,80 85,45" class="rel-polygon" />
+                                <text x="125" y="49" text-anchor="middle" class="rel-text">GERENCIA</text>
+                                
+                                <!-- Linhas de Loop -->
+                                <polyline points="125,80 125,120" class="edge" />
+                                <polyline points="165,45 200,45 200,140 175,140" class="edge" />
+                            </svg>
+                        </div>
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">A entidade relaciona-se com <strong>ela mesma</strong>.</p>
+                            <div class="p-4 bg-brand-muted border-l-4 border-brand-primary rounded-r-lg">
+                                <p class="text-brand-dark font-bold mb-2">Porquê?</p>
+                                <p class="text-sm text-brand-dark/80">O Gerente também é um Funcionário da empresa. Em vez de criar uma tabela só para gerentes, o sistema liga o registro do "João" ao registro da "Maria" dentro da mesma tabela.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exemplo 2: Grau Unário",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                         <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">Outro exemplo clássico é a "Lista de Materiais".</p>
+                            <p class="text-brand-dark/80">Uma <strong>PEÇA</strong> (como o motor de um carro) é composta por outras <strong>PEÇAS</strong> menores (parafusos, engrenagens). Ambas são cadastradas na mesma tabela.</p>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex flex-col items-center justify-center p-4 shadow-sm border border-brand-secondary">
+                            <svg width="250" height="200" viewBox="0 0 250 200">
+                                <!-- Entidade -->
+                                <rect x="75" y="120" width="100" height="40" class="node-rect" />
+                                <text x="125" y="145" text-anchor="middle" class="node-text">PEÇA</text>
+                                
+                                <!-- Relacionamento Unário -->
+                                <polygon points="125,10 165,45 125,80 85,45" class="rel-polygon" />
+                                <text x="125" y="49" text-anchor="middle" class="rel-text">COMPÕE</text>
+                                
+                                <!-- Linhas de Loop -->
+                                <polyline points="125,80 125,120" class="edge" />
+                                <polyline points="165,45 200,45 200,140 175,140" class="edge" />
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "3. Grau Ternário",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">Ocorre quando um único evento envolve obrigatoriamente <strong>três entidades</strong> ao mesmo tempo para fazer sentido.</p>
+                            <p class="text-sm text-brand-primary font-bold italic bg-brand-muted p-4 rounded border border-brand-secondary/30">Nota: Muitas vezes, um Ternário é convertido em uma nova Entidade nas fases seguintes, mas conceitualmente ele une os três atores originais.</p>
+                        </div>
+                        <div class="bg-white rounded-3xl h-64 flex flex-col items-center justify-center p-4 shadow-sm border border-brand-secondary">
+                            <svg width="350" height="250" viewBox="0 0 350 250">
+                                <!-- Relacionamento -->
+                                <polygon points="175,70 225,120 175,170 125,120" class="rel-polygon" />
+                                <text x="175" y="124" text-anchor="middle" class="rel-text">ATENDIMENTO</text>
+                                
+                                <!-- Entidade Top -->
+                                <line x1="175" y1="70" x2="175" y2="40" class="edge" />
+                                <rect x="125" y="0" width="100" height="40" class="node-rect" />
+                                <text x="175" y="25" text-anchor="middle" class="node-text">MÉDICO</text>
+                                
+                                <!-- Entidade Bottom Left -->
+                                <line x1="150" y1="145" x2="80" y2="190" class="edge" />
+                                <rect x="10" y="190" width="100" height="40" class="node-rect" />
+                                <text x="60" y="215" text-anchor="middle" class="node-text">PACIENTE</text>
+
+                                <!-- Entidade Bottom Right -->
+                                <line x1="200" y1="145" x2="270" y2="190" class="edge" />
+                                <rect x="240" y="190" width="100" height="40" class="node-rect" />
+                                <text x="290" y="215" text-anchor="middle" class="node-text">HOSPITAL</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exemplo 2: Grau Ternário",
+                content: `
+                    <div class="flex flex-col items-center space-y-6">
+                        <p class="text-xl text-brand-dark">Na indústria, um <span class="font-bold">FORNECEDOR</span> fornece uma determinada <span class="font-bold">PEÇA</span> para um <span class="font-bold">PROJETO</span> específico.</p>
+                        <div class="bg-brand-muted rounded-3xl h-72 w-full max-w-2xl flex items-center justify-center p-4 shadow-inner border border-brand-secondary">
+                             <svg width="400" height="250" viewBox="0 0 400 250">
+                                <!-- Relacionamento Central -->
+                                <polygon points="200,70 250,120 200,170 150,120" class="rel-polygon" />
+                                <text x="200" y="124" text-anchor="middle" class="rel-text">FORNECE</text>
+                                
+                                <!-- Entidade Top -->
+                                <line x1="200" y1="70" x2="200" y2="40" class="edge" />
+                                <rect x="150" y="0" width="100" height="40" class="node-rect" />
+                                <text x="200" y="25" text-anchor="middle" class="node-text">FORNECEDOR</text>
+                                
+                                <!-- Entidade Bottom Left -->
+                                <line x1="175" y1="145" x2="100" y2="190" class="edge" />
+                                <rect x="30" y="190" width="100" height="40" class="node-rect" />
+                                <text x="80" y="215" text-anchor="middle" class="node-text">PROJETO</text>
+
+                                <!-- Entidade Bottom Right -->
+                                <line x1="225" y1="145" x2="300" y2="190" class="edge" />
+                                <rect x="270" y="190" width="100" height="40" class="node-rect" />
+                                <text x="320" y="215" text-anchor="middle" class="node-text">PEÇA</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "A Mágica da FK (Chave Estrangeira)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl">
+                            <h4 class="text-2xl font-bold mb-4 text-brand-secondary">Como a Máquina Entende o Desenho?</h4>
+                            <p class="text-lg leading-relaxed mb-4">No desenho (DER), nós fazemos uma linha com um losango. Mas como o Banco de Dados sabe que aquela linha existe fisicamente?</p>
+                            <p class="text-lg">Ele usa a <strong>Foreign Key (FK)</strong>. O banco pega o <code>id</code> da tabela de Clientes e "copia" para dentro da tabela de Compras. Assim, a ligação torna-se real na máquina.</p>
+                        </div>
+                        <div class="text-center mt-6">
+                            <span class="inline-block bg-brand-primary text-white font-bold px-6 py-2 rounded-full uppercase tracking-widest shadow-lg">
+                                Losango (Desenho) = Cópia do ID (Físico)
+                            </span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Resolução Guiada 1: Cenário",
+                content: `
+                    <div class="space-y-8">
+                        <h4 class="text-2xl font-bold text-brand-dark">O Desafio da Clínica Veterinária</h4>
+                        <div class="p-8 bg-white border-2 border-brand-secondary rounded-2xl shadow-lg text-xl leading-relaxed text-brand-dark">
+                            "A clínica veterinária Patinhas Felizes precisa informatizar o seu atendimento. Eles querem manter o cadastro do <strong>Veterinário</strong>, armazenando o seu <strong>nome</strong> e a sua <strong>cédula profissional (CRVM)</strong> que é única. Também precisam cadastrar o <strong>Animal</strong>, guardando o seu <strong>nome</strong> e a sua <strong>espécie</strong> (cão, gato). Sabemos que, no dia a dia, o veterinário <strong>atende</strong> o animal."
+                        </div>
+                        <p class="text-brand-dark font-bold text-center italic">Siga os passos a seguir junto com o professor.</p>
+                    </div>
+                `
+            },
+            {
+                title: "Passo 1: Identificando as Entidades",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Procure pelos <strong>Substantivos</strong> principais no texto.</p>
+                        <div class="p-8 bg-brand-muted border-2 border-brand-secondary rounded-2xl text-xl leading-relaxed text-brand-dark/50">
+                            "A clínica veterinária Patinhas Felizes precisa informatizar o seu atendimento. Eles querem manter o cadastro do <span class="bg-brand-primary text-white font-bold px-2 py-1 rounded">Veterinário</span>, armazenando o seu nome e a sua cédula profissional (CRVM) que é única. Também precisam cadastrar o <span class="bg-brand-primary text-white font-bold px-2 py-1 rounded">Animal</span>, guardando o seu nome e a sua espécie (cão, gato). Sabemos que, no dia a dia, o veterinário atende o animal."
+                        </div>
+                        <div class="flex justify-center gap-8 mt-6">
+                            <div class="w-48 h-20 bg-white border-4 border-brand-dark flex items-center justify-center font-bold text-lg rounded shadow-lg text-brand-dark">VETERINÁRIO</div>
+                            <div class="w-48 h-20 bg-white border-4 border-brand-dark flex items-center justify-center font-bold text-lg rounded shadow-lg text-brand-dark">ANIMAL</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Passo 2: Atributos e Tipos",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm">
+                            <h4 class="font-bold text-brand-dark text-xl mb-4 border-b border-brand-muted pb-2">Entidade: VETERINÁRIO</h4>
+                            <ul class="space-y-3 text-brand-dark">
+                                <li><i class="fas fa-key text-brand-primary w-6"></i> <strong>id:</strong> INT <span class="text-xs font-bold bg-brand-muted px-1 rounded">(PK / Surrogate)</span></li>
+                                <li><i class="fas fa-font text-brand-secondary w-6"></i> <strong>nome:</strong> VARCHAR</li>
+                                <li><i class="fas fa-id-card text-brand-secondary w-6"></i> <strong>crvm:</strong> VARCHAR <span class="text-xs font-bold bg-brand-muted px-1 rounded">(Unique)</span></li>
+                            </ul>
+                        </div>
+                        <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm">
+                            <h4 class="font-bold text-brand-dark text-xl mb-4 border-b border-brand-muted pb-2">Entidade: ANIMAL</h4>
+                            <ul class="space-y-3 text-brand-dark">
+                                <li><i class="fas fa-key text-brand-primary w-6"></i> <strong>id:</strong> INT <span class="text-xs font-bold bg-brand-muted px-1 rounded">(PK / Surrogate)</span></li>
+                                <li><i class="fas fa-font text-brand-secondary w-6"></i> <strong>nome:</strong> VARCHAR</li>
+                                <li><i class="fas fa-paw text-brand-secondary w-6"></i> <strong>especie:</strong> VARCHAR</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-center mt-6 font-bold text-brand-primary italic text-sm">* Adicionamos o 'id' como Chave Primária Artificial (Boa Prática).</p>
+                `
+            },
+            {
+                title: "Passo 3: Relacionamento (DER Final)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg text-brand-dark">Procuramos o <strong>Verbo</strong>: "o veterinário <span class="font-bold text-brand-primary italic underline">atende</span> o animal". Agora, unimos as entidades e adicionamos os atributos desenhados no Passo 2.</p>
+                        <div class="bg-brand-muted rounded-3xl h-80 flex flex-col items-center justify-center p-4 shadow-inner border border-brand-secondary w-full max-w-4xl mx-auto overflow-x-auto">
+                            <svg width="720" height="250" viewBox="0 0 720 250">
+                                <!-- Linhas de Relacionamento -->
+                                <line x1="170" y1="150" x2="310" y2="150" class="edge" />
+                                <line x1="410" y1="150" x2="550" y2="150" class="edge" />
+                                
+                                <!-- Linhas de Atributos - VETERINÁRIO -->
+                                <line x1="100" y1="150" x2="50" y2="90" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="100" y1="150" x2="120" y2="70" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="100" y1="150" x2="190" y2="90" stroke="#8CC7C4" stroke-width="2" />
+
+                                <!-- Linhas de Atributos - ANIMAL -->
+                                <line x1="620" y1="150" x2="530" y2="90" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="620" y1="150" x2="620" y2="70" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="620" y1="150" x2="690" y2="90" stroke="#8CC7C4" stroke-width="2" />
+
+                                <!-- Entidade VETERINÁRIO -->
+                                <rect x="30" y="125" width="140" height="50" class="node-rect" />
+                                <text x="100" y="155" text-anchor="middle" class="node-text">VETERINÁRIO</text>
+                                
+                                <!-- Relacionamento ATENDE -->
+                                <polygon points="360,110 410,150 360,190 310,150" class="rel-polygon" />
+                                <text x="360" y="154" text-anchor="middle" class="rel-text">ATENDE</text>
+                                
+                                <!-- Entidade ANIMAL -->
+                                <rect x="550" y="125" width="140" height="50" class="node-rect" />
+                                <text x="620" y="155" text-anchor="middle" class="node-text">ANIMAL</text>
+
+                                <!-- Atributos VETERINÁRIO -->
+                                <!-- ID (PK) -->
+                                <ellipse cx="50" cy="90" rx="35" ry="15" fill="#FFF6F6" stroke="#DB1A1A" stroke-width="2" />
+                                <text x="50" y="94" text-anchor="middle" font-size="10" fill="#DB1A1A" style="text-decoration: underline; font-weight: bold;">id</text>
+                                <!-- NOME -->
+                                <ellipse cx="120" cy="70" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="120" y="74" text-anchor="middle" font-size="10" fill="#2C687B">nome</text>
+                                <!-- CRVM (UNIQUE) -->
+                                <ellipse cx="190" cy="90" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="190" y="94" text-anchor="middle" font-size="10" fill="#2C687B" style="text-decoration: underline; text-decoration-style: dashed;">crvm</text>
+
+                                <!-- Atributos ANIMAL -->
+                                <!-- ID (PK) -->
+                                <ellipse cx="530" cy="90" rx="35" ry="15" fill="#FFF6F6" stroke="#DB1A1A" stroke-width="2" />
+                                <text x="530" y="94" text-anchor="middle" font-size="10" fill="#DB1A1A" style="text-decoration: underline; font-weight: bold;">id</text>
+                                <!-- NOME -->
+                                <ellipse cx="620" cy="70" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="620" y="74" text-anchor="middle" font-size="10" fill="#2C687B">nome</text>
+                                <!-- ESPECIE -->
+                                <ellipse cx="690" cy="90" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="690" y="94" text-anchor="middle" font-size="10" fill="#2C687B">especie</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Resolução Guiada 2: Mais Complexo",
+                content: `
+                    <div class="space-y-6">
+                        <h4 class="text-2xl font-bold text-brand-dark">A Livraria Online</h4>
+                        <div class="p-6 bg-white border-2 border-brand-secondary rounded-2xl shadow-lg text-lg leading-relaxed text-brand-dark">
+                            "A livraria quer cadastrar os seus <span class="font-bold">Livros</span> (título e ISBN) e os seus <span class="font-bold">Autores</span> (nome). Sabemos que o autor <span class="italic">escreve</span> o livro. Além disso, o sistema possui <span class="font-bold">Clientes</span> (nome e email único). O cliente entra no site e <span class="italic">compra</span> o livro."
+                        </div>
+                        <p class="text-brand-primary font-bold text-center mt-4">Temos mais de um verbo! Como ligar as três ilhas?</p>
+                    </div>
+                `
+            },
+            {
+                title: "Passo 1: Identificando as Entidades",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Identificando os Substantivos principais:</p>
+                        <div class="flex justify-center gap-6 mt-10">
+                            <div class="w-40 h-16 bg-white border-4 border-brand-dark flex items-center justify-center font-bold text-lg rounded shadow-lg text-brand-dark">AUTOR</div>
+                            <div class="w-40 h-16 bg-white border-4 border-brand-dark flex items-center justify-center font-bold text-lg rounded shadow-lg text-brand-dark">LIVRO</div>
+                            <div class="w-40 h-16 bg-white border-4 border-brand-dark flex items-center justify-center font-bold text-lg rounded shadow-lg text-brand-dark">CLIENTE</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Passo 2: Atributos",
+                content: `
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="p-5 bg-white border border-brand-secondary rounded-2xl shadow-sm text-sm">
+                            <h4 class="font-bold text-brand-dark text-base mb-3 border-b border-brand-muted pb-1">AUTOR</h4>
+                            <ul class="space-y-2 text-brand-dark">
+                                <li><strong>id:</strong> INT <span class="text-brand-primary">(PK)</span></li>
+                                <li><strong>nome:</strong> VARCHAR</li>
+                            </ul>
+                        </div>
+                        <div class="p-5 bg-white border border-brand-secondary rounded-2xl shadow-sm text-sm">
+                            <h4 class="font-bold text-brand-dark text-base mb-3 border-b border-brand-muted pb-1">LIVRO</h4>
+                            <ul class="space-y-2 text-brand-dark">
+                                <li><strong>id:</strong> INT <span class="text-brand-primary">(PK)</span></li>
+                                <li><strong>titulo:</strong> VARCHAR</li>
+                                <li><strong>isbn:</strong> CHAR <span class="text-brand-primary">(Unique)</span></li>
+                            </ul>
+                        </div>
+                        <div class="p-5 bg-white border border-brand-secondary rounded-2xl shadow-sm text-sm">
+                            <h4 class="font-bold text-brand-dark text-base mb-3 border-b border-brand-muted pb-1">CLIENTE</h4>
+                            <ul class="space-y-2 text-brand-dark">
+                                <li><strong>id:</strong> INT <span class="text-brand-primary">(PK)</span></li>
+                                <li><strong>nome:</strong> VARCHAR</li>
+                                <li><strong>email:</strong> VARCHAR <span class="text-brand-primary">(Unique)</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Passo 3: Múltiplos Relacionamentos",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg text-brand-dark">Unimos tudo: Autor <strong>escreve</strong> Livro. Cliente <strong>compra</strong> Livro. E inserimos os atributos desenhados.</p>
+                        <div class="bg-brand-muted rounded-3xl h-80 flex flex-col items-center justify-center shadow-inner border border-brand-secondary w-full max-w-5xl mx-auto overflow-x-auto">
+                            <svg width="700" height="250" viewBox="0 0 700 250">
+                                <!-- Linhas de Atributos - AUTOR -->
+                                <line x1="90" y1="150" x2="55" y2="80" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="90" y1="150" x2="125" y2="70" stroke="#8CC7C4" stroke-width="2" />
+                                
+                                <!-- Linhas de Atributos - LIVRO -->
+                                <line x1="330" y1="150" x2="280" y2="80" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="330" y1="150" x2="330" y2="60" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="330" y1="150" x2="380" y2="80" stroke="#8CC7C4" stroke-width="2" />
+                                
+                                <!-- Linhas de Atributos - CLIENTE -->
+                                <line x1="570" y1="150" x2="520" y2="80" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="570" y1="150" x2="570" y2="60" stroke="#8CC7C4" stroke-width="2" />
+                                <line x1="570" y1="150" x2="620" y2="80" stroke="#8CC7C4" stroke-width="2" />
+
+                                <!-- Linhas Autor -> Escreve -> Livro -->
+                                <line x1="140" y1="150" x2="170" y2="150" class="edge" />
+                                <line x1="250" y1="150" x2="280" y2="150" class="edge" />
+                                
+                                <!-- Linhas Livro -> Compra -> Cliente -->
+                                <line x1="380" y1="150" x2="410" y2="150" class="edge" />
+                                <line x1="490" y1="150" x2="520" y2="150" class="edge" />
+                                
+                                <!-- Entidade Autor -->
+                                <rect x="40" y="130" width="100" height="40" class="node-rect" />
+                                <text x="90" y="155" text-anchor="middle" class="node-text">AUTOR</text>
+                                
+                                <!-- Relacionamento Escreve (Center x=210) -->
+                                <polygon points="210,125 250,150 210,175 170,150" class="rel-polygon" />
+                                <text x="210" y="154" text-anchor="middle" class="rel-text">ESCREVE</text>
+                                
+                                <!-- Entidade Livro -->
+                                <rect x="280" y="130" width="100" height="40" class="node-rect" />
+                                <text x="330" y="155" text-anchor="middle" class="node-text">LIVRO</text>
+
+                                <!-- Relacionamento Compra (Center x=450) -->
+                                <polygon points="450,125 490,150 450,175 410,150" class="rel-polygon" />
+                                <text x="450" y="154" text-anchor="middle" class="rel-text">COMPRA</text>
+
+                                <!-- Entidade Cliente -->
+                                <rect x="520" y="130" width="100" height="40" class="node-rect" />
+                                <text x="570" y="155" text-anchor="middle" class="node-text">CLIENTE</text>
+
+                                <!-- Atributos AUTOR -->
+                                <ellipse cx="55" cy="80" rx="30" ry="15" fill="#FFF6F6" stroke="#DB1A1A" stroke-width="2" />
+                                <text x="55" y="84" text-anchor="middle" font-size="10" fill="#DB1A1A" style="text-decoration: underline; font-weight: bold;">id</text>
+                                <ellipse cx="125" cy="70" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="125" y="74" text-anchor="middle" font-size="10" fill="#2C687B">nome</text>
+
+                                <!-- Atributos LIVRO -->
+                                <ellipse cx="280" cy="80" rx="30" ry="15" fill="#FFF6F6" stroke="#DB1A1A" stroke-width="2" />
+                                <text x="280" y="84" text-anchor="middle" font-size="10" fill="#DB1A1A" style="text-decoration: underline; font-weight: bold;">id</text>
+                                <ellipse cx="330" cy="60" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="330" y="64" text-anchor="middle" font-size="10" fill="#2C687B">titulo</text>
+                                <ellipse cx="380" cy="80" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="380" y="84" text-anchor="middle" font-size="10" fill="#2C687B" style="text-decoration: underline; text-decoration-style: dashed;">isbn</text>
+
+                                <!-- Atributos CLIENTE -->
+                                <ellipse cx="520" cy="80" rx="30" ry="15" fill="#FFF6F6" stroke="#DB1A1A" stroke-width="2" />
+                                <text x="520" y="84" text-anchor="middle" font-size="10" fill="#DB1A1A" style="text-decoration: underline; font-weight: bold;">id</text>
+                                <ellipse cx="570" cy="60" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="570" y="64" text-anchor="middle" font-size="10" fill="#2C687B">nome</text>
+                                <ellipse cx="620" cy="80" rx="35" ry="15" fill="#ffffff" stroke="#8CC7C4" stroke-width="2" />
+                                <text x="620" y="84" text-anchor="middle" font-size="10" fill="#2C687B" style="text-decoration: underline; text-decoration-style: dashed;">email</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Individual 1: Gestão de Projetos",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "A empresa TechSolutions precisa controlar os seus funcionários e os projetos em andamento. Sabemos que o <strong>Desenvolvedor</strong> <span class="italic underline">atua</span> no <strong>Projeto</strong>. 
+                            <br><br>
+                            Cadastre o Desenvolvedor (nome e número do crachá que é único). Cadastre o Projeto (nome do projeto e data de início)."
+                        </div>
+                        <p class="font-bold text-brand-dark mb-2">Desenhe o MER completo (Entidades com os seus Atributos e PKs, ligados pelo Relacionamento).</p>
+                        
+                        <div class="mt-4 p-8 border-2 border-dashed border-brand-secondary/50 rounded-2xl bg-brand-muted flex flex-col items-center justify-center text-brand-secondary">
+                            <i class="fas fa-laptop-code text-4xl mb-3 opacity-50"></i>
+                            <p class="italic font-bold text-center">Entrega no Classroom <br><span class="text-sm font-normal opacity-80">(Pode utilizar o BRModelo Web ou o DIA)</span></p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Individual 2: Locadora de Veículos",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "Uma locadora quer modernizar o seu sistema. Eles possuem <strong>Clientes</strong> (nome, NIF e e-mail). Eles também possuem <strong>Veículos</strong> na garagem (matrícula, modelo e ano). No dia a dia, o cliente vai à loja e <span class="italic underline">aluga</span> o veículo."
+                        </div>
+                        <p class="font-bold text-brand-dark mb-2">Desenhe o diagrama deste cenário. Lembre-se de adicionar o ID (Surrogate Key) em ambas as entidades.</p>
+                        
+                        <div class="mt-4 p-8 border-2 border-dashed border-brand-secondary/50 rounded-2xl bg-brand-muted flex flex-col items-center justify-center text-brand-secondary">
+                            <i class="fas fa-car text-4xl mb-3 opacity-50"></i>
+                            <p class="italic font-bold text-center">Entrega no Classroom <br><span class="text-sm font-normal opacity-80">(Pode utilizar o BRModelo Web ou o DIA)</span></p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Exercício Individual 3: Rede de Pizzarias",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-lg leading-relaxed">
+                            "O <strong>Cliente</strong> liga para a pizzaria e <span class="italic underline">faz</span> o <strong>Pedido</strong>. A pizzaria precisa registar os dados do Cliente (nome, telefone). O Pedido gera um valor total. Após ficar pronto, o <strong>Motoboy</strong> (nome e placa da moto) <span class="italic underline">entrega</span> esse Pedido."
+                        </div>
+                        <p class="font-bold text-brand-primary mb-2">Atenção! Temos 3 entidades e 2 relacionamentos em cadeia.</p>
+                        <p class="text-sm text-brand-dark">Desenhe o DER interligando o Cliente, o Pedido e o Motoboy de forma lógica.</p>
+                        
+                        <div class="mt-4 p-6 border-2 border-dashed border-brand-secondary/50 rounded-2xl bg-brand-muted flex flex-col items-center justify-center text-brand-secondary">
+                            <i class="fas fa-pizza-slice text-4xl mb-3 opacity-50"></i>
+                            <p class="italic font-bold text-center">Entrega no Classroom <br><span class="text-sm font-normal opacity-80">(Pode utilizar o BRModelo Web ou o DIA)</span></p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Resumo da Aula",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-lg border-t-4 border-brand-primary">
+                            <h4 class="font-bold text-xl mb-4 text-brand-secondary">O DER na Prática</h4>
+                            <ul class="space-y-4 text-sm leading-relaxed">
+                                <li><strong>Retângulo:</strong> Entidade (Substantivos do mundo real).</li>
+                                <li><strong>Losango:</strong> Relacionamento (Verbos de ação/posse).</li>
+                                <li><strong>Linhas:</strong> Conexões que amarram a estrutura da base de dados.</li>
+                            </ul>
+                        </div>
+                        <div class="p-8 bg-white border border-brand-secondary rounded-3xl shadow-sm">
+                            <h4 class="text-brand-dark font-bold text-xl mb-4 border-b border-brand-muted pb-2">Graus de Relacionamento</h4>
+                            <ul class="space-y-4 text-brand-dark/80 text-sm">
+                                <li><i class="fas fa-circle text-brand-primary mr-2 text-[10px]"></i> <strong>Unário:</strong> A tabela liga-se a si mesma (ex: Funcionário gerencia Funcionário).</li>
+                                <li><i class="fas fa-circle text-brand-primary mr-2 text-[10px]"></i> <strong>Binário:</strong> O mais comum. Liga 2 entidades.</li>
+                                <li><i class="fas fa-circle text-brand-primary mr-2 text-[10px]"></i> <strong>Ternário:</strong> Uma ação complexa envolvendo 3 entidades simultaneamente.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Fim da Aula 05",
+                content: `
+                    <div class="text-center space-y-10 py-10">
+                        <div class="inline-block p-10 bg-brand-muted rounded-full border-4 border-brand-primary shadow-[0_0_20px_#DB1A1A]">
+                            <i class="fas fa-project-diagram text-brand-dark text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl font-black text-brand-dark">A Ponte Foi Construída!</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto">Você aprendeu como identificar as conexões lógicas entre as tabelas e desenhá-las graficamente.</p>
+                        <div class="mt-12 px-10 py-4 bg-brand-dark text-white rounded-3xl font-black text-xl uppercase shadow-xl inline-block border-b-4 border-brand-primary">
+                            Próxima Aula: Dicionário de Dados
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-primary tracking-widest mb-4">Tópico ${currentStep + 1}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>' : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Banco de Dados I</h1>
+                <p>Aula 05 - MER e DER (Relacionamentos)</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand-primary pl-2">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

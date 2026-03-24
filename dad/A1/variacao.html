@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Avaliação: Implantes Cibernéticos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Embedded CSS for strict chart container constraints and specific interactive elements */
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 300px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 350px;
+            }
+        }
+
+        /* Custom scrollbar for modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d6d3d1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e; 
+        }
+
+        /* Accordion transition */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        .accordion-content.open {
+            max-height: 500px; /* Arbitrary large max-height for transition */
+            padding-bottom: 1rem;
+            padding-top: 1rem;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        /* Warm Neutrals Palette */
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        accent: {
+                            teal: '#0f766e', /* Muted Teal for primary actions */
+                            rose: '#be123c', /* Muted Rose for risks/alerts */
+                            amber: '#b45309' /* Muted Amber for highlights */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<!-- Chosen Palette: Warm Neutrals with Muted Teal and Rose Accents -->
+<!-- Application Structure Plan: The SPA is structured into three main thematic sections to guide the professor/student through the evaluation material effectively. 
+     1. 'Diretrizes da Avaliação' sets the context, listing rules and objectives clearly using a grid layout. 
+     2. 'Simulador do Gabarito' provides a live, interactive implementation of the expected student code, paired with a dynamic Chart.js visualization. This allows users to test the logic visually and see data relationships (Risk vs Safe) instantly, moving beyond static code reading. 
+     3. 'Sabatina Interativa' transforms the static question bank into interactive flashcard accordions, organized by set, facilitating active recall and study. This structure prioritizes active engagement and logical flow over a linear reading of the original markdown document. -->
+<!-- Visualization & Content Choices: 
+     - Overview Grid: Goal -> Inform on rules. Method -> Tailwind Grid with Unicode icons. Justification -> Clean, scannable layout. 
+     - Live Sandbox (Simulator): Goal -> Interact with gabarito logic. Method -> HTML Forms & Vanilla JS DOM manipulation. Justification -> Demonstrates the exact required functionality (map, filter, DOM).
+     - Inventory Breakdown Chart: Goal -> Compare safe vs risky items. Method -> Chart.js Doughnut Chart. Interaction -> Updates automatically when simulator data changes. Justification -> Provides instant visual feedback on catalog composition, enhancing the raw data list. NO SVG used, rendered on Canvas.
+     - Sabatina Accordions: Goal -> Organize Q&A for study. Method -> HTML/CSS/JS Accordions. Interaction -> Click to reveal answers. Justification -> Prevents information overload and encourages active learning.
+     - CONFIRMING NO SVG/Mermaid used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<body class="bg-stone-50 text-stone-800 antialiased selection:bg-accent-teal selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-stone-50/90 backdrop-blur-md border-b border-stone-200 z-50 transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2 font-bold text-xl text-stone-900 tracking-tight">
+                    <span>🦾</span> Cyber-Catálogo Edu
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#diretrizes" class="text-stone-600 hover:text-accent-teal transition-colors font-medium">Diretrizes</a>
+                    <a href="#simulador" class="text-stone-600 hover:text-accent-teal transition-colors font-medium">Simulador do Gabarito</a>
+                    <a href="#sabatina" class="text-stone-600 hover:text-accent-teal transition-colors font-medium">Sabatina</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header / Hero Section -->
+    <header class="pt-32 pb-16 px-4 text-center max-w-4xl mx-auto">
+        <span class="inline-block py-1 px-3 rounded-full bg-stone-200 text-stone-700 text-sm font-semibold tracking-wider mb-4 border border-stone-300">
+            AVALIAÇÃO PRÁTICA 1 (VARIAÇÃO B)
+        </span>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 mb-6 leading-tight">
+            Defesa de Código: <br><span class="text-accent-teal">Clínica de Implantes Cibernéticos</span>
+        </h1>
+        <p class="text-lg text-stone-600 mb-8 max-w-2xl mx-auto">
+            Plataforma interativa projetada para auxiliar professores na aplicação da sabatina e alunos no estudo do gabarito oficial. Explore os requisitos, teste o código ao vivo e acesse o banco de perguntas.
+        </p>
+        <a href="#simulador" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-accent-teal hover:bg-teal-800 transition-colors shadow-sm">
+            Acessar Simulador 👇
+        </a>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 space-y-24">
+
+        <!-- Section 1: Diretrizes -->
+        <section id="diretrizes" class="scroll-mt-24">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4 flex justify-center md:justify-start items-center gap-2">
+                    <span>📋</span> Diretrizes da Avaliação
+                </h2>
+                <p class="text-stone-600 max-w-3xl">
+                    Esta seção detalha o escopo do desafio proposto aos alunos e as regras de engajamento para a construção do painel de gestão do catálogo de peças cibernéticas. O entendimento claro destas regras é vital para a avaliação.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Requisitos Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8">
+                    <h3 class="text-xl font-bold text-stone-800 mb-6 border-b border-stone-100 pb-3">O que o programa deve fazer</h3>
+                    <ul class="space-y-4 text-stone-600">
+                        <li class="flex items-start">
+                            <span class="mr-3 text-accent-teal font-bold">1.</span>
+                            <span>Array de objetos inicial com peças de exemplo (ex: <code>{nome: "Olho", preco: 2500, altoRisco: false}</code>).</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 text-accent-teal font-bold">2.</span>
+                            <span>Formulário HTML (Inputs e Botão) para registrar um novo implante no catálogo.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 text-accent-teal font-bold">3.</span>
+                            <span>Listagem de implantes na tela. Itens com <code>altoRisco: true</code> devem ter destaque visual (⚠️).</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 text-accent-teal font-bold">4.</span>
+                            <span>Botão "Mostrar Apenas Seguros" que oculta implantes de alto risco via filtro JS.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 text-accent-teal font-bold">5.</span>
+                            <span>Painel exibindo o "Custo Total do Catálogo" calculado dinamicamente.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Regras Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8">
+                    <h3 class="text-xl font-bold text-stone-800 mb-6 border-b border-stone-100 pb-3">Regras & Metodologia</h3>
+                    <div class="space-y-6">
+                        <div class="flex gap-4 items-start">
+                            <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-xl shrink-0">💻</div>
+                            <div>
+                                <h4 class="font-bold text-stone-800">Desenvolvimento Livre</h4>
+                                <p class="text-sm text-stone-600 mt-1">Uso permitido de Google, YouTube e IA em casa para estudo e resolução do problema.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-xl shrink-0">⚙️</div>
+                            <div>
+                                <h4 class="font-bold text-stone-800">Requisitos Técnicos</h4>
+                                <p class="text-sm text-stone-600 mt-1">Obrigatório o uso de <strong>Arrow Functions</strong>, métodos <code>map</code> e <code>filter</code>, e manipulação de DOM via JS.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 items-start p-4 bg-stone-50 rounded-lg border border-stone-200 border-l-4 border-l-accent-rose">
+                            <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-lg shrink-0">⚖️</div>
+                            <div>
+                                <h4 class="font-bold text-accent-rose">A Defesa (Sabatina)</h4>
+                                <p class="text-sm text-stone-700 mt-1">No dia da prova, o código avaliado <strong>não será o do aluno</strong>, mas sim o gabarito do professor. A nota baseia-se na explicação oral do código oficial.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Simulador -->
+        <section id="simulador" class="scroll-mt-24">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4 flex justify-center md:justify-start items-center gap-2">
+                    <span>🔬</span> Simulador do Gabarito
+                </h2>
+                <p class="text-stone-600 max-w-3xl">
+                    Interaja com a implementação oficial do código exigido na avaliação. Adicione itens, utilize os filtros e observe a interface e os gráficos reagindo em tempo real através da manipulação do DOM e lógica de Arrays do JavaScript.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-stone-900 rounded-2xl p-6 shadow-xl border border-stone-800 text-stone-200">
+                
+                <!-- Coluna Esquerda: Formulário e Ações -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-stone-800 p-5 rounded-xl border border-stone-700">
+                        <h3 class="text-lg font-bold text-white mb-4 border-b border-stone-700 pb-2">Registrar Implante</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <input type="text" id="inputNome" placeholder="Nome da Peça" class="w-full bg-stone-900 border border-stone-600 rounded-md py-2 px-3 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-accent-teal focus:ring-1 focus:ring-accent-teal transition-colors">
+                            </div>
+                            <div>
+                                <input type="number" id="inputPreco" placeholder="Preço (E$)" class="w-full bg-stone-900 border border-stone-600 rounded-md py-2 px-3 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-accent-teal focus:ring-1 focus:ring-accent-teal transition-colors">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="checkRisco" class="w-4 h-4 text-accent-rose bg-stone-900 border-stone-600 rounded focus:ring-accent-rose focus:ring-2 accent-accent-rose">
+                                <label for="checkRisco" class="ml-2 text-sm text-stone-300">Alto Risco de Rejeição?</label>
+                            </div>
+                            <button id="btnAdicionar" class="w-full bg-accent-teal hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
+                                + Adicionar ao Catálogo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-stone-800 p-5 rounded-xl border border-stone-700">
+                        <h3 class="text-lg font-bold text-white mb-4 border-b border-stone-700 pb-2">Controles de Visão</h3>
+                        <div class="flex gap-2">
+                            <button id="btnTodos" class="flex-1 bg-stone-700 hover:bg-stone-600 text-white text-sm font-semibold py-2 px-2 rounded-md transition-colors">
+                                Catálogo Completo
+                            </button>
+                            <button id="btnSeguros" class="flex-1 bg-stone-700 hover:bg-stone-600 text-white text-sm font-semibold py-2 px-2 rounded-md transition-colors">
+                                Apenas Seguros
+                            </button>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-stone-700">
+                            <p class="text-sm text-stone-400 uppercase tracking-wider font-semibold mb-1">Valor em Estoque Exibido</p>
+                            <p class="text-3xl font-bold text-white">E$ <span id="totalPreco">0</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Lista e Gráfico -->
+                <div class="lg:col-span-2 flex flex-col gap-6">
+                    <!-- Gráfico -->
+                    <div class="bg-stone-800 p-5 rounded-xl border border-stone-700 flex flex-col items-center justify-center">
+                        <h3 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-2 w-full text-center">Composição do Catálogo Visível</h3>
+                        
+                        <!-- REQUIRED CHART CONTAINER STYLING -->
+                        <div class="chart-container">
+                            <canvas id="inventoryChart"></canvas>
+                        </div>
+
+                    </div>
+
+                    <!-- Lista -->
+                    <div class="bg-stone-800 p-5 rounded-xl border border-stone-700 flex-grow">
+                        <h3 class="text-lg font-bold text-white mb-4 border-b border-stone-700 pb-2 flex justify-between items-center">
+                            <span>Inventário</span>
+                            <span class="text-xs font-normal text-stone-400 bg-stone-900 px-2 py-1 rounded">DOM Dinâmico</span>
+                        </h3>
+                        <ul id="listaImplantes" class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                            <!-- Items will be injected here via JS -->
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 3: Sabatina -->
+        <section id="sabatina" class="scroll-mt-24">
+            <div class="mb-10 text-center md:text-left">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4 flex justify-center md:justify-start items-center gap-2">
+                    <span>🧠</span> Sabatina Interativa
+                </h2>
+                <p class="text-stone-600 max-w-3xl">
+                    Banco de perguntas oficial para a avaliação oral. Clique nas perguntas para revelar o gabarito correspondente. Ideal para professores na hora da prova ou alunos em preparação. Organizado por conjuntos (A, B e C).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Conjunto A -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-stone-100 px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+                        <h3 class="font-bold text-lg text-stone-800">Conjunto A</h3>
+                        <span class="text-xl">🟦</span>
+                    </div>
+                    <div class="p-2 space-y-2">
+                        <!-- Q1 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qa-1')">
+                                <span>Q1. (DOM & Tipos) - Uso do Number()</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qa-1" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> Por que o uso de <code>Number(implante.preco)</code> é necessário ao trabalhar com inputs do HTML?<br><br>
+                                <strong>Gabarito:</strong> Tudo o que vem de um input HTML via <code>.value</code> chega ao Javascript como <em>String</em>. Se não convertermos usando <code>Number()</code>, o operador <code>+</code> irá concatenar os textos (ex: "15" + "5" = "155") em vez de somar matematicamente.
+                            </div>
+                        </div>
+                        <!-- Q2 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qa-2')">
+                                <span>Q2. (Método Map) - Uso do .join("")</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qa-2" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> O que aconteceria se não usássemos o <code>.join("")</code> após o <code>.map()</code> no innerHTML?<br><br>
+                                <strong>Gabarito:</strong> O <code>map</code> retorna um Array. O HTML imprimiria as vírgulas que separam os itens do array na tela. O <code>.join("")</code> junta todas as strings do array em uma única string, removendo as vírgulas indesejadas.
+                            </div>
+                        </div>
+                        <!-- Q3 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qa-3')">
+                                <span>Q3. (Escopo) - const vs let</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qa-3" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> Por que faz sentido usar <code>const</code> para elementos da tela (ulLista) e <code>let</code> para o array (catalogo)?<br><br>
+                                <strong>Gabarito:</strong> <code>const</code> é usado pois a referência na memória daquele elemento HTML não muda na execução; tentar reatribuir geraria erro. O array usa <code>let</code> para indicar semanticamente que o catálogo sofrerá grandes alterações de estado ao longo do tempo.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conjunto B -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-stone-100 px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+                        <h3 class="font-bold text-lg text-stone-800">Conjunto B</h3>
+                        <span class="text-xl">🟩</span>
+                    </div>
+                    <div class="p-2 space-y-2">
+                        <!-- Q1 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qb-1')">
+                                <span>Q1. (Lógica) - Short-Circuit (|| e !)</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qb-1" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> Explique a verificação <code>if (!nome || !preco)</code> e o uso do <code>return alert</code>.<br><br>
+                                <strong>Gabarito:</strong> O <code>!</code> verifica valores falsy (vazio). O <code>||</code> é OU. Testa: "Se nome for vazio OU preço for vazio". O <code>return</code> aborta a função imediatamente, impedindo a criação de um objeto com dados em branco.
+                            </div>
+                        </div>
+                        <!-- Q2 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qb-2')">
+                                <span>Q2. (Método Filter) - Comportamento</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qb-2" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> O <code>.filter()</code> altera ou deleta dados do array original <code>catalogo</code>?<br><br>
+                                <strong>Gabarito:</strong> Não. O <code>filter</code> avalia a condição e gera um <strong>novo array</strong> contendo apenas cópias dos itens que passaram no teste, preservando o array original intacto.
+                            </div>
+                        </div>
+                        <!-- Q3 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qb-3')">
+                                <span>Q3. (Operador Ternário) - Conversão</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qb-3" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> Traduza <code>classeCSS = altoRisco ? "risco" : "seguro";</code> para um bloco if/else comum.<br><br>
+                                <strong>Gabarito:</strong><br>
+                                <pre class="mt-2 p-2 bg-white border border-stone-200 rounded text-xs text-stone-800">let classeCSS;
+if (implante.altoRisco == true) {
+    classeCSS = "risco";
+} else {
+    classeCSS = "seguro";
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conjunto C -->
+                <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="bg-stone-100 px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+                        <h3 class="font-bold text-lg text-stone-800">Conjunto C</h3>
+                        <span class="text-xl">🟧</span>
+                    </div>
+                    <div class="p-2 space-y-2">
+                        <!-- Q1 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qc-1')">
+                                <span>Q1. (Eventos) - Callbacks vs Execução</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qc-1" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> No <code>addEventListener</code>, por que não colocamos parênteses na função chamada no segundo argumento?<br><br>
+                                <strong>Gabarito:</strong> O listener precisa da "receita" da função (callback) para executá-la apenas no futuro (no clique). Colocar parênteses executaria a função imediatamente durante o carregamento da página.
+                            </div>
+                        </div>
+                        <!-- Q2 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qc-2')">
+                                <span>Q2. (Sintaxe) - Arrow Functions</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qc-2" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> Quais as diferenças visuais da Arrow Function em comparação com uma função C clássica?<br><br>
+                                <strong>Gabarito:</strong> Ausência da palavra <code>function</code>, não exige definição de tipo (int/void), e utiliza o sinal de flecha <code>=></code> após os parâmetros.
+                            </div>
+                        </div>
+                        <!-- Q3 -->
+                        <div class="border border-stone-100 rounded-lg">
+                            <button class="w-full text-left px-4 py-3 font-semibold text-stone-700 hover:bg-stone-50 focus:outline-none flex justify-between items-center" onclick="toggleAccordion('qc-3')">
+                                <span>Q3. (Loops) - forEach vs map</span>
+                                <span class="text-stone-400">▼</span>
+                            </button>
+                            <div id="qc-3" class="accordion-content px-4 bg-stone-50/50 text-stone-600 text-sm border-t border-stone-100">
+                                <strong>Pergunta:</strong> Faz sentido usar <code>.map()</code> apenas para calcular o somatório de preços?<br><br>
+                                <strong>Gabarito:</strong> Não. O <code>.map()</code> serve para transformar dados gerando um novo array. O <code>.forEach()</code> serve apenas para iterar e executar ações colaterais (como somar valores numa variável externa). Usar map apenas para somar é desperdício de memória.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-100 border-t border-stone-200 py-8 text-center text-stone-500 text-sm">
+        <p>Gerado a partir do relatório de Avaliação Prática 1 • Desenvolvimento Modular • 2026</p>
+    </footer>
+
+    <!-- Aplicação Lógica JS (Simulador Gabarito & UI Interactions) -->
+    <script>
+        // --- 1. ESTADO DA APLICAÇÃO (SIMULADOR) ---
+        let catalogo = [
+            { nome: "Braço Gorila", preco: 15000, altoRisco: false },
+            { nome: "Acelerador Sináptico (Mercado Negro)", preco: 45000, altoRisco: true }
+        ];
+
+        // Estado do gráfico
+        let inventoryChartInstance = null;
+
+        // --- 2. ELEMENTOS DO DOM ---
+        const ulLista = document.querySelector("#listaImplantes");
+        const spanTotal = document.querySelector("#totalPreco");
+        const btnAdicionar = document.querySelector("#btnAdicionar");
+        const btnTodos = document.querySelector("#btnTodos");
+        const btnSeguros = document.querySelector("#btnSeguros");
+        
+        const inputNome = document.querySelector("#inputNome");
+        const inputPreco = document.querySelector("#inputPreco");
+        const checkRisco = document.querySelector("#checkRisco");
+
+        // --- 3. LÓGICA DE RENDERIZAÇÃO E GRÁFICO ---
+        
+        // Função para formatar moeda
+        const formataMoeda = (valor) => {
+            return Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        const atualizarInterface = (listaAtual) => {
+            // A. Desenha a lista HTML
+            const htmlLista = listaAtual.map(implante => {
+                // Tailwind classes for styling based on condition
+                const baseClasses = "flex justify-between items-center p-3 rounded-lg border text-sm";
+                const classeCSS = implante.altoRisco 
+                    ? `${baseClasses} bg-accent-rose/10 border-accent-rose/30 text-accent-rose` 
+                    : `${baseClasses} bg-accent-teal/10 border-accent-teal/30 text-stone-300`;
+                
+                const icone = implante.altoRisco ? "⚠️ Risco" : "✅ Seguro";
+                const corNome = implante.altoRisco ? "font-bold text-white" : "font-semibold text-stone-100";
+                
+                return `
+                    <li class="${classeCSS}">
+                        <div class="flex flex-col">
+                            <span class="${corNome}">${implante.nome}</span>
+                            <span class="opacity-80 text-xs mt-1">E$ ${formataMoeda(implante.preco)}</span>
+                        </div>
+                        <span class="px-2 py-1 bg-stone-900/50 rounded text-xs font-mono border border-stone-700/50 tracking-wide">${icone}</span>
+                    </li>
+                `;
+            }).join("");
+            
+            ulLista.innerHTML = htmlLista || `<li class="p-4 text-center text-stone-500 border border-dashed border-stone-600 rounded-lg">Nenhum implante corresponde ao filtro atual.</li>`;
+
+            // B. Calcula o total em exibição
+            let somaTotal = 0;
+            listaAtual.forEach(implante => {
+                somaTotal += Number(implante.preco);
+            });
+            spanTotal.innerText = formataMoeda(somaTotal);
+
+            // C. Atualiza o Gráfico de Chart.js
+            atualizarGrafico(listaAtual);
+        };
+
+        const atualizarGrafico = (dadosVisiveis) => {
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            
+            // Conta os itens baseados no risco
+            let seguros = 0;
+            let risco = 0;
+            
+            dadosVisiveis.forEach(item => {
+                if (item.altoRisco) risco++;
+                else seguros++;
+            });
+
+            // Se não houver dados, cria um dado fantasma visual
+            const isEmpty = (seguros === 0 && risco === 0);
+            const chartData = isEmpty ? [1] : [seguros, risco];
+            const chartColors = isEmpty ? ['#292524'] : ['#0f766e', '#be123c']; // Tailwind accent-teal & accent-rose
+            const chartBorders = isEmpty ? ['#44403c'] : ['#134e4a', '#881337'];
+
+            if (inventoryChartInstance) {
+                inventoryChartInstance.destroy();
+            }
+
+            inventoryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: isEmpty ? ['Vazio'] : ['Seguros', 'Alto Risco'],
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: chartColors,
+                        borderColor: chartBorders,
+                        borderWidth: 1,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Ensures it respects the container CSS height
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#a8a29e', // text-stone-400
+                                font: { family: 'Inter', size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if(isEmpty) return ' Nenhum item exibido';
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' item(ns)';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 4. EVENTOS DO SIMULADOR ---
+        
+        btnAdicionar.addEventListener("click", () => {
+            const nomeDigitado = inputNome.value.trim();
+            const precoDigitado = inputPreco.value;
+            const riscoMarcado = checkRisco.checked;
+
+            if (!nomeDigitado || !precoDigitado) {
+                // Alerta visual mais bonito ao invés de alert() padrão bloqueante
+                const btnOriginalText = btnAdicionar.innerText;
+                btnAdicionar.innerText = "❌ Preencha os campos!";
+                btnAdicionar.classList.replace("bg-accent-teal", "bg-accent-rose");
+                btnAdicionar.classList.replace("hover:bg-teal-600", "hover:bg-rose-600");
+                
+                setTimeout(() => {
+                    btnAdicionar.innerText = btnOriginalText;
+                    btnAdicionar.classList.replace("bg-accent-rose", "bg-accent-teal");
+                    btnAdicionar.classList.replace("hover:bg-rose-600", "hover:bg-teal-600");
+                }, 2000);
+                return;
+            }
+
+            const novoImplante = {
+                nome: nomeDigitado,
+                preco: Number(precoDigitado),
+                altoRisco: riscoMarcado
+            };
+
+            catalogo.push(novoImplante);
+            
+            // Volta pro modo "Todos" ao adicionar para visualizar a inserção
+            btnSeguros.classList.replace("bg-accent-teal", "bg-stone-700");
+            btnTodos.classList.replace("bg-stone-700", "bg-accent-teal");
+            atualizarInterface(catalogo);
+            
+            // Limpeza
+            inputNome.value = "";
+            inputPreco.value = "";
+            checkRisco.checked = false;
+        });
+
+        // Filtros Ativos Visual
+        const setActiveFilterButton = (activeBtn, inactiveBtn) => {
+            activeBtn.classList.add("bg-accent-teal");
+            activeBtn.classList.remove("bg-stone-700");
+            inactiveBtn.classList.add("bg-stone-700");
+            inactiveBtn.classList.remove("bg-accent-teal");
+        }
+
+        btnSeguros.addEventListener("click", () => {
+            const apenasSeguros = catalogo.filter(implante => implante.altoRisco === false);
+            atualizarInterface(apenasSeguros);
+            setActiveFilterButton(btnSeguros, btnTodos);
+        });
+
+        btnTodos.addEventListener("click", () => {
+            atualizarInterface(catalogo);
+            setActiveFilterButton(btnTodos, btnSeguros);
+        });
+
+
+        // --- 5. LÓGICA DA SABATINA (ACCORDION) ---
+        function toggleAccordion(id) {
+            const element = document.getElementById(id);
+            const button = element.previousElementSibling;
+            const arrow = button.querySelector('span:last-child');
+            
+            // Toggle class open
+            if (element.classList.contains('open')) {
+                element.classList.remove('open');
+                arrow.style.transform = 'rotate(0deg)';
+                button.classList.remove('bg-stone-50');
+            } else {
+                // Close all others in the same group (optional, but good UX)
+                const group = element.parentElement.parentElement;
+                const allContents = group.querySelectorAll('.accordion-content');
+                allContents.forEach(el => {
+                    el.classList.remove('open');
+                    el.previousElementSibling.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+                    el.previousElementSibling.classList.remove('bg-stone-50');
+                });
+
+                element.classList.add('open');
+                arrow.style.transform = 'rotate(180deg)';
+                button.classList.add('bg-stone-50');
+            }
+        }
+
+        // --- INICIALIZAÇÃO GERAL ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Seta botão todos como ativo no início visualmente
+            btnTodos.classList.replace("bg-stone-700", "bg-accent-teal");
+            atualizarInterface(catalogo);
+        });
+
+    </script>
+</body>
+</html>

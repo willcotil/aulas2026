@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 07 - Gestão de Arquivos e Permissões no Linux</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Personalizada */
+        :root {
+            --color-red: #DB1A1A;
+            --color-bg: #FFF6F6;
+            --color-teal-light: #8CC7C4;
+            --color-teal-dark: #2C687B;
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--color-bg); 
+            color: var(--color-teal-dark);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-bg);
+            background-image: 
+                radial-gradient(rgba(44, 104, 123, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            opacity: 0;
+            transform: translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: translateY(0);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor Tailwind-like */
+        .text-c-red { color: var(--color-red); }
+        .text-c-bg { color: var(--color-bg); }
+        .text-c-teal-light { color: var(--color-teal-light); }
+        .text-c-teal-dark { color: var(--color-teal-dark); }
+        
+        .bg-c-red { background-color: var(--color-red); }
+        .bg-c-bg { background-color: var(--color-bg); }
+        .bg-c-teal-light { background-color: var(--color-teal-light); }
+        .bg-c-teal-dark { background-color: var(--color-teal-dark); }
+        
+        .border-c-red { border-color: var(--color-red); }
+        .border-c-teal-dark { border-color: var(--color-teal-dark); }
+        .border-c-teal-light { border-color: var(--color-teal-light); }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(44, 104, 123, 0.1);
+            border: 2px solid rgba(140, 199, 196, 0.3);
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-teal-light); box-shadow: 0 15px 35px rgba(44, 104, 123, 0.2); }
+        
+        .terminal {
+            background-color: #1e1e1e; /* Fundo escuro para o terminal parecer real */
+            color: #a6e22e; /* Texto verde terminal */
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+            text-align: left;
+            width: 100%;
+            font-size: 1.1rem; /* Fonte aumentada base para o terminal */
+            line-height: 1.6;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                color: black !important;
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+                background: white !important;
+            }
+
+            .slide { 
+                position: relative !important; 
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                display: block !important; 
+                page-break-inside: avoid;
+                page-break-after: always; 
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                color: black !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            h1, h2, h3, h4 { color: black !important; }
+            h2 { border-bottom: 2px solid var(--color-teal-dark); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li { font-size: 11pt !important; color: #000 !important; line-height: 1.5; }
+            
+            .card {
+                background: white !important;
+                border: 1px solid #999 !important;
+                box-shadow: none !important;
+                color: black !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            .terminal { background: #f4f4f4 !important; color: #000 !important; border: 1px solid #000 !important; }
+            .bg-c-teal-dark, .bg-c-red { background-color: #eee !important; color: black !important; border: 1px solid black; }
+            .text-c-bg { color: black !important; }
+            .text-c-teal-dark { color: black !important; }
+            .text-c-red { color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-c-bg/90 backdrop-blur-md border-b-2 border-c-teal-light shadow-sm">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <span class="font-black text-c-teal-dark tracking-widest text-xl">AULA 07</span>
+            <div class="h-3 w-24 md:w-48 lg:w-64 bg-gray-200 rounded-full overflow-hidden border border-c-teal-light/30">
+                <div id="progressBar" class="h-full bg-c-red transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-base font-mono text-c-teal-dark font-bold tracking-wider">00 / 00</span>
+            
+            <!-- Link -->
+            <a href="https://willcotil.github.io/aulas2026" target="_blank" class="hidden sm:inline-block text-c-teal-dark font-black text-base lg:text-xl hover:text-c-red transition" style="text-decoration: none;">willcotil.github.io/aulas2026</a>
+        </div>
+
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-c-teal-light/20 rounded text-c-teal-dark transition border border-transparent hover:border-c-teal-dark" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-c-teal-dark text-white rounded hover:bg-c-teal-dark/80 transition flex items-center gap-2 font-bold shadow-md text-lg" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Apostila PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-c-teal-light text-c-teal-dark px-6 py-2 rounded-full text-base font-bold tracking-widest uppercase mb-8 inline-block shadow-sm">Sistemas Operacionais</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-c-teal-dark">
+                    Arquivos &<br><span class="text-c-red">Permissões</span>
+                </h1>
+                <p class="text-2xl font-mono text-c-teal-dark/70 max-w-3xl mx-auto mt-6">Hackeando o terminal do Linux sem medo.</p>
+            </div>
+            <div class="mt-16 animate-bounce text-c-red no-print">
+                <i data-lucide="arrow-down" class="mx-auto w-12 h-12"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-teal-dark mb-10 border-l-4 border-c-red pl-4">O que vamos ver hoje?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl">
+                <div class="card p-6 border-t-8 border-c-teal-light">
+                    <div class="text-c-teal-dark mb-4"><i data-lucide="folder-tree" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-2 text-c-teal-dark">1. O Sistema</h3>
+                    <p class="text-lg opacity-90 mb-4">A grande biblioteca.</p>
+                    <ul class="text-lg list-disc pl-5 space-y-2 font-mono text-c-teal-dark/90">
+                        <li>Sistema de Arquivos</li>
+                        <li>Tudo é um arquivo!</li>
+                        <li>A Árvore de Diretórios</li>
+                    </ul>
+                </div>
+                <div class="card p-6 border-t-8 border-c-teal-dark">
+                    <div class="text-c-teal-dark mb-4"><i data-lucide="terminal" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-2 text-c-teal-dark">2. Comandos</h3>
+                    <p class="text-lg opacity-90 mb-4">Conversando com o Kernel.</p>
+                    <ul class="text-lg list-disc pl-5 space-y-2 font-mono text-c-teal-dark/90">
+                        <li>pwd, cd, ls</li>
+                        <li>Atalhos e Parâmetros</li>
+                        <li>Navegando pela casa</li>
+                    </ul>
+                </div>
+                <div class="card p-6 border-t-8 border-c-red">
+                    <div class="text-c-red mb-4"><i data-lucide="shield-alert" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-2 text-c-teal-dark">3. Permissões</h3>
+                    <p class="text-lg opacity-90 mb-4">Quem pode fazer o quê?</p>
+                    <ul class="text-lg list-disc pl-5 space-y-2 font-mono text-c-teal-dark/90">
+                        <li>Dono, Grupo, Outros</li>
+                        <li>Ler (r), Gravar (w), Executar (x)</li>
+                        <li>Entendendo o ls -l</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 1: SISTEMA DE ARQUIVOS ================= -->
+
+        <!-- SLIDE 3 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-teal-dark mb-8">A Grande Biblioteca 📚</h2>
+            <div class="card p-10 max-w-5xl bg-white text-center">
+                <p class="text-2xl mb-6">O HD/SSD é apenas um pedaço de silício ou metal cheio de 0s e 1s espalhados.</p>
+                <div class="p-8 bg-c-bg border-2 border-c-teal-light rounded-xl my-6">
+                    <h3 class="font-bold text-c-teal-dark text-2xl mb-4">Sistema de Arquivos (File System)</h3>
+                    <p class="text-xl leading-relaxed">É o "índice" do Sistema Operacional. Ele organiza essa bagunça em Pastas (Diretórios) e Arquivos para que a gente consiga achar as coisas.</p>
+                </div>
+                <p class="text-lg text-c-teal-dark/80 font-bold mt-6">No Windows usamos NTFS. No Linux, usamos geralmente o EXT4.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 4 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-red mb-8">Regra de Ouro do Linux</h2>
+            <div class="flex flex-col items-center justify-center py-16 w-full max-w-5xl rounded-2xl border-4 border-c-red bg-c-red text-white p-8 text-center shadow-2xl transition-transform hover:-translate-y-1">
+                <i data-lucide="file-code" class="w-24 h-24 mb-6"></i>
+                <h1 class="text-6xl font-black uppercase tracking-widest">"Tudo é um arquivo!"</h1>
+                <p class="mt-8 opacity-90 font-mono text-2xl leading-relaxed max-w-4xl">No Linux, um texto é um arquivo, uma foto é um arquivo, e ATÉ O SEU MOUSE E TECLADO são representados como arquivos de texto dentro do sistema.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 5 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">A Árvore de Diretórios 🌳</h2>
+            <p class="text-center mb-8 text-2xl">No Windows, as coisas começam no Disco <strong>C:\</strong>. No Linux, começam na Raiz (<strong>/</strong>).</p>
+            
+            <div class="flex flex-col items-center text-xl font-bold font-mono w-full">
+                <div class="bg-c-teal-dark text-white px-10 py-4 rounded-xl border-4 border-c-teal-light shadow text-2xl">/ (Root - A Raiz de tudo)</div>
+                <div class="w-2 h-10 bg-c-teal-dark"></div>
+                <div class="flex gap-16 border-t-4 border-c-teal-dark pt-8 px-10 relative">
+                    <!-- Home -->
+                    <div class="flex flex-col items-center relative">
+                        <div class="absolute -top-8 w-2 h-8 bg-c-teal-dark"></div>
+                        <div class="bg-white border-4 border-c-teal-dark px-6 py-3 rounded text-c-teal-dark shadow-sm">/home</div>
+                        <p class="text-base text-gray-600 mt-2 font-sans font-bold">Onde ficam seus arquivos</p>
+                        
+                        <div class="w-2 h-8 bg-gray-300 mt-2"></div>
+                        <div class="bg-gray-100 border-2 border-gray-300 px-4 py-2 rounded text-lg text-gray-700">/william</div>
+                    </div>
+                    
+                    <!-- Bin -->
+                    <div class="flex flex-col items-center relative">
+                        <div class="absolute -top-8 w-2 h-8 bg-c-teal-dark"></div>
+                        <div class="bg-white border-4 border-c-teal-dark px-6 py-3 rounded text-c-teal-dark shadow-sm">/bin</div>
+                        <p class="text-base text-gray-600 mt-2 font-sans font-bold">Os programas do sistema</p>
+                    </div>
+
+                    <!-- Etc -->
+                    <div class="flex flex-col items-center relative">
+                        <div class="absolute -top-8 w-2 h-8 bg-c-teal-dark"></div>
+                        <div class="bg-white border-4 border-c-teal-dark px-6 py-3 rounded text-c-teal-dark shadow-sm">/etc</div>
+                        <p class="text-base text-gray-600 mt-2 font-sans font-bold">Configurações</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-10">Caminhos: Como chegar no seu quarto?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl w-full">
+                <div class="card p-8 border-l-8 border-c-teal-dark bg-white">
+                    <h3 class="font-bold text-3xl mb-4 text-c-teal-dark">Caminho Absoluto</h3>
+                    <p class="text-xl mb-6">É como dar o seu endereço completo: País, Estado, Cidade, Rua, Número.</p>
+                    <p class="font-mono bg-gray-100 p-4 rounded text-lg font-bold">/home/aluno/Documentos/texto.txt</p>
+                    <p class="text-base mt-4 text-gray-600 font-semibold">Começa sempre da raiz ( / ) e não tem erro, funciona de qualquer lugar que você esteja.</p>
+                </div>
+                <div class="card p-8 border-l-8 border-c-red bg-white">
+                    <h3 class="font-bold text-3xl mb-4 text-c-red">Caminho Relativo</h3>
+                    <p class="text-xl mb-6">É como dizer: "Vá para o quarto ao lado". Depende de <strong>onde você está agora</strong>.</p>
+                    <p class="font-mono bg-gray-100 p-4 rounded text-lg font-bold">Documentos/texto.txt</p>
+                    <p class="text-base mt-4 text-gray-600 font-semibold">Só funciona se você já estiver dentro da pasta "/home/aluno". Não tem a barra inicial.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 2: COMANDOS BÁSICOS ================= -->
+
+        <!-- SLIDE 7 -->
+        <section class="slide">
+            <div class="flex flex-col items-center text-center">
+                <i data-lucide="terminal" class="w-32 h-32 text-c-teal-dark mb-8"></i>
+                <h2 class="text-6xl font-black text-c-teal-dark mb-8">O Temido Terminal</h2>
+                <p class="text-3xl max-w-4xl text-c-teal-dark/80 leading-relaxed font-bold">
+                    Esqueça o mouse. A partir de agora, vamos falar com o computador escrevendo. É mais rápido, mais poderoso e faz você parecer um hacker nos filmes. 🕶️💻
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 8 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">O Prompt (A linha de espera)</h2>
+            <p class="mb-6 text-xl">Sempre que você abre o terminal, ele mostra algo parecido com isso:</p>
+            
+            <div class="terminal text-3xl mb-10 text-center py-8">
+                <span class="text-green-400 font-bold">aluno@meu-pc</span>:<span class="text-blue-400 font-bold">~</span>$ <span class="animate-pulse text-white">_</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 max-w-6xl text-lg w-full">
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+                    <strong class="text-green-500 text-2xl block mb-2">aluno@meu-pc</strong>
+                    Quem sou eu? (Usuário) e em qual máquina estou logado.
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+                    <strong class="text-blue-500 text-2xl block mb-2">~ (Til)</strong>
+                    Onde eu estou? O Til é um atalho que significa "A minha pasta pessoal" (/home/aluno).
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-200">
+                    <strong class="text-gray-500 text-2xl block mb-2">$ (Cifrão)</strong>
+                    Sou um usuário comum. (Se fosse um <strong>#</strong>, eu seria o Administrador).
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: Anatomia do Comando -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">A Anatomia de um Comando 🦴</h2>
+            <p class="mb-10 text-center max-w-4xl text-gray-700 text-xl font-bold">Antes de sairmos digitando, precisamos entender como o Linux lê o que escrevemos. Quase tudo segue uma "receita" básica de 3 partes:</p>
+            
+            <div class="terminal text-center mb-10 flex justify-center gap-10 items-center py-6">
+                <div class="flex flex-col items-center">
+                    <span class="text-green-400 font-bold text-5xl">ls</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-blue-400 font-bold text-5xl">-l -a</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-white text-5xl">/home/aluno</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
+                <div class="card p-6 bg-white border-t-8 border-green-500">
+                    <h3 class="font-bold text-green-600 mb-2 text-2xl">1. O Comando</h3>
+                    <p class="text-base font-bold uppercase text-gray-400 mb-4">"O Verbo / A Ação"</p>
+                    <p class="text-lg text-gray-700">É o nome do programa. É a ação principal que você quer fazer.<br><br><em>Ex: listar, copiar, apagar.</em></p>
+                </div>
+                <div class="card p-6 bg-white border-t-8 border-blue-500">
+                    <h3 class="font-bold text-blue-600 mb-2 text-2xl">2. As Flags (Opções)</h3>
+                    <p class="text-base font-bold uppercase text-gray-400 mb-4">"O Advérbio / O Modo"</p>
+                    <p class="text-lg text-gray-700">Começam com um traço (<strong>-</strong>). Elas modificam <em>como</em> o comando age.<br><br><em>Ex: listar de forma detalhada (-l).</em></p>
+                </div>
+                <div class="card p-6 bg-white border-t-8 border-gray-400">
+                    <h3 class="font-bold text-gray-600 mb-2 text-2xl">3. O Argumento</h3>
+                    <p class="text-base font-bold uppercase text-gray-400 mb-4">"O Alvo / O Objeto"</p>
+                    <p class="text-lg text-gray-700">Informa ao comando <em>onde</em> ou <em>em quê</em> ele deve agir.<br><br><em>Ex: listar os arquivos "desta pasta".</em></p>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-c-red/10 border border-c-red text-c-red p-4 rounded-lg text-lg font-bold shadow-sm">
+                💡 Nota Ninja: O Comando é obrigatório, mas as Flags e os Argumentos costumam ser opcionais!
+            </div>
+        </section>
+
+        <!-- SLIDE 10: PWD -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-teal-dark mb-6">Comando: <code>pwd</code></h2>
+            <p class="text-2xl font-bold text-c-teal-light mb-10">Print Working Directory (Onde diabos eu estou?)</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="space-y-6">
+                    <p class="text-xl leading-relaxed">Às vezes a gente se perde andando pelas pastas. O `pwd` imprime na tela o Caminho Absoluto de onde você está neste exato momento.</p>
+                    <p class="text-lg text-gray-600 font-bold border-l-4 border-c-teal-dark pl-4 py-2">Pense nele como o GPS do terminal que te mostra o seu pino no mapa da árvore de diretórios.</p>
+                </div>
+                <div class="terminal text-xl">
+                    aluno@meu-pc:~$ pwd<br>
+                    <span class="text-white">/home/aluno/Imagens/Ferias</span><br>
+                    aluno@meu-pc:~/Imagens/Ferias$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: CD -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-teal-dark mb-6">Comando: <code>cd</code></h2>
+            <p class="text-2xl font-bold text-c-teal-light mb-10">Change Directory (Andando pela casa)</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="space-y-6">
+                    <p class="text-xl">Você digita `cd` seguido do nome da pasta (Argumento) para entrar nela.</p>
+                    <p class="text-lg text-gray-600 bg-white p-4 rounded border border-gray-200 shadow-sm font-bold">Atenção: Se o nome da pasta tiver espaços, você precisa usar aspas (Ex: <code>cd "Minhas Musicas"</code>).</p>
+                </div>
+                <div class="terminal text-xl">
+                    aluno@meu-pc:~$ cd Documentos<br>
+                    aluno@meu-pc:<span class="text-blue-400">~/Documentos</span>$ pwd<br>
+                    <span class="text-white">/home/aluno/Documentos</span><br>
+                    aluno@meu-pc:<span class="text-blue-400">~/Documentos</span>$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Atalhos do CD -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-6">Atalhos Ninjas do <code>cd</code> 🥷</h2>
+            <p class="text-2xl font-bold text-c-teal-light mb-10">Porque digitar o caminho todo cansa...</p>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl text-center">
+                <div class="card p-8 bg-white border-t-8 border-c-teal-dark">
+                    <h3 class="text-4xl font-mono font-bold text-c-teal-dark mb-4">cd ..</h3>
+                    <p class="text-lg text-gray-600 font-bold">Sobe um nível. Sai do quarto e vai pro corredor.</p>
+                </div>
+                <div class="card p-8 bg-white border-t-8 border-c-teal-light">
+                    <h3 class="text-4xl font-mono font-bold text-c-teal-light mb-4">cd ~</h3>
+                    <p class="text-lg text-gray-600 font-bold">Leva você direto para o seu quarto (Sua pasta <code>/home/usuario</code>).</p>
+                </div>
+                <div class="card p-8 bg-white border-t-8 border-c-red">
+                    <h3 class="text-4xl font-mono font-bold text-c-red mb-4">cd /</h3>
+                    <p class="text-lg text-gray-600 font-bold">Leva você como um foguete para a Raiz de todo o sistema.</p>
+                </div>
+                <div class="card p-8 bg-white border-t-8 border-gray-500">
+                    <h3 class="text-4xl font-mono font-bold text-gray-600 mb-4">cd -</h3>
+                    <p class="text-lg text-gray-600 font-bold">É o botão "Voltar". Joga na última pasta em que você estava.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: Joguinho Navegação -->
+        <section class="slide no-print">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">Minijogo: Navegando no Escuro 🚶‍♂️</h2>
+            <div class="card p-10 w-full max-w-5xl bg-white border-4 border-c-teal-dark text-center shadow-2xl">
+                <p class="mb-6 text-2xl">Você está em: <strong class="font-mono text-c-teal-dark bg-c-teal-light/20 p-2 rounded">/home/aluno/Musicas</strong></p>
+                <p class="mb-8 text-xl font-bold">Onde você vai parar se digitar o comando abaixo?</p>
+                
+                <div class="terminal w-2/3 mx-auto text-center mb-10 font-bold text-4xl py-6">
+                    <span class="text-green-400">cd</span> <span class="text-white">..</span>
+                </div>
+                
+                <div class="flex gap-6 justify-center">
+                    <button onclick="alert('Errado! Voltar não vai pro diretório raiz (/).')" class="bg-gray-100 hover:bg-gray-200 px-8 py-4 rounded-xl text-xl font-bold transition shadow"> / (Root) </button>
+                    <button onclick="alert('Correto! O (..) volta um nível para trás na árvore!')" class="bg-c-teal-dark hover:bg-c-teal-dark/80 text-white px-8 py-4 rounded-xl text-xl font-bold shadow-lg transition border-2 border-transparent hover:border-c-teal-light"> /home/aluno </button>
+                    <button onclick="alert('Errado! Isso seria se você fizesse um cd para uma pasta específica.')" class="bg-gray-100 hover:bg-gray-200 px-8 py-4 rounded-xl text-xl font-bold transition shadow"> Abre a música </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: LS -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-teal-dark mb-6">Comando: <code>ls</code></h2>
+            <p class="text-2xl font-bold text-c-teal-light mb-10">List (O que tem aqui dentro?)</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="space-y-6">
+                    <p class="text-xl">É o equivalente a dar dois cliques numa pasta no Windows para ver o que tem dentro. Ele lista arquivos e diretórios.</p>
+                    <p class="text-lg bg-white p-4 border-l-8 border-c-red rounded shadow font-bold"><strong>Dica:</strong> No Linux, pastas geralmente aparecem coloridas em azul, e arquivos em branco ou verde (se forem executáveis).</p>
+                </div>
+                <div class="terminal text-xl py-8">
+                    aluno@meu-pc:~$ ls<br>
+                    <span class="text-blue-400 font-bold">Documentos</span>  <span class="text-blue-400 font-bold">Downloads</span>  <span class="text-white">tarefa.txt</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Parâmetros do LS -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-6">Turbinando o <code>ls</code> (As Flags)</h2>
+            <p class="text-2xl font-bold text-c-teal-light mb-10">Usando opções para extrair mais segredos do Kernel.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="space-y-6 text-lg text-gray-700">
+                    <p>O <code>ls</code> puro só mostra os nomes básicos. Mas veja o que acontece se adicionarmos flags:</p>
+                    <p class="p-4 bg-white border-l-8 border-c-teal-dark rounded shadow-sm"><strong><code>ls -a</code> (All)</strong>: Mostra até os "arquivos fantasmas" do Linux (arquivos ocultos que começam com ponto, ex: <code>.config</code>).</p>
+                    <p class="p-4 bg-white border-l-8 border-c-red rounded shadow-sm"><strong><code>ls -l</code> (Long)</strong>: Cria uma lista detalhada. Mostra tamanho, data e uma <strong>sopa de letrinhas estranhas (rwxr-x---)</strong> no começo da linha.</p>
+                    <p class="font-bold text-c-red animate-pulse text-xl">O que diabos é rwxr-x---? Vamos descobrir agora!</p>
+                </div>
+                <div class="terminal text-lg py-6">
+                    aluno@meu-pc:~$ ls -l<br>
+                    <span class="text-red-400 font-bold">-rw-r--r--</span> 1 aluno familia 4096 Out 10 14:00 <span class="text-white">senha.txt</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 3: PERMISSÕES ================= -->
+
+        <!-- SLIDE 16 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-red text-white px-4 py-2 rounded-xl font-black text-3xl">03</span>
+                <h2 class="text-5xl font-bold text-c-red">Permissões no Linux 🛡️</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl">
+                <h3 class="text-3xl font-bold mb-6 text-c-teal-dark">O Problema do Irmão Mais Novo</h3>
+                <p class="text-xl opacity-90 text-gray-700 leading-relaxed mb-8">Você divide o computador com seu irmãozinho. Ele loga na conta dele, vasculha suas pastas e acidentalmente <strong>apaga o save do seu jogo de 100 horas.</strong></p>
+                <p class="mt-6 text-c-red font-black text-2xl bg-c-red/10 p-6 rounded-xl border-2 border-c-red shadow-inner">No Linux, isso é impossível se as Permissões estiverem corretas!</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: UGO -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">Quem é quem? (Usuário, Grupo, Outros)</h2>
+            <p class="text-center mb-10 max-w-4xl text-gray-700 text-2xl font-semibold">Para cada arquivo, o Linux divide o mundo em três categorias de pessoas:</p>
+            
+            <div class="grid grid-cols-3 gap-8 w-full max-w-6xl">
+                <div class="card p-8 text-center bg-white">
+                    <div class="text-6xl mb-6">👤</div>
+                    <h3 class="font-bold text-c-teal-dark text-3xl mb-4">Dono (User)</h3>
+                    <p class="text-lg text-gray-600 font-bold">A pessoa que criou o arquivo. É a "dona do diário".</p>
+                </div>
+                <div class="card p-8 text-center bg-white border-4 border-c-teal-light">
+                    <div class="text-6xl mb-6">👥</div>
+                    <h3 class="font-bold text-c-teal-dark text-3xl mb-4">Grupo (Group)</h3>
+                    <p class="text-lg text-gray-600 font-bold">A "família" ou "equipe". Pessoas que têm acesso VIP.</p>
+                </div>
+                <div class="card p-8 text-center bg-white">
+                    <div class="text-6xl mb-6">👽</div>
+                    <h3 class="font-bold text-c-red text-3xl mb-4">Outros (Others)</h3>
+                    <p class="text-lg text-gray-600 font-bold">Os penetras. O resto do mundo que acessa o sistema.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: Os 3 Poderes -->
+        <section class="slide">
+            <h2 class="text-5xl font-black text-c-teal-dark mb-10">Os 3 Poderes Mágicos (r w x)</h2>
+            <div class="flex flex-col gap-8 w-full max-w-5xl">
+                <div class="flex items-center bg-white p-6 rounded-2xl shadow-md border-l-[12px] border-blue-500">
+                    <div class="w-24 font-mono text-5xl font-black text-blue-500 text-center">r</div>
+                    <div class="ml-6">
+                        <h4 class="font-bold text-2xl text-c-teal-dark mb-2">Read (Ler)</h4>
+                        <p class="text-lg text-gray-600 font-semibold">Pode abrir o arquivo, ler o texto, ou ver o conteúdo de uma pasta.</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white p-6 rounded-2xl shadow-md border-l-[12px] border-orange-500">
+                    <div class="w-24 font-mono text-5xl font-black text-orange-500 text-center">w</div>
+                    <div class="ml-6">
+                        <h4 class="font-bold text-2xl text-c-teal-dark mb-2">Write (Escrever)</h4>
+                        <p class="text-lg text-gray-600 font-semibold">Pode modificar o arquivo, salvar por cima ou <strong>apagar</strong>.</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white p-6 rounded-2xl shadow-md border-l-[12px] border-c-red">
+                    <div class="w-24 font-mono text-5xl font-black text-c-red text-center">x</div>
+                    <div class="ml-6">
+                        <h4 class="font-bold text-2xl text-c-teal-dark mb-2">eXecute (Executar)</h4>
+                        <p class="text-lg text-gray-600 font-semibold">Se for um programa/jogo, pode rodar. Se for uma pasta, pode entrar (`cd`) nela.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 19: O tracinho -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-red mb-10">E esse tracinho ( - ) ?</h2>
+            <div class="card p-12 bg-white max-w-5xl text-center flex flex-col items-center shadow-xl border-4 border-gray-200">
+                <div class="text-8xl font-mono font-black text-gray-400 mb-8 bg-gray-100 px-8 py-4 rounded-xl border-2 border-gray-300">- - -</div>
+                <p class="text-3xl text-c-teal-dark font-black mb-6">O tracinho significa <strong class="text-c-red uppercase">PERMISSÃO NEGADA</strong>.</p>
+                <p class="text-xl mt-4 text-gray-700 leading-relaxed font-bold">O Linux sempre espera a ordem de 3 letras pra cada pessoa (r w x). Se alguém não tem aquele poder, ele preenche com um traço pra não perder a posição correta na leitura.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Juntando Tudo -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">A Sopa de Letrinhas Resolvida</h2>
+            <p class="text-center mb-10 max-w-4xl text-gray-700 text-xl font-bold">O Linux junta os 3 Poderes (rwx) para os 3 Grupos (User, Group, Others), criando um código de 9 caracteres de segurança.</p>
+            
+            <div class="bg-white p-10 rounded-2xl shadow-2xl border-4 border-c-teal-light font-mono text-6xl font-black flex gap-6 tracking-widest text-center">
+                <span class="text-c-teal-dark underline decoration-c-teal-dark decoration-[6px] underline-offset-[12px]">rwx</span>
+                <span class="text-c-teal-light underline decoration-c-teal-light decoration-[6px] underline-offset-[12px]">r-x</span>
+                <span class="text-c-red underline decoration-c-red decoration-[6px] underline-offset-[12px]">r--</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-6 mt-12 max-w-5xl w-full text-center bg-white p-6 rounded-xl shadow-md border-2 border-gray-100">
+                <div>
+                    <h4 class="font-bold text-c-teal-dark text-2xl">Dono</h4>
+                    <p class="text-base text-gray-600 mt-2 font-bold">Lê, Grava, Executa</p>
+                </div>
+                <div class="border-l-2 border-r-2 border-gray-200">
+                    <h4 class="font-bold text-c-teal-light text-2xl">Grupo</h4>
+                    <p class="text-base text-gray-600 mt-2 font-bold">Lê, Negado (-), Executa</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-c-red text-2xl">Outros</h4>
+                    <p class="text-base text-gray-600 mt-2 font-bold">Só Lê. (Penetras!)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 21: Voltando ao LS -L -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-6">De volta ao <code>ls -l</code></h2>
+            <p class="text-2xl font-bold text-c-teal-light mb-8">Fim do mistério: Estamos olhando os crachás!</p>
+            
+            <div class="w-full max-w-6xl">
+                <p class="mb-6 text-gray-700 text-xl font-bold">Agora que você conhece a anatomia da segurança, a lista detalhada do <code>ls -l</code> finalmente faz todo o sentido:</p>
+                <div class="terminal text-lg md:text-xl py-8">
+                    $ ls -l<br>
+                    <span class="text-white">-</span><span class="text-green-400">rw-r--r--</span> 1 aluno familia 4096 Out 10 14:00 <span class="text-white">senha.txt</span><br>
+                    <span class="text-blue-400 font-bold">d</span><span class="text-green-400">rwxr-xr-x</span> 2 aluno familia 4096 Out 10 14:05 <span class="text-blue-400 font-bold">Downloads</span><br>
+                    <span class="text-white">-</span><span class="text-green-400">rwxrwxrwx</span> 1 aluno familia 8192 Out 10 14:10 <span class="text-green-400 font-bold">jogo.exe</span>
+                </div>
+                <p class="mt-6 text-base font-bold text-black bg-c-teal-light/40 p-4 rounded-lg shadow-sm inline-block border-2 border-c-teal-dark">Nota: O primeiríssimo caractere (antes do rwx) indica se é Diretório (d) ou Arquivo (-).</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 22: Desvendando o ls -l passo a passo -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">Desvendando a linha (Anatomia)</h2>
+            <div class="terminal text-3xl text-center mb-10 bg-gray-900 border-4 border-gray-700 shadow-2xl py-8 leading-loose">
+                <span class="text-white">-</span><span class="text-yellow-400 underline decoration-yellow-400 decoration-4">rw-</span><span class="text-blue-400 underline decoration-blue-400 decoration-4">r--</span><span class="text-red-400 underline decoration-red-400 decoration-4">r--</span> <span class="text-gray-500 text-xl">1</span> <span class="text-yellow-400">aluno</span> <span class="text-blue-400">familia</span> <span class="text-gray-500 text-xl">4096 texto.txt</span>
+            </div>
+            <div class="grid grid-cols-3 gap-6 text-lg font-bold bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-200 w-full max-w-6xl">
+                <div class="text-yellow-600 text-center">
+                    <span class="block text-4xl mb-4">👤</span>
+                    Dono: "aluno"<br><span class="text-base text-gray-500 font-bold mt-2 inline-block">Permissão: rw- (Lê e Grava)</span>
+                </div>
+                <div class="text-blue-600 border-l-2 border-r-2 border-gray-200 px-6 text-center">
+                    <span class="block text-4xl mb-4">👥</span>
+                    Grupo: "familia"<br><span class="text-base text-gray-500 font-bold mt-2 inline-block">Permissão: r-- (Só lê)</span>
+                </div>
+                <div class="text-red-600 text-center">
+                    <span class="block text-4xl mb-4">👽</span>
+                    Outros: O mundo<br><span class="text-base text-gray-500 font-bold mt-2 inline-block">Permissão: r-- (Só lê)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 23: Interativo Decifrador -->
+        <section class="slide no-print">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">Decifrador de Permissões 🕵️‍♀️</h2>
+            <p class="mb-10 text-gray-700 text-2xl font-bold">Você vê o seguinte arquivo na pasta: <strong class="font-mono text-3xl bg-white p-3 rounded border-2 border-gray-300 shadow-md text-c-teal-dark inline-block ml-2">-rwxr-x---</strong></p>
+            
+            <div class="card p-10 w-full max-w-5xl text-center mb-8 bg-c-teal-light/10 border-2 border-c-teal-light">
+                <p class="font-bold text-c-teal-dark mb-8 text-2xl">O que o grupo "Outros" (os penetras) pode fazer com esse arquivo?</p>
+                <div class="flex gap-6 justify-center">
+                    <button onclick="alert('Errado! Ler e Executar seria r-x. Os outros olham para os últimos 3 caracteres (---).')" class="bg-white text-c-teal-dark px-8 py-4 rounded-xl font-bold shadow hover:bg-gray-50 border-2 border-gray-300 transition text-xl">Ler e Executar</button>
+                    <button onclick="alert('Errado! Os outros olham os últimos 3 caracteres (---). O rwx é o poder do Dono (primeiros 3 caracteres).')" class="bg-white text-c-teal-dark px-8 py-4 rounded-xl font-bold shadow hover:bg-gray-50 border-2 border-gray-300 transition text-xl">Tudo (rwx)</button>
+                    <button onclick="alert('ACERTOU NA MOSCA! Os últimos 3 caracteres são (---). O acesso é totalmente negado pros outros!')" class="bg-c-red text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-red-700 transition transform hover:scale-105 border-2 border-red-800 text-xl">Absolutamente Nada</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 24: Resumo dos Comandos -->
+        <section class="slide bg-white">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">Cheat Sheet (Sua colinha)</h2>
+            <table class="w-full max-w-5xl border-collapse font-mono text-lg text-left shadow-lg rounded-xl overflow-hidden border-2 border-c-teal-dark">
+                <tr class="bg-c-teal-dark text-white">
+                    <th class="p-6 text-xl">Comando</th>
+                    <th class="p-6 text-xl">Tradução Mental</th>
+                    <th class="p-6 text-xl">O que faz?</th>
+                </tr>
+                <tr class="border-b-2 border-gray-200">
+                    <td class="p-6 font-bold text-c-teal-dark text-xl">pwd</td>
+                    <td class="p-6 font-bold">Onde estou?</td>
+                    <td class="p-6 text-gray-700 font-semibold">Mostra o caminho absoluto da pasta atual.</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200 bg-gray-50">
+                    <td class="p-6 font-bold text-c-teal-dark text-xl">ls</td>
+                    <td class="p-6 font-bold">Lista</td>
+                    <td class="p-6 text-gray-700 font-semibold">Mostra os arquivos na pasta.</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200">
+                    <td class="p-6 font-bold text-c-teal-dark text-xl">cd</td>
+                    <td class="p-6 font-bold">Mudar pasta</td>
+                    <td class="p-6 text-gray-700 font-semibold">Entra em um diretório. (cd .. para voltar).</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200 bg-gray-50">
+                    <td class="p-6 font-bold text-c-teal-dark text-xl">cd ~</td>
+                    <td class="p-6 font-bold">Ir pra Casa</td>
+                    <td class="p-6 text-gray-700 font-semibold">Volta instantaneamente para a sua pasta de usuário.</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200">
+                    <td class="p-6 font-bold text-c-teal-dark text-xl">ls -l</td>
+                    <td class="p-6 font-bold">Lista Longa</td>
+                    <td class="p-6 text-gray-700 font-semibold">Mostra os arquivos com detalhes, <strong>incluindo as permissões!</strong></td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- SLIDE 25: Root -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-teal-dark">O Cuidado de Ser Root (Deus)</h2>
+            <div class="card p-10 bg-white border-t-[12px] border-c-red text-center max-w-4xl shadow-xl">
+                <i data-lucide="skull" class="w-24 h-24 mx-auto text-c-red mb-6"></i>
+                <p class="text-2xl text-gray-800 mb-6 font-bold leading-relaxed">O usuário <strong>'root' (administrador)</strong> ignora todas as regras de permissão (o tracinho <code class="bg-gray-200 px-2 rounded">-</code> não funciona com ele).</p>
+                <p class="text-lg text-gray-700 font-bold bg-gray-50 p-6 rounded-lg border-2 border-gray-200">Ele pode ler, escrever e apagar qualquer coisa, inclusive o próprio Kernel do sistema. É por isso que você nunca usa o PC logado como Root. Você só usa o comando <code class="bg-gray-800 px-3 py-1 rounded text-red-400 font-mono text-xl shadow-inner">sudo</code> quando precisa de poderes temporários.</p>
+            </div>
+        </section>
+        
+        <!-- SLIDE 26: Permission Denied -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-red">E se eu tentar apagar arquivo dos outros?</h2>
+            <div class="flex flex-col items-center justify-center text-center max-w-4xl mt-8">
+                <p class="text-2xl text-gray-800 mb-8 font-bold leading-relaxed">Se você for um mero mortal (usuário comum) e não tiver o 'w' (Write) configurado no seu grupo, o terminal cuspirá na sua cara de forma muito direta e fria:</p>
+                <strong class="bg-[#1e1e1e] text-red-500 p-8 rounded-xl text-3xl inline-block font-mono border-4 border-red-900 shadow-2xl tracking-wide">
+                    bash: arquivo.txt: Permission Denied
+                </strong>
+                <p class="mt-10 text-xl text-c-teal-dark font-black uppercase tracking-widest bg-c-teal-light/20 p-4 rounded-lg">E não adianta chorar, o Kernel não tem sentimentos.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 27: Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold text-c-teal-dark mb-8">Mapa Mental</h2>
+            <div class="flex flex-col items-center gap-6 w-full max-w-5xl text-lg font-mono">
+                <div class="bg-c-teal-dark text-white px-10 py-4 rounded-2xl font-bold text-2xl shadow-lg border-2 border-c-teal-light">LINUX BÁSICO</div>
+                <div class="flex w-full gap-8 mt-4">
+                    <div class="flex-1 flex flex-col gap-4">
+                        <div class="bg-white text-c-teal-dark px-6 py-3 rounded-xl text-center font-black border-2 border-gray-300 shadow-sm text-xl">COMANDOS</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 text-base shadow-sm text-gray-700 font-bold">pwd, ls, cd</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 text-base shadow-sm text-gray-700 font-bold">Atalhos (~, /, ..) e Flags (-l, -a)</div>
+                    </div>
+                    <div class="flex-1 flex flex-col gap-4">
+                        <div class="bg-white text-c-red px-6 py-3 rounded-xl text-center font-black border-2 border-c-red/50 shadow-sm text-xl">PERMISSÕES (UGO)</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 text-base shadow-sm text-gray-700 font-bold">User, Group, Others</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 text-base font-black text-c-teal-dark shadow-sm">rwx (Ler, Gravar, Executar)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 28: Fim -->
+        <section class="slide bg-white border-t-[16px] border-c-teal-dark shadow-[inset_0_20px_50px_rgba(0,0,0,0.02)]">
+            <div class="text-center">
+                <i data-lucide="terminal-square" class="w-32 h-32 mx-auto text-c-teal-dark mb-8"></i>
+                <h1 class="text-7xl font-black mb-6 text-c-teal-dark">FIM DA AULA 07</h1>
+                <p class="text-3xl text-gray-600 mb-16 font-mono font-bold">O Terminal agora é seu amigo.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-c-teal-dark text-white px-12 py-6 rounded-full font-black shadow-2xl hover:bg-c-teal-light transition flex items-center gap-4 hover:scale-105 border-4 border-transparent text-2xl">
+                        <i data-lucide="download" class="w-8 h-8"></i> Gerar Apostila de Estudo (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-base text-gray-400 font-mono tracking-widest uppercase font-black">COTIL - Fundamentos de Informática</p>
+            </div>
+        </section>
+        
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-10 right-10 flex space-x-6 z-50">
+        <button id="prevBtn" class="p-6 bg-white/90 backdrop-blur rounded-full shadow-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition transform active:scale-95">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-6 bg-c-red rounded-full shadow-xl text-white font-bold hover:bg-red-700 transition transform active:scale-95 border-2 border-red-800">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica dos Slides
+        let currentSlide = 0;
+        // Pegando todos os slides que existem de verdade agora
+        const slides = document.querySelectorAll('.slide'); 
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            // Progress Bar
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Decimal Counter
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        // Init
+        updateSlides();
+
+        // Controls
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        // Fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
