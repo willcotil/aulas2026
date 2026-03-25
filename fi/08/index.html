@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 08 - Utilitários e Configurações de Sistema no Linux</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Nova Paleta Personalizada (Colorhunt) */
+        :root {
+            --color-purple-dark: #4D2B8C;
+            --color-purple-light: #85409D;
+            --color-orange: #EEA727;
+            --color-yellow: #FFEF5F;
+            --color-bg: #FCFDFD; /* Fundo super claro para contraste no projetor */
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--color-bg); 
+            color: var(--color-purple-dark);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-bg);
+            background-image: 
+                radial-gradient(rgba(77, 43, 140, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            opacity: 0;
+            transform: translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: translateY(0);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor Tailwind-like */
+        .text-c-purple-dark { color: var(--color-purple-dark); }
+        .text-c-purple-light { color: var(--color-purple-light); }
+        .text-c-orange { color: var(--color-orange); }
+        .text-c-yellow { color: var(--color-yellow); }
+        
+        .bg-c-purple-dark { background-color: var(--color-purple-dark); }
+        .bg-c-purple-light { background-color: var(--color-purple-light); }
+        .bg-c-orange { background-color: var(--color-orange); }
+        .bg-c-yellow { background-color: var(--color-yellow); }
+        .bg-c-bg { background-color: var(--color-bg); }
+        
+        .border-c-purple-dark { border-color: var(--color-purple-dark); }
+        .border-c-purple-light { border-color: var(--color-purple-light); }
+        .border-c-orange { border-color: var(--color-orange); }
+        .border-c-yellow { border-color: var(--color-yellow); }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(77, 43, 140, 0.08);
+            border: 2px solid rgba(133, 64, 157, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-purple-light); box-shadow: 0 15px 35px rgba(77, 43, 140, 0.15); }
+        
+        .terminal {
+            background-color: #1e1e1e;
+            color: #a6e22e; 
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border: 2px solid #444;
+            text-align: left;
+            width: 100%;
+            font-size: 1.25rem; /* Fonte grande para o projetor */
+            line-height: 1.6;
+        }
+        
+        .img-placeholder {
+            background: #f3f4f6;
+            border: 2px dashed var(--color-purple-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-purple-light);
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            opacity: 0.8;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                color: black !important;
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+                background: white !important;
+            }
+
+            .slide { 
+                position: relative !important; 
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                display: block !important; 
+                page-break-inside: avoid;
+                page-break-after: always; 
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                color: black !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            h1, h2, h3, h4 { color: black !important; }
+            h2 { border-bottom: 2px solid var(--color-purple-dark); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li { font-size: 12pt !important; color: #000 !important; line-height: 1.5; }
+            
+            .card {
+                background: white !important;
+                border: 2px solid #999 !important;
+                box-shadow: none !important;
+                color: black !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            .terminal { background: #f4f4f4 !important; color: #000 !important; border: 2px solid #000 !important; }
+            .bg-c-purple-dark, .bg-c-purple-light, .bg-c-orange, .bg-c-yellow { background-color: #eee !important; color: black !important; border: 1px solid black; }
+            .text-c-bg, .text-c-purple-dark, .text-c-purple-light, .text-c-orange, .text-c-yellow, .text-white, .text-green-400, .text-blue-400, .text-red-400, .text-yellow-400 { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-c-bg/90 backdrop-blur-md border-b-2 border-c-purple-light shadow-sm">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <span class="font-black text-c-purple-dark tracking-widest text-xl">AULA 08</span>
+            <div class="h-3 w-24 md:w-48 lg:w-64 bg-gray-200 rounded-full overflow-hidden border border-c-purple-light/30">
+                <div id="progressBar" class="h-full bg-c-orange transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-base font-mono text-c-purple-dark font-bold tracking-wider">00 / 00</span>
+            
+            <!-- Link -->
+            <a href="https://willcotil.github.io/aulas2026" target="_blank" class="hidden sm:inline-block text-c-purple-dark font-black text-base lg:text-xl hover:text-c-orange transition" style="text-decoration: none;">willcotil.github.io/aulas2026</a>
+        </div>
+
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-c-purple-light/10 rounded text-c-purple-dark transition border border-transparent hover:border-c-purple-dark" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-c-purple-dark text-white rounded hover:bg-c-purple-dark/80 transition flex items-center gap-2 font-bold shadow-md text-lg" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Imprimir PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-c-purple-light text-white px-6 py-2 rounded-full text-lg font-bold tracking-widest uppercase mb-8 inline-block shadow-sm">Sistemas Operacionais</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-c-purple-dark">
+                    Raio-X do<br><span class="text-c-orange">Sistema</span>
+                </h1>
+                <p class="text-2xl font-mono text-c-purple-dark/80 max-w-3xl mx-auto mt-6 font-bold">Monitorando CPU, Memória, Discos e Redes.</p>
+            </div>
+            <div class="mt-16 animate-bounce text-c-orange no-print">
+                <i data-lucide="arrow-down" class="mx-auto w-12 h-12"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-12 border-l-8 border-c-orange pl-6">O que faremos hoje?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-8 border-t-8 border-c-purple-dark">
+                    <div class="text-c-purple-dark mb-4"><i data-lucide="monitor" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">1. Modo Gráfico (GUI)</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Explorando o Gerenciador de Tarefas e o Analisador de Discos nativos do sistema.</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-purple-light">
+                    <div class="text-c-purple-light mb-4"><i data-lucide="terminal" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">2. Modo Terminal (CLI)</h3>
+                    <p class="text-xl opacity-90 text-gray-700">O raio-X hacker: top, htop, free, df e du. Vendo recursos direto na matriz.</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-orange">
+                    <div class="text-c-orange mb-4"><i data-lucide="skull" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">3. Matando Processos</h3>
+                    <p class="text-xl opacity-90 text-gray-700">O programa travou? Aprenda a usar o comando `kill` para forçar o encerramento.</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-yellow">
+                    <div class="text-c-orange mb-4"><i data-lucide="wifi" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">4. Redes Básicas</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Descobrindo nosso endereço IP e testando a conexão com a internet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 1: MODO GRÁFICO ================= -->
+
+        <!-- SLIDE 3 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-purple-light text-white px-4 py-2 rounded-xl font-black text-3xl">01</span>
+                <h2 class="text-5xl font-bold text-c-purple-dark">Monitoramento Gráfico 🖱️</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl">
+                <h3 class="text-3xl font-bold mb-6 text-gray-800">O Painel de Controle do Linux</h3>
+                <p class="text-2xl opacity-90 text-gray-700 leading-relaxed mb-8">Assim como o "Ctrl+Alt+Del" do Windows, a maioria das distribuições Linux de mesa vem com um aplicativo chamado <strong>Monitor do Sistema</strong>.</p>
+                <p class="mt-6 text-c-purple-dark font-black text-2xl bg-c-purple-dark/10 p-6 rounded-xl border-2 border-c-purple-light shadow-inner">Ele é lindo, intuitivo e nos mostra exatamente o que está acontecendo por baixo do capô.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 4 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Monitor do Sistema: Processos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">A primeira aba nos mostra a lista de todos os <strong>Processos</strong> (aplicativos e rotinas do sistema) abertos.</p>
+                    <ul class="text-xl space-y-4 text-gray-600 bg-white p-6 rounded-xl shadow border border-gray-200 font-bold">
+                        <li>✅ Podemos ver o nome do programa.</li>
+                        <li>✅ Quanto de CPU (%) ele está sugando.</li>
+                        <li>✅ Quanto de Memória RAM ele está ocupando.</li>
+                        <li><strong class="text-c-orange">Botão Direito:</strong> Podemos clicar em "Finalizar" se ele travar!</li>
+                    </ul>
+                </div>
+                <div class="img-placeholder w-full h-96 shadow-2xl">
+                    [Imagem: Captura de tela do System Monitor do Ubuntu na aba "Processos"]
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Monitor do Sistema: Recursos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="img-placeholder w-full h-96 shadow-2xl">
+                    [Imagem: Captura de tela do System Monitor mostrando os gráficos coloridos de CPU, RAM e Rede]
+                </div>
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">A aba de <strong>Recursos</strong> exibe gráficos coloridos em tempo real da saúde da máquina.</p>
+                    <ul class="text-xl space-y-4 text-gray-600 bg-white p-6 rounded-xl shadow border border-gray-200 font-bold">
+                        <li><span class="text-c-purple-dark">Gráfico 1:</span> Histórico de uso de cada núcleo da CPU.</li>
+                        <li><span class="text-c-purple-light">Gráfico 2:</span> Consumo de Memória RAM e Swap.</li>
+                        <li><span class="text-c-orange">Gráfico 3:</span> Tráfego da Placa de Rede (Download e Upload).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Gestão de Espaço: Analisador de Discos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">"Meu PC está cheio, o que está ocupando tanto espaço?"</p>
+                    <p class="text-xl text-gray-600 bg-white p-6 rounded-xl shadow border border-gray-200 font-bold">
+                        Aplicativos como o <strong>Analisador de Uso de Disco (Baobab)</strong> varrem o HD inteiro e criam um gráfico circular mostrando quais pastas estão mais "gordas". É perfeito para fazer faxina.
+                    </p>
+                </div>
+                <div class="img-placeholder w-full h-96 shadow-2xl">
+                    [Imagem: Aplicativo Analisador de Uso de Disco (Baobab) com seu gráfico circular em anéis]
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 2: TERMINAL ================= -->
+
+        <!-- SLIDE 7 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-purple-dark text-white px-4 py-2 rounded-xl font-black text-3xl">02</span>
+                <h2 class="text-5xl font-bold text-c-purple-dark">O Lado Terminal (CLI) 💻</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl border-t-8 border-c-purple-dark">
+                <h3 class="text-3xl font-bold mb-6 text-gray-800">Por que complicar se existe o Gráfico?</h3>
+                <p class="text-2xl opacity-90 text-gray-700 leading-relaxed mb-8">
+                    Se você for administrar um <strong>Servidor</strong> de verdade (Google, Netflix, Bancos), o computador fica trancado numa sala gelada. <strong class="text-c-orange">Não tem monitor ligado nele, não tem mouse e não tem interface gráfica!</strong>
+                </p>
+                <p class="mt-6 text-c-purple-dark font-black text-2xl bg-c-yellow p-6 rounded-xl shadow-sm">
+                    Você acessa a máquina de longe usando apenas o Terminal. Vamos aprender os comandos de raio-X.
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 8 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>top</code></h2>
+            <p class="text-2xl font-bold text-c-purple-light mb-10">O clássico absoluto</p>
+            
+            <div class="w-full max-w-7xl">
+                <p class="text-2xl text-gray-700 font-bold mb-6">O `top` mostra uma lista em tempo real dos processos (programas) que estão rodando e sugando recursos.</p>
+                <div class="terminal text-xl py-6 bg-black border-4 border-gray-600 shadow-2xl font-mono leading-tight">
+                    <span class="text-white">top - 14:20:00 up  2:10,  1 user,  load average: 0.15, 0.05, 0.01<br>
+                    Tasks: <span class="font-bold">120</span> total,   <span class="font-bold">1</span> running, <span class="font-bold">119</span> sleeping<br>
+                    %Cpu(s):  <span class="text-green-400 font-bold">2.5 us</span>,  0.5 sy,  0.0 ni, 97.0 id<br>
+                    MiB Mem :   <span class="font-bold">8000.0</span> total,   <span class="font-bold">3000.0</span> free,   <span class="text-red-400 font-bold">2500.0</span> used<br><br></span>
+                    <span class="bg-white text-black font-bold px-2 py-1 w-full block">  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND</span>
+                    <span class="text-white">&nbsp;1234 root      20   0 1500000 200000  50000 S   <span class="text-red-400 font-bold">5.5</span>   2.5   0:15.00 mysql<br>
+                    &nbsp;5678 aluno     20   0 2000000 500000  60000 R   <span class="text-yellow-400 font-bold">2.0</span>   6.2   1:20.00 chrome<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;1 root      20   0  100000  10000   5000 S   0.0   0.1   0:05.00 init</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Entendendo o <code>top</code></h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl mt-6 text-xl">
+                <div class="card p-6 border-l-8 border-c-purple-light bg-white">
+                    <h4 class="font-black text-c-purple-dark mb-2">PID (Process ID)</h4>
+                    <p class="text-gray-700 font-bold">É o RG do programa! O sistema não conhece nomes, ele conhece esse número único gerado quando o app abriu.</p>
+                </div>
+                <div class="card p-6 border-l-8 border-green-500 bg-white">
+                    <h4 class="font-black text-green-600 mb-2">USER</h4>
+                    <p class="text-gray-700 font-bold">Quem abriu este programa? Foi você, ou foi o Root (sistema)?</p>
+                </div>
+                <div class="card p-6 border-l-8 border-c-orange bg-white">
+                    <h4 class="font-black text-c-orange mb-2">%CPU / %MEM</h4>
+                    <p class="text-gray-700 font-bold">A porcentagem de processador e memória RAM que este aplicativo está consumindo neste instante.</p>
+                </div>
+                <div class="card p-6 border-l-8 border-gray-600 bg-gray-100 flex items-center justify-center">
+                    <p class="text-gray-800 font-black text-2xl">Para SAIR dessa tela, pressione <strong class="bg-gray-300 px-3 py-1 rounded text-c-orange">q</strong> (quit).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>htop</code></h2>
+            <p class="text-2xl font-bold text-c-purple-light mb-10">O top com grife e cores (muito mais fácil de ler)</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">Faz a mesma coisa que o <code>top</code>, mas desenha gráficos de barra coloridos direto no terminal usando símbolos de texto!</p>
+                    <p class="text-xl text-gray-600 bg-white p-6 border-l-8 border-c-purple-dark rounded-xl shadow-md font-bold">Além disso, ele permite que você navegue pela lista de processos usando as <strong>setinhas do teclado</strong> para cima e para baixo.</p>
+                </div>
+                <div class="terminal text-lg py-6 bg-black border-4 border-gray-600 shadow-2xl font-mono leading-tight">
+                    <span class="text-cyan-400">1</span>  [<span class="text-green-500">|||||</span><span class="text-gray-600">----------------------</span> <span class="text-white">15.2%</span>]<br>
+                    <span class="text-cyan-400">2</span>  [<span class="text-green-500">|||||||||</span><span class="text-gray-600">------------------</span> <span class="text-white">32.1%</span>]<br>
+                    <span class="text-cyan-400">Mem</span>[<span class="text-green-500">||||||||||||||||</span><span class="text-gray-600">---------</span> <span class="text-white">2.5G/8.0G</span>]<br>
+                    <span class="text-cyan-400">Swp</span>[<span class="text-gray-600">--------------------------</span> <span class="text-white">0K/2.0G</span>]<br>
+                    <br>
+                    <span class="bg-green-700 text-white font-bold px-2 py-1 w-full block">  PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command</span>
+                    <span class="text-white">&nbsp;5678 aluno      20   0 2000M  500M 60000 R  <span class="text-green-400 font-bold">2.0</span>  6.2  1:20.00 chrome</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>free</code></h2>
+            <p class="text-2xl font-bold text-c-purple-light mb-10">Como está a minha RAM?</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">Mostra uma foto instantânea do total de Memória RAM livre e usada no sistema.</p>
+                    <p class="text-xl text-gray-600 bg-white p-6 border-l-8 border-c-yellow rounded-xl shadow-md font-bold">
+                        <strong class="text-c-orange text-2xl block mb-2">DICA DE OURO:</strong>
+                        Sempre use a flag <code class="bg-gray-200 px-2 rounded">-h</code> (Human Readable). O Linux adora mostrar números em bytes. O <code class="text-c-orange">-h</code> converte tudo para Mega (M) e Giga (G)!
+                    </p>
+                </div>
+                <div class="terminal text-xl py-10 font-mono leading-relaxed">
+                    aluno@meu-pc:~$ <span class="text-yellow-400">free -h</span><br>
+                    <span class="text-white">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;free&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shared<br>
+                    Mem:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-green-400 font-bold">7.8G</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-red-400 font-bold">2.4G</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-400 font-bold">3.1G</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;120M<br>
+                    Swap:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0G&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.0G</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comandos: <code>df</code> e <code>du</code></h2>
+            <p class="text-2xl font-bold text-c-purple-light mb-10">Monitorando o HD / SSD pelo texto</p>
+            
+            <div class="grid grid-cols-2 gap-10 w-full max-w-7xl">
+                <div class="card p-8 bg-white border-t-8 border-c-purple-dark">
+                    <h3 class="font-bold text-3xl mb-4 font-mono text-c-purple-dark">df -h</h3>
+                    <p class="text-xl text-gray-700 font-bold mb-6">(Disk Free) Mostra o espaço livre e ocupado de todas as **partições do HD inteiro**.</p>
+                    <div class="terminal text-sm font-mono p-4">
+                        $ df -h<br>
+                        <span class="text-white">Sist. Arq.&nbsp;&nbsp;Tam.&nbsp;Usado&nbsp;Disp.<br>
+                        /dev/sda1&nbsp;&nbsp;&nbsp;<span class="text-blue-400 font-bold">250G</span>&nbsp;&nbsp;<span class="text-red-400 font-bold">150G</span>&nbsp;&nbsp;<span class="text-green-400 font-bold">88G</span></span>
+                    </div>
+                </div>
+                <div class="card p-8 bg-white border-t-8 border-c-orange">
+                    <h3 class="font-bold text-3xl mb-4 font-mono text-c-orange">du -sh</h3>
+                    <p class="text-xl text-gray-700 font-bold mb-6">(Disk Usage) Você coloca o caminho de uma pasta na frente, e ele calcula o peso **daquela pasta específica**.</p>
+                    <div class="terminal text-sm font-mono p-4">
+                        $ du -sh /home/aluno/Musicas<br>
+                        <span class="text-red-400 font-bold">15G</span><span class="text-white">&nbsp;&nbsp;&nbsp;/home/aluno/Musicas</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: Quiz Interativo -->
+        <section class="slide no-print bg-c-purple-dark/5">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-8">Raio-X Rápido 🎓</h2>
+            <div class="card p-10 w-full max-w-6xl bg-white border-4 border-c-purple-dark text-center shadow-2xl">
+                <p class="mb-8 text-3xl font-bold text-gray-800 leading-relaxed">Você digitou <strong class="bg-gray-200 px-2 rounded font-mono text-c-purple-dark">free -h</strong> e viu que a RAM "usada" está quase batendo no limite "total", e a máquina começou a engasgar.</p>
+                <p class="mb-8 text-2xl font-bold text-gray-600">Qual comando você usaria logo em seguida para descobrir <strong>quem</strong> está comendo toda a sua RAM?</p>
+                
+                <div class="flex gap-6 justify-center">
+                    <button onclick="alert('Incorreto! O df mostra espaço livre no HD/Disco, não na memória RAM.')" class="bg-gray-100 hover:bg-gray-200 px-8 py-4 rounded-xl text-2xl font-bold transition shadow border border-gray-300 font-mono text-gray-700"> df -h </button>
+                    <button onclick="alert('Exatamente! O htop (ou top) vai abrir a lista de processos ao vivo, e você verá no gráfico qual aplicativo está monopolizando a memória!')" class="bg-c-purple-dark hover:bg-c-purple-light text-white px-8 py-4 rounded-xl text-2xl font-bold shadow-lg transition border border-transparent font-mono"> htop </button>
+                    <button onclick="alert('Incorreto! O System Monitor não é um comando de terminal, é o aplicativo gráfico.')" class="bg-gray-100 hover:bg-gray-200 px-8 py-4 rounded-xl text-2xl font-bold transition shadow border border-gray-300 text-gray-700"> System Monitor </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 3: MATANDO PROCESSOS ================= -->
+
+        <!-- SLIDE 14 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-orange text-white px-4 py-2 rounded-xl font-black text-3xl">03</span>
+                <h2 class="text-5xl font-bold text-c-orange">Matando Processos 💀</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl">
+                <h3 class="text-3xl font-bold mb-6 text-gray-800">Travou tudo! E agora?</h3>
+                <p class="text-2xl opacity-90 text-gray-700 leading-relaxed mb-8">Você abriu o <code>htop</code>, encontrou aquele aplicativo problemático engolindo 100% da CPU e o mouse nem mexe direito.</p>
+                <p class="mt-6 text-c-orange font-black text-2xl bg-c-orange/10 p-6 rounded-xl border-2 border-c-orange shadow-sm">É hora de pedir para o Kernel "assassinar" esse processo teimoso.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 15 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>kill</code></h2>
+            <p class="text-2xl font-bold text-c-purple-light mb-10">Usando o RG do aplicativo</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">Lembra do <strong>PID</strong> que vimos lá no comando `top`? É o número de identificação único daquele programa.</p>
+                    <p class="text-xl text-gray-600 bg-white p-6 border-l-8 border-c-orange rounded-xl shadow-md font-bold">
+                        Basta digitar `kill` seguido do PID. <br><br>
+                        Se ele recusar fechar amigavelmente, adicionamos a flag brutal <code class="text-c-orange bg-gray-100 px-2 rounded">-9</code> (Forçar Encaminhamento Imediato).
+                    </p>
+                </div>
+                <div class="terminal text-xl py-10 font-mono leading-relaxed">
+                    aluno@meu-pc:~$ <span class="text-white opacity-50"># Suponha que o Chrome travado tem o PID 5678</span><br>
+                    aluno@meu-pc:~$ <span class="text-yellow-400">kill 5678</span><br>
+                    <span class="text-white opacity-50"># Se o Chrome ignorar o aviso...</span><br>
+                    aluno@meu-pc:~$ <span class="text-yellow-400">kill -9 5678</span><br>
+                    <span class="text-white">[1]+  Morto          chrome</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>killall</code></h2>
+            <p class="text-2xl font-bold text-c-orange mb-10">Quando você não sabe o PID...</p>
+            
+            <div class="w-full max-w-6xl">
+                <p class="text-2xl text-gray-700 font-bold mb-6">O `killall` permite que você encerre o programa usando o <strong>Nome dele</strong>, e ele matará todas as instâncias e janelas daquele aplicativo de uma vez.</p>
+                <div class="terminal text-2xl py-10 bg-black border-4 border-gray-600 shadow-2xl font-mono leading-loose text-center">
+                    aluno@meu-pc:~$ <span class="text-yellow-400">killall firefox</span><br>
+                    <span class="text-white opacity-50"># Todas as 20 abas do Firefox travadas se fecham instantaneamente.</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 4: REDES BÁSICAS ================= -->
+
+        <!-- SLIDE 17 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-yellow text-c-purple-dark px-4 py-2 rounded-xl font-black text-3xl">04</span>
+                <h2 class="text-5xl font-bold text-c-orange">Redes Básicas 🌐</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl border-t-8 border-c-yellow">
+                <h3 class="text-3xl font-bold mb-6 text-gray-800">Estamos Vivos na Internet?</h3>
+                <p class="text-2xl opacity-90 text-gray-700 leading-relaxed mb-8">Computadores sem rede são praticamente calculadoras glorificadas hoje em dia. Vamos aprender dois comandos rápidos para diagnosticar se o cabo de internet da nossa máquina está funcionando.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 18 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-8">O que é um Endereço IP?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center w-full max-w-7xl">
+                <div class="img-placeholder w-full h-80 bg-white border-4 border-c-purple-light rounded-2xl shadow-xl flex items-center justify-center flex-col">
+                    <span class="text-8xl mb-4">🏠</span>
+                    <span class="text-4xl font-mono font-black text-gray-700">192.168.0.10</span>
+                </div>
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">É como o CEP e Número da sua casa, só que no mundo digital.</p>
+                    <p class="text-xl text-gray-600 bg-white p-6 border-l-8 border-c-yellow rounded-xl shadow-md font-bold">Sem um número IP, as informações da internet (como as mensagens do WhatsApp) não sabem para onde ser entregues pelo roteador.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 19 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>ip a</code></h2>
+            <p class="text-2xl font-bold text-c-purple-light mb-10">Descobrindo o seu endereço</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">Lista todas as placas de rede do computador (Cabo, Wi-Fi) e mostra os endereços IP que elas pegaram do roteador.</p>
+                </div>
+                <div class="terminal text-base md:text-xl py-8 font-mono leading-relaxed bg-black border-4 border-gray-600 shadow-2xl">
+                    aluno@meu-pc:~$ <span class="text-yellow-400">ip a</span><br>
+                    <span class="text-white">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; ...<br>
+                    2: <span class="text-blue-400 font-bold">eth0</span>: &lt;BROADCAST,UP&gt; ...<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;link/ether a1:b2:c3:d4:e5:f6<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;inet <span class="text-green-400 font-bold bg-white/20 px-2 py-1 rounded">192.168.1.50</span>/24 brd ...</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Comando: <code>ping</code></h2>
+            <p class="text-2xl font-bold text-c-orange mb-10">Tem alguém aí?</p>
+            
+            <div class="w-full max-w-7xl">
+                <p class="text-2xl text-gray-700 font-bold mb-6">Envia pequenos "pacotes" de dados para um destino na internet e vê se eles respondem de volta (eco). Se responderem, você tem internet!</p>
+                <div class="terminal text-xl py-6 font-mono leading-relaxed bg-black border-4 border-gray-600 shadow-2xl">
+                    aluno@meu-pc:~$ <span class="text-yellow-400">ping google.com</span><br>
+                    <span class="text-white">PING google.com (142.250.218.238) 56(84) bytes of data.<br>
+                    64 bytes from gru11s15-in-f14.net: icmp_seq=1 <span class="text-green-400 font-bold">time=12.4 ms</span><br>
+                    64 bytes from gru11s15-in-f14.net: icmp_seq=2 <span class="text-green-400 font-bold">time=12.1 ms</span><br>
+                    <span class="text-gray-400">^C (Ctrl+C pressionado para parar)</span><br>
+                    --- google.com ping statistics ---<br>
+                    2 packets transmitted, 2 received, <span class="text-blue-400 font-bold">0% packet loss</span></span><br>
+                </div>
+                <p class="mt-6 text-2xl font-bold text-gray-800 bg-white p-4 rounded-xl shadow-sm border border-gray-200">⚠️ No Linux o ping envia testes para sempre! Pressione <strong class="text-c-orange bg-orange/10 px-3 py-1 rounded border border-c-orange">Ctrl + C</strong> no teclado para forçar a parada.</p>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 5: EXTRAS ================= -->
+
+        <!-- SLIDE 21 -->
+        <section class="slide">
+            <div class="flex flex-col items-center text-center">
+                <h2 class="text-6xl font-black text-c-purple-dark mb-8">Utilitários Extras 🧰</h2>
+                <p class="text-3xl max-w-4xl text-c-purple-dark/80 leading-relaxed font-bold">
+                    Comandos de "qualidade de vida" que facilitam muito a nossa rotina na tela preta.
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 22 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-10"><code>clear</code> e <code>history</code></h2>
+            <div class="grid grid-cols-2 gap-12 w-full max-w-7xl">
+                <div class="card p-10 bg-white border-t-8 border-c-purple-light text-center">
+                    <h3 class="text-5xl font-mono font-bold text-c-purple-dark mb-6">clear</h3>
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">Limpa toda a bagunça visual da tela do terminal, deixando o prompt lá no topo limpinho de novo. (Atalho: <code class="bg-gray-100 px-2 rounded border border-gray-200">Ctrl + L</code>)</p>
+                </div>
+                <div class="card p-10 bg-white border-t-8 border-c-purple-dark text-center">
+                    <h3 class="text-5xl font-mono font-bold text-c-purple-dark mb-6">history</h3>
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed">Mostra uma lista numerada de todos os comandos que você já digitou no passado. Ótimo pra lembrar aquele comando longo!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 23 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Informações do Sistema: <code>uname -a</code></h2>
+            <div class="w-full max-w-7xl mt-4">
+                <p class="text-2xl text-gray-700 font-bold mb-6">Mostra rapidamente detalhes básicos do sistema, a versão do Kernel Linux, a arquitetura da máquina e a data de compilação.</p>
+                <div class="terminal text-xl py-10 font-mono leading-loose bg-black border-4 border-gray-600 shadow-xl">
+                    aluno@meu-pc:~$ <span class="text-yellow-400">uname -a</span><br>
+                    <span class="text-white">Linux meu-pc <span class="text-green-400 font-bold">5.15.0-76-generic</span> #83-Ubuntu SMP Wed Jun 21 20:23:31 UTC 2023 <span class="text-blue-400 font-bold">x86_64</span> x86_64 x86_64 GNU/Linux</span><br>
+                    aluno@meu-pc:~$ <span class="animate-pulse text-white">_</span>
+                </div>
+                <p class="mt-8 text-xl font-bold text-gray-800 bg-white p-6 rounded-xl border border-gray-200"><strong>Dica Hacker:</strong> O comando <code>neofetch</code> é mais bonito e desenha logos na tela, mas ele requer a instalação de pacotes de fora, o <code>uname</code> já vem instalado em tudo!</p>
+            </div>
+        </section>
+
+        <!-- ================= FIM E RESUMO ================= -->
+
+        <!-- SLIDE 24: Resumo dos Comandos -->
+        <section class="slide bg-white">
+            <h2 class="text-4xl font-bold text-c-purple-dark mb-8">Cheat Sheet de Hoje (Sua colinha)</h2>
+            <table class="w-full max-w-6xl border-collapse font-mono text-2xl text-left shadow-lg rounded-xl overflow-hidden border-2 border-c-purple-dark">
+                <tr class="bg-c-purple-dark text-white">
+                    <th class="p-6 w-1/3 border-r border-c-purple-light/30">Comando</th>
+                    <th class="p-6">Para que serve?</th>
+                </tr>
+                <tr class="border-b-2 border-gray-200 bg-gray-50">
+                    <td class="p-6 font-bold text-c-purple-dark border-r border-gray-200">top / htop</td>
+                    <td class="p-6 text-gray-700 font-bold">Gerenciador de tarefas (Processos vivos e CPU/RAM).</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200">
+                    <td class="p-6 font-bold text-c-purple-dark border-r border-gray-200">free -h</td>
+                    <td class="p-6 text-gray-700 font-bold">Mostra a quantidade de Memória RAM livre/usada.</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200 bg-gray-50">
+                    <td class="p-6 font-bold text-c-purple-dark border-r border-gray-200">df -h</td>
+                    <td class="p-6 text-gray-700 font-bold">Mostra o espaço livre no HD inteiro (partições).</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200">
+                    <td class="p-6 font-bold text-c-purple-dark border-r border-gray-200">du -sh [pasta]</td>
+                    <td class="p-6 text-gray-700 font-bold">Calcula o "peso" (tamanho) de uma pasta específica.</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200 bg-gray-50">
+                    <td class="p-6 font-bold text-c-purple-dark border-r border-gray-200">kill / killall</td>
+                    <td class="p-6 text-gray-700 font-bold">Encerra um programa travado à força (-9).</td>
+                </tr>
+                <tr class="border-b-2 border-gray-200">
+                    <td class="p-6 font-bold text-c-purple-dark border-r border-gray-200">ip a / ping</td>
+                    <td class="p-6 text-gray-700 font-bold">Descobre seu IP e testa conexão com a internet.</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- SLIDE 25: Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-10">Mapa Mental da Aula</h2>
+            <div class="flex flex-col items-center gap-8 w-full max-w-6xl text-xl font-mono">
+                <div class="bg-c-purple-dark text-white px-10 py-4 rounded-2xl font-bold text-3xl shadow-lg border-2 border-c-purple-light">DIAGNÓSTICO DO SISTEMA</div>
+                <div class="grid grid-cols-2 gap-8 w-full mt-4">
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white text-c-purple-dark px-6 py-4 rounded-xl text-center font-black border-2 border-gray-300 shadow-sm text-2xl">MÉTODO GRÁFICO (GUI)</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 shadow-sm text-gray-700 font-bold">Monitor do Sistema</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 shadow-sm text-gray-700 font-bold">Analisador de Uso de Disco</div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white text-c-orange px-6 py-4 rounded-xl text-center font-black border-2 border-c-orange/50 shadow-sm text-2xl">TERMINAL (CLI)</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 shadow-sm text-gray-700 font-bold">top, free, df, du</div>
+                        <div class="bg-white p-4 rounded-xl text-center border-2 border-gray-200 shadow-sm text-gray-700 font-bold">kill, ping, clear</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 26: Próxima Aula -->
+        <section class="slide">
+            <h2 class="text-3xl font-mono text-c-orange mb-6 font-black uppercase tracking-widest">O Próximo Passo...</h2>
+            <h1 class="text-6xl font-black text-c-purple-dark mb-10 text-center leading-tight">Chegou a hora de escrever: <br>Edição Profissional de Texto</h1>
+            <p class="text-2xl max-w-5xl text-center text-gray-700 mb-12 font-bold leading-relaxed">Acabamos de ver o lado "nerd" do terminal. Na Aula 09 e 10, entraremos no mundo dos Editores Visuais para criar relatórios técnicos perfeitos e formatados na norma ABNT.</p>
+            <div class="flex gap-10 justify-center text-c-purple-dark opacity-40">
+                <i data-lucide="file-text" class="w-24 h-24"></i>
+                <i data-lucide="align-justify" class="w-24 h-24"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 27: Fim -->
+        <section class="slide bg-white border-t-[16px] border-c-purple-dark shadow-[inset_0_20px_50px_rgba(0,0,0,0.02)]">
+            <div class="text-center">
+                <i data-lucide="wrench" class="w-32 h-32 mx-auto text-c-purple-dark mb-8"></i>
+                <h1 class="text-7xl font-black mb-6 text-c-purple-dark">FIM DA AULA 08</h1>
+                <p class="text-3xl text-gray-600 mb-16 font-mono font-bold">Você sabe diagnosticar a máquina.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-c-purple-dark text-white px-12 py-6 rounded-full font-black shadow-2xl hover:bg-c-purple-light transition flex items-center gap-4 hover:scale-105 border-4 border-transparent text-2xl">
+                        <i data-lucide="download" class="w-8 h-8"></i> Gerar Apostila de Estudo (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-base text-gray-400 font-mono tracking-widest uppercase font-black">COTIL - Fundamentos de Informática</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-10 right-10 flex space-x-6 z-50">
+        <button id="prevBtn" class="p-6 bg-white/90 backdrop-blur rounded-full shadow-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition transform active:scale-95">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-6 bg-c-orange rounded-full shadow-xl text-white font-bold hover:bg-orange/80 transition transform active:scale-95 border-2 border-orange/50">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica dos Slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide'); 
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            // Progress Bar
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        // Init
+        updateSlides();
+
+        // Controls
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
