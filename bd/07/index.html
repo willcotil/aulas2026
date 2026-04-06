@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados - Aula 07: Dicionário de Dados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#1A3A2A',
+                            primary:   '#2D6A4F',
+                            secondary: '#74C69D',
+                            accent:    '#F4A020',
+                            muted:     '#F0F7F4',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #1A3A2A;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .print-break { page-break-after: always; }
+            .resposta-gabarito { display: block !important; }
+        }
+
+        .node-rect { fill: #ffffff; stroke: #2D6A4F; stroke-width: 2.5; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #1A3A2A; }
+        .edge { stroke: #2D6A4F; stroke-width: 2; fill: none; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #1A3A2A; padding: 2px 6px; border-radius: 4px; color: #F4A020; font-size: 0.9em; font-weight: bold; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #F0F7F4; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #74C69D; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2D6A4F; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <header class="no-print h-16 bg-white text-brand-dark border-b border-brand-secondary px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-3 z-10">
+            <div class="bg-brand-primary text-white p-2 rounded-lg">
+                <i class="fas fa-book-open text-sm"></i>
+            </div>
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">Banco de Dados I <span class="text-brand-primary">Dicionário</span></h1>
+        </div>
+
+        <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none hidden md:flex">
+            <a href="https://willcotil.github.io/aulas2026/" target="_blank" class="pointer-events-auto text-brand-dark hover:text-brand-primary font-extrabold text-lg transition tracking-wide">
+                willcotil.github.io/aulas2026
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-muted border border-brand-secondary hover:bg-brand-secondary hover:text-white rounded-lg text-brand-dark text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-dark hover:text-brand-primary transition">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="no-print h-1.5 w-full bg-brand-muted overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-accent transition-all duration-500 w-0 shadow-[0_0_10px_#F4A020]"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl"></div>
+    </main>
+
+    <footer class="no-print h-20 bg-white border-t border-brand-secondary px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-brand-muted text-brand-dark border border-brand-secondary rounded-xl font-bold hover:bg-brand-secondary hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-xs font-black text-brand-primary uppercase tracking-widest">Tópico 1 / 33</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-primary text-white rounded-xl font-bold hover:bg-brand-dark transition shadow-lg shadow-brand-primary/30">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01 ──────────────────────────────────────────────────────────
+            {
+                title: "O Dicionário de Dados",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-6 bg-brand-muted border border-brand-secondary rounded-full text-brand-primary mb-4">
+                            <i class="fas fa-book-open text-7xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 07: Dicionário de Dados</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto italic leading-relaxed">Estrutura, Padrões e Documentação Profissional de Banco de Dados.</p>
+                        <div class="flex justify-center gap-4 text-brand-dark/50 text-sm mt-10">
+                            <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">SETAS</span>
+                            <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">ESPAÇO</span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02 ──────────────────────────────────────────────────────────
+            {
+                title: "O Trabalho que Fizemos Até Agora",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">Nas aulas anteriores construímos um sólido arsenal de modelagem:</p>
+                            <ul class="space-y-4 text-brand-dark font-medium">
+                                <li class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0 font-bold">04</div> Tipos de Dados e Chaves (PK, FK, UK)</li>
+                                <li class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0 font-bold">05</div> Entidades, Atributos e Cardinalidade</li>
+                                <li class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0 font-bold">06</div> MER e DER — o diagrama visual completo</li>
+                            </ul>
+                            <p class="text-lg text-brand-dark/80">Agora o DER está pronto. Temos o <strong>mapa</strong> do banco. Mas um mapa sem legenda é inútil para quem chega depois.</p>
+                        </div>
+                        <div class="bg-brand-muted rounded-3xl p-6 border border-brand-secondary shadow-sm flex flex-col items-center justify-center gap-4">
+                            <svg width="300" height="180" viewBox="0 0 300 180">
+                                <rect x="10" y="20" width="90" height="50" rx="6" class="node-rect"/>
+                                <text x="55" y="50" text-anchor="middle" class="node-text">CLIENTE</text>
+                                <rect x="200" y="20" width="90" height="50" rx="6" class="node-rect"/>
+                                <text x="245" y="50" text-anchor="middle" class="node-text">PEDIDO</text>
+                                <line x1="100" y1="45" x2="200" y2="45" class="edge"/>
+                                <text x="150" y="40" text-anchor="middle" style="font-size:10px;fill:#2D6A4F;font-weight:bold;">1:N</text>
+                                <rect x="10" y="110" width="90" height="50" rx="6" class="node-rect"/>
+                                <text x="55" y="140" text-anchor="middle" class="node-text">PRODUTO</text>
+                                <rect x="200" y="110" width="90" height="50" rx="6" class="node-rect"/>
+                                <text x="245" y="140" text-anchor="middle" class="node-text">CATEGORIA</text>
+                                <line x1="100" y1="135" x2="200" y2="135" class="edge"/>
+                                <text x="150" y="130" text-anchor="middle" style="font-size:10px;fill:#2D6A4F;font-weight:bold;">N:1</text>
+                                <line x1="55" y1="70" x2="55" y2="110" class="edge" stroke-dasharray="4"/>
+                            </svg>
+                            <span class="text-xs font-bold uppercase tracking-widest text-brand-primary">DER Concluído — E agora?</span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 03 ──────────────────────────────────────────────────────────
+            {
+                title: "O Modelo Existe. Mas e os Outros?",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-center text-brand-dark">Você criou o modelo. Mas imagine o cenário real:</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-white border-2 border-brand-secondary rounded-3xl shadow-sm space-y-4">
+                                <div class="text-4xl text-brand-primary"><i class="fas fa-user-plus"></i></div>
+                                <h4 class="text-xl font-bold text-brand-dark">Um novo desenvolvedor entra no time</h4>
+                                <p class="text-brand-dark/80 leading-relaxed">Ele vê o DER. Enxerga a tabela <code>ped_dt_ent</code>. O que esse campo significa? É a data de entrada do pedido? De entrega? De digitação?</p>
+                            </div>
+                            <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl border-b-4 border-brand-accent space-y-4">
+                                <div class="text-4xl text-brand-accent"><i class="fas fa-question-circle"></i></div>
+                                <h4 class="text-xl font-bold text-brand-secondary">A pergunta que não quer calar:</h4>
+                                <p class="text-brand-muted leading-relaxed">Como garantimos que <strong>qualquer pessoa</strong> — agora ou daqui a 3 anos — entenda exatamente o que cada campo armazena, aceita e representa?</p>
+                                <p class="text-brand-accent font-bold text-lg">A resposta: o Dicionário de Dados.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 04 ──────────────────────────────────────────────────────────
+            {
+                title: "O Que É Um Dicionário de Dados?",
+                content: `
+                    <div class="space-y-8">
+                        <blockquote class="border-l-4 border-brand-accent pl-6 py-4 bg-brand-muted rounded-r-2xl">
+                            <p class="text-xl text-brand-dark italic leading-relaxed">"Um Dicionário de Dados (DD) é um repositório centralizado de metadados — dados <em>sobre</em> os dados — que descreve formalmente cada elemento de informação em um sistema de banco de dados."</p>
+                        </blockquote>
+                        <div class="grid md:grid-cols-3 gap-6 mt-4">
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center">
+                                <div class="text-3xl text-brand-primary mb-3"><i class="fas fa-tag"></i></div>
+                                <h4 class="font-bold text-brand-dark mb-2">Nomeia</h4>
+                                <p class="text-sm text-brand-dark/70">Define padrões de nomenclatura para tabelas, colunas e índices.</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center">
+                                <div class="text-3xl text-brand-primary mb-3"><i class="fas fa-info-circle"></i></div>
+                                <h4 class="font-bold text-brand-dark mb-2">Descreve</h4>
+                                <p class="text-sm text-brand-dark/70">Explica o propósito de cada tabela e o significado de cada campo.</p>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center">
+                                <div class="text-3xl text-brand-primary mb-3"><i class="fas fa-shield-alt"></i></div>
+                                <h4 class="font-bold text-brand-dark mb-2">Restringe</h4>
+                                <p class="text-sm text-brand-dark/70">Documenta constraints, regras de negócio e valores permitidos.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 05 ──────────────────────────────────────────────────────────
+            {
+                title: "A Analogia da Ficha Catalográfica",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="bg-brand-muted rounded-3xl p-6 border border-brand-secondary shadow-sm flex flex-col items-center justify-center">
+                            <svg width="280" height="200" viewBox="0 0 280 200">
+                                <rect x="20" y="20" width="240" height="160" rx="8" fill="white" stroke="#74C69D" stroke-width="2"/>
+                                <rect x="20" y="20" width="240" height="34" rx="8" fill="#2D6A4F"/>
+                                <text x="140" y="42" text-anchor="middle" fill="white" font-weight="bold" font-size="13" font-family="Inter">FICHA CATALOGRÁFICA</text>
+                                <line x1="30" y1="70" x2="250" y2="70" stroke="#74C69D" stroke-width="1"/>
+                                <text x="30" y="88" font-size="11" fill="#1A3A2A" font-family="Inter"><tspan font-weight="bold">Título:</tspan> Banco de Dados I</text>
+                                <text x="30" y="108" font-size="11" fill="#1A3A2A" font-family="Inter"><tspan font-weight="bold">Autor:</tspan> Sistema de Vendas</text>
+                                <text x="30" y="128" font-size="11" fill="#1A3A2A" font-family="Inter"><tspan font-weight="bold">Campo:</tspan> cli_cpf</text>
+                                <text x="30" y="148" font-size="11" fill="#1A3A2A" font-family="Inter"><tspan font-weight="bold">Tipo:</tspan> CHAR(11) | NOT NULL</text>
+                                <text x="30" y="168" font-size="11" fill="#F4A020" font-family="Inter" font-weight="bold">Regra: CPF sem pontuação</text>
+                            </svg>
+                        </div>
+                        <div class="space-y-6">
+                            <p class="text-xl leading-relaxed text-brand-dark">Assim como uma biblioteca usa fichas catalográficas para descrever cada livro — título, autor, assunto, localização — o Dicionário de Dados descreve <strong>cada campo</strong> do banco.</p>
+                            <div class="p-6 bg-white border-l-4 border-brand-primary rounded-r-xl shadow-sm">
+                                <p class="font-bold text-brand-dark">Sem a ficha:</p>
+                                <p class="text-sm text-brand-dark/70">Você sabe que o livro existe, mas não sabe onde está nem sobre o que trata.</p>
+                                <p class="font-bold text-brand-dark mt-3">Sem o dicionário:</p>
+                                <p class="text-sm text-brand-dark/70">Você sabe que o campo existe, mas não sabe o que guarda, nem quais valores aceita.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 06 ──────────────────────────────────────────────────────────
+            {
+                title: "Anatomia de um Dicionário de Dados",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-center text-brand-dark">O DD é organizado em três níveis hierárquicos:</p>
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-full max-w-2xl p-5 bg-brand-dark text-white rounded-2xl text-center shadow-xl border-b-4 border-brand-accent">
+                                <i class="fas fa-database text-2xl text-brand-accent mb-2"></i>
+                                <h4 class="font-black text-xl">BANCO DE DADOS</h4>
+                                <p class="text-brand-secondary text-sm">Nome, versão, descrição geral, responsável</p>
+                            </div>
+                            <div class="w-4 h-8 border-l-2 border-brand-secondary"></div>
+                            <div class="w-full max-w-2xl p-5 bg-brand-primary text-white rounded-2xl text-center shadow-lg">
+                                <i class="fas fa-table text-2xl text-brand-secondary mb-2"></i>
+                                <h4 class="font-black text-xl">TABELAS / ENTIDADES</h4>
+                                <p class="text-brand-secondary text-sm">Nome, alias, descrição, volume estimado de registros</p>
+                            </div>
+                            <div class="w-4 h-8 border-l-2 border-brand-secondary"></div>
+                            <div class="w-full max-w-2xl p-5 bg-white border-2 border-brand-secondary rounded-2xl text-center shadow-sm">
+                                <i class="fas fa-columns text-2xl text-brand-primary mb-2"></i>
+                                <h4 class="font-black text-xl text-brand-dark">COLUNAS / ATRIBUTOS</h4>
+                                <p class="text-brand-primary text-sm">Nome, tipo, tamanho, constraint, valor padrão, descrição completa</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 07 ──────────────────────────────────────────────────────────
+            {
+                title: "Documentando uma Tabela (Cabeçalho)",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark">Antes de listar as colunas, cada tabela recebe um <strong>cabeçalho de identificação</strong>:</p>
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl border-b-4 border-brand-accent space-y-5">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-brand-secondary text-xs uppercase tracking-widest font-bold mb-1">Nome da Tabela</p>
+                                    <p class="text-white font-black text-2xl font-mono">CLIENTES</p>
+                                </div>
+                                <div>
+                                    <p class="text-brand-secondary text-xs uppercase tracking-widest font-bold mb-1">Alias / Prefixo</p>
+                                    <p class="text-brand-accent font-black text-2xl font-mono">cli_</p>
+                                </div>
+                                <div>
+                                    <p class="text-brand-secondary text-xs uppercase tracking-widest font-bold mb-1">Descrição</p>
+                                    <p class="text-brand-muted text-sm leading-relaxed">Armazena os dados cadastrais de pessoas físicas e jurídicas que realizaram ao menos uma compra no sistema.</p>
+                                </div>
+                                <div>
+                                    <p class="text-brand-secondary text-xs uppercase tracking-widest font-bold mb-1">Responsável / Versão</p>
+                                    <p class="text-brand-muted text-sm">Equipe BD — v1.2 — 2026-04-06</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-brand-dark/60 italic text-center">Este cabeçalho aparece uma vez por tabela. As colunas são documentadas na tabela abaixo.</p>
+                    </div>
+                `
+            },
+            // ── 08 ──────────────────────────────────────────────────────────
+            {
+                title: "Documentando uma Coluna: 7 Campos",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Cada coluna do banco deve ser descrita com <strong>7 informações</strong>:</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-sm font-black shrink-0">1</div>
+                                <div><p class="font-bold text-brand-dark">Nome da Coluna</p><p class="text-sm text-brand-dark/70">O nome físico exato como está no banco. Ex: <code>cli_cpf</code></p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-sm font-black shrink-0">2</div>
+                                <div><p class="font-bold text-brand-dark">Tipo de Dado</p><p class="text-sm text-brand-dark/70">O tipo SQL: <code>VARCHAR</code>, <code>INT</code>, <code>DATE</code>, <code>ENUM</code>…</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-sm font-black shrink-0">3</div>
+                                <div><p class="font-bold text-brand-dark">Tamanho / Precisão</p><p class="text-sm text-brand-dark/70">Ex: <code>VARCHAR(100)</code>, <code>DECIMAL(10,2)</code></p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-sm font-black shrink-0">4</div>
+                                <div><p class="font-bold text-brand-dark">Permite NULL?</p><p class="text-sm text-brand-dark/70">Sim ou Não. Uma das informações mais críticas.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-sm font-black shrink-0">5</div>
+                                <div><p class="font-bold text-brand-dark">Valor Padrão (Default)</p><p class="text-sm text-brand-dark/70">O que o banco insere se nenhum valor for informado.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-sm font-black shrink-0">6</div>
+                                <div><p class="font-bold text-brand-dark">Constraint / Chave</p><p class="text-sm text-brand-dark/70">PK, FK, UK, CHECK, AUTO_INCREMENT…</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-brand-muted border-2 border-brand-accent rounded-xl shadow-sm md:col-span-2">
+                                <div class="w-8 h-8 rounded-full bg-brand-accent text-white flex items-center justify-center text-sm font-black shrink-0">7</div>
+                                <div><p class="font-bold text-brand-dark">Descrição / Regra de Negócio</p><p class="text-sm text-brand-dark/70">Explicação em linguagem natural. O campo mais importante — o único que um humano escreve.</p></div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 09 ──────────────────────────────────────────────────────────
+            {
+                title: "O Formato em Tabela",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Na prática, os 7 campos viram colunas de uma tabela de documentação:</p>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-sm min-w-[700px]">
+                                <thead>
+                                    <tr class="bg-brand-dark text-white">
+                                        <th class="p-3 font-bold">Coluna</th>
+                                        <th class="p-3 font-bold">Tipo</th>
+                                        <th class="p-3 font-bold">Tam.</th>
+                                        <th class="p-3 font-bold">NULL?</th>
+                                        <th class="p-3 font-bold">Default</th>
+                                        <th class="p-3 font-bold">Constraint</th>
+                                        <th class="p-3 font-bold">Descrição</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted">
+                                        <td class="p-3 font-mono text-brand-accent font-bold">cli_id</td>
+                                        <td class="p-3">INT</td>
+                                        <td class="p-3">—</td>
+                                        <td class="p-3 text-red-600 font-bold">Não</td>
+                                        <td class="p-3 font-mono">AUTO</td>
+                                        <td class="p-3 font-bold">PK, AI</td>
+                                        <td class="p-3">Identificador único do cliente</td>
+                                    </tr>
+                                    <tr class="border-b border-brand-secondary bg-white">
+                                        <td class="p-3 font-mono text-brand-accent font-bold">cli_nome</td>
+                                        <td class="p-3">VARCHAR</td>
+                                        <td class="p-3">150</td>
+                                        <td class="p-3 text-red-600 font-bold">Não</td>
+                                        <td class="p-3 font-mono">—</td>
+                                        <td class="p-3">—</td>
+                                        <td class="p-3">Nome completo do cliente</td>
+                                    </tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted">
+                                        <td class="p-3 font-mono text-brand-accent font-bold">cli_email</td>
+                                        <td class="p-3">VARCHAR</td>
+                                        <td class="p-3">200</td>
+                                        <td class="p-3 text-green-600 font-bold">Sim</td>
+                                        <td class="p-3 font-mono">NULL</td>
+                                        <td class="p-3 font-bold">UK</td>
+                                        <td class="p-3">E-mail para contato. Único por cliente.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-sm text-brand-dark/60 italic text-center">Este é o formato padrão que usaremos para todos os exercícios da Aula 08.</p>
+                    </div>
+                `
+            },
+            // ── 10 ──────────────────────────────────────────────────────────
+            {
+                title: "Convenções de Nomenclatura",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark text-center">Antes de documentar, precisamos <strong>padronizar</strong> os nomes. Veja o problema:</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-6 bg-red-50 border-2 border-red-300 rounded-3xl">
+                                <h4 class="font-black text-red-700 mb-4 text-lg"><i class="fas fa-times-circle mr-2"></i> CAOS — Sem Padrão</h4>
+                                <ul class="space-y-2 font-mono text-sm">
+                                    <li class="text-red-800"><i class="fas fa-times text-red-500 mr-2"></i>NomeCliente</li>
+                                    <li class="text-red-800"><i class="fas fa-times text-red-500 mr-2"></i>nome_do_cliente</li>
+                                    <li class="text-red-800"><i class="fas fa-times text-red-500 mr-2"></i>NOMECLIENTE</li>
+                                    <li class="text-red-800"><i class="fas fa-times text-red-500 mr-2"></i>nm_cli</li>
+                                    <li class="text-red-800"><i class="fas fa-times text-red-500 mr-2"></i>clientName</li>
+                                </ul>
+                                <p class="text-xs text-red-600 mt-4">Cada desenvolvedor inventa o seu. Manutenção impossível.</p>
+                            </div>
+                            <div class="p-6 bg-brand-muted border-2 border-brand-primary rounded-3xl">
+                                <h4 class="font-black text-brand-dark mb-4 text-lg"><i class="fas fa-check-circle text-brand-primary mr-2"></i> PADRÃO — snake_case</h4>
+                                <ul class="space-y-2 font-mono text-sm">
+                                    <li class="text-brand-dark"><i class="fas fa-check text-brand-primary mr-2"></i>cli_nome</li>
+                                    <li class="text-brand-dark"><i class="fas fa-check text-brand-primary mr-2"></i>cli_email</li>
+                                    <li class="text-brand-dark"><i class="fas fa-check text-brand-primary mr-2"></i>ped_data_criacao</li>
+                                    <li class="text-brand-dark"><i class="fas fa-check text-brand-primary mr-2"></i>pro_preco_unitario</li>
+                                    <li class="text-brand-dark"><i class="fas fa-check text-brand-primary mr-2"></i>cat_descricao</li>
+                                </ul>
+                                <p class="text-xs text-brand-primary mt-4">Prefixo + nome descritivo em minúsculas, separado por _</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 11 ──────────────────────────────────────────────────────────
+            {
+                title: "A Convenção: snake_case",
+                content: `
+                    <div class="space-y-8">
+                        <div class="p-6 bg-brand-dark rounded-2xl font-mono text-lg text-center shadow-xl">
+                            <span class="text-brand-accent font-black">cli</span><span class="text-white">_</span><span class="text-brand-secondary font-black">data</span><span class="text-white">_</span><span class="text-white font-black">nascimento</span>
+                            <div class="flex justify-center gap-12 mt-4 text-xs">
+                                <span class="text-brand-accent">▲ prefixo (alias da tabela)</span>
+                                <span class="text-brand-secondary">▲ domínio semântico</span>
+                                <span class="text-white">▲ nome do atributo</span>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <h4 class="font-bold text-brand-dark text-lg">Regras do snake_case:</h4>
+                                <ul class="space-y-3 text-brand-dark">
+                                    <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary w-5"></i> Tudo em <strong>minúsculas</strong></li>
+                                    <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary w-5"></i> Palavras separadas por <strong>underscore (_)</strong></li>
+                                    <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary w-5"></i> Sem acentos, cedilhas ou espaços</li>
+                                    <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary w-5"></i> Sem abreviações ambíguas</li>
+                                    <li class="flex items-center gap-3"><i class="fas fa-check text-brand-primary w-5"></i> Começar sempre com o <strong>prefixo da tabela</strong></li>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-brand-muted border border-brand-secondary rounded-2xl">
+                                <h4 class="font-bold text-brand-dark mb-3">Exemplos corretos:</h4>
+                                <ul class="space-y-2 font-mono text-sm text-brand-dark">
+                                    <li><code>cli_cpf</code> — CPF do cliente</li>
+                                    <li><code>ped_valor_total</code> — Valor total do pedido</li>
+                                    <li><code>pro_estoque_atual</code> — Estoque do produto</li>
+                                    <li><code>fun_data_admissao</code> — Admissão do funcionário</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 12 ──────────────────────────────────────────────────────────
+            {
+                title: "Prefixos e Sufixos",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Os <strong>prefixos</strong> identificam a tabela de origem. Os <strong>sufixos</strong> indicam o tipo ou papel da coluna:</p>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-brand-primary text-white">
+                                        <th class="p-3">Prefixo / Sufixo</th>
+                                        <th class="p-3">Tabela / Papel</th>
+                                        <th class="p-3">Exemplos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3 font-mono font-bold text-brand-accent">cli_</td><td class="p-3">CLIENTES</td><td class="p-3 font-mono text-sm">cli_id, cli_nome, cli_cpf</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-3 font-mono font-bold text-brand-accent">ped_</td><td class="p-3">PEDIDOS</td><td class="p-3 font-mono text-sm">ped_id, ped_data, ped_status</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3 font-mono font-bold text-brand-accent">pro_</td><td class="p-3">PRODUTOS</td><td class="p-3 font-mono text-sm">pro_id, pro_nome, pro_preco</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-3 font-mono font-bold text-brand-accent">cat_</td><td class="p-3">CATEGORIAS</td><td class="p-3 font-mono text-sm">cat_id, cat_nome</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3 font-mono font-bold text-brand-secondary">_id</td><td class="p-3">Chave Primária</td><td class="p-3 font-mono text-sm">cli_id, ped_id, pro_id</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-3 font-mono font-bold text-brand-secondary">_id_fk</td><td class="p-3">Chave Estrangeira</td><td class="p-3 font-mono text-sm">ped_cli_id_fk, ped_pro_id_fk</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3 font-mono font-bold text-brand-secondary">_dt_</td><td class="p-3">Campo de Data</td><td class="p-3 font-mono text-sm">cli_dt_nascimento, ped_dt_criacao</td></tr>
+                                    <tr class="bg-white"><td class="p-3 font-mono font-bold text-brand-secondary">_fl_</td><td class="p-3">Flag booleana</td><td class="p-3 font-mono text-sm">cli_fl_ativo, pro_fl_disponivel</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 13 ──────────────────────────────────────────────────────────
+            {
+                title: "Tipos de Dados e Como Documentá-los",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark text-center">Cada família de tipos exige cuidados específicos na documentação:</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-primary text-lg mb-3"><i class="fas fa-font mr-2"></i> Textuais</h4>
+                                <ul class="space-y-2 text-sm text-brand-dark">
+                                    <li><code>CHAR(n)</code> — tamanho fixo (CPF, CEP, UF)</li>
+                                    <li><code>VARCHAR(n)</code> — tamanho variável (nomes, emails)</li>
+                                    <li><code>TEXT</code> — sem limite (observações, logs)</li>
+                                    <li class="text-brand-primary text-xs italic mt-2">Documentar: tamanho máximo e charset (UTF-8).</li>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-primary text-lg mb-3"><i class="fas fa-hashtag mr-2"></i> Numéricos</h4>
+                                <ul class="space-y-2 text-sm text-brand-dark">
+                                    <li><code>INT</code> / <code>BIGINT</code> — inteiros (IDs, quantidades)</li>
+                                    <li><code>DECIMAL(p,s)</code> — precisão exata (preços, saldos)</li>
+                                    <li><code>FLOAT</code> — aproximado (coordenadas GPS)</li>
+                                    <li class="text-brand-primary text-xs italic mt-2">Documentar: precisão, escala e se aceita negativo.</li>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-primary text-lg mb-3"><i class="fas fa-calendar mr-2"></i> Temporais</h4>
+                                <ul class="space-y-2 text-sm text-brand-dark">
+                                    <li><code>DATE</code> — apenas data (AAAA-MM-DD)</li>
+                                    <li><code>DATETIME</code> — data + hora completa</li>
+                                    <li><code>TIMESTAMP</code> — data+hora com fuso horário</li>
+                                    <li class="text-brand-primary text-xs italic mt-2">Documentar: fuso horário e formato de entrada.</li>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-brand-muted border-2 border-brand-accent rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-brand-dark text-lg mb-3"><i class="fas fa-list mr-2 text-brand-accent"></i> Especiais</h4>
+                                <ul class="space-y-2 text-sm text-brand-dark">
+                                    <li><code>ENUM('A','B')</code> — lista fechada de valores</li>
+                                    <li><code>BOOLEAN</code> — verdadeiro/falso (0 ou 1)</li>
+                                    <li><code>JSON</code> — estrutura semiestruturada</li>
+                                    <li class="text-brand-accent text-xs italic mt-2 font-bold">ENUM exige documentar TODOS os valores e seus significados!</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 14 ──────────────────────────────────────────────────────────
+            {
+                title: "ENUM: O Tipo Que Exige Mais Documentação",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark"><code>ENUM</code> é o tipo mais perigoso quando mal documentado. Veja a diferença:</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-6 bg-red-50 border-2 border-red-300 rounded-3xl space-y-3">
+                                <h4 class="font-black text-red-700"><i class="fas fa-times-circle mr-2"></i> Antes: Documentação Ruim</h4>
+                                <div class="overflow-x-auto rounded-xl border border-red-200">
+                                    <table class="w-full text-sm">
+                                        <tr class="bg-red-100"><th class="p-2 text-left">Coluna</th><th class="p-2 text-left">Tipo</th><th class="p-2 text-left">Descrição</th></tr>
+                                        <tr><td class="p-2 font-mono">ped_status</td><td class="p-2">ENUM</td><td class="p-2 text-red-700 italic">Status do pedido.</td></tr>
+                                    </table>
+                                </div>
+                                <p class="text-xs text-red-600">Quais são os valores possíveis? O que cada um significa? Mistério total.</p>
+                            </div>
+                            <div class="p-6 bg-brand-muted border-2 border-brand-primary rounded-3xl space-y-3">
+                                <h4 class="font-black text-brand-dark"><i class="fas fa-check-circle text-brand-primary mr-2"></i> Depois: Documentação Completa</h4>
+                                <div class="overflow-x-auto rounded-xl border border-brand-secondary">
+                                    <table class="w-full text-sm">
+                                        <tr class="bg-brand-primary text-white"><th class="p-2 text-left">Valor</th><th class="p-2 text-left">Significado</th></tr>
+                                        <tr class="bg-white"><td class="p-2 font-mono text-brand-accent">'pendente'</td><td class="p-2">Aguardando pagamento</td></tr>
+                                        <tr class="bg-brand-muted"><td class="p-2 font-mono text-brand-accent">'aprovado'</td><td class="p-2">Pago e em preparação</td></tr>
+                                        <tr class="bg-white"><td class="p-2 font-mono text-brand-accent">'enviado'</td><td class="p-2">Saiu para entrega</td></tr>
+                                        <tr class="bg-brand-muted"><td class="p-2 font-mono text-brand-accent">'cancelado'</td><td class="p-2">Cancelado pelo cliente ou sistema</td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 15 ──────────────────────────────────────────────────────────
+            {
+                title: "Constraints: O Que Documentar",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">As <em>constraints</em> são regras que o próprio banco de dados aplica. Todas devem estar no DD:</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl">
+                                <span class="px-2 py-1 bg-brand-dark text-brand-accent font-mono text-xs font-bold rounded shrink-0">PK</span>
+                                <div><p class="font-bold text-brand-dark">PRIMARY KEY</p><p class="text-sm text-brand-dark/70">Identifica unicamente cada registro. Nunca NULL, nunca duplicada.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl">
+                                <span class="px-2 py-1 bg-brand-dark text-brand-accent font-mono text-xs font-bold rounded shrink-0">FK</span>
+                                <div><p class="font-bold text-brand-dark">FOREIGN KEY</p><p class="text-sm text-brand-dark/70">Referencia a PK de outra tabela. Documentar tabela e coluna de destino.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl">
+                                <span class="px-2 py-1 bg-brand-dark text-brand-accent font-mono text-xs font-bold rounded shrink-0">UK</span>
+                                <div><p class="font-bold text-brand-dark">UNIQUE KEY</p><p class="text-sm text-brand-dark/70">Valor único, mas pode ser NULL. Ex: email, CPF, CNPJ.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl">
+                                <span class="px-2 py-1 bg-brand-dark text-brand-accent font-mono text-xs font-bold rounded shrink-0">NN</span>
+                                <div><p class="font-bold text-brand-dark">NOT NULL</p><p class="text-sm text-brand-dark/70">Campo obrigatório. Deve ser justificado pela regra de negócio.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl">
+                                <span class="px-2 py-1 bg-brand-dark text-brand-accent font-mono text-xs font-bold rounded shrink-0">CK</span>
+                                <div><p class="font-bold text-brand-dark">CHECK</p><p class="text-sm text-brand-dark/70">Valida uma condição. Ex: <code>preco > 0</code>. Documentar a expressão.</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-white border border-brand-secondary rounded-xl">
+                                <span class="px-2 py-1 bg-brand-dark text-brand-accent font-mono text-xs font-bold rounded shrink-0">AI</span>
+                                <div><p class="font-bold text-brand-dark">AUTO_INCREMENT</p><p class="text-sm text-brand-dark/70">O banco gera o valor automaticamente (sequencial crescente).</p></div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 16 ──────────────────────────────────────────────────────────
+            {
+                title: "FK Avançado: Regras de Deleção",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Quando documentamos uma FK, precisamos registrar também o <strong>comportamento ao deletar</strong> o registro pai:</p>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border-2 border-brand-secondary rounded-2xl shadow-sm text-center space-y-3">
+                                <div class="text-3xl text-red-500"><i class="fas fa-ban"></i></div>
+                                <h4 class="font-black text-brand-dark">RESTRICT</h4>
+                                <p class="text-sm text-brand-dark/70">Bloqueia a deleção do pai se existirem filhos. O mais seguro.</p>
+                                <div class="p-2 bg-red-50 rounded-lg text-xs font-mono">ON DELETE RESTRICT</div>
+                            </div>
+                            <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl text-center space-y-3 border-b-4 border-brand-accent">
+                                <div class="text-3xl text-brand-accent"><i class="fas fa-trash-alt"></i></div>
+                                <h4 class="font-black text-brand-secondary">CASCADE</h4>
+                                <p class="text-sm text-brand-muted/80">Deleta todos os filhos junto com o pai. Poderoso e perigoso.</p>
+                                <div class="p-2 bg-brand-primary/50 rounded-lg text-xs font-mono text-brand-accent">ON DELETE CASCADE</div>
+                            </div>
+                            <div class="p-6 bg-white border-2 border-brand-secondary rounded-2xl shadow-sm text-center space-y-3">
+                                <div class="text-3xl text-brand-primary"><i class="fas fa-eraser"></i></div>
+                                <h4 class="font-black text-brand-dark">SET NULL</h4>
+                                <p class="text-sm text-brand-dark/70">A FK do filho vira NULL. A coluna precisa aceitar NULL.</p>
+                                <div class="p-2 bg-brand-muted rounded-lg text-xs font-mono">ON DELETE SET NULL</div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-center text-brand-dark/60 italic">Documentar esta regra evita deleções acidentais em produção.</p>
+                    </div>
+                `
+            },
+            // ── 17 ──────────────────────────────────────────────────────────
+            {
+                title: "Exemplo Completo: Tabela CLIENTES",
+                content: `
+                    <div class="space-y-5">
+                        <div class="p-5 bg-brand-dark text-white rounded-2xl flex flex-wrap gap-6">
+                            <div><p class="text-brand-secondary text-xs font-bold uppercase">Tabela</p><p class="text-white font-black font-mono text-lg">CLIENTES</p></div>
+                            <div><p class="text-brand-secondary text-xs font-bold uppercase">Prefixo</p><p class="text-brand-accent font-black font-mono text-lg">cli_</p></div>
+                            <div class="flex-1"><p class="text-brand-secondary text-xs font-bold uppercase">Descrição</p><p class="text-brand-muted text-sm">Cadastro de clientes ativos e inativos da plataforma.</p></div>
+                        </div>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-xs min-w-[750px]">
+                                <thead><tr class="bg-brand-primary text-white">
+                                    <th class="p-2">Coluna</th><th class="p-2">Tipo</th><th class="p-2">Tam.</th><th class="p-2">NULL?</th><th class="p-2">Default</th><th class="p-2">Constraint</th><th class="p-2">Descrição</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono font-bold text-brand-accent">cli_id</td><td class="p-2">INT</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2 font-mono">AUTO</td><td class="p-2 font-bold">PK, AI</td><td class="p-2">Identificador único do cliente</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-2 font-mono font-bold text-brand-accent">cli_nome</td><td class="p-2">VARCHAR</td><td class="p-2">150</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2">—</td><td class="p-2">—</td><td class="p-2">Nome completo do cliente</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono font-bold text-brand-accent">cli_cpf</td><td class="p-2">CHAR</td><td class="p-2">11</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2">—</td><td class="p-2 font-bold">UK</td><td class="p-2">CPF sem pontuação (somente dígitos)</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-2 font-mono font-bold text-brand-accent">cli_email</td><td class="p-2">VARCHAR</td><td class="p-2">200</td><td class="p-2 text-green-600 font-bold">Sim</td><td class="p-2 font-mono">NULL</td><td class="p-2 font-bold">UK</td><td class="p-2">E-mail de contato. Único por cliente.</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono font-bold text-brand-accent">cli_dt_nasc</td><td class="p-2">DATE</td><td class="p-2">—</td><td class="p-2 text-green-600 font-bold">Sim</td><td class="p-2 font-mono">NULL</td><td class="p-2">—</td><td class="p-2">Data de nascimento (AAAA-MM-DD)</td></tr>
+                                    <tr class="bg-white"><td class="p-2 font-mono font-bold text-brand-accent">cli_fl_ativo</td><td class="p-2">BOOLEAN</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2 font-mono">1</td><td class="p-2">—</td><td class="p-2">1=ativo, 0=inativo. Exclusão lógica.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 18 ──────────────────────────────────────────────────────────
+            {
+                title: "Exemplo Completo: Tabela PEDIDOS",
+                content: `
+                    <div class="space-y-5">
+                        <div class="p-5 bg-brand-dark text-white rounded-2xl flex flex-wrap gap-6">
+                            <div><p class="text-brand-secondary text-xs font-bold uppercase">Tabela</p><p class="text-white font-black font-mono text-lg">PEDIDOS</p></div>
+                            <div><p class="text-brand-secondary text-xs font-bold uppercase">Prefixo</p><p class="text-brand-accent font-black font-mono text-lg">ped_</p></div>
+                            <div class="flex-1"><p class="text-brand-secondary text-xs font-bold uppercase">Descrição</p><p class="text-brand-muted text-sm">Registra cada compra realizada por um cliente, com status e valor.</p></div>
+                        </div>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-xs min-w-[750px]">
+                                <thead><tr class="bg-brand-primary text-white">
+                                    <th class="p-2">Coluna</th><th class="p-2">Tipo</th><th class="p-2">Tam.</th><th class="p-2">NULL?</th><th class="p-2">Default</th><th class="p-2">Constraint</th><th class="p-2">Descrição</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono font-bold text-brand-accent">ped_id</td><td class="p-2">INT</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2 font-mono">AUTO</td><td class="p-2 font-bold">PK, AI</td><td class="p-2">Identificador único do pedido</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-2 font-mono font-bold text-brand-accent">ped_cli_id_fk</td><td class="p-2">INT</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2">—</td><td class="p-2 font-bold">FK → cli_id</td><td class="p-2">FK para CLIENTES. ON DELETE RESTRICT.</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono font-bold text-brand-accent">ped_dt_criacao</td><td class="p-2">DATETIME</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2 font-mono">NOW()</td><td class="p-2">—</td><td class="p-2">Data e hora de criação do pedido</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-2 font-mono font-bold text-brand-accent">ped_valor_total</td><td class="p-2">DECIMAL</td><td class="p-2">10,2</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2 font-mono">0.00</td><td class="p-2 font-bold">CK &gt; 0</td><td class="p-2">Soma dos itens com descontos aplicados</td></tr>
+                                    <tr class="bg-brand-muted"><td class="p-2 font-mono font-bold text-brand-accent">ped_status</td><td class="p-2">ENUM</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2 font-mono">'pendente'</td><td class="p-2">—</td><td class="p-2">pendente | aprovado | enviado | cancelado</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 19 ──────────────────────────────────────────────────────────
+            {
+                title: "Seção de Relacionamentos no Dicionário",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="bg-brand-muted rounded-3xl p-6 border border-brand-secondary shadow-sm flex flex-col items-center justify-center">
+                            <svg width="280" height="140" viewBox="0 0 280 140">
+                                <rect x="10" y="45" width="100" height="50" rx="6" class="node-rect"/>
+                                <text x="60" y="74" text-anchor="middle" class="node-text">CLIENTES</text>
+                                <text x="60" y="88" text-anchor="middle" style="font-size:9px;fill:#2D6A4F;">(cli_id)</text>
+                                <rect x="170" y="45" width="100" height="50" rx="6" class="node-rect"/>
+                                <text x="220" y="74" text-anchor="middle" class="node-text">PEDIDOS</text>
+                                <text x="220" y="88" text-anchor="middle" style="font-size:9px;fill:#F4A020;">(ped_cli_id_fk)</text>
+                                <line x1="110" y1="70" x2="170" y2="70" class="edge"/>
+                                <text x="140" y="63" text-anchor="middle" style="font-size:10px;fill:#1A3A2A;font-weight:bold;">1 : N</text>
+                            </svg>
+                        </div>
+                        <div class="space-y-5">
+                            <p class="text-xl text-brand-dark">O DD deve ter uma seção dedicada a <strong>mapear os relacionamentos</strong> entre tabelas:</p>
+                            <div class="p-5 bg-white border border-brand-secondary rounded-2xl shadow-sm space-y-3 text-sm">
+                                <div class="flex justify-between font-bold text-brand-dark border-b border-brand-secondary pb-2">
+                                    <span>Tabela Pai</span><span>Tabela Filha</span><span>Cardinalidade</span><span>On Delete</span>
+                                </div>
+                                <div class="flex justify-between text-brand-dark/80">
+                                    <span class="font-mono text-brand-primary">CLIENTES</span>
+                                    <span class="font-mono text-brand-primary">PEDIDOS</span>
+                                    <span class="font-bold">1 : N</span>
+                                    <span class="text-red-600 font-bold">RESTRICT</span>
+                                </div>
+                                <div class="flex justify-between text-brand-dark/80">
+                                    <span class="font-mono text-brand-primary">CATEGORIAS</span>
+                                    <span class="font-mono text-brand-primary">PRODUTOS</span>
+                                    <span class="font-bold">1 : N</span>
+                                    <span class="text-yellow-600 font-bold">SET NULL</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 20 ──────────────────────────────────────────────────────────
+            {
+                title: "Padrão de Abreviações",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Abreviações economizam espaço, mas só funcionam se <strong>padronizadas e documentadas</strong>:</p>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead><tr class="bg-brand-dark text-white">
+                                    <th class="p-3">Termo Completo</th><th class="p-3">Abreviação Padrão</th><th class="p-3">Uso</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3">identificador</td><td class="p-3 font-mono text-brand-accent font-bold">id</td><td class="p-3">PKs e FKs</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-3">data/date</td><td class="p-3 font-mono text-brand-accent font-bold">dt</td><td class="p-3">campos de data</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3">descrição</td><td class="p-3 font-mono text-brand-accent font-bold">desc</td><td class="p-3">textos longos</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-3">quantidade</td><td class="p-3 font-mono text-brand-accent font-bold">qtd</td><td class="p-3">campos numéricos de contagem</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3">valor/preço</td><td class="p-3 font-mono text-brand-accent font-bold">vlr / preco</td><td class="p-3">campos monetários</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-3">flag/booleano</td><td class="p-3 font-mono text-brand-accent font-bold">fl</td><td class="p-3">campos 0/1 ou true/false</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-3">número/número</td><td class="p-3 font-mono text-brand-accent font-bold">num / nr</td><td class="p-3">campos numéricos de referência</td></tr>
+                                    <tr class="bg-white"><td class="p-3">foreign key</td><td class="p-3 font-mono text-brand-accent font-bold">_fk</td><td class="p-3">sufixo de chave estrangeira</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 21 ──────────────────────────────────────────────────────────
+            {
+                title: "Boa Prática: Nomes Auto-Documentados",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark">O melhor nome é aquele que <strong>dispensa explicação</strong>. Compare:</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-6 bg-red-50 border-2 border-red-300 rounded-3xl space-y-4">
+                                <h4 class="font-black text-red-700 text-lg"><i class="fas fa-times-circle mr-2"></i> Nomes Ruins</h4>
+                                <ul class="space-y-3 font-mono text-sm">
+                                    <li class="flex items-center gap-2 text-red-700"><i class="fas fa-times text-red-500"></i> <code class="bg-red-100 text-red-800">x</code> — O que é isso?</li>
+                                    <li class="flex items-center gap-2 text-red-700"><i class="fas fa-times text-red-500"></i> <code class="bg-red-100 text-red-800">val</code> — Valor de quê?</li>
+                                    <li class="flex items-center gap-2 text-red-700"><i class="fas fa-times text-red-500"></i> <code class="bg-red-100 text-red-800">dt1</code> — Qual data?</li>
+                                    <li class="flex items-center gap-2 text-red-700"><i class="fas fa-times text-red-500"></i> <code class="bg-red-100 text-red-800">temp_field</code> — Ainda existe?</li>
+                                    <li class="flex items-center gap-2 text-red-700"><i class="fas fa-times text-red-500"></i> <code class="bg-red-100 text-red-800">flag</code> — Flag de quê?</li>
+                                </ul>
+                            </div>
+                            <div class="p-6 bg-brand-muted border-2 border-brand-primary rounded-3xl space-y-4">
+                                <h4 class="font-black text-brand-dark text-lg"><i class="fas fa-check-circle text-brand-primary mr-2"></i> Nomes Auto-Documentados</h4>
+                                <ul class="space-y-3 font-mono text-sm">
+                                    <li class="flex items-center gap-2 text-brand-dark"><i class="fas fa-check text-brand-primary"></i> <code>ped_valor_total</code></li>
+                                    <li class="flex items-center gap-2 text-brand-dark"><i class="fas fa-check text-brand-primary"></i> <code>ped_dt_entrega</code></li>
+                                    <li class="flex items-center gap-2 text-brand-dark"><i class="fas fa-check text-brand-primary"></i> <code>pro_estoque_minimo</code></li>
+                                    <li class="flex items-center gap-2 text-brand-dark"><i class="fas fa-check text-brand-primary"></i> <code>cli_fl_ativo</code></li>
+                                    <li class="flex items-center gap-2 text-brand-dark"><i class="fas fa-check text-brand-primary"></i> <code>fun_dt_admissao</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-center text-brand-dark/70 italic">Um bom nome reduz o tamanho da coluna "Descrição" no dicionário.</p>
+                    </div>
+                `
+            },
+            // ── 22 ──────────────────────────────────────────────────────────
+            {
+                title: "Armadilha 01: NULL Não Documentado",
+                content: `
+                    <div class="space-y-8">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-6 bg-red-50 border-2 border-red-300 rounded-3xl space-y-4">
+                                <h4 class="font-black text-red-700 text-lg"><i class="fas fa-bug mr-2"></i> O Problema</h4>
+                                <p class="text-red-800">O campo <code class="bg-red-100">cli_telefone</code> aceita NULL — mas ninguém documentou o que isso significa.</p>
+                                <ul class="text-sm text-red-700 space-y-2">
+                                    <li><i class="fas fa-question-circle mr-2"></i> Cliente não tem telefone?</li>
+                                    <li><i class="fas fa-question-circle mr-2"></i> Ou simplesmente não foi informado ainda?</li>
+                                    <li><i class="fas fa-question-circle mr-2"></i> O sistema deve bloquear o cadastro sem ele?</li>
+                                </ul>
+                                <p class="text-xs text-red-600 font-bold mt-4">NULL silencioso = bug em produção garantido.</p>
+                            </div>
+                            <div class="p-6 bg-brand-muted border-2 border-brand-primary rounded-3xl space-y-4">
+                                <h4 class="font-black text-brand-dark text-lg"><i class="fas fa-shield-alt text-brand-primary mr-2"></i> A Solução</h4>
+                                <p class="text-brand-dark">Na coluna "Descrição" do DD, sempre explicite o <strong>significado do NULL</strong>:</p>
+                                <div class="p-4 bg-white rounded-xl border border-brand-secondary text-sm">
+                                    <p class="font-bold text-brand-dark mb-2">cli_telefone — VARCHAR(20) — NULL permitido</p>
+                                    <p class="text-brand-dark/70 italic">"NULL indica que o cliente optou por não informar. Não é obrigatório. O sistema de envio de SMS ignora registros com NULL neste campo."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 23 ──────────────────────────────────────────────────────────
+            {
+                title: "Armadilha 02: ENUM Misterioso",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark text-center">Valores de ENUM sem explicação criam bugs invisíveis:</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-6 bg-red-50 border-2 border-red-300 rounded-3xl">
+                                <h4 class="font-black text-red-700 mb-3"><i class="fas fa-times-circle mr-2"></i> Misterioso</h4>
+                                <div class="p-4 bg-white rounded-xl border border-red-200 font-mono text-sm space-y-2">
+                                    <p class="text-brand-dark font-bold">fun_tipo ENUM</p>
+                                    <p class="text-red-700">Valores: 'A', 'B', 'C', 'D'</p>
+                                    <p class="text-red-600 italic text-xs mt-3">Descrição: "Tipo do funcionário."</p>
+                                </div>
+                                <p class="text-xs text-red-600 mt-4">Desenvolvedor novo vai ter que ler o código fonte para descobrir o que 'A', 'B', 'C' e 'D' significam.</p>
+                            </div>
+                            <div class="p-6 bg-brand-muted border-2 border-brand-primary rounded-3xl">
+                                <h4 class="font-black text-brand-dark mb-3"><i class="fas fa-check-circle text-brand-primary mr-2"></i> Documentado</h4>
+                                <div class="p-4 bg-white rounded-xl border border-brand-secondary text-sm space-y-2">
+                                    <p class="text-brand-dark font-bold">fun_tipo ENUM</p>
+                                    <div class="space-y-1 mt-2">
+                                        <p><code>'CLT'</code> → Contrato CLT (carteira assinada)</p>
+                                        <p><code>'PJ'</code> → Pessoa Jurídica (nota fiscal)</p>
+                                        <p><code>'EST'</code> → Estágio (CIEE/contrato)</p>
+                                        <p><code>'TMP'</code> → Temporário (prazo determinado)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 24 ──────────────────────────────────────────────────────────
+            {
+                title: "Armadilha 03: Dicionário Desatualizado",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark text-center">Um dicionário que não acompanha as mudanças do banco se torna uma <strong>fonte de desinformação</strong>.</p>
+                        <div class="w-full overflow-x-auto">
+                            <svg width="700" height="120" viewBox="0 0 700 120" class="mx-auto">
+                                <line x1="60" y1="60" x2="640" y2="60" stroke="#74C69D" stroke-width="3"/>
+                                <!-- Event 1 -->
+                                <circle cx="100" cy="60" r="12" fill="#2D6A4F"/>
+                                <text x="100" y="35" text-anchor="middle" style="font-size:10px;fill:#1A3A2A;font-weight:bold;">Criação</text>
+                                <text x="100" y="85" text-anchor="middle" style="font-size:9px;fill:#2D6A4F;">DD atualizado ✓</text>
+                                <!-- Event 2 -->
+                                <circle cx="270" cy="60" r="12" fill="#F4A020"/>
+                                <text x="270" y="35" text-anchor="middle" style="font-size:10px;fill:#1A3A2A;font-weight:bold;">Nova coluna</text>
+                                <text x="270" y="85" text-anchor="middle" style="font-size:9px;fill:#F4A020;">DD esquecido ✗</text>
+                                <!-- Event 3 -->
+                                <circle cx="440" cy="60" r="12" fill="#dc2626"/>
+                                <text x="440" y="35" text-anchor="middle" style="font-size:10px;fill:#1A3A2A;font-weight:bold;">Refactor ENUM</text>
+                                <text x="440" y="85" text-anchor="middle" style="font-size:9px;fill:#dc2626;">DD esquecido ✗</text>
+                                <!-- Event 4 -->
+                                <circle cx="610" cy="60" r="12" fill="#dc2626"/>
+                                <text x="610" y="35" text-anchor="middle" style="font-size:10px;fill:#1A3A2A;font-weight:bold;">Dev novo</text>
+                                <text x="610" y="85" text-anchor="middle" style="font-size:9px;fill:#dc2626;">Informação errada!</text>
+                            </svg>
+                        </div>
+                        <div class="p-5 bg-brand-dark text-white rounded-2xl text-center">
+                            <p class="text-brand-accent font-black text-lg"><i class="fas fa-rule mr-2"></i> Regra de Ouro</p>
+                            <p class="text-brand-muted mt-2">Toda alteração no banco de dados (ALTER TABLE, ADD COLUMN, MODIFY…) deve vir acompanhada de uma atualização no Dicionário de Dados.</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 25 ──────────────────────────────────────────────────────────
+            {
+                title: "Boas Práticas: Checklist do Profissional",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark text-center">Antes de considerar o dicionário pronto, revise este checklist:</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            ${[
+                                ["check","Toda tabela tem nome, alias, descrição e responsável"],
+                                ["check","Toda coluna tem os 7 campos preenchidos"],
+                                ["check","Todo ENUM tem seus valores e significados listados"],
+                                ["check","Todo NULL está justificado com a regra de negócio"],
+                                ["check","Toda FK informa tabela de destino e ON DELETE"],
+                                ["check","Prefixos seguem o padrão snake_case acordado"],
+                                ["check","Seção de relacionamentos está completa e atualizada"],
+                                ["check","Versão e data de última atualização registradas"],
+                            ].map(([icon, text]) => `
+                                <div class="flex items-center gap-4 p-4 bg-white border border-brand-secondary rounded-xl shadow-sm">
+                                    <div class="w-7 h-7 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-${icon}"></i></div>
+                                    <p class="text-sm text-brand-dark font-medium">${text}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `
+            },
+            // ── 26 ──────────────────────────────────────────────────────────
+            {
+                title: "Ferramentas: Excel / Google Sheets",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-start">
+                        <div class="space-y-5">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-file-excel text-4xl text-green-600"></i>
+                                <h4 class="text-2xl font-black text-brand-dark">Excel / Google Sheets</h4>
+                            </div>
+                            <div class="p-5 bg-green-50 border border-green-300 rounded-2xl">
+                                <h5 class="font-bold text-green-700 mb-3"><i class="fas fa-plus-circle mr-2"></i> Vantagens</h5>
+                                <ul class="text-sm text-green-800 space-y-2">
+                                    <li><i class="fas fa-check mr-2"></i> Zero curva de aprendizado</li>
+                                    <li><i class="fas fa-check mr-2"></i> Colaboração em tempo real (Sheets)</li>
+                                    <li><i class="fas fa-check mr-2"></i> Filtros, formatação condicional, fórmulas</li>
+                                    <li><i class="fas fa-check mr-2"></i> Exporta para PDF facilmente</li>
+                                </ul>
+                            </div>
+                            <div class="p-5 bg-red-50 border border-red-200 rounded-2xl">
+                                <h5 class="font-bold text-red-700 mb-3"><i class="fas fa-minus-circle mr-2"></i> Desvantagens</h5>
+                                <ul class="text-sm text-red-800 space-y-2">
+                                    <li><i class="fas fa-times mr-2"></i> Sem controle de versão nativo</li>
+                                    <li><i class="fas fa-times mr-2"></i> Não vincula ao código-fonte</li>
+                                    <li><i class="fas fa-times mr-2"></i> Difícil de automatizar</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="p-8 bg-brand-muted border border-brand-secondary rounded-3xl shadow-sm space-y-4">
+                            <h4 class="font-bold text-brand-dark text-lg"><i class="fas fa-lightbulb text-brand-accent mr-2"></i> Quando Usar</h4>
+                            <p class="text-brand-dark leading-relaxed">Ideal para <strong>projetos pequenos a médios</strong>, equipes não técnicas, e como ponto de partida rápido.</p>
+                            <p class="text-brand-dark/70 text-sm">É a ferramenta que usaremos nos exercícios da <strong>Aula 08</strong>. Simples, eficaz, sem instalação.</p>
+                            <div class="p-4 bg-white border-l-4 border-brand-accent rounded-r-xl text-sm">
+                                <p class="font-bold text-brand-dark">Dica profissional:</p>
+                                <p class="text-brand-dark/70 mt-1">Crie uma aba por tabela e uma aba "Relacionamentos" no mesmo arquivo.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 27 ──────────────────────────────────────────────────────────
+            {
+                title: "Ferramentas: Wikis Colaborativas",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark text-center">Para equipes maiores, wikis oferecem rastreabilidade e colaboração superior:</p>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center space-y-4">
+                                <div class="text-4xl text-blue-600"><i class="fab fa-confluence"></i></div>
+                                <h4 class="font-black text-brand-dark">Confluence</h4>
+                                <p class="text-sm text-brand-dark/70">Wiki corporativa integrada ao Jira. Suporte a tabelas, templates e hierarquia de páginas.</p>
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full">Corporativo</span>
+                            </div>
+                            <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl text-center space-y-4 border-b-4 border-brand-accent">
+                                <div class="text-4xl text-brand-secondary"><i class="fab fa-notion"></i></div>
+                                <h4 class="font-black text-brand-secondary">Notion</h4>
+                                <p class="text-sm text-brand-muted/80">Bloco de notas colaborativo. Excelente para dicionários com bancos de dados embutidos.</p>
+                                <span class="px-3 py-1 bg-brand-primary/50 text-brand-accent text-xs font-bold rounded-full">Versátil</span>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm text-center space-y-4">
+                                <div class="text-4xl text-brand-primary"><i class="fab fa-github"></i></div>
+                                <h4 class="font-black text-brand-dark">GitHub Wiki</h4>
+                                <p class="text-sm text-brand-dark/70">Wiki do repositório. Versionado com o código. Ideal para projetos open-source.</p>
+                                <span class="px-3 py-1 bg-brand-muted text-brand-primary text-xs font-bold rounded-full">Dev-friendly</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 28 ──────────────────────────────────────────────────────────
+            {
+                title: "Ferramentas: Ferramentas de Banco",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark text-center">Os próprios SGBDs e clientes gráficos já geram dicionários automaticamente:</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-brand-primary/10 rounded-xl flex items-center justify-center"><i class="fas fa-dolphin text-brand-primary text-xl"></i></div>
+                                    <h4 class="font-bold text-brand-dark text-lg">MySQL Workbench</h4>
+                                </div>
+                                <p class="text-sm text-brand-dark/70">Gera relatório de schema completo com todas as tabelas, colunas e relacionamentos.</p>
+                                <span class="px-3 py-1 bg-brand-muted text-brand-primary text-xs font-bold rounded-full">Gratuito</span>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-database text-blue-600 text-xl"></i></div>
+                                    <h4 class="font-bold text-brand-dark text-lg">DBeaver</h4>
+                                </div>
+                                <p class="text-sm text-brand-dark/70">Cliente universal. Exibe ER diagram e exporta metadata em CSV/HTML.</p>
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full">Gratuito / Open-source</span>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><i class="fas fa-project-diagram text-amber-600 text-xl"></i></div>
+                                    <h4 class="font-bold text-brand-dark text-lg">dbdiagram.io</h4>
+                                </div>
+                                <p class="text-sm text-brand-dark/70">Ferramenta online. Descreve o schema em texto e gera diagrama + exporta SQL.</p>
+                                <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-full">Online / Gratuito</span>
+                            </div>
+                            <div class="p-6 bg-white border border-brand-secondary rounded-2xl shadow-sm space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center"><i class="fas fa-code text-purple-600 text-xl"></i></div>
+                                    <h4 class="font-bold text-brand-dark text-lg">SchemaSpy</h4>
+                                </div>
+                                <p class="text-sm text-brand-dark/70">Analisa o banco e gera um site HTML completo com todo o dicionário automaticamente.</p>
+                                <span class="px-3 py-1 bg-purple-50 text-purple-700 text-xs font-bold rounded-full">Open-source / CLI</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 29 ──────────────────────────────────────────────────────────
+            {
+                title: "A Ponte: Do DER para o Dicionário",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark text-center">O DER e o Dicionário são complementares — não concorrentes. O fluxo de trabalho profissional é:</p>
+                        <div class="w-full overflow-x-auto">
+                            <svg width="680" height="120" viewBox="0 0 680 120" class="mx-auto">
+                                <!-- Box 1 -->
+                                <rect x="10" y="30" width="160" height="60" rx="10" fill="#2D6A4F"/>
+                                <text x="90" y="58" text-anchor="middle" fill="white" font-weight="bold" font-size="13" font-family="Inter">DER</text>
+                                <text x="90" y="76" text-anchor="middle" fill="#74C69D" font-size="10" font-family="Inter">Diagrama Visual</text>
+                                <!-- Arrow 1 -->
+                                <line x1="170" y1="60" x2="250" y2="60" stroke="#F4A020" stroke-width="3" marker-end="url(#arrow)"/>
+                                <text x="210" y="50" text-anchor="middle" fill="#F4A020" font-size="9" font-weight="bold" font-family="Inter">extrai</text>
+                                <!-- Box 2 -->
+                                <rect x="250" y="30" width="180" height="60" rx="10" fill="#1A3A2A"/>
+                                <text x="340" y="58" text-anchor="middle" fill="white" font-weight="bold" font-size="12" font-family="Inter">Dicionário de</text>
+                                <text x="340" y="76" text-anchor="middle" fill="#74C69D" font-size="12" font-weight="bold" font-family="Inter">Dados</text>
+                                <!-- Arrow 2 -->
+                                <line x1="430" y1="60" x2="510" y2="60" stroke="#F4A020" stroke-width="3" marker-end="url(#arrow)"/>
+                                <text x="470" y="50" text-anchor="middle" fill="#F4A020" font-size="9" font-weight="bold" font-family="Inter">guia</text>
+                                <!-- Box 3 -->
+                                <rect x="510" y="30" width="160" height="60" rx="10" fill="#2D6A4F"/>
+                                <text x="590" y="58" text-anchor="middle" fill="white" font-weight="bold" font-size="13" font-family="Inter">CREATE TABLE</text>
+                                <text x="590" y="76" text-anchor="middle" fill="#74C69D" font-size="10" font-family="Inter">Implementação SQL</text>
+                                <!-- Arrow marker -->
+                                <defs>
+                                    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#F4A020"/>
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-4 text-center text-sm text-brand-dark">
+                            <div class="p-4 bg-brand-muted rounded-xl border border-brand-secondary"><strong>DER</strong><br>Responde o "o quê" e o "como se relaciona"</div>
+                            <div class="p-4 bg-brand-dark text-white rounded-xl"><strong class="text-brand-accent">Dicionário</strong><br>Responde o "por quê" e o "como funciona"</div>
+                            <div class="p-4 bg-brand-muted rounded-xl border border-brand-secondary"><strong>SQL</strong><br>Responde o "como implementar"</div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 30 ──────────────────────────────────────────────────────────
+            {
+                title: "Exercício 1: Leitura e Interpretação",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark">Leia o trecho do dicionário abaixo e responda as perguntas:</p>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-xs min-w-[700px]">
+                                <thead><tr class="bg-brand-dark text-white">
+                                    <th class="p-2">Coluna</th><th class="p-2">Tipo</th><th class="p-2">Tam.</th><th class="p-2">NULL?</th><th class="p-2">Default</th><th class="p-2">Constraint</th><th class="p-2">Descrição</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono text-brand-accent font-bold">pro_id</td><td class="p-2">INT</td><td class="p-2">—</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2">AUTO</td><td class="p-2 font-bold">PK, AI</td><td class="p-2">Identificador único do produto</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-white"><td class="p-2 font-mono text-brand-accent font-bold">pro_nome</td><td class="p-2">VARCHAR</td><td class="p-2">200</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2">—</td><td class="p-2 font-bold">UK</td><td class="p-2">Nome do produto. Único no sistema.</td></tr>
+                                    <tr class="border-b border-brand-secondary bg-brand-muted"><td class="p-2 font-mono text-brand-accent font-bold">pro_preco</td><td class="p-2">DECIMAL</td><td class="p-2">10,2</td><td class="p-2 text-red-600 font-bold">Não</td><td class="p-2">0.00</td><td class="p-2 font-bold">CK &gt; 0</td><td class="p-2">Preço de venda ao público. Deve ser positivo.</td></tr>
+                                    <tr class="bg-white"><td class="p-2 font-mono text-brand-accent font-bold">pro_cat_id_fk</td><td class="p-2">INT</td><td class="p-2">—</td><td class="p-2 text-green-600 font-bold">Sim</td><td class="p-2">NULL</td><td class="p-2 font-bold">FK → cat_id</td><td class="p-2">NULL = produto sem categoria definida. SET NULL ao deletar categoria.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="space-y-3">
+                            <p class="font-bold text-brand-dark">Perguntas:</p>
+                            ${[
+                                "1. Por que <code>pro_nome</code> tem constraint UK mas não é a PK?",
+                                "2. O que acontece se tentarmos inserir um produto com <code>pro_preco = -5.00</code>?",
+                                "3. O campo <code>pro_cat_id_fk</code> aceita NULL. Qual a consequência disso para o produto?",
+                                "4. Se a categoria for deletada, o que acontece com os produtos que a referenciavam?"
+                            ].map(q => `
+                                <div class="p-4 bg-brand-muted border border-brand-secondary rounded-xl text-sm text-brand-dark">${q}</div>
+                            `).join('')}
+                        </div>
+                        <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="px-5 py-2 bg-brand-accent text-white rounded-xl font-bold text-sm hover:bg-brand-dark transition shadow-md">
+                            <i class="fas fa-eye mr-2"></i> Ver Gabarito
+                        </button>
+                        <div class="hidden resposta-gabarito p-6 bg-brand-dark text-white rounded-2xl space-y-3 text-sm mt-2">
+                            <p><strong class="text-brand-accent">1.</strong> A PK (<code>pro_id</code>) é um número artificial gerado pelo sistema. A UK no nome garante que não haverá dois produtos com o mesmo nome, mas a PK é o identificador estável usado nas FKs.</p>
+                            <p><strong class="text-brand-accent">2.</strong> O banco rejeitará o INSERT com um erro de violação de CHECK constraint. Nenhum dado será salvo.</p>
+                            <p><strong class="text-brand-accent">3.</strong> O produto existirá no sistema sem categoria associada. Sistemas que filtram produtos por categoria simplesmente não exibirão esse produto.</p>
+                            <p><strong class="text-brand-accent">4.</strong> O campo <code>pro_cat_id_fk</code> será definido como NULL automaticamente (ON DELETE SET NULL). O produto não é deletado, apenas "desvinculado" da categoria.</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 31 ──────────────────────────────────────────────────────────
+            {
+                title: "Exercício 2: Criando uma Entrada",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-brand-dark text-white rounded-2xl">
+                            <h4 class="font-black text-brand-accent text-lg mb-3"><i class="fas fa-clipboard mr-2"></i> Cenário</h4>
+                            <p class="text-brand-muted leading-relaxed">O sistema precisa de uma tabela <strong>FUNCIONARIOS</strong> (prefixo: <code class="bg-brand-primary">fun_</code>) com as seguintes informações: identificador único, nome completo (obrigatório), CPF (único, obrigatório), cargo (CLT, PJ ou Estágio), salário (positivo, pode ser nulo para estagiários), data de admissão e um flag indicando se está ativo.</p>
+                        </div>
+                        <p class="font-bold text-brand-dark">Preencha o Dicionário de Dados abaixo:</p>
+                        <div class="overflow-x-auto w-full rounded-2xl border border-brand-secondary shadow-sm">
+                            <table class="w-full text-left border-collapse text-xs min-w-[750px]">
+                                <thead><tr class="bg-brand-primary text-white">
+                                    <th class="p-3">Coluna</th><th class="p-3">Tipo</th><th class="p-3">Tam.</th><th class="p-3">NULL?</th><th class="p-3">Default</th><th class="p-3">Constraint</th><th class="p-3">Descrição</th>
+                                </tr></thead>
+                                <tbody>
+                                    ${['fun_id','fun_nome','fun_cpf','fun_cargo','fun_salario','fun_dt_admissao','fun_fl_ativo'].map((col, i) => `
+                                    <tr class="border-b border-brand-secondary ${i%2===0?'bg-brand-muted':'bg-white'}">
+                                        <td class="p-3 font-mono text-brand-accent font-bold">${col}</td>
+                                        <td class="p-3 text-brand-dark/40 italic text-xs">?</td>
+                                        <td class="p-3 text-brand-dark/40 italic text-xs">?</td>
+                                        <td class="p-3 text-brand-dark/40 italic text-xs">?</td>
+                                        <td class="p-3 text-brand-dark/40 italic text-xs">?</td>
+                                        <td class="p-3 text-brand-dark/40 italic text-xs">?</td>
+                                        <td class="p-3 text-brand-dark/40 italic text-xs">?</td>
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-brand-dark/50 italic">Este exercício será realizado como atividade prática na Aula 08.</p>
+                    </div>
+                `
+            },
+            // ── 32 ──────────────────────────────────────────────────────────
+            {
+                title: "Resumo da Aula",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10">
+                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl border-b-4 border-brand-accent space-y-5">
+                            <h4 class="font-black text-brand-accent text-xl"><i class="fas fa-graduation-cap mr-2"></i> O que Aprendemos</h4>
+                            <ul class="space-y-3 text-brand-muted text-sm leading-relaxed">
+                                <li class="flex gap-2"><i class="fas fa-check text-brand-secondary mt-1 shrink-0"></i> O que é um Dicionário de Dados e por que ele é indispensável</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-brand-secondary mt-1 shrink-0"></i> Os 7 campos obrigatórios de cada coluna documentada</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-brand-secondary mt-1 shrink-0"></i> Convenções: snake_case, prefixos e abreviações padronizadas</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-brand-secondary mt-1 shrink-0"></i> Como documentar ENUM, NULL, FK e constraints corretamente</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-brand-secondary mt-1 shrink-0"></i> As 3 armadilhas mais comuns e como evitá-las</li>
+                                <li class="flex gap-2"><i class="fas fa-check text-brand-secondary mt-1 shrink-0"></i> Ferramentas disponíveis para criar e manter o DD</li>
+                            </ul>
+                        </div>
+                        <div class="p-8 bg-white border-2 border-brand-secondary rounded-3xl shadow-sm space-y-5">
+                            <h4 class="font-black text-brand-dark text-xl"><i class="fas fa-arrow-right text-brand-primary mr-2"></i> Próxima Aula</h4>
+                            <p class="text-brand-dark leading-relaxed"><strong>Aula 08 — Laboratório Prático:</strong> Criaremos o Dicionário de Dados completo de um sistema real usando Google Sheets.</p>
+                            <ul class="space-y-3 text-brand-dark text-sm">
+                                <li class="flex gap-2"><i class="fas fa-tools text-brand-primary mt-1 shrink-0"></i> Preencher o DD da tabela FUNCIONARIOS (Exercício 2)</li>
+                                <li class="flex gap-2"><i class="fas fa-tools text-brand-primary mt-1 shrink-0"></i> Criar o DD completo de um mini-sistema de 4 tabelas</li>
+                                <li class="flex gap-2"><i class="fas fa-tools text-brand-primary mt-1 shrink-0"></i> Validar convenções e regras entre os colegas</li>
+                            </ul>
+                            <div class="p-3 bg-brand-muted border border-brand-secondary rounded-xl text-sm text-brand-primary font-bold">
+                                <i class="fas fa-laptop mr-2"></i> Trazer o computador — aula 100% prática!
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 33 ──────────────────────────────────────────────────────────
+            {
+                title: "Fechamento",
+                content: `
+                    <div class="text-center space-y-10 py-8">
+                        <div class="inline-block p-6 bg-brand-muted border border-brand-secondary rounded-full text-brand-primary mb-4">
+                            <i class="fas fa-book-open text-6xl"></i>
+                        </div>
+                        <blockquote class="max-w-3xl mx-auto">
+                            <p class="text-3xl md:text-4xl font-black text-brand-dark leading-tight italic">"Um banco de dados sem dicionário é como uma biblioteca sem catalogação: os livros existem, mas ninguém sabe onde estão nem o que contêm."</p>
+                        </blockquote>
+                        <div class="flex flex-col items-center gap-6 mt-6">
+                            <p class="text-xl text-brand-dark/70">Dicionário de Dados: o contrato entre o banco de dados e quem o usa.</p>
+                            <div class="flex gap-4">
+                                <span class="px-4 py-2 bg-brand-primary text-white rounded-xl text-sm font-bold shadow-lg">Aula 07 — Concluída</span>
+                                <span class="px-4 py-2 bg-brand-muted border border-brand-secondary rounded-xl text-sm font-bold text-brand-dark">Próximo: Lab Prático →</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-primary tracking-widest mb-4">Tópico ${currentStep + 1}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1
+                ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>'
+                : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Banco de Dados I</h1>
+                <p>Aula 07 — Dicionário de Dados: Estrutura e Padrões</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand-primary pl-2">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>
