@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 09 - Operadores Lógicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES MODERNA E VIBRANTE --- 
+           Black: #000000
+           Purple: #9929ea
+           Pink: #ff5fcf
+           Pale Yellow: #faeb92 
+        */
+        :root {
+            --c-dark: #000000;
+            --c-primary: #9929ea;
+            --c-accent: #ff5fcf;
+            --c-light: #faeb92;
+            --c-bg: #fafafa; /* Fundo geral muito claro para não cansar a vista */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-dark);
+            overflow-x: hidden;
+            padding-top: 50px;
+        }
+
+        /* --- TOP BAR FIXA --- */
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--c-dark);
+            color: var(--c-light);
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(153, 41, 234, 0.2);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .top-bar a { color: var(--c-light); text-decoration: none; transition: color 0.2s; }
+        .top-bar a:hover { color: var(--c-accent); }
+
+        /* --- SLIDES --- */
+        .slide {
+            min-height: calc(100vh - 50px);
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            position: relative;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .slide.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TIPOGRAFIA --- */
+        h1 { 
+            font-size: 4rem; font-weight: 900; 
+            color: var(--c-dark); margin-bottom: 1rem;
+            line-height: 1.1; text-align: center; letter-spacing: -1px;
+        }
+        h2 { 
+            font-size: 2.6rem; font-weight: 800; 
+            color: var(--c-primary); margin-bottom: 2rem; 
+            text-align: center; position: relative;
+        }
+        h2::after {
+            content: ''; display: block; width: 50px; height: 5px;
+            background-color: var(--c-accent); margin: 0.75rem auto 0;
+            border-radius: 4px;
+        }
+        p, li { font-size: 1.25rem; line-height: 1.7; color: #333; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* --- COMPONENTES MODERNOS --- */
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px -10px rgba(153, 41, 234, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .card-accent { border-top: 6px solid var(--c-accent); }
+        .card-primary { border-top: 6px solid var(--c-primary); }
+        .card-light { border-top: 6px solid var(--c-light); }
+
+        /* --- BLOCOS DE CÓDIGO --- */
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1.5rem auto; }
+        .copy-button {
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: var(--c-dark); color: var(--c-light);
+            border: 1px solid var(--c-light); padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--c-light); color: var(--c-dark); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+
+        .code-block {
+            background-color: #111; color: #fdfcf8; padding: 1.8rem;
+            border-radius: 1rem; font-family: 'Fira Code', monospace;
+            font-size: 1.2rem; text-align: left; border-left: 6px solid var(--c-primary);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); margin: 0;
+            font-variant-ligatures: none;
+        }
+        code.inline-code {
+            background-color: var(--c-light); color: var(--c-dark);
+            padding: 0.2em 0.5em; margin: 0 0.1em; font-size: 0.9em;
+            border-radius: 4px; font-family: 'Fira Code', monospace; font-weight: 700;
+            font-variant-ligatures: none;
+        }
+        
+        /* Sintaxe Colorida para fundo escuro */
+        .syn-kw { color: var(--c-accent); font-weight: bold; }
+        .syn-type { color: var(--c-light); font-weight: bold; }
+        .syn-func { color: #a3e635; font-weight: bold; }
+        .syn-str { color: #fde047; }
+        .syn-num { color: #60a5fa; }
+        .syn-op { color: var(--c-accent); font-weight: bold; }
+        .syn-comment { color: #9ca3af; font-style: italic; }
+
+        /* Tabelas Gerais */
+        .ops-table { width: 100%; max-width: 900px; border-collapse: collapse; margin-top: 1rem; background: white; border-radius: 1rem; overflow: hidden; border: 2px solid var(--c-primary); box-shadow: 0 4px 6px rgba(153, 41, 234, 0.1); }
+        .ops-table th, .ops-table td { padding: 1rem; border-bottom: 1px solid #eee; text-align: center; }
+        .ops-table th { background-color: var(--c-primary); color: white; font-weight: bold; font-size: 1.2rem; }
+        .ops-table tr:last-child td { border-bottom: none; }
+        .op-symbol { font-family: 'Fira Code', monospace; font-size: 1.8rem; font-weight: bold; color: var(--c-accent); font-variant-ligatures: none; }
+        .truth-val-1 { color: #16a34a; font-weight: bold; font-size: 1.5rem; }
+        .truth-val-0 { color: #dc2626; font-weight: bold; font-size: 1.5rem; }
+
+        /* --- DEPURADOR INTERATIVO --- */
+        .debugger-container {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--c-primary);
+            box-shadow: 0 10px 40px -10px rgba(153, 41, 234, 0.2);
+        }
+        .debug-code { flex: 1.2; font-family: 'Fira Code', monospace; font-size: 1.2rem; line-height: 1.8; background: #111; color: white; padding: 1.5rem; border-radius: 8px; text-align: left; font-variant-ligatures: none; }
+        .debug-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.5; position: relative; }
+        .debug-code .line.active { background-color: var(--c-accent); color: white; font-weight: bold; opacity: 1; transform: scale(1.02); z-index: 2; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        .trace-panel { flex: 0.8; display: flex; flex-direction: column; gap: 1rem; justify-content: center;}
+        .var-box { background: var(--c-bg); border: 2px solid var(--c-primary); border-radius: 8px; padding: 15px; text-align: center; }
+        .var-name { font-size: 0.9rem; color: var(--c-dark); font-weight: bold; text-transform: uppercase; }
+        .var-val { font-family: 'Fira Code', monospace; font-size: 1.8rem; color: var(--c-primary); font-weight: bold; transition: all 0.3s; }
+        .var-val.changed { color: var(--c-accent); transform: scale(1.2); display: inline-block; }
+
+        /* --- NAVEGAÇÃO --- */
+        .nav-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-nav { 
+            background-color: var(--c-dark); color: var(--c-light); 
+            width: 3.5rem; height: 3.5rem; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+            transition: all 0.2s; border: 2px solid var(--c-dark); font-size: 1.2rem; 
+        }
+        .btn-nav:hover { background-color: var(--c-light); color: var(--c-dark); transform: translateY(-3px); }
+        .counter { 
+            position: fixed; bottom: 2rem; left: 2rem; 
+            background-color: white; padding: 0.6rem 1.5rem; 
+            border-radius: 2rem; font-weight: 700; 
+            border: 2px solid var(--c-primary); color: var(--c-primary); 
+            z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* --- IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body { background: white; color: black; padding-top: 0; }
+            .top-bar, .nav-controls, .counter, .copy-button { display: none !important; }
+            .slide { 
+                display: flex !important; min-height: auto; height: auto;
+                page-break-after: always; padding: 1cm; align-items: flex-start;
+                animation: none; border: none;
+            }
+            .slide:last-child { page-break-after: avoid; }
+            h1 { font-size: 2.5rem; color: black; }
+            h2 { color: black; text-align: left; }
+            h2::after { margin-left: 0; background-color: black; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .card { box-shadow: none; border: 1px solid #ccc; padding: 1.5rem; page-break-inside: avoid; }
+            .code-block { background-color: #f3f4f6 !important; color: black !important; border-left: 4px solid black; box-shadow: none; }
+            .syn-kw, .syn-type, .syn-func, .syn-str, .syn-num, .syn-op, .syn-comment, .syn-inc { color: black !important; font-weight: bold; }
+            .debugger-container { box-shadow: none; border: 1px solid #000; padding: 1rem; page-break-inside: avoid; }
+            .debug-code { background-color: #f3f4f6 !important; color: black !important; border: 1px solid #ccc; }
+            .debug-code .line { opacity: 1 !important; color: black !important; background: none !important; }
+            .ops-table th { background-color: #eee !important; color: black !important; border: 1px solid black; }
+            .ops-table td { border: 1px solid black; }
+            .op-symbol { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Fixo -->
+    <div class="top-bar">
+        <a href="https://willcotil.github.io/aulas2026/" target="_blank">https://willcotil.github.io/aulas2026/</a>
+    </div>
+
+    <!-- Navegação e Contador -->
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn" title="Anterior">←</button>
+        <button class="btn-nav" id="nextBtn" title="Próximo">→</button>
+        <button class="btn-nav" id="fsBtn" title="Tela Cheia">⛶</button>
+        <button class="btn-nav" onclick="window.print()" title="Imprimir">🖨️</button>
+    </div>
+    <div id="counter" class="counter">1 / 14</div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide active">
+            <h1>Lógica de Programação</h1>
+            <h2>Aula 09: Operadores Lógicos</h2>
+            
+            <div class="card card-primary mt-8 flex flex-col items-center">
+                <div style="font-size: 5rem;">🧠 🔗 ⚡</div>
+                <p class="mt-4 font-bold text-xl text-center" style="color: var(--c-dark);">
+                    AND (&&) &nbsp;|&nbsp; OR (||) &nbsp;|&nbsp; NOT (!)
+                </p>
+                <p class="text-gray-600 mt-2">Como combinar múltiplas condições no C.</p>
+            </div>
+            <p class="mt-12 font-bold text-lg" style="color: var(--c-primary);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: O Limite do IF Simples -->
+        <section class="slide">
+            <h2>O Limite do IF Simples</h2>
+            <p>Até agora, os nossos <code class="inline-code">if</code> faziam apenas <strong>uma</strong> pergunta por vez. Exemplo: <em>"A nota é maior que 6?"</em>.</p>
+            <p>Mas no mundo real, muitas decisões dependem de <strong>várias exigências ao mesmo tempo</strong>.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card border-l-8" style="border-color: var(--c-primary);">
+                    <h3 class="font-bold text-xl mb-4 text-purple-900">Exemplo 1: Montanha-russa</h3>
+                    <p class="text-sm text-gray-700">Para entrar, a pessoa precisa ter a idade certa <strong>E</strong> a altura certa.</p>
+                    <p class="mt-4 font-mono font-bold bg-gray-100 p-2 rounded text-center">Idade >= 12 <span class="text-purple-600">E</span> Altura > 1.50</p>
+                </div>
+                <div class="card border-l-8" style="border-color: var(--c-accent);">
+                    <h3 class="font-bold text-xl mb-4 text-pink-900">Exemplo 2: Isenção de Taxa</h3>
+                    <p class="text-sm text-gray-700">A pessoa não paga se for idosa <strong>OU</strong> se for estudante.</p>
+                    <p class="mt-4 font-mono font-bold bg-gray-100 p-2 rounded text-center">Idade > 65 <span class="text-pink-600">OU</span> Estudante == 1</p>
+                </div>
+            </div>
+            <p class="mt-8 font-bold text-xl text-gray-800">Para resolver isso, usamos os Operadores Lógicos!</p>
+        </section>
+
+        <!-- Slide 3: O Operador AND -->
+        <section class="slide">
+            <div class="text-8xl md:text-9xl font-mono font-black mb-2 tracking-tighter" style="color: var(--c-primary); text-shadow: 4px 4px 0px rgba(153, 41, 234, 0.15);">&amp;&amp;</div>
+            <h2 class="mt-2">O Operador AND</h2>
+            <p>Conhecido como "E" Lógico. Ele é <strong>muito exigente</strong>. Para o resultado final ser Verdadeiro, <strong>TODAS</strong> as condições precisam ser verdadeiras.</p>
+            
+            <div class="card card-primary w-full max-w-4xl mt-6">
+                <p class="text-center text-lg italic text-gray-600 mb-6">"Para dirigir legalmente no Brasil, você precisa ser maior de idade <strong>E</strong> ter a carteira de habilitação."</p>
+                
+                <div class="code-block-wrapper">
+                    <button class="copy-button">Copiar</button>
+                    <pre class="code-block text-xl">
+<span class="syn-comment">// Os dois 'E' comerciais representam o AND em C</span>
+<span class="syn-kw">if</span> (idade >= <span class="syn-num">18</span> <span class="syn-op">&&</span> carteira <span class="syn-op">==</span> <span class="syn-num">1</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Pode dirigir o carro!\n"</span>);
+}</pre>
+                </div>
+                <p class="mt-4 text-center text-sm text-gray-500">Se a pessoa tiver 20 anos, mas não tiver a carteira, o resultado final é Falso (0) e ela não dirige.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: Tabela Verdade AND -->
+        <section class="slide">
+            <h2>A Tabela Verdade do AND (<code class="inline-code text-3xl">&&</code>)</h2>
+            <p>O computador avalia cada lado e tenta juntá-los. Lembre-se: Verdadeiro = 1, Falso = 0.</p>
+            
+            <table class="ops-table mt-6 w-full max-w-3xl">
+                <thead>
+                    <tr>
+                        <th>Condição A</th>
+                        <th>Condição B</th>
+                        <th>Resultado (A && B)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-mono text-xl">0 (Falso)</td>
+                        <td class="font-mono text-xl">0 (Falso)</td>
+                        <td class="truth-val-0">0 (Falso)</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="font-mono text-xl">0 (Falso)</td>
+                        <td class="font-mono text-xl">1 (Verdadeiro)</td>
+                        <td class="truth-val-0">0 (Falso)</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono text-xl">1 (Verdadeiro)</td>
+                        <td class="font-mono text-xl">0 (Falso)</td>
+                        <td class="truth-val-0">0 (Falso)</td>
+                    </tr>
+                    <tr class="bg-purple-100 border-2 border-purple-500">
+                        <td class="font-mono text-xl font-bold">1 (Verdadeiro)</td>
+                        <td class="font-mono text-xl font-bold">1 (Verdadeiro)</td>
+                        <td class="truth-val-1">1 (Verdadeiro)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="mt-6 font-bold text-lg text-purple-900 bg-purple-50 p-4 rounded border border-purple-200">Regra de Ouro do AND: Basta que UM seja Falso para que tudo desmorone e seja Falso.</p>
+        </section>
+
+        <!-- Slide 5: O Operador OR -->
+        <section class="slide">
+            <div class="text-8xl md:text-9xl font-mono font-black mb-2 tracking-tighter" style="color: var(--c-accent); text-shadow: 4px 4px 0px rgba(255, 95, 207, 0.15);">||</div>
+            <h2 class="mt-2">O Operador OR</h2>
+            <p>Conhecido como "OU" Lógico. Ele é <strong>muito flexível</strong>. Basta que <strong>APENAS UMA</strong> das condições seja verdadeira para que o resultado final seja Verdadeiro.</p>
+            
+            <div class="card card-accent w-full max-w-4xl mt-6">
+                <p class="text-center text-lg italic text-gray-600 mb-6">"O cliente tem frete grátis se comprar mais de R$ 200 <strong>OU</strong> se tiver um cupom VIP."</p>
+                
+                <div class="code-block-wrapper">
+                    <button class="copy-button">Copiar</button>
+                    <pre class="code-block text-xl">
+<span class="syn-comment">// As duas 'barras em pé' (Pipes) representam o OR em C</span>
+<span class="syn-kw">if</span> (valor > <span class="syn-num">200.0</span> <span class="syn-op">||</span> cupom_vip <span class="syn-op">==</span> <span class="syn-num">1</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Frete Gratis aplicado!\n"</span>);
+}</pre>
+                </div>
+                <p class="mt-4 text-center text-sm text-gray-500">Se o cliente tiver o cupom VIP, o frete é grátis mesmo que ele compre apenas 10 reais!</p>
+            </div>
+        </section>
+
+        <!-- Slide 6: Tabela Verdade OR -->
+        <section class="slide">
+            <h2>A Tabela Verdade do OR (<code class="inline-code text-3xl">||</code>)</h2>
+            <p>Avaliando ambos os lados com o operador OU. Verdadeiro = 1, Falso = 0.</p>
+
+            <table class="ops-table mt-6 w-full max-w-3xl">
+                <thead style="background-color: var(--c-accent);">
+                    <tr>
+                        <th>Condição A</th>
+                        <th>Condição B</th>
+                        <th>Resultado (A || B)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="bg-pink-50 border-2 border-pink-400">
+                        <td class="font-mono text-xl font-bold">0 (Falso)</td>
+                        <td class="font-mono text-xl font-bold">0 (Falso)</td>
+                        <td class="truth-val-0">0 (Falso)</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono text-xl">0 (Falso)</td>
+                        <td class="font-mono text-xl">1 (Verdadeiro)</td>
+                        <td class="truth-val-1">1 (Verdadeiro)</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="font-mono text-xl">1 (Verdadeiro)</td>
+                        <td class="font-mono text-xl">0 (Falso)</td>
+                        <td class="truth-val-1">1 (Verdadeiro)</td>
+                    </tr>
+                    <tr>
+                        <td class="font-mono text-xl">1 (Verdadeiro)</td>
+                        <td class="font-mono text-xl">1 (Verdadeiro)</td>
+                        <td class="truth-val-1">1 (Verdadeiro)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="mt-6 font-bold text-lg text-pink-900 bg-pink-50 p-4 rounded border border-pink-200">Regra de Ouro do OR: Basta que UM seja Verdadeiro para que tudo seja Verdadeiro. Só será Falso se os dois forem Falsos.</p>
+        </section>
+
+        <!-- Slide 7: O Operador NOT -->
+        <section class="slide">
+            <div class="text-8xl md:text-9xl font-mono font-black mb-2 tracking-tighter" style="color: var(--c-dark); text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);">!</div>
+            <h2 class="mt-2">O Operador NOT</h2>
+            <p>Conhecido como "NÃO" Lógico. Ele é o do contra. Ele serve para <strong>INVERTER</strong> o estado de uma variável ou expressão.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card bg-gray-50 border-gray-300 flex flex-col justify-center items-center">
+                    <p class="text-3xl font-mono font-bold mb-4 bg-white p-4 rounded border border-gray-300 shadow-sm text-gray-800">
+                        <span class="text-red-500">!</span>1 <span class="text-gray-400">-></span> <span class="text-red-600">0</span>
+                    </p>
+                    <p class="text-center text-gray-600">O que era Verdadeiro vira Falso.</p>
+                </div>
+                <div class="card bg-gray-50 border-gray-300 flex flex-col justify-center items-center">
+                    <p class="text-3xl font-mono font-bold mb-4 bg-white p-4 rounded border border-gray-300 shadow-sm text-gray-800">
+                        <span class="text-green-500">!</span>0 <span class="text-gray-400">-></span> <span class="text-green-600">1</span>
+                    </p>
+                    <p class="text-center text-gray-600">O que era Falso vira Verdadeiro.</p>
+                </div>
+            </div>
+
+            <div class="code-block-wrapper w-full max-w-4xl mt-6">
+                <pre class="code-block" style="padding: 1rem 1.5rem;">
+<span class="syn-comment">// Ex: Se a porta NÃO estiver trancada, entre!</span>
+<span class="syn-kw">if</span> (<span class="syn-op">!</span>porta_trancada) { ... }</pre>
+            </div>
+        </section>
+
+        <!-- Slide 8: Agrupando Tudo -->
+        <section class="slide">
+            <h2>Agrupando Condições (O Poder Máximo)</h2>
+            <p>Podemos misturar <code class="inline-code">&&</code> e <code class="inline-code">||</code> na mesma expressão! Para evitar que o computador se confunda, usamos <strong>parênteses</strong> para separar os blocos lógicos.</p>
+            
+            <div class="card card-dark bg-black w-full max-w-4xl mt-6">
+                <p class="text-center text-lg italic text-white opacity-80 mb-6">"Para pilotar, você precisa ser maior de idade E ter carteira, OU então ter uma autorização especial (mesmo sendo menor)."</p>
+                
+                <code class="block text-2xl font-mono text-center p-6 bg-gray-900 rounded-lg border border-gray-700 text-gray-100 shadow-inner">
+                    <span class="syn-kw">if</span> ( <span class="text-blue-400">(idade >= 18 && carteira == 1)</span> <span class="syn-op text-pink-400">||</span> <span class="text-green-400">autorizacao == 1</span> )
+                </code>
+                
+                <p class="mt-6 text-center text-sm text-gray-400">O C vai resolver os parênteses azuis primeiro (O bloco AND). Depois vai pegar a resposta desse bloco (0 ou 1) e comparar com o bloco verde usando o OR central.</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Depurador Interativo -->
+        <section class="slide" id="slide-debug-logic" data-interactive="true">
+            <h2>Depurador: Simulando o Cérebro do PC</h2>
+            <p class="text-gray-500 mb-6">(Pressione a <strong>Seta →</strong> para ver o computador transformar expressões em Verdadeiro ou Falso)</p>
+            
+            <div class="debugger-container">
+                <div class="debug-code" id="debug-logic-code">
+                    <div class="line" data-line="1"><span class="syn-type">int</span> a = <span class="syn-num">1</span>; <span class="syn-comment">// Verdadeiro</span></div>
+                    <div class="line" data-line="2"><span class="syn-type">int</span> b = <span class="syn-num">0</span>; <span class="syn-comment">// Falso</span></div>
+                    <div class="line mt-4" data-step="3"><span class="syn-type">int</span> res_and = (a <span class="syn-op">&&</span> b);</div>
+                    <div class="line" data-step="4"><span class="syn-type">int</span> res_or = (a <span class="syn-op">||</span> b);</div>
+                    <div class="line" data-step="5"><span class="syn-type">int</span> res_not = (<span class="syn-op">!</span>a);</div>
+                    <div class="line mt-4" data-step="6"><span class="syn-type">int</span> combo = ( (a <span class="syn-op">&&</span> b) <span class="syn-op">||</span> <span class="syn-num">1</span> );</div>
+                </div>
+                
+                <div class="trace-panel">
+                    <table id="logic-table" class="w-full text-left">
+                        <thead>
+                            <tr>
+                                <th class="bg-gray-100 p-3 border border-gray-300 font-bold text-gray-700">Expressão</th>
+                                <th class="bg-gray-100 p-3 border border-gray-300 font-bold text-gray-700">Resultado Lógico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: O Código Completo -->
+        <section class="slide">
+            <h2>O Código Completo: Login Simples</h2>
+            <p>Usando o AND Lógico (<code class="inline-code">&&</code>) para garantir que tanto o usuário quanto a senha estejam corretos ao mesmo tempo.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button">Copiar</button>
+                <pre class="code-block text-lg">
+<span class="syn-inc">#include &lt;stdio.h&gt;</span>
+
+<span class="syn-type">int</span> <span class="syn-func">main</span>() {
+    <span class="syn-type">int</span> user_db = <span class="syn-num">999</span>;
+    <span class="syn-type">int</span> pass_db = <span class="syn-num">1234</span>;
+    
+    <span class="syn-type">int</span> user_digitado, pass_digitada;
+
+    <span class="syn-func">printf</span>(<span class="syn-str">"ID de Usuario: "</span>);
+    <span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &user_digitado);
+    <span class="syn-func">printf</span>(<span class="syn-str">"Senha numerica: "</span>);
+    <span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &pass_digitada);
+
+    <span class="syn-comment">// Exige que AMBOS os dados estejam corretos</span>
+    <span class="syn-kw">if</span> (user_digitado <span class="syn-op">==</span> user_db <span class="syn-op">&&</span> pass_digitada <span class="syn-op">==</span> pass_db) {
+        <span class="syn-func">printf</span>(<span class="syn-str">"\n--> BEM-VINDO AO SISTEMA!\n"</span>);
+    } <span class="syn-kw">else</span> {
+        <span class="syn-func">printf</span>(<span class="syn-str">"\n--> ACESSO NEGADO!\n"</span>);
+    }
+
+    <span class="syn-kw">return</span> <span class="syn-num">0</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- Slide 11: Resumo dos Operadores (Cheat Sheet) -->
+        <section class="slide">
+            <h2>Resumo: Os 3 Operadores Lógicos</h2>
+            <p>Um guia rápido para não esquecer como o computador combina informações.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mt-8">
+                <!-- AND -->
+                <div class="card card-primary flex flex-col items-center text-center">
+                    <div class="text-6xl font-mono font-black mb-4 tracking-tighter" style="color: var(--c-primary);">&&</div>
+                    <h3 class="font-bold text-2xl text-gray-800 mb-2">AND (E)</h3>
+                    <p class="text-sm font-bold text-purple-800 mb-4 bg-purple-100 px-3 py-1 rounded">O Exigente</p>
+                    <div class="bg-gray-50 p-4 rounded border border-gray-200 w-full h-full flex flex-col justify-center">
+                        <p class="text-lg font-bold text-gray-800 mb-2 border-b pb-2">1 && 1 = 1</p>
+                        <p class="text-sm text-gray-600">Só devolve Verdadeiro se <strong>TODOS</strong> os lados forem verdadeiros.</p>
+                    </div>
+                </div>
+
+                <!-- OR -->
+                <div class="card card-accent flex flex-col items-center text-center">
+                    <div class="text-6xl font-mono font-black mb-4 tracking-tighter" style="color: var(--c-accent);">||</div>
+                    <h3 class="font-bold text-2xl text-gray-800 mb-2">OR (OU)</h3>
+                    <p class="text-sm font-bold text-pink-700 mb-4 bg-pink-100 px-3 py-1 rounded">O Flexível</p>
+                    <div class="bg-gray-50 p-4 rounded border border-gray-200 w-full h-full flex flex-col justify-center">
+                        <p class="text-lg font-bold text-gray-800 mb-2 border-b pb-2">0 || 1 = 1</p>
+                        <p class="text-sm text-gray-600">Devolve Verdadeiro se <strong>PELO MENOS UM</strong> lado for verdadeiro.</p>
+                    </div>
+                </div>
+
+                <!-- NOT -->
+                <div class="card border-t-8 border-black flex flex-col items-center text-center">
+                    <div class="text-6xl font-mono font-black mb-4 tracking-tighter" style="color: var(--c-dark);">!</div>
+                    <h3 class="font-bold text-2xl text-gray-800 mb-2">NOT (NÃO)</h3>
+                    <p class="text-sm font-bold text-gray-800 mb-4 bg-gray-200 px-3 py-1 rounded">O Inversor</p>
+                    <div class="bg-gray-50 p-4 rounded border border-gray-200 w-full h-full flex flex-col justify-center">
+                        <p class="text-lg font-bold text-gray-800 mb-2 border-b pb-2">!1 = 0</p>
+                        <p class="text-sm text-gray-600">Inverte o valor lógico. O que era Verdadeiro vira Falso e vice-versa.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Cabeçalho Exercícios -->
+        <section class="slide" style="background-color: var(--c-dark); border: none;">
+            <h1 class="slide-title" style="color: var(--c-light);">Semana 10: Laboratório de Lógica</h1>
+            <p class="text-white opacity-90 text-2xl mt-4">10 Exercícios para fundir o seu cérebro com a máquina.</p>
+            
+            <div class="mt-12 p-6 card w-full max-w-4xl text-left border-l-8" style="background-color: var(--c-bg); border-color: var(--c-accent);">
+                <p class="font-bold mb-4 text-xl" style="color: var(--c-dark);">Instruções do Laboratório:</p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li>1. Crie uma pasta chamada <strong>"lab_logica"</strong>.</li>
+                    <li>2. Para os testes de mesa mental (1 ao 4), use um arquivo <code class="inline-code">teoria.txt</code>.</li>
+                    <li>3. Para os desafios de código, crie arquivos <code>.c</code> e compile com muita atenção aos parênteses.</li>
+                    <li>4. Compacte tudo e entregue na plataforma.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 13: Exercícios Parte 1 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Teste de Mesa Mental)</h2>
+            <p class="mb-4">Calcule o valor final (0 ou 1) que o computador atribuirá a cada expressão, sabendo que <code>x=5</code> e <code>y=10</code>.</p>
+            
+            <div class="w-full max-w-6xl columns-1 md:columns-2 gap-8 space-y-8">
+                
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">1. Teste Lógico Básico</h3>
+                    <code class="block bg-gray-100 p-4 text-sm text-black font-mono border rounded">
+                        int result = (x < 10) && (y == 10);
+                    </code>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">2. O Poder do OR</h3>
+                    <code class="block bg-gray-100 p-4 text-sm text-black font-mono border rounded">
+                        int result = (x > 10) || (y >= 10);
+                    </code>
+                </div>
+
+                <div class="card card-light break-inside-avoid mb-8" style="border-top-color: #f59e0b;">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">3. A Inversão (NOT)</h3>
+                    <code class="block bg-gray-100 p-4 text-sm text-black font-mono border rounded">
+                        int result = !(x == 5);
+                    </code>
+                </div>
+
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">4. O Combo Mortal</h3>
+                    <p class="text-sm mb-2 text-gray-500">Resolva primeiro os parênteses internos!</p>
+                    <code class="block bg-gray-100 p-4 text-sm text-black font-mono border rounded">
+                        int result = ( (x == 5 && y < 5) || (y == 10) );
+                    </code>
+                </div>
+                
+                <div class="card border-t-8 break-inside-avoid mb-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl mb-2 text-red-700">5. Consertando o Código</h3>
+                    <p class="text-sm mb-2">O aluno queria testar se uma variável <code>nota</code> estava entre 0 e 10. Ele escreveu: <code class="bg-gray-100 px-1 font-mono">if (0 <= nota <= 10)</code>. Explique no seu arquivo de texto porque o C não compreende isso e reescreva a linha usando o operador lógico correto.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Exercícios Parte 2 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Programação)</h2>
+            
+            <div class="w-full max-w-6xl columns-1 md:columns-2 gap-8 space-y-8">
+                
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">6. Voto Obrigatório (ex6.c)</h3>
+                    <p class="text-sm">Peça a idade do usuário. O voto no Brasil é obrigatório apenas para quem tem idade maior ou igual a 18 <strong>E</strong> menor que 70. Use um <code>if / else</code> com operador lógico para dizer se a pessoa é obrigada a votar ou não.</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">7. Acesso VIP (ex7.c)</h3>
+                    <p class="text-sm">Numa festa, o usuário entra VIP se o nome começar por 'W' <strong>OU</strong> se tiver um ingresso VIP (numero 1). Peça a inicial do nome (char) e o numero do ingresso (int). Use a estrutura condicional para validar a entrada com o <code>||</code>.</p>
+                </div>
+
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">8. Empréstimo Bancário (ex8.c)</h3>
+                    <p class="text-sm">Para obter um empréstimo, o cliente precisa ser maior de idade (>= 18) <strong>E</strong> ter um salário mensal estritamente maior que R$ 2000. Crie um programa que leia estes dois dados e diga se o empréstimo foi aprovado ou negado.</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">9. O Jogo (ex9.c)</h3>
+                    <p class="text-sm">Crie um cenário de jogo. Defina (atribua) vidas = 3 e pontos = 1500. Um jogador avança de nível <strong>SE</strong> (pontos >= 1000 <strong>E</strong> vidas > 0). Faça o programa validar essas variáveis pré-definidas e exibir a mensagem correta.</p>
+                </div>
+
+                <div class="card border-t-8 break-inside-avoid mb-8" style="border-color: #000; background-color: #fafafa;">
+                    <h3 class="font-bold text-xl mb-2 text-black">10. Desafio Supremo: Ano Bissexto (ex10.c)</h3>
+                    <p class="text-sm">Leia um ano (int). Para ser Bissexto, o ano precisa cumprir as seguintes condições lógicas:</p>
+                    <p class="text-sm mt-2 font-mono font-bold bg-white p-2 border border-gray-300">(Ser divisível por 4 E NÃO ser divisível por 100) OU (Ser divisível por 400).</p>
+                    <p class="text-sm mt-2">Dica: Divisível significa que o <em>resto da divisão</em> (operador <code>%</code>) é igual a zero. Tente programar isto!</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER NAV -->
+    <footer class="h-16 bg-white border-t border-gray-200 flex items-center justify-between px-6 shrink-0 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] relative">
+        <button id="prevBtn" class="px-4 md:px-6 py-2 bg-gray-200 text-gray-700 font-bold rounded hover:bg-gray-300 transition-colors uppercase text-sm md:text-base cursor-pointer">Anterior</button>
+        <span id="counter" class="text-gray-500 font-semibold tracking-widest text-sm md:text-base uppercase absolute left-1/2 transform -translate-x-1/2">Tópico 1 / 14</span>
+        <button id="nextBtn" class="px-4 md:px-6 py-2 font-bold rounded transition-colors uppercase text-sm md:text-base cursor-pointer" style="background-color: var(--c-dark); color: var(--c-light);">Próximo</button>
+    </footer>
+
+    <script>
+        // --- COPIAR CÓDIGO ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('pre');
+                
+                let codeText = '';
+                const lines = codeEl.querySelectorAll('.line');
+                
+                if (lines.length > 0) {
+                    lines.forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+                } else {
+                    codeText = codeEl.innerText;
+                }
+
+                codeText = codeText.replace(/\u00A0/g, ' ');
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    if (span) {
+                        const originalText = span.innerText;
+                        span.innerText = 'Copiado!';
+                        setTimeout(() => { span.innerText = originalText; }, 2000);
+                    } else {
+                        const originalText = button.innerText;
+                        button.innerText = 'Copiado!';
+                        setTimeout(() => { button.innerText = originalText; }, 2000);
+                    }
+                }).catch(err => console.error("Falha ao copiar: ", err));
+            });
+        });
+
+        // --- DEPURADOR INTERATIVO LOGICO ---
+        const logicSteps = [
+            { line: 0, a: '?', b: '?', expr: 'Aguardando...', res: '?' },
+            { line: 1, a: '1', b: '?', expr: 'a = 1', res: '1' },
+            { line: 2, a: '1', b: '0', expr: 'b = 0', res: '0' },
+            { line: 3, a: '1', b: '0', expr: '(a && b) -> 1 && 0', res: '0 (Falso)' }, 
+            { line: 4, a: '1', b: '0', expr: '(a || b) -> 1 || 0', res: '1 (Verdadeiro)' }, 
+            { line: 5, a: '1', b: '0', expr: '(!a) -> !1', res: '0 (Falso)' },  
+            { line: 6, a: '1', b: '0', expr: '((a && b) || 1) -> (0) || 1', res: '1 (Verdadeiro)' }
+        ];
+
+        let currentLogicStep = 0;
+
+        function updateLogicDebugger() {
+            const step = logicSteps[currentLogicStep];
+            
+            document.querySelectorAll('#debug-logic-code .line').forEach((el, index) => {
+                el.classList.remove('active');
+                if (index + 1 === step.line) {
+                    el.classList.add('active');
+                }
+            });
+
+            const tbody = document.querySelector('#logic-table tbody');
+            let colorClass = '';
+            if (step.res.includes('1')) colorClass = 'text-green-600';
+            if (step.res.includes('0')) colorClass = 'text-red-600';
+
+            tbody.innerHTML = `
+                <tr><td class="p-3 border border-gray-300 font-mono text-gray-700">Variável 'a'</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold">${step.a}</td></tr>
+                <tr><td class="p-3 border border-gray-300 font-mono text-gray-700">Variável 'b'</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold">${step.b}</td></tr>
+                <tr class="bg-purple-50"><td class="p-4 border border-purple-200 font-mono font-bold text-purple-900">${step.expr}</td><td class="p-4 border border-purple-200 font-mono text-xl font-bold ${colorClass}">${step.res}</td></tr>
+            `;
+        }
+
+        // --- NAVEGAÇÃO DOS SLIDES ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+        const counterElement = document.getElementById('counter');
+        const mainContainer = document.querySelector('body');
+        let currentSlide = 0;
+
+        function updateCounter() {
+            if (counterElement) counterElement.textContent = `Tópico ${currentSlide + 1} / ${slides.length}`;
+            prevBtn.style.opacity = currentSlide === 0 ? '0.5' : '1';
+            prevBtn.style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
+            nextBtn.style.opacity = currentSlide === slides.length - 1 ? '0.5' : '1';
+            nextBtn.style.pointerEvents = currentSlide === slides.length - 1 ? 'none' : 'auto';
+        }
+
+        function showSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                slides.forEach(s => s.classList.remove('active'));
+                slides[index].classList.add('active');
+                currentSlide = index;
+                window.scrollTo(0,0);
+                updateCounter();
+
+                if(slides[index].id === 'slide-debug-logic') {
+                    currentLogicStep = 0;
+                    updateLogicDebugger();
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (slides[currentSlide].id === 'slide-debug-logic') {
+                if (currentLogicStep < logicSteps.length - 1) {
+                    currentLogicStep++;
+                    updateLogicDebugger();
+                    return; 
+                }
+            }
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (slides[currentSlide].id === 'slide-debug-logic') {
+                if (currentLogicStep > 0) {
+                    currentLogicStep--;
+                    updateLogicDebugger();
+                    return;
+                }
+            }
+            showSlide(currentSlide - 1);
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlide = index;
+                    updateCounter();
+                }
+            });
+        }, { threshold: 0.5 }); 
+
+        slides.forEach(slide => observer.observe(slide));
+
+        // Inicialização
+        updateCounter();
+        showSlide(0);
+        updateLogicDebugger();
+
+    </script>
+</body>
+</html>

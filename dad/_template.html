@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- EDITAR: título da aba -->
+    <title>Aula NN: TÍTULO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        /* EDITAR: aplicar a próxima paleta livre de palettes.json
+           --primary   → palette.primary
+           --accent    → palette.accent
+           --code-bg   → palette.dark
+        */
+        :root {
+            --bg: #f8fafc;
+            --slide-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --primary: #312e81;
+            --accent: #d946ef;
+            --accent-light: #fdf4ff;
+            --code-bg: #1e1b4b;
+            --code-text: #e0e7ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--primary);
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-bottom: 3px solid var(--accent);
+        }
+        .fixed-link-bar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .fixed-link-bar a:hover { color: var(--accent); }
+
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide de Tópico (separador de seção) */
+        .slide.topic {
+            background-color: var(--primary);
+            text-align: center;
+            border: 5px solid var(--accent);
+        }
+        .slide.topic h1, .slide.topic p { color: #ffffff; }
+        .slide.topic h2 { color: var(--accent); border: none; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); }
+
+        .slide-content-wrapper { max-width: 1100px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 70px; right: 40px; font-size: 1.5rem; color: var(--primary); font-weight: 800; opacity: 0.3; }
+
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: inline-block; }
+        p, li { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--text); }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; border: none; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .col { background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #cbd5e1; }
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; }
+
+        .alert-box { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 15px; border-radius: 0 8px 8px 0; margin: 20px 0; }
+        .alert-box h4 { color: var(--accent); margin-bottom: 5px; }
+
+        /* Controles flutuantes */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--primary); }
+        .btn { background: white; border: 2px solid var(--primary); color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
+            .fixed-link-bar a { color: black; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
+            .controls, .progress-bar { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; }
+            pre { border: 1px solid #000; background: white !important; color: black !important; box-shadow: none; }
+            h1, h2, p, li, strong { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
+    <button class="btn" onclick="goToExercises()" title="Ir para os Exercícios"><i class="fa-solid fa-clipboard-list"></i></button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila"><i class="fa-solid fa-print"></i></button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <!-- EDITAR: número e título da aula -->
+            <h1>Aula NN: TÍTULO</h1>
+            <h2>Subtítulo</h2>
+            <br>
+            <p><strong>Roteiro da Aula:</strong></p>
+            <ol>
+                <li>Tópico 1</li>
+                <li>Tópico 2</li>
+                <li>Tópico 3</li>
+            </ol>
+            <div style="margin-top: 40px; color: var(--primary); font-weight: 600;">
+                Técnico em Informática • 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE DE TÓPICO (separador de seção) -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <!-- EDITAR: ícone e título da seção -->
+            <i class="fa-solid fa-code"></i>
+            <h1>Parte 1: NOME</h1>
+            <p>Descrição curta da seção</p>
+        </div>
+    </div>
+
+    <!-- SLIDE DE CONTEÚDO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">03</div>
+            <h2>TÍTULO DO SLIDE</h2>
+            <p>Conteúdo introdutório do slide.</p>
+            <div class="two-col">
+                <div class="col">
+                    <h3>Bloco A</h3>
+                    <p>Conteúdo do bloco A.</p>
+                    <pre><code>// código de exemplo
+console.log("Olá, Mundo!");</code></pre>
+                </div>
+                <div class="col">
+                    <h3>Bloco B</h3>
+                    <p>Conteúdo do bloco B.</p>
+                    <div class="alert-box">
+                        <h4><i class="fa-solid fa-lightbulb"></i> Dica</h4>
+                        <p>Observação importante aqui.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXERCÍCIOS (sempre o último slide — goToExercises() aponta aqui) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>Exercícios</h2>
+            <p>Configure os exercícios e resolva os desafios abaixo.</p>
+            <ol>
+                <li><strong>Exercício 1:</strong> Descrição do exercício.</li>
+                <li><strong>Exercício 2:</strong> Descrição do exercício.</li>
+                <li><strong>Desafio:</strong> Descrição do desafio.</li>
+            </ol>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function goToExercises() { showSlide(totalSlides - 1); }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- EDITAR: título da aba -->
+    <title>DISCIPLINA - Aula NN: TÍTULO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // EDITAR: escolher a próxima paleta não usada em palettes.json e marcar "used": true
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#0D1B2A',  // ← palette.dark
+                            primary:   '#1B4F72',  // ← palette.primary
+                            secondary: '#2E86AB',  // ← palette.secondary
+                            accent:    '#A8DADC',  // ← palette.accent
+                            muted:     '#EAF4F8',  // ← palette.muted
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            /* EDITAR: usar palette.dark */
+            background-color: #ffffff;
+            color: #0D1B2A;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .print-break { page-break-after: always; }
+            .resposta-gabarito { display: block !important; }
+        }
+
+        /* EDITAR: usar palette.primary e palette.dark nos SVGs inline */
+        .node-rect { fill: #ffffff; stroke: #1B4F72; stroke-width: 2.5; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: bold; fill: #0D1B2A; }
+        .edge { stroke: #1B4F72; stroke-width: 2; fill: none; }
+
+        /* EDITAR: background = palette.dark, color = palette.accent */
+        code { font-family: 'JetBrains Mono', monospace; background: #0D1B2A; padding: 2px 6px; border-radius: 4px; color: #A8DADC; font-size: 0.9em; font-weight: bold; }
+
+        /* EDITAR: usar palette.muted, palette.secondary, palette.primary */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #EAF4F8; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #2E86AB; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #1B4F72; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white">
+
+    <header class="no-print h-16 bg-white text-brand-dark border-b border-brand-secondary px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-3 z-10">
+            <div class="bg-brand-primary text-white p-2 rounded-lg">
+                <!-- EDITAR: ícone da disciplina (fa-database, fa-desktop, fa-network-wired, etc.) -->
+                <i class="fas fa-book text-sm"></i>
+            </div>
+            <!-- EDITAR: nome da disciplina e título curto da aula -->
+            <h1 class="font-extrabold text-lg tracking-tight uppercase">DISCIPLINA <span class="text-brand-primary">TÍTULO CURTO</span></h1>
+        </div>
+
+        <div class="absolute inset-x-0 top-0 h-full flex items-center justify-center pointer-events-none hidden md:flex">
+            <a href="https://willcotil.github.io/aulas2026/" target="_blank" class="pointer-events-auto text-brand-dark hover:text-brand-primary font-extrabold text-lg transition tracking-wide">
+                willcotil.github.io/aulas2026
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 bg-brand-muted border border-brand-secondary hover:bg-brand-secondary hover:text-white rounded-lg text-brand-dark text-sm font-bold transition">
+                <i class="fas fa-print"></i> GERAR APOSTILA
+            </button>
+            <button onclick="toggleFullscreen()" class="p-2 text-brand-dark hover:text-brand-primary transition">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- EDITAR: accent hex na classe shadow (shadow-[0_0_10px_#ACCENT]) -->
+    <div class="no-print h-1.5 w-full bg-brand-muted overflow-hidden">
+        <div id="progress-bar" class="h-full bg-brand-accent transition-all duration-500 w-0 shadow-[0_0_10px_#A8DADC]"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-12 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl"></div>
+    </main>
+
+    <footer class="no-print h-20 bg-white border-t border-brand-secondary px-6 flex items-center justify-between sticky bottom-0">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-2 px-6 py-2 bg-brand-muted text-brand-dark border border-brand-secondary rounded-xl font-bold hover:bg-brand-secondary hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark">
+            <i class="fas fa-chevron-left"></i> ANTERIOR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-xs font-black text-brand-primary uppercase tracking-widest"></span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-2 px-10 py-2 bg-brand-primary text-white rounded-xl font-bold hover:bg-brand-dark transition shadow-lg shadow-brand-primary/30">
+            PRÓXIMO <i class="fas fa-chevron-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01 — CAPA ────────────────────────────────────────────────────
+            {
+                title: "TÍTULO DA AULA",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-6 bg-brand-muted border border-brand-secondary rounded-full text-brand-primary mb-4">
+                            <!-- EDITAR: ícone da aula -->
+                            <i class="fas fa-book text-7xl"></i>
+                        </div>
+                        <!-- EDITAR: número e título da aula -->
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula NN: TÍTULO</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto italic leading-relaxed">Subtítulo ou descrição curta da aula.</p>
+                        <div class="flex justify-center gap-4 text-brand-dark/50 text-sm mt-10">
+                            <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">SETAS</span>
+                            <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">ESPAÇO</span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02 ──────────────────────────────────────────────────────────
+            {
+                title: "TÍTULO DO SLIDE",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark">Conteúdo do slide.</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="p-8 bg-white border-2 border-brand-secondary rounded-3xl shadow-sm space-y-4">
+                                <div class="text-4xl text-brand-primary"><i class="fas fa-star"></i></div>
+                                <h4 class="text-xl font-bold text-brand-dark">Título do Bloco</h4>
+                                <p class="text-brand-dark/80 leading-relaxed">Descrição do bloco de conteúdo.</p>
+                            </div>
+                            <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl border-b-4 border-brand-accent space-y-4">
+                                <div class="text-4xl text-brand-accent"><i class="fas fa-lightbulb"></i></div>
+                                <h4 class="text-xl font-bold text-brand-secondary">Título do Bloco Escuro</h4>
+                                <p class="text-brand-muted leading-relaxed">Conteúdo em fundo escuro.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── ÚLTIMO — FECHAMENTO ──────────────────────────────────────────
+            {
+                title: "Fechamento",
+                content: `
+                    <div class="text-center space-y-10 py-8">
+                        <div class="inline-block p-6 bg-brand-muted border border-brand-secondary rounded-full text-brand-primary mb-4">
+                            <i class="fas fa-flag-checkered text-6xl"></i>
+                        </div>
+                        <!-- EDITAR: frase de fechamento -->
+                        <blockquote class="max-w-3xl mx-auto">
+                            <p class="text-3xl md:text-4xl font-black text-brand-dark leading-tight italic">"Frase de encerramento da aula."</p>
+                        </blockquote>
+                        <div class="flex flex-col items-center gap-6 mt-6">
+                            <p class="text-xl text-brand-dark/70">Mensagem de encerramento.</p>
+                            <div class="flex gap-4">
+                                <!-- EDITAR: número da aula -->
+                                <span class="px-4 py-2 bg-brand-primary text-white rounded-xl text-sm font-bold shadow-lg">Aula NN — Concluída</span>
+                                <span class="px-4 py-2 bg-brand-muted border border-brand-secondary rounded-xl text-sm font-bold text-brand-dark">Próximo: PRÓXIMA AULA →</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h3 class="no-print text-sm font-black uppercase text-brand-primary tracking-widest mb-4">Tópico ${currentStep + 1}</h3>
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-12 text-brand-dark">${step.title}</h2>
+                    <div class="content-body text-lg">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `Tópico ${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1
+                ? 'FINALIZAR <i class="fas fa-flag ml-2"></i>'
+                : 'PRÓXIMO <i class="fas fa-chevron-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            // EDITAR: disciplina e título da aula
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: DISCIPLINA</h1>
+                <p>Aula NN — TÍTULO DA AULA</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-10 border-b pb-10">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-dark border-l-4 border-brand-primary pl-2">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+            document.body.style.overflow = 'visible';
+        };
+
+        window.onafterprint = function() {
+            document.body.style.overflow = 'hidden';
+            renderStep();
+        };
+
+        renderStep();
+    </script>
+</body>
+</html>

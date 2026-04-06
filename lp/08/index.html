@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 08 - Operadores Relacionais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES MODERNA --- 
+           Dark Slate: #313647
+           Slate: #435663
+           Sage Green: #a3b087
+           Cream: #fff8d4 
+        */
+        :root {
+            --c-dark: #313647;
+            --c-primary: #435663;
+            --c-accent: #a3b087;
+            --c-light: #fff8d4;
+            --c-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-dark);
+            overflow-x: hidden;
+            padding-top: 50px;
+        }
+
+        /* --- TOP BAR FIXA --- */
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--c-dark);
+            color: var(--c-light);
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .top-bar a { color: var(--c-light); text-decoration: none; transition: color 0.2s; }
+        .top-bar a:hover { color: var(--c-accent); }
+
+        /* --- SLIDES --- */
+        .slide {
+            min-height: calc(100vh - 50px);
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            position: relative;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .slide.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TIPOGRAFIA --- */
+        h1 { 
+            font-size: 4rem; font-weight: 900; 
+            color: var(--c-dark); margin-bottom: 1rem;
+            line-height: 1.1; text-align: center; letter-spacing: -1px;
+        }
+        h2 { 
+            font-size: 2.6rem; font-weight: 800; 
+            color: var(--c-primary); margin-bottom: 2rem; 
+            text-align: center; position: relative;
+        }
+        h2::after {
+            content: ''; display: block; width: 50px; height: 5px;
+            background-color: var(--c-accent); margin: 0.75rem auto 0;
+            border-radius: 4px;
+        }
+        p, li { font-size: 1.25rem; line-height: 1.7; color: #4b5563; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* --- COMPONENTES MODERNOS --- */
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px -10px rgba(64, 81, 59, 0.15);
+            border: 1px solid rgba(229, 217, 182, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .card-accent { border-top: 6px solid var(--c-accent); }
+        .card-primary { border-top: 6px solid var(--c-primary); }
+        .card-danger { border-top: 6px solid #ef4444; }
+
+        /* --- BLOCOS DE CÓDIGO --- */
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1.5rem auto; }
+        .copy-button {
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: var(--c-dark); color: var(--c-light);
+            border: 1px solid var(--c-light); padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--c-light); color: var(--c-dark); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+
+        .code-block {
+            background-color: #222632; color: #fdfcf8; padding: 1.8rem;
+            border-radius: 1rem; font-family: 'Fira Code', monospace;
+            font-size: 1.2rem; text-align: left; border-left: 6px solid var(--c-primary);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); margin: 0;
+            font-variant-ligatures: none;
+        }
+        code.inline-code {
+            background-color: var(--c-light); color: var(--c-dark);
+            padding: 0.2em 0.5em; margin: 0 0.1em; font-size: 0.9em;
+            border-radius: 4px; font-family: 'Fira Code', monospace; font-weight: 700;
+            font-variant-ligatures: none;
+        }
+        
+        /* Sintaxe Colorida para fundo escuro */
+        .syn-kw { color: #fb923c; font-weight: bold; }
+        .syn-type { color: #a3e635; font-weight: bold; }
+        .syn-func { color: #fef08a; font-weight: bold; }
+        .syn-str { color: #fde047; }
+        .syn-num { color: #bae6fd; }
+        .syn-op { color: #fb923c; font-weight: bold; }
+        .syn-comment { color: #9ca3af; font-style: italic; }
+
+        /* Tabelas Gerais */
+        .ops-table { width: 100%; max-width: 900px; border-collapse: collapse; margin-top: 1rem; background: white; border-radius: 1rem; overflow: hidden; border: 2px solid var(--c-light); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .ops-table th, .ops-table td { padding: 1rem; border-bottom: 1px solid var(--c-light); text-align: center; }
+        .ops-table th { background-color: var(--c-primary); color: white; font-weight: bold; font-size: 1.2rem; }
+        .ops-table tr:last-child td { border-bottom: none; }
+        .op-symbol { font-family: 'Fira Code', monospace; font-size: 1.8rem; font-weight: bold; color: var(--c-accent); font-variant-ligatures: none; }
+
+        /* --- DEPURADOR INTERATIVO --- */
+        .debugger-container {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--c-light);
+            box-shadow: 0 10px 40px -10px rgba(49, 54, 71, 0.2);
+        }
+        .debug-code { flex: 1.2; font-family: 'Fira Code', monospace; font-size: 1.2rem; line-height: 1.8; background: #222632; color: white; padding: 1.5rem; border-radius: 8px; text-align: left; font-variant-ligatures: none; }
+        .debug-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.5; position: relative; }
+        .debug-code .line.active { background-color: var(--c-accent); color: white; font-weight: bold; opacity: 1; transform: scale(1.02); z-index: 2; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        .trace-panel { flex: 0.8; display: flex; flex-direction: column; gap: 1rem; justify-content: center;}
+        .var-box { background: var(--c-bg); border: 2px solid var(--c-light); border-radius: 8px; padding: 15px; text-align: center; }
+        .var-name { font-size: 0.9rem; color: var(--c-dark); font-weight: bold; text-transform: uppercase; }
+        .var-val { font-family: 'Fira Code', monospace; font-size: 1.8rem; color: var(--c-primary); font-weight: bold; transition: all 0.3s; }
+        .var-val.changed { color: var(--c-accent); transform: scale(1.2); display: inline-block; }
+        
+        .terminal-box { background: #111; color: #4ade80; font-family: 'Fira Code', monospace; padding: 15px; border-radius: 8px; min-height: 100px; text-align: left; border: 2px solid #333; flex-grow: 1; }
+        .terminal-box::before { content: "Terminal"; display: block; color: #888; font-size: 0.8rem; border-bottom: 1px solid #333; margin-bottom: 8px; padding-bottom: 4px; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- NAVEGAÇÃO --- */
+        .nav-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-nav { 
+            background-color: var(--c-dark); color: var(--c-light); 
+            width: 3.5rem; height: 3.5rem; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            transition: all 0.2s; border: 2px solid var(--c-dark); font-size: 1.2rem; 
+        }
+        .btn-nav:hover { background-color: var(--c-light); color: var(--c-dark); transform: translateY(-3px); }
+        .counter { 
+            position: fixed; bottom: 2rem; left: 2rem; 
+            background-color: white; padding: 0.6rem 1.5rem; 
+            border-radius: 2rem; font-weight: 700; 
+            border: 2px solid var(--c-light); color: var(--c-dark); 
+            z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* --- IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body { background: white; color: black; padding-top: 0; }
+            .top-bar, .nav-controls, .counter, .copy-button { display: none !important; }
+            .slide { 
+                display: flex !important; min-height: auto; height: auto;
+                page-break-after: always; padding: 1cm; align-items: flex-start;
+                animation: none; border: none;
+            }
+            .slide:last-child { page-break-after: avoid; }
+            h1 { font-size: 2.5rem; color: black; }
+            h2 { color: black; text-align: left; }
+            h2::after { margin-left: 0; background-color: black; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .card { box-shadow: none; border: 1px solid #ccc; padding: 1.5rem; page-break-inside: avoid; }
+            .code-block { background-color: #f3f4f6 !important; color: black !important; border-left: 4px solid black; box-shadow: none; }
+            .syn-kw, .syn-type, .syn-func, .syn-str, .syn-num, .syn-op, .syn-comment, .syn-inc { color: black !important; font-weight: bold; }
+            .debugger-container { box-shadow: none; border: 1px solid #000; padding: 1rem; page-break-inside: avoid; }
+            .debug-code { background-color: #f3f4f6 !important; color: black !important; border: 1px solid #ccc; }
+            .debug-code .line { opacity: 1 !important; color: black !important; background: none !important; }
+            .ops-table th { background-color: #eee !important; color: black !important; border: 1px solid black; }
+            .ops-table td { border: 1px solid black; }
+            .op-symbol { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Fixo -->
+    <div class="top-bar">
+        <a href="https://willcotil.github.io/aulas2026/" target="_blank">https://willcotil.github.io/aulas2026/</a>
+    </div>
+
+    <!-- Navegação e Contador -->
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn" title="Anterior">←</button>
+        <button class="btn-nav" id="nextBtn" title="Próximo">→</button>
+        <button class="btn-nav" id="fsBtn" title="Tela Cheia">⛶</button>
+        <button class="btn-nav" onclick="window.print()" title="Imprimir">🖨️</button>
+    </div>
+    <div id="counter" class="counter">1 / 12</div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide active">
+            <h1>Lógica de Programação</h1>
+            <h2>Aula 08: Operadores Relacionais</h2>
+
+            <div class="card card-accent mt-8 flex flex-col items-center">
+                <div style="font-size: 5rem;">⚖️ 🔢 🔍</div>
+                <p class="mt-4 font-bold text-xl text-center" style="color: var(--c-dark);">
+                    A Matemática da Comparação
+                </p>
+            </div>
+            <p class="mt-12 font-bold text-lg" style="color: var(--c-primary);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: Revisitando o IF -->
+        <section class="slide">
+            <h2>O que o <code class="inline-code">if</code> realmente avalia?</h2>
+            <p>Na aula sobre Estruturas de Decisão, aprendemos que o <code class="inline-code">if</code> precisa de uma <strong>condição</strong> para decidir se entra ou não num bloco de código.</p>
+            
+            <div class="code-block-wrapper w-full max-w-2xl mt-6">
+                <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                <pre class="code-block">
+<span class="syn-kw">if</span> (idade >= <span class="syn-num">18</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Pode entrar!"</span>);
+}</pre>
+            </div>
+            
+            <p class="mt-8 text-xl font-bold" style="color: var(--c-accent);">Mas como é que o computador sabe se "idade >= 18" é verdadeiro ou falso?</p>
+        </section>
+
+        <!-- Slide 3: Verdadeiro e Falso em C -->
+        <section class="slide">
+            <h2>Verdadeiro e Falso em C</h2>
+            <p>Nós usamos as palavras "Verdadeiro" e "Falso" ou "Sim" e "Não". Mas para o computador (especialmente na linguagem C clássica), <strong>tudo se resume a números.</strong></p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-8">
+                <div class="card border-l-8" style="border-color: #ef4444;">
+                    <div class="text-6xl mb-4 text-center">0</div>
+                    <h3 class="font-bold text-3xl mb-2 text-center text-red-600">Falso (False)</h3>
+                    <p class="text-sm mt-4 text-center text-gray-700">Para a linguagem C, o número <strong>zero</strong> significa <strong>Falso</strong>. Se uma condição der 0, o <code>if</code> não é executado.</p>
+                </div>
+                <div class="card border-l-8" style="border-color: #10b981;">
+                    <div class="text-6xl mb-4 text-center">1</div>
+                    <h3 class="font-bold text-3xl mb-2 text-center text-green-600">Verdadeiro (True)</h3>
+                    <p class="text-sm mt-4 text-center text-gray-700">O C devolve o número <strong>um</strong> para dizer que uma afirmação é <strong>Verdadeira</strong>. O <code>if</code> executará o bloco.</p>
+                </div>
+            </div>
+            <div class="mt-8 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg max-w-4xl text-left shadow-sm">
+                <p class="text-sm text-blue-900"><strong>Curiosidade:</strong> Na verdade, o C considera qualquer número <em>diferente</em> de zero (como 5, -10, 42) como Verdadeiro. Apenas o 0 é estritamente Falso.</p>
+            </div>
+        </section>
+
+        <!-- Slide 4: O IF Cego -->
+        <section class="slide">
+            <h2>Testando o <code class="inline-code">if</code> Cego</h2>
+            <p>Se o <code>if</code> apenas procura por 0 ou 1, podemos colocar os números diretamente dentro dos parênteses!</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="code-block-wrapper">
+                    <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                    <pre class="code-block h-full">
+<span class="syn-comment">// Isto vai imprimir SEMPRE!</span>
+<span class="syn-kw">if</span> (<span class="syn-num">1</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Entrou aqui!\n"</span>);
+}</pre>
+                </div>
+                
+                <div class="code-block-wrapper">
+                    <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                    <pre class="code-block h-full">
+<span class="syn-comment">// Isto NUNCA vai imprimir!</span>
+<span class="syn-kw">if</span> (<span class="syn-num">0</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Nunca serei lido!\n"</span>);
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Operadores Relacionais -->
+        <section class="slide">
+            <h2>Os Juízes do Código</h2>
+            <p>Os <strong>Operadores Relacionais</strong> comparam dois valores. Se a afirmação matemática for correta, o operador devolve <strong class="text-green-600">1</strong>. Se for incorreta, devolve <strong class="text-red-600">0</strong>.</p>
+            
+            <table class="ops-table">
+                <thead>
+                    <tr>
+                        <th>Símbolo</th>
+                        <th>Significado</th>
+                        <th>Exemplo Mental</th>
+                        <th>Resultado (0 ou 1)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="op-symbol">></td>
+                        <td>Maior que</td>
+                        <td class="font-mono text-gray-700">8 > 5</td>
+                        <td class="font-bold text-green-600 text-xl">1</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="op-symbol"><</td>
+                        <td>Menor que</td>
+                        <td class="font-mono text-gray-700">10 < 3</td>
+                        <td class="font-bold text-red-600 text-xl">0</td>
+                    </tr>
+                    <tr>
+                        <td class="op-symbol">>=</td>
+                        <td>Maior ou igual a</td>
+                        <td class="font-mono text-gray-700">5 >= 5</td>
+                        <td class="font-bold text-green-600 text-xl">1</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="op-symbol"><=</td>
+                        <td>Menor ou igual a</td>
+                        <td class="font-mono text-gray-700">4 <= 9</td>
+                        <td class="font-bold text-green-600 text-xl">1</td>
+                    </tr>
+                    <tr>
+                        <td class="op-symbol" style="color: #ef4444;">==</td>
+                        <td class="font-bold text-red-600">IGUAL A</td>
+                        <td class="font-mono text-gray-700">7 == 7</td>
+                        <td class="font-bold text-green-600 text-xl">1</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="op-symbol">!=</td>
+                        <td class="font-bold text-red-600">DIFERENTE DE</td>
+                        <td class="font-mono text-gray-700">5 != 5</td>
+                        <td class="font-bold text-red-600 text-xl">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Slide 6: O Grande Erro: = vs == -->
+        <section class="slide">
+            <h2>O Maior Erro dos Iniciantes</h2>
+            <p>É incrivelmente comum confundir a Atribuição com a Comparação em C.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card card-primary flex flex-col items-center justify-center h-full">
+                    <h3 class="text-3xl font-bold text-green-700 mb-6">Um sinal (<code class="inline-code">=</code>)</h3>
+                    <div class="text-5xl font-mono font-bold bg-gray-100 px-6 py-2 rounded border border-gray-300 text-gray-800">x = 5</div>
+                    <p class="mt-6 text-xl text-center">É o <strong>Comando de Atribuição</strong>. Significa "RECEBE". Você está forçando a caixa X a guardar o valor 5.</p>
+                </div>
+                
+                <div class="card card-danger flex flex-col items-center justify-center h-full">
+                    <h3 class="text-3xl font-bold text-red-600 mb-6">Dois sinais (<code class="inline-code">==</code>)</h3>
+                    <div class="text-5xl font-mono font-bold bg-gray-100 px-6 py-2 rounded border border-gray-300 text-gray-800">x == 5</div>
+                    <p class="mt-6 text-xl text-center">É uma <strong>PERGUNTA</strong>. Significa "É IGUAL A?". O computador olha para a caixa X, compara com 5, e responde 1 (Sim) ou 0 (Não).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Guardando Comparações -->
+        <section class="slide">
+            <h2>Guardando a Resposta de uma Comparação</h2>
+            <p>Se as comparações resultam em números (0 ou 1), isso significa que podemos <strong>guardar o resultado</strong> de uma comparação dentro de uma variável inteira normal!</p>
+            
+            <div class="code-block-wrapper w-full max-w-4xl mt-6">
+                <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                <pre class="code-block">
+<span class="syn-type">int</span> nota = <span class="syn-num">8</span>;
+
+<span class="syn-comment">// A expressão (nota >= 6) é avaliada primeiro.</span>
+<span class="syn-comment">// 8 é maior ou igual a 6? Sim (1). </span>
+<span class="syn-comment">// O valor 1 é guardado na variável 'passou'.</span>
+<span class="syn-type">int</span> passou = (nota >= <span class="syn-num">6</span>);
+
+<span class="syn-func">printf</span>(<span class="syn-str">"O aluno passou? (1=Sim, 0=Nao): %d\n"</span>, passou);
+<span class="syn-comment">// Saída: O aluno passou? (1=Sim, 0=Nao): 1</span></pre>
+            </div>
+        </section>
+
+        <!-- Slide 8: Depurador Interativo -->
+        <section class="slide" id="slide-debug-rel" data-interactive="true">
+            <h2>Depurador: A Matemática da Comparação</h2>
+            <p class="text-gray-500 mb-6">(Pressione a <strong>Seta →</strong> para ver as comparações sendo resolvidas para 0 ou 1)</p>
+            
+            <div class="debugger-container">
+                <div class="debug-code" id="debug-rel-code">
+                    <div class="line" data-line="1"><span class="syn-type">int</span> a = <span class="syn-num">10</span>;</div>
+                    <div class="line" data-line="2"><span class="syn-type">int</span> b = <span class="syn-num">10</span>;</div>
+                    <div class="line mt-4" data-line="3"><span class="syn-type">int</span> res1 = (a <span class="syn-op">></span> b);  <span class="syn-comment">// a é MAIOR que b?</span></div>
+                    <div class="line" data-line="4"><span class="syn-type">int</span> res2 = (a <span class="syn-op">==</span> b); <span class="syn-comment">// a é IGUAL a b?</span></div>
+                    <div class="line" data-line="5"><span class="syn-type">int</span> res3 = (a <span class="syn-op">!=</span> <span class="syn-num">5</span>); <span class="syn-comment">// a é DIFERENTE de 5?</span></div>
+                </div>
+                
+                <div class="trace-panel">
+                    <table id="rel-table" class="w-full text-left">
+                        <thead>
+                            <tr>
+                                <th class="bg-gray-100 p-3 border border-gray-300 font-bold text-gray-700">Variável</th>
+                                <th class="bg-gray-100 p-3 border border-gray-300 font-bold text-gray-700">Valor Atual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Comparando Letras -->
+        <section class="slide">
+            <h2>E se eu quiser comparar Letras (char)?</h2>
+            <p>O computador não entende letras, ele entende números. Cada letra tem um código numérico na tabela <strong>ASCII</strong> (ex: 'A' = 65, 'B' = 66).</p>
+            <p>Portanto, você pode usar os operadores relacionais com letras normalmente!</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl mt-6">
+                <div class="card card-accent bg-blue-50 border-blue-200">
+                    <h3 class="font-bold text-blue-800 text-xl mb-4">Igualdade</h3>
+                    <code class="block font-mono bg-white text-gray-800 p-3 rounded mb-2 border border-gray-300">('S' == 'S')</code>
+                    <p class="text-sm">Verdadeiro (1). Os códigos numéricos são iguais.</p>
+                </div>
+
+                <div class="card card-accent bg-green-50 border-green-200">
+                    <h3 class="font-bold text-green-800 text-xl mb-4">Ordem Alfabética</h3>
+                    <code class="block font-mono bg-white text-gray-800 p-3 rounded mb-2 border border-gray-300">('Z' > 'A')</code>
+                    <p class="text-sm">Verdadeiro (1). O código numérico de 'Z' é maior que o de 'A', indicando que vem depois no alfabeto.</p>
+                </div>
+            </div>
+            <p class="mt-8 font-bold text-red-600 bg-red-50 p-4 rounded-xl border border-red-200 max-w-4xl text-center shadow-sm">
+                Nota: O C diferencia maiúsculas de minúsculas. <code>'a' == 'A'</code> é Falso (0), pois têm códigos numéricos diferentes na tabela ASCII (97 vs 65).
+            </p>
+        </section>
+
+        <!-- Slide 10: O Erro Lógico -->
+        <section class="slide">
+            <h2>O Problema da Comparação Dupla</h2>
+            <p>Na matemática normal, escrevemos <code>10 < x < 20</code> para dizer que x está entre 10 e 20. <strong>Na linguagem C, isso NÃO funciona do jeito que você espera!</strong></p>
+            
+            <div class="card card-danger w-full max-w-4xl mt-6 bg-red-50">
+                <p class="font-bold text-xl mb-4 text-center text-red-800">Entenda como o C lê:</p>
+                <code class="block text-2xl font-mono text-center p-4 bg-white rounded border border-gray-300 text-gray-800 shadow-sm">
+                    <span class="line-through opacity-50">10 < x < 20</span>
+                </code>
+                <p class="mt-6 text-lg">Se <code class="inline-code">x = 5</code>, o computador resolve da esquerda para a direita:</p>
+                <ol class="list-decimal pl-8 space-y-2 mt-4 text-lg">
+                    <li>Ele resolve primeiro <code>10 < 5</code>. Isso é Falso, logo dá o número <strong>0</strong>.</li>
+                    <li>Aí ele pega esse resultado (0) e resolve a próxima parte: <code>0 < 20</code>.</li>
+                    <li>0 é menor que 20? Sim! Então é Verdadeiro (dá <strong>1</strong>).</li>
+                </ol>
+                <p class="mt-6 font-bold text-center text-red-700 bg-white p-3 rounded border border-red-300">Resultado: O C achou que 5 está entre 10 e 20! <br><span class="font-normal text-sm block mt-1">(Para resolver isso corretamente, usaremos Operadores Lógicos AND/OR futuramente).</span></p>
+            </div>
+        </section>
+
+        <!-- Slide 11: Cabeçalho Exercícios -->
+        <section class="slide" style="background-color: var(--c-dark); border: none;">
+            <h1 class="slide-title" style="color: var(--c-light);">Hora de Praticar!</h1>
+            <p class="text-white opacity-90 text-2xl">Vamos treinar a lógica da comparação.</p>
+            
+            <div class="mt-8 p-6 card w-full max-w-4xl text-left border-l-8" style="background-color: var(--c-bg); border-color: var(--c-accent);">
+                <p class="font-bold mb-4 text-xl" style="color: var(--c-dark);">Instruções da Lista:</p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li>1. Crie uma pasta chamada <strong>"aula08"</strong> no seu computador.</li>
+                    <li>2. Para os exercícios teóricos e mentais (1 a 4), use um arquivo <code class="inline-code">teoria.txt</code>.</li>
+                    <li>3. Para os exercícios práticos (5 a 10), crie arquivos <code>.c</code> separados (ex: <code>ex5.c</code>) e compile no terminal.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 12: Exercícios Parte 1 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Teoria e Teste Mental)</h2>
+            
+            <div class="w-full max-w-6xl columns-1 md:columns-2 gap-8 space-y-8">
+                
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">1. A Base da Lógica</h3>
+                    <p class="text-sm">Explique brevemente com as suas palavras: Na linguagem C, como o computador representa fisicamente as respostas para "Verdadeiro" e "Falso"?</p>
+                </div>
+
+                <div class="card card-danger break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-red-700">2. Identificando o Erro Fatal</h3>
+                    <p class="text-sm mb-2">Um aluno queria verificar se a variável nota era igual a 10 e escreveu: <code>if (nota = 10)</code>. Explique qual é o erro dessa linha e o que realmente vai acontecer no programa.</p>
+                </div>
+
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">3. Teste Mental A</h3>
+                    <p class="text-sm mb-2">Anotar (0 ou 1) para o resultado de cada expressão abaixo, considerando <code>x = 5</code> e <code>y = 8</code>:</p>
+                    <ul class="text-sm space-y-1 font-mono bg-gray-100 p-3 rounded border border-gray-300">
+                        <li>a) (x <= 5)</li>
+                        <li>b) (x > y)</li>
+                        <li>c) (y != 8)</li>
+                        <li>d) (x == 5)</li>
+                    </ul>
+                </div>
+
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">4. Teste Mental B</h3>
+                    <p class="text-sm mb-2">Qual será o valor exato impresso pelo código abaixo?</p>
+                    <code class="block bg-gray-100 p-3 text-sm text-black font-mono border border-gray-300 rounded mt-2">
+                        int x = 10;<br>
+                        int y = 15;<br>
+                        int resultado = (x >= 10);<br>
+                        printf("%d", resultado);
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Exercícios Parte 2 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Mão na Massa - Prática)</h2>
+            
+            <div class="w-full max-w-6xl columns-1 md:columns-2 gap-8 space-y-8">
+                
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">5. O Detector de Iguais (ex5.c)</h3>
+                    <p class="text-sm mb-2">Peça ao usuário para digitar dois números inteiros. Em seguida, use um <code>printf</code> para exibir DIRETAMENTE o resultado da expressão que verifica se os dois são <strong>iguais</strong>. <br><em>Ex: O ecrã mostrará 1 se forem iguais, ou 0 se forem diferentes. Não use <code>if/else</code> aqui, apenas imprima a expressão relacional (Ex: <code>printf("%d", a == b);</code>).</em></p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">6. Verificador de Maioridade (ex6.c)</h3>
+                    <p class="text-sm mb-2">Peça ao usuário a idade dele. Imprima o resultado (0 ou 1) da expressão que verifica se a idade é <strong>maior ou igual a 18</strong>.</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">7. O Menor Preço (ex7.c)</h3>
+                    <p class="text-sm">Leia dois preços (<code>float</code>) de produtos diferentes. O usuário quer comprar o primeiro. Exiba o resultado de <code>(preco1 < preco2)</code> para ele saber se a escolha dele é realmente estritamente mais barata (1) ou não (0).</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">8. A Pegadinha da Matemática (ex8.c)</h3>
+                    <p class="text-sm mb-2">Copie, compile e execute o seguinte código. No arquivo <code>teoria.txt</code>, explique detalhadamente por que o resultado deu 1 e não 0.</p>
+                    <code class="block font-mono bg-gray-100 p-3 text-xs border border-gray-300 rounded">
+                        int x = 20;<br>
+                        printf("Resultado: %d\n", 10 < x < 15);
+                    </code>
+                </div>
+
+                <div class="card border-t-8 break-inside-avoid mb-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl mb-2 text-red-600">9. O Perigo da Atribuição (ex9.c)</h3>
+                    <p class="text-sm mb-2">Crie um programa que faça: <code>int a = 10;</code> e logo a seguir <code>printf("%d", (a = 5));</code>. Você perceberá que ele vai imprimir <strong>5</strong>, e não 0 ou 1. Explique em texto o porquê disto acontecer e o perigo de colocar um único '=' dentro de um <code>if</code>.</p>
+                </div>
+                
+                <div class="card border-t-8 break-inside-avoid mb-8" style="border-color: #ef4444;">
+                    <h3 class="font-bold text-xl mb-2 text-red-600">10. Desafio: Par ou Ímpar Relacional (ex10.c)</h3>
+                    <p class="text-sm">Nas aulas passadas usamos o módulo <code>%</code>. Crie um programa que pede um número ao usuário. Usando <strong>uma única linha de printf</strong> (sem <code>if</code>), com o operador de módulo e o de igualdade, faça o ecrã mostrar <strong>1</strong> se o número for PAR, ou <strong>0</strong> se for ÍMPAR.</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- COPIAR CÓDIGO ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('pre');
+                
+                let codeText = '';
+                const lines = codeEl.querySelectorAll('.line');
+                
+                if (lines.length > 0) {
+                    lines.forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+                } else {
+                    codeText = codeEl.innerText;
+                }
+
+                codeText = codeText.replace(/\u00A0/g, ' ');
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    if (span) {
+                        const originalText = span.innerText;
+                        span.innerText = 'Copiado!';
+                        setTimeout(() => { span.innerText = originalText; }, 2000);
+                    }
+                }).catch(err => console.error("Falha ao copiar: ", err));
+            });
+        });
+
+        // --- DEPURADOR INTERATIVO RELACIONAL ---
+        const relSteps = [
+            { line: 0, a: '?', b: '?', res1: '?', res2: '?', res3: '?' },
+            { line: 1, a: '10', b: '?', res1: '?', res2: '?', res3: '?' },
+            { line: 2, a: '10', b: '10', res1: '?', res2: '?', res3: '?' },
+            { line: 3, a: '10', b: '10', res1: '0', res2: '?', res3: '?' }, // 10 > 10 is False
+            { line: 4, a: '10', b: '10', res1: '0', res2: '1', res3: '?' }, // 10 == 10 is True
+            { line: 5, a: '10', b: '10', res1: '0', res2: '1', res3: '1' }  // 10 != 5 is True
+        ];
+
+        let currentRelStep = 0;
+
+        function updateRelDebugger() {
+            const step = relSteps[currentRelStep];
+            
+            document.querySelectorAll('#debug-rel-code .line').forEach((el, index) => {
+                el.classList.remove('active');
+                if (index + 1 === step.line) {
+                    el.classList.add('active');
+                }
+            });
+
+            const tbody = document.querySelector('#rel-table tbody');
+            tbody.innerHTML = `
+                <tr><td class="p-3 border border-gray-300">a</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold ${step.line===1?'bg-green-100 text-green-800':''}">${step.a}</td></tr>
+                <tr><td class="p-3 border border-gray-300">b</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold ${step.line===2?'bg-green-100 text-green-800':''}">${step.b}</td></tr>
+                <tr><td class="p-3 border border-gray-300">res1 (a > b)</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold text-red-600 ${step.line===3?'bg-yellow-100':''}">${step.res1}</td></tr>
+                <tr><td class="p-3 border border-gray-300">res2 (a == b)</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold text-green-600 ${step.line===4?'bg-yellow-100':''}">${step.res2}</td></tr>
+                <tr><td class="p-3 border border-gray-300">res3 (a != 5)</td><td class="p-3 border border-gray-300 font-mono text-xl font-bold text-green-600 ${step.line===5?'bg-yellow-100':''}">${step.res3}</td></tr>
+            `;
+        }
+
+        // --- NAVEGAÇÃO DOS SLIDES ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+        const counterElement = document.getElementById('counter');
+        const mainContainer = document.querySelector('body');
+        let currentSlide = 0;
+
+        function updateCounter() {
+            if (counterElement) counterElement.textContent = `Tópico ${currentSlide + 1} / ${slides.length}`;
+            prevBtn.style.opacity = currentSlide === 0 ? '0.5' : '1';
+            prevBtn.style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
+            nextBtn.style.opacity = currentSlide === slides.length - 1 ? '0.5' : '1';
+            nextBtn.style.pointerEvents = currentSlide === slides.length - 1 ? 'none' : 'auto';
+        }
+
+        function showSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                slides.forEach(s => s.classList.remove('active'));
+                slides[index].classList.add('active');
+                currentSlide = index;
+                window.scrollTo(0,0);
+                updateCounter();
+
+                if(slides[index].id === 'slide-debug-rel') {
+                    currentRelStep = 0;
+                    updateRelDebugger();
+                }
+            }
+        }
+
+        function nextSlide() {
+            if (slides[currentSlide].id === 'slide-debug-rel') {
+                if (currentRelStep < relSteps.length - 1) {
+                    currentRelStep++;
+                    updateRelDebugger();
+                    return; 
+                }
+            }
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (slides[currentSlide].id === 'slide-debug-rel') {
+                if (currentRelStep > 0) {
+                    currentRelStep--;
+                    updateRelDebugger();
+                    return;
+                }
+            }
+            showSlide(currentSlide - 1);
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlide = index;
+                    updateCounter();
+                }
+            });
+        }, { threshold: 0.5 }); 
+
+        slides.forEach(slide => observer.observe(slide));
+
+        // Inicialização
+        updateCounter();
+        showSlide(0);
+        updateRelDebugger();
+
+    </script>
+</body>
+</html>

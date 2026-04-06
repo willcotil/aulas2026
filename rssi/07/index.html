@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 07: Prática de Crimpagem</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- PALETA DE CORES TERROSAS --- */
+        :root {
+            --primary: #8a7650;    /* Marrom/Oliva Escuro (Títulos) */
+            --secondary: #8e977d;  /* Verde Sálvia (Ícones) */
+            --bg-app: #ece7d1;     /* Bege Claro (Fundo) */
+            --accent: #dbcea5;     /* Khaki (Destaques) */
+            
+            --text-main: #333333;  
+            --danger: #d9534f;     
+            --success: #5cb85c;    
+            --slide-bg: #ffffff;   
+        }
+
+        * { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* --- GUIA DE CORES FIXO (SEMPRE VISÍVEL) --- */
+        #fixed-guide {
+            position: fixed; top: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid var(--primary);
+            border-radius: 15px; padding: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            z-index: 5000; width: 220px;
+            transition: transform 0.3s ease;
+        }
+
+        #fixed-guide h3 {
+            margin: 0 0 15px 0; color: var(--primary);
+            font-size: 1.1rem; text-align: center;
+            border-bottom: 2px solid var(--accent); padding-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .pattern-container { display: flex; justify-content: space-between; gap: 10px; }
+        .pattern-col { flex: 1; display: flex; flex-direction: column; gap: 3px; align-items: center; }
+        .pattern-col h4 { margin: 0 0 5px 0; font-size: 1rem; color: var(--secondary); }
+
+        /* Fios coloridos via CSS */
+        .wire { width: 35px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.3); }
+        .w-bv { background: repeating-linear-gradient(45deg, #fff, #fff 4px, #228b22 4px, #228b22 8px); }
+        .w-vd { background: #228b22; }
+        .w-bl { background: repeating-linear-gradient(45deg, #fff, #fff 4px, #ff8c00 4px, #ff8c00 8px); }
+        .w-lr { background: #ff8c00; }
+        .w-ba { background: repeating-linear-gradient(45deg, #fff, #fff 4px, #1e90ff 4px, #1e90ff 8px); }
+        .w-az { background: #1e90ff; }
+        .w-bm { background: repeating-linear-gradient(45deg, #fff, #fff 4px, #8b4513 4px, #8b4513 8px); }
+        .w-mr { background: #8b4513; }
+
+        .pin-number { font-size: 0.7rem; color: #555; margin-right: 5px; font-weight: bold; width: 10px;}
+        .wire-row { display: flex; align-items: center; width: 100%; justify-content: center; }
+
+        /* NUMERAÇÃO NO TOPO */
+        #top-counter {
+            position: fixed; top: 20px; right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 20px; border-radius: 20px;
+            font-weight: bold; color: var(--primary);
+            box-shadow: 0 4px 15px rgba(138, 118, 80, 0.2);
+            z-index: 3000; font-family: monospace; font-size: 1.1rem;
+            border: 2px solid var(--accent);
+        }
+
+        /* Container principal */
+        main {
+            height: 100vh; width: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        /* --- ESTILO DOS SLIDES --- */
+        section.slide {
+            height: 100vh; width: 100%; max-width: 1200px;
+            margin: 0 auto; background: var(--slide-bg);
+            scroll-snap-align: start; position: relative;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 40px 40px 40px 260px; /* Padding esquerdo maior para não bater no menu fixo */
+            border-bottom: 3px solid var(--accent);
+        }
+
+        h1 { font-size: 3.5rem; color: var(--primary); margin-bottom: 0.5rem; text-align: center; }
+        h2 { font-size: 2.5rem; color: var(--primary); margin-bottom: 2rem; border-bottom: 4px solid var(--accent); padding-bottom: 10px; text-align: center; width: 100%;}
+        h3 { font-size: 1.8rem; color: var(--secondary); margin-bottom: 1rem; }
+        p, li { font-size: 1.4rem; line-height: 1.6; color: var(--text-main); max-width: 850px; }
+        
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 15px; padding-left: 40px; position: relative; }
+        li::before { content: '➤'; color: var(--primary); font-size: 1.5rem; position: absolute; left: 0; top: 2px; }
+
+        .cols { display: flex; gap: 40px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 300px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+        .hook-box {
+            margin-top: 40px; padding: 15px 25px; background: var(--bg-app);
+            border-left: 6px solid var(--primary); border-radius: 0 10px 10px 0;
+            font-style: italic; font-weight: bold; color: var(--primary);
+            max-width: 800px; text-align: left; font-size: 1.3rem;
+            box-shadow: 0 4px 10px rgba(138, 118, 80, 0.1);
+        }
+
+        .visual-box {
+            background: #ffffff; border: 3px dashed var(--secondary); border-radius: 15px;
+            width: 100%; max-width: 400px; height: 300px; display: flex; justify-content: center; align-items: center;
+            flex-direction: column; position: relative; overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(138, 118, 80, 0.15);
+        }
+        .visual-box.step-box { border: 4px solid var(--primary); background: var(--bg-app); border-style: solid; }
+        .emoji-icon { font-size: 6rem; transition: transform 0.3s; cursor: default; }
+
+        .step-number {
+            position: absolute; top: -15px; left: -15px;
+            background: var(--danger); color: white;
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; font-weight: bold; border: 4px solid white;
+        }
+
+        /* Controles Flutuantes */
+        .controls {
+            position: fixed; bottom: 30px; right: 30px;
+            background: rgba(255, 255, 255, 0.95); padding: 10px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(138, 118, 80, 0.3); display: flex; gap: 10px; flex-direction: column;
+            z-index: 4000; border: 2px solid var(--accent);
+        }
+        .btn-nav { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--primary); color: white; padding: 0; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; cursor: pointer; transition: 0.2s;}
+        .btn-nav:hover { transform: translateY(-3px); background: #6b5a3b;}
+
+        @media (max-width: 900px) {
+            #fixed-guide { transform: translateX(-150%); } /* Oculta o painel no mobile para não quebrar a tela */
+            section.slide { padding: 40px; }
+        }
+
+        @media print {
+            .controls, #top-counter, #fixed-guide { display: none !important; }
+            main { height: auto; overflow: visible; }
+            section.slide { height: 100vh; page-break-after: always; padding: 40px; margin: 0;}
+            .hook-box { border: 1px solid var(--primary); background: #fff; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAINEL FIXO: GUIA DE CORES (A e B) -->
+    <div id="fixed-guide">
+        <h3><i class="fas fa-palette"></i> Tabela TIA/EIA</h3>
+        <div class="pattern-container">
+            <!-- Padrão A -->
+            <div class="pattern-col">
+                <h4>T568A</h4>
+                <div class="wire-row"><span class="pin-number">1</span><div class="wire w-bv"></div></div>
+                <div class="wire-row"><span class="pin-number">2</span><div class="wire w-vd"></div></div>
+                <div class="wire-row"><span class="pin-number">3</span><div class="wire w-bl"></div></div>
+                <div class="wire-row"><span class="pin-number">4</span><div class="wire w-az"></div></div>
+                <div class="wire-row"><span class="pin-number">5</span><div class="wire w-ba"></div></div>
+                <div class="wire-row"><span class="pin-number">6</span><div class="wire w-lr"></div></div>
+                <div class="wire-row"><span class="pin-number">7</span><div class="wire w-bm"></div></div>
+                <div class="wire-row"><span class="pin-number">8</span><div class="wire w-mr"></div></div>
+            </div>
+            <!-- Padrão B -->
+            <div class="pattern-col">
+                <h4>T568B</h4>
+                <div class="wire-row"><span class="pin-number">1</span><div class="wire w-bl"></div></div>
+                <div class="wire-row"><span class="pin-number">2</span><div class="wire w-lr"></div></div>
+                <div class="wire-row"><span class="pin-number">3</span><div class="wire w-bv"></div></div>
+                <div class="wire-row"><span class="pin-number">4</span><div class="wire w-az"></div></div>
+                <div class="wire-row"><span class="pin-number">5</span><div class="wire w-ba"></div></div>
+                <div class="wire-row"><span class="pin-number">6</span><div class="wire w-vd"></div></div>
+                <div class="wire-row"><span class="pin-number">7</span><div class="wire w-bm"></div></div>
+                <div class="wire-row"><span class="pin-number">8</span><div class="wire w-mr"></div></div>
+            </div>
+        </div>
+        <p style="font-size: 0.75rem; text-align: center; margin: 10px 0 0 0; color: var(--secondary);">Lendo o conector:<br>Trava para baixo, pino 1 à esquerda.</p>
+    </div>
+
+    <div id="top-counter">1 / 10</div>
+
+    <main id="slide-container">
+
+        <!-- Slide 1: CAPA -->
+        <section class="slide" id="slide-1">
+            <div class="visual-box" style="height: 180px; width: 180px; border-radius: 50%; border: 4px solid var(--primary); margin-bottom: 20px; background: var(--bg-app);">
+                <span class="emoji-icon">🛠️</span>
+            </div>
+            <h1>A Arte da Crimpagem</h1>
+            <h3>Colégio Técnico de Limeira</h3>
+            <p><strong>Aula 07: Prática de Laboratório</strong></p>
+            <div class="hook-box">
+                "Na teoria, a rede é invisível. Hoje, você vai colocar a mão na massa e criar a ponte física que conecta o mundo. Vamos conhecer nossas armas..."
+            </div>
+        </section>
+
+        <!-- Slide 2: FERRAMENTAS -->
+        <section class="slide" id="slide-2">
+            <h2>As Ferramentas do Mestre</h2>
+            <div class="cols">
+                <div class="col" style="flex: 2;">
+                    <ul style="font-size: 1.2rem;">
+                        <li><strong>Cabo UTP (Cat5e ou Cat6):</strong> O par trançado por onde trafega a informação.</li>
+                        <li><strong>Alicate de Crimpagem:</strong> A ferramenta pesada. Possui lâminas de corte e a matriz para prensar o conector.</li>
+                        <li><strong>Conectores RJ-45:</strong> O plugue de acrílico transparente com 8 pinos de cobre.</li>
+                        <li><strong>Decapador:</strong> Ferramenta amarela/cinza para remover a capa azul sem ferir os fios.</li>
+                        <li><strong>Testador de Cabos:</strong> Mostra as luzes de 1 a 8 piscando se o cabo estiver perfeito.</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <div class="visual-box" style="background: var(--bg-app); border-color: var(--primary);">
+                        <span class="emoji-icon">🧰</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Ferramentas na mesa. Mas como saber a ordem certa de enfiar 8 fios minúsculos dentro de um conector?"
+            </div>
+        </section>
+
+        <!-- Slide 3: PADROES -->
+        <section class="slide" id="slide-3">
+            <h2>A Regra Global: TIA/EIA</h2>
+            <p>Olhe para a <strong>Tabela Fixa à sua esquerda</strong>. Existem dois padrões mundiais de ordem de cores.</p>
+            <div class="cols" style="align-items: flex-start; margin-top: 20px;">
+                <div class="col" style="background: var(--bg-app); padding: 20px; border-radius: 10px;">
+                    <h3 style="color: var(--primary);">Cabo Direto (Patch Cable)</h3>
+                    <p>Você usa o <strong>MESMO</strong> padrão (ex: T568A e T568A) nas duas pontas do cabo.</p>
+                    <p>Serve para ligar aparelhos diferentes: <em>PC > Switch</em> ou <em>Roteador > PC</em>.</p>
+                </div>
+                <div class="col" style="background: #fff; padding: 20px; border-radius: 10px; border: 3px solid var(--accent);">
+                    <h3 style="color: var(--primary);">Cabo Crossover (Cruzado)</h3>
+                    <p>Você usa <strong>PADRÕES DIFERENTES</strong> (T568A de um lado, T568B do outro).</p>
+                    <p>Serve para ligar aparelhos iguais: <em>PC > PC</em> ou <em>Switch > Switch</em>.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Pegue seu alicate, seu cabo e escolha o padrão T568A. Vamos ao passo a passo de montagem!"
+            </div>
+        </section>
+
+        <!-- Slide 4: PASSO 1 -->
+        <section class="slide" id="slide-4">
+            <h2>Passo 1: Decapar a Capa Externa</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Meça cerca de <strong>2 a 3 dedos (3 cm)</strong> a partir da ponta do cabo.</p>
+                    <p>Insira o cabo na lâmina do decapador (ou do próprio alicate), aperte levemente e dê uma volta de 360 graus.</p>
+                    <p style="color: var(--danger); font-weight: bold;">Cuidado: Não aperte forte demais, senão você cortará a proteção dos fios internos e terá que recomeçar.</p>
+                    <p>Puxe a capa azul/cinza para fora. Os 4 pares trançados aparecerão.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box step-box">
+                        <div class="step-number">1</div>
+                        <span class="emoji-icon">✂️</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Com as 'tripas' do cabo expostas, temos fios enrolados uns nos outros. Precisamos soltá-los..."
+            </div>
+        </section>
+
+        <!-- Slide 5: PASSO 2 -->
+        <section class="slide" id="slide-5">
+            <h2>Passo 2: Destrançar e Alisar</h2>
+            <div class="cols">
+                <div class="col">
+                    <div class="visual-box step-box">
+                        <div class="step-number">2</div>
+                        <span class="emoji-icon">🧶</span>
+                    </div>
+                </div>
+                <div class="col">
+                    <p>Separe os 4 pares. Desenrole-os completamente até a base da capa de plástico.</p>
+                    <p>Passe os dedos firmemente por cada fio para <strong>alisá-los e deixá-los o mais retos possível</strong>.</p>
+                    <p>Use a tabela da esquerda. Coloque-os na ordem do padrão escolhido e junte-os bem apertados formando uma fita plana na sua mão.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Os fios estão na ordem, mas as pontas estão parecendo uma escada irregular. Precisamos de um alinhamento cirúrgico."
+            </div>
+        </section>
+
+        <!-- Slide 6: PASSO 3 -->
+        <section class="slide" id="slide-6">
+            <h2>Passo 3: O Corte Reto e Perfeito</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Segure a "fita" de fios bem apertada na ordem correta.</p>
+                    <p>Pegue a lâmina reta do seu Alicate de Crimpagem.</p>
+                    <p>Corte as pontas de forma que fiquem <strong>todas perfeitamente retas e do mesmo tamanho</strong>.</p>
+                    <p style="font-weight: bold; color: var(--primary);">Deixe sobrar apenas 1,5 cm (mais ou menos a largura do polegar) de fios expostos.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box step-box">
+                        <div class="step-number">3</div>
+                        <span class="emoji-icon">📏</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Tamanho exato e pontas pareadas. Chegou o momento de máxima concentração: Inserir no Acrílico."
+            </div>
+        </section>
+
+        <!-- Slide 7: PASSO 4 -->
+        <section class="slide" id="slide-7">
+            <h2>Passo 4: Inserção no Conector RJ-45</h2>
+            <div class="cols">
+                <div class="col">
+                    <div class="visual-box step-box">
+                        <div class="step-number">4</div>
+                        <span class="emoji-icon">🔌</span>
+                    </div>
+                </div>
+                <div class="col">
+                    <p>Segure o conector com a <strong>trava de plástico voltada para BAIXO</strong> e os contatos de metal para CIMA.</p>
+                    <p>O Pino 1 fica à sua esquerda.</p>
+                    <p>Empurre os fios cuidadosamente pelos trilhos até o fundo. Olhe pela ponta transparente e garanta que <strong>o cobre dos 8 fios encostou no fundo</strong> do conector.</p>
+                    <p style="color: var(--danger); font-weight: bold;">A capa azul do cabo TEM que entrar um pouco dentro do conector, para ficar firme.</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Fios no fundo e capa presa. Agora não solte. Hora de esmagar o metal!"
+            </div>
+        </section>
+
+        <!-- Slide 8: PASSO 5 -->
+        <section class="slide" id="slide-8">
+            <h2>Passo 5: A Crimpagem</h2>
+            <div class="cols">
+                <div class="col">
+                    <p>Insira o conector RJ-45 (com o cabo bem encaixado) no buraco central apropriado do Alicate de Crimpagem.</p>
+                    <p>Aperte os cabos do alicate com firmeza usando as duas mãos.</p>
+                    <p>O alicate vai empurrar as lâminas de cobre do conector, perfurando o plástico do fio e encostando no metal interno. <strong>Você sentirá um 'clique' duro</strong>.</p>
+                    <p>Solte o alicate e retire o cabo.</p>
+                </div>
+                <div class="col">
+                    <div class="visual-box step-box">
+                        <div class="step-number">5</div>
+                        <span class="emoji-icon">💪</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Repita o processo na outra ponta. O cabo parece perfeito visualmente, mas nós não confiamos em olhares. Confiamos em testes."
+            </div>
+        </section>
+
+        <!-- Slide 9: PASSO 6 -->
+        <section class="slide" id="slide-9">
+            <h2>Passo 6: O Teste de Continuidade</h2>
+            <div class="cols">
+                <div class="col">
+                    <div class="visual-box step-box">
+                        <div class="step-number">6</div>
+                        <span class="emoji-icon">🚦</span>
+                    </div>
+                </div>
+                <div class="col">
+                    <p>Pegue o Testador de Cabos. Ele se divide em duas partes.</p>
+                    <p>Encaixe uma ponta do seu cabo novo na base (Master) e a outra ponta na unidade remota.</p>
+                    <p>Ligue o aparelho.</p>
+                    <p>Se as luzes piscarem em sequência de <strong>1 a 8 simultaneamente de ambos os lados</strong>, parabéns!</p>
+                    <p style="color: var(--danger); font-size: 1.1rem;">(Se um número pular ou piscar fora de ordem, o pino não encostou ou os fios estão trocados. Corte a ponta e tente de novo).</p>
+                </div>
+            </div>
+            <div class="hook-box">
+                "Resumindo a missão de hoje..."
+            </div>
+        </section>
+
+        <!-- Slide 10: RESUMO -->
+        <section class="slide" id="slide-10">
+            <h2>Checklist do Laboratório</h2>
+            <ul>
+                <li><strong>Mantenha a tabela visível:</strong> Branco/Verde no pino 1 para T568A, Branco/Laranja no pino 1 para T568B.</li>
+                <li><strong>O Segredo do Corte:</strong> Cortar reto é a diferença entre um cabo que dá Gigabit e um cabo que fica desconectando.</li>
+                <li><strong>Capa pra dentro:</strong> Se a capa do cabo ficar balançando fora do conector, o cabo vai quebrar fácil com o tempo.</li>
+                <li><strong>Paciência:</strong> O primeiro conector demora 15 minutos. O décimo demora 1 minuto.</li>
+            </ul>
+            
+            <div class="visual-box" style="height: auto; padding: 20px; background: var(--bg-app); border-color: var(--primary); margin-top: 30px;">
+                <h3 style="margin: 0; color: var(--primary);">Mãos à obra! 🛠️</h3>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONTROLES FLUTUANTES DE NAVEGAÇÃO -->
+    <div class="controls">
+        <button class="btn-nav" onclick="changeSlide(-1)" title="Anterior"><i class="fas fa-chevron-up"></i></button>
+        <button class="btn-nav" onclick="changeSlide(1)" title="Próximo"><i class="fas fa-chevron-down"></i></button>
+        <button class="btn-nav" style="background: var(--secondary);" onclick="window.print()" title="Imprimir Roteiro"><i class="fas fa-print"></i></button>
+    </div>
+
+    <script>
+        const container = document.getElementById('slide-container');
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('top-counter');
+        let currentIndex = 0;
+
+        function changeSlide(direction) {
+            let newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < slides.length) {
+                slides[newIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        container.addEventListener('scroll', () => {
+            let scrollPos = container.scrollTop;
+            let index = Math.round(scrollPos / window.innerHeight);
+            if (index !== currentIndex) {
+                currentIndex = index;
+                counter.innerText = `${currentIndex + 1} / ${slides.length}`;
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+        });
+    </script>
+</body>
+</html>

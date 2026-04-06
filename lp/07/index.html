@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 07 - Estruturas de Decisão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- PALETA DE CORES MODERNA --- 
+           Dark Green: #40513b
+           Medium Green: #628141
+           Light Beige: #e5d9b6
+           Orange: #e67e22 
+        */
+        :root {
+            --c-dark: #40513b;
+            --c-primary: #628141;
+            --c-light: #e5d9b6;
+            --c-accent: #e67e22;
+            --c-bg: #fdfcf8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-dark);
+            overflow-x: hidden;
+            padding-top: 50px;
+        }
+
+        /* --- TOP BAR FIXA --- */
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--c-dark);
+            color: var(--c-light);
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .top-bar a { color: var(--c-light); text-decoration: none; transition: color 0.2s; }
+        .top-bar a:hover { color: var(--c-accent); }
+
+        /* --- SLIDES --- */
+        .slide {
+            min-height: calc(100vh - 50px);
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+            position: relative;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .slide.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TIPOGRAFIA --- */
+        h1 { 
+            font-size: 4rem; font-weight: 900; 
+            color: var(--c-dark); margin-bottom: 1rem;
+            line-height: 1.1; text-align: center; letter-spacing: -1px;
+        }
+        h2 { 
+            font-size: 2.6rem; font-weight: 800; 
+            color: var(--c-primary); margin-bottom: 2rem; 
+            text-align: center; position: relative;
+        }
+        h2::after {
+            content: ''; display: block; width: 50px; height: 5px;
+            background-color: var(--c-accent); margin: 0.75rem auto 0;
+            border-radius: 4px;
+        }
+        p, li { font-size: 1.25rem; line-height: 1.7; color: #4b5563; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* --- COMPONENTES MODERNOS --- */
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px -10px rgba(64, 81, 59, 0.15);
+            border: 1px solid rgba(229, 217, 182, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .card-accent { border-top: 6px solid var(--c-accent); }
+        .card-primary { border-top: 6px solid var(--c-primary); }
+
+        /* --- BLOCOS DE CÓDIGO --- */
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1.5rem auto; }
+        .copy-button {
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: var(--c-dark); color: var(--c-light);
+            border: 1px solid var(--c-light); padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--c-light); color: var(--c-dark); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+
+        .code-block {
+            background-color: #1a2218; color: #fdfcf8; padding: 1.8rem;
+            border-radius: 1rem; font-family: 'Fira Code', monospace;
+            font-size: 1.2rem; text-align: left; border-left: 6px solid var(--c-primary);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); margin: 0;
+            font-variant-ligatures: none;
+        }
+        code.inline-code {
+            background-color: var(--c-light); color: var(--c-dark);
+            padding: 0.2em 0.5em; margin: 0 0.1em; font-size: 0.9em;
+            border-radius: 4px; font-family: 'Fira Code', monospace; font-weight: 700;
+            font-variant-ligatures: none;
+        }
+        
+        /* Sintaxe Colorida para fundo escuro */
+        .syn-kw { color: #fb923c; font-weight: bold; }
+        .syn-type { color: #a3e635; font-weight: bold; }
+        .syn-func { color: #fef08a; font-weight: bold; }
+        .syn-str { color: #fde047; }
+        .syn-num { color: #bae6fd; }
+        .syn-op { color: #fb923c; font-weight: bold; }
+        .syn-comment { color: #9ca3af; font-style: italic; }
+
+        /* --- DEPURADOR INTERATIVO --- */
+        .debugger-container {
+            display: flex; gap: 2rem; width: 100%; max-width: 1000px; margin-top: 1rem;
+            background: white; padding: 2rem; border-radius: 1rem; border: 2px solid var(--c-light);
+            box-shadow: 0 10px 40px -10px rgba(64, 81, 59, 0.2);
+        }
+        .debug-code { flex: 1.2; font-family: 'Fira Code', monospace; font-size: 1.2rem; line-height: 1.8; background: #1a2218; color: white; padding: 1.5rem; border-radius: 8px; text-align: left; font-variant-ligatures: none; }
+        .debug-code .line { padding: 2px 8px; border-radius: 4px; transition: all 0.3s; opacity: 0.5; position: relative; }
+        .debug-code .line.active { background-color: var(--c-accent); color: white; font-weight: bold; opacity: 1; transform: scale(1.02); z-index: 2; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .debug-code .line.skipped { opacity: 0.2; text-decoration: line-through; }
+        
+        .trace-panel { flex: 0.8; display: flex; flex-direction: column; gap: 1rem; }
+        .var-box { background: var(--c-bg); border: 2px solid var(--c-light); border-radius: 8px; padding: 15px; text-align: center; }
+        .var-name { font-size: 0.9rem; color: var(--c-dark); font-weight: bold; text-transform: uppercase; }
+        .var-val { font-family: 'Fira Code', monospace; font-size: 1.8rem; color: var(--c-primary); font-weight: bold; transition: all 0.3s; }
+        .var-val.changed { color: var(--c-accent); transform: scale(1.2); display: inline-block; }
+        
+        .terminal-box { background: #111; color: #4ade80; font-family: 'Fira Code', monospace; padding: 15px; border-radius: 8px; min-height: 100px; text-align: left; border: 2px solid #333; flex-grow: 1; }
+        .terminal-box::before { content: "Terminal"; display: block; color: #888; font-size: 0.8rem; border-bottom: 1px solid #333; margin-bottom: 8px; padding-bottom: 4px; }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- NAVEGAÇÃO --- */
+        .nav-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-nav { 
+            background-color: var(--c-dark); color: var(--c-light); 
+            width: 3.5rem; height: 3.5rem; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            transition: all 0.2s; border: 2px solid var(--c-dark); font-size: 1.2rem; 
+        }
+        .btn-nav:hover { background-color: var(--c-light); color: var(--c-dark); transform: translateY(-3px); }
+        .counter { 
+            position: fixed; bottom: 2rem; left: 2rem; 
+            background-color: white; padding: 0.6rem 1.5rem; 
+            border-radius: 2rem; font-weight: 700; 
+            border: 2px solid var(--c-light); color: var(--c-dark); 
+            z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* --- IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body { background: white; color: black; padding-top: 0; }
+            .top-bar, .nav-controls, .counter, .copy-button { display: none !important; }
+            .slide { 
+                display: flex !important; min-height: auto; height: auto;
+                page-break-after: always; padding: 1cm; align-items: flex-start;
+                animation: none; border: none;
+            }
+            .slide:last-child { page-break-after: avoid; }
+            h1 { font-size: 2.5rem; color: black; }
+            h2 { color: black; text-align: left; }
+            h2::after { margin-left: 0; background-color: black; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .card { box-shadow: none; border: 1px solid #ccc; padding: 1.5rem; page-break-inside: avoid; }
+            .code-block { background-color: #f3f4f6 !important; color: black !important; border-left: 4px solid black; box-shadow: none; }
+            .syn-kw, .syn-type, .syn-func, .syn-str, .syn-num, .syn-op, .syn-comment, .syn-inc { color: black !important; }
+            .debugger-container { box-shadow: none; border: 1px solid #000; padding: 1rem; page-break-inside: avoid; }
+            .debug-code { background-color: #f3f4f6 !important; color: black !important; border: 1px solid #ccc; }
+            .debug-code .line { opacity: 1 !important; color: black !important; background: none !important; }
+            .terminal-box { background: white !important; color: black !important; border: 1px dashed black; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Fixo -->
+    <div class="top-bar">
+        <a href="https://willcotil.github.io/aulas2026/" target="_blank">https://willcotil.github.io/aulas2026/</a>
+    </div>
+
+    <!-- Navegação e Contador -->
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn" title="Anterior">←</button>
+        <button class="btn-nav" id="nextBtn" title="Próximo">→</button>
+        <button class="btn-nav" id="fsBtn" title="Tela Cheia">⛶</button>
+        <button class="btn-nav" onclick="window.print()" title="Imprimir">🖨️</button>
+    </div>
+    <div id="counter" class="counter">1 / 15</div>
+
+    <main>
+        <!-- Slide 1: Capa -->
+        <section class="slide active">
+            <h1>Lógica de Programação</h1>
+            <h2>Aula 07: Estruturas de Decisão</h2>
+            
+            <div class="card card-accent mt-8 flex flex-col items-center">
+                <div style="font-size: 5rem;">🔀 🚦 🛤️</div>
+                <p class="mt-4 font-bold text-xl text-center" style="color: var(--c-dark);">
+                    Ensinando o computador a fazer escolhas.
+                </p>
+            </div>
+            <p class="mt-12 font-bold text-lg" style="color: var(--c-primary);">Prof. William Paiva</p>
+        </section>
+
+        <!-- Slide 2: O Problema do Fluxo Reto -->
+        <section class="slide">
+            <h2>O Fluxo Sequencial: Um Caminho Só</h2>
+            <p>Até agora, nossos programas eram como um trem em um trilho reto. O computador executava <strong>todas as linhas</strong>, de cima para baixo, sem pensar duas vezes.</p>
+            
+            <div class="flex flex-col items-center gap-3 mt-6 font-mono font-bold text-lg w-full max-w-lg opacity-80">
+                <div class="bg-gray-100 px-6 py-3 border-2 border-gray-300 rounded w-full text-center shadow-sm text-gray-700">1. Ler a Senha digitada</div>
+                <div class="text-gray-400 text-2xl">↓</div>
+                <div class="bg-gray-100 px-6 py-3 border-2 border-gray-300 rounded w-full text-center shadow-sm text-gray-700">2. Calcular Juros da Conta</div>
+                <div class="text-gray-400 text-2xl">↓</div>
+                <div class="bg-gray-100 px-6 py-3 border-2 border-gray-300 rounded w-full text-center shadow-sm text-gray-700">3. Exibir: Saldo é R$ 1.000.000</div>
+            </div>
+            
+            <div class="mt-8 p-6 bg-red-50 border-l-8 border-red-500 rounded-lg max-w-4xl text-left shadow-sm">
+                <p class="text-xl font-bold text-red-800 mb-2">Qual é o problema aqui?</p>
+                <p class="text-lg text-red-900">Se o usuário digitar a senha <strong>errada</strong>, o programa vai continuar andando em frente e exibirá o saldo da mesma forma! O programa é "cego", não avalia a situação.</p>
+            </div>
+        </section>
+
+        <!-- Slide 3: Decisões no Mundo Real -->
+        <section class="slide">
+            <h2>Nós já somos mestres nisso!</h2>
+            <p>O mundo real exige decisões a todo momento. Fazemos isso de forma tão natural que nem percebemos. Veja se reconhece a estrutura:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 w-full max-w-5xl mt-6">
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">1. <strong>Se</strong> chover, fico em casa, <strong>senão</strong>, vou sair.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">2. <strong>Se</strong> tiver dinheiro, compro um carro, <strong>senão</strong>, ando de Uber.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">3. <strong>Se</strong> souber a questão, respondo, <strong>senão</strong>, deixo em branco.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">4. <strong>Se</strong> o sinal estiver verde, atravesso, <strong>senão</strong>, espero.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">5. <strong>Se</strong> estiver com fome, como uma maçã, <strong>senão</strong>, bebo água.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">6. <strong>Se</strong> a nota for maior que 6, estou aprovado, <strong>senão</strong>, reprovado.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">7. <strong>Se</strong> a bateria acabar, o celular desliga, <strong>senão</strong>, continua ligado.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">8. <strong>Se</strong> hoje for sábado, durmo até tarde, <strong>senão</strong>, acordo às 6h.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4 border-gray-300">9. <strong>Se</strong> eu for maior de 18 anos, posso tirar carteira, <strong>senão</strong>, ando de ônibus.</div>
+                <div class="card p-4 text-left shadow-sm border-l-4" style="border-left-color: var(--c-accent);">10. <strong>Se</strong> a senha estiver correta, acesso o sistema, <strong>senão</strong>, bloqueio!</div>
+            </div>
+        </section>
+
+        <!-- Slide 4: A Estrutura IF (Esqueleto) -->
+        <section class="slide">
+            <h2>A Condicional Simples: <code class="inline-code">if</code> (SE)</h2>
+            <p>A palavra em inglês para "SE" é <strong>if</strong>. Ela cria um desvio no seu código.</p>
+            
+            <div class="card card-primary mt-6 w-full max-w-4xl text-left bg-white">
+                <p class="font-bold text-xl mb-4 text-gray-700">O Esqueleto (Sintaxe Básica):</p>
+                <div class="code-block-wrapper">
+                    <pre class="code-block text-2xl" style="padding: 2rem;">
+<span class="syn-kw">if</span> ( condicao ) {
+    <span class="syn-comment">// comandos a executar se for verdade</span>
+}</pre>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-6 bg-green-50 rounded-xl border border-green-200 w-full max-w-4xl text-left shadow-sm">
+                <p class="text-xl text-green-900 font-medium"><strong>Como ler isso em português:</strong></p>
+                <p class="text-2xl text-green-800 mt-2 font-serif italic">"<strong>SE</strong> a condição for verdadeira, <strong>ENTÃO</strong> execute os comandos que estão dentro das chaves."</p>
+            </div>
+        </section>
+
+        <!-- Slide 5: O IF na Prática -->
+        <section class="slide">
+            <h2>O <code class="inline-code">if</code> na Prática</h2>
+            <p>Vamos aplicar o esqueleto ao nosso problema do caixa eletrônico.</p>
+            
+            <div class="code-block-wrapper w-full max-w-4xl mt-6">
+                <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                <pre class="code-block text-xl">
+<span class="syn-type">int</span> senha;
+<span class="syn-func">printf</span>(<span class="syn-str">"Digite sua senha numerica: "</span>);
+<span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &senha);
+
+<span class="syn-comment">// Avaliando a condição</span>
+<span class="syn-kw">if</span> (senha <span class="syn-op">==</span> <span class="syn-num">1234</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Acesso liberado!\n"</span>);
+    <span class="syn-func">printf</span>(<span class="syn-str">"Seu saldo e: R$ 1.000.000\n"</span>);
+}
+
+<span class="syn-func">printf</span>(<span class="syn-str">"Obrigado por usar nosso banco!\n"</span>);</pre>
+            </div>
+            <p class="mt-6 text-lg text-gray-600">Se o usuário digitar a senha errada, o computador pula o bloco protegido pelas chaves e não mostra o saldo, indo direto para a despedida.</p>
+        </section>
+
+        <!-- Slide 6: A Condição (Pergunta) -->
+        <section class="slide">
+            <h2>A Pergunta Mágica</h2>
+            <p>Dentro dos parênteses do <code class="inline-code">if</code>, nós colocamos uma <strong>comparação</strong>. O computador avalia se aquilo é verdade ou mentira usando os Operadores Relacionais.</p>
+            
+            <div class="card w-full max-w-4xl mt-6 border-l-8" style="border-color: var(--c-primary);">
+                <p class="font-mono text-2xl text-center bg-gray-100 p-4 rounded-lg text-gray-800 font-bold mb-4">
+                    if ( nota <span class="text-green-600">>=</span> 6.0 )
+                </p>
+                <ul class="text-lg space-y-2 mt-6">
+                    <li>👉 <code>>=</code> significa <strong>Maior ou Igual a</strong>.</li>
+                    <li>👉 <code>></code> significa <strong>Maior que</strong>.</li>
+                    <li>👉 <code><</code> significa <strong>Menor que</strong>.</li>
+                    <li>👉 <code>==</code> significa <strong>Igual a</strong> (Cuidado: usamos DOIS sinais de igual para perguntar!).</li>
+                    <li>👉 <code>!=</code> significa <strong>Diferente de</strong>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 7: Depurador IF Simples -->
+        <section class="slide" id="slide-debug-if" data-interactive="true">
+            <h2>Depurador: O Salto do IF</h2>
+            <p class="text-gray-500 mb-6">(Pressione a <strong>Seta →</strong> do teclado para ver como o computador decide se entra ou não no bloco)</p>
+            
+            <div class="debugger-container">
+                <div class="debug-code" id="debug-if-code">
+                    <div class="line" data-line="1"><span class="syn-type">int</span> nota = <span class="syn-num">5</span>;</div>
+                    <div class="line" data-line="2"><span class="syn-func">printf</span>(<span class="syn-str">"Analisando...\n"</span>);</div>
+                    <div class="line mt-4" data-line="3"><span class="syn-kw">if</span> (nota >= <span class="syn-num">6</span>) {</div>
+                    <div class="line" data-line="4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Parabéns! Aprovado.\n"</span>);</div>
+                    <div class="line" data-line="5">}</div>
+                    <div class="line mt-4" data-line="6"><span class="syn-func">printf</span>(<span class="syn-str">"Fim do ano letivo.\n"</span>);</div>
+                </div>
+                
+                <div class="trace-panel">
+                    <div class="var-box flex justify-center items-center gap-4">
+                        <span class="var-name">Variável nota:</span>
+                        <span class="var-val" id="val-if-nota">?</span>
+                    </div>
+                    <div class="var-box" style="border-color: var(--c-accent); background-color: #fffbeb;">
+                        <span class="var-name text-orange-800">Avaliação do IF</span><br>
+                        <span class="var-val text-orange-600 text-xl mt-2 block" id="val-if-cond">Aguardando...</span>
+                    </div>
+                    <div class="terminal-box" id="term-if"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: A Estrutura IF-ELSE (Esqueleto) -->
+        <section class="slide">
+            <h2>O Plano B: <code class="inline-code">else</code> (SENÃO)</h2>
+            <p>Muitas vezes, queremos que o programa faça algo se a condição for verdadeira, e <strong>outra coisa diferente</strong> se for falsa. Para isso existe o <code>else</code>.</p>
+            
+            <div class="card card-accent mt-6 w-full max-w-4xl text-left bg-white">
+                <p class="font-bold text-xl mb-4 text-gray-700">O Esqueleto (Sintaxe Básica):</p>
+                <div class="code-block-wrapper">
+                    <pre class="code-block text-2xl" style="padding: 2rem;">
+<span class="syn-kw">if</span> ( condicao ) {
+    <span class="syn-comment">// plano A (se for verdade)</span>
+} <span class="syn-kw">else</span> {
+    <span class="syn-comment">// plano B (se for mentira)</span>
+}</pre>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-6 bg-orange-50 rounded-xl border border-orange-200 w-full max-w-4xl text-left shadow-sm">
+                <p class="text-xl text-orange-900 font-medium"><strong>Como ler isso em português:</strong></p>
+                <p class="text-2xl text-orange-800 mt-2 font-serif italic">"<strong>SE</strong> a condição for verdadeira, <strong>ENTÃO</strong> faça o Plano A. <strong>SENÃO</strong>, faça o Plano B."</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: O IF-ELSE na Prática -->
+        <section class="slide">
+            <h2>O <code class="inline-code">else</code> na Prática</h2>
+            <p>Veja como o código decide o destino da pessoa baseado na idade.</p>
+            
+            <div class="code-block-wrapper w-full max-w-4xl mt-6">
+                <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                <pre class="code-block text-xl">
+<span class="syn-type">int</span> idade = <span class="syn-num">16</span>;
+
+<span class="syn-kw">if</span> (idade >= <span class="syn-num">18</span>) {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Voce e maior de idade.\n"</span>);
+    <span class="syn-func">printf</span>(<span class="syn-str">"Pode tirar a carteira de motorista!\n"</span>);
+} <span class="syn-kw">else</span> {
+    <span class="syn-func">printf</span>(<span class="syn-str">"Ainda nao tem idade suficiente.\n"</span>);
+    <span class="syn-func">printf</span>(<span class="syn-str">"Continue andando de onibus.\n"</span>);
+}</pre>
+            </div>
+            <p class="mt-6 font-bold text-red-600 text-xl bg-red-50 p-4 rounded-lg">Regra Absoluta: O computador NUNCA executa os dois caminhos. É sempre um ou o outro!</p>
+        </section>
+
+        <!-- Slide 10: Depurador IF/ELSE -->
+        <section class="slide" id="slide-debug-ifelse" data-interactive="true">
+            <h2>Depurador: Caminhos Alternativos</h2>
+            <p class="text-gray-500 mb-6">(Pressione a <strong>Seta →</strong> para ver o bloco <code class="inline-code">else</code> em ação quando falta saldo)</p>
+            
+            <div class="debugger-container">
+                <div class="debug-code" id="debug-ifelse-code">
+                    <div class="line" data-line="1"><span class="syn-type">int</span> saldo = <span class="syn-num">50</span>;</div>
+                    <div class="line" data-line="2"><span class="syn-type">int</span> preco_jogo = <span class="syn-num">60</span>;</div>
+                    <div class="line mt-4" data-line="3"><span class="syn-kw">if</span> (saldo >= preco_jogo) {</div>
+                    <div class="line" data-line="4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Jogo comprado com sucesso!\n"</span>);</div>
+                    <div class="line" data-line="5">} <span class="syn-kw">else</span> {</div>
+                    <div class="line" data-line="6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="syn-func">printf</span>(<span class="syn-str">"Saldo insuficiente. Faltam R$ %d\n"</span>, preco_jogo - saldo);</div>
+                    <div class="line" data-line="7">}</div>
+                </div>
+                
+                <div class="trace-panel">
+                    <div class="flex gap-2">
+                        <div class="var-box flex-1">
+                            <span class="var-name">Saldo</span><br>
+                            <span class="var-val" id="val-ie-saldo">?</span>
+                        </div>
+                        <div class="var-box flex-1">
+                            <span class="var-name">Preço</span><br>
+                            <span class="var-val" id="val-ie-preco">?</span>
+                        </div>
+                    </div>
+                    <div class="var-box" style="border-color: var(--c-accent); background-color: #fffbeb;">
+                        <span class="var-name text-orange-800">Avaliação do IF</span><br>
+                        <span class="var-val text-orange-600 text-xl mt-2 block" id="val-ie-cond">Aguardando...</span>
+                    </div>
+                    <div class="terminal-box" id="term-ifelse"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: O Perigo das Chaves -->
+        <section class="slide">
+            <h2>O Perigo Silencioso das Chaves <code class="inline-code">{ }</code></h2>
+            <p>As chaves dizem ao computador onde começa e onde termina o "reino" do <code>if</code>. Em C, se você não usar chaves, o <code>if</code> só protege a <strong>PRIMEIRA linha</strong> logo abaixo dele.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mt-6">
+                <div class="card card-accent bg-red-50 border-red-200">
+                    <h3 class="font-bold text-red-700 text-2xl mb-4">❌ Sem Chaves (Perigoso)</h3>
+                    <code class="block font-mono bg-white p-4 rounded text-gray-800 border text-lg">
+                        if (idade >= 18)<br>
+                        &nbsp;&nbsp;printf("Pode entrar na festa.\n");<br>
+                        &nbsp;&nbsp;printf("Pegue uma bebida.\n");
+                    </code>
+                    <p class="text-sm mt-4 text-red-900">A segunda mensagem será impressa <strong>SEMPRE</strong>, até para uma criança de 10 anos, porque ela está fora do IF invisível! Isso causa bugs terríveis.</p>
+                </div>
+                <div class="card card-primary bg-green-50 border-green-200">
+                    <h3 class="font-bold text-green-700 text-2xl mb-4">✅ Com Chaves (Seguro)</h3>
+                    <code class="block font-mono bg-white p-4 rounded text-gray-800 border text-lg">
+                        if (idade >= 18) <strong>{</strong><br>
+                        &nbsp;&nbsp;printf("Pode entrar na festa.\n");<br>
+                        &nbsp;&nbsp;printf("Pegue uma bebida.\n");<br>
+                        <strong>}</strong>
+                    </code>
+                    <p class="text-sm mt-4 text-green-900">As duas mensagens estão agrupadas no mesmo bloco. Ou o computador faz as duas, ou não faz nenhuma.</p>
+                </div>
+            </div>
+            
+            <p class="mt-8 font-bold text-xl bg-blue-100 text-blue-900 p-4 rounded-xl border border-blue-300">Recomendação de Ouro: Acostume-se a SEMPRE colocar as chaves <code>{ }</code> logo que abrir o <code>if</code>, mesmo que vá escrever apenas uma linha!</p>
+        </section>
+
+        <!-- Slide 12: Exemplo Completo -->
+        <section class="slide">
+            <h2>O Código Completo: O Radar de Trânsito</h2>
+            <p>Juntando tudo num programa real. Um radar lê a velocidade e decide se multa ou não o condutor.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                <pre class="code-block">
+<span class="syn-inc">#include &lt;stdio.h&gt;</span>
+
+<span class="syn-type">int</span> <span class="syn-func">main</span>() {
+    <span class="syn-type">int</span> velocidade;
+    <span class="syn-type">int</span> limite = <span class="syn-num">80</span>;
+
+    <span class="syn-func">printf</span>(<span class="syn-str">"Digite a velocidade do carro: "</span>);
+    <span class="syn-func">scanf</span>(<span class="syn-str">"%d"</span>, &velocidade);
+
+    <span class="syn-comment">// Estrutura de Decisão</span>
+    <span class="syn-kw">if</span> (velocidade > limite) {
+        <span class="syn-func">printf</span>(<span class="syn-str">"\nMULTADO! Voce ultrapassou %d km/h.\n"</span>, limite);
+        <span class="syn-func">printf</span>(<span class="syn-str">"Valor da multa: R$ 150.00\n"</span>);
+    } <span class="syn-kw">else</span> {
+        <span class="syn-func">printf</span>(<span class="syn-str">"\nBoa viagem! Continue dirigindo com seguranca.\n"</span>);
+    }
+
+    <span class="syn-kw">return</span> <span class="syn-num">0</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- Slide 13: Cabeçalho Exercícios -->
+        <section class="slide" style="background-color: var(--c-dark); border: none;">
+            <h1 class="slide-title" style="color: var(--c-light);">Hora de Praticar!</h1>
+            <p class="text-white opacity-90 text-2xl">Chegou a hora de programar os seus próprios caminhos.</p>
+            
+            <div class="mt-8 p-6 card w-full max-w-4xl text-left border-l-8" style="background-color: var(--c-bg); border-color: var(--c-accent);">
+                <p class="font-bold mb-4 text-xl" style="color: var(--c-dark);">Instruções da Lista:</p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li>1. Crie uma pasta chamada <strong>"aula04"</strong> no seu computador.</li>
+                    <li>2. Para a questão 1 (teoria), use um arquivo <code class="inline-code">respostas.txt</code>.</li>
+                    <li>3. Para os outros exercícios, crie arquivos <code>.c</code> separados (ex: <code>ex2.c</code>) e compile no terminal para ver a funcionar.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Slide 14: Exercícios Parte 1 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Teoria e Leitura)</h2>
+            
+            <div class="w-full max-w-6xl columns-1 md:columns-2 gap-8 space-y-8">
+                
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">1. Tradução Lógica</h3>
+                    <p class="text-sm">Explique com as suas palavras a diferença do que acontece no fluxo de um programa quando o computador encontra um <code>if</code> isolado, e quando ele encontra um <code>if</code> acompanhado de um <code>else</code>.</p>
+                </div>
+
+                <div class="card card-primary break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">2. Teste de Mesa Visual</h3>
+                    <p class="text-sm mb-2">Dado o código abaixo, se o usuário digitar <strong>15</strong> no teclado, quais as exatas mensagens que vão aparecer na tela?</p>
+                    <code class="block bg-gray-100 p-3 text-sm text-black font-mono border rounded mt-2">
+                        int x;<br>
+                        scanf("%d", &x);<br>
+                        if (x > 20) {<br>
+                        &nbsp;&nbsp;printf("Maior.");<br>
+                        } else {<br>
+                        &nbsp;&nbsp;printf("Menor ou Igual.");<br>
+                        }<br>
+                        printf(" Fim.");
+                    </code>
+                </div>
+
+                <div class="card card-danger break-inside-avoid mb-8" style="border-top-color: #ef4444;">
+                    <h3 class="font-bold text-xl mb-2 text-red-700">3. O Erro Silencioso</h3>
+                    <p class="text-sm mb-2">O programador queria que as duas mensagens fossem impressas apenas se a conta fosse maior que 1000. Mas ele esqueceu algo fundamental ensinado nesta aula. O que falta e como corrigir?</p>
+                    <code class="block bg-gray-100 p-3 text-sm text-black font-mono border rounded mt-2">
+                        float conta = 500.0;<br>
+                        if (conta > 1000.0)<br>
+                        &nbsp;&nbsp;printf("Cliente VIP!\n");<br>
+                        &nbsp;&nbsp;printf("Oferecer desconto.\n");
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Exercícios Parte 2 -->
+        <section class="slide items-start text-left">
+            <h2>Exercícios (Mão na Massa - Prática)</h2>
+            
+            <div class="w-full max-w-6xl columns-1 md:columns-2 gap-8 space-y-8">
+                
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">4. Maioridade Penal (ex4.c)</h3>
+                    <p class="text-sm">Crie um programa que peça a idade do usuário (usando <code>scanf</code>). Se a idade for maior ou igual a 18, exiba "Você já é maior de idade. Pode ser preso!". Senão, exiba "Você ainda é menor de idade.".</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">5. Aprovado ou Reprovado (ex5.c)</h3>
+                    <p class="text-sm">Peça ao usuário para digitar a sua nota final em Programação (um <code>float</code>). Se a nota for maior ou igual a 6.0, mostre uma mensagem de aprovação festiva. Senão, mostre uma mensagem de incentivo para estudar mais para a recuperação.</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">6. Verificador de Senha (ex6.c)</h3>
+                    <p class="text-sm">Defina uma senha secreta no seu código (ex: <code>int senha_secreta = 1234;</code>). O programa deve pedir para o usuário digitar uma senha. Se ele acertar (use o operador <code>==</code> para comparar), exiba "Acesso Concedido". Se errar, "Acesso Negado".</p>
+                </div>
+
+                <div class="card card-accent break-inside-avoid mb-8">
+                    <h3 class="font-bold text-xl mb-2 text-gray-800">7. Qual é o Maior? (ex7.c)</h3>
+                    <p class="text-sm">Peça ao usuário para digitar dois números inteiros diferentes (ex: num1 e num2). Crie uma estrutura condicional que compare os dois usando <code>if/else</code> e imprima apenas o número que for o maior de todos.</p>
+                </div>
+
+                <div class="card border-t-8 break-inside-avoid mb-8" style="border-color: #b91c1c;">
+                    <h3 class="font-bold text-xl mb-2 text-red-700">8. Desafio Final: A Loja com Desconto (ex8.c)</h3>
+                    <p class="text-sm">Uma loja dá um desconto especial de 10% apenas nas compras cujo valor total seja <strong>acima de R$ 100,00</strong>.<br>Crie um programa que leia o valor total da compra. Se o valor for maior que 100, calcule o desconto (multiplicando o valor por 0.10), subtraia do total e exiba o novo valor final a pagar. Se não for maior que 100, exiba o valor original sem desconto.</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- COPIAR CÓDIGO ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('pre');
+                let codeText = codeEl.innerText.replace(/\u00A0/g, ' ');
+                
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    if (span) {
+                        const originalText = span.innerText;
+                        span.innerText = 'Copiado!';
+                        setTimeout(() => { span.innerText = originalText; }, 2000);
+                    }
+                }).catch(err => console.error("Falha ao copiar: ", err));
+            });
+        });
+
+        // --- DEPURADORES INTERATIVOS ---
+        const debuggers = {
+            'if': {
+                steps: [
+                    { line: null, nota: '?', cond: 'Aguardando', term: '', skip: [] },
+                    { line: 1, nota: '5', cond: 'Aguardando', term: '', skip: [] },
+                    { line: 2, nota: '5', cond: 'Aguardando', term: '> Analisando...<br>', skip: [] },
+                    { line: 3, nota: '5', cond: '(5 >= 6) é FALSO', term: '> Analisando...<br>', skip: [] },
+                    // Salta o bloco do if (linha 4)
+                    { line: 6, nota: '5', cond: 'FALSO', term: '> Analisando...<br>> Fim do ano letivo.<br><span class="cursor-blink">_</span>', skip: [4] }
+                ],
+                current: 0,
+                update: function() {
+                    const step = this.steps[this.current];
+                    document.querySelectorAll('#debug-if-code .line').forEach((el) => {
+                        el.classList.remove('active', 'skipped');
+                        const lineNum = parseInt(el.dataset.line);
+                        if (lineNum === step.line) el.classList.add('active');
+                        if (step.skip.includes(lineNum)) el.classList.add('skipped');
+                    });
+                    document.getElementById('val-if-nota').textContent = step.nota;
+                    document.getElementById('val-if-cond').textContent = step.cond;
+                    document.getElementById('term-if').innerHTML = step.term;
+                }
+            },
+            'ifelse': {
+                steps: [
+                    { line: null, s: '?', p: '?', cond: 'Aguardando', term: '', skip: [] },
+                    { line: 1, s: '50', p: '?', cond: 'Aguardando', term: '', skip: [] },
+                    { line: 2, s: '50', p: '60', cond: 'Aguardando', term: '', skip: [] },
+                    { line: 3, s: '50', p: '60', cond: '(50 >= 60) é FALSO', term: '', skip: [] },
+                    // Pula pro else (linha 5) ignorando o if (linha 4)
+                    { line: 5, s: '50', p: '60', cond: 'FALSO', term: '', skip: [4] },
+                    { line: 6, s: '50', p: '60', cond: 'FALSO', term: '> Saldo insuficiente. Faltam R$ 10<br><span class="cursor-blink">_</span>', skip: [4] },
+                    { line: 7, s: '50', p: '60', cond: 'FALSO', term: '> Saldo insuficiente. Faltam R$ 10<br><span class="cursor-blink">_</span>', skip: [4] }
+                ],
+                current: 0,
+                update: function() {
+                    const step = this.steps[this.current];
+                    document.querySelectorAll('#debug-ifelse-code .line').forEach((el) => {
+                        el.classList.remove('active', 'skipped');
+                        const lineNum = parseInt(el.dataset.line);
+                        if (lineNum === step.line) el.classList.add('active');
+                        if (step.skip.includes(lineNum)) el.classList.add('skipped');
+                    });
+                    document.getElementById('val-ie-saldo').textContent = step.s;
+                    document.getElementById('val-ie-preco').textContent = step.p;
+                    document.getElementById('val-ie-cond').textContent = step.cond;
+                    document.getElementById('term-ifelse').innerHTML = step.term;
+                }
+            }
+        };
+
+        // --- NAVEGAÇÃO DOS SLIDES ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fsBtn = document.getElementById('fsBtn');
+        const counterElement = document.getElementById('counter');
+        const mainContainer = document.querySelector('body');
+        let currentSlide = 0;
+
+        function updateCounter() {
+            if (counterElement) counterElement.textContent = `Página ${currentSlide + 1} / ${slides.length}`;
+            prevBtn.style.opacity = currentSlide === 0 ? '0.5' : '1';
+            prevBtn.style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
+            nextBtn.style.opacity = currentSlide === slides.length - 1 ? '0.5' : '1';
+            nextBtn.style.pointerEvents = currentSlide === slides.length - 1 ? 'none' : 'auto';
+        }
+
+        function showSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                slides.forEach(s => s.classList.remove('active'));
+                slides[index].classList.add('active');
+                currentSlide = index;
+                window.scrollTo(0,0);
+                updateCounter();
+
+                // Reset debuggers on entry
+                if(slides[index].id === 'slide-debug-if') { debuggers['if'].current = 0; debuggers['if'].update(); }
+                if(slides[index].id === 'slide-debug-ifelse') { debuggers['ifelse'].current = 0; debuggers['ifelse'].update(); }
+            }
+        }
+
+        function nextSlide() {
+            // Check debuggers
+            if (slides[currentSlide].id === 'slide-debug-if' && debuggers['if'].current < debuggers['if'].steps.length - 1) {
+                debuggers['if'].current++; debuggers['if'].update(); return; 
+            }
+            if (slides[currentSlide].id === 'slide-debug-ifelse' && debuggers['ifelse'].current < debuggers['ifelse'].steps.length - 1) {
+                debuggers['ifelse'].current++; debuggers['ifelse'].update(); return; 
+            }
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (slides[currentSlide].id === 'slide-debug-if' && debuggers['if'].current > 0) {
+                debuggers['if'].current--; debuggers['if'].update(); return;
+            }
+            if (slides[currentSlide].id === 'slide-debug-ifelse' && debuggers['ifelse'].current > 0) {
+                debuggers['ifelse'].current--; debuggers['ifelse'].update(); return;
+            }
+            showSlide(currentSlide - 1);
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        });
+
+        // Intersection Observer (for manual scrolling compatibility)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlide = index;
+                    updateCounter();
+                }
+            });
+        }, { threshold: 0.5 }); 
+
+        slides.forEach(slide => observer.observe(slide));
+
+        // Inicialização
+        updateCounter();
+        showSlide(0);
+        debuggers['if'].update();
+        debuggers['ifelse'].update();
+
+    </script>
+</body>
+</html>

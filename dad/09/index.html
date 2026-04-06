@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 09: IPC - Comunicação Bidirecional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta: Índigo Profundo & Fúcsia */
+            --bg: #f8fafc;         
+            --slide-bg: #ffffff;   
+            --text: #0f172a;       
+            --text-muted: #64748b; 
+            --primary: #312e81;    /* Índigo 900 */
+            --accent: #d946ef;     /* Fúcsia 500 */
+            --accent-light: #fdf4ff; 
+            --cyan: #0d9488;       /* Teal 600 para retornos */
+            
+            --code-bg: #1e1b4b;    /* Índigo mais escuro pro código */
+            --code-text: #e0e7ff;  
+            
+            --main-color: #312e81; 
+            --rend-color: #d946ef; 
+            --preload-color: #f59e0b; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link Fixa */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--primary);
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-bottom: 3px solid var(--accent);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .fixed-link-bar a:hover { color: var(--accent); }
+
+        /* Slides - O Coração Interativo */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: var(--primary);
+            text-align: center;
+            border: 5px solid var(--accent);
+        }
+        .slide.topic h1, .slide.topic p { color: #ffffff; }
+        .slide.topic h2 { color: var(--accent); border: none; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--accent); }
+
+        .slide-content-wrapper { max-width: 1100px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 70px; right: 40px; font-size: 1.5rem; color: var(--primary); font-weight: 800; opacity: 0.3; }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--text); }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        code { 
+            font-family: 'Fira Code', monospace; 
+            background: #f1f5f9; 
+            color: var(--primary);
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border: 1px solid #e2e8f0;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; border: none; }
+        
+        .file-label {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px 6px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: -15px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 2px solid var(--accent);
+        }
+        .file-label.html { background: var(--accent); border-color: #fff; }
+        .file-label.preload { background: var(--preload-color); border-color: #fff; color: #000; }
+        .file-label.main { background: var(--main-color); border-color: #fff; }
+
+        /* Layouts */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .col { background: #f8fafc; padding: 25px; border-radius: 12px; border: 1px solid #cbd5e1; }
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; display: flex; align-items: center; gap: 10px;}
+
+        /* IPC Animator Bidirecional */
+        .ipc-animator { background: var(--code-bg); padding: 30px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px; position: relative; overflow: hidden; }
+        .node-box { background: #2e1065; color: white; padding: 20px; border-radius: 8px; width: 35%; text-align: center; border: 2px solid #6366f1; z-index: 2; position: relative; }
+        .node-box h4 { margin-bottom: 10px; color: var(--accent); font-size: 1.1rem; }
+        .ipc-track { position: absolute; left: 35%; right: 35%; height: 2px; background: #6366f1; top: 50%; z-index: 1; border-style: dashed; }
+        
+        .ipc-packet { 
+            position: absolute; left: 35%; top: 50%; transform: translate(-50%, -50%); 
+            background: var(--accent); color: #fff; padding: 5px 15px; border-radius: 20px; 
+            font-weight: bold; font-size: 0.85rem; opacity: 0; z-index: 3; 
+            box-shadow: 0 0 10px var(--accent);
+        }
+        
+        .ipc-packet.animate-go { animation: travelGo 1.5s ease-in-out forwards; }
+        .ipc-packet.animate-back { animation: travelBack 1.5s ease-in-out forwards; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); color: white;}
+        
+        @keyframes travelGo { 
+            0% { left: 35%; opacity: 1; } 
+            90% { opacity: 1; } 
+            100% { left: 65%; opacity: 0; } 
+        }
+        @keyframes travelBack { 
+            0% { left: 65%; opacity: 1; } 
+            90% { opacity: 1; } 
+            100% { left: 35%; opacity: 0; } 
+        }
+        
+        .console-log { background: #000; color: #a78bfa; font-family: monospace; padding: 10px; border-radius: 5px; min-height: 40px; text-align: left; font-size: 0.9rem; margin-top: 10px; border: 1px solid #312e81; }
+
+        /* Code Block Wrapper with Line Numbers */
+        .code-wrapper {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 15px 0;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            border-left: 5px solid var(--accent);
+            overflow-x: auto;
+            line-height: 1.6;
+            margin: 15px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .code-line { display: flex; padding: 0 15px; }
+        .line-num {
+            color: var(--text-muted);
+            min-width: 30px;
+            text-align: right;
+            margin-right: 15px;
+            padding-right: 10px;
+            border-right: 1px solid #312e81;
+            user-select: none;
+            opacity: 0.6;
+        }
+        .code-content { white-space: pre; }
+        .highlight-line {
+            background-color: rgba(217, 70, 239, 0.15); /* Destaque sutil com a cor de accent */
+            border-radius: 4px;
+        }
+        .highlight-line .line-num { color: var(--accent); opacity: 1; border-right-color: var(--accent); }
+        .highlight-line-cyan {
+            background-color: rgba(13, 148, 136, 0.15); 
+            border-radius: 4px;
+        }
+        .highlight-line-cyan .line-num { color: var(--cyan); opacity: 1; border-right-color: var(--cyan); }
+
+        /* Final List */
+        .final-list ol { counter-reset: item; list-style: none; padding: 0; }
+        .final-list li { 
+            background: white; margin-bottom: 10px; padding: 15px 15px 15px 60px; 
+            border-radius: 8px; position: relative; border: 1px solid #cbd5e1; font-size: 1.1rem; 
+        }
+        .final-list li::before {
+            content: counter(item); counter-increment: item; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; 
+            text-align: center; font-size: 1rem; line-height: 30px; font-weight: bold;
+        }
+
+        /* Controls */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--primary); }
+        .btn { background: white; border: 2px solid var(--primary); color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        .alert-box { background: #fdf4ff; border-left: 4px solid var(--accent); padding: 15px; border-radius: 0 8px 8px 0; margin: 20px 0; border-top: 1px solid #fbcfe8; border-right: 1px solid #fbcfe8; border-bottom: 1px solid #fbcfe8;}
+        .alert-box h4 { color: var(--accent); margin-bottom: 5px; display: flex; align-items: center; gap: 10px;}
+
+        /* Spinner para o visualizador */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border-left-color: var(--accent);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
+            .fixed-link-bar a { color: black; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
+            .controls, .progress-bar { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
+            pre, .arch-box, .col, .ipc-animator { border: 1px solid #000; color: black; box-shadow: none; background: white !important; }
+            .arch-box { color: black !important; }
+            .arch-box h4 { color: black !important; }
+            h1, h2, p, li, strong { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+            .code-wrapper { border: 1px solid #000; background: #fff;}
+            .code-line { color: #000; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn" onclick="goToExercises()" title="Ir para os Exercícios">
+        <i class="fa-solid fa-clipboard-list"></i>
+    </button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <h1>Aula 09: IPC Bidirecional</h1>
+            <h2>Solicitando e Recebendo Dados</h2>
+            <br>
+            <p><strong>Roteiro da Aula:</strong></p>
+            <ol>
+                <li>O problema do Rádio Unidirecional (Send/On).</li>
+                <li>O Telefone: <code>invoke</code> e <code>handle</code>.</li>
+                <li>O conceito de Promises e <code>async / await</code> (A espera).</li>
+                <li>Atualizando o Garçom (Preload).</li>
+                <li><strong>Live Coding: Construindo o Buscador do Sistema.</strong></li>
+                <li>Na Prática: 6 exercícios de comunicação.</li>
+            </ol>
+            <div style="margin-top: 40px; color: var(--primary); font-weight: 600;">
+                Técnico em Informática • 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: O PROBLEMA -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-walkie-talkie"></i>
+            <h1>Parte 1: O Problema</h1>
+            <p>O limite do Send e On</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: RELEMBRANDO A AULA 08 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">03</div>
+            <h2>Relembrando a Aula Passada</h2>
+            <p>Aprendemos a enviar comandos do HTML (Renderer) para o Node (Main) usando <code>ipcRenderer.send()</code> e <code>ipcMain.on()</code>.</p>
+            
+            <div class="alert-box">
+                <h4><i class="fa-regular fa-paper-plane"></i> A Analogia da Carta</h4>
+                <p>Usar o <code>send()</code> é como jogar uma carta nos Correios. Você envia a ordem (ex: "Feche o aplicativo", "Salve este arquivo") e vai cuidar da sua vida. <strong>Você não fica esperando o carteiro voltar com uma resposta.</strong></p>
+            </div>
+            
+            <p style="margin-top: 20px;">Isso é ótimo para comandos de ação. Mas e se o Front-end precisar fazer uma <strong>pergunta</strong>?</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: E SE PRECISARMOS DA RESPOSTA? -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>A Necessidade de uma Resposta</h2>
+            <p>Imagine que o seu botão HTML pede para o Node.js ler um arquivo de texto no disco rígido ou consultar um Banco de Dados.</p>
+            
+            <div class="comparison">
+                <div class="col" style="border-color: #ef4444; background: #fef2f2;">
+                    <h3 style="color: #ef4444;"><i class="fa-solid fa-xmark"></i> O Jeito Antigo (Difícil)</h3>
+                    <p style="font-size: 0.95rem;">Você enviava a pergunta com <code>send</code> por um canal. O Main processava. Depois o Main usava <em>outro</em> <code>send</code> para enviar a resposta por um <em>segundo</em> canal de volta pro Front.</p>
+                    <p style="font-size: 0.85rem; color: #991b1b; margin-top: 10px;"><em>Resultado: Código espaguete e difícil de ler.</em></p>
+                </div>
+                <div class="col" style="border-color: var(--cyan); background: #f0fdfa;">
+                    <h3 style="color: var(--cyan);"><i class="fa-solid fa-check"></i> O Jeito Moderno (Invoke)</h3>
+                    <p style="font-size: 0.95rem;">Você faz uma "ligação telefônica". Você pede o dado, <strong>pausa o seu código</strong> e fica na linha esperando. Quando o Main retorna, o seu código continua com o dado em mãos.</p>
+                    <p style="font-size: 0.85rem; color: #115e59; margin-top: 10px;"><em>Resultado: Código linear, limpo e direto.</em></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: O NOVO MÉTODO -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-phone-volume"></i>
+            <h1>Parte 2: O Telefone</h1>
+            <p>Invoke, Handle e a arte de Esperar</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: A NOVA SINTAXE -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">06</div>
+            <h2>A Nova Dupla Dinâmica</h2>
+            <p>Esqueça o <code>send()</code> e o <code>on()</code> quando precisar de dados de volta. Apresento-lhes as novas ferramentas IPC:</p>
+            
+            <div class="comparison" style="margin-top: 15px;">
+                <div class="col" style="border-top: 4px solid var(--accent);">
+                    <h3 style="color: var(--accent);"><i class="fa-solid fa-microphone"></i> ipcRenderer.invoke()</h3>
+                    <p>Usado no <strong>Front-end</strong> (via Preload).</p>
+                    <p>Significa "Invocar". Ele chama o Back-end e <strong>cria uma Promessa (Promise)</strong> de que a resposta vai chegar.</p>
+                </div>
+                
+                <div class="col" style="border-top: 4px solid var(--primary);">
+                    <h3 style="color: var(--primary);"><i class="fa-solid fa-headset"></i> ipcMain.handle()</h3>
+                    <p>Usado no <strong>Back-end</strong> (Node).</p>
+                    <p>Significa "Lidar com". Ele ouve a invocação, processa o que foi pedido, e usa a palavra <code>return</code> para devolver a resposta pela mesma linha.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: O PRELOAD ATUALIZADO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">07</div>
+            <h2>Passo 1: O Garçom (Preload.js)</h2>
+            <p>Nosso garçom agora anota o pedido, leva na cozinha e <strong>espera</strong> o prato ficar pronto para levar de volta à mesa.</p>
+            
+            <div class="file-label preload">preload.js</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">const { contextBridge, ipcRenderer } = require('electron');</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">3</span><span class="code-content">contextBridge.exposeInMainWorld('api', {</span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content">    </span></div>
+                <div class="code-line highlight-line"><span class="line-num">5</span><span class="code-content">    // Usa return e invoke para prometer a resposta ao HTML</span></div>
+                <div class="code-line highlight-line"><span class="line-num">6</span><span class="code-content">    pedirInformacao: (pergunta) => {</span></div>
+                <div class="code-line highlight-line"><span class="line-num">7</span><span class="code-content">        return ipcRenderer.invoke('canal-info', pergunta);</span></div>
+                <div class="code-line highlight-line"><span class="line-num">8</span><span class="code-content">    }</span></div>
+                <div class="code-line"><span class="line-num">9</span><span class="code-content">    </span></div>
+                <div class="code-line"><span class="line-num">10</span><span class="code-content">});</span></div>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--text-muted);">Como <code>invoke</code> retorna uma <em>Promise</em>, repassamos esse retorno diretamente para a API do navegador.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: O RENDERER (AWAIT) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">08</div>
+            <h2>Passo 2: O Cliente Esperando (HTML/JS)</h2>
+            <p>Se o Garçom traz uma "Promessa", nós precisamos <strong>esperar</strong> (await) ela se cumprir antes de exibir na tela.</p>
+            <p>Para usar <code>await</code>, a nossa função de clique precisa ser marcada como <code>async</code>.</p>
+            
+            <div class="file-label html">index.html (Renderer)</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">const botao = document.querySelector("#btnPerguntar");</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content"></span></div>
+                <div class="code-line highlight-line"><span class="line-num">3</span><span class="code-content">botao.addEventListener("click", async () => {</span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content">    </span></div>
+                <div class="code-line highlight-line"><span class="line-num">5</span><span class="code-content">    // O código PAUSA nesta linha até o Node responder</span></div>
+                <div class="code-line highlight-line"><span class="line-num">6</span><span class="code-content">    const resposta = await window.api.pedirInformacao("Qual o sistema?");</span></div>
+                <div class="code-line"><span class="line-num">7</span><span class="code-content">    </span></div>
+                <div class="code-line"><span class="line-num">8</span><span class="code-content">    // Só exibe o alert DEPOIS que a resposta chegar</span></div>
+                <div class="code-line"><span class="line-num">9</span><span class="code-content">    alert(resposta); </span></div>
+                <div class="code-line"><span class="line-num">10</span><span class="code-content">});</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: O MAIN (HANDLE) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">09</div>
+            <h2>Passo 3: A Cozinha Respondendo (Main.js)</h2>
+            <p>O Node usa o <code>handle</code>. Ele recebe o pedido, processa (pode acessar arquivos, banco, etc.) e <strong>retorna</strong> o valor pela mesma linha telefônica.</p>
+            
+            <div class="file-label main">index.js (Main Process)</div>
+            <div class="code-wrapper">
+                <div class="code-line"><span class="line-num">1</span><span class="code-content">const { app, BrowserWindow, ipcMain } = require('electron');</span></div>
+                <div class="code-line"><span class="line-num">2</span><span class="code-content">const os = require('os'); // Módulo do Node para infos do PC</span></div>
+                <div class="code-line"><span class="line-num">3</span><span class="code-content"></span></div>
+                <div class="code-line"><span class="line-num">4</span><span class="code-content">app.whenReady().then(() => {</span></div>
+                <div class="code-line"><span class="line-num">5</span><span class="code-content">    criarJanela();</span></div>
+                <div class="code-line"><span class="line-num">6</span><span class="code-content"></span></div>
+                <div class="code-line highlight-line-cyan"><span class="line-num">7</span><span class="code-content">    // Handle escuta invocações no canal 'canal-info'</span></div>
+                <div class="code-line highlight-line-cyan"><span class="line-num">8</span><span class="code-content">    ipcMain.handle('canal-info', (evento, pergunta) => {</span></div>
+                <div class="code-line"><span class="line-num">9</span><span class="code-content">        console.log("O HTML perguntou:", pergunta);</span></div>
+                <div class="code-line"><span class="line-num">10</span><span class="code-content">        </span></div>
+                <div class="code-line"><span class="line-num">11</span><span class="code-content">        // Processa o pedido (Ex: Pega o nome do sistema operacional)</span></div>
+                <div class="code-line"><span class="line-num">12</span><span class="code-content">        const sistema = os.platform(); </span></div>
+                <div class="code-line"><span class="line-num">13</span><span class="code-content">        </span></div>
+                <div class="code-line highlight-line-cyan"><span class="line-num">14</span><span class="code-content">        // O return é a "mágica" que viaja de volta pro HTML</span></div>
+                <div class="code-line highlight-line-cyan"><span class="line-num">15</span><span class="code-content">        return `O sistema rodando é: ${sistema}`; </span></div>
+                <div class="code-line highlight-line-cyan"><span class="line-num">16</span><span class="code-content">    });</span></div>
+                <div class="code-line"><span class="line-num">17</span><span class="code-content">});</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: O SIMULADOR -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-arrows-spin"></i>
+            <h1>Parte 3: Na Prática</h1>
+            <p>O fluxo de ida e volta</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: SIMULADOR ANIMADO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">11</div>
+            <h2>O Ciclo Invoke/Handle em Ação</h2>
+            
+            <div class="ipc-animator">
+                <div class="node-box" style="border-color: var(--rend-color);">
+                    <h4 style="color: var(--accent);">Renderer (HTML)</h4>
+                    <p style="font-size: 0.8rem; margin-bottom: 10px; font-family: 'Fira Code', monospace;">const r = <b>await</b> api.pedir()</p>
+                    <button id="btnSimula" onclick="dispararIPC()" style="padding: 8px 15px; cursor: pointer; background: var(--rend-color); color: white; border: none; border-radius: 5px; font-weight: bold; transition: 0.2s;">
+                        <span id="spinnerHtml" class="spinner"></span>
+                        <span id="btnText">Solicitar Dados</span>
+                    </button>
+                    <div id="htmlTerminal" class="console-log" style="color: #cbd5e1; font-size: 0.8rem;">Console vazio...</div>
+                </div>
+                
+                <div class="ipc-track"></div>
+                <div id="packet" class="ipc-packet">"Qual a versão?"</div>
+                
+                <div class="node-box" style="border-color: var(--main-color);">
+                    <h4 style="color: #818cf8;">Main Process (Node)</h4>
+                    <p style="font-size: 0.8rem; margin-bottom: 5px; font-family: 'Fira Code', monospace;">ipcMain.<b>handle</b>(...)</p>
+                    <div id="mainTerminal" class="console-log" style="border-color: #4338ca; color: #64748b;">Aguardando invoke...</div>
+                </div>
+            </div>
+
+            <div class="col" style="margin-top: 20px; padding: 15px; background: white;">
+                <ol style="margin: 0 0 0 20px; font-size: 1rem;">
+                    <li>Front-end usa o <code>await</code>, o que <strong>pausa o seu script HTML</strong> (Loading).</li>
+                    <li>O Main recebe o pedido via <code>handle</code> e pode fazer operações demoradas (Ler banco de dados).</li>
+                    <li>O Main dá um <code>return</code>. O pacote volta pela mesma linha. O <code>await</code> do HTML é destravado com a resposta!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 4: LIVE CODING (NOVO) -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-laptop-code"></i>
+            <h1>Parte 4: Live Coding</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 25px;">Prática Guiada: O Buscador do Sistema</p>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 12px; max-width: 800px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.2); text-align: left;">
+                <h3 style="color: var(--accent); font-size: 1.3rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-bullseye"></i> O que vamos construir?
+                </h3>
+                <p style="font-size: 1.1rem; color: #e0e7ff; margin-bottom: 0; line-height: 1.6;">
+                    Um aplicativo onde o Front-end (HTML) faz uma "ligação" para o Back-end (Node.js) perguntando o <strong>Nome do Usuário</strong> logado no computador e a quantidade de <strong>Memória RAM</strong> instalada. O Node.js fará essa leitura direto do sistema operacional e devolverá os dados para exibirmos na interface gráfica!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE LC 0: SETUP (NOVO) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">13</div>
+            <h2>Passo 0: Preparar o Terreno</h2>
+            <p>Antes de programar, precisamos de iniciar o projeto Node.js e instalar o Electron. Abram o terminal do VS Code (<code>Ctrl + '</code>) numa pasta vazia.</p>
+            
+            <div class="comparison" style="margin-top: 15px;">
+                <div class="col">
+                    <h3 style="color: var(--primary);"><i class="fa-solid fa-terminal"></i> 1. No Terminal</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Crie o <code>package.json</code> (Identidade do app):</p>
+                    <pre style="padding: 10px; font-size: 0.85rem; margin-bottom: 15px;">npm init -y</pre>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Instale o framework Electron:</p>
+                    <pre style="padding: 10px; font-size: 0.85rem;">npm install electron --save-dev</pre>
+                </div>
+                <div class="col" style="border-color: var(--accent);">
+                    <h3 style="color: var(--accent);"><i class="fa-solid fa-file-code"></i> 2. No package.json</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Abra o ficheiro gerado e altere o bloco "scripts" para ensinar o Node a iniciar a nossa janela:</p>
+                    <div class="code-wrapper" style="margin-top: 10px; padding: 10px 0;">
+                        <div class="code-line"><span class="code-content">"scripts": {</span></div>
+                        <div class="code-line highlight-line"><span class="code-content">  "start": "electron ."</span></div>
+                        <div class="code-line"><span class="code-content">}</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE LC 1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">14</div>
+            <h2>Passo 1: A Interface Visual</h2>
+            <p>Criem 4 ficheiros vazios: <code>index.html</code>, <code>renderer.js</code>, <code>preload.js</code> e <code>index.js</code>. <br>Abram o <code>index.html</code> e digitem:</p>
+            <div class="file-label html">index.html</div>
+            <pre style="font-size: 0.85rem; padding: 15px;">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Meu PC Info&lt;/title&gt;
+    &lt;style&gt;
+        body { font-family: Arial; padding: 20px; text-align: center; background: #1e293b; color: white; }
+        button { padding: 10px 20px; font-size: 1.2rem; cursor: pointer; background: #d946ef; color: white; border: none; border-radius: 8px; }
+        #resultado { margin-top: 20px; font-size: 1.5rem; font-weight: bold; color: #0d9488; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Informações do Sistema&lt;/h1&gt;
+    &lt;p&gt;O HTML não tem poder para ler a memória do seu PC. Vamos pedir ao Node.js!&lt;/p&gt;
+    
+    &lt;button id="btnBuscar"&gt;Consultar Node.js&lt;/button&gt;
+    &lt;p id="resultado"&gt;Aguardando...&lt;/p&gt;
+
+    &lt;script src="renderer.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE LC 2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">15</div>
+            <h2>Passo 2: O Garçom (A Ponte)</h2>
+            <p>O HTML não grita direto para o Node. Aqui usamos a palavra mágica <code>invoke</code>, que pede algo e espera uma promessa de resposta.</p>
+            <div class="file-label preload">preload.js</div>
+            <pre>const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+    
+    // Criamos um "telefone" chamado buscarInfoPC
+    buscarInfoPC: () => {
+        // O invoke dispara a mensagem pelo canal 'get-sys-info'
+        // e PROMETERÁ devolver o que o Main responder!
+        return ipcRenderer.invoke('get-sys-info');
+    }
+
+});</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE LC 3 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">16</div>
+            <h2>Passo 3: O Back-end (A Cozinha)</h2>
+            <p>O garçom grita 'get-sys-info'. A cozinha usa o <code>handle</code> para ouvir, prepara o dado e usa o <code>return</code> para devolver a bandeja.</p>
+            <div class="file-label main">index.js</div>
+            <pre style="font-size: 0.85rem; padding: 15px;">const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+const os = require('os'); // Módulo do Node para infos do PC
+
+function criarJanela() {
+    const janela = new BrowserWindow({
+        width: 600, height: 400,
+        webPreferences: { preload: path.join(__dirname, 'preload.js') }
+    });
+    janela.loadFile('index.html');
+}
+
+app.whenReady().then(() => {
+    criarJanela();
+
+    // A COZINHA ATENDE O TELEFONE AQUI
+    ipcMain.handle('get-sys-info', () => {
+        console.log("O Front-end pediu os dados. Calculando...");
+        const nomeUsuario = os.userInfo().username;
+        const memoriaTotalMB = Math.round(os.totalmem() / 1024 / 1024);
+
+        // O SEGREDO DO BIDIRECIONAL: O return!
+        return `Usuário: ${nomeUsuario} | Memória RAM: ${memoriaTotalMB} MB`;
+    });
+});</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE LC 4 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">17</div>
+            <h2>Passo 4: O Cliente Esperando</h2>
+            <p>Como o Node.js pode demorar, a nossa função de clique precisa ser <code>async</code> e mandamos o código <strong>esperar</strong> a resposta com <code>await</code>.</p>
+            <div class="file-label html">renderer.js</div>
+            <pre>const btnBuscar = document.getElementById('btnBuscar');
+const pResultado = document.getElementById('resultado');
+
+// O 'async' avisa: "Esta função vai ter pausas"
+btnBuscar.addEventListener('click', async () => {
+    
+    pResultado.innerText = "Consultando o Sistema... ⏳";
+    
+    // O 'await' pausa a execução EXATAMENTE NESTA LINHA.
+    const respostaDoNode = await window.api.buscarInfoPC();
+
+    // A resposta chegou! Vamos mostrar na tela.
+    pResultado.innerText = respostaDoNode;
+});</pre>
+        </div>
+    </div>
+
+    <!-- SLIDE LC 5 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">18</div>
+            <h2>Passo 5: O Grande Teste</h2>
+            <div class="interactive-area" style="text-align: left; padding: 40px; background: var(--bg); border-color: var(--accent);">
+                <h3 style="color: var(--primary);"><i class="fa-solid fa-play"></i> Hora da Verdade</h3>
+                <ol style="margin-top: 20px;">
+                    <li>Abram o terminal do VS Code (<code>Ctrl + '</code>).</li>
+                    <li>Certifiquem-se de ter salvo <strong>todos os 5 ficheiros</strong> (incluindo o package.json).</li>
+                    <li>Executem o comando: <br><br>
+                        <code style="font-size: 1.2rem; background: var(--primary); color: white; padding: 10px;">npm start</code>
+                    </li>
+                </ol>
+                <p style="margin-top: 30px; font-weight: bold; color: var(--text-muted);">Testem clicar no botão e vejam o terminal do VS Code registar o log do Back-end ao mesmo tempo que o ecrã atualiza!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 19: LISTA FINAL -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">19</div>
+            <h2>Lista de Exercícios (Bidirecional)</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Configure o Preload com <code>invoke</code> e resolva os desafios abaixo construindo a ponte de <strong>ida e volta</strong>.</p>
+            
+            <div class="final-list">
+                <ol>
+                    <li><strong>Ping-Pong:</strong> Crie um botão "Ping". O HTML faz o <code>invoke</code> mandando "Ping". O Main recebe, processa e dá um <code>return "Pong"</code>. O HTML deve exibir a resposta usando um <code>alert()</code>.</li>
+                    <li><strong>Calculadora Node:</strong> O HTML possui dois inputs numéricos e um botão "Somar no Back-end". Envie os dois números (em um objeto <code>{n1: x, n2: y}</code>) pelo <code>invoke</code>. O Main soma e retorna o total para o HTML exibir num parágrafo.</li>
+                    <li><strong>Info do Sistema:</strong> Crie um botão "Meu PC". O Main deve importar o <code>require('os')</code> e, no <code>handle</code>, retornar um objeto com a Memória Livre (<code>os.freemem()</code>) e a versão (<code>os.release()</code>). Exiba isso formatado no HTML.</li>
+                    <li><strong>Gerador de Senha Forte:</strong> O HTML envia o tamanho desejado (ex: 12). O Main gera uma senha aleatória segura misturando letras e números e retorna a string gerada para o Front-end mostrar na tela.</li>
+                    <li><strong style="color: var(--primary);">Desafio da Espera Fake:</strong> No HTML, ao clicar no botão "Baixar Dados", troque o texto do botão para "Baixando...". No Main, crie um <code>setTimeout</code> de 3 segundos antes de dar o <code>return "Dados Concluídos!"</code> (você precisará retornar uma Promise). Quando a resposta chegar no HTML, mude o botão para "Concluído!".</li>
+                    <li><strong style="color: var(--accent);"><i class="fa-solid fa-robot"></i> Desafio IA (Árvore de Arquivos VS Code):</strong> Vá muito além da lista simples! Peça à IA: <em>"Como ler de forma recursiva pastas e arquivos usando o módulo 'fs' no Node.js, retornar essa estrutura hierárquica via IPC (handle), e criar no Front-end uma árvore de arquivos expansível (estilo VS Code) muito bem estilizada com HTML e CSS?"</em>. O desafio é implementar a lógica no Node e criar a interface. <strong>Atenção: adicione um toque pessoal (um tema de cores único, ícones específicos para o tipo da extensão do arquivo ou exiba o tamanho/peso do arquivo ao lado do nome) para diferenciar o seu explorador do projeto dos seus colegas!</strong></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    // Navegação de Slides
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function goToExercises() { showSlide(totalSlides - 1); }
+    
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    // Simulador IPC Animado de Ida e Volta
+    function dispararIPC() {
+        const packet = document.getElementById('packet');
+        const mainTerm = document.getElementById('mainTerminal');
+        const htmlTerm = document.getElementById('htmlTerminal');
+        const btn = document.getElementById('btnSimula');
+        const spinner = document.getElementById('spinnerHtml');
+        const btnText = document.getElementById('btnText');
+        
+        // Impede duplo clique durante a animação
+        if(btn.disabled) return;
+        
+        // Reset state
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        spinner.style.display = 'inline-block';
+        btnText.innerText = "Aguardando (await)...";
+        
+        packet.classList.remove('animate-go');
+        packet.classList.remove('animate-back');
+        packet.innerText = '"Qual a versão?"';
+        
+        mainTerm.innerText = "Aguardando invoke...";
+        mainTerm.style.color = "#64748b"; 
+        htmlTerm.innerText = "Console vazio...";
+        htmlTerm.style.color = "#cbd5e1";
+        
+        void packet.offsetWidth; // Trigger reflow
+        
+        // Fase 1: Ida
+        packet.classList.add('animate-go');
+        
+        // Chegou no Main
+        setTimeout(() => {
+            mainTerm.innerHTML = "> Invoke recebido.<br>> Processando DB... ⏳";
+            mainTerm.style.color = "#a78bfa";
+            
+            // Simula processamento do Main e muda o pacote
+            setTimeout(() => {
+                mainTerm.innerHTML = "> Processado!<br>> Retornando: 'v1.0.4'";
+                mainTerm.style.color = "var(--cyan)";
+                
+                packet.classList.remove('animate-go');
+                void packet.offsetWidth; // Trigger reflow
+                packet.innerText = "'v1.0.4'";
+                packet.classList.add('animate-back');
+                
+                // Fase 2: Volta para o HTML
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                    btnText.innerText = "Solicitar Dados";
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    
+                    htmlTerm.innerHTML = "> Promise Resolvida!<br>> Resposta: 'v1.0.4'";
+                    htmlTerm.style.color = "var(--accent)";
+                }, 1500); // tempo da volta
+                
+            }, 1000); // tempo de processamento no back
+            
+        }, 1500); // tempo da ida
+    }
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

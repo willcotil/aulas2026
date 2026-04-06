@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- EDITAR: título da aba -->
+    <title>Aula: TÍTULO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        /* EDITAR: aplicar a próxima paleta livre de palettes.json
+           --primary-color    → palette.primary
+           --secondary-color  → palette.secondary (ou cor de texto secundária)
+           Manter: --background-color, --card-background, --border-color como estão
+           Os --success/warning/danger/info-color são utilitários fixos, não alterar.
+        */
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #495057;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-grey: #e9ecef;
+        }
+
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #presentation-container { width: 100%; height: 100%; position: relative; }
+
+        .slides-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
+
+        .slide {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--card-background);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 40px; box-sizing: border-box;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; transform: translateY(0); visibility: visible; z-index: 1; }
+
+        /* Navegação */
+        .navigation {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 15px; z-index: 100;
+        }
+        .nav-btn {
+            background-color: var(--primary-color); color: white;
+            border: none; border-radius: 50%;
+            width: 50px; height: 50px; font-size: 24px; cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .nav-btn:hover { background-color: #004494; transform: translateY(-2px); }
+        .nav-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
+        .slide-counter {
+            font-size: 18px; font-weight: bold; color: var(--secondary-color);
+            min-width: 60px; text-align: center;
+            background-color: var(--card-background);
+            padding: 5px 10px; border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Tipografia */
+        h1, h2, h3 { color: var(--primary-color); margin-bottom: 15px; text-align: center; font-weight: 700; }
+        h1 { font-size: 2.8em; }
+        h2 { font-size: 2.2em; }
+        h3 { font-size: 1.6em; color: var(--secondary-color); }
+        p { font-size: 1.2em; line-height: 1.7; max-width: 850px; text-align: center; }
+        ul, ol { max-width: 850px; width: 100%; font-size: 1.1em; line-height: 1.7; }
+        li { margin-bottom: 10px; }
+        .highlight { color: var(--primary-color); font-weight: bold; }
+
+        /* Layout */
+        .two-column-layout { display: flex; gap: 30px; width: 100%; max-width: 1200px; align-items: center; }
+        .column { flex: 1; }
+
+        /* Tabela */
+        .styled-table { border-collapse: collapse; width: 100%; max-width: 1100px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 0.95em; }
+        .styled-table th, .styled-table td { border: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
+        .styled-table th { background-color: var(--primary-color); color: white; font-weight: bold; }
+        .styled-table tr:nth-child(even) { background-color: var(--background-color); }
+        .styled-table tr:hover { background-color: #d8e6f5; }
+
+        /* Caixa de destaque */
+        .info-box { background-color: var(--light-grey); border-left: 6px solid var(--primary-color); padding: 20px; border-radius: 0 8px 8px 0; margin: 20px 0; width: 100%; max-width: 900px; box-sizing: border-box; }
+        .info-box.warning { border-left-color: var(--warning-color); background-color: #fff3cd; }
+        .info-box.danger  { border-left-color: var(--danger-color);  background-color: #f8d7da; }
+        .info-box.success { border-left-color: var(--success-color); background-color: #d4edda; }
+
+        /* Print */
+        @media print {
+            html, body { height: auto; overflow: visible; }
+            #presentation-container, .slides-container { height: auto; overflow: visible; }
+            .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: auto; min-height: 100vh; page-break-after: always; overflow: visible; }
+            .navigation { display: none !important; }
+            h1, h2, h3 { color: black !important; }
+            .info-box { border: 1px solid #000; background: white !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        <div class="slides-container">
+
+            <!-- Slide 1: Título -->
+            <section class="slide active">
+                <!-- EDITAR: título e subtítulo da aula -->
+                <h1>TÍTULO DA AULA</h1>
+                <p class="subtitle" style="font-size:1.3em; color: var(--secondary-color); margin-top: 10px;">Subtítulo Descritivo</p>
+                <p style="font-size: 1.2em; margin-top: 20px;"><strong>Prof. William Paiva</strong></p>
+            </section>
+
+            <!-- Slide 2: Introdução -->
+            <section class="slide">
+                <h2>TÍTULO DO SLIDE</h2>
+                <p>Texto introdutório do slide. Apresente o conceito central de forma direta.</p>
+                <ul style="margin-top: 20px; text-align: left;">
+                    <li>Ponto 1 — descrição breve.</li>
+                    <li>Ponto 2 — descrição breve.</li>
+                    <li>Ponto 3 — descrição breve.</li>
+                </ul>
+            </section>
+
+            <!-- Slide 3: Dois Colunas -->
+            <section class="slide">
+                <h2>TÍTULO — Dois Blocos</h2>
+                <div class="two-column-layout">
+                    <div class="column">
+                        <h3>Bloco A</h3>
+                        <p class="text-left" style="text-align:left;">Conteúdo do bloco A, texto explicativo.</p>
+                        <div class="info-box">
+                            <strong>Destaque:</strong> Observação importante sobre este bloco.
+                        </div>
+                    </div>
+                    <div class="column">
+                        <h3>Bloco B</h3>
+                        <p class="text-left" style="text-align:left;">Conteúdo do bloco B, texto explicativo.</p>
+                        <div class="info-box warning">
+                            <strong>Atenção:</strong> Ponto de cuidado neste bloco.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: Tabela -->
+            <section class="slide">
+                <h2>Comparativo: TEMA</h2>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Característica</th>
+                            <th>Opção A</th>
+                            <th>Opção B</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Velocidade</td><td>Alta</td><td>Média</td></tr>
+                        <tr><td>Custo</td><td>Alto</td><td>Baixo</td></tr>
+                        <tr><td>Aplicação</td><td>Data Centers</td><td>Redes Locais</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Slide 5: Resumo -->
+            <section class="slide">
+                <h2>Resumo da Aula</h2>
+                <ul style="text-align: left;">
+                    <li>Ponto resumo 1 — o que foi aprendido.</li>
+                    <li>Ponto resumo 2 — o que foi aprendido.</li>
+                    <li>Ponto resumo 3 — o que foi aprendido.</li>
+                </ul>
+            </section>
+
+        </div>
+
+        <!-- Navegação -->
+        <div class="navigation">
+            <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+            <div class="slide-counter" id="slide-counter">1 / N</div>
+            <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+            <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const slideCounter = document.getElementById('slide-counter');
+
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function updateSlideView() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                });
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+
+            function changeSlide(direction) {
+                currentSlide += direction;
+                if (currentSlide < 0) currentSlide = 0;
+                if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+                updateSlideView();
+            }
+
+            nextBtn.addEventListener('click', () => changeSlide(1));
+            prevBtn.addEventListener('click', () => changeSlide(-1));
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') changeSlide(1);
+                if (e.key === 'ArrowLeft') changeSlide(-1);
+            });
+
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => {
+                        alert(`Erro ao entrar em tela cheia: ${err.message}`);
+                    });
+                } else { document.exitFullscreen(); }
+            });
+
+            updateSlideView();
+        });
+    </script>
+</body>
+</html>

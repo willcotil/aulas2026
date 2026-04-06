@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula: Roteadores e Endereçamento IP</title>
+    <title>Aula 08: Roteadores e Protocolos de Rede</title>
     <style>
-        /* --- GERAL & TEMA CLARO --- */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
         :root {
-            --primary-color: #0056b3;
-            --secondary-color: #495057;
+            --primary-color: #1B4F72;
+            --secondary-color: #2E86AB;
             --background-color: #f8f9fa;
             --card-background: #ffffff;
             --text-color: #212529;
@@ -18,807 +17,1024 @@
             --success-color: #28a745;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
+            --info-color: #17a2b8;
             --light-grey: #e9ecef;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
 
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            margin: 0;
-        }
-        
-        #presentation-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* --- SEÇÕES DE ROLAGEM --- */
-        .scroll-section {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 60px 40px;
-            box-sizing: border-box;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .scroll-section:last-of-type {
-            border-bottom: none;
-        }
+        #presentation-container { width: 100%; height: 100%; position: relative; }
+        .slides-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
 
-        /* --- NAVEGAÇÃO --- */
+        .slide {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--card-background);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 40px 60px 80px 60px; box-sizing: border-box;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; transform: translateY(0); visibility: visible; z-index: 1; }
+
         .navigation {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 100;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 15px; z-index: 100;
         }
-
         .nav-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
+            background-color: var(--primary-color); color: white;
+            border: none; border-radius: 50%;
+            width: 50px; height: 50px; font-size: 24px; cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
         }
-        .nav-btn:hover {
-            background-color: #004494;
-            transform: translateY(-2px);
-        }
-        .nav-btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
+        .nav-btn:hover { background-color: #0d3251; transform: translateY(-2px); }
+        .nav-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; }
         .slide-counter {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--secondary-color);
-            min-width: 60px;
-            text-align: center;
+            font-size: 18px; font-weight: bold; color: var(--secondary-color);
+            min-width: 70px; text-align: center;
             background-color: var(--card-background);
-            padding: 5px 10px;
-            border-radius: 15px;
+            padding: 5px 12px; border-radius: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
-        /* --- ESTILOS DE CONTEÚDO --- */
-        h1, h2, h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: 700;
-        }
-        h1 { font-size: 2.8em; }
-        h2 { font-size: 2.2em; }
-        h3 { font-size: 1.6em; color: var(--secondary-color); }
 
-        p {
-            font-size: 1.2em;
-            line-height: 1.7;
-            max-width: 850px;
-            text-align: center;
-        }
-        .text-left { text-align: left; }
+        h1 { color: var(--primary-color); margin-bottom: 10px; text-align: center; font-weight: 700; font-size: 2.6em; }
+        h2 { color: var(--primary-color); margin-bottom: 18px; text-align: center; font-weight: 700; font-size: 2em; }
+        h3 { color: var(--secondary-color); margin-bottom: 10px; font-weight: 700; font-size: 1.3em; }
+        p  { font-size: 1.1em; line-height: 1.7; max-width: 900px; text-align: center; margin-bottom: 10px; }
+        ul, ol { max-width: 900px; width: 100%; font-size: 1.05em; line-height: 1.75; }
+        li { margin-bottom: 7px; }
         .highlight { color: var(--primary-color); font-weight: bold; }
-        code {
-            font-family: 'Roboto Mono', monospace;
-            background-color: var(--light-grey);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
+        .subtitle { font-size: 1.25em; color: var(--secondary-color); margin-top: 8px; text-align: center; }
+        blockquote { font-size: 1.35em; font-style: italic; color: var(--primary-color); max-width: 820px; text-align: center; line-height: 1.7; border-left: 5px solid var(--secondary-color); padding-left: 25px; margin: 20px auto; }
 
-        .two-column-layout {
-            display: flex;
-            gap: 30px;
-            width: 100%;
-            max-width: 1200px;
-            align-items: center;
-        }
+        .two-column-layout { display: flex; gap: 25px; width: 100%; max-width: 1150px; align-items: flex-start; }
         .column { flex: 1; }
 
-        .placeholder-img {
-            width: 100%;
-            max-width: 450px;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            background-color: var(--light-grey);
-            display: block;
-            margin: 20px auto;
-        }
-        
-        /* --- TABELAS --- */
-        .styled-table {
-            border-collapse: collapse;
-            width: 100%;
-            max-width: 1100px;
-            margin: 20px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-size: 1em;
-        }
-        .styled-table th, .styled-table td {
-            border: 1px solid var(--border-color);
-            padding: 12px 15px;
-            text-align: left;
-        }
-        .styled-table th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
-        }
+        .card { background: var(--card-background); border: 2px solid var(--border-color); border-radius: 12px; padding: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .card-primary   { border-top: 5px solid var(--primary-color); }
+        .card-secondary { border-top: 5px solid var(--secondary-color); }
+        .card-success   { border-top: 5px solid var(--success-color); }
+        .card-danger    { border-top: 5px solid var(--danger-color); }
+
+        .info-box { background-color: var(--light-grey); border-left: 6px solid var(--primary-color); padding: 15px 20px; border-radius: 0 8px 8px 0; margin: 12px 0; width: 100%; max-width: 900px; box-sizing: border-box; font-size: 1em; line-height: 1.6; }
+        .info-box.warning { border-left-color: var(--warning-color); background-color: #fff3cd; }
+        .info-box.info    { border-left-color: var(--info-color);    background-color: #d1ecf1; }
+        .info-box.success { border-left-color: var(--success-color); background-color: #d4edda; }
+        .info-box.danger  { border-left-color: var(--danger-color);  background-color: #f8d7da; }
+
+        .styled-table { border-collapse: collapse; width: 100%; max-width: 1000px; margin: 12px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 0.93em; }
+        .styled-table th, .styled-table td { border: 1px solid var(--border-color); padding: 10px 14px; text-align: left; }
+        .styled-table th { background-color: var(--primary-color); color: white; font-weight: bold; }
         .styled-table tr:nth-child(even) { background-color: var(--background-color); }
-        .styled-table tr:hover { background-color: #d8e6f5; }
+        .styled-table tr:hover { background-color: #d0e8f5; }
+        .styled-table .highlight-row td { background-color: #cfe2f3; font-weight: bold; }
 
-        /* --- ELEMENTOS INTERATIVOS --- */
-        .interactive-container {
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 25px;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 900px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .interactive-container input[type="text"], .interactive-container select {
-            font-family: 'Roboto Mono', monospace;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1.1em;
-            margin: 0 10px;
-        }
-        .interactive-container button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            border: none;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .result-box {
-            font-family: 'Roboto Mono', monospace;
-            background-color: var(--light-grey);
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-            white-space: pre-wrap;
-            text-align: left;
-        }
-        
-        .binary-converter {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .binary-bits {
-            display: flex;
-            gap: 5px;
-            margin: 10px 0;
-        }
-        .bit-box {
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1.5em;
-            background-color: #fff;
-        }
-        .bit-value {
-            font-size: 0.9em;
-            color: var(--secondary-color);
-        }
-        
-        /* --- ANIMAÇÃO VIAGEM PACOTE --- */
-        #packet-journey-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            height: 450px;
-            background-color: var(--light-grey);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .pj-device {
-            position: absolute;
-            font-size: 40px;
-        }
-        .pj-label {
-            position: absolute;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 0.9em;
-            text-align: center;
-        }
-        #pj-pc { top: 180px; left: 50px; }
-        #pj-pc-label { top: 230px; left: 30px; }
-        #pj-switch { top: 180px; left: 200px; }
-        #pj-switch-label { top: 230px; left: 190px; }
-        #pj-router { top: 180px; left: 350px; }
-        #pj-router-label { top: 230px; left: 320px; }
-        #pj-cloud { top: 180px; left: 520px; font-size: 80px; color: #007bff; }
-        #pj-server { top: 180px; left: 700px; }
-        #pj-server-label { top: 230px; left: 680px; }
-        .pj-packet {
-            position: absolute;
-            font-size: 30px;
-            top: 185px;
-            left: 100px;
-            opacity: 0;
-            transition: all 1s ease-in-out;
-        }
-        .packet-info {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid var(--border-color);
-            font-family: 'Roboto Mono', monospace;
-            font-size: 0.9em;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
+        .step-row { display: flex; gap: 0; width: 100%; max-width: 950px; align-items: stretch; }
+        .step-box { flex: 1; background: var(--light-grey); border: 2px solid var(--border-color); border-radius: 10px; padding: 18px 12px; text-align: center; }
+        .step-box.done   { background: #d4edda; border-color: var(--success-color); }
+        .step-box.active { background: #cfe2f3; border-color: var(--primary-color); }
+        .step-box.future { opacity: 0.55; }
+        .step-num { display: inline-block; width: 34px; height: 34px; border-radius: 50%; background: var(--primary-color); color: white; font-weight: bold; line-height: 34px; text-align: center; margin-bottom: 8px; font-size: 1em; }
+        .step-box.done .step-num { background: var(--success-color); }
+        .step-arrow { display: flex; align-items: center; font-size: 1.8rem; color: var(--secondary-color); padding: 0 6px; }
 
-        /* --- RESPONSIVIDADE --- */
-        @media (max-width: 768px) {
-            .scroll-section { padding: 40px 20px; }
-            h1 { font-size: 2em; }
-            h2 { font-size: 1.6em; }
-            p { font-size: 1em; }
-            .two-column-layout { flex-direction: column; }
-            .interactive-container input[type="text"] { width: 90%; margin-bottom: 10px; }
+        .encap-visual { display: flex; flex-direction: column; gap: 7px; width: 100%; max-width: 880px; }
+        .encap-layer { padding: 11px 18px; border-radius: 8px; font-size: 0.97em; font-weight: 500; display: flex; justify-content: space-between; align-items: center; }
+        .encap-label { font-size: 0.78em; color: #666; font-style: italic; }
+
+        .pj-row { display: flex; align-items: center; width: 100%; max-width: 1100px; flex-wrap: nowrap; }
+        .pj-node { background: var(--card-background); border: 2px solid var(--primary-color); border-radius: 10px; padding: 10px 8px; text-align: center; font-size: 0.78em; font-weight: bold; color: var(--primary-color); min-width: 110px; flex-shrink: 0; }
+        .pj-node.hl { background: var(--primary-color); color: white; }
+        .pj-arrow { font-size: 1.6em; color: var(--secondary-color); padding: 0 3px; flex-shrink: 0; }
+        .pj-sub { font-size: 0.68em; color: #666; font-weight: normal; margin-top: 3px; }
+
+        .tag { display: inline-block; background: var(--light-grey); border: 2px solid var(--border-color); border-radius: 30px; padding: 7px 18px; font-size: 0.88em; }
+
+        .three-col { display: flex; gap: 18px; width: 100%; max-width: 1100px; }
+        .three-col .col { flex: 1; }
+
+        @media print {
+            html, body { height: auto; overflow: visible; }
+            #presentation-container, .slides-container { height: auto; overflow: visible; }
+            .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: auto; min-height: 100vh; page-break-after: always; overflow: visible; padding: 30px; }
+            .navigation { display: none !important; }
+            h1, h2, h3 { color: black !important; }
+            .info-box { border: 1px solid #000; background: white !important; }
+            .card { border: 1px solid #ccc; box-shadow: none; }
+            .styled-table th { background-color: #eee !important; color: black !important; }
         }
     </style>
 </head>
 <body>
 
 <div id="presentation-container">
-    <div class="slides-container">
-        
-        <section class="scroll-section">
-            <h1>Roteadores e o Endereçamento da Internet</h1>
-            <p class="subtitle">Entendendo os Protocolos IPv4 e as Máscaras de Rede</p>
-        </section>
+<div class="slides-container">
 
-        <section class="scroll-section">
-            <h2>O Problema da Comunicação em Larga Escala</h2>
-            <p>Imagine uma sala de reuniões gigante com milhares de pessoas. Se alguém grita "MARIA!", todas as Marias da sala respondem, e todas as outras pessoas precisam parar para ouvir a gritaria.</p>
-            <p>Essa "gritaria" em uma rede é chamada de <strong class="highlight">Broadcast</strong>. É uma mensagem enviada para <strong class="highlight">TODOS</strong> os dispositivos da mesma rede local.</p>
-            <p>Broadcasts são úteis para certas funções (como descobrir endereços), mas em uma rede muito grande, o excesso deles (um "broadcast storm") pode travar tudo.</p>
-        </section>
+<!-- ═══════════════════════════════════════════════════════ SLIDE 01 -->
+<section class="slide active">
+    <h1>Roteadores e<br>Protocolos de Rede</h1>
+    <p class="subtitle">Do Cabo ao Protocolo — Como os Dados Chegam ao Destino</p>
+    <p style="margin-top: 25px; font-size: 1.05em;"><strong>Prof. William Paiva</strong> &nbsp;|&nbsp; RSSI — Aula 08</p>
+    <div style="margin-top: 35px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <span class="tag">🌐 Roteamento</span>
+        <span class="tag">🗺️ Tabela de Rotas</span>
+        <span class="tag">🔀 Modelo OSI</span>
+        <span class="tag">📦 Encapsulamento</span>
+        <span class="tag">🔌 Protocolo IP</span>
+    </div>
+</section>
 
-        <section class="scroll-section">
-            <h2>O Switch e o Domínio de Broadcast</h2>
-            <p>Como vimos, um Switch é inteligente para entregar mensagens diretas (unicast). Mas quando ele recebe uma mensagem de broadcast, sua única opção é encaminhá-la para <strong class="highlight">TODAS as suas portas</strong>.</p>
-            <p>Isso significa que todos os dispositivos conectados a um ou mais switches interligados formam um único e grande <strong class="highlight">Domínio de Broadcast</strong>. A "gritaria" de um é ouvida por todos.</p>
-            <img src="broadcast.gif" alt="Diagrama de um grande domínio de broadcast com vários switches" class="placeholder-img">
-        </section>
+<!-- ═══════════════════════════════════════════════════════ SLIDE 02 -->
+<section class="slide">
+    <h2>Onde Estamos na Nossa Jornada?</h2>
+    <div class="step-row" style="margin: 25px 0;">
+        <div class="step-box done">
+            <div class="step-num">✓</div>
+            <h3 style="color: var(--success-color); font-size: 1em;">Físico</h3>
+            <p style="font-size: 0.88em; text-align: center;">Cabos, conectores, crimpagem</p>
+            <small style="color:#666;">Aulas 06–07</small>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box done">
+            <div class="step-num">✓</div>
+            <h3 style="color: var(--success-color); font-size: 1em;">LAN</h3>
+            <p style="font-size: 0.88em; text-align: center;">Switches conectam dispositivos na mesma rede</p>
+            <small style="color:#666;">Aula 03</small>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box active">
+            <div class="step-num" style="background: var(--secondary-color);">08</div>
+            <h3 style="font-size: 1em;">Além da LAN</h3>
+            <p style="font-size: 0.88em; text-align: center;">Roteadores + Protocolos</p>
+            <small style="color: var(--primary-color); font-weight: bold;">Hoje ←</small>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box future">
+            <div class="step-num" style="background: #aaa;">09</div>
+            <h3 style="color: #888; font-size: 1em;">Endereçamento</h3>
+            <p style="font-size: 0.88em; text-align: center; color: #888;">IPv4 e máscaras de rede</p>
+            <small style="color:#aaa;">Próxima aula</small>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align: center; max-width: 800px;">
+        <strong>A pergunta desta aula:</strong> o switch conecta computadores <em>dentro</em> de uma rede — mas como um dado sai daqui e chega a um servidor em outro país?
+    </div>
+</section>
 
-        <section class="scroll-section">
-            <h2>A Solução: Segmentar a Rede</h2>
-            <p>Para resolver o problema da "gritaria" e organizar a rede, precisamos dividi-la em "salas" menores e isoladas. Em redes, chamamos isso de <strong class="highlight">segmentação</strong>.</p>
-            <p>O dispositivo que faz essa divisão, criando barreiras para os broadcasts, é o <strong class="highlight">Roteador</strong>.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>O Roteador: Criando Múltiplos Domínios de Broadcast</h2>
-            <p>A regra de ouro: <strong class="highlight">Roteadores NÃO encaminham broadcasts</strong> de uma rede para outra.</p>
-            <p>Cada porta de um roteador conecta-se a uma rede diferente e cria um <strong class="highlight">domínio de broadcast separado e isolado</strong>. A "gritaria" de uma sala não passa para a outra.</p>
-            <img src="router-stop.gif" alt="Diagrama de um roteador separando domínios de broadcast" class="placeholder-img">
-        </section>
+<!-- ═══════════════════════════════════════════════════════ SLIDE 03 -->
+<section class="slide">
+    <h2>O Problema: a Limitação do Switch</h2>
+    <p>Nas aulas anteriores, vimos que o switch conecta computadores dentro de uma <strong class="highlight">mesma rede local (LAN)</strong>. Mas ele tem um limite claro:</p>
+    <div class="three-col" style="margin: 20px 0;">
+        <div class="col card card-secondary" style="text-align: center;">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🔌</div>
+            <h3 style="font-size: 1.05em;">O switch conhece...</h3>
+            <p style="font-size: 0.92em; text-align: center;">Quais dispositivos estão conectados <strong>em suas portas</strong>, usando o endereço físico (MAC) de cada um.</p>
+        </div>
+        <div class="col card" style="text-align: center; border-top: 5px solid var(--danger-color);">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🚫</div>
+            <h3 style="font-size: 1.05em; color: var(--danger-color);">O switch não sabe...</h3>
+            <p style="font-size: 0.92em; text-align: center;">Como chegar a um dispositivo que está <strong>em outra rede</strong> — outra empresa, outro bairro, outro país.</p>
+        </div>
+        <div class="col card card-primary" style="text-align: center;">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🌐</div>
+            <h3 style="font-size: 1.05em;">A solução é...</h3>
+            <p style="font-size: 0.92em; text-align: center;">O <strong>roteador</strong> — dispositivo que sabe como interligar redes diferentes e encaminhar dados entre elas.</p>
+        </div>
+    </div>
+    <div class="info-box warning" style="text-align: center; max-width: 850px;">
+        Imagine que o switch é o sistema de ramais de um único escritório. O roteador é a central telefônica que conecta escritórios em cidades diferentes.
+    </div>
+</section>
 
-        <section class="scroll-section">
-            <h2>A Conexão Lógica: Protocolos</h2>
-            <p>Ok, agora temos "salas" (redes) separadas. Mas como um computador em uma sala envia uma mensagem para outro em uma sala diferente?</p>
-            <p>Precisamos de um sistema de endereçamento lógico, como CEPs e números de apartamentos, que funcione entre as salas. É aqui que entram os <strong class="highlight">Protocolos</strong>.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Introdução a Protocolos</h2>
-            <p>Um <strong class="highlight">protocolo</strong> é um conjunto de regras que governa como os dados são formatados e transmitidos. É a "linguagem" que os dispositivos usam para se comunicar de forma organizada.</p>
-            <p>O protocolo que cuida do endereçamento lógico entre redes diferentes é o <strong class="highlight">IP (Internet Protocol)</strong>.</p>
-        </section>
+<!-- ═══════════════════════════════════════════════════════ SLIDE 04 -->
+<section class="slide">
+    <h2>Switch e Roteador: A Diferença Fundamental</h2>
+    <div class="two-column-layout">
+        <div class="column card card-secondary">
+            <h3 style="text-align:center;">🔌 Switch</h3>
+            <ul>
+                <li>Opera na <strong>Camada 2</strong> do Modelo OSI (Enlace)</li>
+                <li>Identifica dispositivos pelo <strong class="highlight">endereço MAC</strong> (físico)</li>
+                <li>Conecta dispositivos <strong>dentro da mesma rede</strong> (LAN)</li>
+                <li>Aprende quais MACs estão em cada porta automaticamente</li>
+                <li>Não entende endereços IP — não sabe "onde fica" a internet</li>
+            </ul>
+            <div class="info-box" style="margin-top: 12px; font-size: 0.9em;">
+                <strong>Analogia:</strong> interfone de um prédio — fala com quem está <em>no mesmo prédio</em>.
+            </div>
+        </div>
+        <div class="column card card-primary">
+            <h3 style="text-align:center;">🌐 Roteador</h3>
+            <ul>
+                <li>Opera na <strong>Camada 3</strong> do Modelo OSI (Rede)</li>
+                <li>Identifica redes pelo <strong class="highlight">endereço IP</strong> (lógico)</li>
+                <li>Conecta <strong>redes diferentes</strong> entre si (LAN ↔ internet)</li>
+                <li>Mantém uma <strong>tabela de rotas</strong> com caminhos conhecidos</li>
+                <li>Decide o melhor caminho para cada pacote de dados</li>
+            </ul>
+            <div class="info-box" style="margin-top: 12px; font-size: 0.9em;">
+                <strong>Analogia:</strong> agência dos Correios — sabe para qual cidade e estado mandar cada encomenda.
+            </div>
+        </div>
+    </div>
+</section>
 
-        <section class="scroll-section">
-            <h2>Switch vs. Roteador: A Ligação Final</h2>
-            <table class="styled-table" style="max-width: 900px;">
-                 <thead>
-                    <tr>
-                        <th>Característica</th>
-                        <th>Switch</th>
-                        <th>Roteador</th>
-                    </tr>
-                </thead>
+<!-- ═══════════════════════════════════════════════════════ SLIDE 05 -->
+<section class="slide">
+    <h2>O Roteador: O Carteiro da Internet</h2>
+    <p style="margin-bottom: 20px;"><em>"Um roteador é um dispositivo de rede que recebe pacotes de dados e decide qual o melhor caminho para encaminhá-los até o destino."</em></p>
+    <div class="three-col" style="margin-bottom: 20px;">
+        <div class="col card card-primary" style="text-align:center;">
+            <div style="font-size: 2.2em; margin-bottom: 8px;">📦</div>
+            <h3 style="font-size: 1em;">1. Recebe</h3>
+            <p style="font-size: 0.88em; text-align: center;">Um pacote chega com um <strong>IP de destino</strong> no cabeçalho</p>
+        </div>
+        <div class="col card card-primary" style="text-align:center;">
+            <div style="font-size: 2.2em; margin-bottom: 8px;">🗺️</div>
+            <h3 style="font-size: 1em;">2. Consulta</h3>
+            <p style="font-size: 0.88em; text-align: center;">Busca o destino na sua <strong>tabela de rotas</strong></p>
+        </div>
+        <div class="col card card-primary" style="text-align:center;">
+            <div style="font-size: 2.2em; margin-bottom: 8px;">🚀</div>
+            <h3 style="font-size: 1em;">3. Encaminha</h3>
+            <p style="font-size: 0.88em; text-align: center;">Envia o pacote pela <strong>interface correta</strong> em direção ao destino</p>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align: center; max-width: 820px;">
+        <strong>Dado curioso:</strong> um pacote do Brasil para o Japão pode atravessar <strong>15 a 20 roteadores</strong> antes de chegar — em menos de 300 milissegundos.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 06 -->
+<section class="slide">
+    <h2>Tipos de Roteadores</h2>
+    <p style="margin-bottom: 20px;">Nem todo roteador é igual — o porte e a capacidade variam muito dependendo do uso:</p>
+    <div class="three-col">
+        <div class="col card card-secondary" style="text-align:center;">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🏠</div>
+            <h3 style="font-size: 1.05em;">Doméstico</h3>
+            <p style="font-size: 0.88em; text-align: center;">O roteador Wi-Fi da sua casa. Conecta sua rede local (computadores, celulares) à internet via ISP. Geralmente já tem switch e ponto de acesso Wi-Fi embutidos.</p>
+            <div class="info-box" style="margin-top: 10px; font-size: 0.82em;">Ex.: TP-Link, Intelbras</div>
+        </div>
+        <div class="col card card-primary" style="text-align:center;">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🏢</div>
+            <h3 style="font-size: 1.05em;">Corporativo</h3>
+            <p style="font-size: 0.88em; text-align: center;">Usado em empresas e universidades. Suporta muitos usuários simultâneos, VPNs, QoS (qualidade de serviço) e configurações avançadas de segurança.</p>
+            <div class="info-box" style="margin-top: 10px; font-size: 0.82em;">Ex.: Cisco, Juniper, MikroTik</div>
+        </div>
+        <div class="col card" style="text-align:center; border-top: 5px solid #6c3483;">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🌐</div>
+            <h3 style="font-size: 1.05em; color: #6c3483;">Núcleo (Core)</h3>
+            <p style="font-size: 0.88em; text-align: center;">Roteadores da espinha dorsal da internet. Processam bilhões de pacotes por segundo e mantêm rotas para todas as redes do planeta.</p>
+            <div class="info-box" style="margin-top: 10px; font-size: 0.82em;">Ex.: Cisco CRS, Juniper PTX</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 07 -->
+<section class="slide">
+    <h2>Roteamento: Encontrar o Melhor Caminho</h2>
+    <div class="info-box" style="margin-bottom: 22px; text-align: center; max-width: 820px;">
+        <strong>Definição:</strong> Roteamento é o processo de determinar o caminho que um pacote de dados deve seguir desde a origem até o destino, passando por uma ou mais redes intermediárias.
+    </div>
+    <div class="two-column-layout" style="align-items: flex-start;">
+        <div class="column card card-secondary">
+            <h3>🛰️ Analogia com GPS</h3>
+            <ul>
+                <li>Você digita o destino → GPS calcula a rota</li>
+                <li>O pacote carrega o IP de destino → o roteador calcula o próximo passo</li>
+                <li>O GPS recalcula em caso de congestionamento → protocolos dinâmicos fazem o mesmo</li>
+                <li>Você pode ter preferências (mais rápido, menos pedágio) → o roteador tem métricas</li>
+            </ul>
+        </div>
+        <div class="column card card-primary">
+            <h3>📡 Como o roteamento funciona?</h3>
+            <ul>
+                <li>O pacote viaja de roteador em roteador</li>
+                <li>Cada roteador toma sua própria decisão: <em>"para onde passo esse pacote agora?"</em></li>
+                <li>Nenhum roteador precisa saber o caminho completo — só o próximo passo</li>
+                <li>É como pedir direção na rua: cada pessoa te indica o próximo trecho</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 08 -->
+<section class="slide">
+    <h2>O Salto (Hop): a Unidade do Roteamento</h2>
+    <p>Cada vez que um pacote passa por um roteador, dizemos que ele realizou um <strong class="highlight">salto</strong> (em inglês, <em>hop</em>).</p>
+    <div style="display: flex; align-items: center; gap: 0; max-width: 950px; width: 100%; margin: 25px 0; justify-content: center;">
+        <div class="pj-node hl">💻 Origem<div class="pj-sub">Seu PC</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node" style="border-color: var(--secondary-color);">🔀 Roteador A<div class="pj-sub">Salto 1</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node" style="border-color: var(--secondary-color);">🔀 Roteador B<div class="pj-sub">Salto 2</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node" style="border-color: var(--secondary-color);">🔀 Roteador C<div class="pj-sub">Salto 3</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node hl">🖥️ Destino<div class="pj-sub">Servidor</div></div>
+    </div>
+    <div class="two-column-layout" style="align-items: flex-start;">
+        <div class="column">
+            <div class="info-box info">
+                <strong>Contar saltos é útil!</strong> O comando <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">traceroute</code> (ou <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">tracert</code> no Windows) mostra cada roteador no caminho e o tempo que o pacote levou em cada salto.
+            </div>
+        </div>
+        <div class="column">
+            <div class="info-box warning">
+                <strong>Mais saltos nem sempre = mais lento.</strong> A velocidade do link entre dois roteadores importa mais do que o número de saltos. Um link de fibra com 10 saltos pode ser mais rápido que um link de satélite com 3 saltos.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 09 -->
+<section class="slide">
+    <h2>TTL: A Data de Validade do Pacote</h2>
+    <p>Imagine um pacote que, por algum erro de configuração, fica circulando entre roteadores para sempre — sem nunca chegar ao destino. Para evitar isso, existe o <strong class="highlight">TTL (Time to Live)</strong>.</p>
+    <div class="two-column-layout" style="margin: 20px 0; align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>⏱️ Como o TTL funciona?</h3>
+            <ul>
+                <li>Quando o pacote é criado, recebe um TTL inicial (geralmente <strong>64</strong> ou <strong>128</strong>)</li>
+                <li>A cada roteador pelo qual passa, o TTL é <strong>decrementado em 1</strong></li>
+                <li>Se o TTL chegar a <strong>zero</strong>, o roteador descarta o pacote</li>
+                <li>O roteador envia uma mensagem de erro de volta à origem</li>
+            </ul>
+        </div>
+        <div class="column card card-secondary">
+            <h3>🎯 Exemplo prático</h3>
+            <ul>
+                <li>Pacote sai com TTL = 64</li>
+                <li>Passa pelo Roteador 1 → TTL vira 63</li>
+                <li>Passa pelo Roteador 2 → TTL vira 62</li>
+                <li>... e assim por diante</li>
+                <li>Após 64 saltos sem encontrar o destino → <strong>descartado</strong></li>
+            </ul>
+        </div>
+    </div>
+    <div class="info-box success" style="text-align: center; max-width: 820px;">
+        O <strong>traceroute</strong> usa o TTL de forma inteligente: envia pacotes com TTL=1, TTL=2, TTL=3... Cada vez que um roteador descarta o pacote, ele responde revelando sua identidade — assim o traceroute "mapeia" o caminho!
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 10 -->
+<section class="slide">
+    <h2>O que é uma Rota?</h2>
+    <p>Uma <strong class="highlight">rota</strong> é uma instrução que diz ao roteador: <em>"para chegar à rede X, encaminhe o pacote pelo caminho Y."</em></p>
+    <div class="two-column-layout" style="margin: 20px 0; align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>🗺️ Componentes de uma Rota</h3>
+            <ul>
+                <li><strong>Destino:</strong> qual rede ou endereço o roteador quer alcançar</li>
+                <li><strong>Gateway (próximo salto):</strong> o endereço IP do roteador vizinho que sabe chegar lá</li>
+                <li><strong>Interface:</strong> qual porta física do roteador deve ser usada para sair</li>
+                <li><strong>Métrica:</strong> custo ou qualidade dessa rota (quanto menor, melhor)</li>
+            </ul>
+        </div>
+        <div class="column card card-secondary">
+            <h3>📌 Analogia dos Correios</h3>
+            <p style="text-align: left; font-size: 0.95em;">Uma agência dos Correios tem uma instrução interna:</p>
+            <ul>
+                <li><strong>Destino:</strong> encomendas para São Paulo</li>
+                <li><strong>Próximo passo:</strong> entregar ao caminhão da Rodovia Anhanguera</li>
+                <li><strong>Saída:</strong> doca número 3</li>
+            </ul>
+            <p style="text-align: left; font-size: 0.88em; margin-top: 8px; color: #666;">Esse é exatamente o raciocínio de uma entrada na tabela de rotas.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 11 -->
+<section class="slide">
+    <h2>A Tabela de Rotas: o Mapa do Roteador</h2>
+    <p style="margin-bottom: 15px;">O roteador consulta sua <strong class="highlight">tabela de rotas</strong> para cada pacote que recebe. Veja um exemplo simplificado:</p>
+    <table class="styled-table">
+        <thead>
+            <tr><th>Destino</th><th>Gateway (Próximo Salto)</th><th>Interface de Saída</th><th>Tipo</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Rede local (192.168.1.x)</td>
+                <td>— conexão direta —</td>
+                <td>eth0 (LAN)</td>
+                <td>Direta</td>
+            </tr>
+            <tr>
+                <td>Rede da filial (10.0.0.x)</td>
+                <td>192.168.1.1</td>
+                <td>eth0</td>
+                <td>Estática</td>
+            </tr>
+            <tr class="highlight-row">
+                <td><strong>Qualquer outro destino</strong></td>
+                <td>192.168.1.254</td>
+                <td>eth1 (WAN)</td>
+                <td><strong>Padrão (Default)</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="info-box info" style="max-width: 900px; text-align: left;">
+        <strong>Leitura da tabela:</strong> o roteador verifica o IP de destino do pacote e procura a linha mais adequada. Se nenhuma linha específica corresponder, usa a rota <strong>padrão</strong> (última linha) — que aponta para o provedor de internet.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 12 -->
+<section class="slide">
+    <h2>O Gateway Padrão: a Porta de Saída</h2>
+    <p>O <strong class="highlight">gateway padrão</strong> (default gateway) é o roteador que um dispositivo usa quando quer se comunicar com <strong>qualquer rede fora da sua rede local</strong>.</p>
+    <div class="two-column-layout" style="margin: 18px 0; align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>🏠 No seu computador em casa</h3>
+            <ul>
+                <li>Seu PC tem um IP local (ex: 192.168.1.10)</li>
+                <li>O roteador Wi-Fi tem o IP (ex: 192.168.1.1)</li>
+                <li>Esse IP do roteador é configurado como o <strong>gateway padrão</strong> do seu PC</li>
+                <li>Quando você acessa qualquer site, seu PC manda o pacote para 192.168.1.1 primeiro</li>
+            </ul>
+        </div>
+        <div class="column card card-secondary">
+            <h3>🤔 Como o PC decide?</h3>
+            <p style="text-align: left; font-size: 0.95em;">Antes de qualquer coisa, o computador se pergunta:</p>
+            <ul>
+                <li><em>"O destino está na minha rede local?"</em></li>
+                <li>Se <strong style="color: var(--success-color);">SIM</strong> → entrega diretamente (via switch)</li>
+                <li>Se <strong style="color: var(--danger-color);">NÃO</strong> → manda para o <strong>gateway padrão</strong></li>
+            </ul>
+            <div class="info-box warning" style="margin-top: 10px; font-size: 0.88em;">
+                Sem um gateway padrão configurado, o computador só consegue se comunicar dentro da rede local.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 13 -->
+<section class="slide">
+    <h2>Como o Roteador Escolhe o Caminho?</h2>
+    <p style="margin-bottom: 15px;">O roteador usa <strong class="highlight">métricas</strong> para comparar rotas e decidir a melhor opção quando há mais de um caminho possível:</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 1000px; width: 100%;">
+        <div class="card" style="padding: 16px;">
+            <h3 style="font-size: 0.98em;">🔢 Número de Saltos (Hop Count)</h3>
+            <p style="text-align:left; font-size: 0.9em;">Prefere o caminho com <strong>menos roteadores</strong> no meio. Simples, mas ignora velocidade dos links. Usado pelo protocolo RIP.</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+            <h3 style="font-size: 0.98em;">📡 Largura de Banda</h3>
+            <p style="text-align:left; font-size: 0.9em;">Prefere links <strong>mais rápidos</strong> (fibra óptica &gt; cabo de cobre &gt; Wi-Fi). Usado pelo OSPF.</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+            <h3 style="font-size: 0.98em;">⏱️ Latência</h3>
+            <p style="text-align:left; font-size: 0.9em;">Prefere caminhos com <strong>menor atraso</strong>. Muito importante para chamadas de voz e videochamadas.</p>
+        </div>
+        <div class="card" style="padding: 16px;">
+            <h3 style="font-size: 0.98em;">🔒 Confiabilidade</h3>
+            <p style="text-align:left; font-size: 0.9em;">Prefere links com <strong>menor histórico de falhas</strong>. Evita caminhos instáveis mesmo que mais rápidos.</p>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align: center; max-width: 900px; margin-top: 14px;">
+        <strong>Regra geral:</strong> entre duas rotas para o mesmo destino, o roteador sempre escolhe a mais <strong>específica</strong> (a que descreve melhor aquele destino) e, se empatarem, a de menor métrica.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 14 -->
+<section class="slide">
+    <h2>Roteamento Estático</h2>
+    <p>No <strong class="highlight">roteamento estático</strong>, o administrador de rede configura as rotas <strong>manualmente</strong>, uma por uma.</p>
+    <div class="two-column-layout" style="margin: 18px 0; align-items: flex-start;">
+        <div class="column card card-success">
+            <h3 style="color: var(--success-color);">✅ Vantagens</h3>
+            <ul>
+                <li>Simples de entender e configurar em redes pequenas</li>
+                <li>Previsível: o administrador controla exatamente o caminho</li>
+                <li>Sem consumo extra de banda (roteadores não trocam mensagens entre si)</li>
+                <li>Mais seguro: nenhum protocolo externo pode alterar as rotas</li>
+            </ul>
+        </div>
+        <div class="column card card-danger">
+            <h3 style="color: var(--danger-color);">❌ Desvantagens</h3>
+            <ul>
+                <li>Não se adapta automaticamente a falhas</li>
+                <li>Se um link cair, o tráfego para até intervenção humana</li>
+                <li>Trabalhoso em redes grandes: cada rota precisa ser adicionada manualmente</li>
+                <li>Qualquer mudança na topologia exige reconfiguração manual</li>
+            </ul>
+        </div>
+    </div>
+    <div class="info-box warning" style="text-align: center; max-width: 820px;">
+        <strong>Analogia:</strong> mapa de papel impresso. Você planejou a rota antes de sair, mas se houver um bloqueio na estrada, o mapa não te ajuda — você precisa descobrir o desvio sozinho.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 15 -->
+<section class="slide">
+    <h2>Roteamento Dinâmico</h2>
+    <p>No <strong class="highlight">roteamento dinâmico</strong>, os próprios roteadores trocam informações entre si e atualizam suas tabelas automaticamente.</p>
+    <div class="two-column-layout" style="margin: 18px 0; align-items: flex-start;">
+        <div class="column card card-success">
+            <h3 style="color: var(--success-color);">✅ Vantagens</h3>
+            <ul>
+                <li>Adapta-se automaticamente a falhas — o tráfego desvia sem intervenção humana</li>
+                <li>Funciona bem em redes grandes e complexas</li>
+                <li>Configuração inicial mais trabalhosa, mas manutenção quase zero</li>
+                <li>Detecta novos caminhos assim que novos links são adicionados</li>
+            </ul>
+        </div>
+        <div class="column card card-danger">
+            <h3 style="color: var(--danger-color);">❌ Desvantagens</h3>
+            <ul>
+                <li>Mais complexo de configurar e entender</li>
+                <li>Consome banda de rede para trocar mensagens de roteamento</li>
+                <li>Pode demorar alguns segundos para convergir após uma falha</li>
+                <li>Requer que os roteadores confiem uns nos outros</li>
+            </ul>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align: center; max-width: 820px;">
+        <strong>Analogia:</strong> GPS com trânsito em tempo real. Se houver um acidente na Marginal, ele detecta e recalcula o caminho automaticamente — você não precisa fazer nada.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 16 -->
+<section class="slide">
+    <h2>Protocolos de Roteamento: Uma Visão Geral</h2>
+    <p style="margin-bottom: 18px;">Os <strong class="highlight">protocolos de roteamento</strong> são as "línguas" que os roteadores usam para trocar informações sobre os caminhos disponíveis:</p>
+    <table class="styled-table" style="max-width: 950px;">
+        <thead>
+            <tr><th>Protocolo</th><th>Nome completo</th><th>Métrica principal</th><th>Onde é usado</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>RIP</strong></td>
+                <td>Routing Information Protocol</td>
+                <td>Número de saltos</td>
+                <td>Redes pequenas (raramente usado hoje)</td>
+            </tr>
+            <tr>
+                <td><strong>OSPF</strong></td>
+                <td>Open Shortest Path First</td>
+                <td>Largura de banda</td>
+                <td>Redes corporativas</td>
+            </tr>
+            <tr>
+                <td><strong>BGP</strong></td>
+                <td>Border Gateway Protocol</td>
+                <td>Políticas e acordos</td>
+                <td>A própria Internet — conecta provedores entre si</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="info-box warning" style="text-align: center; max-width: 900px; margin-top: 12px;">
+        <strong>Não se preocupe em memorizar esses protocolos agora.</strong> O importante é entender que eles existem e qual é o papel de cada um. Veremos mais detalhes em aulas futuras.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 17 -->
+<section class="slide">
+    <h2>O que é um Protocolo de Rede?</h2>
+    <div class="info-box" style="text-align: center; margin-bottom: 22px; max-width: 820px;">
+        <strong>Definição:</strong> um protocolo de rede é um conjunto de <strong>regras e padrões</strong> que definem como dois dispositivos se comunicam — o formato das mensagens, a ordem dos eventos e como tratar erros.
+    </div>
+    <div class="two-column-layout" style="align-items: flex-start;">
+        <div class="column card card-secondary">
+            <h3>🗣️ Analogia Humana</h3>
+            <p style="text-align: left; font-size: 0.95em;">Para duas pessoas se comunicarem, precisam de:</p>
+            <ul>
+                <li>Um <strong>idioma em comum</strong> (vocabulário + gramática)</li>
+                <li><strong>Regras de conversação</strong> (quem fala quando)</li>
+                <li>Um <strong>canal</strong> (voz, escrita, gesto)</li>
+                <li>Forma de lidar com <strong>mal-entendidos</strong> (pedir para repetir)</li>
+            </ul>
+            <p style="text-align: left; font-size: 0.9em; margin-top: 8px; color: #666;">Protocolos de rede fazem exatamente isso para dispositivos.</p>
+        </div>
+        <div class="column card card-primary">
+            <h3>🌐 Protocolo na prática</h3>
+            <p style="text-align: left; font-size: 0.95em;">Quando você acessa um site, vários protocolos entram em ação:</p>
+            <ul>
+                <li>Seu navegador e o servidor "combinam" como trocar dados → <strong>HTTP</strong></li>
+                <li>Os dados são divididos em pedaços e numerados → <strong>TCP</strong></li>
+                <li>Cada pedaço recebe um endereço e é roteado → <strong>IP</strong></li>
+                <li>Os pedaços viram sinais no cabo → <strong>Ethernet</strong></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 18 -->
+<section class="slide">
+    <h2>Por que Precisamos de Vários Protocolos?</h2>
+    <p style="margin-bottom: 18px;">Cada camada da comunicação resolve um <strong>problema diferente</strong>. Cada protocolo faz uma coisa bem-feita — e eles trabalham juntos:</p>
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 900px; width: 100%;">
+        <div class="info-box success" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>❓ Como o navegador pede uma página ao servidor?</span>
+            <strong>→ HTTP / HTTPS</strong>
+        </div>
+        <div class="info-box info" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>❓ Como garantir que todos os pedaços chegaram e na ordem certa?</span>
+            <strong>→ TCP</strong>
+        </div>
+        <div class="info-box" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>❓ Como endereçar o destino de forma única no mundo inteiro?</span>
+            <strong>→ IP</strong>
+        </div>
+        <div class="info-box warning" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>❓ Como transformar bits em sinais elétricos ou ondas de rádio?</span>
+            <strong>→ Ethernet / Wi-Fi</strong>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align: center; max-width: 820px; margin-top: 12px;">
+        Essa separação de responsabilidades é chamada de <strong>arquitetura em camadas</strong>. Vamos entendê-la com o Modelo OSI.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 19 -->
+<section class="slide">
+    <h2>O Modelo OSI: As 7 Camadas da Comunicação</h2>
+    <table class="styled-table" style="margin: 12px 0; max-width: 980px;">
+        <thead>
+            <tr><th style="width:5%;">#</th><th style="width:18%;">Camada</th><th style="width:37%;">O que resolve?</th><th>Exemplos</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>7</strong></td><td><strong>Aplicação</strong></td><td>Interface com o usuário final</td><td>HTTP, DNS, FTP, SMTP</td></tr>
+            <tr><td><strong>6</strong></td><td><strong>Apresentação</strong></td><td>Tradução, compressão, criptografia</td><td>SSL/TLS, JPEG, UTF-8</td></tr>
+            <tr><td><strong>5</strong></td><td><strong>Sessão</strong></td><td>Abre, mantém e encerra sessões</td><td>NetBIOS, RPC</td></tr>
+            <tr><td><strong>4</strong></td><td><strong>Transporte</strong></td><td>Entrega confiável, controle de fluxo</td><td>TCP, UDP</td></tr>
+            <tr style="background: #cfe2f3;"><td><strong>3</strong></td><td><strong>Rede ← 📌</strong></td><td>Endereçamento lógico e roteamento</td><td><strong>IP</strong>, ICMP</td></tr>
+            <tr><td><strong>2</strong></td><td><strong>Enlace</strong></td><td>Comunicação entre vizinhos diretos</td><td>Ethernet, Wi-Fi (802.11)</td></tr>
+            <tr><td><strong>1</strong></td><td><strong>Física</strong></td><td>Transmissão de bits no meio físico</td><td>Cabos, fibra, rádio</td></tr>
+        </tbody>
+    </table>
+    <div class="info-box info" style="text-align: center; max-width: 900px;">
+        O roteador opera principalmente na <strong>Camada 3 (Rede)</strong>. Ele lê o IP de destino e decide o próximo salto — mas não abre o conteúdo da mensagem (Camadas 4–7).
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 20 -->
+<section class="slide">
+    <h2>Camadas 1 e 2: O que Já Conhecemos</h2>
+    <p style="margin-bottom: 20px;">Boas notícias — você já estudou essas camadas nas aulas anteriores!</p>
+    <div class="two-column-layout" style="align-items: flex-start;">
+        <div class="column card card-secondary">
+            <h3>⚡ Camada 1 — Física</h3>
+            <p style="text-align: left; font-size: 0.95em;">É o meio físico pelo qual os bits viajam. Estudamos isso nas Aulas 06 e 07:</p>
+            <ul>
+                <li>Cabos de par trançado (UTP, FTP)</li>
+                <li>Categorias de cabos (Cat5e, Cat6...)</li>
+                <li>Conectores RJ-45 e crimpagem</li>
+                <li>Fibra óptica</li>
+            </ul>
+            <div class="info-box success" style="margin-top: 10px; font-size: 0.88em;">
+                ✓ Já dominado nas aulas de cabeamento!
+            </div>
+        </div>
+        <div class="column card card-primary">
+            <h3>🔗 Camada 2 — Enlace</h3>
+            <p style="text-align: left; font-size: 0.95em;">Garante a entrega entre dispositivos diretamente conectados. Estudamos na Aula 03:</p>
+            <ul>
+                <li>Endereços MAC (físicos)</li>
+                <li>Protocolo Ethernet</li>
+                <li>Switches e sua tabela MAC</li>
+                <li>CSMA/CD para evitar colisões</li>
+            </ul>
+            <div class="info-box success" style="margin-top: 10px; font-size: 0.88em;">
+                ✓ Já dominado nas aulas de LAN e switches!
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 21 -->
+<section class="slide">
+    <h2>Camada 3 — Rede: o Papel do Roteador</h2>
+    <p>A <strong class="highlight">Camada 3</strong> resolve o problema do endereçamento global e do roteamento entre redes diferentes. É aqui que entram o <strong>IP</strong> e os <strong>roteadores</strong>.</p>
+    <div class="two-column-layout" style="margin: 18px 0; align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>🔑 Responsabilidades da Camada 3</h3>
+            <ul>
+                <li>Atribuir um <strong>endereço lógico único</strong> a cada dispositivo na rede (endereço IP)</li>
+                <li>Dividir os dados em <strong>pacotes</strong> para transmissão</li>
+                <li>Determinar o <strong>melhor caminho</strong> de ponta a ponta</li>
+                <li>Encaminhar os pacotes de roteador em roteador até o destino</li>
+            </ul>
+        </div>
+        <div class="column card card-secondary">
+            <h3>⚖️ Camada 2 vs. Camada 3</h3>
+            <table class="styled-table" style="font-size: 0.85em; margin: 0;">
+                <thead><tr><th></th><th>Camada 2</th><th>Camada 3</th></tr></thead>
                 <tbody>
-                    <tr>
-                        <td><strong>Função</strong></td>
-                        <td>Conecta dispositivos na <strong>mesma rede</strong>.</td>
-                        <td>Conecta <strong>redes diferentes</strong>.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Endereço</strong></td>
-                        <td>Usa Endereço MAC (físico).</td>
-                        <td>Usa Endereço IP (lógico).</td>
-                    </tr>
-                     <tr>
-                        <td><strong>Broadcast</strong></td>
-                        <td>Encaminha para todos (cria o domínio).</td>
-                        <td>Bloqueia e isola (separa os domínios).</td>
-                    </tr>
+                    <tr><td><strong>Endereço</strong></td><td>MAC (físico)</td><td>IP (lógico)</td></tr>
+                    <tr><td><strong>Alcance</strong></td><td>Mesma rede</td><td>Redes diferentes</td></tr>
+                    <tr><td><strong>Dispositivo</strong></td><td>Switch</td><td>Roteador</td></tr>
+                    <tr><td><strong>Unidade</strong></td><td>Frame</td><td>Pacote</td></tr>
                 </tbody>
             </table>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>A Família de Protocolos TCP/IP</h2>
-            <p>A internet funciona com uma <strong class="highlight">suíte (conjunto)</strong> de protocolos. O <strong class="highlight">IP</strong> é o responsável pelo endereçamento e roteamento, como se fosse o serviço de correios que só se preocupa com o CEP de origem e destino.</p>
-            <img src="tcpip.png" alt="Diagrama das camadas do modelo TCP/IP" class="placeholder-img">
-        </section>
-
-        <section class="scroll-section">
-            <h2>Endereço IP: O CEP do seu Dispositivo</h2>
-            <p>O <strong class="highlight">Endereço IP</strong> é um número único que identifica um dispositivo em uma rede, permitindo que os dados o encontrem. Vamos focar na versão mais comum: o <strong class="highlight">IPv4</strong>.</p>
-        </section>
-
-        <section class="scroll-section">
-            <h2>Anatomia de um Endereço IPv4</h2>
-            <p>Um endereço IPv4 é um número de <strong class="highlight">32 bits</strong>, dividido em 4 blocos de 8 bits (<strong>octetos</strong>), representados em decimal (0 a 255).</p>
-            <p>Exemplo: <code>192.168.1.10</code></p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Interativo: Do Binário ao Decimal</h2>
-            <p>Vamos ver como o número <code>192</code> é formado por 8 bits.</p>
-            <div class="interactive-container binary-converter">
-                <p>Digite um número de 0 a 255:</p>
-                <input type="number" id="decimalInput" value="192" min="0" max="255">
-                <div class="binary-bits" id="binaryBits"></div>
-                <div id="binaryCalculation" class="result-box" style="font-size: 1em;"></div>
-            </div>
-        </section>
-
-        <section class="scroll-section">
-            <h2>O Esgotamento dos Endereços IPv4</h2>
-            <p>Com aproximadamente <strong class="highlight">4,3 bilhões</strong> de endereços, o IPv4 se esgotou. Isso levou à criação do <strong class="highlight">NAT</strong> e do <strong class="highlight">IPv6</strong>.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Endereços Públicos vs. Privados</h2>
-             <div class="two-column-layout" style="max-width: 900px; text-align: left;">
-                <div class="column">
-                    <h3>IP Público</h3>
-                    <p style="font-size: 1em;">É o endereço <strong class="highlight">único no mundo</strong> que seu roteador usa na internet.</p>
-                </div>
-                <div class="column">
-                    <h3>IP Privado</h3>
-                    <p style="font-size: 1em;">São endereços usados <strong class="highlight">apenas dentro da sua rede local</strong> (podem se repetir em outras casas).</p>
-                </div>
-            </div>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>NAT: O Tradutor de Endereços</h2>
-            <p>O <strong class="highlight">NAT (Network Address Translation)</strong> permite que vários dispositivos com IPs privados compartilhem um único IP público para acessar a internet.</p>
-            <img src="nat.gif" alt="Diagrama explicando o NAT" class="placeholder-img">
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Como o NAT Sabe Para Onde Devolver? A Tabela de Estado</h2>
-            <p>O roteador não troca apenas o IP. Ele também troca a <strong class="highlight">porta de origem</strong> por uma porta aleatória e cria uma entrada em sua <strong class="highlight">Tabela NAT</strong> (ou Tabela de Estado).</p>
-            <p><code>[IP Privado:Porta Original] ↔ [IP Público:Porta Traduzida]</code></p>
-            <p>Quando a resposta chega no IP público e na porta traduzida, o roteador consulta a tabela, descobre qual era o IP/Porta original e encaminha o pacote para o dispositivo correto na rede interna. É um processo <strong class="highlight">stateful</strong> (com estado).</p>
-            <img src="tabelanat.png" alt="Diagrama de uma Tabela NAT" class="placeholder-img">
-        </section>
-
-        <section class="scroll-section">
-            <h2>Faixas de Endereçamento Privado (RFC 1918)</h2>
-             <table class="styled-table" style="max-width: 800px;">
-                 <thead><tr><th>Faixa de IP</th><th>Uso Comum</th></tr></thead>
-                <tbody>
-                    <tr><td><code>10.0.0.0</code> - <code>10.255.255.255</code></td><td>Grandes redes corporativas.</td></tr>
-                    <tr><td><code>172.16.0.0</code> - <code>172.31.255.255</code></td><td>Redes de médio porte.</td></tr>
-                    <tr><td><code>192.168.0.0</code> - <code>192.168.255.255</code></td><td>Redes residenciais.</td></tr>
-                </tbody>
-            </table>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>O Problema da Organização</h2>
-            <p>Imagine uma empresa com 2000 funcionários que recebe do provedor uma única rede gigante, como a <code>10.0.0.0/8</code>. Se todos os 2000 dispositivos estiverem na mesma rede, teremos um <strong class="highlight">enorme domínio de broadcast</strong>.</p>
-            <p>A "gritaria" de um dispositivo seria ouvida por todos os outros 1999, causando lentidão. Além disso, como separar o departamento de Vendas do Financeiro por segurança?</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>A Solução: Sub-redes</h2>
-            <p>A solução é pegar essa rede grande e dividi-la em redes menores e gerenciáveis: as <strong class="highlight">sub-redes</strong>.</p>
-            <p>Podemos criar uma sub-rede para Vendas, outra para o Financeiro, outra para a TI, etc. Cada uma será um <strong class="highlight">domínio de broadcast separado</strong>, isolado por um roteador.</p>
-            <p>Mas como fazemos essa divisão matematicamente? Qual ferramenta usamos?</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>A Máscara de Rede: A Ferramenta para Criar Sub-redes</h2>
-            <p>O Endereço IP é dividido em duas partes: uma que identifica a <strong class="highlight">Rede</strong> e outra que identifica o <strong class="highlight">Dispositivo (Host)</strong>.</p>
-            <p>A <strong class="highlight">Máscara de Sub-rede</strong> é a ferramenta que define onde essa divisão acontece. Ao "puxar" a linha divisória, nós "emprestamos" bits da parte de Host para criar novas sub-redes.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Como a Máscara Funciona?</h2>
-            <p>A máscara é uma sequência de bits '1' (que representam a parte da Rede) seguida por bits '0' (que representam a parte do Host).</p>
-            <p>Exemplo: <code>255.255.255.0</code> em binário é:</p>
-            <p><code>11111111.11111111.11111111.00000000</code></p>
-            <p>Os 24 bits '1' definem a rede, e os 8 bits '0' definem os hosts dentro dela.</p>
-        </section>
-        
-         <section class="scroll-section">
-            <h2>A Operação "E" (AND) Binária</h2>
-            <p>Para descobrir o "nome" da rede (o endereço de rede) de um IP, o computador realiza uma operação lógica <strong class="highlight">"E" (AND)</strong> entre o IP e a Máscara.</p>
-             <table class="styled-table" style="max-width: 400px; font-family: 'Roboto Mono'; text-align: center;">
-                 <thead><tr><th colspan="3">Regras do AND</th></tr></thead>
-                 <tbody>
-                     <tr><td>1 AND 1 = 1</td><td>1 AND 0 = 0</td><td>0 AND 0 = 0</td></tr>
-                 </tbody>
-             </table>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Interativo: Calculando o Endereço de Rede</h2>
-            <div class="interactive-container">
-                <p>IP: <code>192.168.1.10</code> | Máscara: <code>255.255.255.0</code></p>
-                <div id="and-calculation" class="result-box">
-                    <p><strong>IP:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11000000.10101000.00000001.00001010</p>
-                    <p><strong>Máscara:</strong> 11111111.11111111.11111111.00000000</p>
-                    <p>-------------------------------------------------- (AND)</p>
-                    <p><strong>Rede:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11000000.10101000.00000001.00000000</p>
-                    <p style="text-align:center; font-weight: bold; margin-top: 10px;">= 192.168.1.0</p>
-                </div>
-            </div>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Notação CIDR</h2>
-            <p>A notação <strong class="highlight">CIDR</strong> simplifica a máscara contando o número de bits '1'.</p>
-            <ul>
-                <li><code>255.255.255.0</code> = 24 bits '1' = <code>/24</code></li>
-                <li><code>192.168.1.10</code> com máscara <code>255.255.255.0</code> vira <code>192.168.1.10/24</code>.</li>
-            </ul>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Classes de Endereços (Conceito Histórico)</h2>
-            <p>Originalmente, as máscaras eram fixas de acordo com a "Classe" do IP (A, B, C). Hoje, o CIDR nos dá flexibilidade total para criar sub-redes de qualquer tamanho.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Endereços Especiais</h2>
-            <div class="two-column-layout" style="max-width: 900px; text-align: left;">
-                <div class="column">
-                    <h3>Endereço de Rede</h3>
-                    <p style="font-size: 1em;">O primeiro endereço da faixa (hosts em '0'). Identifica a rede. Ex: <code>192.168.1.0/24</code>.</p>
-                </div>
-                <div class="column">
-                    <h3>Endereço de Broadcast</h3>
-                    <p style="font-size: 1em;">O último endereço da faixa (hosts em '1'). Fala com todos na rede. Ex: <code>192.168.1.255/24</code>.</p>
-                </div>
-            </div>
-             <p>Estes dois endereços <strong class="highlight">não podem ser usados</strong> em dispositivos.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>O Endereço de Loopback</h2>
-            <p>A faixa <code>127.0.0.0/8</code>, especialmente <code>127.0.0.1</code> (<strong>"localhost"</strong>), é usada para um dispositivo "falar consigo mesmo", essencial para testes de software.</p>
-        </section>
-
-        <section class="scroll-section">
-            <h2>Calculadora de Rede Interativa</h2>
-            <p>Digite um IP e escolha a máscara para ver as informações da sub-rede.</p>
-            <div class="interactive-container">
-                <div style="text-align: center;">
-                    IP: <input type="text" id="ip-calc-input" value="192.168.1.77">
-                    Máscara (CIDR):
-                    <select id="cidr-calc-select"></select>
-                    <button id="calculate-btn">Calcular</button>
-                </div>
-                <div id="network-calc-results" class="result-box"></div>
-            </div>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Cenário: A Viagem de um Pacote</h2>
-            <p>Seu PC (<code>192.168.1.10/24</code>) quer acessar <code>www.google.com</code> (<code>8.8.8.8</code>). O que acontece?</p>
-            <p>Vamos ver a jornada passo a passo.</p>
-        </section>
-        
-        <section class="scroll-section">
-            <h2>Interativo: A Viagem de um Pacote</h2>
-            <div id="packet-journey-container">
-                 <div class="pj-device" id="pj-pc">💻</div>
-                 <div class="pj-label" id="pj-pc-label">Seu PC<br>192.168.1.10</div>
-                 <div class="pj-device" id="pj-switch">🖧</div>
-                 <div class="pj-label" id="pj-switch-label">Switch</div>
-                 <div class="pj-device" id="pj-router">🌐</div>
-                 <div class="pj-label" id="pj-router-label">Roteador (NAT)<br>192.168.1.1<br>200.20.10.5</div>
-                 <div class="pj-device" id="pj-cloud">☁️</div>
-                 <div class="pj-device" id="pj-server">🖥️</div>
-                 <div class="pj-label" id="pj-server-label">Servidor Google<br>8.8.8.8</div>
-                 <div class="pj-packet" id="pj-packet">✉️</div>
-                 <div class="packet-info" id="pj-packet-info"></div>
-            </div>
-            <p id="pj-description" style="margin-top:20px; min-height: 40px;"></p>
-        </section>
-
-        <section class="scroll-section">
-            <h2>Resumo da Aula</h2>
-            <ul>
-                <li>O <strong class="highlight">Roteador</strong> segmenta a rede em múltiplos <strong class="highlight">domínios de broadcast</strong>.</li>
-                <li>O <strong class="highlight">Endereço IP</strong> permite a comunicação entre redes diferentes.</li>
-                <li>A <strong class="highlight">Máscara de Rede</strong> é a ferramenta para criar <strong class="highlight">sub-redes</strong>, organizando e otimizando a rede.</li>
-                <li>Dispositivos em redes diferentes se comunicam através do <strong class="highlight">Gateway Padrão</strong> (o roteador).</li>
-            </ul>
-        </section>
-
-        <section class="scroll-section">
-            <h2>Perguntas?</h2>
-        </section>
-        
+        </div>
     </div>
+</section>
 
-    <!-- Navegação -->
-    <div class="navigation">
-        <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
-        <div class="slide-counter" id="slide-counter">1 / 35</div>
-        <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
-        <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-        </button>
+<!-- ═══════════════════════════════════════════════════════ SLIDE 22 -->
+<section class="slide">
+    <h2>Camadas 4 a 7: Uma Prévia</h2>
+    <p style="margin-bottom: 18px;">As camadas superiores serão estudadas em detalhes nas próximas aulas. Veja o que cada uma faz:</p>
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 900px; width: 100%;">
+        <div class="card" style="padding: 14px; display: flex; gap: 15px; align-items: center;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
+            <div><strong>Transporte (TCP/UDP):</strong> garante que os dados chegaram completos e na ordem certa (TCP) ou os envia sem confirmação, mais rápido (UDP). <em>Aula 12.</em></div>
+        </div>
+        <div class="card" style="padding: 14px; display: flex; gap: 15px; align-items: center;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">5</div>
+            <div><strong>Sessão:</strong> controla o diálogo entre aplicações — quem fala quando, como pausar e retomar uma conversa. Menos visível no dia a dia.</div>
+        </div>
+        <div class="card" style="padding: 14px; display: flex; gap: 15px; align-items: center;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">6</div>
+            <div><strong>Apresentação:</strong> traduz o formato dos dados — criptografia (TLS/SSL), compressão e codificação de caracteres (UTF-8).</div>
+        </div>
+        <div class="card" style="padding: 14px; display: flex; gap: 15px; align-items: center;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">7</div>
+            <div><strong>Aplicação (HTTP, DNS, DHCP):</strong> a interface com o usuário. O protocolo que o seu navegador, e-mail ou jogo online usa. <em>Aulas 13 e 14.</em></div>
+        </div>
     </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 23 -->
+<section class="slide">
+    <h2>Encapsulamento: o que é?</h2>
+    <p>Quando você envia dados pela rede, cada camada do Modelo OSI <strong>adiciona informações extras</strong> ao pacote — como colocar uma carta dentro de envelopes sucessivos.</p>
+    <div class="two-column-layout" style="margin: 18px 0; align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>📦 A Analogia dos Envelopes</h3>
+            <p style="text-align: left; font-size: 0.95em;">Imagine que você vai enviar uma carta internacional:</p>
+            <ol>
+                <li>Escreve a carta (conteúdo = dados)</li>
+                <li>Coloca num envelope com endereço → <strong>TCP</strong></li>
+                <li>Coloca numa caixa com endereço IP → <strong>IP</strong></li>
+                <li>A caixa vai num contêiner com rota de entrega → <strong>Ethernet</strong></li>
+                <li>O contêiner vai num navio/avião → <strong>Físico</strong></li>
+            </ol>
+        </div>
+        <div class="column card card-secondary">
+            <h3>📬 No receptor (desencapsulamento)</h3>
+            <p style="text-align: left; font-size: 0.95em;">O processo é <strong>inverso</strong> — cada camada remove seu envelope:</p>
+            <ol>
+                <li>Camada Física: converte sinais em bits</li>
+                <li>Ethernet: remove o cabeçalho de enlace</li>
+                <li>IP: remove o cabeçalho de rede</li>
+                <li>TCP: remove o cabeçalho de transporte</li>
+                <li>Aplicação: lê os dados originais</li>
+            </ol>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 24 -->
+<section class="slide">
+    <h2>Encapsulamento: Visualizando as Camadas</h2>
+    <p style="margin-bottom: 15px;">Veja como as camadas se <strong>empilham</strong> — cada uma envolve a anterior como um envelope:</p>
+    <div class="encap-visual">
+        <div class="encap-layer" style="background: #f8f9fa; border: 2px solid var(--border-color);">
+            <span><strong>Dados</strong> — conteúdo da aplicação (ex: página HTML, e-mail)</span>
+            <span class="encap-label">Camada 7 — Aplicação</span>
+        </div>
+        <div class="encap-layer" style="background: #e8f4fd; border: 2px solid var(--secondary-color);">
+            <span><strong style="color: var(--secondary-color);">[Cabeçalho TCP]</strong> &nbsp;&nbsp; Dados</span>
+            <span class="encap-label">Camada 4 — Segmento TCP</span>
+        </div>
+        <div class="encap-layer" style="background: #d4e6f1; border: 2px solid var(--primary-color);">
+            <span><strong style="color: var(--primary-color);">[Cabeçalho IP]</strong> &nbsp;&nbsp; Cabeçalho TCP &nbsp;&nbsp; Dados</span>
+            <span class="encap-label">Camada 3 — Pacote IP &nbsp;← o roteador lê aqui</span>
+        </div>
+        <div class="encap-layer" style="background: #c8daea; border: 2px solid #1a5276;">
+            <span><strong style="color: #1a5276;">[Cabeçalho Ethernet]</strong> &nbsp;&nbsp; Cabeçalho IP &nbsp;&nbsp; Cabeçalho TCP &nbsp;&nbsp; Dados &nbsp;&nbsp; <strong>[FCS]</strong></span>
+            <span class="encap-label">Camada 2 — Frame Ethernet</span>
+        </div>
+        <div class="encap-layer" style="background: #1a1a1a; color: #a8dadc; border: 2px solid #333; font-family: monospace; font-size: 0.88em;">
+            <span>10110100 01001010 11001011... &nbsp;(bits elétricos / luz / ondas de rádio)</span>
+            <span style="color:#888; font-family: Roboto, sans-serif;">Camada 1 — Físico</span>
+        </div>
+    </div>
+    <p style="margin-top: 12px; font-size: 0.9em; color: #555;">O roteador abre o pacote até a Camada 3, lê o IP de destino, e remonta o frame para a próxima rede — trocando os cabeçalhos de Camada 2.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 25 -->
+<section class="slide">
+    <h2>O Protocolo IP: o que ele faz?</h2>
+    <p>O <strong class="highlight">IP (Internet Protocol)</strong> é o protocolo da Camada 3 responsável por endereçar e encaminhar pacotes entre redes.</p>
+    <div class="two-column-layout" style="margin: 18px 0; align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>⚙️ Responsabilidades do IP</h3>
+            <ul>
+                <li><strong>Endereçar</strong> — atribui a cada dispositivo um endereço único (o IP)</li>
+                <li><strong>Fragmentar</strong> — divide dados grandes em pacotes menores que a rede consegue transportar</li>
+                <li><strong>Rotear</strong> — define como roteadores encaminham esses pacotes até o destino</li>
+            </ul>
+        </div>
+        <div class="column card card-danger">
+            <h3 style="color: var(--danger-color);">⚠️ O que o IP NÃO faz</h3>
+            <ul>
+                <li><strong>Não garante entrega</strong> — um pacote pode ser perdido e o IP não avisa</li>
+                <li><strong>Não garante ordem</strong> — pacotes do mesmo arquivo podem chegar fora de sequência</li>
+                <li><strong>Não verifica o conteúdo</strong> — só checa a integridade do cabeçalho</li>
+            </ul>
+            <div class="info-box warning" style="margin-top: 10px; font-size: 0.88em;">
+                Quem garante a entrega confiável é o <strong>TCP</strong> (Camada 4). O IP apenas faz o melhor esforço (<em>best effort</em>).
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 26 -->
+<section class="slide">
+    <h2>O Cabeçalho IP: as Informações do Pacote</h2>
+    <p style="margin-bottom: 15px;">Cada pacote IP carrega um <strong class="highlight">cabeçalho</strong> com campos que os roteadores usam para tomar decisões:</p>
+    <table class="styled-table" style="max-width: 900px;">
+        <thead>
+            <tr><th>Campo</th><th>O que armazena?</th><th>Exemplo</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>IP de Origem</strong></td><td>Endereço de quem enviou o pacote</td><td>192.168.1.10</td></tr>
+            <tr><td><strong>IP de Destino</strong></td><td>Endereço de quem deve receber</td><td>172.217.28.110</td></tr>
+            <tr><td><strong>TTL</strong></td><td>Número de saltos restantes (decrementado a cada roteador)</td><td>64, 63, 62...</td></tr>
+            <tr><td><strong>Protocolo</strong></td><td>Qual protocolo de camada superior está encapsulado</td><td>TCP=6 / UDP=17 / ICMP=1</td></tr>
+            <tr><td><strong>Checksum</strong></td><td>Verificação de erros no cabeçalho</td><td>(número calculado)</td></tr>
+            <tr><td><strong>Tamanho</strong></td><td>Tamanho total do pacote em bytes</td><td>1500 bytes (máx. Ethernet)</td></tr>
+        </tbody>
+    </table>
+    <div class="info-box info" style="text-align: center; max-width: 900px; margin-top: 12px;">
+        O roteador lê principalmente o <strong>IP de Destino</strong> e o <strong>TTL</strong> para tomar sua decisão. O restante do cabeçalho é ignorado por ele.
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 27 -->
+<section class="slide">
+    <h2>A Jornada de um Pacote: o Cenário</h2>
+    <p style="margin-bottom: 18px;">Vamos acompanhar um pacote do início ao fim. Cenário: você acessa <strong>google.com</strong> do seu computador em casa.</p>
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 880px; width: 100%;">
+        <div class="info-box" style="display: flex; gap: 15px; align-items: center;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+            <div><strong>Resolução de nome:</strong> seu navegador pergunta ao servidor DNS "qual é o IP do google.com?" e recebe a resposta. (DNS = Aula 13)</div>
+        </div>
+        <div class="info-box info" style="display: flex; gap: 15px; align-items: center;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+            <div><strong>Montagem do pacote:</strong> seu PC cria o pacote IP com IP de origem = seu IP e IP de destino = IP do Google.</div>
+        </div>
+        <div class="info-box warning" style="display: flex; gap: 15px; align-items: center;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--warning-color); color: #333; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+            <div><strong>Decisão local:</strong> <em>"O Google está na minha rede local?"</em> → Não. → O pacote é enviado para o <strong>gateway padrão</strong> (seu roteador Wi-Fi).</div>
+        </div>
+        <div class="info-box" style="display: flex; gap: 15px; align-items: center;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
+            <div><strong>Roteamento em cadeia:</strong> o roteador doméstico consulta sua tabela → encaminha ao ISP → backbone → datacenter do Google.</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 28 -->
+<section class="slide">
+    <h2>A Jornada de um Pacote: o Caminho</h2>
+    <div class="pj-row" style="margin: 18px 0; justify-content: center;">
+        <div class="pj-node hl">💻 Seu PC<div class="pj-sub">Cria o pacote<br>IP destino = Google</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node">🏠 Roteador<br>Doméstico<div class="pj-sub">Seu gateway<br>padrão</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node">🏢 Roteador<br>do ISP<div class="pj-sub">Seu provedor<br>de internet</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node">🌐 Backbone<br>da Internet<div class="pj-sub">Roteadores de<br>alta capacidade</div></div>
+        <div class="pj-arrow">→</div>
+        <div class="pj-node hl">☁️ Google<br>Datacenter<div class="pj-sub">Recebe, processa<br>e responde</div></div>
+    </div>
+    <div style="display: flex; gap: 14px; max-width: 1000px; width: 100%; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+        <div class="info-box" style="flex:1; min-width:200px; text-align:center; padding: 12px;">
+            Em cada roteador: lê IP destino → consulta tabela → encaminha
+        </div>
+        <div class="info-box info" style="flex:1; min-width:200px; text-align:center; padding: 12px;">
+            TTL decrementado a cada salto — proteção contra loops
+        </div>
+        <div class="info-box success" style="flex:1; min-width:200px; text-align:center; padding: 12px;">
+            Todo esse caminho em <strong>menos de 100 ms</strong>
+        </div>
+    </div>
+    <div class="info-box warning" style="text-align: center; max-width: 880px;">
+        A resposta do Google faz o <strong>caminho inverso</strong> — e pode até passar por roteadores <em>diferentes</em>, pois cada pacote é roteado de forma independente!
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 29 -->
+<section class="slide">
+    <h2>Resumo da Aula</h2>
+    <div class="two-column-layout" style="align-items: flex-start;">
+        <div class="column card card-primary">
+            <h3>✅ Roteamento</h3>
+            <ul style="font-size: 0.92em;">
+                <li><strong>Switch</strong> (Camada 2, MAC) vs. <strong>Roteador</strong> (Camada 3, IP)</li>
+                <li>Roteamento: encontrar o melhor caminho de rede a rede</li>
+                <li><strong>Salto (hop):</strong> cada roteador no caminho; <strong>TTL</strong>: proteção contra loops</li>
+                <li><strong>Rota:</strong> destino + gateway + interface de saída</li>
+                <li><strong>Gateway padrão:</strong> a porta de saída da rede local</li>
+                <li><strong>Métricas:</strong> hop count, largura de banda, latência</li>
+                <li>Roteamento <strong>estático</strong> (manual) vs. <strong>dinâmico</strong> (RIP, OSPF, BGP)</li>
+            </ul>
+        </div>
+        <div class="column card card-secondary">
+            <h3>✅ Protocolos e OSI</h3>
+            <ul style="font-size: 0.92em;">
+                <li><strong>Protocolo:</strong> regras de comunicação entre dispositivos</li>
+                <li>Múltiplos protocolos pois cada camada resolve um problema</li>
+                <li><strong>Modelo OSI:</strong> 7 camadas, roteador na Camada 3</li>
+                <li>Camadas 1–2: já estudadas (cabo, switch, MAC, Ethernet)</li>
+                <li><strong>Encapsulamento:</strong> cada camada adiciona um cabeçalho</li>
+                <li><strong>IP:</strong> endereça e roteia — mas sem garantia de entrega</li>
+                <li>Cabeçalho IP: IP origem, IP destino, TTL, protocolo</li>
+            </ul>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align: center; max-width: 900px; margin-top: 14px;">
+        <strong>Próximas aulas:</strong> Aula 09 — Endereçamento IPv4 em profundidade &nbsp;|&nbsp; Aula 10 — Cálculo prático de sub-redes
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ SLIDE 30 -->
+<section class="slide">
+    <blockquote>
+        "A internet não é um lugar. É um conjunto de acordos — protocolos — que permitem que máquinas diferentes, em países diferentes, construídas por empresas diferentes, se entendam perfeitamente."
+    </blockquote>
+    <p style="font-size: 1.25em; margin-top: 25px; font-weight: 700; color: var(--primary-color);">
+        Roteadores: os carteiros invisíveis que fazem tudo isso funcionar.
+    </p>
+    <div style="margin-top: 35px; display: flex; gap: 15px; justify-content: center;">
+        <span style="background: var(--primary-color); color: white; padding: 10px 24px; border-radius: 30px; font-weight: bold;">Aula 08 — Concluída ✓</span>
+        <span style="background: var(--light-grey); border: 2px solid var(--border-color); padding: 10px 24px; border-radius: 30px; font-weight: bold; color: var(--secondary-color);">Próximo: IPv4 →</span>
+    </div>
+</section>
+
+</div><!-- /slides-container -->
+
+<!-- Navegação -->
+<div class="navigation">
+    <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+    <div class="slide-counter" id="slide-counter">1 / 30</div>
+    <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+    <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
 </div>
+</div><!-- /presentation-container -->
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const sections = document.querySelectorAll('.scroll-section');
+        const presentationContainer = document.getElementById('presentation-container');
+        const slides = document.querySelectorAll('.slide');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const slideCounter = document.getElementById('slide-counter');
-        
-        let currentSectionIndex = 0;
-        const totalSections = sections.length;
-        let pjStep = 0; // Packet Journey Step
 
-        function updateNavigation() {
-            slideCounter.textContent = `${currentSectionIndex + 1} / ${totalSections}`;
-            prevBtn.disabled = currentSectionIndex === 0 && pjStep === 0;
-            nextBtn.disabled = currentSectionIndex === totalSections - 1;
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        function updateSlideView() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
         }
 
-        function handleNavigation(direction) {
-            const currentSection = sections[currentSectionIndex];
-            
-            if (currentSection.querySelector('#packet-journey-container')) {
-                if (direction > 0) {
-                    if (runPacketJourneyStep()) return; // Animação em andamento, não avança
-                } else { // direction < 0
-                    if (pjStep > 0) {
-                        resetPacketJourney();
-                        return; // Fica na seção, apenas reseta
-                    }
-                }
-            }
-
-            if (direction > 0 && currentSectionIndex < totalSections - 1) {
-                sections[currentSectionIndex + 1].scrollIntoView({ behavior: 'smooth' });
-            } else if (direction < 0 && currentSectionIndex > 0) {
-                sections[currentSectionIndex - 1].scrollIntoView({ behavior: 'smooth' });
-            }
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            updateSlideView();
         }
 
-        nextBtn.addEventListener('click', () => handleNavigation(1));
-        prevBtn.addEventListener('click', () => handleNavigation(-1));
+        nextBtn.addEventListener('click', () => changeSlide(1));
+        prevBtn.addEventListener('click', () => changeSlide(-1));
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') handleNavigation(1);
-            if (e.key === 'ArrowLeft') handleNavigation(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
         });
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const index = Array.from(sections).indexOf(entry.target);
-                    currentSectionIndex = index;
-                    if (entry.target.querySelector('#packet-journey-container')) {
-                        resetPacketJourney();
-                    }
-                    updateNavigation();
-                }
-            });
-        }, { threshold: 0.7 });
-
-        sections.forEach(section => observer.observe(section));
 
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {});
-            } else {
-                document.exitFullscreen();
-            }
+                presentationContainer.requestFullscreen().catch(err => {
+                    alert(`Erro ao entrar em tela cheia: ${err.message}`);
+                });
+            } else { document.exitFullscreen(); }
         });
 
-        // --- INTERACTIVE SCRIPTS ---
-
-        // Binary Converter
-        const decimalInput = document.getElementById('decimalInput');
-        const binaryBitsContainer = document.getElementById('binaryBits');
-        const binaryCalculation = document.getElementById('binaryCalculation');
-
-        function updateBinaryConverter() {
-            const num = parseInt(decimalInput.value) || 0;
-            if (num < 0 || num > 255) return;
-            const binaryString = num.toString(2).padStart(8, '0');
-            binaryBitsContainer.innerHTML = '';
-            let calculation = '';
-            for (let i = 0; i < 8; i++) {
-                const bit = binaryString[i];
-                const value = Math.pow(2, 7 - i);
-                const bitBox = document.createElement('div');
-                bitBox.className = 'bit-box';
-                bitBox.textContent = bit;
-                const valueLabel = document.createElement('div');
-                valueLabel.className = 'bit-value';
-                valueLabel.textContent = value;
-                const container = document.createElement('div');
-                container.style.textAlign = 'center';
-                container.appendChild(bitBox);
-                container.appendChild(valueLabel);
-                binaryBitsContainer.appendChild(container);
-                if (bit === '1') {
-                    if (calculation !== '') calculation += ' + ';
-                    calculation += value;
-                }
-            }
-            if (calculation === '') calculation = '0';
-            binaryCalculation.textContent = `${calculation} = ${num}`;
-        }
-        decimalInput.addEventListener('input', updateBinaryConverter);
-        updateBinaryConverter();
-
-        // Network Calculator
-        const ipInput = document.getElementById('ip-calc-input');
-        const cidrSelect = document.getElementById('cidr-calc-select');
-        const calcBtn = document.getElementById('calculate-btn');
-        const resultsBox = document.getElementById('network-calc-results');
-        for (let i = 1; i <= 32; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `/${i}`;
-            if (i === 24) option.selected = true;
-            cidrSelect.appendChild(option);
-        }
-        function ipToLong(ip) { return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0; }
-        function longToIp(long) { return [ (long >>> 24), (long >>> 16 & 255), (long >>> 8 & 255), (long & 255) ].join('.'); }
-        function calculateNetwork() {
-            const ip = ipInput.value;
-            const cidr = parseInt(cidrSelect.value);
-            if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
-                resultsBox.textContent = 'Erro: Endereço IP inválido.';
-                return;
-            }
-            const ipLong = ipToLong(ip);
-            const maskLong = (0xFFFFFFFF << (32 - cidr)) >>> 0;
-            const networkLong = (ipLong & maskLong) >>> 0;
-            const broadcastLong = (networkLong | (~maskLong)) >>> 0;
-            const firstHostLong = networkLong + 1;
-            const lastHostLong = broadcastLong - 1;
-            const totalHosts = Math.pow(2, 32 - cidr);
-            const usableHosts = totalHosts > 2 ? totalHosts - 2 : 0;
-            resultsBox.innerHTML = `
-                <p><strong>Endereço IP:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${ip}/${cidr}</p>
-                <p><strong>Máscara de Rede:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${longToIp(maskLong)}</p>
-                <p>-------------------------------------------------</p>
-                <p><strong>Endereço de Rede:</strong> &nbsp;&nbsp;&nbsp;&nbsp;${longToIp(networkLong)}</p>
-                <p><strong>Endereço de Broadcast:</strong> ${longToIp(broadcastLong)}</p>
-                <p><strong>Primeiro Host Válido:</strong> &nbsp;${(usableHosts > 0) ? longToIp(firstHostLong) : 'N/A'}</p>
-                <p><strong>Último Host Válido:</strong> &nbsp;&nbsp;&nbsp;${(usableHosts > 0) ? longToIp(lastHostLong) : 'N/A'}</p>
-                <p><strong>Total de Hosts:</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${usableHosts}</p>
-            `;
-        }
-        calcBtn.addEventListener('click', calculateNetwork);
-        calculateNetwork();
-        
-        // Packet Journey Animation
-        const pjPacket = document.getElementById('pj-packet');
-        const pjPacketInfo = document.getElementById('pj-packet-info');
-        const pjDescription = document.getElementById('pj-description');
-
-        function resetPacketJourney() {
-            pjStep = 0;
-            pjPacket.style.transition = 'none';
-            pjPacket.style.opacity = 0;
-            pjPacket.style.left = '100px';
-            pjPacket.style.transform = 'translateY(0)';
-            pjPacketInfo.style.opacity = 0;
-            pjDescription.textContent = 'Clique na seta para a direita para iniciar a animação.';
-            updateNavigation();
-        }
-
-        function runPacketJourneyStep() {
-            pjPacket.style.transition = 'all 1s ease-in-out';
-            pjStep++;
-            updateNavigation();
-
-            switch(pjStep) {
-                case 1:
-                    pjDescription.textContent = "1. O PC cria um pacote para o Google (8.8.8.8) e percebe que o destino está fora da sua rede local.";
-                    pjPacket.style.opacity = 1;
-                    pjPacketInfo.innerHTML = "Origem: 192.168.1.10<br>Destino: 8.8.8.8";
-                    pjPacketInfo.style.opacity = 1;
-                    break;
-                case 2:
-                    pjDescription.textContent = "2. O pacote é enviado para o Gateway Padrão (Roteador), passando pelo Switch.";
-                    pjPacket.style.left = '360px';
-                    break;
-                case 3:
-                    pjDescription.textContent = "3. O Roteador realiza o NAT: troca o IP de origem privado pelo seu IP público.";
-                    pjPacketInfo.innerHTML = "Origem: <span style='color:red;'>200.20.10.5</span><br>Destino: 8.8.8.8";
-                    break;
-                case 4:
-                    pjDescription.textContent = "4. O pacote modificado é enviado para a Internet.";
-                    pjPacket.style.left = '710px';
-                    break;
-                case 5:
-                    pjDescription.textContent = "5. O servidor do Google recebe o pacote e prepara a resposta.";
-                    pjPacket.style.transform = 'translateY(40px)'; // Move para baixo para simular a volta
-                    pjPacketInfo.innerHTML = "Origem: 8.8.8.8<br>Destino: <span style='color:red;'>200.20.10.5</span>";
-                    break;
-                case 6:
-                    pjDescription.textContent = "6. A resposta volta pela Internet até o seu roteador.";
-                    pjPacket.style.left = '360px';
-                    break;
-                case 7:
-                    pjDescription.textContent = "7. O roteador desfaz o NAT, trocando o IP de destino público pelo IP privado original do PC.";
-                    pjPacketInfo.innerHTML = "Origem: 8.8.8.8<br>Destino: <span style='color:green;'>192.168.1.10</span>";
-                    break;
-                case 8:
-                    pjDescription.textContent = "8. O roteador entrega o pacote final ao PC. Comunicação completa!";
-                    pjPacket.style.left = '100px';
-                    break;
-                default:
-                    resetPacketJourney();
-                    return false; // Animação terminou, pode avançar
-            }
-            return true; // Animação em andamento
-        }
-        resetPacketJourney(); // Inicia o estado
+        updateSlideView();
     });
 </script>
 </body>
 </html>
-

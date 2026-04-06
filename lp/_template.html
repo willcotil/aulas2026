@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- EDITAR: título da aba -->
+    <title>Aula NN - TÍTULO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* EDITAR: aplicar a próxima paleta livre de palettes.json
+           --c-dark    → palette.dark
+           --c-primary → palette.primary
+           --c-accent  → palette.secondary  (cor de destaque suave)
+           --c-light   → palette.muted      (fundo de código, caixas claras)
+           --c-bg      → #f8f9fa (manter fixo, ou palette.muted clarificado)
+        */
+        :root {
+            --c-dark: #313647;
+            --c-primary: #435663;
+            --c-accent: #a3b087;
+            --c-light: #fff8d4;
+            --c-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-bg);
+            color: var(--c-dark);
+            overflow-x: hidden;
+            padding-top: 50px;
+        }
+
+        /* Top bar fixa */
+        .top-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: var(--c-dark); color: var(--c-light);
+            text-align: center; padding: 12px 0;
+            font-size: 1.1rem; z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-weight: 500; letter-spacing: 0.5px;
+        }
+        .top-bar a { color: var(--c-light); text-decoration: none; transition: color 0.2s; }
+        .top-bar a:hover { color: var(--c-accent); }
+
+        /* Slides */
+        .slide {
+            min-height: calc(100vh - 50px); width: 100%;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 2rem 4rem; position: relative;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        .slide.active { display: flex; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tipografia */
+        h1 { font-size: 4rem; font-weight: 900; color: var(--c-dark); margin-bottom: 1rem; line-height: 1.1; text-align: center; letter-spacing: -1px; }
+        h2 { font-size: 2.6rem; font-weight: 800; color: var(--c-primary); margin-bottom: 2rem; text-align: center; position: relative; }
+        h2::after { content: ''; display: block; width: 50px; height: 5px; background-color: var(--c-accent); margin: 0.75rem auto 0; border-radius: 4px; }
+        p, li { font-size: 1.25rem; line-height: 1.7; color: #4b5563; max-width: 900px; text-align: center; margin-bottom: 1rem; }
+        li { text-align: left; margin-bottom: 0.5rem; }
+
+        /* Componentes */
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 10px 30px -10px rgba(64, 81, 59, 0.15); border: 1px solid rgba(229, 217, 182, 0.5); position: relative; overflow: hidden; }
+        .card-accent  { border-top: 6px solid var(--c-accent); }
+        .card-primary { border-top: 6px solid var(--c-primary); }
+        .card-danger  { border-top: 6px solid #ef4444; }
+
+        /* Blocos de Código */
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1.5rem auto; }
+        .copy-button {
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: var(--c-dark); color: var(--c-light);
+            border: 1px solid var(--c-light); padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--c-light); color: var(--c-dark); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+        .code-block {
+            background-color: #222632; color: #fdfcf8; padding: 1.8rem;
+            border-radius: 1rem; font-family: 'Fira Code', monospace;
+            font-size: 1.2rem; text-align: left;
+            border-left: 6px solid var(--c-primary);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); margin: 0;
+        }
+        code.inline-code {
+            background-color: var(--c-light); color: var(--c-dark);
+            padding: 0.2em 0.5em; border-radius: 4px;
+            font-family: 'Fira Code', monospace; font-weight: 700; font-size: 0.9em;
+        }
+
+        /* Sintaxe colorida (fundo escuro) */
+        .syn-kw      { color: #fb923c; font-weight: bold; }
+        .syn-type    { color: #a3e635; font-weight: bold; }
+        .syn-func    { color: #fef08a; font-weight: bold; }
+        .syn-str     { color: #fde047; }
+        .syn-num     { color: #bae6fd; }
+        .syn-op      { color: #fb923c; font-weight: bold; }
+        .syn-comment { color: #9ca3af; font-style: italic; }
+
+        /* Navegação */
+        .nav-controls { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; z-index: 100; }
+        .btn-nav { background-color: var(--c-dark); color: var(--c-light); width: 3.5rem; height: 3.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.2s; border: 2px solid var(--c-dark); font-size: 1.2rem; }
+        .btn-nav:hover { background-color: var(--c-light); color: var(--c-dark); transform: translateY(-3px); }
+        .counter { position: fixed; bottom: 2rem; left: 2rem; background-color: white; padding: 0.6rem 1.5rem; border-radius: 2rem; font-weight: 700; border: 2px solid var(--c-light); color: var(--c-dark); z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* Impressão */
+        @media print {
+            body { background: white; color: black; padding-top: 0; }
+            .top-bar, .nav-controls, .counter, .copy-button { display: none !important; }
+            .slide { display: flex !important; min-height: auto; height: auto; page-break-after: always; padding: 1cm; align-items: flex-start; animation: none; border: none; }
+            .slide:last-child { page-break-after: avoid; }
+            h1 { font-size: 2.5rem; color: black; }
+            h2 { color: black; text-align: left; }
+            h2::after { margin-left: 0; background-color: black; }
+            p, li { text-align: justify; color: black; max-width: 100%; }
+            .card { box-shadow: none; border: 1px solid #ccc; padding: 1.5rem; page-break-inside: avoid; }
+            .code-block { background-color: #f3f4f6 !important; color: black !important; border-left: 4px solid black; box-shadow: none; }
+            .syn-kw, .syn-type, .syn-func, .syn-str, .syn-num, .syn-op, .syn-comment { color: black !important; font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Fixo -->
+    <div class="top-bar">
+        <a href="https://willcotil.github.io/aulas2026/" target="_blank">https://willcotil.github.io/aulas2026/</a>
+    </div>
+
+    <!-- Navegação -->
+    <div class="nav-controls">
+        <button class="btn-nav" id="prevBtn" title="Anterior">←</button>
+        <button class="btn-nav" id="nextBtn" title="Próximo">→</button>
+        <button class="btn-nav" id="fsBtn" title="Tela Cheia">⛶</button>
+        <button class="btn-nav" onclick="window.print()" title="Imprimir">🖨️</button>
+    </div>
+    <div id="counter" class="counter">1 / 0</div>
+
+    <main>
+
+        <!-- Slide 1: Capa -->
+        <section class="slide active">
+            <!-- EDITAR: disciplina e título da aula -->
+            <h1>Linguagem de Programação</h1>
+            <h2 style="font-size:2rem; margin-top:1rem;">Aula NN: TÍTULO</h2>
+            <p style="font-size:1.4rem; font-weight:700; margin-top:2rem;">Subtítulo ou descrição curta.</p>
+            <p style="font-size:1rem; color:#9ca3af; margin-top:3rem;">Use as setas ou os botões para navegar • Linguagem C</p>
+        </section>
+
+        <!-- Slide 2: Roteiro -->
+        <section class="slide">
+            <h2>O que veremos hoje?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mt-8">
+                <div class="card card-accent text-center p-8">
+                    <p style="font-size:3rem; margin-bottom:1rem;">📖</p>
+                    <h3 style="font-size:1.3rem; font-weight:900; color: var(--c-dark); margin-bottom:0.5rem;">Teoria</h3>
+                    <p style="font-size:1rem;">Conceito central da aula.</p>
+                </div>
+                <div class="card card-primary text-center p-8">
+                    <p style="font-size:3rem; margin-bottom:1rem;">💻</p>
+                    <h3 style="font-size:1.3rem; font-weight:900; color: var(--c-dark); margin-bottom:0.5rem;">Código</h3>
+                    <p style="font-size:1rem;">Exemplos práticos em C.</p>
+                </div>
+                <div class="card card-danger text-center p-8">
+                    <p style="font-size:3rem; margin-bottom:1rem;">🛠️</p>
+                    <h3 style="font-size:1.3rem; font-weight:900; color: var(--c-dark); margin-bottom:0.5rem;">Exercícios</h3>
+                    <p style="font-size:1rem;">Prática e fixação.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Conteúdo com código -->
+        <section class="slide">
+            <h2>TÍTULO DO SLIDE</h2>
+            <p>Texto introdutório do conceito. Explique o "porquê" antes do "como".</p>
+            <div class="code-block-wrapper">
+                <button class="copy-button"><span>Copiar</span></button>
+                <pre class="code-block"><span class="syn-inc">#include &lt;stdio.h&gt;</span>
+
+<span class="syn-type">int</span> <span class="syn-func">main</span>() {
+    <span class="syn-comment">// EDITAR: substituir por código real do slide</span>
+    <span class="syn-func">printf</span>(<span class="syn-str">"Olá, Mundo!\n"</span>);
+    <span class="syn-kw">return</span> <span class="syn-num">0</span>;
+}</pre>
+            </div>
+        </section>
+
+        <!-- Slide 4: Exercícios (sempre o último) -->
+        <section class="slide">
+            <h2>Exercícios</h2>
+            <div class="w-full max-w-4xl space-y-6 mt-4">
+                <div class="card card-accent">
+                    <h3 style="font-weight:bold; font-size:1.2rem; margin-bottom:0.5rem; color:var(--c-dark);">1. Nome do Exercício (ex1.c)</h3>
+                    <p style="text-align:left; font-size:1rem; color:#4b5563;">Descrição do que o aluno deve fazer.</p>
+                </div>
+                <div class="card card-accent">
+                    <h3 style="font-weight:bold; font-size:1.2rem; margin-bottom:0.5rem; color:var(--c-dark);">2. Nome do Exercício (ex2.c)</h3>
+                    <p style="text-align:left; font-size:1rem; color:#4b5563;">Descrição do que o aluno deve fazer.</p>
+                </div>
+                <div class="card" style="border-top: 6px solid #ef4444;">
+                    <h3 style="font-weight:bold; font-size:1.2rem; margin-bottom:0.5rem; color:#dc2626;">3. Desafio (ex3.c)</h3>
+                    <p style="text-align:left; font-size:1rem; color:#4b5563;">Descrição do desafio mais complexo.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- COPIAR CÓDIGO ---
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                const codeEl = container.querySelector('pre');
+                const codeText = codeEl.innerText;
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    if (span) {
+                        const originalText = span.innerText;
+                        span.innerText = 'Copiado!';
+                        setTimeout(() => { span.innerText = originalText; }, 2000);
+                    }
+                }).catch(err => console.error("Falha ao copiar: ", err));
+            });
+        });
+
+        // --- NAVEGAÇÃO ---
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+        const counter = document.getElementById('counter');
+
+        function updateCounter() {
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        function showSlide(index) {
+            if (index < 0 || index >= slides.length) return;
+            slides[currentSlide].classList.remove('active');
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            updateCounter();
+        }
+
+        function nextSlide() { showSlide(currentSlide + 1); }
+        function prevSlide() { showSlide(currentSlide - 1); }
+
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+        document.getElementById('prevBtn').addEventListener('click', prevSlide);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        document.getElementById('fsBtn').addEventListener('click', () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        });
+
+        updateCounter();
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- EDITAR: título da aba -->
+    <title>Aula NN - TÍTULO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* EDITAR: aplicar a próxima paleta livre de palettes.json
+           --color-purple-dark  → palette.dark  (cor principal escura)
+           --color-purple-light → palette.primary (cor de destaque)
+           --color-orange       → palette.accent
+           --color-yellow       → palette.secondary (segunda cor de destaque)
+           --color-bg           → palette.muted ou #FCFDFD
+        */
+        :root {
+            --color-purple-dark: #4D2B8C;
+            --color-purple-light: #85409D;
+            --color-orange: #EEA727;
+            --color-yellow: #FFEF5F;
+            --color-bg: #FCFDFD;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-purple-dark);
+            margin: 0; padding: 0;
+            height: 100vh; width: 100vw;
+            overflow: hidden;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        #presentation {
+            position: relative;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background-color: var(--color-bg);
+            background-image: radial-gradient(rgba(77, 43, 140, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 2rem;
+            opacity: 0; transform: translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            overflow-y: auto; z-index: 1;
+        }
+        .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; z-index: 10; }
+
+        /* Utilitários de cor */
+        .text-c-purple-dark  { color: var(--color-purple-dark); }
+        .text-c-purple-light { color: var(--color-purple-light); }
+        .text-c-orange       { color: var(--color-orange); }
+        .text-c-yellow       { color: var(--color-yellow); }
+        .bg-c-purple-dark    { background-color: var(--color-purple-dark); }
+        .bg-c-purple-light   { background-color: var(--color-purple-light); }
+        .bg-c-orange         { background-color: var(--color-orange); }
+        .bg-c-yellow         { background-color: var(--color-yellow); }
+        .bg-c-bg             { background-color: var(--color-bg); }
+        .border-c-purple-dark  { border-color: var(--color-purple-dark); }
+        .border-c-purple-light { border-color: var(--color-purple-light); }
+        .border-c-orange       { border-color: var(--color-orange); }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(77, 43, 140, 0.08);
+            border: 2px solid rgba(133, 64, 157, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-purple-light); box-shadow: 0 15px 35px rgba(77, 43, 140, 0.15); }
+
+        .terminal {
+            background-color: #1e1e1e; color: #a6e22e;
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 12px; padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            border: 2px solid #444; text-align: left;
+            width: 100%; font-size: 1.25rem; line-height: 1.6;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO --- */
+        @media print {
+            body, html { overflow: visible !important; height: auto !important; background: white !important; color: black !important; }
+            #presentation { display: block !important; height: auto !important; overflow: visible !important; position: static !important; background: white !important; }
+            .slide { position: relative !important; top: auto !important; left: auto !important; opacity: 1 !important; transform: none !important; height: auto !important; min-height: auto !important; display: block !important; page-break-inside: avoid; page-break-after: always; border-bottom: 2px solid #ccc; background: white !important; color: black !important; padding: 2rem 0 !important; margin-bottom: 2rem; }
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            h1, h2, h3, h4 { color: black !important; }
+            p, li { font-size: 12pt !important; color: #000 !important; line-height: 1.5; }
+            .card { background: white !important; border: 2px solid #999 !important; box-shadow: none !important; color: black !important; margin-bottom: 1rem; page-break-inside: avoid; }
+            .terminal { background: #f4f4f4 !important; color: #000 !important; border: 2px solid #000 !important; }
+            .bg-c-purple-dark, .bg-c-purple-light, .bg-c-orange, .bg-c-yellow { background-color: #eee !important; color: black !important; border: 1px solid black; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-c-bg/90 backdrop-blur-md border-b-2 border-c-purple-light shadow-sm">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <!-- EDITAR: número da aula -->
+            <span class="font-black text-c-purple-dark tracking-widest text-xl">AULA NN</span>
+            <div class="h-3 w-24 md:w-48 lg:w-64 bg-gray-200 rounded-full overflow-hidden border border-c-purple-light/30">
+                <div id="progressBar" class="h-full bg-c-orange transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-base font-mono text-c-purple-dark font-bold tracking-wider">00 / 00</span>
+            <a href="https://willcotil.github.io/aulas2026" target="_blank" class="hidden sm:inline-block text-c-purple-dark font-black text-base lg:text-xl hover:text-c-orange transition" style="text-decoration: none;">willcotil.github.io/aulas2026</a>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-c-purple-light/10 rounded text-c-purple-dark transition border border-transparent hover:border-c-purple-dark" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-c-purple-dark text-white rounded hover:bg-c-purple-dark/80 transition flex items-center gap-2 font-bold shadow-md text-lg" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Imprimir PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active" style="padding-top: 5rem;">
+            <div class="text-center">
+                <!-- EDITAR: disciplina e subtítulo -->
+                <span class="bg-c-purple-light text-white px-6 py-2 rounded-full text-lg font-bold tracking-widest uppercase mb-8 inline-block shadow-sm">DISCIPLINA</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-c-purple-dark">
+                    TÍTULO<br><span class="text-c-orange">DA AULA</span>
+                </h1>
+                <p class="text-2xl font-mono text-c-purple-dark/80 max-w-3xl mx-auto mt-6 font-bold">Subtítulo ou descrição curta.</p>
+            </div>
+            <div class="mt-16 animate-bounce text-c-orange no-print">
+                <i data-lucide="arrow-down" class="mx-auto w-12 h-12"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro -->
+        <section class="slide" style="padding-top: 5rem;">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-12 border-l-8 border-c-orange pl-6">O que faremos hoje?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-8 border-t-8 border-c-purple-dark">
+                    <div class="text-c-purple-dark mb-4"><i data-lucide="book-open" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">1. Tópico A</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Descrição do tópico A.</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-purple-light">
+                    <div class="text-c-purple-light mb-4"><i data-lucide="terminal" class="w-16 h-16"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">2. Tópico B</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Descrição do tópico B.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: Conteúdo -->
+        <section class="slide" style="padding-top: 5rem;">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-10 border-l-8 border-c-orange pl-6">TÍTULO DO SLIDE</h2>
+            <div class="grid md:grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-8">
+                    <p class="text-xl text-gray-700">Conteúdo do bloco.</p>
+                    <div class="terminal mt-6">
+                        $ comando --exemplo<br>
+                        <span class="text-white">saída do terminal</span>
+                    </div>
+                </div>
+                <div class="card p-8 bg-c-purple-dark text-white">
+                    <p class="text-xl text-gray-200">Bloco de destaque em fundo escuro.</p>
+                    <ul class="mt-4 space-y-3 text-lg">
+                        <li><span class="text-c-orange font-bold mr-2">→</span> Item 1</li>
+                        <li><span class="text-c-orange font-bold mr-2">→</span> Item 2</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-10 right-10 flex space-x-6 z-50">
+        <button id="prevBtn" class="p-6 bg-white/90 backdrop-blur rounded-full shadow-lg border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition transform active:scale-95">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-6 bg-c-orange rounded-full shadow-xl text-white font-bold hover:opacity-80 transition transform active:scale-95 border-2 border-c-orange">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentSlide > 0) { currentSlide--; updateSlides(); }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if (currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
