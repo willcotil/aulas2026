@@ -300,8 +300,8 @@
             <p><strong>Roteiro da Aula:</strong></p>
             <ol>
                 <li>O problema do Rádio Unidirecional (Send/On).</li>
+                <li>Assincronismo: O que é uma Promise e o Await.</li>
                 <li>O Telefone: <code>invoke</code> e <code>handle</code>.</li>
-                <li>O conceito de Promises e <code>async / await</code> (A espera).</li>
                 <li>Atualizando o Garçom (Preload).</li>
                 <li><strong>Live Coding: Construindo o Buscador do Sistema.</strong></li>
                 <li>Na Prática: 6 exercícios de comunicação.</li>
@@ -346,32 +346,87 @@
             
             <div class="comparison">
                 <div class="col" style="border-color: #ef4444; background: #fef2f2;">
-                    <h3 style="color: #ef4444;"><i class="fa-solid fa-xmark"></i> O Jeito Antigo (Difícil)</h3>
-                    <p style="font-size: 0.95rem;">Você enviava a pergunta com <code>send</code> por um canal. O Main processava. Depois o Main usava <em>outro</em> <code>send</code> para enviar a resposta por um <em>segundo</em> canal de volta pro Front.</p>
-                    <p style="font-size: 0.85rem; color: #991b1b; margin-top: 10px;"><em>Resultado: Código espaguete e difícil de ler.</em></p>
+                    <h3 style="color: #ef4444;"><i class="fa-solid fa-xmark"></i> A Gambiarra com Send</h3>
+                    <p style="font-size: 0.95rem;">Teríamos que usar dois rádios separados: O Front enviaria a pergunta com <code>send</code>. O Main processaria e usaria <em>outro</em> <code>send</code> cego para tentar avisar o Front que terminou.</p>
+                    <p style="font-size: 0.85rem; color: #991b1b; margin-top: 10px;"><em>Resultado: Código espaguete, difícil de rastrear a resposta.</em></p>
                 </div>
                 <div class="col" style="border-color: var(--cyan); background: #f0fdfa;">
-                    <h3 style="color: var(--cyan);"><i class="fa-solid fa-check"></i> O Jeito Moderno (Invoke)</h3>
-                    <p style="font-size: 0.95rem;">Você faz uma "ligação telefônica". Você pede o dado, <strong>pausa o seu código</strong> e fica na linha esperando. Quando o Main retorna, o seu código continua com o dado em mãos.</p>
+                    <h3 style="color: var(--cyan);"><i class="fa-solid fa-check"></i> A Solução (O Telefone)</h3>
+                    <p style="font-size: 0.95rem;">Usar uma rota de <strong>ida e volta contínua</strong>. Você pede o dado, o sistema "espera na linha", e quando o Main responde, o seu código continua com o dado em mãos.</p>
                     <p style="font-size: 0.85rem; color: #115e59; margin-top: 10px;"><em>Resultado: Código linear, limpo e direto.</em></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TÓPICO 2: O NOVO MÉTODO -->
+    <!-- TÓPICO 2: ASSINCRONISMO (NOVO) -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-hourglass-half"></i>
+            <h1>Parte 2: O Tempo de Espera</h1>
+            <p>O que são Promises e Assincronismo?</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: A PADARIA (NOVO) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">06</div>
+            <h2>O Problema da Fila (Síncrono)</h2>
+            <p>Na programação antiga (Síncrona), se você manda o computador ler um arquivo pesado, ele <strong>trava a tela inteira</strong> até terminar. É como pedir um lanche na padaria e ficar travando o caixa até ele ficar pronto.</p>
+            
+            <h2 style="margin-top: 20px; font-size: 1.8rem; color: var(--accent);">A Solução: A Promise (Promessa)</h2>
+            <p>O Javascript é Assíncrono. Em vez de travar a tela, ele te dá uma <strong>Ficha (Promise)</strong> de que a resposta vai chegar no futuro.</p>
+            <ul style="margin-top: 15px;">
+                <li>Você pede a informação do Banco de Dados.</li>
+                <li>O JS devolve imediatamente uma <strong>Promise</strong> (A ficha do lanche).</li>
+                <li>Você pode mexer na tela livremente (A tela não trava).</li>
+                <li>Quando o dado chega, a Promise é "Resolvida" e vira o dado real!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: ASYNC / AWAIT (NOVO) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">07</div>
+            <h2>Controlando a Ficha: <code>async / await</code></h2>
+            <p>Para pegar a resposta da Promise de um jeito fácil, usamos duas palavras mágicas no código:</p>
+            
+            <div class="comparison" style="margin-top: 15px;">
+                <div class="col" style="border-top: 4px solid var(--accent);">
+                    <h3 style="color: var(--accent);">await (Aguardar)</h3>
+                    <p>Colocamos antes do pedido. Significa: <em>"Pause a execução desta função apenas, e só vá para a linha de baixo quando a ficha do lanche ficar pronta."</em></p>
+                </div>
+                <div class="col" style="border-top: 4px solid var(--primary);">
+                    <h3 style="color: var(--primary);">async (Assíncrono)</h3>
+                    <p>O Javascript exige que, para usar <code>await</code>, a função inteira deve ser rotulada com <code>async</code>, avisando o sistema que ela terá "pausas".</p>
+                </div>
+            </div>
+            
+            <pre style="margin-top: 20px; padding: 15px; font-size: 0.9rem;">
+botao.addEventListener("click", <strong style="color: var(--accent);">async</strong> () => {
+    // O código pausa AQUI, mas a janela não trava!
+    const lanche = <strong style="color: var(--accent);">await</strong> fazerPedido(); 
+    
+    console.log("Recebi meu " + lanche);
+});</pre>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: O NOVO MÉTODO (ANTIGO TÓPICO 2) -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-phone-volume"></i>
-            <h1>Parte 2: O Telefone</h1>
+            <h1>Parte 3: O Telefone</h1>
             <p>Invoke, Handle e a arte de Esperar</p>
         </div>
     </div>
 
-    <!-- SLIDE 6: A NOVA SINTAXE -->
+    <!-- SLIDE 9: A NOVA SINTAXE (ANTIGO 06) -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">06</div>
+            <div class="slide-number">09</div>
             <h2>A Nova Dupla Dinâmica</h2>
             <p>Esqueça o <code>send()</code> e o <code>on()</code> quando precisar de dados de volta. Apresento-lhes as novas ferramentas IPC:</p>
             
@@ -391,10 +446,10 @@
         </div>
     </div>
 
-    <!-- SLIDE 7: O PRELOAD ATUALIZADO -->
+    <!-- SLIDE 10: O PRELOAD ATUALIZADO (ANTIGO 07) -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">07</div>
+            <div class="slide-number">10</div>
             <h2>Passo 1: O Garçom (Preload.js)</h2>
             <p>Nosso garçom agora anota o pedido, leva na cozinha e <strong>espera</strong> o prato ficar pronto para levar de volta à mesa.</p>
             
@@ -415,10 +470,10 @@
         </div>
     </div>
 
-    <!-- SLIDE 8: O RENDERER (AWAIT) -->
+    <!-- SLIDE 11: O RENDERER (AWAIT) (ANTIGO 08) -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">08</div>
+            <div class="slide-number">11</div>
             <h2>Passo 2: O Cliente Esperando (HTML/JS)</h2>
             <p>Se o Garçom traz uma "Promessa", nós precisamos <strong>esperar</strong> (await) ela se cumprir antes de exibir na tela.</p>
             <p>Para usar <code>await</code>, a nossa função de clique precisa ser marcada como <code>async</code>.</p>
@@ -439,10 +494,10 @@
         </div>
     </div>
 
-    <!-- SLIDE 9: O MAIN (HANDLE) -->
+    <!-- SLIDE 12: O MAIN (HANDLE) (ANTIGO 09) -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">09</div>
+            <div class="slide-number">12</div>
             <h2>Passo 3: A Cozinha Respondendo (Main.js)</h2>
             <p>O Node usa o <code>handle</code>. Ele recebe o pedido, processa (pode acessar arquivos, banco, etc.) e <strong>retorna</strong> o valor pela mesma linha telefônica.</p>
             
@@ -469,19 +524,19 @@
         </div>
     </div>
 
-    <!-- TÓPICO 3: O SIMULADOR -->
+    <!-- TÓPICO 4: O SIMULADOR (ANTIGO TÓPICO 3) -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-arrows-spin"></i>
-            <h1>Parte 3: Na Prática</h1>
+            <h1>Parte 4: Na Prática</h1>
             <p>O fluxo de ida e volta</p>
         </div>
     </div>
 
-    <!-- SLIDE 11: SIMULADOR ANIMADO -->
+    <!-- SLIDE 14: SIMULADOR ANIMADO (ANTIGO 11) -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">11</div>
+            <div class="slide-number">14</div>
             <h2>O Ciclo Invoke/Handle em Ação</h2>
             
             <div class="ipc-animator">
@@ -515,11 +570,11 @@
         </div>
     </div>
 
-    <!-- TÓPICO 4: LIVE CODING (NOVO) -->
+    <!-- TÓPICO 5: LIVE CODING (ANTIGO TÓPICO 4) -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-laptop-code"></i>
-            <h1>Parte 4: Live Coding</h1>
+            <h1>Parte 5: Live Coding</h1>
             <p style="font-size: 1.5rem; margin-bottom: 25px;">Prática Guiada: O Buscador do Sistema</p>
             
             <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 12px; max-width: 800px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.2); text-align: left;">
@@ -533,10 +588,10 @@
         </div>
     </div>
 
-    <!-- SLIDE LC 0: SETUP (NOVO) -->
+    <!-- SLIDE LC 0: SETUP -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">13</div>
+            <div class="slide-number">16</div>
             <h2>Passo 0: Preparar o Terreno</h2>
             <p>Antes de programar, precisamos de iniciar o projeto Node.js e instalar o Electron. Abram o terminal do VS Code (<code>Ctrl + '</code>) numa pasta vazia.</p>
             
@@ -550,7 +605,7 @@
                 </div>
                 <div class="col" style="border-color: var(--accent);">
                     <h3 style="color: var(--accent);"><i class="fa-solid fa-file-code"></i> 2. No package.json</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Abra o ficheiro gerado e altere o bloco "scripts" para ensinar o Node a iniciar a nossa janela:</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 5px;">Abra o arquivo gerado e altere o bloco "scripts" para ensinar o Node a iniciar a nossa janela:</p>
                     <div class="code-wrapper" style="margin-top: 10px; padding: 10px 0;">
                         <div class="code-line"><span class="code-content">"scripts": {</span></div>
                         <div class="code-line highlight-line"><span class="code-content">  "start": "electron ."</span></div>
@@ -564,9 +619,9 @@
     <!-- SLIDE LC 1 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">14</div>
+            <div class="slide-number">17</div>
             <h2>Passo 1: A Interface Visual</h2>
-            <p>Criem 4 ficheiros vazios: <code>index.html</code>, <code>renderer.js</code>, <code>preload.js</code> e <code>index.js</code>. <br>Abram o <code>index.html</code> e digitem:</p>
+            <p>Criem 4 arquivos vazios: <code>index.html</code>, <code>renderer.js</code>, <code>preload.js</code> e <code>index.js</code>. <br>Abram o <code>index.html</code> e digitem:</p>
             <div class="file-label html">index.html</div>
             <pre style="font-size: 0.85rem; padding: 15px;">&lt;!DOCTYPE html&gt;
 &lt;html lang="pt-BR"&gt;
@@ -595,7 +650,7 @@
     <!-- SLIDE LC 2 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">15</div>
+            <div class="slide-number">18</div>
             <h2>Passo 2: O Garçom (A Ponte)</h2>
             <p>O HTML não grita direto para o Node. Aqui usamos a palavra mágica <code>invoke</code>, que pede algo e espera uma promessa de resposta.</p>
             <div class="file-label preload">preload.js</div>
@@ -617,7 +672,7 @@ contextBridge.exposeInMainWorld('api', {
     <!-- SLIDE LC 3 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">16</div>
+            <div class="slide-number">19</div>
             <h2>Passo 3: O Back-end (A Cozinha)</h2>
             <p>O garçom grita 'get-sys-info'. A cozinha usa o <code>handle</code> para ouvir, prepara o dado e usa o <code>return</code> para devolver a bandeja.</p>
             <div class="file-label main">index.js</div>
@@ -652,7 +707,7 @@ app.whenReady().then(() => {
     <!-- SLIDE LC 4 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">17</div>
+            <div class="slide-number">20</div>
             <h2>Passo 4: O Cliente Esperando</h2>
             <p>Como o Node.js pode demorar, a nossa função de clique precisa ser <code>async</code> e mandamos o código <strong>esperar</strong> a resposta com <code>await</code>.</p>
             <div class="file-label html">renderer.js</div>
@@ -676,26 +731,26 @@ btnBuscar.addEventListener('click', async () => {
     <!-- SLIDE LC 5 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">18</div>
+            <div class="slide-number">21</div>
             <h2>Passo 5: O Grande Teste</h2>
             <div class="interactive-area" style="text-align: left; padding: 40px; background: var(--bg); border-color: var(--accent);">
                 <h3 style="color: var(--primary);"><i class="fa-solid fa-play"></i> Hora da Verdade</h3>
                 <ol style="margin-top: 20px;">
                     <li>Abram o terminal do VS Code (<code>Ctrl + '</code>).</li>
-                    <li>Certifiquem-se de ter salvo <strong>todos os 5 ficheiros</strong> (incluindo o package.json).</li>
+                    <li>Certifiquem-se de ter salvo <strong>todos os 5 arquivos</strong> (incluindo o package.json).</li>
                     <li>Executem o comando: <br><br>
                         <code style="font-size: 1.2rem; background: var(--primary); color: white; padding: 10px;">npm start</code>
                     </li>
                 </ol>
-                <p style="margin-top: 30px; font-weight: bold; color: var(--text-muted);">Testem clicar no botão e vejam o terminal do VS Code registar o log do Back-end ao mesmo tempo que o ecrã atualiza!</p>
+                <p style="margin-top: 30px; font-weight: bold; color: var(--text-muted);">Testem clicar no botão e vejam o terminal do VS Code registrar o log do Back-end ao mesmo tempo que a tela atualiza!</p>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 19: LISTA FINAL -->
+    <!-- SLIDE 22: LISTA FINAL -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">19</div>
+            <div class="slide-number">22</div>
             <h2>Lista de Exercícios (Bidirecional)</h2>
             <p style="margin-bottom: 15px; color: var(--text-muted);">Configure o Preload com <code>invoke</code> e resolva os desafios abaixo construindo a ponte de <strong>ida e volta</strong>.</p>
             
@@ -706,7 +761,7 @@ btnBuscar.addEventListener('click', async () => {
                     <li><strong>Info do Sistema:</strong> Crie um botão "Meu PC". O Main deve importar o <code>require('os')</code> e, no <code>handle</code>, retornar um objeto com a Memória Livre (<code>os.freemem()</code>) e a versão (<code>os.release()</code>). Exiba isso formatado no HTML.</li>
                     <li><strong>Gerador de Senha Forte:</strong> O HTML envia o tamanho desejado (ex: 12). O Main gera uma senha aleatória segura misturando letras e números e retorna a string gerada para o Front-end mostrar na tela.</li>
                     <li><strong style="color: var(--primary);">Desafio da Espera Fake:</strong> No HTML, ao clicar no botão "Baixar Dados", troque o texto do botão para "Baixando...". No Main, crie um <code>setTimeout</code> de 3 segundos antes de dar o <code>return "Dados Concluídos!"</code> (você precisará retornar uma Promise). Quando a resposta chegar no HTML, mude o botão para "Concluído!".</li>
-                    <li><strong style="color: var(--accent);"><i class="fa-solid fa-robot"></i> Desafio IA (Árvore de Arquivos VS Code):</strong> Vá muito além da lista simples! Peça à IA: <em>"Como ler de forma recursiva pastas e arquivos usando o módulo 'fs' no Node.js, retornar essa estrutura hierárquica via IPC (handle), e criar no Front-end uma árvore de arquivos expansível (estilo VS Code) muito bem estilizada com HTML e CSS?"</em>. O desafio é implementar a lógica no Node e criar a interface. <strong>Atenção: adicione um toque pessoal (um tema de cores único, ícones específicos para o tipo da extensão do arquivo ou exiba o tamanho/peso do arquivo ao lado do nome) para diferenciar o seu explorador do projeto dos seus colegas!</strong></li>
+                    <li><strong style="color: var(--accent);"><i class="fa-solid fa-robot"></i> Desafio IA (O Pedido do Cliente):</strong> Um cliente leigo fez o seguinte pedido: <em>"Quero uma tela que mostre as minhas pastas e arquivos igual àquela barra lateral do VS Code, onde eu clico na pasta e ela abre mostrando o que tem dentro. Tem que ficar muito bonito!"</em>. O seu desafio é <strong>escrever um prompt técnico e detalhado</strong> para a IA, orientando-a a usar o que aprendemos na aula (módulo <code>fs</code> do Node, comunicação IPC bidirecional com <code>invoke/handle</code> e manipulação de DOM). Implemente a solução gerada! <strong>Atenção: adicione um toque pessoal (um tema de cores único, ícones específicos para as extensões ou exibe o tamanho do arquivo ao lado do nome) para diferenciar o seu explorador do explorador dos seus colegas!</strong></li>
                 </ol>
             </div>
         </div>

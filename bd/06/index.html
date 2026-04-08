@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banco de Dados - Aula 05: MER e DER</title>
+    <title>Banco de Dados - Aula 06: MER e DER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -138,7 +138,7 @@
                         <div class="inline-block p-6 bg-brand-muted border border-brand-secondary rounded-full text-brand-primary mb-4">
                             <i class="fas fa-link text-7xl"></i>
                         </div>
-                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 05: MER e DER</h2>
+                        <h2 class="text-5xl md:text-7xl font-black text-brand-dark leading-tight">Aula 06: MER e DER</h2>
                         <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto italic leading-relaxed">Conectando as Ilhas de Dados: Como as tabelas conversam entre si.</p>
                         <div class="flex justify-center gap-4 text-brand-dark/50 text-sm mt-10">
                             <span class="px-3 py-1 bg-white border border-brand-secondary rounded shadow-sm">SETAS</span>
@@ -471,23 +471,6 @@
                 `
             },
             {
-                title: "A Mágica da FK (Chave Estrangeira)",
-                content: `
-                    <div class="space-y-6">
-                        <div class="p-8 bg-brand-dark text-white rounded-3xl shadow-xl">
-                            <h4 class="text-2xl font-bold mb-4 text-brand-secondary">Como a Máquina Entende o Desenho?</h4>
-                            <p class="text-lg leading-relaxed mb-4">No desenho (DER), nós fazemos uma linha com um losango. Mas como o Banco de Dados sabe que aquela linha existe fisicamente?</p>
-                            <p class="text-lg">Ele usa a <strong>Foreign Key (FK)</strong>. O banco pega o <code>id</code> da tabela de Clientes e "copia" para dentro da tabela de Compras. Assim, a ligação torna-se real na máquina.</p>
-                        </div>
-                        <div class="text-center mt-6">
-                            <span class="inline-block bg-brand-primary text-white font-bold px-6 py-2 rounded-full uppercase tracking-widest shadow-lg">
-                                Losango (Desenho) = Cópia do ID (Físico)
-                            </span>
-                        </div>
-                    </div>
-                `
-            },
-            {
                 title: "Resolução Guiada 1: Cenário",
                 content: `
                     <div class="space-y-8">
@@ -802,7 +785,7 @@
                 `
             },
             {
-                title: "Fim da Aula 05",
+                title: "Fim da Aula 06",
                 content: `
                     <div class="text-center space-y-10 py-10">
                         <div class="inline-block p-10 bg-brand-muted rounded-full border-4 border-brand-primary shadow-[0_0_20px_#DB1A1A]">
@@ -853,7 +836,7 @@
         window.onbeforeprint = function() {
             let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
                 <h1 class="text-4xl font-black text-brand-dark">Apostila: Banco de Dados I</h1>
-                <p>Aula 05 - MER e DER (Relacionamentos)</p>
+                <p>Aula 06 - MER e DER (Relacionamentos)</p>
             </div>`;
             steps.forEach((s, i) => {
                 fullHtml += `<div class="step-content block mb-10 border-b pb-10">
