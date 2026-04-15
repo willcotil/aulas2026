@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 11: Interface Gráfica II</title>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap (para os exemplos interativos) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Prism.js CSS (Syntax Highlighting) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-highlight/prism-line-highlight.min.css" rel="stylesheet" />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta: https://colorhunt.co/palette/16c47fffd65aff9d23f93827 */
+            --bg: #f8fafc;         
+            --slide-bg: #ffffff;   
+            --text: #1e293b;       /* Dark Slate para legibilidade */
+            --text-muted: #475569; 
+            
+            --primary: #16C47F;    /* Verde Vibrante */
+            --primary-dark: #129c65;
+            --accent-yellow: #FFD65A; /* Amarelo */
+            --accent-orange: #FF9D23; /* Laranja */
+            --danger: #F93827;     /* Vermelho */
+            
+            --border-color: #e2e8f0; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container-presentation { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link Fixa */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--primary);
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(22, 196, 127, 0.2);
+            border-bottom: 3px solid var(--accent-yellow);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .fixed-link-bar a:hover { color: var(--text); }
+
+        /* Slides */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico */
+        .slide.topic {
+            background-color: var(--text);
+            text-align: center;
+            border: 5px solid var(--primary);
+        }
+        .slide.topic h1, .slide.topic p { color: #ffffff; }
+        .slide.topic h2 { color: var(--primary); border: none; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--primary); }
+
+        .slide-content-wrapper { max-width: 1100px; width: 100%; margin: 0 auto; }
+        .slide-number { position: absolute; top: 70px; right: 40px; font-size: 1.5rem; color: var(--primary); font-weight: 800; opacity: 0.5; }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px; color: var(--text); }
+        h2 { font-size: 2rem; font-weight: 700; color: var(--text); margin-bottom: 20px; border-bottom: 3px solid var(--primary); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--text); }
+
+        /* Prism.js Overrides & Code Styling */
+        pre[class*="language-"] {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin: 15px 0;
+            padding: 20px 20px 20px 10px;
+        }
+        code[class*="language-"], pre[class*="language-"] {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            text-shadow: none;
+        }
+        .line-numbers .line-numbers-rows {
+            border-right: 1px solid #e2e8f0;
+            padding-right: 10px;
+        }
+        .line-highlight {
+            background: rgba(22, 196, 127, 0.15); /* Fundo verde clarinho */
+            margin-top: 20px;
+        }
+
+        /* Inline Code styling */
+        :not(pre) > code { 
+            font-family: 'Fira Code', monospace; 
+            background: #fffbea; /* Amarelo muito clarinho */
+            color: #b45309; /* Laranja escuro para contraste */
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            border: 1px solid var(--accent-yellow);
+        }
+        
+        .file-label {
+            display: inline-block;
+            background: var(--text);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px 6px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: -15px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 2px solid var(--primary);
+        }
+        .file-label.html { background: var(--accent-orange); border-color: var(--text); color: white; }
+        .file-label.js { background: var(--accent-yellow); color: var(--text); border-color: var(--text); }
+        .file-label.danger { background: var(--danger); color: white; border-color: var(--text); }
+
+        /* Layouts */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
+        .col { background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
+        .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--text); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; display: flex; align-items: center; gap: 10px;}
+
+        /* Interactive Grid Visualizer */
+        .grid-visualizer {
+            border: 2px dashed var(--text-muted);
+            padding: 20px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            resize: horizontal;
+            overflow: hidden;
+            min-width: 300px;
+            max-width: 100%;
+            margin: 20px 0;
+            position: relative;
+            container-type: inline-size; /* Isolamento de responsividade */
+        }
+
+        /* Força a quebra de linha simulando o Bootstrap quando a caixa ficar pequena */
+        @container (max-width: 768px) {
+            .grid-visualizer .col-md-4 {
+                width: 100% !important;
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                margin-bottom: 10px;
+            }
+        }
+
+        .grid-visualizer::after {
+            content: "↔ Arraste a lateral para redimensionar";
+            position: absolute;
+            bottom: 5px; right: 25px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+        .demo-col {
+            background-color: var(--primary);
+            color: white;
+            border: 2px solid white;
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        /* Final List */
+        .final-list ol { counter-reset: item; list-style: none; padding: 0; }
+        .final-list li { 
+            background: white; margin-bottom: 10px; padding: 15px 15px 15px 60px; 
+            border-radius: 8px; position: relative; border: 1px solid var(--border-color); font-size: 1.1rem; 
+        }
+        .final-list li::before {
+            content: counter(item); counter-increment: item; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: var(--primary); color: white; width: 30px; height: 30px; border-radius: 50%; 
+            text-align: center; font-size: 1rem; line-height: 30px; font-weight: bold;
+        }
+
+        /* Controls */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); padding: 10px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--primary); }
+        .btn-ctrl { background: white; border: 2px solid var(--primary); color: var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-ctrl:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: var(--accent-orange); width: 0%; transition: width 0.3s; z-index: 101; }
+
+        .alert-box { background: #fff5f5; border-left: 4px solid var(--danger); padding: 15px; border-radius: 0 8px 8px 0; margin: 20px 0; border: 1px solid var(--border-color); border-left-width: 4px; }
+        .alert-box h4 { color: var(--danger); margin-bottom: 5px; display: flex; align-items: center; gap: 10px;}
+
+        @media print {
+            body, .container-presentation { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
+            .fixed-link-bar a { color: black; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
+            .controls, .progress-bar, .grid-visualizer::after { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
+            pre, .col, .grid-visualizer { border: 1px solid #000 !important; color: black; box-shadow: none; background: white !important; }
+            h1, h2, p, li, strong { color: black !important; }
+            code { background: #eee; color: black; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn-ctrl" onclick="toggleFullscreen()" title="Tela Cheia (F)">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    <button class="btn-ctrl" onclick="prevSlide()" title="Anterior (←)">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    <button class="btn-ctrl" onclick="nextSlide()" title="Próximo (→)">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn-ctrl" onclick="goToExercises()" title="Ir para Exercícios">
+        <i class="fa-solid fa-clipboard-list"></i>
+    </button>
+    <button class="btn-ctrl" onclick="window.print()" title="Imprimir Apostila">
+        <i class="fa-solid fa-print"></i>
+    </button>
+</div>
+
+<div class="container-presentation">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">01</div>
+            <h1>Aula 11: Interface Gráfica II</h1>
+            <h2>Dinâmica, Responsividade e Inputs</h2>
+            <br>
+            <p><strong>Roteiro da Aula:</strong></p>
+            <ol>
+                <li><strong>Responsividade:</strong> O Sistema de Grid (12 Colunas) do Bootstrap.</li>
+                <li><strong>O Perigo dos Formulários:</strong> Como evitar que o App Desktop recarregue.</li>
+                <li><strong>A Mágica do FormData:</strong> Coletando inputs do jeito moderno e profissional.</li>
+                <li><strong>Busca em Tempo Real:</strong> Eventos de <code>input</code> e filtragem dinâmica.</li>
+                <li><strong>Live Coding:</strong> Adicionando Pesquisa e Cadastro ao nosso Dashboard.</li>
+                <li><strong>Missão Prática:</strong> Exercícios e Desafios.</li>
+            </ol>
+            <div style="margin-top: 40px; color: var(--text-muted); font-weight: 600;">
+                Técnico em Informática • 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: RESPONSIVIDADE -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            <h1>Parte 1: Responsividade</h1>
+            <p>Adaptando a interface para qualquer tamanho de janela</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: O SISTEMA DE GRID -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">03</div>
+            <h2>A Mágica das 12 Colunas</h2>
+            <p>O Bootstrap divide a tela em <strong>12 colunas invisíveis</strong>. Quando você cria uma <code>div</code>, você diz quantas colunas ela deve ocupar.</p>
+            
+            <div class="comparison">
+                <div class="col" style="border-top: 4px solid var(--primary);">
+                    <h3 style="color: var(--primary);"><i class="fa-solid fa-border-all"></i> Como funciona?</h3>
+                    <p>Você cria um container de linha <code>&lt;div class="row"&gt;</code> e coloca colunas <code>&lt;div class="col-..."&gt;</code> dentro.</p>
+                    <ul>
+                        <li><code>col-12</code>: Ocupa a tela inteira (12/12).</li>
+                        <li><code>col-6</code>: Ocupa metade da tela (6/12).</li>
+                        <li><code>col-4</code>: Ocupa um terço da tela (4/12).</li>
+                    </ul>
+                </div>
+                <div class="col" style="border-top: 4px solid var(--accent-orange);">
+                    <h3 style="color: var(--accent-orange);"><i class="fa-solid fa-mobile-screen"></i> Breakpoints</h3>
+                    <p>Podemos dizer ao Bootstrap para mudar o tamanho dependendo da largura da tela usando prefixos:</p>
+                    <ul>
+                        <li><code>sm</code> (Small / Celular Deitado)</li>
+                        <li><code>md</code> (Medium / Tablet)</li>
+                        <li><code>lg</code> (Large / Desktop)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: SIMULADOR DE GRID -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">04</div>
+            <h2>O Grid na Prática</h2>
+            <p>Abaixo temos 3 colunas com a classe <code>col-12 col-md-4</code>. Isso significa: <em>"Seja tamanho total (12) no celular, mas seja um terço (4) em telas médias/grandes"</em>.</p>
+            
+            <!-- Simulador Interativo -->
+            <div class="grid-visualizer">
+                <div class="row g-2">
+                    <div class="col-12 col-md-4">
+                        <div class="demo-col">Card 1</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="demo-col" style="background-color: var(--accent-orange);">Card 2</div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="demo-col" style="background-color: var(--danger);">Card 3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="text-align: center; font-weight: bold; color: var(--primary);">
+                <i class="fa-solid fa-arrow-pointer"></i> Arraste a borda direita da caixa cinza acima para testar a responsividade!
+            </p>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: FORMULÁRIOS E INPUTS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-keyboard"></i>
+            <h1>Parte 2: Inputs & Formulários</h1>
+            <p>Lendo dados do usuário do jeito profissional</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: O PERIGO DO FORM -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">06</div>
+            <h2>A Armadilha do <code>&lt;form&gt;</code></h2>
+            <p>Na Web antiga, clicar em "Salvar" num formulário fazia o navegador pegar os dados, enviar para o servidor e <strong>recarregar a página inteira</strong>.</p>
+            
+            <div class="alert-box">
+                <h4><i class="fa-solid fa-triangle-exclamation"></i> O Problema no Electron e React</h4>
+                <p>Se o seu HTML recarregar, todo o Javascript do Front-end (variáveis, listas, estado do app) será <strong>apagado da memória RAM</strong>. A tela vai piscar e voltar ao zero!</p>
+            </div>
+            
+            <p style="font-size: 1.2rem; text-align: center; margin-top: 20px;">
+                Nós <strong>PRECISAMOS</strong> interceptar o envio e impedir que a janela recarregue.
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: PREVENT DEFAULT -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">07</div>
+            <h2>O Salvador: <code>preventDefault()</code></h2>
+            <p>A primeira regra de um formulário moderno: interceptar o evento <code>submit</code> e usar o comando <code>preventDefault()</code> para travar o comportamento destrutivo do navegador.</p>
+            
+            <div class="file-label js">renderer.js</div>
+<pre class="language-javascript line-numbers" data-line="3-5"><code>const form = document.querySelector("#formProduto");
+
+// Escutamos o evento de envio (submit), e não o clique do botão
+form.addEventListener("submit", (e) => {
+    // 1. IMPEDE O RECARREGAMENTO DA PÁGINA (CRÍTICO!)
+    e.preventDefault();
+    
+    // Agora a tela está travada e segura. 
+    // Próximo passo: pegar os dados que o usuário digitou!
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: O PROBLEMA DOS QUERIES -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">08</div>
+            <h2>Coletando Dados: O Antigo vs O Moderno</h2>
+            <p>Até agora, usávamos <code>document.querySelector("#id").value</code>. Imagine um formulário de cadastro de cliente com 20 campos (Nome, CPF, Rua, Bairro, etc). O seu código viraria um pesadelo espaguete.</p>
+            
+            <div class="comparison" style="margin-top: 10px;">
+                <div class="col" style="border-color: var(--danger);">
+                    <h3 style="color: var(--danger);"><i class="fa-solid fa-xmark"></i> O Jeito Amador</h3>
+<pre class="language-javascript" style="margin:0; padding:10px; font-size: 0.8rem;"><code>const nome = document.querySelector("#nome").value;
+const cpf = document.querySelector("#cpf").value;
+const cep = document.querySelector("#cep").value;
+// ... (mais 17 linhas iguais) ...
+const obj = { nome: nome, cpf: cpf, cep: cep ... }</code></pre>
+                </div>
+                <div class="col" style="border-color: var(--primary);">
+                    <h3 style="color: var(--primary);"><i class="fa-solid fa-check"></i> O Jeito Profissional</h3>
+                    <p style="font-size: 0.9rem;">Deixamos a API nativa do navegador, chamada <strong>FormData</strong>, varrer o formulário e agrupar tudo automaticamente em uma única linha de código!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: FORMDATA HTML -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">09</div>
+            <h2>O Segredo do FormData: O Atributo <code>name</code></h2>
+            <p>Para o `FormData` funcionar, a única coisa que o HTML exige é que <strong>todos os seus inputs tenham o atributo `name`</strong>. O `id` não importa para ele.</p>
+            
+            <div class="file-label html">index.html</div>
+<pre class="language-html line-numbers" data-line="3-4, 7-8, 11-12"><code>&lt;form id="formCadastro"&gt;
+    &lt;!-- Texto e Números --&gt;
+    &lt;input type="text" name="produto" placeholder="Nome"&gt;
+    &lt;input type="number" name="quantidade" placeholder="Qtd"&gt;
+    
+    &lt;!-- Rádio (Opção Única): Mesma 'name', 'value' diferentes --&gt;
+    &lt;input type="radio" name="categoria" value="Hardware"&gt; Hardware
+    &lt;input type="radio" name="categoria" value="Software"&gt; Software
+    
+    &lt;!-- Slider e Checkbox --&gt;
+    &lt;input type="range" name="desconto" min="0" max="100"&gt;
+    &lt;input type="checkbox" name="promocao"&gt; Em Promoção?
+    
+    &lt;button type="submit"&gt;Salvar&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: FORMDATA JS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">10</div>
+            <h2>A Extração Mágica</h2>
+            <p>No Javascript, passamos o elemento do formulário para o <code>new FormData()</code>, e depois usamos <code>Object.fromEntries()</code> para transformar os dados num JSON perfeito!</p>
+            
+            <div class="file-label js">renderer.js</div>
+<pre class="language-javascript line-numbers" data-line="6-8, 11-12"><code>const form = document.querySelector("#formCadastro");
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault(); // 1. Trava o recarregamento
+    
+    // 2. O FormData "suga" os valores baseados no atributo 'name'
+    const extrator = new FormData(form);
+    const dadosProntos = Object.fromEntries(extrator);
+    
+    console.log(dadosProntos);
+    /* Saída: 
+       { produto: "Teclado", quantidade: "2", categoria: "Hardware", 
+         desconto: "15", promocao: "on" } 
+    */
+    
+    form.reset(); // Limpa todos os campos da tela
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: BUSCA EM TEMPO REAL -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h1>Parte 3: Busca Dinâmica</h1>
+            <p>Filtros em tempo real (Estilo Google)</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: O EVENTO INPUT -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">12</div>
+            <h2>Pesquisa Instantânea</h2>
+            <p>Diferente de um formulário que precisa do botão "Salvar", uma barra de pesquisa moderna filtra os dados <strong>a cada letra que o usuário digita</strong>.</p>
+            <p>Para isso, não usamos o evento <code>click</code> ou <code>submit</code>. Usamos o evento <code>input</code> num campo de texto isolado.</p>
+            
+            <div class="comparison" style="margin-top: 10px;">
+                <div class="col">
+                    <h3 style="color: var(--primary);">O Gatilho</h3>
+<pre class="language-javascript" style="margin:0; padding:10px; font-size: 0.85rem;"><code>const barraBusca = document.querySelector("#busca");
+
+barraBusca.addEventListener("input", () => {
+    const texto = barraBusca.value.toLowerCase();
+    // A cada letra digitada, o código roda!
+});</code></pre>
+                </div>
+                <div class="col">
+                    <h3 style="color: var(--accent-orange);">A Lógica</h3>
+                    <p style="font-size: 0.9rem;">Dentro desse evento, usamos o <code>filter()</code> no nosso array original de dados para encontrar itens cujo nome inclua o texto digitado (<code>includes()</code>).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 4: LIVE CODING -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-laptop-code"></i>
+            <h1>Parte 4: Live Coding</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 25px;">Adicionando Interatividade ao Dashboard</p>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 12px; max-width: 800px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.2); text-align: left;">
+                <h3 style="color: var(--accent-yellow); font-size: 1.3rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-bullseye"></i> O que vamos construir?
+                </h3>
+                <p style="font-size: 1.1rem; color: #ffffff; margin-bottom: 0; line-height: 1.6;">
+                    Pegaremos o código da Aula 10 (Dashboard com JSON). 
+                    <br>1. Adicionaremos uma <strong>Barra de Busca</strong> na Topbar.
+                    <br>2. Função de <strong>Filtro Dinâmico</strong> no <code>renderer.js</code>.
+                    <br>3. Criaremos um <strong>Formulário de Cadastro</strong> na Sidebar.
+                    <br>4. Usaremos <strong>FormData</strong> para salvar o novo item e atualizar a tela.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: LIVE CODING - HTML -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">14</div>
+            <h2>Passo 1: O HTML (Barra de Busca)</h2>
+            <p>Na Topbar do nosso <code>index.html</code> (Aula 10), vamos adicionar um input de texto do Bootstrap.</p>
+            <div class="file-label html">src/renderer/index.html (Topbar)</div>
+<pre class="language-html line-numbers" data-line="3-7"><code>&lt;!-- HEADER (Topbar) --&gt;
+&lt;header class="bg-white border-bottom p-3 d-flex justify-content-between align-items-center shadow-sm z-1"&gt;
+    &lt;h4 class="m-0 text-secondary"&gt;Catálogo&lt;/h4&gt;
+    
+    &lt;!-- Nossa nova barra de busca --&gt;
+    &lt;input type="text" id="inputBusca" class="form-control w-50" placeholder="Pesquisar produto..."&gt;
+    
+    &lt;span class="badge bg-secondary p-2"&gt;Admin&lt;/span&gt;
+&lt;/header&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 15: LIVE CODING - JS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">15</div>
+            <h2>Passo 2: O JS (Refatorando)</h2>
+            <p>No <code>renderer.js</code>, vamos salvar a lista original vinda do Node numa variável global para podermos filtrá-la várias vezes sem perder os dados originais.</p>
+            
+            <div class="file-label js">src/renderer/renderer.js (Parte 1)</div>
+<pre class="language-javascript line-numbers" data-line="1, 8"><code>let listaProdutos = []; // Estado Global do Front-end
+
+// Função que pega os dados e desenha a tela
+const renderizarCatalogo = async () => {
+    
+    // Se a lista estiver vazia (primeira vez que abre o app), busca no Node
+    if (listaProdutos.length === 0) {
+        listaProdutos = await window.api.pedirProdutos();
+    }
+    
+    // Aqui vai o map() que já tínhamos na Aula 10...
+    const html = listaProdutos.map(prod => `...`).join("");
+    document.querySelector("#conteudo").innerHTML = html;
+};
+
+renderizarCatalogo();</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 16: LIVE CODING - JS FILTRO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">16</div>
+            <h2>Passo 3: A Lógica da Busca</h2>
+            <p>Agora adicionamos o "escutador" na barra de busca que fará o filtro e desenhará o catálogo novamente (usando a lista filtrada)!</p>
+            
+            <div class="file-label js">src/renderer/renderer.js (Parte 2)</div>
+<pre class="language-javascript line-numbers" data-line="8, 12"><code>// ... código anterior ...
+
+const barraBusca = document.querySelector("#inputBusca");
+
+barraBusca.addEventListener("input", () => {
+    const textoDigitado = barraBusca.value.toLowerCase();
+    
+    // Filtra a lista global baseada no que foi digitado
+    const listaFiltrada = listaProdutos.filter(prod => {
+        return prod.nome.toLowerCase().includes(textoDigitado);
+    });
+    
+    // Redesenha a tela passando a nova lista!
+    // (Atenção: precisará alterar a função renderizarCatalogo para receber parâmetros)
+    desenharCards(listaFiltrada); 
+});</code></pre>
+            <p style="font-size: 0.9rem; color: var(--danger);">*Dica de Arquitetura: Teremos que separar a função que <strong>Busca</strong> no Node da função que apenas <strong>Desenha</strong> o HTML.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 17: LIVE CODING - HTML FORM -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">17</div>
+            <h2>Passo 4: O HTML (Formulário)</h2>
+            <p>Na nossa Sidebar escura, vamos substituir os links de navegação por um pequeno formulário de cadastro, lembrando de colocar a tag <code>name</code> nos inputs.</p>
+            <div class="file-label html">src/renderer/index.html (Sidebar)</div>
+<pre class="language-html line-numbers" data-line="4-8"><code>&lt;!-- SIDEBAR --&gt;
+&lt;div class="bg-dark text-white p-3 d-flex flex-column shadow z-2" style="width: 250px;"&gt;
+    &lt;h3 class="text-warning fw-bold mb-3"&gt;DevSystem&lt;/h3&gt;
+    
+    &lt;form id="formProduto"&gt;
+        &lt;input type="text" name="nome" class="form-control mb-2" placeholder="Nome do Produto" required&gt;
+        &lt;input type="number" name="preco" class="form-control mb-3" placeholder="Preço" required&gt;
+        &lt;button type="submit" class="btn btn-success w-100"&gt;Cadastrar&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 18: LIVE CODING - JS FORM -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">18</div>
+            <h2>Passo 5: A Lógica do Cadastro</h2>
+            <p>No <code>renderer.js</code>, interceptamos o evento <code>submit</code>, usamos a magia do <code>FormData</code> para extrair os dados, e injetamos no Array Global!</p>
+            <div class="file-label js">src/renderer/renderer.js (Parte 3)</div>
+<pre class="language-javascript line-numbers" data-line="4-6, 9-10"><code>const form = document.querySelector("#formProduto");
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault(); // Trava o recarregamento da página!
+    
+    const extrator = new FormData(form);
+    const novoProduto = Object.fromEntries(extrator);
+    
+    // Adiciona na lista global e redesenha a tela!
+    listaProdutos.push(novoProduto);
+    desenharCards(listaProdutos);
+    
+    form.reset(); // Limpa os inputs
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- TÓPICO 5: EXERCÍCIOS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-code-branch"></i>
+            <h1>Parte 5: Missão Prática</h1>
+            <p>Dinamismo e Formulários</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 20: EXERCICIOS PARTE 1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">20</div>
+            <h2>Exercícios: Responsividade & Busca</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Use o projeto da Aula 10 (Dashboard de Inventário) como base.</p>
+            
+            <div class="final-list">
+                <ol>
+                    <li><strong>Grid Responsivo:</strong> No seu <code>renderer.js</code> (Aula 10), o Grid dos cards estava fixo em 3 colunas (<code>row-cols-md-3</code>). Altere a string HTML do container no JavaScript para que fique: 1 coluna no celular (<code>col-12</code>), 2 colunas em tablets (<code>col-md-6</code>) e 4 colunas em telas grandes (<code>col-lg-3</code>). Redimensione a janela do seu app para testar.</li>
+                    <li><strong>Separando Responsabilidades:</strong> Refatore seu <code>renderer.js</code>. Crie uma função <code>buscarDados()</code> que faz o <code>invoke</code> e salva na variável global, e uma função <code>desenharTela(lista)</code> que recebe um array e faz o <code>map()</code>.</li>
+                    <li><strong>A Busca Dinâmica:</strong> Implemente a barra de busca (vista no Live Coding). Ao digitar qualquer letra na Topbar, o Dashboard deve atualizar instantaneamente mostrando apenas os produtos cujo nome ou categoria correspondam ao texto digitado.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 21: EXERCICIOS PARTE 2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">21</div>
+            <h2>Exercícios: Aprimorando o Cadastro</h2>
+            
+            <div class="final-list">
+                <ol start="4">
+                    <li><strong>Evoluindo o Formulário:</strong> O formulário do Live Coding está muito simples. Adicione mais dois campos HTML nele: Um <code>&lt;select name="categoria"&gt;</code> com opções (Hardware, Periféricos, Móveis) e um input de quantidade. Como usamos o <code>FormData</code>, o seu JS vai capturar esses campos novos automaticamente sem você mudar 1 linha de JS! Mude a função de desenhar os cards para exibir essas novas informações na tela.</li>
+                    <li><strong>Validação Simples:</strong> No JS, antes de dar o <code>.push()</code> na variável global, faça um <code>if</code>: Se o preço do produto for menor ou igual a 0, dê um <code>alert("Preço inválido!")</code> e use o <code>return</code> para cancelar o cadastro de dados errados.</li>
+                    <li><strong style="color: var(--primary);"><i class="fa-solid fa-robot"></i> Desafio IA (Modais Dinâmicos):</strong> Peça ao ChatGPT: <em>"Usando Bootstrap 5, como crio uma Janela Modal oculta no HTML e a abro via Javascript usando a API nativa do Bootstrap, quando o usuário clica num botão?"</em>. Remova o formulário de cadastro da Sidebar e coloque-o dentro dessa Modal! O cadastro (com FormData) deve continuar funcionando perfeitamente.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Prism.js Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function goToExercises() { showSlide(19); } // Vai para o Slide 20 (Índice 19)
+    
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

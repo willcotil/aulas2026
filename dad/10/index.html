@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 10: Interface Gráfica I</title>
+    <title>Aula 10: Layout Desktop & Bootstrap</title>
+    
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Prism.js CSS (Syntax Highlighting Claro e de Alto Contraste) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-highlight/prism-line-highlight.min.css" rel="stylesheet" />
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
 
@@ -19,11 +27,6 @@
             --accent-light: #fffce8; 
             --cyan: #4c5c2d;       /* Usando o Verde Oliva como tom secundário ativo */
             
-            --code-bg: #1b0c0c;    /* Fundo código escuro */
-            --code-text: #ffde42;  /* Texto código amarelo */
-            
-            --main-color: #313e17; 
-            --rend-color: #4c5c2d; 
             --border-color: #d1d5db; /* Cinza claro para bordas estruturais */
         }
 
@@ -95,30 +98,41 @@
         ul, ol { margin-left: 30px; margin-bottom: 25px; }
         strong { color: var(--primary); }
 
-        /* Code */
-        pre {
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 20px;
-            border-radius: 8px;
-            font-family: 'Fira Code', monospace;
-            font-size: 1rem;
-            margin: 15px 0;
-            overflow-x: auto;
+        /* Prism.js Overrides & Code Styling */
+        pre[class*="language-"] {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-left: 5px solid var(--accent);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin: 15px 0;
+            padding: 20px 20px 20px 10px; /* Adjust padding for line numbers */
         }
-        code { 
+        code[class*="language-"], pre[class*="language-"] {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            text-shadow: none; /* Removing text shadow for cleaner look */
+        }
+        .line-numbers .line-numbers-rows {
+            border-right: 1px solid #e2e8f0;
+            padding-right: 10px;
+        }
+        .line-highlight {
+            background: rgba(255, 222, 66, 0.3); /* Destaque amarelo suave */
+            margin-top: 20px; /* Offset for pre padding */
+        }
+
+        /* Inline Code styling (NOT inside <pre>) */
+        :not(pre) > code { 
             font-family: 'Fira Code', monospace; 
-            background: var(--accent-light); 
-            color: var(--primary);
+            background: #f1f5f9; 
+            color: #be123c; /* Rose 700 (Alto Contraste) */
             padding: 2px 6px; 
             border-radius: 4px; 
             font-size: 0.9em; 
             font-weight: 600;
-            border: 1px solid var(--accent);
+            border: 1px solid var(--border-color);
         }
-        pre code { background: transparent; color: inherit; padding: 0; border: none; }
         
         .file-label {
             display: inline-block;
@@ -134,59 +148,27 @@
             z-index: 1;
             border-bottom: 2px solid var(--accent);
         }
-        .file-label.html { background: #e34f26; border-color: #1b0c0c; }
-        .file-label.css { background: #264de4; border-color: #1b0c0c; }
-        .file-label.js { background: #ffde42; color: #1b0c0c; border-color: #1b0c0c; }
-        .file-label.json { background: #4c5c2d; color: #fff; border-color: #1b0c0c; }
+        .file-label.html { background: #e34f26; color: white; border-color: var(--border-color); }
+        .file-label.js { background: #ffde42; color: #1b0c0c; border-color: var(--border-color); }
+        .file-label.json { background: #4c5c2d; color: #fff; border-color: var(--border-color); }
+        .file-label.main { background: var(--primary); color: #fff; border-color: var(--border-color); }
 
         /* Layouts */
         .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
         .col { background: #fafaf9; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); }
         .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--primary); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; display: flex; align-items: center; gap: 10px;}
 
-        /* Code Block Wrapper with Line Numbers */
-        .code-wrapper {
-            background: var(--code-bg);
-            color: var(--code-text);
-            padding: 15px 0;
-            border-radius: 8px;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.95rem;
-            border-left: 5px solid var(--accent);
-            overflow-x: auto;
-            line-height: 1.6;
-            margin: 15px 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .code-line { display: flex; padding: 0 15px; }
-        .line-num {
-            color: #888;
-            min-width: 30px;
-            text-align: right;
-            margin-right: 15px;
-            padding-right: 10px;
-            border-right: 1px solid #444;
-            user-select: none;
-            opacity: 0.6;
-        }
-        .code-content { white-space: pre; }
-        .highlight-line { background-color: rgba(255, 222, 66, 0.15); border-radius: 4px; }
-        .highlight-line .line-num { color: var(--accent); opacity: 1; border-right-color: var(--accent); }
-        
-        .highlight-line-green { background-color: rgba(76, 92, 45, 0.3); border-radius: 4px; }
-        .highlight-line-green .line-num { color: #8cd34a; opacity: 1; border-right-color: #8cd34a; }
-
-        /* Tree Viz for Folders */
+        /* Tree Viz for Folders (Claro e Alto Contraste) */
         .tree-viz {
-            background: #1b0c0c; color: #ffde42; padding: 25px; border-radius: 12px;
-            font-family: 'Fira Code', monospace; font-size: 1.1rem; border: 1px solid #4c5c2d;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: inline-block; text-align: left; line-height: 1.8;
+            background: #ffffff; color: #1e293b; padding: 25px; border-radius: 12px;
+            font-family: 'Fira Code', monospace; font-size: 1.1rem; border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: inline-block; text-align: left; line-height: 1.8;
             margin-top: 20px; min-width: 500px;
         }
-        .tree-viz .comment { color: #888; font-style: italic; font-size: 0.9rem; margin-left: 10px; }
-        .tree-viz .folder-main { color: #4c5c2d; font-weight: bold; }
-        .tree-viz .folder-rend { color: #ffde42; font-weight: bold; }
-        .tree-viz .file { color: #e2e8f0; }
+        .tree-viz .comment { color: #64748b; font-style: italic; font-size: 0.9rem; margin-left: 10px; }
+        .tree-viz .folder-main { color: #15803d; font-weight: bold; } /* Verde Escuro */
+        .tree-viz .folder-rend { color: #b45309; font-weight: bold; } /* Laranja Escuro */
+        .tree-viz .file { color: #334155; }
         .pl-4 { padding-left: 20px; }
         .pl-8 { padding-left: 40px; }
         .pl-12 { padding-left: 60px; }
@@ -258,11 +240,9 @@
             .controls, .progress-bar { display: none !important; }
             .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
             .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
-            pre, .arch-box, .col, .layout-builder, .tree-viz { border: 1px solid #000; color: black; box-shadow: none; background: white !important; }
+            pre, .arch-box, .col, .layout-builder, .tree-viz { border: 1px solid #000 !important; color: black; box-shadow: none; background: white !important; }
             h1, h2, p, li, strong { color: black !important; }
             code { background: #eee; color: black; border: none; }
-            .code-wrapper { border: 1px solid #000; background: #fff;}
-            .code-line { color: #000; }
             .tree-viz .comment { color: #555; }
             .tree-viz .folder-main, .tree-viz .folder-rend { color: black !important; }
         }
@@ -280,14 +260,14 @@
     <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)">
         <i class="fa-solid fa-expand"></i>
     </button>
-    <button class="btn" onclick="goToExercises()" title="Ir para os Exercícios">
-        <i class="fa-solid fa-clipboard-list"></i>
-    </button>
     <button class="btn" onclick="prevSlide()" title="Anterior (←)">
         <i class="fa-solid fa-arrow-left"></i>
     </button>
     <button class="btn" onclick="nextSlide()" title="Próximo (→)">
         <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="btn" onclick="goToExercises()" title="Ir para Exercícios">
+        <i class="fa-solid fa-clipboard-list"></i>
     </button>
     <button class="btn" onclick="window.print()" title="Imprimir Apostila">
         <i class="fa-solid fa-print"></i>
@@ -300,8 +280,8 @@
     <div class="slide active">
         <div class="slide-content-wrapper">
             <div class="slide-number">01</div>
-            <h1>Aula 10: Interface Gráfica I</h1>
-            <h2>Estrutura de Layout Desktop e Bootstrap</h2>
+            <h1>Aula 10: Layout Desktop</h1>
+            <h2>Bootstrap, Arquitetura e JSON</h2>
             <br>
             <p><strong>Roteiro da Aula:</strong></p>
             <ol>
@@ -434,7 +414,6 @@
                             
                             <!-- Content -->
                             <div id="mockContentArea">
-                                <!-- Populated dynamically -->
                                 <div style="height: 100%; display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-weight: bold; font-size: 1.2rem;">Área Vazia</div>
                             </div>
                         </div>
@@ -511,7 +490,7 @@
                     <i class="fa-solid fa-bullseye"></i> O que vamos construir?
                 </h3>
                 <p style="font-size: 1.1rem; color: #fffce8; margin-bottom: 0; line-height: 1.6;">
-                    Primeiro, vamos criar a estrutura de pastas correta. Depois, importaremos o <strong>Bootstrap via CDN</strong> e usaremos as suas classes utilitárias de Flexbox (<code>d-flex</code>, <code>vh-100</code>) para travar a tela e criar uma estrutura de App profissional (Sidebar + Header + Main) pronta para receber dados.
+                    Primeiro, vamos criar a estrutura de pastas correta. Depois, instalaremos o <strong>Bootstrap via NPM (para funcionar offline)</strong> e usaremos as suas classes utilitárias de Flexbox (<code>d-flex</code>, <code>vh-100</code>) para travar a tela e criar uma estrutura de App profissional (Sidebar + Header + Main) pronta para receber dados.
                 </p>
             </div>
         </div>
@@ -527,8 +506,9 @@
             <div class="comparison" style="margin-top: 15px;">
                 <div class="col">
                     <h3 style="color: var(--primary);"><i class="fa-solid fa-terminal"></i> 1. No Terminal</h3>
-                    <pre style="padding: 10px; font-size: 0.85rem; margin-bottom: 15px;">npm init -y
-npm install electron --save-dev</pre>
+<pre class="language-bash line-numbers"><code>npm init -y
+npm install electron --save-dev
+npm install bootstrap</code></pre>
                     <p style="font-size: 0.9rem; margin-bottom: 5px;">Agora, crie as pastas manualmente no VS Code:</p>
                     <p style="font-size: 0.85rem; font-weight: bold; color: var(--cyan);">src > main</p>
                     <p style="font-size: 0.85rem; font-weight: bold; color: var(--accent);">src > renderer</p>
@@ -536,11 +516,9 @@ npm install electron --save-dev</pre>
                 <div class="col" style="border-color: var(--accent);">
                     <h3 style="color: var(--accent);"><i class="fa-solid fa-file-code"></i> 2. No package.json</h3>
                     <p style="font-size: 0.9rem; margin-bottom: 5px;">Altere o bloco "scripts" para ensinar o Node onde está o nosso novo arquivo principal:</p>
-                    <div class="code-wrapper" style="margin-top: 10px; padding: 10px 0;">
-                        <div class="code-line"><span class="code-content">"scripts": {</span></div>
-                        <div class="code-line highlight-line"><span class="code-content">  "start": "electron src/main/index.js"</span></div>
-                        <div class="code-line"><span class="code-content">}</span></div>
-                    </div>
+<pre class="language-json line-numbers" data-line="2"><code>"scripts": {
+  "start": "electron src/main/index.js"
+}</code></pre>
                 </div>
             </div>
         </div>
@@ -553,23 +531,21 @@ npm install electron --save-dev</pre>
             <h2>Passo 1: O Back-end (Caminhos)</h2>
             <p>Crie o <code>index.js</code> e o <code>preload.js</code> dentro da pasta <strong><code>src/main/</code></strong>. Como o HTML está noutra pasta, usamos <code>../</code> para "voltar" uma pasta.</p>
             <div class="file-label main">src/main/index.js</div>
-            <div class="code-wrapper">
-                <div class="code-line"><span class="line-num">1</span><span class="code-content">const { app, BrowserWindow } = require('electron');</span></div>
-                <div class="code-line"><span class="line-num">2</span><span class="code-content">const path = require('path');</span></div>
-                <div class="code-line"><span class="line-num">3</span><span class="code-content"></span></div>
-                <div class="code-line"><span class="line-num">4</span><span class="code-content">app.whenReady().then(() => {</span></div>
-                <div class="code-line"><span class="line-num">5</span><span class="code-content">    const janela = new BrowserWindow({</span></div>
-                <div class="code-line"><span class="line-num">6</span><span class="code-content">        width: 1000, height: 700,</span></div>
-                <div class="code-line"><span class="line-num">7</span><span class="code-content">        webPreferences: { </span></div>
-                <div class="code-line highlight-line"><span class="line-num">8</span><span class="code-content">            // Preload está na MESMA pasta que o index.js</span></div>
-                <div class="code-line highlight-line"><span class="line-num">9</span><span class="code-content">            preload: path.join(__dirname, 'preload.js') </span></div>
-                <div class="code-line"><span class="line-num">10</span><span class="code-content">        }</span></div>
-                <div class="code-line"><span class="line-num">11</span><span class="code-content">    });</span></div>
-                <div class="code-line"><span class="line-num">12</span><span class="code-content">    </span></div>
-                <div class="code-line highlight-line-green"><span class="line-num">13</span><span class="code-content">    // Volta uma pasta (sai de 'main', entra em 'renderer')</span></div>
-                <div class="code-line highlight-line-green"><span class="line-num">14</span><span class="code-content">    janela.loadFile(path.join(__dirname, '../renderer/index.html'));</span></div>
-                <div class="code-line"><span class="line-num">15</span><span class="code-content">});</span></div>
-            </div>
+<pre class="language-javascript line-numbers" data-line="8-9, 13-14"><code>const { app, BrowserWindow } = require('electron');
+const path = require('path');
+
+app.whenReady().then(() => {
+    const janela = new BrowserWindow({
+        width: 1000, height: 700,
+        webPreferences: { 
+            // Preload está na MESMA pasta que o index.js
+            preload: path.join(__dirname, 'preload.js') 
+        }
+    });
+    
+    // Volta uma pasta (sai de 'main', entra em 'renderer')
+    janela.loadFile(path.join(__dirname, '../renderer/index.html'));
+});</code></pre>
         </div>
     </div>
 
@@ -577,30 +553,28 @@ npm install electron --save-dev</pre>
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">13</div>
-            <h2>Passo 2: HTML e Bootstrap 5</h2>
-            <p>Crie o <code>index.html</code> dentro da pasta <strong><code>src/renderer/</code></strong>. Colocamos o link do Bootstrap e travamos a janela com <code>vh-100</code> (100% da altura) e <code>overflow-hidden</code>.</p>
+            <h2>Passo 2: HTML e Bootstrap Local</h2>
+            <p>Crie o <code>index.html</code> dentro da pasta <strong><code>src/renderer/</code></strong>. Vamos importar o arquivo CSS do Bootstrap que baixamos na pasta <code>node_modules</code>. Voltamos duas pastas com <code>../../</code>.</p>
             <div class="file-label html">src/renderer/index.html</div>
-            <div class="code-wrapper">
-                <div class="code-line"><span class="line-num">1</span><span class="code-content">&lt;!DOCTYPE html&gt;</span></div>
-                <div class="code-line"><span class="line-num">2</span><span class="code-content">&lt;html lang="pt-BR"&gt;</span></div>
-                <div class="code-line"><span class="line-num">3</span><span class="code-content">&lt;head&gt;</span></div>
-                <div class="code-line"><span class="line-num">4</span><span class="code-content">    &lt;meta charset="UTF-8"&gt;</span></div>
-                <div class="code-line"><span class="line-num">5</span><span class="code-content">    &lt;title&gt;Painel de Controle&lt;/title&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">6</span><span class="code-content">    &lt;!-- Importação do Bootstrap 5 --&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">7</span><span class="code-content">    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"&gt;</span></div>
-                <div class="code-line"><span class="line-num">8</span><span class="code-content">&lt;/head&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">9</span><span class="code-content">&lt;!-- TRAVANDO A JANELA: overflow-hidden e fundo cinza claro --&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">10</span><span class="code-content">&lt;body class="overflow-hidden bg-light"&gt;</span></div>
-                <div class="code-line"><span class="line-num">11</span><span class="code-content">    </span></div>
-                <div class="code-line"><span class="line-num">12</span><span class="code-content">    &lt;!-- d-flex (flexbox) e vh-100 (altura total) --&gt;</span></div>
-                <div class="code-line"><span class="line-num">13</span><span class="code-content">    &lt;div class="container-fluid vh-100 d-flex p-0"&gt;</span></div>
-                <div class="code-line"><span class="line-num">14</span><span class="code-content">        &lt;!-- O conteúdo virá aqui --&gt;</span></div>
-                <div class="code-line"><span class="line-num">15</span><span class="code-content">    &lt;/div&gt;</span></div>
-                <div class="code-line"><span class="line-num">16</span><span class="code-content"></span></div>
-                <div class="code-line"><span class="line-num">17</span><span class="code-content">    &lt;script src="renderer.js"&gt;&lt;/script&gt;</span></div>
-                <div class="code-line"><span class="line-num">18</span><span class="code-content">&lt;/body&gt;</span></div>
-                <div class="code-line"><span class="line-num">19</span><span class="code-content">&lt;/html&gt;</span></div>
-            </div>
+<pre class="language-html line-numbers" data-line="6-7, 9-10"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Painel de Controle&lt;/title&gt;
+    &lt;!-- Importação do Bootstrap Offline --&gt;
+    &lt;link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;!-- TRAVANDO A JANELA: overflow-hidden e fundo cinza claro --&gt;
+&lt;body class="overflow-hidden bg-light"&gt;
+    
+    &lt;!-- d-flex (flexbox) e vh-100 (altura total) --&gt;
+    &lt;div class="container-fluid vh-100 d-flex p-0"&gt;
+        &lt;!-- O conteúdo virá aqui --&gt;
+    &lt;/div&gt;
+
+    &lt;script src="renderer.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
         </div>
     </div>
 
@@ -610,10 +584,9 @@ npm install electron --save-dev</pre>
             <div class="slide-number">14</div>
             <h2>Passo 3: A Barra Lateral (Sidebar)</h2>
             <p>Dentro da nossa div <code>container-fluid</code>, criamos um menu lateral escuro usando classes nativas do Bootstrap como <code>bg-dark</code> e <code>nav-pills</code>.</p>
-            <pre style="font-size: 0.85rem; padding: 15px;">
-&lt;div class="container-fluid vh-100 d-flex p-0"&gt;
+<pre class="language-html line-numbers" data-line="3-4"><code>&lt;div class="container-fluid vh-100 d-flex p-0"&gt;
 
-    <strong style="color:var(--accent);">&lt;!-- 1. MENU LATERAL (Com largura fixa) --&gt;</strong>
+    &lt;!-- 1. MENU LATERAL (Com largura fixa) --&gt;
     &lt;div class="bg-dark text-white p-3 d-flex flex-column shadow z-2" style="width: 250px;"&gt;
         
         &lt;h3 class="text-warning fw-bold mb-0"&gt;DevSystem&lt;/h3&gt;
@@ -633,7 +606,7 @@ npm install electron --save-dev</pre>
 
     &lt;!-- Falta a parte da direita... --&gt;
 
-&lt;/div&gt;</pre>
+&lt;/div&gt;</code></pre>
         </div>
     </div>
 
@@ -643,33 +616,31 @@ npm install electron --save-dev</pre>
             <div class="slide-number">15</div>
             <h2>Passo 4: A Área da Direita (Main Wrapper)</h2>
             <p>O resto da tela empilha o Topo (Header) e o Conteúdo Rolável (Main). Usamos <code>flex-grow-1</code> para ocupar o espaço livre e <code>overflow-auto</code> para a rolagem.</p>
-            <div class="code-wrapper">
-                <div class="code-line"><span class="line-num">1</span><span class="code-content">    &lt;!-- CONTINUAÇÃO DENTRO DO CONTAINER-FLUID... --&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">2</span><span class="code-content">    &lt;!-- CONTAINER DA DIREITA: flex-grow-1 (pega o resto) --&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">3</span><span class="code-content">    &lt;div class="flex-grow-1 d-flex flex-column bg-light"&gt;</span></div>
-                <div class="code-line"><span class="line-num">4</span><span class="code-content">        </span></div>
-                <div class="code-line"><span class="line-num">5</span><span class="code-content">        &lt;!-- 2. HEADER: Fundo branco com sombra leve --&gt;</span></div>
-                <div class="code-line"><span class="line-num">6</span><span class="code-content">        &lt;header class="bg-white border-bottom p-3 d-flex justify-content-between align-items-center shadow-sm z-1"&gt;</span></div>
-                <div class="code-line"><span class="line-num">7</span><span class="code-content">            &lt;h4 class="m-0 text-secondary"&gt;Página Inicial&lt;/h4&gt;</span></div>
-                <div class="code-line"><span class="line-num">8</span><span class="code-content">            &lt;span class="badge bg-secondary p-2"&gt;Admin&lt;/span&gt;</span></div>
-                <div class="code-line"><span class="line-num">9</span><span class="code-content">        &lt;/header&gt;</span></div>
-                <div class="code-line"><span class="line-num">10</span><span class="code-content"></span></div>
-                <div class="code-line highlight-line"><span class="line-num">11</span><span class="code-content">        &lt;!-- 3. ÁREA DE CONTEÚDO (MAIN): overflow-auto (PERMITE ROLAR AQUI!) --&gt;</span></div>
-                <div class="code-line highlight-line"><span class="line-num">12</span><span class="code-content">        &lt;main class="flex-grow-1 overflow-auto p-4"&gt;</span></div>
-                <div class="code-line"><span class="line-num">13</span><span class="code-content">            </span></div>
-                <div class="code-line"><span class="line-num">14</span><span class="code-content">            &lt;h3 class="mb-4"&gt;Bem-vindo de volta!&lt;/h3&gt;</span></div>
-                <div class="code-line highlight-line-green"><span class="line-num">15</span><span class="code-content">            &lt;div id="conteudo"&gt; &lt;!-- ID PARA O JS INJETAR OS DADOS DEPOIS --&gt;</span></div>
-                <div class="code-line"><span class="line-num">16</span><span class="code-content">                &lt;div class="card shadow-sm h-100" style="min-height: 400px;"&gt;</span></div>
-                <div class="code-line"><span class="line-num">17</span><span class="code-content">                    &lt;div class="card-body text-muted d-flex align-items-center justify-content-center"&gt;</span></div>
-                <div class="code-line"><span class="line-num">18</span><span class="code-content">                        Conteúdo em branco...</span></div>
-                <div class="code-line"><span class="line-num">19</span><span class="code-content">                    &lt;/div&gt;</span></div>
-                <div class="code-line"><span class="line-num">20</span><span class="code-content">                &lt;/div&gt;</span></div>
-                <div class="code-line highlight-line-green"><span class="line-num">21</span><span class="code-content">            &lt;/div&gt;</span></div>
-                <div class="code-line"><span class="line-num">22</span><span class="code-content"></span></div>
-                <div class="code-line"><span class="line-num">23</span><span class="code-content">        &lt;/main&gt;</span></div>
-                <div class="code-line"><span class="line-num">24</span><span class="code-content">        </span></div>
-                <div class="code-line"><span class="line-num">25</span><span class="code-content">    &lt;/div&gt; &lt;!-- Fim container direita --&gt;</span></div>
-            </div>
+<pre class="language-html line-numbers" data-line="2-3, 11-12, 15, 21"><code>    &lt;!-- CONTINUAÇÃO DENTRO DO CONTAINER-FLUID... --&gt;
+    &lt;!-- CONTAINER DA DIREITA: flex-grow-1 (pega o resto) --&gt;
+    &lt;div class="flex-grow-1 d-flex flex-column bg-light"&gt;
+        
+        &lt;!-- 2. HEADER: Fundo branco com sombra leve --&gt;
+        &lt;header class="bg-white border-bottom p-3 d-flex justify-content-between align-items-center shadow-sm z-1"&gt;
+            &lt;h4 class="m-0 text-secondary"&gt;Página Inicial&lt;/h4&gt;
+            &lt;span class="badge bg-secondary p-2"&gt;Admin&lt;/span&gt;
+        &lt;/header&gt;
+
+        &lt;!-- 3. ÁREA DE CONTEÚDO (MAIN): overflow-auto (PERMITE ROLAR AQUI!) --&gt;
+        &lt;main class="flex-grow-1 overflow-auto p-4"&gt;
+            
+            &lt;h3 class="mb-4"&gt;Bem-vindo de volta!&lt;/h3&gt;
+            &lt;div id="conteudo"&gt; &lt;!-- ID PARA O JS INJETAR OS DADOS DEPOIS --&gt;
+                &lt;div class="card shadow-sm h-100" style="min-height: 400px;"&gt;
+                    &lt;div class="card-body text-muted d-flex align-items-center justify-content-center"&gt;
+                        Conteúdo em branco...
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+        &lt;/main&gt;
+        
+    &lt;/div&gt; &lt;!-- Fim container direita --&gt;</code></pre>
         </div>
     </div>
 
@@ -704,11 +675,10 @@ npm install electron --save-dev</pre>
             <p>Um arquivo JSON nada mais é do que um arquivo de texto estruturado que o Javascript entende nativamente.</p>
             
             <div class="file-label json">dados.json</div>
-            <pre>
-[
+<pre class="language-json line-numbers"><code>[
   { "id": 1, "nome": "Ana", "cargo": "Dev" },
   { "id": 2, "nome": "Carlos", "cargo": "Design" }
-]</pre>
+]</code></pre>
             <p style="font-size: 0.9rem; color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> <strong>Regra do JSON:</strong> Todas as chaves ("id", "nome") devem OBRIGATORIAMENTE estar entre aspas duplas!</p>
         </div>
     </div>
@@ -724,30 +694,26 @@ npm install electron --save-dev</pre>
                 <!-- Coluna Main -->
                 <div>
                     <div class="file-label main" style="font-size: 0.75rem;">src/main/index.js</div>
-                    <div class="code-wrapper" style="margin-top: 0; padding: 10px 0;">
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">// Lê o JSON da raiz do projeto</span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">const db = require('../../dados.json');</span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;"></span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">// Atende o telefone do front</span></div>
-                        <div class="code-line highlight-line"><span class="code-content" style="font-size: 0.85rem;">ipcMain.handle('pedir-usuarios', () => {</span></div>
-                        <div class="code-line highlight-line"><span class="code-content" style="font-size: 0.85rem;">    return db; </span></div>
-                        <div class="code-line highlight-line"><span class="code-content" style="font-size: 0.85rem;">});</span></div>
-                    </div>
+<pre class="language-javascript line-numbers" data-line="5-7" style="margin-top: 0; padding-top: 10px;"><code>// Lê o JSON da raiz do projeto
+const db = require('../../dados.json');
+
+// Atende o telefone do front
+ipcMain.handle('pedir-usuarios', () => {
+    return db; 
+});</code></pre>
                 </div>
 
                 <!-- Coluna Preload -->
                 <div>
                     <div class="file-label js" style="font-size: 0.75rem;">src/main/preload.js</div>
-                    <div class="code-wrapper" style="margin-top: 0; padding: 10px 0;">
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">const { contextBridge, ipcRenderer } = require('electron');</span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;"></span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">contextBridge.exposeInMainWorld('api', {</span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">    // Cria o atalho para o Front-end</span></div>
-                        <div class="code-line highlight-line"><span class="code-content" style="font-size: 0.85rem;">    pedirUsuarios: () => {</span></div>
-                        <div class="code-line highlight-line"><span class="code-content" style="font-size: 0.85rem;">        return ipcRenderer.invoke('pedir-usuarios');</span></div>
-                        <div class="code-line highlight-line"><span class="code-content" style="font-size: 0.85rem;">    }</span></div>
-                        <div class="code-line"><span class="code-content" style="font-size: 0.85rem;">});</span></div>
-                    </div>
+<pre class="language-javascript line-numbers" data-line="5-7" style="margin-top: 0; padding-top: 10px;"><code>const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+    // Cria o atalho para o Front-end
+    pedirUsuarios: () => {
+        return ipcRenderer.invoke('pedir-usuarios');
+    }
+});</code></pre>
                 </div>
             </div>
         </div>
@@ -761,8 +727,7 @@ npm install electron --save-dev</pre>
             <p>Agora o Front-end liga para o Node, pega o JSON e usa o sistema de <strong>Grid e Cards do Bootstrap</strong> para desenhar os itens na tela.</p>
             
             <div class="file-label js">src/renderer/renderer.js</div>
-            <pre>
-const carregarTela = async () => {
+<pre class="language-javascript line-numbers"><code>const carregarTela = async () => {
     // 1. Liga para o Node e ESPERA o JSON chegar
     const listaUsuarios = await window.api.pedirUsuarios();
     
@@ -783,7 +748,7 @@ const carregarTela = async () => {
 };
 
 // 4. Executa a função assim que o script carregar!
-carregarTela();</pre>
+carregarTela();</code></pre>
         </div>
     </div>
 
@@ -804,8 +769,7 @@ carregarTela();</pre>
             <p>Crie um arquivo chamado <code>produtos.json</code> na <strong>raiz</strong> do seu projeto (junto ao package.json) e cole os dados abaixo. Eles serão a base da nossa loja de tecnologia.</p>
             
             <div class="file-label json">produtos.json</div>
-            <pre style="height: 300px; overflow-y: scroll;">
-[
+<pre class="language-json line-numbers" style="height: 300px;"><code>[
   { "id": 1, "nome": "Monitor Dell 27", "preco": 1200, "estoque": 15, "categoria": "Hardware" },
   { "id": 2, "nome": "Teclado Mecânico RGB", "preco": 350, "estoque": 0, "categoria": "Periféricos" },
   { "id": 3, "nome": "Mouse Sem Fio Ultra", "preco": 150, "estoque": 42, "categoria": "Periféricos" },
@@ -813,7 +777,7 @@ carregarTela();</pre>
   { "id": 5, "nome": "Placa de Vídeo RTX 4060", "preco": 2500, "estoque": 2, "categoria": "Hardware" },
   { "id": 6, "nome": "Headset Dolby 7.1", "preco": 420, "estoque": 0, "categoria": "Periféricos" },
   { "id": 7, "nome": "SSD NVMe 1TB", "preco": 380, "estoque": 20, "categoria": "Hardware" }
-]</pre>
+]</code></pre>
         </div>
     </div>
 
@@ -826,7 +790,7 @@ carregarTela();</pre>
             
             <div class="final-list">
                 <ol>
-                    <li><strong>O Esqueleto (Bootstrap):</strong> Dentro de <code>src/renderer/</code>, crie o <code>index.html</code>. Use a técnica do Live Coding para criar uma <strong>Sidebar</strong> escura à esquerda e uma área <strong>Main</strong> clara à direita (Lembre-se do <code>container-fluid</code> e <code>vh-100</code>).</li>
+                    <li><strong>O Esqueleto (Bootstrap Local):</strong> Dentro de <code>src/renderer/</code>, crie o <code>index.html</code>. Lembre-se de importar o CSS do bootstrap acessando a pasta <code>node_modules</code>. Use a técnica do Live Coding para criar uma <strong>Sidebar</strong> escura à esquerda e uma área <strong>Main</strong> clara à direita (Lembre-se do <code>container-fluid</code> e <code>vh-100</code>).</li>
                     <li><strong>A Ponte IPC:</strong> No Main (<code>index.js</code>), use <code>require('../../produtos.json')</code> e crie um <code>ipcMain.handle('pedir-produtos')</code>. No <code>preload.js</code>, crie e exponha a função <code>pedirProdutos: () => ipcRenderer.invoke('pedir-produtos')</code>.</li>
                     <li><strong>O Grid de Cards:</strong> No <code>renderer.js</code>, crie a função assíncrona para buscar os dados. Na área Main do HTML, crie uma <code>div id="catalogo"</code>. Use o <code>map()</code> para gerar uma coluna <code>col</code> contendo um componente <code>card</code> do Bootstrap para cada produto.</li>
                 </ol>
@@ -852,6 +816,14 @@ carregarTela();</pre>
     </div>
 
 </div>
+
+<!-- Prism.js Scripts para Syntax Highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
 
 <script>
     let currentSlide = 0;

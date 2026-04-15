@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Global: Aulas 01 a 11</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            
+            --primary: #4f46e5;    /* Indigo 600 */
+            --secondary: #0ea5e9;  /* Sky 500 */
+            --success: #10b981;    /* Emerald 500 */
+            --warning: #f59e0b;    /* Amber 500 */
+            --danger: #ef4444;     /* Red 500 */
+            --dark: #1e293b;       /* Slate 800 */
+            
+            --border-color: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* --- Header --- */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .pill {
+            display: inline-block;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* --- Cards de Exercícios --- */
+        .exercise-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-header i { font-size: 2rem; }
+        
+        .ex-1 .card-header { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-bottom-color: #bbf7d0; }
+        .ex-1 .card-header i { color: var(--success); }
+        .ex-1 .card-title { color: #065f46; }
+
+        .ex-2 .card-header { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-bottom-color: #fde68a; }
+        .ex-2 .card-header i { color: var(--warning); }
+        .ex-2 .card-title { color: #92400e; }
+
+        .ex-3 .card-header { background: linear-gradient(135deg, #fef2f2, #fee2e2); border-bottom-color: #fecaca; }
+        .ex-3 .card-header i { color: var(--danger); }
+        .ex-3 .card-title { color: #991b1b; }
+
+        .card-title { font-size: 1.5rem; font-weight: 800; margin: 0; }
+        
+        .difficulty {
+            margin-left: auto;
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card-body { padding: 30px; }
+
+        .context {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 4px solid var(--border-color);
+        }
+
+        /* --- Requisitos List --- */
+        .req-list { list-style: none; counter-reset: req; }
+        .req-list li {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+        .req-list li::before {
+            counter-increment: req;
+            content: counter(req);
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+        .req-list strong { color: var(--primary); }
+
+        /* --- Code & JSON --- */
+        .json-box { margin: 20px 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--dark); }
+        .json-header { background: var(--dark); color: #fff; padding: 10px 15px; font-family: 'Fira Code', monospace; font-size: 0.85rem; display: flex; justify-content: space-between; }
+        pre[class*="language-"] { margin: 0 !important; border-radius: 0 !important; font-size: 0.9rem !important; }
+        
+        code.inline {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- AI Challenge Box --- */
+        .ai-challenge {
+            background: #f8fafc;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            position: relative;
+        }
+        .ai-challenge h4 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ai-challenge .ai-prompt {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            font-style: italic;
+            color: var(--text-muted);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="pill">Revisão Global</div>
+            <h1>A Grande Integração</h1>
+            <p class="subtitle">Este é o teste definitivo. Junte as 11 semanas de aulas: Layout (Bootstrap), Eventos, Forms, Promises, IPC Bidirecional e Arquitetura Main/Renderer.</p>
+        </header>
+
+        <!-- EXERCÍCIO 1 -->
+        <div class="exercise-card ex-1">
+            <div class="card-header">
+                <i class="fa-solid fa-list-check"></i>
+                <h2 class="card-title">1. To-Do List Espartano</h2>
+                <span class="difficulty" style="color: var(--success);">Iniciante</span>
+            </div>
+            <div class="card-body">
+                <div class="context">
+                    Crie um aplicativo de tarefas que use o Node.js como "cérebro" para guardar as informações enquanto o aplicativo estiver aberto (em memória).
+                </div>
+                
+                <ul class="req-list">
+                    <li>Crie a estrutura profissional de pastas (<code>src/main</code> e <code>src/renderer</code>).</li>
+                    <li>No HTML, construa um layout com <strong>Bootstrap</strong>: Um formulário no topo e uma área para as tarefas embaixo. O formulário deve ter um input para o <code class="inline">nome_tarefa</code> e um select para a <code class="inline">prioridade</code> (Baixa, Média, Alta).</li>
+                    <li>No JS do Front-end, intercepte o <code>submit</code> do formulário, use o <code class="inline">new FormData()</code> para capturar os dados, e envie o objeto para o Back-end via IPC (<code class="inline">invoke</code>).</li>
+                    <li>No Node.js (Main), crie um Array global vazio. Sempre que o canal IPC for acionado, receba a nova tarefa, adicione um ID único a ela (pode ser o tamanho do array + 1), dê um <code>.push()</code> no array e <strong>retorne a lista inteira atualizada</strong>.</li>
+                    <li>Quando o Front-end receber a lista de volta, use <code class="inline">.map()</code> para renderizar <i>Cards</i> do Bootstrap na tela. Destaque tarefas de "Alta" prioridade com uma cor diferente!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- EXERCÍCIO 2 -->
+        <div class="exercise-card ex-2">
+            <div class="card-header">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <h2 class="card-title">2. Gestão de Biblioteca (JSON)</h2>
+                <span class="difficulty" style="color: var(--warning);">Intermediário</span>
+            </div>
+            <div class="card-body">
+                <div class="context">
+                    Um sistema para visualizar e emprestar livros. O Back-end agora não inicia vazio; ele carrega dados de um arquivo externo!
+                </div>
+
+                <div class="json-box">
+                    <div class="json-header">
+                        <span><i class="fa-solid fa-file-code"></i> livros.json (Crie na raiz do projeto)</span>
+                    </div>
+                    <pre><code class="language-json">[
+  { "id": 1, "titulo": "O Senhor dos Anéis", "autor": "J.R.R. Tolkien", "ano": 1954, "disponivel": true },
+  { "id": 2, "titulo": "1984", "autor": "George Orwell", "ano": 1949, "disponivel": false },
+  { "id": 3, "titulo": "Dom Quixote", "autor": "Miguel de Cervantes", "ano": 1605, "disponivel": true }
+]</code></pre>
+                </div>
+                
+                <ul class="req-list">
+                    <li>No Main, use <code class="inline">require('../../livros.json')</code> para carregar os livros para dentro de uma variável <code>let</code>. Crie um <code>ipcMain.handle('get-livros')</code> que apenas retorna essa variável para o Front-end renderizar a tela inicial.</li>
+                    <li>No Front-end, além de desenhar os livros, crie uma <strong>Barra de Busca Dinâmica</strong>. Ao digitar qualquer coisa (evento <code class="inline">input</code>), filtre a lista e re-renderize os cards.</li>
+                    <li><strong>Ação no Backend:</strong> Em cada card de livro gerado no HTML, adicione um botão <strong>"Emprestar"</strong>. Ao clicar neste botão, o Front-end deve enviar o <code>id</code> do livro via IPC para o Node.js.</li>
+                    <li>No Node.js, crie um ouvinte IPC que recebe esse ID, encontra o livro correspondente no array, altera a propriedade <code class="inline">disponivel</code> de <code>true</code> para <code>false</code>, e devolve o array inteiro atualizado!</li>
+                    <li><strong>Regra Visual:</strong> Se o livro estiver com <code class="inline">disponivel: false</code>, o card dele no HTML deve ficar cinza (ou opaco) e o botão "Emprestar" deve sumir!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- EXERCÍCIO 3 -->
+        <div class="exercise-card ex-3">
+            <div class="card-header">
+                <i class="fa-solid fa-wallet"></i>
+                <h2 class="card-title">3. Tracker Financeiro Pro</h2>
+                <span class="difficulty" style="color: var(--danger);">Avançado + IA</span>
+            </div>
+            <div class="card-body">
+                <div class="context">
+                    Um dashboard para controle de despesas. O nível sobe: você não apenas lerá o JSON, mas fará com que o sistema o atualize de verdade (persistência de dados) e gerará gráficos interativos.
+                </div>
+
+                <div class="json-box">
+                    <div class="json-header">
+                        <span><i class="fa-solid fa-file-code"></i> transacoes.json (Crie na raiz)</span>
+                    </div>
+                    <pre><code class="language-json">[
+  { "id": 1, "descricao": "Salário", "valor": 4500, "tipo": "receita", "data": "2026-04-05" },
+  { "id": 2, "descricao": "Aluguel", "valor": 1200, "tipo": "despesa", "data": "2026-04-10" },
+  { "id": 3, "descricao": "Supermercado", "valor": 600, "tipo": "despesa", "data": "2026-04-12" }
+]</code></pre>
+                </div>
+
+                <ul class="req-list">
+                    <li>Construa uma interface Dashboard usando o sistema de Grid do Bootstrap (<code class="inline">col-md-4</code>, etc). O topo deve exibir cards de resumo calculados no JS: "Total Receitas", "Total Despesas" e "Saldo Atual".</li>
+                    <li>Crie um formulário complexo para registrar novas transações (Descrição, Valor Numérico, Tipo [Radio Button] e Data [Input Date]). Capture tudo com <code class="inline">FormData</code> e envie ao Main.</li>
+                    <li><strong>Validação no Main:</strong> O Node.js deve rejeitar transações cujo <code>valor</code> seja menor ou igual a 0. Se passar, adicione ao Array em memória.</li>
+                </ul>
+
+                <!-- Desafio IA -->
+                <div class="ai-challenge">
+                    <h4><i class="fa-solid fa-robot"></i> Missão Crítica: Engenharia de Prompts</h4>
+                    <p style="margin-bottom: 15px; color: var(--text-muted);">Use o ChatGPT, Gemini ou Claude para resolver os dois bloqueios técnicos do seu sistema. Em vez de fornecermos o texto pronto, <strong>o seu desafio é formular a pergunta técnica perfeita.</strong></p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <strong>Desafio A (A Persistência):</strong> Nós usamos <code>require()</code> para ler arquivos, mas como SALVAMOS o array modificado de volta no arquivo físico para os dados não sumirem quando o app fechar?
+                        <p style="margin-top: 8px; color: var(--primary);"><em><i class="fa-solid fa-arrow-right"></i> Formule um prompt técnico exigindo que a IA explique o uso do módulo nativo <code>fs</code> (File System) do Node.js para salvar/sobrescrever um array dentro de um arquivo <code>.json</code>.</em></p>
+                    </div>
+
+                    <div>
+                        <strong>Desafio B (O Gráfico):</strong> Um Dashboard financeiro não é nada sem gráficos interativos.
+                        <p style="margin-top: 8px; color: var(--primary);"><em><i class="fa-solid fa-arrow-right"></i> Formule um prompt pedindo à IA um exemplo prático de como importar a biblioteca <strong>Chart.js</strong> (via CDN) e como gerar um Gráfico de Pizza (Doughnut) baseado nos totais de receitas e despesas que calculou no Javascript.</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
