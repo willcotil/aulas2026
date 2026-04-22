@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 09: Endereçamento IPv4 e Máscaras de Rede</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        /* Paleta 3 — Purple Night
+           dark      → #12032E
+           primary   → #4A1272
+           secondary → #9B59B6
+           accent    → #F39C12
+           muted     → #F5EEF8
+        */
+        :root {
+            --primary-color: #4A1272;
+            --secondary-color: #9B59B6;
+            --dark-color: #12032E;
+            --accent-color: #F39C12;
+            --muted-color: #F5EEF8;
+            --background-color: #F0EAF7;
+            --card-background: #ffffff;
+            --text-color: #1a0a2e;
+            --border-color: #D6C4E8;
+            --success-color: #1e7e34;
+            --warning-color: #c96b10;
+            --danger-color: #b02233;
+            --info-color: #0d7fa0;
+            --light-grey: #EDE0F5;
+            --lavender-mid: #c8a8e9;
+        }
+
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #presentation-container { width: 100%; height: 100%; position: relative; }
+        .slides-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
+
+        .slide {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(160deg, #ffffff 0%, #FAF5FF 100%);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 36px 56px 76px 56px; box-sizing: border-box;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; transform: translateY(0); visibility: visible; z-index: 1; }
+
+        /* Barra decorativa superior em cada slide */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        }
+
+        /* Navegação */
+        .navigation {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 12px; z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(8px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            box-shadow: 0 4px 20px rgba(74, 18, 114, 0.18);
+            border: 1px solid var(--border-color);
+        }
+        .nav-btn {
+            background-color: var(--primary-color); color: white;
+            border: none; border-radius: 50%;
+            width: 44px; height: 44px; font-size: 20px; cursor: pointer;
+            transition: background-color 0.25s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(74,18,114,0.3);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .nav-btn:hover { background-color: #2d0a48; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(74,18,114,0.4); }
+        .nav-btn:disabled { background-color: #c4b5d4; cursor: not-allowed; transform: none; box-shadow: none; }
+        .slide-counter {
+            font-size: 15px; font-weight: bold; color: var(--primary-color);
+            min-width: 58px; text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tipografia */
+        h1 { color: var(--primary-color); margin-bottom: 10px; text-align: center; font-weight: 700; font-size: 2.6em; line-height: 1.2; }
+        h2 {
+            color: var(--primary-color); margin-bottom: 18px; text-align: center;
+            font-weight: 700; font-size: 1.95em; line-height: 1.2;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--muted-color);
+            width: 100%; max-width: 900px;
+        }
+        h3 { color: var(--secondary-color); margin-bottom: 10px; font-weight: 700; font-size: 1.2em; }
+        p  { font-size: 1.05em; line-height: 1.7; max-width: 900px; text-align: center; margin-bottom: 8px; }
+        ul, ol { max-width: 900px; width: 100%; font-size: 1em; line-height: 1.75; }
+        li { margin-bottom: 6px; }
+        .highlight { color: var(--primary-color); font-weight: bold; }
+        .subtitle { font-size: 1.2em; color: var(--secondary-color); margin-top: 6px; text-align: center; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; background: var(--muted-color); color: var(--primary-color); padding: 2px 7px; border-radius: 4px; font-size: 0.9em; border: 1px solid var(--border-color); }
+        blockquote {
+            font-size: 1.25em; font-style: italic; color: #3d0a5e;
+            max-width: 820px; text-align: left; line-height: 1.75;
+            border-left: 5px solid var(--secondary-color);
+            padding: 14px 20px 14px 28px;
+            margin: 20px auto;
+            background: var(--muted-color);
+            border-radius: 0 10px 10px 0;
+        }
+
+        /* Layout */
+        .two-col { display: flex; gap: 22px; width: 100%; max-width: 1150px; align-items: flex-start; }
+        .col { flex: 1; }
+        .three-col { display: flex; gap: 16px; width: 100%; max-width: 1100px; }
+        .three-col .col { flex: 1; }
+
+        /* Cards */
+        .card { background: var(--card-background); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 18px 20px; box-shadow: 0 3px 14px rgba(74,18,114,0.07); }
+        .card-primary   { border-top: 5px solid var(--primary-color); background: linear-gradient(180deg, #faf5ff 0%, #fff 40%); }
+        .card-secondary { border-top: 5px solid var(--secondary-color); background: linear-gradient(180deg, #f8f0ff 0%, #fff 40%); }
+        .card-success   { border-top: 5px solid var(--success-color); background: linear-gradient(180deg, #f0fdf4 0%, #fff 40%); }
+        .card-warning   { border-top: 5px solid var(--warning-color); background: linear-gradient(180deg, #fffbf0 0%, #fff 40%); }
+        .card-accent    { border-top: 5px solid var(--accent-color); background: linear-gradient(180deg, #fffbf0 0%, #fff 40%); }
+
+        /* Info boxes */
+        .info-box { background-color: var(--muted-color); border-left: 6px solid var(--primary-color); padding: 12px 18px; border-radius: 0 8px 8px 0; margin: 10px 0; width: 100%; max-width: 900px; box-sizing: border-box; font-size: 0.97em; line-height: 1.65; color: var(--text-color); }
+        .info-box.warning { border-left-color: var(--warning-color); background-color: #fef5e7; }
+        .info-box.info    { border-left-color: var(--info-color);    background-color: #e8f6fa; }
+        .info-box.success { border-left-color: var(--success-color); background-color: #eafaf1; }
+        .info-box.danger  { border-left-color: var(--danger-color);  background-color: #fdf0f2; }
+        .info-box.accent  { border-left-color: var(--accent-color);  background-color: #fef9ec; }
+
+        /* Tabela */
+        .styled-table { border-collapse: collapse; width: 100%; max-width: 1050px; margin: 10px 0; box-shadow: 0 2px 10px rgba(74,18,114,0.1); font-size: 0.9em; border-radius: 8px; overflow: hidden; }
+        .styled-table th, .styled-table td { border: 1px solid var(--border-color); padding: 9px 13px; text-align: left; }
+        .styled-table th { background: linear-gradient(135deg, var(--primary-color), #6b1fa0); color: white; font-weight: bold; letter-spacing: 0.3px; }
+        .styled-table tr:nth-child(even) { background-color: #faf5ff; }
+        .styled-table tr:hover { background-color: var(--muted-color); transition: background 0.2s; }
+        .styled-table .hl td { background-color: #e8d5f7; font-weight: bold; color: var(--primary-color); }
+
+        /* Tags */
+        .tag { display: inline-block; background: var(--light-grey); border: 2px solid var(--border-color); border-radius: 30px; padding: 7px 18px; font-size: 0.88em; }
+        .tag-primary { background: var(--muted-color); border-color: var(--secondary-color); color: var(--primary-color); font-family: 'JetBrains Mono', monospace; font-size: 0.85em; font-weight: 700; letter-spacing: 0.3px; }
+
+        /* Bits / octetos */
+        .bit-row { display: flex; gap: 3px; justify-content: center; align-items: center; flex-wrap: nowrap; }
+        .bit { width: 34px; height: 38px; border: 2px solid var(--border-color); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 1.05em; font-weight: 700; }
+        .bit-1 { background: linear-gradient(135deg, #4A1272, #6b1fa0); color: white; border-color: #4A1272; box-shadow: 0 2px 6px rgba(74,18,114,0.35); }
+        .bit-0 { background: var(--muted-color); color: var(--secondary-color); border-color: var(--lavender-mid); }
+        .bit-sep { width: 14px; text-align: center; font-size: 1.4em; color: var(--secondary-color); font-weight: bold; }
+        .octet { display: flex; gap: 3px; }
+        .octet-label { text-align: center; font-size: 0.75em; color: #888; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+        /* IP display */
+        .ip-display { font-family: 'JetBrains Mono', monospace; font-size: 2.2em; font-weight: 700; color: var(--primary-color); letter-spacing: 2px; }
+        .ip-part { display: inline-block; background: var(--muted-color); border: 2px solid var(--secondary-color); border-radius: 8px; padding: 6px 14px; margin: 3px; font-family: 'JetBrains Mono', monospace; }
+
+        /* Diagrama rede/host */
+        .nh-bar { display: flex; width: 100%; max-width: 860px; height: 54px; border-radius: 10px; overflow: hidden; border: 2px solid var(--border-color); box-shadow: 0 3px 10px rgba(74,18,114,0.12); }
+        .nh-net { background: linear-gradient(135deg, var(--primary-color), #6b1fa0); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; letter-spacing: 0.5px; }
+        .nh-host { background: #e0c8f5; color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; }
+
+        /* Breadcrumb de jornada */
+        .pj-row { display: flex; align-items: center; width: 100%; max-width: 1000px; flex-wrap: nowrap; }
+        .pj-node { background: var(--card-background); border: 2px solid var(--primary-color); border-radius: 10px; padding: 10px 8px; text-align: center; font-size: 0.78em; font-weight: bold; color: var(--primary-color); min-width: 100px; flex-shrink: 0; }
+        .pj-node.hl { background: linear-gradient(135deg, var(--primary-color), #6b1fa0); color: white; box-shadow: 0 3px 10px rgba(74,18,114,0.3); }
+        .pj-arrow { font-size: 1.6em; color: var(--secondary-color); padding: 0 4px; flex-shrink: 0; }
+
+        /* Step boxes */
+        .step-row { display: flex; gap: 8px; width: 100%; max-width: 920px; align-items: stretch; }
+        .step-box { flex: 1; background: var(--muted-color); border: 2px solid var(--border-color); border-radius: 12px; padding: 16px 12px; text-align: center; transition: transform 0.2s; }
+        .step-box.done   { background: #eafaf1; border-color: #5cb87a; }
+        .step-box.active { background: #ede0ff; border-color: var(--secondary-color); box-shadow: 0 4px 16px rgba(155,89,182,0.25); transform: translateY(-3px); }
+        .step-box.future { opacity: 0.45; }
+        .step-num { display: inline-block; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), #6b1fa0); color: white; font-weight: bold; line-height: 32px; text-align: center; margin-bottom: 6px; font-size: 0.95em; box-shadow: 0 2px 6px rgba(74,18,114,0.3); }
+        .step-box.done .step-num { background: var(--success-color); box-shadow: 0 2px 6px rgba(30,126,52,0.3); }
+        .step-arrow { display: flex; align-items: center; font-size: 1.8rem; color: var(--secondary-color); padding: 0 4px; flex-shrink: 0; }
+
+        /* Terminal / bloco de comando */
+        .terminal-block {
+            background: var(--dark-color);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            color: #d8c0f0;
+            margin-top: 8px;
+            line-height: 1.9;
+            border: 1px solid rgba(155,89,182,0.3);
+            box-shadow: 0 4px 14px rgba(18,3,46,0.25);
+        }
+        .terminal-block .prompt { color: var(--accent-color); }
+        .terminal-block .comment { color: #7a6a8a; }
+
+        /* ── Indicador de progresso textual por slide ── */
+        .slide-progress-label {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78em;
+            color: var(--secondary-color);
+            background: rgba(245,238,248,0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 3px 12px;
+            letter-spacing: 0.3px;
+            z-index: 2;
+            user-select: none;
+        }
+
+        /* ── Destaque de dica/observação — consistente em todos os slides ── */
+        .dica-box {
+            background: #fffbf0;
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            max-width: 900px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 0.93em;
+            line-height: 1.6;
+        }
+        .dica-box .dica-icon {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+        }
+        .dica-box strong { color: var(--warning-color); }
+
+        /* ── Botão de revelar gabarito — visualmente explícito ── */
+        .btn-revelar {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: 0.9em;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 0.3px;
+            transition: background 0.2s;
+        }
+        .btn-revelar:hover { background: #2d0a48; }
+
+        /* ── Semáforo de armadilhas (acessível — sem emojis) ── */
+        .semaforo-erro   { width: 18px; height: 18px; border-radius: 50%; background: #b02233; flex-shrink: 0; margin-top: 3px; }
+        .semaforo-atencao{ width: 18px; height: 18px; border-radius: 50%; background: #c96b10; flex-shrink: 0; margin-top: 3px; }
+        .semaforo-ok     { width: 18px; height: 18px; border-radius: 50%; background: #1e7e34; flex-shrink: 0; margin-top: 3px; }
+
+        /* ── Passo numerado explícito ── */
+        .passo-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 9px 14px;
+            background: var(--muted-color);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.93em;
+            line-height: 1.65;
+        }
+        .passo-num {
+            min-width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.9em;
+            flex-shrink: 0;
+        }
+
+        /* Print */
+        @media print {
+            html, body { height: auto; overflow: visible; }
+            #presentation-container, .slides-container { height: auto; overflow: visible; }
+            .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: auto; min-height: 100vh; page-break-after: always; overflow: visible; padding: 30px; background: white !important; }
+            .slide::before { display: none; }
+            .navigation { display: none !important; }
+            h1, h2 { color: black !important; border-bottom-color: #eee !important; }
+            h3 { color: #333 !important; }
+            .info-box { border: 1px solid #ccc; background: #f9f9f9 !important; }
+            .card { border: 1px solid #ccc; box-shadow: none; background: white !important; }
+            .styled-table th { background-color: #444 !important; color: white !important; }
+            .terminal-block { background: #222 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="presentation-container">
+<div class="slides-container">
+
+<section class="slide active" style="background: linear-gradient(150deg, #12032E 0%, #2a0660 50%, #4A1272 100%) !important;">
+    <style>.slide.active.capa-slide::before { background: linear-gradient(90deg, #F39C12, #9B59B6, #F39C12); }</style>
+    <svg width="110" height="110" viewBox="0 0 110 110" style="margin-bottom:22px; filter: drop-shadow(0 6px 18px rgba(243,156,18,0.5));">
+        <circle cx="55" cy="55" r="52" fill="none" stroke="#9B59B6" stroke-width="2.5" stroke-dasharray="8,4" opacity="0.5"/>
+        <circle cx="55" cy="55" r="40" fill="rgba(74,18,114,0.7)" stroke="#F39C12" stroke-width="2.5"/>
+        <text x="55" y="62" text-anchor="middle" font-size="22" font-family="JetBrains Mono" fill="white" font-weight="700">IPv4</text>
+        <circle cx="55" cy="15" r="6" fill="#F39C12"/>
+        <circle cx="95" cy="55" r="6" fill="#9B59B6"/>
+        <circle cx="55" cy="95" r="6" fill="#F39C12"/>
+        <circle cx="15" cy="55" r="6" fill="#9B59B6"/>
+        <line x1="55" y1="21" x2="55" y2="34" stroke="#F39C12" stroke-width="1.5" opacity="0.7"/>
+        <line x1="89" y1="55" x2="76" y2="55" stroke="#9B59B6" stroke-width="1.5" opacity="0.7"/>
+        <line x1="55" y1="89" x2="55" y2="76" stroke="#F39C12" stroke-width="1.5" opacity="0.7"/>
+        <line x1="21" y1="55" x2="34" y2="55" stroke="#9B59B6" stroke-width="1.5" opacity="0.7"/>
+    </svg>
+    <h1 style="color:white; font-size:2.8em; text-shadow: 0 2px 12px rgba(0,0,0,0.4);">Endereçamento IPv4<br>e Máscaras de Rede</h1>
+    <p class="subtitle" style="color:#c8a8e9; font-size:1.2em; margin-top:4px;">Do endereço de 32 bits ao cálculo de sub-redes</p>
+    <p style="margin-top:18px; font-size:0.98em; color:rgba(255,255,255,0.7);">
+        <strong style="color:white;">Prof. William Paiva</strong> &nbsp;|&nbsp; RSSI — Aula 09
+    </p>
+    <div style="margin-top:24px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <span class="tag tag-primary" style="background:rgba(74,18,114,0.7); border-color:rgba(155,89,182,0.6); color:#c8a8e9;">192.168.1.0</span>
+        <span class="tag tag-primary" style="background:rgba(243,156,18,0.15); border-color:rgba(243,156,18,0.6); color:#F39C12;">/24</span>
+        <span class="tag tag-primary" style="background:rgba(74,18,114,0.7); border-color:rgba(155,89,182,0.6); color:#c8a8e9;">255.255.255.0</span>
+        <span class="tag tag-primary" style="background:rgba(74,18,114,0.7); border-color:rgba(155,89,182,0.6); color:#c8a8e9;">Sub-redes</span>
+        <span class="tag tag-primary" style="background:rgba(243,156,18,0.15); border-color:rgba(243,156,18,0.6); color:#F39C12;">CIDR</span>
+    </div>
+
+    <div style="margin-top:28px; background:rgba(255,255,255,0.1); border:1px solid rgba(155,89,182,0.4); border-radius:12px; padding:14px 20px; max-width:820px; width:100%;">
+        <p style="color:#c8a8e9; font-size:0.82em; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">O que veremos hoje (30 slides)</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <span style="background:rgba(74,18,114,0.6); border:1px solid rgba(155,89,182,0.5); border-radius:6px; padding:5px 12px; font-size:0.8em; color:#e0c8f5;">Slides 1–5: Estrutura &amp; Binário</span>
+            <span style="background:rgba(74,18,114,0.6); border:1px solid rgba(155,89,182,0.5); border-radius:6px; padding:5px 12px; font-size:0.8em; color:#e0c8f5;">Slides 6–7: Classes &amp; Especiais</span>
+            <span style="background:rgba(74,18,114,0.6); border:1px solid rgba(155,89,182,0.5); border-radius:6px; padding:5px 12px; font-size:0.8em; color:#e0c8f5;">Slides 8–12: Máscaras</span>
+            <span style="background:rgba(74,18,114,0.6); border:1px solid rgba(155,89,182,0.5); border-radius:6px; padding:5px 12px; font-size:0.8em; color:#e0c8f5;">Slides 13–16: CIDR &amp; Sub-redes</span>
+            <span style="background:rgba(74,18,114,0.6); border:1px solid rgba(155,89,182,0.5); border-radius:6px; padding:5px 12px; font-size:0.8em; color:#e0c8f5;">Slides 17–23: NAT &amp; IPv6</span>
+            <span style="background:rgba(243,156,18,0.25); border:1px solid rgba(243,156,18,0.5); border-radius:6px; padding:5px 12px; font-size:0.8em; color:#F39C12;">Slides 24–30: Prática &amp; Revisão</span>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Onde Estamos?</h2>
+    <div class="step-row" style="margin:22px 0;">
+        <div class="step-box done">
+            <div class="step-num">✓</div>
+            <h3 style="color:var(--success-color); font-size:0.92em;">Físico + LAN</h3>
+            <small style="color:#666;">Aulas 06–07: cabos</small>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box done">
+            <div class="step-num">✓</div>
+            <h3 style="color:var(--success-color); font-size:0.92em;">Roteamento</h3>
+            <small style="color:#666;">Aula 08: roteadores</small>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box active">
+            <div class="step-num" style="background:var(--secondary-color);">09</div>
+            <h3 style="font-size:0.92em;">Endereçamento</h3>
+            <small style="color:var(--primary-color); font-weight:bold;">Você está aqui</small>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box future">
+            <div class="step-num" style="background:#aaa;">10</div>
+            <h3 style="color:#888; font-size:0.92em;">TCP / UDP</h3>
+            <small style="color:#aaa;">Próxima aula</small>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align:center;">
+        <strong>Pergunta central desta aula:</strong> o roteador precisa de um endereço para entregar o pacote. Como esse endereço é estruturado? E como ele separa "rede" de "host"?
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Por que Endereços IP?</h2>
+    <div class="three-col" style="margin:20px 0;">
+        <div class="col card card-primary" style="text-align:center;">
+            <svg width="48" height="48" viewBox="0 0 48 48" style="margin-bottom:8px;">
+                <circle cx="24" cy="24" r="22" fill="#f5eeff" stroke="#4A1272" stroke-width="2"/>
+                <circle cx="14" cy="20" r="5" fill="#4A1272"/>
+                <circle cx="34" cy="20" r="5" fill="#4A1272"/>
+                <circle cx="24" cy="34" r="5" fill="#9B59B6"/>
+                <line x1="14" y1="25" x2="24" y2="29" stroke="#c8a8e9" stroke-width="1.5"/>
+                <line x1="34" y1="25" x2="24" y2="29" stroke="#c8a8e9" stroke-width="1.5"/>
+                <text x="24" y="14" text-anchor="middle" font-size="8" fill="#4A1272" font-family="Roboto" font-weight="bold">?</text>
+            </svg>
+            <h3 style="font-size:0.95em;">Problema</h3>
+            <p style="font-size:0.88em; text-align:center;">Bilhões de dispositivos. Como identificar cada um de forma única no planeta?</p>
+        </div>
+        <div class="col card card-secondary" style="text-align:center;">
+            <svg width="48" height="48" viewBox="0 0 48 48" style="margin-bottom:8px;">
+                <circle cx="24" cy="24" r="22" fill="#f0e6ff" stroke="#9B59B6" stroke-width="2"/>
+                <rect x="10" y="16" width="28" height="18" rx="4" fill="#9B59B6"/>
+                <text x="24" y="29" text-anchor="middle" font-size="9" fill="white" font-family="JetBrains Mono" font-weight="bold">IP</text>
+                <circle cx="10" cy="24" r="3" fill="#F39C12"/>
+            </svg>
+            <h3 style="font-size:0.95em;">Solução</h3>
+            <p style="font-size:0.88em; text-align:center;">Atribuir um endereço <strong>lógico</strong> e hierárquico — o <strong>endereço IP</strong>.</p>
+        </div>
+        <div class="col card card-accent" style="text-align:center;">
+            <svg width="48" height="48" viewBox="0 0 48 48" style="margin-bottom:8px;">
+                <circle cx="24" cy="24" r="22" fill="#fef9ec" stroke="#F39C12" stroke-width="2"/>
+                <circle cx="10" cy="24" r="5" fill="#4A1272"/>
+                <rect x="19" y="20" width="10" height="8" rx="2" fill="#9B59B6"/>
+                <circle cx="38" cy="24" r="5" fill="#4A1272"/>
+                <line x1="15" y1="24" x2="19" y2="24" stroke="#F39C12" stroke-width="2"/>
+                <polygon points="29,22 33,24 29,26" fill="#F39C12"/>
+            </svg>
+            <h3 style="font-size:0.95em;">Diferencial</h3>
+            <p style="font-size:0.88em; text-align:center;">Ao contrário do MAC (físico, fixo), o IP é <strong>configurável</strong> e encaminhável por roteadores.</p>
+        </div>
+    </div>
+    <div class="info-box accent" style="text-align:center;">
+        <strong>Analogia:</strong> pense no endereço IP como o CEP + número da casa. O CEP identifica o bairro (rede); o número da casa identifica o morador (host). O roteador faz o papel do carteiro: usa o CEP para chegar ao bairro certo e depois usa o número da casa para entregar.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Estrutura do Endereço IPv4</h2>
+    <p style="margin-bottom:18px;">Um endereço IPv4 tem exatamente <strong class="highlight">32 bits</strong>, organizados em <strong class="highlight">4 grupos de 8 bits</strong> (octetos):</p>
+
+    <svg width="860" height="96" viewBox="0 0 860 96" style="margin:8px 0;">
+        <defs>
+            <linearGradient id="oct1-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4A1272"/>
+                <stop offset="100%" stop-color="#6b1fa0"/>
+            </linearGradient>
+            <linearGradient id="oct2-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7D3C98"/>
+                <stop offset="100%" stop-color="#9B59B6"/>
+            </linearGradient>
+        </defs>
+        <rect x="2" y="6" width="200" height="56" rx="10" fill="url(#oct1-grad)" opacity="0.15" stroke="#4A1272" stroke-width="2"/>
+        <rect x="218" y="6" width="200" height="56" rx="10" fill="url(#oct2-grad)" opacity="0.12" stroke="#9B59B6" stroke-width="2"/>
+        <rect x="434" y="6" width="200" height="56" rx="10" fill="url(#oct1-grad)" opacity="0.15" stroke="#4A1272" stroke-width="2"/>
+        <rect x="650" y="6" width="200" height="56" rx="10" fill="url(#oct2-grad)" opacity="0.12" stroke="#9B59B6" stroke-width="2"/>
+
+        <rect x="8"   y="14" width="22" height="30" rx="5" fill="#4A1272"/>
+        <text x="19"  y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="33"  y="14" width="22" height="30" rx="5" fill="#4A1272"/>
+        <text x="44"  y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="58"  y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="69"  y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="83"  y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="94"  y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="108" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="119" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="133" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="144" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="158" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="169" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="183" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="194" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <text x="103" y="78" text-anchor="middle" font-size="11" fill="#4A1272" font-family="Roboto" font-weight="bold">1º octeto (192)</text>
+
+        <text x="210" y="36" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="Roboto" font-weight="bold">.</text>
+
+        <rect x="224" y="14" width="22" height="30" rx="5" fill="#7D3C98"/>
+        <text x="235" y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="249" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="260" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="274" y="14" width="22" height="30" rx="5" fill="#7D3C98"/>
+        <text x="285" y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="299" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="310" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="324" y="14" width="22" height="30" rx="5" fill="#7D3C98"/>
+        <text x="335" y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="349" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="360" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="374" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="385" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="399" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="410" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <text x="319" y="78" text-anchor="middle" font-size="11" fill="#7D3C98" font-family="Roboto" font-weight="bold">2º octeto (168)</text>
+
+        <text x="426" y="36" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="Roboto" font-weight="bold">.</text>
+
+        <rect x="440" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="451" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="465" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="476" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="490" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="501" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="515" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="526" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="540" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="551" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="565" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="576" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="590" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="601" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="615" y="14" width="22" height="30" rx="5" fill="#4A1272"/>
+        <text x="626" y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <text x="535" y="78" text-anchor="middle" font-size="11" fill="#4A1272" font-family="Roboto" font-weight="bold">3º octeto (1)</text>
+
+        <text x="642" y="36" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="Roboto" font-weight="bold">.</text>
+
+        <rect x="656" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="667" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="681" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="692" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="706" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="717" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="731" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="742" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="756" y="14" width="22" height="30" rx="5" fill="#7D3C98"/>
+        <text x="767" y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="781" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="792" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <rect x="806" y="14" width="22" height="30" rx="5" fill="#7D3C98"/>
+        <text x="817" y="34" text-anchor="middle" font-size="14" fill="white" font-family="JetBrains Mono" font-weight="bold">1</text>
+        <rect x="831" y="14" width="22" height="30" rx="5" fill="#F5EEF8" stroke="#c8a8e9" stroke-width="1.5"/>
+        <text x="842" y="34" text-anchor="middle" font-size="14" fill="#9B59B6" font-family="JetBrains Mono">0</text>
+        <text x="751" y="78" text-anchor="middle" font-size="11" fill="#7D3C98" font-family="Roboto" font-weight="bold">4º octeto (10)</text>
+
+        <line x1="2" y1="90" x2="858" y2="90" stroke="#D6C4E8" stroke-width="1.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+        <text x="430" y="95" text-anchor="middle" font-size="10" fill="#888" font-family="Roboto">← 32 bits no total →</text>
+    </svg>
+
+    <div style="margin:14px 0; text-align:center;">
+        <span class="ip-part" style="background:#f0e6ff;">11000000</span>
+        <span style="font-size:1.6em; color:var(--secondary-color); font-weight:bold;">.</span>
+        <span class="ip-part" style="background:var(--muted-color);">10101000</span>
+        <span style="font-size:1.6em; color:var(--secondary-color); font-weight:bold;">.</span>
+        <span class="ip-part" style="background:#f0e6ff;">00000001</span>
+        <span style="font-size:1.6em; color:var(--secondary-color); font-weight:bold;">.</span>
+        <span class="ip-part" style="background:var(--muted-color);">00001010</span>
+        &nbsp;
+        <strong style="font-size:1.1em; color:#666;">→</strong>
+        &nbsp;
+        <span class="ip-display">192.168.1.10</span>
+    </div>
+    <div class="info-box accent" style="text-align:center;">
+        Cada octeto vai de <strong>0 a 255</strong> (2<sup>8</sup> = 256 valores possíveis). Por isso, nenhum número passa de 255!
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Conversão: Binário → Decimal</h2>
+    <p style="margin-bottom:10px;">Cada posição de bit tem um peso fixo — da esquerda para a direita: <strong class="highlight">128, 64, 32, 16, 8, 4, 2, 1</strong>.</p>
+    <p style="font-size:0.88em; color:#666; margin-bottom:14px;"><strong>Procedimento:</strong> identifique as posições com bit <strong>1</strong> e some seus pesos. As posições com bit <strong>0</strong> valem zero e não entram na soma.</p>
+
+    <svg width="760" height="110" viewBox="0 0 760 110">
+        <text x="45"  y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">128</text>
+        <text x="140" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">64</text>
+        <text x="235" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">32</text>
+        <text x="330" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">16</text>
+        <text x="425" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">8</text>
+        <text x="520" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">4</text>
+        <text x="615" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">2</text>
+        <text x="710" y="14" font-size="11" fill="#666" font-family="JetBrains Mono" text-anchor="middle">1</text>
+        <rect x="10"  y="20" width="70" height="50" rx="10" fill="#4A1272"/>
+        <rect x="105" y="20" width="70" height="50" rx="10" fill="#4A1272"/>
+        <rect x="200" y="20" width="70" height="50" rx="10" fill="#f0e6ff" stroke="#c8a8e9" stroke-width="2"/>
+        <rect x="295" y="20" width="70" height="50" rx="10" fill="#f0e6ff" stroke="#c8a8e9" stroke-width="2"/>
+        <rect x="390" y="20" width="70" height="50" rx="10" fill="#f0e6ff" stroke="#c8a8e9" stroke-width="2"/>
+        <rect x="485" y="20" width="70" height="50" rx="10" fill="#f0e6ff" stroke="#c8a8e9" stroke-width="2"/>
+        <rect x="580" y="20" width="70" height="50" rx="10" fill="#f0e6ff" stroke="#c8a8e9" stroke-width="2"/>
+        <rect x="675" y="20" width="70" height="50" rx="10" fill="#f0e6ff" stroke="#c8a8e9" stroke-width="2"/>
+        <text x="45"  y="53" text-anchor="middle" font-size="22" fill="white"   font-family="JetBrains Mono" font-weight="bold">1</text>
+        <text x="140" y="53" text-anchor="middle" font-size="22" fill="white"   font-family="JetBrains Mono" font-weight="bold">1</text>
+        <text x="235" y="53" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="JetBrains Mono" font-weight="bold">0</text>
+        <text x="330" y="53" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="JetBrains Mono" font-weight="bold">0</text>
+        <text x="425" y="53" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="JetBrains Mono" font-weight="bold">0</text>
+        <text x="520" y="53" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="JetBrains Mono" font-weight="bold">0</text>
+        <text x="615" y="53" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="JetBrains Mono" font-weight="bold">0</text>
+        <text x="710" y="53" text-anchor="middle" font-size="22" fill="#9B59B6" font-family="JetBrains Mono" font-weight="bold">0</text>
+        <text x="45"  y="84" text-anchor="middle" font-size="12" fill="#4A1272" font-family="Roboto">↓ 128</text>
+        <text x="140" y="84" text-anchor="middle" font-size="12" fill="#4A1272" font-family="Roboto">↓ 64</text>
+        <text x="380" y="96" text-anchor="middle" font-size="14" fill="#28a745" font-family="Roboto" font-weight="bold">128 + 64 = 192</text>
+    </svg>
+
+    <table class="styled-table" style="max-width:680px; margin-top:8px;">
+        <thead>
+            <tr><th>Octeto</th><th>Binário</th><th>Pesos ativos</th><th>Decimal</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>1º</td><td><code>11000000</code></td><td>128 + 64</td><td><strong>192</strong></td></tr>
+            <tr><td>2º</td><td><code>10101000</code></td><td>128 + 32 + 8</td><td><strong>168</strong></td></tr>
+            <tr><td>3º</td><td><code>00000001</code></td><td>1</td><td><strong>1</strong></td></tr>
+            <tr><td>4º</td><td><code>00001010</code></td><td>8 + 2</td><td><strong>10</strong></td></tr>
+        </tbody>
+    </table>
+    <p style="font-size:0.9em; color:#666; margin-top:6px;">Resultado: <span class="ip-display" style="font-size:1.4em;">192.168.1.10</span></p>
+</section>
+
+<section class="slide">
+    <h2>Classes de Endereços (Contexto Histórico)</h2>
+    <p style="margin-bottom:14px;">Antes do ano de 1993, os endereços eram divididos em <strong class="highlight">classes fixas</strong> (grupos predefinidos por tamanho). Esse sistema foi substituído pelo CIDR — que veremos nas próximas aulas. Conhecer as classes é útil porque elas aparecem em documentações antigas e em provas técnicas:</p>
+    <table class="styled-table" style="max-width:950px;">
+        <thead>
+            <tr><th>Classe</th><th>Faixa do 1º octeto</th><th>Exemplo</th><th>Uso</th><th>Hosts por rede</th></tr>
+        </thead>
+        <tbody>
+            <tr class="hl"><td><strong>A</strong></td><td>1 – 126</td><td>10.x.x.x</td><td>Redes gigantes (governos, ISPs)</td><td>~16 milhões</td></tr>
+            <tr><td><strong>B</strong></td><td>128 – 191</td><td>172.16.x.x</td><td>Redes médias (empresas)</td><td>~65 mil</td></tr>
+            <tr class="hl"><td><strong>C</strong></td><td>192 – 223</td><td>192.168.1.x</td><td>Redes pequenas (doméstico)</td><td>254</td></tr>
+            <tr><td><strong>D</strong></td><td>224 – 239</td><td>224.0.0.1</td><td>Multicast</td><td>—</td></tr>
+            <tr><td><strong>E</strong></td><td>240 – 255</td><td>—</td><td>Reservado / Pesquisa</td><td>—</td></tr>
+        </tbody>
+    </table>
+    <div class="info-box warning" style="text-align:center; max-width:860px;">
+        <strong>Atenção:</strong> o sistema de classes foi <strong>substituído pelo CIDR</strong> (veremos nas próximas aulas). Exceção: a faixa <code>127.x.x.x</code> é reservada para testes locais (loopback) e não pertence a nenhuma classe normal.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Endereços Especiais</h2>
+    <div class="three-col" style="margin:16px 0;">
+        <div class="col card card-primary" style="text-align:center;">
+            <svg width="42" height="42" viewBox="0 0 42 42" style="margin-bottom:6px;">
+                <circle cx="21" cy="21" r="19" fill="#f5eeff" stroke="#4A1272" stroke-width="2"/>
+                <path d="M21 10 A11 11 0 1 1 10 21" stroke="#4A1272" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <polygon points="7,18 10,24 14,19" fill="#4A1272"/>
+            </svg>
+            <h3 style="font-size:0.95em;">Loopback</h3>
+            <code style="font-size:1.05em;">127.0.0.1</code>
+            <p style="font-size:0.85em; text-align:center; margin-top:8px;">Aponta para o próprio dispositivo. Usado para testar se o software de rede está instalado e funcionando, mesmo sem conexão física.</p>
+            <div class="info-box" style="font-size:0.82em; margin-top:8px; text-align:center;"><code>ping 127.0.0.1</code> — se obtiver resposta, a pilha TCP/IP está ativa neste computador.</div>
+        </div>
+        <div class="col card card-secondary" style="text-align:center;">
+            <svg width="42" height="42" viewBox="0 0 42 42" style="margin-bottom:6px;">
+                <circle cx="21" cy="21" r="19" fill="#f0e6ff" stroke="#9B59B6" stroke-width="2"/>
+                <circle cx="21" cy="21" r="4" fill="#9B59B6"/>
+                <circle cx="21" cy="21" r="9" fill="none" stroke="#9B59B6" stroke-width="1.5" opacity="0.6"/>
+                <circle cx="21" cy="21" r="15" fill="none" stroke="#9B59B6" stroke-width="1" opacity="0.35"/>
+            </svg>
+            <h3 style="font-size:0.95em;">Broadcast</h3>
+            <code style="font-size:1.05em;">x.x.x.255</code>
+            <p style="font-size:0.85em; text-align:center; margin-top:8px;">Enviado a <strong>todos</strong> os hosts da rede. O roteador não encaminha broadcasts para fora da rede local.</p>
+            <div class="info-box" style="font-size:0.82em; margin-top:8px; text-align:center;">Exemplo: <code>192.168.1.255</code></div>
+        </div>
+        <div class="col card card-accent" style="text-align:center;">
+            <svg width="42" height="42" viewBox="0 0 42 42" style="margin-bottom:6px;">
+                <circle cx="21" cy="21" r="19" fill="#fef9ec" stroke="#F39C12" stroke-width="2"/>
+                <rect x="13" y="21" width="16" height="11" rx="3" fill="#F39C12"/>
+                <path d="M16 21 v-5 a5 5 0 0 1 10 0 v5" stroke="#c96b10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <circle cx="21" cy="26" r="2" fill="white"/>
+            </svg>
+            <h3 style="font-size:0.95em;">Endereços Privados</h3>
+            <code style="font-size:0.88em; display:block; margin:4px 0;">10.0.0.0/8</code>
+            <code style="font-size:0.88em; display:block; margin:4px 0;">172.16.0.0/12</code>
+            <code style="font-size:0.88em; display:block; margin:4px 0;">192.168.0.0/16</code>
+            <p style="font-size:0.85em; text-align:center; margin-top:8px;">Definidos pela RFC 1918. Não são roteados na internet pública.</p>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align:center;">
+        Endereços privados existem porque <strong>endereços públicos são escassos</strong>. O NAT (Network Address Translation — tradução de endereços de rede) converte um endereço privado em público ao sair para a internet. Veremos o NAT em detalhes no Slide 18.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>O que é uma Máscara de Rede?</h2>
+    <p style="margin-bottom:16px;">A máscara responde: <em>"Qual parte do endereço IP identifica a <strong class="highlight">rede</strong> e qual identifica o <strong class="highlight">host</strong>?"</em></p>
+
+    <div style="width:100%; max-width:860px; margin:12px auto;">
+        <div class="nh-bar">
+            <div class="nh-net"  style="width:75%;">Parte da REDE (network)</div>
+            <div class="nh-host" style="width:25%;">Parte do HOST</div>
+        </div>
+        <div style="display:flex; max-width:860px; margin-top:4px;">
+            <div style="width:75%; text-align:center; font-size:0.8em; color:#4A1272; font-family:'JetBrains Mono';">192.168.1</div>
+            <div style="width:25%; text-align:center; font-size:0.8em; color:#9B59B6; font-family:'JetBrains Mono';">.10</div>
+        </div>
+    </div>
+
+    <div class="two-col" style="margin-top:16px; max-width:860px;">
+        <div class="col card card-primary">
+            <h3 style="font-size:0.95em;">Sem a máscara</h3>
+            <p style="text-align:left; font-size:0.9em;">O roteador não sabe onde termina a parte da rede e onde começa a parte do host. Ele não consegue decidir se dois IPs pertencem à mesma rede ou não.</p>
+        </div>
+        <div class="col card card-secondary">
+            <h3 style="font-size:0.95em;">Com a máscara</h3>
+            <p style="text-align:left; font-size:0.9em;">O roteador aplica a máscara ao IP e calcula o endereço de rede. Isso permite decidir: o IP de destino está na mesma rede (entrega direta) ou precisa ser encaminhado para outro roteador?</p>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Duas Formas de Escrever a Máscara</h2>
+    <div class="two-col" style="margin:20px 0; max-width:960px;">
+        <div class="col card card-primary" style="text-align:center;">
+            <h3>Notação Decimal</h3>
+            <div style="font-size:2em; margin:12px 0; font-family:'JetBrains Mono'; color:var(--primary-color);">255.255.255.0</div>
+            <p style="font-size:0.88em; text-align:center;">Cada octeto 255 = todos os 8 bits são 1 (parte da rede).<br>Octeto 0 = todos os bits são 0 (parte do host).</p>
+            <div class="info-box" style="font-size:0.82em; text-align:center; margin-top:8px;">Usado em configurações do Windows, roteadores domésticos</div>
+        </div>
+        <div class="col card card-secondary" style="text-align:center;">
+            <h3>Notação CIDR</h3>
+            <div style="font-size:2.8em; margin:12px 0; font-family:'JetBrains Mono'; color:var(--secondary-color);">/24</div>
+            <p style="font-size:0.88em; text-align:center;">O número após "/" indica quantos bits são da parte de <strong>rede</strong>.<br>/24 = 24 bits de rede → 8 bits de host.</p>
+            <div class="info-box" style="font-size:0.82em; text-align:center; margin-top:8px;">Usado em comandos de Linux, Cisco e toda documentação moderna</div>
+        </div>
+    </div>
+    <div class="info-box accent" style="text-align:center;">
+        <strong>São equivalentes!</strong> &nbsp; <code>192.168.1.0/24</code> = <code>192.168.1.0</code> com máscara <code>255.255.255.0</code>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Como a Máscara Funciona: AND Bit a Bit</h2>
+    <p style="margin-bottom:14px;">O roteador aplica a operação <strong class="highlight">AND lógico</strong> entre o IP e a máscara para descobrir o endereço de rede:</p>
+
+    <svg width="780" height="150" viewBox="0 0 780 150" style="background:var(--muted-color); border-radius:12px; padding:4px; border:1.5px solid var(--border-color);">
+        <text x="96" y="26" font-size="12" fill="#4A1272" font-family="Roboto" text-anchor="end" font-weight="bold">IP:</text>
+        <text x="96" y="62" font-size="12" fill="#9B59B6" font-family="Roboto" text-anchor="end" font-weight="bold">Máscara:</text>
+        <text x="96" y="88" font-size="10" fill="#aaa" font-family="Roboto" text-anchor="end" font-style="italic">AND ↓</text>
+        <text x="96" y="124" font-size="12" fill="#1e7e34" font-family="Roboto" text-anchor="end" font-weight="bold">Rede:</text>
+
+        <text x="440" y="26" font-size="14" fill="#4A1272" font-family="JetBrains Mono" text-anchor="middle">11000000 . 10101000 . 00000001 . 00001010</text>
+        <text x="440" y="62" font-size="14" fill="#9B59B6" font-family="JetBrains Mono" text-anchor="middle">11111111 . 11111111 . 11111111 . 00000000</text>
+        <line x1="100" y1="74" x2="770" y2="74" stroke="var(--border-color)" stroke-width="2"/>
+        <text x="440" y="108" font-size="14" fill="#1e7e34" font-family="JetBrains Mono" text-anchor="middle" font-weight="bold">11000000 . 10101000 . 00000001 . 00000000</text>
+        <rect x="282" y="118" width="316" height="24" rx="6" fill="#eafaf1"/>
+        <text x="440" y="135" font-size="13" fill="#1e7e34" font-family="Roboto" text-anchor="middle" font-weight="bold">Resultado: 192.168.1.0 (endereço de REDE)</text>
+    </svg>
+
+    <div class="info-box success" style="text-align:center; margin-top:6px;">
+        <strong>Regra do AND:</strong> quando o bit da máscara é <strong>1</strong>, o bit correspondente do IP é preservado (essa posição identifica a rede). Quando o bit da máscara é <strong>0</strong>, o resultado é sempre 0, independente do IP (essa posição identifica o host e não muda o endereço de rede).
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Rede vs. Host: Visualizando</h2>
+    <p style="margin-bottom:16px;">Para <strong class="highlight">192.168.1.10 / 24</strong>, a divisão é:</p>
+
+    <svg width="860" height="120" viewBox="0 0 860 120">
+        <rect x="20"  y="20" width="645" height="50" rx="8" fill="#4A1272"/>
+        <rect x="665" y="20" width="175" height="50" rx="8" fill="#c8a8e9"/>
+        <text x="342" y="50" text-anchor="middle" font-size="15" fill="white" font-family="Roboto" font-weight="bold">REDE — 24 bits</text>
+        <text x="752" y="50" text-anchor="middle" font-size="15" fill="#4A1272" font-family="Roboto" font-weight="bold">HOST — 8 bits</text>
+        <text x="342" y="66" text-anchor="middle" font-size="12" fill="#d8c0f0" font-family="JetBrains Mono">192.168.1</text>
+        <text x="752" y="66" text-anchor="middle" font-size="12" fill="#9B59B6" font-family="JetBrains Mono">.10</text>
+        <text x="342" y="100" text-anchor="middle" font-size="12" fill="#4A1272" font-family="Roboto">Todos os dispositivos nessa rede compartilham esse prefixo</text>
+        <text x="752" y="100" text-anchor="middle" font-size="12" fill="#9B59B6" font-family="Roboto">Identifica o dispositivo</text>
+    </svg>
+
+    <div class="two-col" style="margin-top:8px; max-width:780px;">
+        <div class="col card" style="text-align:center; border-top:5px solid var(--primary-color);">
+            <h3 style="font-size:0.95em;">Hosts possíveis</h3>
+            <div style="font-size:1.8em; font-weight:700; color:var(--primary-color);">254</div>
+            <p style="font-size:0.82em; text-align:center;">2<sup>8</sup> − 2 = 254<br>(excluindo rede e broadcast)</p>
+        </div>
+        <div class="col card" style="text-align:center; border-top:5px solid var(--secondary-color);">
+            <h3 style="font-size:0.95em;">Faixa de hosts</h3>
+            <div style="font-size:1.3em; font-family:'JetBrains Mono'; color:var(--secondary-color);">192.168.1.1<br>a<br>192.168.1.254</div>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Endereço de Rede e Broadcast</h2>
+    <p style="margin-bottom:16px;">Em cada sub-rede, dois endereços são <strong class="highlight">reservados</strong> e não podem ser atribuídos a hosts:</p>
+
+    <div class="two-col" style="margin:14px 0; max-width:900px;">
+        <div class="col card card-primary" style="text-align:center;">
+            <h3>Endereço de Rede</h3>
+            <div style="font-size:2em; font-family:'JetBrains Mono'; margin:10px 0; color:var(--primary-color);">192.168.1.<span style="color:var(--accent-color);">0</span></div>
+            <p style="font-size:0.88em; text-align:center;">Bits de host todos <strong>zerados</strong>. Identifica a rede em si — aparece nas tabelas de rotas.</p>
+        </div>
+        <div class="col card card-secondary" style="text-align:center;">
+            <h3>Endereço de Broadcast</h3>
+            <div style="font-size:2em; font-family:'JetBrains Mono'; margin:10px 0; color:var(--secondary-color);">192.168.1.<span style="color:var(--accent-color);">255</span></div>
+            <p style="font-size:0.88em; text-align:center;">Bits de host todos em <strong>um</strong>. Mensagem enviada a <em>todos</em> os hosts da rede ao mesmo tempo.</p>
+        </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px; max-width:860px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+        <div style="background:var(--muted-color); border:2px solid var(--primary-color); border-radius:8px; padding:8px 18px; font-family:'JetBrains Mono'; font-size:0.9em; text-align:center; color:var(--text-color);">
+            <span style="color:var(--primary-color); font-weight:bold;">.0</span><br><small>Rede</small>
+        </div>
+        <span style="color:var(--secondary-color); font-size:1.5em;">→</span>
+        <div style="background:var(--muted-color); border:2px solid var(--secondary-color); border-radius:8px; padding:8px 18px; font-family:'JetBrains Mono'; font-size:0.9em; text-align:center; color:var(--text-color);">
+            <span style="color:var(--secondary-color); font-weight:bold;">.1 … .254</span><br><small>Hosts válidos (254 endereços)</small>
+        </div>
+        <span style="color:var(--secondary-color); font-size:1.5em;">→</span>
+        <div style="background:#fef9ec; border:2px solid var(--accent-color); border-radius:8px; padding:8px 18px; font-family:'JetBrains Mono'; font-size:0.9em; text-align:center; color:var(--text-color);">
+            <span style="color:var(--accent-color); font-weight:bold;">.255</span><br><small>Broadcast</small>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>CIDR — Classless Inter-Domain Routing</h2>
+    <p style="margin-bottom:14px;">Introduzido em 1993 para substituir o sistema de classes fixas e usar o espaço de endereços de forma <strong class="highlight">mais eficiente</strong>.</p>
+    <table class="styled-table" style="max-width:900px;">
+        <thead>
+            <tr><th>Prefixo</th><th>Máscara decimal</th><th>Bits de host</th><th>Hosts válidos</th><th>Uso típico</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>/8</code></td><td>255.0.0.0</td><td>24 bits</td><td>~16,7 milhões</td><td>ISPs / grandes provedores</td></tr>
+            <tr><td><code>/16</code></td><td>255.255.0.0</td><td>16 bits</td><td>65.534</td><td>Redes corporativas médias</td></tr>
+            <tr class="hl"><td><strong><code>/24</code></strong></td><td>255.255.255.0</td><td>8 bits</td><td><strong>254</strong></td><td><strong>Redes domésticas / escritórios</strong></td></tr>
+            <tr><td><code>/28</code></td><td>255.255.255.240</td><td>4 bits</td><td>14</td><td>Links ponto a ponto, VLANs pequenas</td></tr>
+            <tr><td><code>/30</code></td><td>255.255.255.252</td><td>2 bits</td><td>2</td><td>Links entre roteadores</td></tr>
+        </tbody>
+    </table>
+    <div class="info-box accent" style="text-align:center;">
+        <strong>Fórmula:</strong> Hosts válidos = 2<sup>n</sup> menos 2, onde <em>n</em> é o número de bits de host (ou seja, n = 32 menos o prefixo). Subtraímos 2 porque o primeiro endereço é o de rede e o último é o de broadcast.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Calculando Hosts: na Prática</h2>
+
+    <div class="three-col" style="margin:16px 0;">
+        <div class="col card card-primary" style="text-align:center;">
+            <div style="font-size:2.6em; font-family:'JetBrains Mono'; font-weight:700; color:var(--primary-color);">/24</div>
+            <div style="font-size:0.95em; margin:8px 0;">8 bits de host</div>
+            <div style="font-size:2em; font-weight:700; color:var(--primary-color);">254</div>
+            <div style="font-size:0.85em; color:#666;">2<sup>8</sup> − 2</div>
+            <div class="info-box" style="font-size:0.8em; margin-top:10px; text-align:center;">Escritório pequeno</div>
+        </div>
+        <div class="col card card-secondary" style="text-align:center;">
+            <div style="font-size:2.6em; font-family:'JetBrains Mono'; font-weight:700; color:var(--secondary-color);">/16</div>
+            <div style="font-size:0.95em; margin:8px 0;">16 bits de host</div>
+            <div style="font-size:2em; font-weight:700; color:var(--secondary-color);">65.534</div>
+            <div style="font-size:0.85em; color:#666;">2<sup>16</sup> − 2</div>
+            <div class="info-box" style="font-size:0.8em; margin-top:10px; text-align:center;">Campus universitário</div>
+        </div>
+        <div class="col card card-accent" style="text-align:center;">
+            <div style="font-size:2.6em; font-family:'JetBrains Mono'; font-weight:700; color:var(--accent-color);">/8</div>
+            <div style="font-size:0.95em; margin:8px 0;">24 bits de host</div>
+            <div style="font-size:2em; font-weight:700; color:var(--accent-color);">16.777.214</div>
+            <div style="font-size:0.85em; color:#666;">2<sup>24</sup> − 2</div>
+            <div class="info-box accent" style="font-size:0.8em; margin-top:10px; text-align:center;">ISP / Data center</div>
+        </div>
+    </div>
+
+    <div class="info-box warning" style="text-align:center;">
+        Sempre subtraímos <strong>2</strong>: um para o endereço de rede (primeiro) e um para o broadcast (último).
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Sub-redes: Dividir para Organizar</h2>
+
+    <div class="two-col" style="margin:16px 0; max-width:960px;">
+        <div class="col">
+            <h3>Por que dividir uma rede?</h3>
+            <ul style="font-size:0.95em;">
+                <li><strong>Organização:</strong> separar setores (TI, RH, financeiro)</li>
+                <li><strong>Segurança:</strong> isolar tráfego entre departamentos</li>
+                <li><strong>Desempenho:</strong> menos broadcasts em cada segmento</li>
+                <li><strong>Economia:</strong> usar melhor o espaço de endereços</li>
+            </ul>
+        </div>
+        <div class="col" style="text-align:center;">
+            <svg width="340" height="200" viewBox="0 0 340 200">
+                <rect x="5" y="5" width="330" height="190" rx="14" fill="#f5eeff" stroke="#4A1272" stroke-width="2" stroke-dasharray="6,3"/>
+                <text x="170" y="22" text-anchor="middle" font-size="12" fill="#4A1272" font-family="Roboto" font-weight="bold">192.168.1.0 /24</text>
+                <rect x="16" y="30" width="144" height="72" rx="10" fill="#4A1272"/>
+                <text x="88" y="52" text-anchor="middle" font-size="11" fill="white" font-family="JetBrains Mono">192.168.1.0/26</text>
+                <text x="88" y="68" text-anchor="middle" font-size="10" fill="#d8c0f0" font-family="Roboto">62 hosts — TI</text>
+                <rect x="178" y="30" width="144" height="72" rx="10" fill="#9B59B6"/>
+                <text x="250" y="52" text-anchor="middle" font-size="11" fill="white" font-family="JetBrains Mono">192.168.1.64/26</text>
+                <text x="250" y="68" text-anchor="middle" font-size="10" fill="#f5eeff" font-family="Roboto">62 hosts — RH</text>
+                <rect x="16" y="112" width="144" height="72" rx="10" fill="#7D3C98"/>
+                <text x="88" y="134" text-anchor="middle" font-size="11" fill="white" font-family="JetBrains Mono">192.168.1.128/26</text>
+                <text x="88" y="150" text-anchor="middle" font-size="10" fill="#f0e6ff" font-family="Roboto">62 hosts — Fin.</text>
+                <rect x="178" y="112" width="144" height="72" rx="10" fill="#F39C12"/>
+                <text x="250" y="134" text-anchor="middle" font-size="11" fill="white" font-family="JetBrains Mono">192.168.1.192/26</text>
+                <text x="250" y="150" text-anchor="middle" font-size="10" fill="#fff" font-family="Roboto">62 hosts — Vendas</text>
+            </svg>
+        </div>
+    </div>
+
+    <div class="info-box success" style="text-align:center;">
+        Exemplo: uma rede /24 dividida em 4 sub-redes /26 fica com 62 hosts válidos por sub-rede (total: 4 x 62 = 248 endereços utilizáveis). Cada sub-rede é gerenciada de forma independente.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Calculando uma Sub-rede: Passo a Passo</h2>
+    <p style="margin-bottom:14px;">Dado: <strong class="highlight">IP 192.168.5.75 / 26</strong> — encontre o endereço de rede, o broadcast e a faixa de hosts válidos.</p>
+
+    <div style="display:flex; flex-direction:column; gap:8px; max-width:820px; width:100%;">
+        <div class="passo-item">
+            <div class="passo-num">1</div>
+            <div><strong>Calcule os bits de host:</strong> 32 (total de bits) menos 26 (prefixo) = <strong>6 bits de host</strong>. O tamanho do bloco é 2<sup>6</sup> = <strong>64 endereços</strong> por sub-rede.</div>
+        </div>
+        <div class="passo-item" style="border-left-color:var(--secondary-color);">
+            <div class="passo-num" style="background:var(--secondary-color);">2</div>
+            <div><strong>Liste os blocos do 4º octeto:</strong> os blocos possíveis são 0, 64, 128, 192 (múltiplos de 64). O valor <code>.75</code> está no intervalo 64 até 127 (ou seja, 64 ≤ 75 &lt; 128). Logo, o bloco correto é o que começa em <strong>64</strong>.</div>
+        </div>
+        <div class="passo-item" style="border-left-color:var(--success-color);">
+            <div class="passo-num" style="background:var(--success-color);">3</div>
+            <div>
+                <strong>Resultados:</strong><br>
+                Endereço de rede: <code>192.168.5.64</code> (primeiro do bloco)<br>
+                Broadcast: <code>192.168.5.127</code> (64 + 64 - 1 = 127, último do bloco)<br>
+                Hosts válidos: <code>192.168.5.65</code> até <code>192.168.5.126</code> — total de <strong>62 hosts</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="dica-box" style="margin-top:10px;">
+        <svg class="dica-icon" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="13" fill="#fffbf0" stroke="#F39C12" stroke-width="2"/>
+            <text x="14" y="19" text-anchor="middle" font-size="14" fill="#c96b10" font-family="Roboto" font-weight="bold">!</text>
+        </svg>
+        <div><strong>Regra do bloco:</strong> para encontrar o início da sub-rede, localize o múltiplo de 2<sup>n</sup> (onde n = bits de host) que seja imediatamente menor ou igual ao valor do octeto relevante. Esse múltiplo é o endereço de rede.</div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Wildcard Mask: a Máscara Coringa</h2>
+
+    <div class="info-box accent" style="text-align:center; margin-bottom:14px;">
+        <strong>Para que serve?</strong> Dizer ao roteador quais bits de um endereço devem ser verificados e quais podem ser ignorados — muito usada em regras de acesso (ACLs) e no protocolo OSPF.
+    </div>
+
+    <div class="two-col" style="margin:10px 0; max-width:920px;">
+        <div class="col card card-primary">
+            <h3>Como calcular</h3>
+            <p style="text-align:left; font-size:0.88em;">Subtraia cada octeto da máscara de <strong>255</strong>:</p>
+            <div class="terminal-block" style="font-size:0.9em; margin-top:8px; line-height:2.2;">
+                <div>Máscara: &nbsp;&nbsp;255 . 255 . 255 . <strong style="color:#F39C12;">0</strong></div>
+                <div style="border-top:1px solid rgba(155,89,182,0.3); padding-top:6px; color:#c8a8e9;">Wildcard: &nbsp;&nbsp;&nbsp;0 . &nbsp; 0 . &nbsp; 0 . <strong style="color:#9B59B6;">255</strong></div>
+            </div>
+            <div class="info-box" style="font-size:0.82em; text-align:center; margin-top:8px;">/24 → wildcard <code>0.0.0.255</code></div>
+        </div>
+        <div class="col card card-secondary">
+            <h3>Como ler</h3>
+            <ul style="font-size:0.9em;">
+                <li>Bit <code>0</code> na wildcard → esse bit <strong>precisa coincidir</strong> (parte fixa)</li>
+                <li>Bit <code>1</code> na wildcard → esse bit <strong>pode ser qualquer valor</strong> (parte livre)</li>
+            </ul>
+            <div class="terminal-block" style="font-size:0.82em; margin-top:10px;">
+                <span class="comment"># Regra Cisco ACL:</span><br>
+                <span class="prompt">R1(config)#</span> access-list 1<br>
+                &nbsp;permit ip 192.168.1.0 <strong style="color:#F39C12;">0.0.0.255</strong><br>
+                <span class="comment"># Leia: "permita qualquer IP</span><br>
+                <span class="comment"># que comece com 192.168.1."</span>
+            </div>
+        </div>
+    </div>
+    <div class="dica-box" style="margin-top:8px;">
+        <svg class="dica-icon" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="13" fill="#fffbf0" stroke="#F39C12" stroke-width="2"/>
+            <text x="14" y="19" text-anchor="middle" font-size="14" fill="#c96b10" font-family="Roboto" font-weight="bold">!</text>
+        </svg>
+        <div><strong>Nota sobre a Wildcard Mask:</strong> ela será retomada nas aulas de segurança e roteamento avançado. Por enquanto, fixe apenas a fórmula: <strong>wildcard = 255 menos cada octeto da máscara</strong>. Não será cobrada nesta avaliação.</div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>NAT: Traduzindo Endereços Privados</h2>
+    <p style="margin-bottom:14px;"><strong class="highlight">NAT (Network Address Translation)</strong> permite que muitos dispositivos com IPs privados compartilhem <strong>um único IP público</strong>:</p>
+
+    <svg width="860" height="170" viewBox="0 0 860 170">
+        <rect x="10" y="20" width="250" height="130" rx="12" fill="#f5eeff" stroke="#4A1272" stroke-width="2"/>
+        <text x="135" y="40" text-anchor="middle" font-size="12" fill="#4A1272" font-family="Roboto" font-weight="bold">Rede Privada (LAN)</text>
+        <text x="135" y="60" text-anchor="middle" font-size="11" fill="#9B59B6" font-family="JetBrains Mono">192.168.1.10</text>
+        <text x="135" y="80" text-anchor="middle" font-size="11" fill="#9B59B6" font-family="JetBrains Mono">192.168.1.11</text>
+        <text x="135" y="100" text-anchor="middle" font-size="11" fill="#9B59B6" font-family="JetBrains Mono">192.168.1.12</text>
+        <text x="135" y="120" text-anchor="middle" font-size="11" fill="#666" font-family="Roboto">IPs privados</text>
+        <rect x="320" y="55" width="160" height="60" rx="10" fill="#4A1272"/>
+        <text x="400" y="80" text-anchor="middle" font-size="13" fill="white" font-family="Roboto" font-weight="bold">Roteador</text>
+        <text x="400" y="98" text-anchor="middle" font-size="11" fill="#d8c0f0" font-family="Roboto">NAT ativo</text>
+        <line x1="260" y1="85" x2="318" y2="85" stroke="#4A1272" stroke-width="2"/>
+        <polygon points="314,80 322,85 314,90" fill="#4A1272"/>
+        <text x="289" y="78" font-size="10" fill="#4A1272" font-family="JetBrains Mono">privado</text>
+        <rect x="560" y="20" width="280" height="130" rx="12" fill="#e8d5f8" stroke="#9B59B6" stroke-width="2"/>
+        <text x="700" y="40" text-anchor="middle" font-size="12" fill="#9B59B6" font-family="Roboto" font-weight="bold">Internet</text>
+        <circle cx="700" cy="80" r="14" fill="none" stroke="#9B59B6" stroke-width="2"/>
+        <ellipse cx="700" cy="80" rx="5" ry="14" fill="none" stroke="#9B59B6" stroke-width="1.5" opacity="0.7"/>
+        <line x1="686" y1="80" x2="714" y2="80" stroke="#9B59B6" stroke-width="1.5" opacity="0.7"/>
+        <text x="700" y="110" text-anchor="middle" font-size="12" fill="#4A1272" font-family="JetBrains Mono">200.150.10.1</text>
+        <text x="700" y="126" text-anchor="middle" font-size="11" fill="#666" font-family="Roboto">IP Público único</text>
+        <line x1="480" y1="85" x2="558" y2="85" stroke="#9B59B6" stroke-width="2"/>
+        <polygon points="554,80 562,85 554,90" fill="#9B59B6"/>
+        <text x="519" y="78" font-size="10" fill="#9B59B6" font-family="JetBrains Mono">público</text>
+    </svg>
+
+    <div class="info-box info" style="text-align:center; margin-top:4px;">
+        Sem o NAT, cada dispositivo precisaria de um <strong>IP público próprio</strong>. Isso seria inviável: o IPv4 tem apenas cerca de 4,3 bilhões de endereços, e todos já foram alocados desde 2011.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Como o Roteador Usa a Máscara</h2>
+    <p style="margin-bottom:16px; font-size:0.95em;">Para cada pacote recebido, o roteador faz sempre a mesma pergunta:</p>
+
+    <svg width="820" height="230" viewBox="0 0 820 230">
+        <rect x="10" y="10" width="180" height="54" rx="10" fill="#4A1272"/>
+        <text x="100" y="33" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">Pacote chega</text>
+        <text x="100" y="52" text-anchor="middle" font-size="11" fill="#d8c0f0" font-family="JetBrains Mono">destino: 192.168.1.50</text>
+        <line x1="190" y1="37" x2="238" y2="37" stroke="#9B59B6" stroke-width="2"/>
+        <polygon points="234,32 242,37 234,42" fill="#9B59B6"/>
+
+        <rect x="240" y="10" width="200" height="54" rx="10" fill="#9B59B6"/>
+        <text x="340" y="30" text-anchor="middle" font-size="11" fill="white" font-family="Roboto" font-weight="bold">Aplica AND (máscara)</text>
+        <text x="340" y="48" text-anchor="middle" font-size="10" fill="#f0e6ff" font-family="JetBrains Mono">.50 AND .0 = .0</text>
+        <text x="340" y="62" text-anchor="middle" font-size="10" fill="#f0e6ff" font-family="Roboto">→ rede: 192.168.1.0</text>
+        <line x1="440" y1="37" x2="488" y2="37" stroke="#9B59B6" stroke-width="2"/>
+        <polygon points="484,32 492,37 484,42" fill="#9B59B6"/>
+
+        <rect x="490" y="10" width="200" height="54" rx="10" fill="#7D3C98"/>
+        <text x="590" y="30" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">Está na tabela?</text>
+        <text x="590" y="50" text-anchor="middle" font-size="11" fill="#f0e6ff" font-family="Roboto">Busca 192.168.1.0</text>
+
+        <line x1="590" y1="64" x2="590" y2="110" stroke="#28a745" stroke-width="2"/>
+        <polygon points="585,106 590,114 595,106" fill="#28a745"/>
+        <rect x="500" y="114" width="180" height="46" rx="10" fill="#d4edda" stroke="#28a745" stroke-width="2"/>
+        <text x="590" y="134" text-anchor="middle" font-size="13" fill="#1a6b28" font-family="Roboto" font-weight="bold">SIM → Entrega direta!</text>
+        <text x="590" y="152" text-anchor="middle" font-size="10" fill="#1a6b28" font-family="Roboto">mesma rede, sem roteador</text>
+
+        <line x1="690" y1="37" x2="750" y2="37" stroke="#dc3545" stroke-width="2"/>
+        <polygon points="746,32 754,37 746,42" fill="#dc3545"/>
+        <rect x="752" y="10" width="58" height="54" rx="10" fill="#f8d7da" stroke="#dc3545" stroke-width="2"/>
+        <text x="781" y="30" text-anchor="middle" font-size="11" fill="#721c24" font-family="Roboto" font-weight="bold">NÃO</text>
+        <text x="781" y="46" text-anchor="middle" font-size="10" fill="#721c24" font-family="Roboto">↓</text>
+        <line x1="781" y1="64" x2="781" y2="110" stroke="#dc3545" stroke-width="2"/>
+        <polygon points="776,106 781,114 786,106" fill="#dc3545"/>
+        <rect x="710" y="114" width="142" height="46" rx="10" fill="#f8d7da" stroke="#dc3545" stroke-width="2"/>
+        <text x="781" y="134" text-anchor="middle" font-size="11" fill="#721c24" font-family="Roboto" font-weight="bold">Gateway padrão</text>
+        <text x="781" y="152" text-anchor="middle" font-size="10" fill="#721c24" font-family="Roboto">encaminha para fora</text>
+
+        <text x="410" y="210" text-anchor="middle" font-size="11" fill="#666" font-family="Roboto">Esse processo acontece em nanossegundos para cada pacote recebido.</text>
+    </svg>
+
+    <div class="info-box info" style="text-align:center; max-width:760px;">
+        <strong>Resumo do processo:</strong> a máscara transforma o IP de destino em um endereço de rede. O roteador busca esse endereço na tabela de rotas. Se encontrar (SIM), entrega diretamente. Se não encontrar (NÃO), encaminha ao gateway padrão (roteador de saída para a internet ou outra rede).
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Exercício 1: Identifique a Sub-rede</h2>
+
+    <div class="info-box accent" style="text-align:center; font-size:1.05em; margin-bottom:14px;">
+        <strong>Enunciado:</strong> um host tem o endereço <strong>172.16.35.200 / 20</strong>.<br>
+        Sua tarefa: determinar o endereço de rede, o broadcast e a faixa de hosts válidos.
+    </div>
+
+    <div class="two-col" style="max-width:880px;">
+        <div class="col card card-primary">
+            <h3>Roteiro — siga os passos em ordem</h3>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <div class="passo-item">
+                    <div class="passo-num">1</div>
+                    <div>Bits de host: 32 menos 20 = <strong>12 bits</strong></div>
+                </div>
+                <div class="passo-item">
+                    <div class="passo-num">2</div>
+                    <div>Tamanho do bloco: 2<sup>12</sup> = <strong>4.096</strong> endereços por sub-rede</div>
+                </div>
+                <div class="passo-item">
+                    <div class="passo-num">3</div>
+                    <div>A máscara /20 atua no <strong>3º octeto</strong>. Incremento: 256 menos 240 = <strong>16</strong> (os blocos são 0, 16, 32, 48...)</div>
+                </div>
+                <div class="passo-item">
+                    <div class="passo-num">4</div>
+                    <div>O octeto 35 está no intervalo: 32 ≤ 35 &lt; 48. Logo, a rede começa em <strong>.32.0</strong></div>
+                </div>
+            </div>
+        </div>
+        <div class="col card card-secondary">
+            <h3>Gabarito com explicação</h3>
+            <button class="btn-revelar" id="btn-gab-20" onclick="document.getElementById('gab-20').style.display='block'; this.style.display='none';">
+                Clique aqui para ver o gabarito
+            </button>
+            <div id="gab-20" style="display:none;">
+                <ul style="font-size:0.9em; line-height:1.9; margin-top:8px;">
+                    <li><strong>Endereço de rede:</strong> <code>172.16.32.0 / 20</code></li>
+                    <li><strong>Broadcast:</strong> <code>172.16.47.255</code></li>
+                    <li><strong>Hosts válidos:</strong> <code>172.16.32.1</code> a <code>172.16.47.254</code></li>
+                    <li><strong>Total de hosts:</strong> 4.094 (2<sup>12</sup> menos 2)</li>
+                </ul>
+                <div class="info-box success" style="font-size:0.85em; margin-top:8px; text-align:left;">
+                    <strong>Por que .32.0?</strong> O valor 35 no 3º octeto cai no bloco 32–47 (múltiplos de 16). O início do bloco (32) é o endereço de rede. O último endereço do bloco (47.255) é o broadcast.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Exercício 2: Quantos Hosts Cabem?</h2>
+    <p style="font-size:0.9em; margin-bottom:6px;"><strong>Fórmula:</strong> Hosts válidos = 2<sup>(32 menos prefixo)</sup> menos 2.</p>
+    <p style="font-size:0.87em; color:#555; margin-bottom:12px;">Para cada rede abaixo: calcule mentalmente ou no papel e depois pressione o botão para conferir a resposta.</p>
+
+    <div class="three-col" style="margin:8px 0;">
+        <div class="col card card-primary" style="text-align:center;">
+            <h3 style="font-size:0.95em;">Rede A</h3>
+            <div style="font-size:1.6em; font-family:'JetBrains Mono'; margin:8px 0; color:var(--primary-color);">10.0.0.0<br><strong>/22</strong></div>
+            <div style="font-size:0.85em; color:#555; margin-bottom:8px;">Bits de host = 32 menos 22 = <strong>10 bits</strong></div>
+            <button class="btn-revelar" onclick="document.getElementById('resp-a').style.display='block'; this.style.display='none';">
+                Ver resposta
+            </button>
+            <div id="resp-a" style="display:none; margin-top:8px; background:#d4edda; border-radius:8px; padding:10px; font-size:0.9em;">
+                2<sup>10</sup> menos 2 = <strong>1.022 hosts válidos</strong>
+            </div>
+        </div>
+        <div class="col card card-secondary" style="text-align:center;">
+            <h3 style="font-size:0.95em;">Rede B</h3>
+            <div style="font-size:1.6em; font-family:'JetBrains Mono'; margin:8px 0; color:var(--secondary-color);">192.168.0.0<br><strong>/27</strong></div>
+            <div style="font-size:0.85em; color:#555; margin-bottom:8px;">Bits de host = 32 menos 27 = <strong>5 bits</strong></div>
+            <button class="btn-revelar" onclick="document.getElementById('resp-b').style.display='block'; this.style.display='none';">
+                Ver resposta
+            </button>
+            <div id="resp-b" style="display:none; margin-top:8px; background:#d4edda; border-radius:8px; padding:10px; font-size:0.9em;">
+                2<sup>5</sup> menos 2 = <strong>30 hosts válidos</strong>
+            </div>
+        </div>
+        <div class="col card card-accent" style="text-align:center;">
+            <h3 style="font-size:0.95em;">Rede C</h3>
+            <div style="font-size:1.6em; font-family:'JetBrains Mono'; margin:8px 0; color:var(--accent-color);">172.30.0.0<br><strong>/30</strong></div>
+            <div style="font-size:0.85em; color:#555; margin-bottom:8px;">Bits de host = 32 menos 30 = <strong>2 bits</strong></div>
+            <button class="btn-revelar" onclick="document.getElementById('resp-c').style.display='block'; this.style.display='none';">
+                Ver resposta
+            </button>
+            <div id="resp-c" style="display:none; margin-top:8px; background:#d4edda; border-radius:8px; padding:10px; font-size:0.9em;">
+                2<sup>2</sup> menos 2 = <strong>2 hosts válidos</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box accent" style="text-align:center; margin-top:10px;">
+        <strong>Curiosidade:</strong> o prefixo /30 suporta apenas 2 hosts. Isso é intencional — é o padrão usado em links diretos entre dois roteadores, onde só existem 2 dispositivos no enlace.
+    </div>
+</section>
+
+<section class="slide">
+    <h2>O Problema do IPv4: Espaço Esgotado</h2>
+
+    <div style="text-align:center; margin:10px 0;">
+        <div style="font-size:3em; font-weight:900; color:var(--primary-color); line-height:1; font-family:'JetBrains Mono',monospace; letter-spacing:-1px;">4.294.967.296</div>
+        <div style="font-size:0.95em; color:#666; margin-bottom:12px;">endereços IPv4 possíveis — e <strong>todos já foram alocados</strong> (IANA, 2011)</div>
+        <svg width="700" height="34" viewBox="0 0 700 34">
+            <defs>
+                <linearGradient id="exhaust-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#4A1272"/>
+                    <stop offset="80%" stop-color="#9B59B6"/>
+                    <stop offset="100%" stop-color="#c0392b"/>
+                </linearGradient>
+            </defs>
+            <rect x="0" y="4" width="700" height="26" rx="13" fill="#ede0ff"/>
+            <rect x="0" y="4" width="700" height="26" rx="13" fill="url(#exhaust-grad)"/>
+            <text x="350" y="22" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold" letter-spacing="1">100% ESGOTADO</text>
+        </svg>
+    </div>
+
+    <div class="three-col" style="margin:14px 0;">
+        <div class="col card card-primary" style="text-align:center; padding:14px;">
+            <svg width="36" height="36" viewBox="0 0 36 36" style="margin-bottom:4px;">
+                <circle cx="18" cy="18" r="16" fill="#4A1272"/>
+                <ellipse cx="18" cy="18" rx="6" ry="16" fill="none" stroke="#c8a8e9" stroke-width="1.5" opacity="0.6"/>
+                <line x1="2" y1="18" x2="34" y2="18" stroke="#c8a8e9" stroke-width="1.5" opacity="0.6"/>
+            </svg>
+            <div style="font-size:1.5em; font-weight:700; color:var(--primary-color);">8 bi</div>
+            <div style="font-size:0.82em; color:#666;">pessoas no planeta</div>
+        </div>
+        <div class="col card card-secondary" style="text-align:center; padding:14px;">
+            <svg width="36" height="36" viewBox="0 0 36 36" style="margin-bottom:4px;">
+                <rect x="4" y="8" width="16" height="12" rx="2" fill="#9B59B6"/>
+                <rect x="8" y="20" width="8" height="2" fill="#9B59B6" opacity="0.7"/>
+                <rect x="20" y="14" width="12" height="16" rx="2" fill="#7D3C98"/>
+                <circle cx="26" cy="28" r="1.5" fill="#c8a8e9"/>
+            </svg>
+            <div style="font-size:1.5em; font-weight:700; color:var(--secondary-color);">4,3 bi</div>
+            <div style="font-size:0.82em; color:#666;">IPs IPv4 no total</div>
+        </div>
+        <div class="col card card-accent" style="text-align:center; padding:14px;">
+            <svg width="36" height="36" viewBox="0 0 36 36" style="margin-bottom:4px;">
+                <circle cx="18" cy="18" r="16" fill="#fef9ec" stroke="#F39C12" stroke-width="2"/>
+                <rect x="14" y="10" width="8" height="16" rx="2" fill="#F39C12"/>
+                <rect x="11" y="13" width="14" height="4" rx="1" fill="#c96b10"/>
+            </svg>
+            <div style="font-size:1em; font-weight:700; color:var(--accent-color);">NAT + CIDR + IPv6</div>
+            <div style="font-size:0.82em; color:#666;">soluções adotadas</div>
+        </div>
+    </div>
+
+    <div class="info-box info" style="text-align:center;">
+        Cada pessoa conectada hoje usa vários dispositivos (smartphone, computador, televisão, etc.). O número de dispositivos já ultrapassa o total de endereços IPv4. Por isso existem o NAT (visto no Slide 18) e o IPv6 (visto a seguir).
+    </div>
+</section>
+
+<section class="slide">
+    <h2>IPv6: Uma Prévia Necessária</h2>
+    <p style="margin-bottom:16px;">O IPv6 foi criado para resolver o esgotamento do IPv4. Ele usa <strong class="highlight">128 bits</strong> em vez de 32, o que gera um espaço de endereços imensamente maior — suficiente para atribuir um IP único a cada dispositivo do planeta:</p>
+
+    <div class="two-col" style="max-width:960px; margin:14px 0;">
+        <div class="col card card-primary">
+            <h3>IPv4</h3>
+            <ul style="font-size:0.9em;">
+                <li>32 bits</li>
+                <li>~4,3 bilhões de endereços</li>
+                <li>Notação: <code>192.168.1.1</code></li>
+                <li>Esgotado desde 2011</li>
+                <li>Requer NAT para reutilização</li>
+            </ul>
+        </div>
+        <div class="col card card-secondary">
+            <h3>IPv6</h3>
+            <ul style="font-size:0.9em;">
+                <li>128 bits</li>
+                <li>340 undecilhões de endereços (340 seguido de 36 zeros)</li>
+                <li>Notação: <code>2001:db8::1</code></li>
+                <li>Adoção crescente (~45% do tráfego global)</li>
+                <li>Sem necessidade de NAT — cada dispositivo pode ter IP público</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="info-box accent" style="text-align:center;">
+        O IPv6 é o futuro, mas o IPv4 com máscaras e NAT ainda domina redes corporativas e domésticas. Dominar o IPv4 continua indispensável!
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Verificando na Prática: Comandos</h2>
+
+    <div class="two-col" style="margin:14px 0; max-width:960px;">
+        <div class="col card card-primary">
+            <h3>Windows</h3>
+            <div class="terminal-block">
+                <span class="prompt">C:\&gt;</span> ipconfig<br>
+                <span class="comment">  IP Address: 192.168.1.10</span><br>
+                <span class="comment">  Subnet Mask: 255.255.255.0</span><br>
+                <span class="comment">  Default Gateway: 192.168.1.1</span><br>
+                <br>
+                <span class="prompt">C:\&gt;</span> ping 192.168.1.1<br>
+                <span class="comment">  Testando gateway padrão...</span>
+            </div>
+        </div>
+        <div class="col card card-secondary">
+            <h3>Linux / macOS</h3>
+            <div class="terminal-block">
+                <span style="color:#9B59B6;">$</span> ip addr show<br>
+                <span class="comment">  inet 192.168.1.10/24 brd 192.168.1.255</span><br>
+                <br>
+                <span style="color:#9B59B6;">$</span> ip route<br>
+                <span class="comment">  default via 192.168.1.1 dev eth0</span><br>
+                <br>
+                <span style="color:#9B59B6;">$</span> ping 127.0.0.1<br>
+                <span class="comment">  Testando loopback...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-box warning" style="max-width:860px; width:100%; box-sizing:border-box;">
+        <strong>Atividade de fixação — siga os passos:</strong>
+        <ol style="margin:8px 0 0 0; padding-left:18px; font-size:0.95em; line-height:1.9;">
+            <li>Abra o terminal do seu computador (Windows: tecla Windows + R, digite <code>cmd</code>, pressione Enter).</li>
+            <li>Digite o comando correspondente ao seu sistema operacional (veja os exemplos acima) e pressione Enter.</li>
+            <li>Localize o seu endereço IP na saída do comando.</li>
+            <li>Localize a máscara de sub-rede (Subnet Mask).</li>
+            <li>Localize o gateway padrão (Default Gateway).</li>
+            <li>Anote os três valores no caderno e identifique a qual sub-rede seu computador pertence.</li>
+        </ol>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Mapa Mental: IPv4 em Uma Tela</h2>
+    <p style="font-size:0.85em; color:#555; margin-bottom:8px;">O diagrama abaixo mostra como os conceitos da aula se conectam ao IPv4 central. Leia cada nó e o texto explicativo ao lado da linha.</p>
+
+    <svg width="900" height="380" viewBox="0 0 900 380">
+        <ellipse cx="450" cy="190" rx="70" ry="40" fill="#4A1272"/>
+        <text x="450" y="195" text-anchor="middle" font-size="16" fill="white" font-family="Roboto" font-weight="bold">IPv4</text>
+
+        <ellipse cx="200" cy="70" rx="85" ry="35" fill="#9B59B6"/>
+        <text x="200" y="75" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">Estrutura</text>
+        <line x1="285" y1="90" x2="385" y2="165" stroke="#9B59B6" stroke-width="2"/>
+        <text x="230" y="118" font-size="10" fill="#666" font-family="Roboto">32 bits · 4 octetos</text>
+
+        <ellipse cx="700" cy="70" rx="85" ry="35" fill="#9B59B6"/>
+        <text x="700" y="75" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">Máscara</text>
+        <line x1="615" y1="90" x2="515" y2="165" stroke="#9B59B6" stroke-width="2"/>
+        <text x="630" y="118" font-size="10" fill="#666" font-family="Roboto">Rede vs. Host</text>
+
+        <ellipse cx="130" cy="230" rx="90" ry="35" fill="#7D3C98"/>
+        <text x="130" y="235" text-anchor="middle" font-size="11" fill="white" font-family="Roboto" font-weight="bold">End. Especiais</text>
+        <line x1="218" y1="220" x2="385" y2="195" stroke="#7D3C98" stroke-width="2"/>
+        <text x="110" y="272" font-size="10" fill="#666" font-family="Roboto">loopback · broadcast · privados</text>
+
+        <ellipse cx="700" cy="230" rx="85" ry="35" fill="#7D3C98"/>
+        <text x="700" y="235" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">CIDR / Prefixo</text>
+        <line x1="615" y1="220" x2="515" y2="195" stroke="#7D3C98" stroke-width="2"/>
+        <text x="640" y="272" font-size="10" fill="#666" font-family="Roboto">/8 /16 /24 /28 /30</text>
+
+        <ellipse cx="200" cy="330" rx="85" ry="35" fill="#F39C12"/>
+        <text x="200" y="335" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">Sub-redes</text>
+        <line x1="270" y1="310" x2="395" y2="220" stroke="#F39C12" stroke-width="2"/>
+        <text x="150" y="375" font-size="10" fill="#666" font-family="Roboto">Bloco · Rede · Broadcast</text>
+
+        <ellipse cx="700" cy="330" rx="85" ry="35" fill="#F39C12"/>
+        <text x="700" y="335" text-anchor="middle" font-size="12" fill="white" font-family="Roboto" font-weight="bold">NAT</text>
+        <line x1="620" y1="310" x2="505" y2="220" stroke="#F39C12" stroke-width="2"/>
+        <text x="640" y="372" font-size="10" fill="#666" font-family="Roboto">Privado - Público</text>
+    </svg>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:900px; margin-top:6px;">
+        <span style="background:#f5eeff; border:1px solid #9B59B6; border-radius:6px; padding:4px 10px; font-size:0.78em; color:#4A1272;"><strong>Estrutura:</strong> 32 bits, 4 octetos</span>
+        <span style="background:#f5eeff; border:1px solid #9B59B6; border-radius:6px; padding:4px 10px; font-size:0.78em; color:#4A1272;"><strong>Máscara:</strong> define rede vs. host</span>
+        <span style="background:#f5eeff; border:1px solid #7D3C98; border-radius:6px; padding:4px 10px; font-size:0.78em; color:#4A1272;"><strong>End. Especiais:</strong> loopback, broadcast, privados</span>
+        <span style="background:#f5eeff; border:1px solid #7D3C98; border-radius:6px; padding:4px 10px; font-size:0.78em; color:#4A1272;"><strong>CIDR/Prefixo:</strong> /8 /16 /24 /28 /30</span>
+        <span style="background:#fef9ec; border:1px solid #F39C12; border-radius:6px; padding:4px 10px; font-size:0.78em; color:#4A1272;"><strong>Sub-redes:</strong> bloco, rede, broadcast</span>
+        <span style="background:#fef9ec; border:1px solid #F39C12; border-radius:6px; padding:4px 10px; font-size:0.78em; color:#4A1272;"><strong>NAT:</strong> traduz privado em público</span>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Referência Rápida: Prefixos CIDR</h2>
+    <table class="styled-table" style="max-width:920px;">
+        <thead>
+            <tr><th>Prefixo</th><th>Máscara</th><th>Hosts Válidos</th><th>Endereços Totais</th><th>Uso Típico</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>/8</code></td><td>255.0.0.0</td><td>16.777.214</td><td>16.777.216</td><td>Redes de ISPs</td></tr>
+            <tr><td><code>/16</code></td><td>255.255.0.0</td><td>65.534</td><td>65.536</td><td>Campus / sede corporativa</td></tr>
+            <tr><td><code>/20</code></td><td>255.255.240.0</td><td>4.094</td><td>4.096</td><td>Rede corporativa média</td></tr>
+            <tr class="hl"><td><strong><code>/24</code></strong></td><td>255.255.255.0</td><td>254</td><td>256</td><td>LAN doméstica / escritório</td></tr>
+            <tr><td><code>/26</code></td><td>255.255.255.192</td><td>62</td><td>64</td><td>Sub-rede de departamento</td></tr>
+            <tr><td><code>/28</code></td><td>255.255.255.240</td><td>14</td><td>16</td><td>VLAN pequena</td></tr>
+            <tr><td><code>/30</code></td><td>255.255.255.252</td><td>2</td><td>4</td><td>Link entre roteadores</td></tr>
+            <tr><td><code>/32</code></td><td>255.255.255.255</td><td>0 (1 host)</td><td>1</td><td>Host específico (rota estática)</td></tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="slide">
+    <h2>Desafio: Projete uma Rede</h2>
+    <div class="info-box accent" style="text-align:center; font-size:1em; margin-bottom:12px;">
+        <strong>Cenário:</strong> você é administrador de rede. Você recebeu a faixa <strong>10.10.0.0 / 16</strong>.<br>
+        Missão: criar <strong>4 sub-redes</strong>, cada uma com capacidade mínima de <strong>500 hosts</strong>.
+    </div>
+
+    <div class="two-col" style="max-width:920px;">
+        <div class="col card card-primary">
+            <h3>Questões — resolva em ordem</h3>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px;">
+                <div class="passo-item">
+                    <div class="passo-num">1</div>
+                    <div>Qual prefixo suporta 500 ou mais hosts? Dica: resolva 2<sup>n</sup> menos 2 ≥ 500. Qual é o menor valor de n que satisfaz isso?</div>
+                </div>
+                <div class="passo-item">
+                    <div class="passo-num">2</div>
+                    <div>Qual é a máscara decimal correspondente ao prefixo encontrado?</div>
+                </div>
+                <div class="passo-item">
+                    <div class="passo-num">3</div>
+                    <div>Quais são os endereços de rede das 4 sub-redes (começando em 10.10.0.0)?</div>
+                </div>
+                <div class="passo-item">
+                    <div class="passo-num">4</div>
+                    <div>Qual é o endereço de broadcast da segunda sub-rede?</div>
+                </div>
+            </div>
+        </div>
+        <div class="col card card-secondary">
+            <h3>Gabarito com raciocínio</h3>
+            <button class="btn-revelar" id="btn-gab-27" onclick="document.getElementById('gab-27').style.display='block'; this.style.display='none';">
+                Clique aqui para ver o gabarito
+            </button>
+            <div id="gab-27" style="display:none; font-size:0.88em; margin-top:8px;">
+                <div class="passo-item" style="margin-bottom:6px;">
+                    <div class="passo-num">1</div>
+                    <div><strong>/23</strong> — porque 2<sup>9</sup> menos 2 = <strong>510 hosts</strong>. O prefixo /24 daria apenas 254 hosts, que é insuficiente.</div>
+                </div>
+                <div class="passo-item" style="margin-bottom:6px; border-left-color:var(--secondary-color);">
+                    <div class="passo-num" style="background:var(--secondary-color);">2</div>
+                    <div>Máscara: <code>255.255.254.0</code> (os 23 bits de rede ocupam 2 octetos completos e 7 bits do 3º octeto: 11111110 = 254).</div>
+                </div>
+                <div class="passo-item" style="margin-bottom:6px; border-left-color:var(--success-color);">
+                    <div class="passo-num" style="background:var(--success-color);">3</div>
+                    <div><code>10.10.0.0</code> / <code>10.10.2.0</code> / <code>10.10.4.0</code> / <code>10.10.6.0</code> — o bloco tem 512 endereços (2<sup>9</sup>), logo o incremento no 3º octeto é 2.</div>
+                </div>
+                <div class="passo-item" style="border-left-color:var(--accent-color);">
+                    <div class="passo-num" style="background:var(--accent-color); color:#1a0000;">4</div>
+                    <div>Broadcast da 2ª sub-rede: <code>10.10.3.255</code> (o bloco vai de 10.10.2.0 até 10.10.3.255).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Erros Comuns — Fique Atento</h2>
+    <p style="font-size:0.88em; color:#555; margin-bottom:10px;">Os itens em vermelho são erros que invalidam uma configuração. Os em laranja são enganos frequentes em cálculos. O verde é um lembrete útil.</p>
+    <div style="display:flex; flex-direction:column; gap:9px; max-width:860px; width:100%;">
+        <div class="info-box danger" style="display:flex; gap:14px; align-items:flex-start;">
+            <div class="semaforo-erro" title="Erro — invalida a configuração"></div>
+            <div><strong>Erro:</strong> atribuir o endereço de rede a um host. O endereço <code>192.168.1.0</code> identifica a rede em si — nenhum dispositivo pode usá-lo como IP.</div>
+        </div>
+        <div class="info-box danger" style="display:flex; gap:14px; align-items:flex-start;">
+            <div class="semaforo-erro" title="Erro — invalida a configuração"></div>
+            <div><strong>Erro:</strong> interpretar o prefixo como quantidade de hosts. O prefixo /24 indica <strong>24 bits de rede</strong>, não 24 hosts. Os bits de host são os restantes (8 bits = 254 hosts válidos).</div>
+        </div>
+        <div class="info-box warning" style="display:flex; gap:14px; align-items:flex-start;">
+            <div class="semaforo-atencao" title="Atenção — erro de cálculo frequente"></div>
+            <div><strong>Atenção:</strong> não subtrair 2 no cálculo de hosts. A fórmula correta é sempre 2<sup>n</sup> menos 2, pois o primeiro endereço (rede) e o último (broadcast) são reservados.</div>
+        </div>
+        <div class="info-box warning" style="display:flex; gap:14px; align-items:flex-start;">
+            <div class="semaforo-atencao" title="Atenção — conceito frequentemente confundido"></div>
+            <div><strong>Atenção:</strong> endereços privados (como <code>192.168.x.x</code>) não são roteados pela internet pública. Para sair para a internet, o roteador precisa converter o IP privado em público usando NAT.</div>
+        </div>
+        <div class="info-box success" style="display:flex; gap:14px; align-items:flex-start;">
+            <div class="semaforo-ok" title="Lembrete positivo"></div>
+            <div><strong>Lembrete:</strong> o endereço <code>127.0.0.1</code> funciona mesmo sem cabo de rede ou acesso à internet. Ele é processado localmente pelo próprio computador (loopback).</div>
+        </div>
+    </div>
+</section>
+
+<section class="slide">
+    <h2>Resumo da Aula</h2>
+    <div class="two-col" style="align-items:flex-start; max-width:1100px;">
+        <div class="col card card-primary">
+            <h3>Conceitos-Chave</h3>
+            <ul style="font-size:0.9em;">
+                <li><strong>IPv4:</strong> 32 bits, 4 octetos, 0–255 cada</li>
+                <li><strong>Máscara:</strong> define a parte de rede da parte de host</li>
+                <li><strong>AND bit a bit:</strong> IP AND máscara = endereço de rede</li>
+                <li><strong>CIDR /n:</strong> n bits de rede; 2<sup>32−n</sup>−2 hosts</li>
+                <li><strong>Rede:</strong> bits de host todos 0; <strong>Broadcast:</strong> todos 1</li>
+                <li><strong>RFC 1918:</strong> privados 10/8, 172.16/12, 192.168/16</li>
+                <li><strong>NAT:</strong> traduz privado ↔ público</li>
+                <li><strong>Wildcard:</strong> 255 − máscara (usado em ACLs)</li>
+            </ul>
+        </div>
+        <div class="col card card-secondary">
+            <h3>Referência Rápida</h3>
+            <table class="styled-table" style="font-size:0.85em;">
+                <thead><tr><th>Prefixo</th><th>Hosts</th><th>Bloco</th></tr></thead>
+                <tbody>
+                    <tr><td>/24</td><td>254</td><td>256</td></tr>
+                    <tr><td>/25</td><td>126</td><td>128</td></tr>
+                    <tr><td>/26</td><td>62</td><td>64</td></tr>
+                    <tr><td>/27</td><td>30</td><td>32</td></tr>
+                    <tr><td>/28</td><td>14</td><td>16</td></tr>
+                    <tr><td>/29</td><td>6</td><td>8</td></tr>
+                    <tr><td>/30</td><td>2</td><td>4</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="info-box info" style="text-align:center; margin-top:12px;">
+        <strong>Próxima aula:</strong> Aula 10 — TCP, UDP e a Camada de Transporte
+    </div>
+</section>
+
+<section class="slide" style="background: linear-gradient(150deg, #12032E 0%, #2a0660 50%, #4A1272 100%) !important;">
+    <svg width="90" height="90" viewBox="0 0 90 90" style="margin-bottom:20px; filter: drop-shadow(0 6px 18px rgba(243,156,18,0.4));">
+        <circle cx="45" cy="45" r="42" fill="rgba(74,18,114,0.8)" stroke="#F39C12" stroke-width="2.5"/>
+        <circle cx="45" cy="45" r="42" fill="none" stroke="#9B59B6" stroke-width="1" stroke-dasharray="8,4" opacity="0.4"/>
+        <polyline points="26,46 38,58 64,32" stroke="#F39C12" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <blockquote style="background:rgba(255,255,255,0.08); border-left-color:#F39C12; color:#e0c8f5; max-width:760px; text-align:left;">
+        "Um endereço IP sem máscara é como um CEP sem o nome da cidade — você sabe que existe um endereço, mas não sabe onde entregá-lo."
+    </blockquote>
+    <p style="font-size:1.1em; margin-top:16px; font-weight:700; color:#c8a8e9; text-align:center;">
+        Endereços IP: a linguagem universal que faz a internet existir.
+    </p>
+    <div style="margin-top:28px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+        <span style="background:var(--accent-color); color:#1a0000; padding:10px 28px; border-radius:30px; font-weight:bold; box-shadow: 0 4px 14px rgba(243,156,18,0.5);">Aula 09 — Concluída</span>
+        <span style="background:rgba(155,89,182,0.3); border:2px solid rgba(155,89,182,0.6); padding:10px 28px; border-radius:30px; font-weight:bold; color:#c8a8e9;">Próximo: TCP / UDP →</span>
+    </div>
+</section>
+
+</div><div class="navigation">
+    <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+    <div class="slide-counter" id="slide-counter">1 / 30</div>
+    <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+    <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+</div>
+</div><script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const presentationContainer = document.getElementById('presentation-container');
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const slideCounter = document.getElementById('slide-counter');
+
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        // Injeta o indicador textual de progresso em cada slide (exceto os de fundo escuro)
+        slides.forEach((slide, index) => {
+            const label = document.createElement('div');
+            label.className = 'slide-progress-label';
+            label.setAttribute('aria-label', `Slide ${index + 1} de ${totalSlides}`);
+            label.textContent = `Slide ${index + 1} de ${totalSlides}`;
+            // Nos slides de fundo escuro (capa e fechamento), ajusta a cor
+            if (slide.style.background && slide.style.background.includes('12032E')) {
+                label.style.background = 'rgba(74,18,114,0.6)';
+                label.style.color = '#c8a8e9';
+                label.style.borderColor = 'rgba(155,89,182,0.5)';
+            }
+            slide.appendChild(label);
+        });
+
+        function updateSlideView() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            // Contador na barra de navegação — formato descritivo para acessibilidade
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            slideCounter.setAttribute('aria-label', `Slide ${currentSlide + 1} de ${totalSlides}`);
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+            // Atualiza o título da janela com o número do slide
+            const slideTitle = slides[currentSlide].querySelector('h1, h2');
+            if (slideTitle) {
+                document.title = `[${currentSlide + 1}/${totalSlides}] ${slideTitle.textContent.trim()} — RSSI Aula 09`;
+            }
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            updateSlideView();
+        }
+
+        nextBtn.addEventListener('click', () => changeSlide(1));
+        prevBtn.addEventListener('click', () => changeSlide(-1));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                presentationContainer.requestFullscreen().catch(err => {
+                    alert(`Erro ao entrar em tela cheia: ${err.message}`);
+                });
+            } else { document.exitFullscreen(); }
+        });
+
+        updateSlideView();
+    });
+</script>
+</body>
+</html>

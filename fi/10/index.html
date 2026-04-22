@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 09 - Edição Profissional e ABNT no Google Docs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Personalizada */
+        :root {
+            --color-purple-dark: #4D2B8C;
+            --color-purple-light: #85409D;
+            --color-orange: #EEA727;
+            --color-yellow: #FFEF5F;
+            --color-bg: #FCFDFD; 
+        }
+
+        /* --- ESTILOS DE TELA (APRESENTAÇÃO) --- */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--color-bg); 
+            color: var(--color-purple-dark);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-bg);
+            background-image: 
+                radial-gradient(rgba(77, 43, 140, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            opacity: 0;
+            transform: translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: translateY(0);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor Tailwind-like */
+        .text-c-purple-dark { color: var(--color-purple-dark); }
+        .text-c-purple-light { color: var(--color-purple-light); }
+        .text-c-orange { color: var(--color-orange); }
+        .text-c-yellow { color: var(--color-yellow); }
+        
+        .bg-c-purple-dark { background-color: var(--color-purple-dark); }
+        .bg-c-purple-light { background-color: var(--color-purple-light); }
+        .bg-c-orange { background-color: var(--color-orange); }
+        .bg-c-yellow { background-color: var(--color-yellow); }
+        .bg-c-bg { background-color: var(--color-bg); }
+        
+        .border-c-purple-dark { border-color: var(--color-purple-dark); }
+        .border-c-purple-light { border-color: var(--color-purple-light); }
+        .border-c-orange { border-color: var(--color-orange); }
+        .border-c-yellow { border-color: var(--color-yellow); }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(77, 43, 140, 0.08);
+            border: 2px solid rgba(133, 64, 157, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-purple-light); box-shadow: 0 15px 35px rgba(77, 43, 140, 0.15); }
+        
+        .img-placeholder {
+            background: #f3f4f6;
+            border: 4px dashed var(--color-purple-light);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-purple-dark);
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 2rem;
+            margin: 1rem 0;
+            opacity: 0.8;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        .highlight-box {
+            background-color: var(--color-yellow);
+            color: var(--color-purple-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-weight: 900;
+            box-shadow: 4px 4px 0px var(--color-orange);
+            border: 2px solid var(--color-orange);
+        }
+        
+        /* Caixa Lógica para Autistas/Curiosos */
+        .logic-box {
+            background-color: #f8fafc;
+            border-left: 6px solid var(--color-purple-light);
+            padding: 1rem 1.5rem;
+            border-radius: 0 12px 12px 0;
+            font-size: 1.1rem;
+            color: #475569;
+        }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { overflow: visible !important; height: auto !important; background: white !important; color: black !important; width: auto !important; }
+            #presentation { display: block !important; height: auto !important; overflow: visible !important; position: static !important; background: white !important; }
+            .slide { position: relative !important; top: auto !important; left: auto !important; opacity: 1 !important; transform: none !important; height: auto !important; min-height: auto !important; display: block !important; page-break-inside: avoid; page-break-after: always; border-bottom: 2px solid #ccc; background: white !important; color: black !important; padding: 2rem 0 !important; margin-bottom: 2rem; }
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            h1, h2, h3, h4 { color: black !important; }
+            h2 { border-bottom: 2px solid var(--color-purple-dark); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li { font-size: 14pt !important; color: #000 !important; line-height: 1.6; }
+            .card { background: white !important; border: 2px solid #999 !important; box-shadow: none !important; color: black !important; margin-bottom: 1rem; page-break-inside: avoid; }
+            .bg-c-purple-dark, .bg-c-purple-light, .bg-c-orange, .bg-c-yellow, .highlight-box, .logic-box { background-color: #eee !important; color: black !important; border: 2px solid black; box-shadow: none; }
+            .text-c-bg, .text-c-purple-dark, .text-c-purple-light, .text-c-orange, .text-c-yellow, .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-c-bg/90 backdrop-blur-md border-b-2 border-c-purple-light shadow-sm">
+        <div class="flex items-center space-x-3 md:space-x-6">
+            <span class="font-black text-c-purple-dark tracking-widest text-xl">AULA 09</span>
+            <div class="h-3 w-24 md:w-48 lg:w-64 bg-gray-200 rounded-full overflow-hidden border border-c-purple-light/30">
+                <div id="progressBar" class="h-full bg-c-orange transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-base font-mono text-c-purple-dark font-bold tracking-wider">00 / 00</span>
+            
+            <a href="https://willcotil.github.io/aulas2026" target="_blank" class="hidden sm:inline-block text-c-purple-dark font-black text-base lg:text-xl hover:text-c-orange transition" style="text-decoration: none;">willcotil.github.io/aulas2026</a>
+        </div>
+
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-c-purple-light/10 rounded text-c-purple-dark transition border border-transparent hover:border-c-purple-dark" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-c-purple-dark text-white rounded hover:bg-c-purple-dark/80 transition flex items-center gap-2 font-bold shadow-md text-lg" title="Imprimir Apostila">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Imprimir PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-c-purple-light text-white px-6 py-2 rounded-full text-lg font-bold tracking-widest uppercase mb-8 inline-block shadow-sm">Edição de Textos</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-c-purple-dark">
+                    Google Docs &<br><span class="text-c-orange">Normas ABNT</span>
+                </h1>
+                <p class="text-2xl font-mono text-c-purple-dark/80 max-w-4xl mx-auto mt-6 font-bold">Como formatar trabalhos de forma lógica e automatizada.</p>
+            </div>
+            <div class="mt-16 animate-bounce text-c-orange no-print">
+                <i data-lucide="arrow-down" class="mx-auto w-12 h-12"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-12 border-l-8 border-c-orange pl-6">O que faremos hoje? (Passo a Passo)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-8 border-t-8 border-c-purple-dark">
+                    <div class="text-c-purple-dark mb-4 flex items-center gap-4"><span class="bg-c-purple-dark text-white px-3 py-1 rounded font-bold text-xl">1</span> <i data-lucide="cloud" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">A Nuvem e Organização</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Por que usar o Google Docs, como salvar, organizar pastas e usar o "Colar Limpo".</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-purple-light">
+                    <div class="text-c-purple-light mb-4 flex items-center gap-4"><span class="bg-c-purple-light text-white px-3 py-1 rounded font-bold text-xl">2</span> <i data-lucide="ruler" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">Regras e Lógica da ABNT</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Configurando margens, entendendo as fontes, recuos e Citações Longas.</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-orange">
+                    <div class="text-c-orange mb-4 flex items-center gap-4"><span class="bg-c-orange text-white px-3 py-1 rounded font-bold text-xl">3</span> <i data-lucide="wand-2" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">O Sistema de Estilos</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Aprenda a dizer ao computador o que é um Título para não formatar textos página por página na mão.</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-yellow">
+                    <div class="text-c-orange mb-4 flex items-center gap-4"><span class="bg-c-yellow text-c-purple-dark px-3 py-1 rounded font-bold text-xl">4</span> <i data-lucide="file-digit" class="w-10 h-10"></i></div>
+                    <h3 class="font-bold text-3xl mb-4 text-c-purple-dark">Paginação e Entrega</h3>
+                    <p class="text-xl opacity-90 text-gray-700">Cabeçalhos, Rodapés, a Capa sem número e como exportar para PDF corretamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 1: A NUVEM ================= -->
+
+        <!-- SLIDE 3 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-purple-light text-white px-4 py-2 rounded-xl font-black text-3xl">01</span>
+                <h2 class="text-5xl font-bold text-c-purple-dark">Nuvem vs Local ☁️</h2>
+            </div>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-6xl">
+                <div class="card p-10 bg-white text-center border-4 border-gray-300">
+                    <h3 class="text-4xl font-bold text-gray-600 mb-6">Microsoft Word (Local)</h3>
+                    <p class="text-2xl text-gray-700 leading-relaxed mb-6 font-bold">Você cria um arquivo <code>.docx</code> e salva no seu HD ou pendrive físico.</p>
+                    <p class="text-xl text-c-red bg-red-50 p-4 rounded-lg font-bold border border-red-200">Risco: Se o PC pifar ou você perder o pendrive, o arquivo se perde com ele.</p>
+                </div>
+                <div class="card p-10 bg-white text-center border-4 border-c-purple-light shadow-2xl transform scale-105">
+                    <h3 class="text-4xl font-bold text-blue-600 mb-6">Google Docs (Nuvem)</h3>
+                    <p class="text-2xl text-gray-700 leading-relaxed mb-6 font-bold">O arquivo fica salvo nos servidores seguros do Google. Você acessa de qualquer tela conectada.</p>
+                    <p class="text-xl text-green-700 bg-green-50 p-4 rounded-lg font-bold border border-green-200">Vantagem: O documento não existe em um disco físico local. Zero risco de perder!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-8">A Lógica do Auto-Save</h2>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl">
+                <div class="text-8xl mb-8">💾 ❌</div>
+                <p class="text-3xl text-gray-800 leading-relaxed font-bold mb-8">No Google Docs, o botão "Salvar" não existe.</p>
+                <div class="highlight-box text-2xl">
+                    Cada letra que você digita é enviada como um pacote de dados para o servidor em frações de segundo. O arquivo está sempre sincronizado.
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4.1: Organizando o Drive -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Sua Mochila Virtual (Drive)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">Arquivos na nuvem exigem nomes claros, ou você não os encontrará nas buscas.</p>
+                    <ul class="text-xl space-y-4 text-gray-600 bg-white p-6 rounded-xl shadow border border-gray-200 font-bold">
+                        <li><span class="text-c-red text-2xl">🚫</span> Erro Comum: <br><code class="text-red-500 bg-red-50 px-2 py-1">Documento sem título</code></li>
+                        <li><span class="text-c-red text-2xl">🚫</span> Erro Comum: <br><code class="text-red-500 bg-red-50 px-2 py-1">trabalho_final_agora_vai_v3.docx</code></li>
+                        <li><span class="text-green-500 text-2xl">✅</span> Prática Profissional: Crie pastas por disciplina.</li>
+                        <li><span class="text-green-500 text-2xl">✅</span> Padrão de Nome: <code class="text-green-700 bg-green-50 px-2 py-1">Materia_Tema_SeuNome</code></li>
+                    </ul>
+                </div>
+
+                    <img src="docs.png"></img>
+
+            </div>
+        </section>
+
+        <!-- SLIDE 4.2: Colar sem formatação -->
+        <section class="slide bg-c-orange/10">
+            <h2 class="text-5xl font-bold text-c-orange mb-8">Evite o Ctrl+V Normal (O Erro da Formatação)</h2>
+            <div class="card p-10 max-w-6xl text-center bg-white shadow-xl border-4 border-c-orange">
+                <p class="text-2xl text-gray-800 leading-relaxed font-bold mb-8">Quando você pesquisa na Wikipedia e aperta <code class="bg-gray-200 px-2 rounded">Ctrl + V</code>, o computador copia as regras visuais da página junto (fundo cinza, letras azuis, tamanhos diferentes).</p>
+                <div class="grid grid-cols-2 gap-8 text-left mt-8">
+                    <div class="p-6 bg-red-50 border-2 border-red-300 rounded-xl">
+                        <p class="font-black text-red-600 text-xl mb-4">Colar com Formato HTML</p>
+                        <p class="font-bold text-2xl"><code>Ctrl + V</code></p>
+                        <p class="mt-4 text-gray-700 text-lg">Bagunça toda a estrutura e acusa plágio visual.</p>
+                    </div>
+                    <div class="p-6 bg-green-50 border-2 border-green-300 rounded-xl transform scale-105 shadow-lg">
+                        <p class="font-black text-green-600 text-xl mb-4">Colar Apenas Texto (Colar Limpo)</p>
+                        <p class="font-bold text-2xl"><code>Ctrl + Shift + V</code></p>
+                        <p class="mt-4 text-gray-700 text-lg">O texto é despido de código visual e se adapta <strong>exatamente</strong> às regras de fonte que você já preparou no seu documento!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 2: ABNT ================= -->
+
+        <!-- SLIDE 5 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-purple-dark text-white px-4 py-2 rounded-xl font-black text-3xl">02</span>
+                <h2 class="text-5xl font-bold text-c-purple-dark">A Lógica da ABNT 📏</h2>
+            </div>
+            <div class="card p-10 max-w-6xl text-center bg-white shadow-xl border-t-8 border-c-orange">
+                <h3 class="text-4xl font-bold mb-6 text-gray-800">Por que ter regras iguais para todos?</h3>
+                <p class="text-2xl text-gray-700 leading-relaxed mb-8">Imagine um livro de biologia onde cada página usa uma cor, tamanho e fonte diferentes. O cérebro gasta mais energia tentando entender a estrutura visual do que lendo o conteúdo.</p>
+                <p class="text-2xl font-bold text-white bg-c-purple-dark p-6 rounded-xl shadow-sm">
+                    A ABNT cria previsibilidade. Quando o formato é previsível, o avaliador pode focar 100% nas suas ideias.
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 6 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Configuração da Página (A Lógica 3-3-2-2)</h2>
+            <p class="text-2xl font-bold text-gray-600 mb-6">Vá em: <strong class="text-c-purple-light">Arquivo > Configuração da Página</strong></p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start w-full max-w-6xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 font-bold">Tamanho do papel: <strong>A4</strong>.</p>
+                    <ul class="text-2xl space-y-4 text-gray-800 bg-white p-6 rounded-xl border border-gray-300 font-black shadow">
+                        <li>⬆️ Superior: <span class="text-c-red">3 cm</span></li>
+                        <li>⬅️ Esquerda: <span class="text-c-red">3 cm</span></li>
+                        <li>⬇️ Inferior: <span class="text-blue-600">2 cm</span></li>
+                        <li>➡️ Direita: <span class="text-blue-600">2 cm</span></li>
+                    </ul>
+                </div>
+                <div class="logic-box shadow-sm">
+                    <h4 class="font-bold text-c-purple-dark mb-2 text-xl flex items-center gap-2"><i data-lucide="lightbulb" class="text-c-orange"></i> Por que a esquerda e o topo são maiores?</h4>
+                    <p class="mb-4">Não é uma regra aleatória! Trabalhos precisam ser encadernados ou grampeados.</p>
+                    <p>O 1 centímetro extra na esquerda serve para a <strong>espiral da encadernação</strong> não furar o seu texto. A margem superior acomoda grampos em pastas catálogo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Formatação Base: O Corpo do Texto</h2>
+            
+            <div class="grid grid-cols-2 gap-10 w-full max-w-7xl mt-6">
+                <div class="card p-8 border-t-8 border-c-purple-light bg-white">
+                    <h3 class="text-3xl font-black text-c-purple-dark mb-6">A Fonte</h3>
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed mb-4">Escolha entre:</p>
+                    <p class="text-3xl font-serif text-center bg-gray-100 py-4 rounded font-bold border border-gray-300 mb-4">Times New Roman</p>
+                    <p class="text-center text-xl font-bold text-gray-500">ou</p>
+                    <p class="text-3xl font-sans text-center bg-gray-100 py-4 rounded font-bold border border-gray-300 mt-4">Arial</p>
+                    <p class="text-2xl text-c-red font-black text-center mt-6 bg-red-50 py-2 rounded">Tamanho Fixo: 12</p>
+                </div>
+                <div class="card p-8 border-t-8 border-c-yellow bg-white">
+                    <h3 class="text-3xl font-black text-c-purple-dark mb-6">A Estrutura Visual</h3>
+                    <p class="text-xl text-gray-700 font-bold leading-relaxed mb-4">O texto precisa formar um bloco reto, sem bordas recortadas.</p>
+                    <div class="highlight-box text-center mb-6 text-xl">
+                        Alinhamento: JUSTIFICADO
+                    </div>
+                    <p class="text-xl text-gray-700 font-bold leading-relaxed mb-4">As linhas precisam "respirar" para a leitura não cansar:</p>
+                    <div class="highlight-box text-center text-xl">
+                        Espaçamento de Linhas: 1,5
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7.1: Serif vs Sans Serif -->
+        <section class="slide bg-white">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-8">Curiosidade: Por que Times ou Arial?</h2>
+            <p class="text-2xl text-gray-700 font-bold max-w-4xl text-center mb-10">Na tipografia, o segredo está na <strong>Serifa</strong> (os tracinhos nas pontas das letras).</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-6xl">
+                <div class="card p-8 text-center bg-gray-50 border-2 border-gray-200">
+                    <h3 class="text-8xl font-serif font-black text-blue-900 mb-4">A</h3>
+                    <h4 class="text-3xl font-bold text-c-purple-dark mb-4">Com Serifa (Times)</h4>
+                    <p class="text-xl text-gray-600 font-bold">As "perninhas" criam uma linha guia invisível para o olho humano. São perfeitas para guiar a leitura em <strong>textos impressos no papel</strong>.</p>
+                </div>
+                <div class="card p-8 text-center bg-gray-50 border-2 border-gray-200">
+                    <h3 class="text-8xl font-sans font-black text-gray-800 mb-4">A</h3>
+                    <h4 class="text-3xl font-bold text-c-purple-dark mb-4">Sem Serifa (Arial)</h4>
+                    <p class="text-xl text-gray-600 font-bold">Sem enfeites (Sans Serif). O design limpo evita borrões nos pixels de <strong>telas e monitores</strong>. Excelentes para leitura digital.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">A Régua e o Recuo (1,25 cm)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+
+                    <img src="recuo.png"></img>
+
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">Todo parágrafo (início de uma ideia) precisa de um espaçamento inicial (recuo).</p>
+                    <p class="text-2xl text-c-red leading-relaxed font-black">Regra: NUNCA use a barra de espaço várias vezes. NUNCA use o Tab.</p>
+                    <p class="text-xl font-bold text-white bg-c-orange p-6 rounded-xl shadow-md border-2 border-red-700">
+                        Passo a Passo: Selecione o texto todo (Ctrl+A), clique no retângulo azul (parte de cima do triângulo) na régua superior e puxe até a marca de <strong class="text-2xl text-black ml-2 bg-yellow-200 px-2 rounded">1,25 cm</strong>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8.1: A Citação Longa -->
+        <section class="slide bg-gray-100">
+            <h2 class="text-4xl font-bold text-c-purple-dark mb-8">A Regra da Citação Longa 📚</h2>
+            <div class="card p-8 max-w-6xl w-full border-l-8 border-c-purple-light shadow-xl">
+                <p class="text-2xl text-gray-800 font-bold mb-6">Quando copiamos um texto de outro autor com <strong>mais de 3 linhas</strong>, a ABNT exige que ele se destaque visualmente do nosso próprio texto:</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-8">
+                    <div>
+                        <ul class="text-xl space-y-4 font-bold text-gray-700 bg-white p-6 rounded-xl border border-gray-200">
+                            <li>📏 <strong>Recuo:</strong> Puxar a régua inteira (o triângulo) até <strong>4 cm</strong> da margem.</li>
+                            <li>🔤 <strong>Tamanho da Fonte:</strong> Reduzir para <strong>10</strong>.</li>
+                            <li>↕️ <strong>Espaçamento:</strong> Reduzir para <strong>Simples (1,0)</strong>.</li>
+                            <li>❌ <strong>Sinalização:</strong> Remova as aspas e cite a fonte no final.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 border-l-4 border-c-orange text-sm italic text-justify text-gray-600 ml-12 shadow-sm">
+                        Aqui entra o texto copiado. A lógica visual é criar um bloco de texto denso e estreito, empurrado para a direita. Quando o olho humano bate nesta página, percebe instantaneamente, antes mesmo de ler, que este parágrafo pertence a outra pessoa. É um design feito para evitar acusações de plágio acidental. (SOBRENOME, 2026, p. 10).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 3: ESTILOS ================= -->
+
+        <!-- SLIDE 9 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-orange text-white px-4 py-2 rounded-xl font-black text-3xl">03</span>
+                <h2 class="text-5xl font-bold text-c-orange">O Sistema de Estilos 🌟</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl border-t-8 border-c-purple-dark">
+                <h3 class="text-4xl font-bold mb-6 text-gray-800">A lógica de conversar com o computador</h3>
+                <p class="text-2xl opacity-90 text-gray-700 leading-relaxed mb-8">Nós humanos entendemos que uma palavra gigante e em negrito é um Título. O computador não tem olhos. Para ele, é apenas "Texto Normal" pintado de preto forte.</p>
+                <p class="mt-6 text-c-purple-dark font-black text-2xl bg-c-purple-light/20 p-6 rounded-xl shadow-sm">
+                    A ferramenta de "Estilos" serve para classificar semanticamente o texto: Nós dizemos para a máquina "Isto é a base estrutural do capítulo".
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 10 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-10">Método Manual vs Estrutural 🚫</h2>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-6xl">
+                <div class="card p-8 bg-red-50 border-4 border-red-300 text-center flex flex-col items-center">
+                    <i data-lucide="x-circle" class="w-20 h-20 text-red-500 mb-6"></i>
+                    <h3 class="text-3xl font-black text-red-700 mb-6">Formatação Puramente Visual (Erro)</h3>
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed mb-6">Selecionar a palavra, apertar "Negrito" e colocar Fonte 14.</p>
+                    <p class="text-xl text-red-800 font-bold mt-auto bg-red-200 p-4 rounded-lg w-full">O computador continuará achando que é texto normal. Sumários automáticos vão falhar, pois a máquina não sabe encontrar os capítulos.</p>
+                </div>
+                <div class="card p-8 bg-green-50 border-4 border-green-300 text-center flex flex-col items-center">
+                    <i data-lucide="check-circle-2" class="w-20 h-20 text-green-500 mb-6"></i>
+                    <h3 class="text-3xl font-black text-green-700 mb-6">Formatação Estrutural (Correto)</h3>
+                    <p class="text-2xl text-gray-700 font-bold leading-relaxed mb-6">Selecionar a palavra, ir na barra superior e trocar a tag "Texto Normal" para <strong class="bg-green-200 px-2 rounded">Título 1</strong>.</p>
+                    <p class="text-xl text-green-800 font-bold mt-auto bg-green-200 p-4 rounded-lg w-full">A máquina agora mapeou o seu documento, permitindo gerar sumários e navegação lateral inteligente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Automatizando seu trabalho 🪄</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center w-full max-w-7xl">
+                <div class="space-y-6">
+                    <p class="text-2xl text-c-purple-dark font-black border-b-2 border-c-purple-light pb-2">Algoritmo de Atualização de Estilos:</p>
+                    <p class="text-2xl text-gray-700 font-bold"><span class="bg-gray-200 px-3 rounded-full mr-2">1</span> Formate UM título fisicamente perfeito (ex: Arial 12, Negrito, Maiúsculo).</p>
+                    <p class="text-2xl text-gray-700 font-bold"><span class="bg-gray-200 px-3 rounded-full mr-2">2</span> Mantenha essa palavra selecionada.</p>
+                    <p class="text-2xl text-gray-700 font-bold"><span class="bg-gray-200 px-3 rounded-full mr-2">3</span> Clique no menu: Estilos > Título 1.</p>
+                    <div class="highlight-box text-2xl text-center">
+                        <span class="bg-c-orange text-white px-3 rounded-full mr-2">4</span> Clique em "Atualizar Título 1 para corresponder"
+                    </div>
+                    <p class="text-xl font-bold text-c-purple-dark bg-c-purple-light/20 p-4 rounded-lg border border-c-purple-light">
+                        Pronto: Se você tiver 50 títulos no trabalho, todos vão mudar simultaneamente para o padrão que você definiu.
+                    </p>
+                </div>
+
+                <img src="titulo.png"></img>
+
+            </div>
+        </section>
+
+        <!-- ================= PARTE 4: PAGINAÇÃO ================= -->
+
+        <!-- SLIDE 12 -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-yellow text-c-purple-dark px-4 py-2 rounded-xl font-black text-3xl">04</span>
+                <h2 class="text-5xl font-bold text-c-purple-dark">Paginação 📄</h2>
+            </div>
+            <div class="card p-10 max-w-6xl w-full bg-white shadow-xl flex gap-10">
+                <div class="flex-1 flex flex-col justify-center">
+                    <h3 class="text-4xl font-bold mb-6 text-gray-800">Lógica de Cabeçalhos e Rodapés</h3>
+                    <p class="text-2xl text-gray-700 leading-relaxed mb-6 font-bold">São os espaços nas margens extremas da folha.</p>
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">A propriedade base deles é a <strong>Repetição Automática</strong>. Tudo o que você escrever ou colocar no cabeçalho da página 2, surgirá na 3, 4 e assim por diante.</p>
+                    <p class="text-xl text-gray-500 font-bold mt-4 border-l-4 border-c-orange pl-4 bg-gray-50 py-2">Menu: Inserir > Cabeçalho e rodapé.</p>
+                </div>
+                <div class="w-1/3 bg-gray-100 border-2 border-gray-300 rounded-lg p-4 relative h-80 flex flex-col justify-between">
+                    <div class="w-full h-8 border-b-2 border-dashed border-gray-400 text-center text-sm font-bold text-gray-400">Cabeçalho (Zona de Repetição)</div>
+                    <div class="flex-1 p-4 text-gray-300 text-center font-bold flex items-center justify-center">Corpo do Documento</div>
+                    <div class="w-full h-8 border-t-2 border-dashed border-gray-400 text-center text-sm font-bold text-gray-400">Rodapé (Zona de Repetição)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13 -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-6">Resolvendo a Capa sem Número</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-7xl">
+
+                      <img src="numera.png"></img>
+
+                <div class="space-y-6">
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">Na ABNT, a Capa é contada, mas o número "1" não pode ser impresso nela.</p>
+                    <p class="text-2xl text-gray-700 leading-relaxed font-bold">A solução lógica para quebrar a regra de "Repetição Automática" apenas na primeira folha:</p>
+                    <ol class="text-2xl space-y-4 text-gray-800 bg-c-yellow/30 p-6 rounded-xl border-2 border-c-yellow font-black">
+                        <li>Passo 1: Dê 2 cliques no número da capa.</li>
+                        <li>Passo 2: Marque <strong class="text-c-purple-dark border-b-2 border-c-purple-dark">"Primeira página diferente"</strong>.</li>
+                        <li>Passo 3: Apague o número. O sistema o ocultará na capa, mas manterá o "2" na próxima folha.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13.1: Exportar PDF -->
+        <section class="slide bg-c-purple-dark text-white">
+            <div class="text-center w-full max-w-5xl">
+                <h2 class="text-6xl font-black mb-8 text-c-yellow">Entregas de Trabalho: O Padrão PDF</h2>
+                <div class="flex items-center justify-center gap-8 mb-10">
+                    <div class="text-center opacity-50">
+                        <i data-lucide="file-text" class="w-20 h-20 mx-auto mb-4"></i>
+                        <p class="text-2xl font-bold">.docx (Word)</p>
+                        <p class="text-sm">Arquivo maleável, pode "quebrar"</p>
+                    </div>
+                    <div class="text-4xl text-c-orange">➜</div>
+                    <div class="text-center">
+                        <i data-lucide="file-check-2" class="w-24 h-24 mx-auto mb-4 text-c-orange"></i>
+                        <p class="text-3xl font-bold text-c-orange">.pdf (Portable)</p>
+                        <p class="text-lg">Trava a formatação perfeitamente</p>
+                    </div>
+                </div>
+                <div class="bg-white/10 p-8 rounded-2xl border border-white/20 text-left">
+                    <p class="text-2xl font-bold mb-4 text-c-yellow">Nunca envie um .docs ou .docx editável se a intenção for apenas leitura.</p>
+                    <p class="text-xl opacity-90 leading-relaxed mb-6">Dependendo do tamanho da tela de quem for corrigir, margens ou imagens podem sair do lugar, destruindo sua formatação. O formato PDF funciona como uma "fotografia digital", congelando o texto em qualquer máquina.</p>
+                    <p class="text-xl font-mono text-c-yellow font-bold text-center bg-black/30 py-3 rounded">Caminho: Arquivo > Fazer download > Documento PDF (.pdf)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= FIM E RESUMO ================= -->
+
+        <!-- SLIDE 14: Atividade Prática -->
+        <section class="slide no-print bg-c-purple-dark/5">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-8">Prática Estruturada 💻</h2>
+            <div class="card p-10 w-full max-w-6xl bg-white border-4 border-c-orange shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-c-orange text-white px-4 py-1 font-bold rounded-bl-xl">Laboratório</div>
+                <h3 class="text-4xl font-bold mb-6 text-gray-800">O Desafio de Formatação</h3>
+                <p class="mb-6 text-2xl font-bold text-gray-700 leading-relaxed text-center">Baixem o documento base no Google Classroom e sigam a sequência de etapas abaixo.</p>
+                <ul class="text-xl font-bold text-left max-w-4xl mx-auto space-y-4 bg-gray-50 p-8 rounded-xl border border-gray-200">
+                    <li class="flex items-center gap-3"><span class="bg-c-purple-light text-white w-8 h-8 rounded-full flex items-center justify-center">1</span> Configure as margens lógicas (3-3-2-2).</li>
+                    <li class="flex items-center gap-3"><span class="bg-c-purple-light text-white w-8 h-8 rounded-full flex items-center justify-center">2</span> Defina o Texto Normal (Arial/Times 12, Espaço 1,5, Justificado).</li>
+                    <li class="flex items-center gap-3"><span class="bg-c-purple-light text-white w-8 h-8 rounded-full flex items-center justify-center">3</span> Estruture os Títulos usando o painel "Estilos" (Título 1).</li>
+                    <li class="flex items-center gap-3"><span class="bg-c-purple-light text-white w-8 h-8 rounded-full flex items-center justify-center">4</span> Aplique a regra da "Citação Longa" com recuo de régua (4cm).</li>
+                    <li class="flex items-center gap-3"><span class="bg-c-purple-light text-white w-8 h-8 rounded-full flex items-center justify-center">5</span> Oculte o número da Capa e exporte em PDF.</li>
+                </ul>
+                
+                <!-- Caixa de Hiperfoco/Missão Extra -->
+                <div class="mt-8 bg-blue-50 border-l-4 border-blue-500 p-4 text-left rounded shadow-sm mx-auto max-w-4xl">
+                    <p class="font-black text-blue-800 flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5"></i> Missão Extra (Opcional para quem terminar rápido):</p>
+                    <p class="text-blue-900 text-sm mt-1">O texto base contém a expressão "Lorem Ipsum". Descubra como inserir uma "Nota de Rodapé" no Google Docs e explique ali o que esse termo histórico significa para o design.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold text-c-purple-dark mb-10">Revisão Estrutural da Aula</h2>
+            <div class="flex flex-col items-center gap-8 w-full max-w-7xl text-xl font-mono">
+                <div class="bg-c-purple-dark text-white px-10 py-4 rounded-2xl font-bold text-3xl shadow-lg border-4 border-c-purple-light">PRODUÇÃO DE TEXTOS</div>
+                <div class="grid grid-cols-4 gap-6 w-full mt-4">
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white text-c-purple-dark px-4 py-3 rounded-xl text-center font-black border-4 border-gray-300 shadow-sm text-lg">PRODUTIVIDADE</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Auto-Save (Sempre Seguro)</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Ctrl+Shift+V (Colar Limpo)</div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white text-c-orange px-4 py-3 rounded-xl text-center font-black border-4 border-c-orange/50 shadow-sm text-lg">PÁGINA E ENTREGA</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Margem (Lógica de Grampo)</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">PDF "Congela" Formato</div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white text-blue-600 px-4 py-3 rounded-xl text-center font-black border-4 border-blue-300 shadow-sm text-lg">REGRAS DE CORPO</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Limpeza Visual (Arial 12)</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Destaque de Citação (4cm)</div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="bg-white text-green-600 px-4 py-3 rounded-xl text-center font-black border-4 border-green-300 shadow-sm text-lg">ESTRUTURAÇÃO</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Mapeamento via Estilos</div>
+                        <div class="bg-white p-3 rounded-xl text-center border-2 border-gray-200 text-sm text-gray-700 font-bold">Quebrar Repetição (Capa)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: Próxima Aula -->
+        <section class="slide">
+            <h2 class="text-3xl font-mono text-c-orange mb-6 font-black uppercase tracking-widest">O Próximo Passo...</h2>
+            <h1 class="text-6xl font-black text-c-purple-dark mb-10 text-center leading-tight">A Mágica Continua: <br>Sumários e Colaboração</h1>
+            <p class="text-2xl max-w-5xl text-center text-gray-700 mb-12 font-bold leading-relaxed">Na próxima aula, a utilidade de termos criado os "Estilos" fará sentido lógico completo: o sistema gerará o Sumário Inteiro do trabalho, com os números das páginas, de forma 100% automatizada e instantânea.</p>
+            <div class="flex gap-10 justify-center text-c-purple-dark opacity-40">
+                <i data-lucide="list-ordered" class="w-24 h-24"></i>
+                <i data-lucide="users" class="w-24 h-24"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: Fim -->
+        <section class="slide bg-white border-t-[16px] border-c-purple-dark shadow-[inset_0_20px_50px_rgba(0,0,0,0.02)]">
+            <div class="text-center">
+                <i data-lucide="file-check-2" class="w-32 h-32 mx-auto text-c-purple-dark mb-8"></i>
+                <h1 class="text-7xl font-black mb-6 text-c-purple-dark">FIM DA AULA 09</h1>
+                <p class="text-3xl text-gray-600 mb-16 font-mono font-bold">As regras de formatação agora possuem um porquê.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-c-purple-dark text-white px-12 py-6 rounded-full font-black shadow-2xl hover:bg-c-purple-light transition flex items-center gap-4 hover:scale-105 border-4 border-transparent text-2xl">
+                        <i data-lucide="download" class="w-8 h-8"></i> Gerar Apostila de Estudo (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-base text-gray-400 font-mono tracking-widest uppercase font-black">COTIL - Fundamentos de Informática</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Flutuante -->
+    <div class="no-print fixed bottom-10 right-10 flex space-x-6 z-50">
+        <button id="prevBtn" class="p-6 bg-white/90 backdrop-blur rounded-full shadow-lg border-4 border-gray-300 text-gray-700 hover:bg-gray-50 transition transform active:scale-95">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-6 bg-c-orange rounded-full shadow-xl text-white font-bold hover:bg-orange/80 transition transform active:scale-95 border-4 border-orange/50">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide'); 
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>

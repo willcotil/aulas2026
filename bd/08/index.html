@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados - Aula 09: Mapeamento no Dicionário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#576A8F', /* Dark/Muted Blue */
+                            primary:   '#FF7444', /* Bright Orange (Used for PK) */
+                            secondary: '#B7BDF7', /* Light Blue (Used for FK / accents) */
+                            muted:     '#FFF8DE', /* Cream/Very Light Yellow (Cards) */
+                            surface:   '#FFFFFF', /* White cards */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FCFCFC; /* Fundo branco/suave para não cansar a vista */
+            color: #576A8F;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+            .resposta-gabarito { display: block !important; }
+        }
+
+        /* Cores consistentes para o SVG baseadas na nova paleta */
+        .node-rect { fill: #ffffff; stroke: #576A8F; stroke-width: 4; rx: 12px; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; fill: #576A8F; }
+        .edge { stroke: #576A8F; stroke-width: 3; fill: none; }
+        .rel-polygon { fill: #FFF8DE; stroke: #FF7444; stroke-width: 3; }
+        .rel-text { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; fill: #576A8F; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #ffffff; border: 2px solid #576A8F; padding: 2px 8px; border-radius: 6px; color: #576A8F; font-weight: 700; }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FCFCFC; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #576A8F; border-radius: 10px; border: 2px solid #FCFCFC; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="no-print h-20 bg-white text-brand-dark px-8 flex items-center justify-between sticky top-0 z-50 shadow-md border-b-4 border-brand-dark">
+        <div class="flex items-center gap-4 z-10">
+            <div class="bg-brand-dark text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-inner">
+                <i class="fas fa-plug text-xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl tracking-tight">Banco de Dados <span class="text-brand-primary opacity-90">| Conexões</span></h1>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-brand-muted hover:bg-brand-secondary hover:text-brand-dark rounded-xl text-brand-dark font-bold transition shadow-sm border border-brand-dark/20">
+                <i class="fas fa-print"></i> IMPRIMIR
+            </button>
+            <button onclick="toggleFullscreen()" class="w-10 h-10 bg-brand-muted rounded-xl text-brand-dark hover:bg-brand-dark hover:text-white transition flex items-center justify-center border border-brand-dark/20">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="no-print h-2 w-full bg-white overflow-hidden border-b border-brand-dark/10">
+        <div id="progress-bar" class="h-full bg-brand-primary transition-all duration-500 w-0"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-10 overflow-y-auto custom-scrollbar">
+        <div id="steps-container" class="w-full max-w-5xl"></div>
+    </main>
+
+    <footer class="no-print h-24 bg-white border-t-4 border-brand-dark px-8 flex items-center justify-between sticky bottom-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-3 px-8 py-3 bg-brand-muted text-brand-dark rounded-2xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark border-2 border-brand-dark/20 disabled:border-transparent text-lg">
+            <i class="fas fa-arrow-left"></i> VOLTAR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center">
+            <span id="step-counter" class="text-sm font-black text-brand-dark uppercase tracking-widest bg-brand-muted px-4 py-1 rounded-full border border-brand-dark/20">1 / 16</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-3 px-10 py-3 bg-brand-dark text-white rounded-2xl font-black hover:bg-brand-primary transition shadow-lg text-lg border-b-4 border-black/30 hover:border-b-0 hover:translate-y-1">
+            AVANÇAR <i class="fas fa-arrow-right"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01: Título ──────────────────────────────────────────────────
+            {
+                title: "A Ponte Entre as Tabelas",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] text-brand-primary mb-4 shadow-xl shadow-brand-dark/10">
+                            <i class="fas fa-network-wired text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-6xl font-black text-brand-dark leading-tight">Mapeamento no Dicionário</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto font-semibold">Como transformar as linhas do DER em ligações reais de Banco de Dados.</p>
+                        <div class="flex justify-center gap-4 text-brand-dark text-sm mt-12 font-bold opacity-50">
+                            <span class="px-4 py-2 bg-white rounded-xl shadow-sm border-2 border-brand-dark/20"><i class="fas fa-arrow-left mr-2"></i> SETAS <i class="fas fa-arrow-right ml-2"></i></span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02: O Problema ──────────────────────────────────────────────
+            {
+                title: "O Computador Não Enxerga Linhas",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-10 items-center">
+                        <div class="space-y-6 bg-white p-8 rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <p class="text-2xl font-bold text-brand-dark leading-relaxed">No papel, fazemos uma linha com um losango para mostrar que as entidades se conhecem.</p>
+                            <p class="text-xl text-brand-dark/80">Mas o computador não entende desenhos. Ele entende <strong>dados e números</strong>.</p>
+                            <div class="p-4 bg-brand-muted rounded-xl border-l-4 border-brand-primary text-lg font-bold">
+                                Como dizemos à máquina que o Aluno 01 pertence à Turma 05?
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-3xl h-72 flex flex-col items-center justify-center border-4 border-brand-dark shadow-xl relative overflow-x-auto">
+                            <svg width="400" height="150" viewBox="0 0 400 150">
+                                <rect x="20" y="50" width="100" height="50" class="node-rect" />
+                                <text x="70" y="80" text-anchor="middle" class="node-text">ALUNO</text>
+                                
+                                <line x1="120" y1="75" x2="160" y2="75" class="edge"/>
+                                
+                                <polygon points="200,35 240,75 200,115 160,75" class="rel-polygon" />
+                                <text x="200" y="80" text-anchor="middle" class="rel-text">ESTUDA</text>
+                                
+                                <line x1="240" y1="75" x2="280" y2="75" class="edge"/>
+                                
+                                <rect x="280" y="50" width="100" height="50" class="node-rect" />
+                                <text x="330" y="80" text-anchor="middle" class="node-text">TURMA</text>
+                            </svg>
+                            <div class="absolute bottom-4 bg-brand-primary text-white px-4 py-1 rounded-full text-sm font-bold animate-pulse">
+                                O computador precisa de valores!
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 03: A Solução ──────────────────────────────────────────────
+            {
+                title: "O Crachá de Visitante",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-2xl text-center text-brand-dark font-bold">Para ligar as tabelas, uma delas precisa <strong>emprestar o seu ID</strong> para a outra.</p>
+                        
+                        <div class="flex flex-col md:flex-row gap-6 justify-center">
+                            <!-- Chave Primária -->
+                            <div class="flex-1 bg-white p-8 rounded-3xl border-t-8 border-brand-primary shadow-xl">
+                                <div class="text-4xl text-brand-primary mb-4"><i class="fas fa-key"></i></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-2">Chave Primária (PK)</h3>
+                                <p class="text-lg text-brand-dark/80">É a identidade do dono da casa. É o ID original. Exemplo: O número do cartão de cidadão de uma pessoa.</p>
+                            </div>
+
+                            <!-- Setinha -->
+                            <div class="flex items-center justify-center text-4xl text-brand-dark/50">
+                                <i class="fas fa-arrow-right hidden md:block"></i>
+                                <i class="fas fa-arrow-down block md:hidden"></i>
+                            </div>
+
+                            <!-- Chave Estrangeira -->
+                            <div class="flex-1 bg-white p-8 rounded-3xl border-t-8 border-brand-dark shadow-xl">
+                                <div class="text-4xl text-brand-dark mb-4"><i class="fas fa-id-badge"></i></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-2">Chave Estrangeira (FK)</h3>
+                                <p class="text-lg text-brand-dark/80">É a PK que foi passear na outra tabela. Ela guarda o ID de quem veio de fora para fazer a ligação.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 04: Visualizando a Conexão ──────────────────────────────────
+            {
+                title: "A Mecânica das Chaves",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-center font-bold text-brand-dark">A Chave Estrangeira (Azul) aponta para a Chave Primária (Laranja/Coral).</p>
+                        
+                        <div class="bg-white p-8 rounded-3xl shadow-xl border-4 border-brand-dark max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-around gap-8">
+                            
+                            <!-- Tabela 1 -->
+                            <div class="border-2 border-brand-dark/20 rounded-xl w-64 overflow-hidden shadow-sm z-10">
+                                <div class="bg-brand-dark text-white font-black p-3 text-center">TURMA</div>
+                                <div class="p-3 bg-white">
+                                    <p class="font-mono text-lg font-bold text-brand-primary"><i class="fas fa-key mr-2"></i>tur_id (PK)</p>
+                                    <p class="font-mono text-sm mt-2 text-brand-dark/60">tur_nome</p>
+                                </div>
+                            </div>
+
+                            <!-- Conexão Visual SVG Responsiva -->
+                            <div class="flex-1 flex flex-col items-center justify-center relative w-full h-16 md:h-auto">
+                                <i class="fas fa-arrow-up block md:hidden text-4xl text-brand-dark"></i>
+                                <svg class="hidden md:block absolute inset-0 w-full h-full pointer-events-none" style="overflow: visible;">
+                                    <line x1="100%" y1="50%" x2="20" y2="50%" stroke="#576A8F" stroke-width="4" marker-end="url(#arrowhead)"/>
+                                    <defs>
+                                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="#576A8F" />
+                                        </marker>
+                                    </defs>
+                                </svg>
+                                <span class="text-xs font-bold mt-2 md:mt-0 bg-white px-2 rounded-lg relative z-10 text-brand-dark">Aponta para</span>
+                            </div>
+
+                            <!-- Tabela 2 -->
+                            <div class="border-2 border-brand-dark/20 rounded-xl w-64 overflow-hidden shadow-sm z-10">
+                                <div class="bg-brand-dark text-white font-black p-3 text-center">ALUNO</div>
+                                <div class="p-3 bg-white">
+                                    <p class="font-mono text-lg font-bold text-brand-primary"><i class="fas fa-key mr-2"></i>alu_id (PK)</p>
+                                    <p class="font-mono text-sm mt-2 text-brand-dark/60">alu_nome</p>
+                                    <div class="mt-4 p-2 bg-brand-secondary/30 border-2 border-brand-dark/40 rounded-lg">
+                                        <p class="font-mono text-sm font-bold text-brand-dark"><i class="fas fa-link mr-2"></i>alu_tur_id (FK)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center font-bold text-brand-dark text-lg mt-4 bg-brand-muted inline-block px-6 py-2 rounded-full border border-brand-dark/20 mx-auto block w-max">A tabela ALUNO guardou o ID da TURMA para si!</p>
+                    </div>
+                `
+            },
+            // ── 05: Prática Guiada - Início ──────────────────────────────────
+            {
+                title: "Prática Guiada: Universo Gamer",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-brand-dark text-white rounded-3xl shadow-xl flex items-center gap-6">
+                            <i class="fas fa-gamepad text-6xl text-brand-primary"></i>
+                            <div>
+                                <h3 class="text-3xl font-black text-brand-muted mb-2">Desafio da Aula</h3>
+                                <p class="text-lg">Vamos montar o Dicionário de Dados de um jogo RPG passo a passo.</p>
+                            </div>
+                        </div>
+                        
+                        <p class="font-bold text-xl text-brand-dark">A Regra do Jogo (O DER):</p>
+                        <div class="bg-white rounded-3xl py-6 flex items-center justify-center border-4 border-brand-dark shadow-sm overflow-x-auto">
+                            <svg width="700" height="200" viewBox="0 0 700 200">
+                                <!-- 1. Linhas de Atributos (Atrás de tudo) -->
+                                <!-- GAMER (Centro: 80, 140) -->
+                                <line x1="80" y1="140" x2="30" y2="60" class="edge" stroke-width="2" />
+                                <line x1="80" y1="140" x2="80" y2="40" class="edge" stroke-width="2" />
+                                <line x1="80" y1="140" x2="130" y2="60" class="edge" stroke-width="2" />
+                                
+                                <!-- AVATAR (Centro: 350, 140) -->
+                                <line x1="350" y1="140" x2="310" y2="50" class="edge" stroke-width="2" />
+                                <line x1="350" y1="140" x2="390" y2="50" class="edge" stroke-width="2" />
+                                
+                                <!-- PODER (Centro: 620, 140) -->
+                                <line x1="620" y1="140" x2="570" y2="60" class="edge" stroke-width="2" />
+                                <line x1="620" y1="140" x2="620" y2="40" class="edge" stroke-width="2" />
+                                <line x1="620" y1="140" x2="670" y2="60" class="edge" stroke-width="2" />
+
+                                <!-- 2. Linhas de Relacionamentos -->
+                                <line x1="130" y1="140" x2="300" y2="140" class="edge" />
+                                <line x1="400" y1="140" x2="570" y2="140" class="edge" />
+                                
+                                <!-- 3. Relacionamentos -->
+                                <polygon points="215,115 255,140 215,165 175,140" class="rel-polygon" />
+                                <text x="215" y="144" text-anchor="middle" class="rel-text">CRIA</text>
+                                
+                                <polygon points="485,115 525,140 485,165 445,140" class="rel-polygon" />
+                                <text x="485" y="144" text-anchor="middle" class="rel-text">USA</text>
+
+                                <!-- 4. Entidades -->
+                                <rect x="30" y="115" width="100" height="50" class="node-rect" />
+                                <text x="80" y="145" text-anchor="middle" class="node-text">GAMER</text>
+                                
+                                <rect x="300" y="115" width="100" height="50" class="node-rect" />
+                                <text x="350" y="145" text-anchor="middle" class="node-text">AVATAR</text>
+
+                                <rect x="570" y="115" width="100" height="50" class="node-rect" />
+                                <text x="620" y="145" text-anchor="middle" class="node-text">PODER</text>
+
+                                <!-- 5. Atributos GAMER -->
+                                <ellipse cx="30" cy="60" rx="25" ry="15" fill="#FFF8DE" stroke="#FF7444" stroke-width="2" />
+                                <text x="30" y="64" text-anchor="middle" font-size="10" fill="#FF7444" style="text-decoration: underline; font-weight: bold;">id</text>
+                                
+                                <ellipse cx="80" cy="40" rx="35" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="80" y="44" text-anchor="middle" font-size="10" fill="#576A8F">data_cad</text>
+
+                                <ellipse cx="130" cy="60" rx="40" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="130" y="64" text-anchor="middle" font-size="10" fill="#576A8F">nickname</text>
+
+                                <!-- Atributos AVATAR -->
+                                <ellipse cx="310" cy="50" rx="25" ry="15" fill="#FFF8DE" stroke="#FF7444" stroke-width="2" />
+                                <text x="310" y="54" text-anchor="middle" font-size="10" fill="#FF7444" style="text-decoration: underline; font-weight: bold;">id</text>
+
+                                <ellipse cx="390" cy="50" rx="35" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="390" y="54" text-anchor="middle" font-size="10" fill="#576A8F">classe</text>
+
+                                <!-- Atributos PODER -->
+                                <ellipse cx="570" cy="60" rx="25" ry="15" fill="#FFF8DE" stroke="#FF7444" stroke-width="2" />
+                                <text x="570" y="64" text-anchor="middle" font-size="10" fill="#FF7444" style="text-decoration: underline; font-weight: bold;">id</text>
+
+                                <ellipse cx="620" cy="40" rx="30" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="620" y="44" text-anchor="middle" font-size="10" fill="#576A8F">dano</text>
+
+                                <ellipse cx="670" cy="60" rx="30" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="670" y="64" text-anchor="middle" font-size="10" fill="#576A8F">nome</text>
+                            </svg>
+                        </div>
+                        <p class="text-center font-bold text-brand-dark/70 text-lg bg-brand-muted px-4 py-2 rounded-xl inline-block w-full border border-brand-dark/10">O <strong>GAMER</strong> cria o <strong>AVATAR</strong>. E o <strong>AVATAR</strong> usa o <strong>PODER</strong>.</p>
+                    </div>
+                `
+            },
+            // ── 06: Prática Guiada - Passo 1 ──────────────────────────────────
+            {
+                title: "1ª Tabela: GAMER (O Dono de Tudo)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl font-bold text-brand-dark">A primeira tabela não precisa de chaves estrangeiras, ela é independente.</p>
+                        
+                        <div class="bg-white border-4 border-brand-dark rounded-3xl overflow-hidden shadow-xl">
+                            <div class="bg-brand-dark text-white px-6 py-4 flex gap-4 items-center">
+                                <span class="bg-brand-primary px-3 py-1 rounded font-bold text-sm">Tabela</span>
+                                <span class="text-2xl font-black font-mono tracking-widest">GAMER</span>
+                            </div>
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-brand-muted text-brand-dark border-b-2 border-brand-dark/20 text-sm">
+                                        <th class="p-4 font-bold">Coluna (Nome)</th>
+                                        <th class="p-4 font-bold">Tipo</th>
+                                        <th class="p-4 font-bold">Restrição</th>
+                                        <th class="p-4 font-bold">O que guarda?</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-dark/10">
+                                        <td class="p-4 font-mono font-bold text-brand-primary">gam_id</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">INT</td>
+                                        <td class="p-4"><span class="bg-brand-primary text-white px-2 py-1 rounded text-xs font-black">PK</span></td>
+                                        <td class="p-4 text-brand-dark/80">O código único de registo do jogador.</td>
+                                    </tr>
+                                    <tr class="bg-brand-secondary/10 border-b border-brand-dark/10">
+                                        <td class="p-4 font-mono font-bold text-brand-dark">gam_nickname</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">VARCHAR</td>
+                                        <td class="p-4"><span class="bg-brand-dark/20 text-brand-dark px-2 py-1 rounded text-xs font-black">UK</span></td>
+                                        <td class="p-4 text-brand-dark/80">O nome que aparece no jogo (não pode repetir).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-4 font-mono font-bold text-brand-dark">gam_data_cad</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">DATETIME</td>
+                                        <td class="p-4">—</td>
+                                        <td class="p-4 text-brand-dark/80">A data e a hora exatas em que a conta foi criada.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 bg-brand-primary/10 rounded-xl flex items-center gap-4 border-2 border-brand-primary/30">
+                            <i class="fas fa-check-circle text-2xl text-brand-primary"></i>
+                            <p class="text-brand-dark font-bold">Tabela GAMER pronta! Ela tem a sua <span class="text-brand-primary">Chave Primária (PK)</span>.</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 07: Prática Guiada - Passo 2 ──────────────────────────────────
+            {
+                title: "2ª Tabela: AVATAR (Recebe o ID)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl font-bold text-brand-dark">O Avatar não existe sozinho. Temos de anotar no Dicionário <span class="underline">quem é o Gamer dono dele</span>.</p>
+                        
+                        <div class="bg-white border-4 border-brand-dark rounded-3xl overflow-hidden shadow-xl relative">
+                            <div class="bg-brand-dark text-white px-6 py-4 flex gap-4 items-center">
+                                <span class="bg-brand-primary px-3 py-1 rounded font-bold text-sm">Tabela</span>
+                                <span class="text-2xl font-black font-mono tracking-widest">AVATAR</span>
+                            </div>
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-brand-muted text-brand-dark border-b-2 border-brand-dark/20 text-sm">
+                                        <th class="p-4 font-bold">Coluna (Nome)</th>
+                                        <th class="p-4 font-bold">Tipo</th>
+                                        <th class="p-4 font-bold">Restrição</th>
+                                        <th class="p-4 font-bold">O que guarda?</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-dark/10">
+                                        <td class="p-4 font-mono font-bold text-brand-primary">ava_id</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">INT</td>
+                                        <td class="p-4"><span class="bg-brand-primary text-white px-2 py-1 rounded text-xs font-black">PK</span></td>
+                                        <td class="p-4 text-brand-dark/80">Código único do personagem.</td>
+                                    </tr>
+                                    <tr class="border-b border-brand-dark/10 bg-brand-secondary/10">
+                                        <td class="p-4 font-mono font-bold text-brand-dark">ava_classe</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">ENUM</td>
+                                        <td class="p-4">—</td>
+                                        <td class="p-4 text-brand-dark/80">Opções: 'Mago', 'Guerreiro' ou 'Arqueiro'.</td>
+                                    </tr>
+                                    <tr class="bg-brand-secondary/30 border-l-8 border-brand-dark animate-pulse">
+                                        <td class="p-4 font-mono font-black text-brand-dark text-lg">ava_gam_id_fk</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">INT</td>
+                                        <td class="p-4"><span class="bg-brand-dark text-white px-2 py-1 rounded text-xs font-black">FK</span></td>
+                                        <td class="p-4 font-bold text-brand-dark">Guarda o ID do Gamer (Vem da tabela GAMER)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 08: Prática Guiada - Passo 3 ──────────────────────────────────
+            {
+                title: "3ª Tabela: PODER (A Cadeia Continua)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl font-bold text-brand-dark">Agora, o PODER pertence ao Avatar. A regra é a mesma: guardamos o ID do dono!</p>
+                        
+                        <div class="bg-white border-4 border-brand-dark rounded-3xl overflow-hidden shadow-xl relative">
+                            <div class="bg-brand-dark text-white px-6 py-4 flex gap-4 items-center">
+                                <span class="bg-brand-primary px-3 py-1 rounded font-bold text-sm">Tabela</span>
+                                <span class="text-2xl font-black font-mono tracking-widest">PODER</span>
+                            </div>
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-brand-muted text-brand-dark border-b-2 border-brand-dark/20 text-sm">
+                                        <th class="p-4 font-bold">Coluna (Nome)</th>
+                                        <th class="p-4 font-bold">Tipo</th>
+                                        <th class="p-4 font-bold">Restrição</th>
+                                        <th class="p-4 font-bold">O que guarda?</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-brand-dark/10">
+                                        <td class="p-4 font-mono font-bold text-brand-primary">pod_id</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">INT</td>
+                                        <td class="p-4"><span class="bg-brand-primary text-white px-2 py-1 rounded text-xs font-black">PK</span></td>
+                                        <td class="p-4 text-brand-dark/80">Código único do poder.</td>
+                                    </tr>
+                                    <tr class="border-b border-brand-dark/10 bg-brand-secondary/10">
+                                        <td class="p-4 font-mono font-bold text-brand-dark">pod_nome</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">VARCHAR</td>
+                                        <td class="p-4">—</td>
+                                        <td class="p-4 text-brand-dark/80">Nome da habilidade (ex: Bola de Fogo).</td>
+                                    </tr>
+                                    <tr class="border-b border-brand-dark/10">
+                                        <td class="p-4 font-mono font-bold text-brand-dark">pod_dano</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">DECIMAL</td>
+                                        <td class="p-4">—</td>
+                                        <td class="p-4 text-brand-dark/80">Valor numérico do dano (ex: 99.50).</td>
+                                    </tr>
+                                    <tr class="bg-brand-secondary/30 border-l-8 border-brand-dark">
+                                        <td class="p-4 font-mono font-black text-brand-dark text-lg">pod_ava_id_fk</td>
+                                        <td class="p-4 font-bold text-brand-dark/70">INT</td>
+                                        <td class="p-4"><span class="bg-brand-dark text-white px-2 py-1 rounded text-xs font-black">FK</span></td>
+                                        <td class="p-4 font-bold text-brand-dark">Guarda o ID do Avatar (Vem da tabela AVATAR)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 09: Regra Final da FK ─────────────────────────────────────────
+            {
+                title: "A Regra de Ouro da FK",
+                content: `
+                    <div class="flex items-center justify-center h-full py-10">
+                        <div class="bg-white border-4 border-brand-secondary rounded-[2rem] p-10 shadow-2xl max-w-3xl text-center space-y-6">
+                            <i class="fas fa-link text-6xl text-brand-secondary mb-4"></i>
+                            <h3 class="text-4xl font-black text-brand-dark">Como nomear uma FK?</h3>
+                            <div class="p-6 bg-brand-muted rounded-2xl text-xl font-bold text-brand-dark leading-relaxed border border-brand-dark/20">
+                                <p>1. Comece com o prefixo da tabela atual.</p>
+                                <p class="my-4">2. Copie o nome exato da PK da tabela de fora.</p>
+                                <p>3. Termine com <span class="bg-brand-dark text-white px-2 py-1 rounded">_fk</span>.</p>
+                            </div>
+                            <p class="font-mono text-2xl text-brand-primary mt-4 font-black">ava_gam_id_fk</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 10: Exercício 1 ───────────────────────────────────────────────
+            {
+                title: "Desafio 1: O Projeto Escolar",
+                content: `
+                    <div class="space-y-8">
+                        <div class="bg-white p-8 rounded-3xl shadow-md border-2 border-brand-dark/10 text-xl font-medium text-brand-dark leading-relaxed">
+                            <p>Temos a tabela <strong>ALUNO</strong> (alu_id, alu_nome) e a tabela <strong>PROJETO</strong> (pro_id, pro_tema).</p>
+                            <p class="mt-4 font-black">Regra do negócio: "A tabela Projeto tem que anotar qual Aluno é o líder do grupo."</p>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-dark rounded-r-2xl shadow-sm border-t border-r border-b border-brand-dark/10">
+                            <p class="font-black text-brand-dark mb-4 text-lg">Responda no seu documento:</p>
+                            <ul class="space-y-3 text-lg font-semibold text-brand-dark/80">
+                                <li>A) Em qual tabela vamos criar a Chave Estrangeira (FK)?</li>
+                                <li>B) Qual deve ser o nome exato dessa nova coluna de FK usando as convenções que aprendemos?</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 11: Exercício 2 ───────────────────────────────────────────────
+            {
+                title: "Desafio 2: A Playlist",
+                content: `
+                    <div class="space-y-8">
+                        <div class="bg-white p-8 rounded-3xl shadow-md border-2 border-brand-dark/10 text-xl font-medium text-brand-dark leading-relaxed">
+                            <p>Temos a tabela <strong>BANDA</strong> (ban_id, ban_nome) e a tabela <strong>ALBUM</strong> (alb_id, alb_titulo).</p>
+                            <p class="mt-4 font-black">Regra do negócio: "Cada Álbum deve registrar o ID de qual Banda o gravou."</p>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-dark rounded-r-2xl shadow-sm border-t border-r border-b border-brand-dark/10">
+                            <p class="font-black text-brand-dark mb-4 text-lg">Responda no seu documento:</p>
+                            <ul class="space-y-3 text-lg font-semibold text-brand-dark/80">
+                                <li>A) Em qual tabela vamos colocar o "crachá de visitante" (FK)?</li>
+                                <li>B) Qual deve ser o nome exato dessa coluna de FK?</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 12: Exercício 3 ───────────────────────────────────────────────
+            {
+                title: "Desafio 3: A Pokedex",
+                content: `
+                    <div class="space-y-8">
+                        <div class="bg-white p-8 rounded-3xl shadow-md border-2 border-brand-dark/10 text-xl font-medium text-brand-dark leading-relaxed">
+                            <p>Temos a tabela <strong>TREINADOR</strong> (tre_id, tre_nome) e a tabela <strong>POKEMON</strong> (pok_id, pok_especie).</p>
+                            <p class="mt-4 font-black">Regra do negócio: "A Pokedex regista o Pokemon e tem obrigatoriamente de guardar o ID do Treinador que o capturou."</p>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-dark rounded-r-2xl shadow-sm border-t border-r border-b border-brand-dark/10">
+                            <p class="font-black text-brand-dark mb-4 text-lg">Responda no seu documento:</p>
+                            <ul class="space-y-3 text-lg font-semibold text-brand-dark/80">
+                                <li>A) Em qual das duas tabelas fica a Chave Estrangeira?</li>
+                                <li>B) Escreva a estrutura exata desta coluna (Nome da coluna e Tipo de Dado).</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 13: Exercício 4 ───────────────────────────────────────────────
+            {
+                title: "Desafio 4: Redes Sociais (Nível Difícil)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-brand-dark/10 text-lg font-medium text-brand-dark leading-relaxed">
+                            <p>Temos três tabelas: <strong>INFLUENCIADOR</strong> (inf_id), <strong>VIDEO</strong> (vid_id), e <strong>COMENTARIO</strong> (com_id).</p>
+                            <p class="mt-4 font-black text-brand-primary">Regra do negócio em cadeia:</p>
+                            <ul class="list-disc ml-6 mt-2 space-y-2">
+                                <li>O Vídeo deve registar qual Influenciador o publicou.</li>
+                                <li>O Comentário deve registar em qual Vídeo ele foi escrito.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-dark rounded-r-2xl shadow-sm border-t border-r border-b border-brand-dark/10">
+                            <p class="font-black text-brand-dark mb-4 text-lg">Responda no seu documento:</p>
+                            <ul class="space-y-2 text-md font-semibold text-brand-dark/80">
+                                <li>A) Qual é o nome da FK que vai entrar na tabela VIDEO?</li>
+                                <li>B) Qual é o nome da FK que vai entrar na tabela COMENTARIO?</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 14: Exercício 5 ───────────────────────────────────────────────
+            {
+                title: "Desafio 5: Monte o Dicionário Final",
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-brand-dark text-white p-8 rounded-3xl shadow-xl flex items-center gap-6">
+                            <i class="fas fa-table text-5xl text-brand-secondary"></i>
+                            <div>
+                                <h3 class="text-2xl font-black mb-2">Prática no Google Sheets</h3>
+                                <p class="text-lg opacity-80">Pegue no cenário do Exercício 4 (Redes Sociais) e crie o Dicionário de Dados real.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-2 border-brand-dark/10 rounded-2xl">
+                            <h4 class="font-bold text-brand-dark mb-4 text-lg">O que deve fazer:</h4>
+                            <ul class="space-y-3 text-brand-dark/80 font-medium">
+                                <li><i class="fas fa-check text-brand-primary mr-2"></i> Criar as 3 abas no Sheets (INFLUENCIADOR, VIDEO, COMENTARIO).</li>
+                                <li><i class="fas fa-check text-brand-primary mr-2"></i> Colocar as colunas obrigatórias (Nome, Tipo, Tamanho, Null, Default, Restrição, Descrição).</li>
+                                <li><i class="fas fa-check text-brand-primary mr-2"></i> Garantir que as <span class="bg-brand-dark text-white px-2 py-1 rounded">FK</span> estão nas tabelas corretas e com os nomes corretos.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 15: Resumo ────────────────────────────────────────────────────
+            {
+                title: "Resumo da Aula",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <h4 class="font-black text-2xl text-brand-dark mb-6 border-b-4 border-brand-primary pb-2 inline-block">Conceitos Chave</h4>
+                            <ul class="space-y-5 text-lg font-medium text-brand-dark/80">
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-key text-brand-primary mt-1 text-xl"></i> 
+                                    <span><strong>PK:</strong> O ID dono da tabela. O "BI/Cartão de Cidadão".</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-id-badge text-brand-secondary mt-1 text-xl"></i> 
+                                    <span><strong>FK:</strong> O ID de fora que vem fazer uma visita para conectar as tabelas.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <i class="fas fa-link text-brand-dark mt-1 text-xl"></i> 
+                                    <span>As ligações (losangos) no DER só se tornam reais quando usamos uma FK no Dicionário.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-brand-dark text-white p-8 rounded-3xl shadow-xl flex flex-col justify-center items-center text-center space-y-6">
+                            <i class="fas fa-spell-check text-6xl text-brand-muted"></i>
+                            <h4 class="text-2xl font-black text-brand-secondary">Regra do Nome da FK</h4>
+                            <p class="text-xl font-mono bg-white text-brand-dark px-4 py-2 rounded-xl font-bold">
+                                prefixo_nomeDaPK_fk
+                            </p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 16: Fechamento ────────────────────────────────────────────────
+            {
+                title: "Conclusão",
+                content: `
+                    <div class="text-center space-y-10 py-10">
+                        <div class="inline-block p-10 bg-white rounded-full border-8 border-brand-secondary shadow-2xl">
+                            <i class="fas fa-database text-brand-dark text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl font-black text-brand-dark">Conexões Estabelecidas!</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto font-semibold">Agora o seu Banco de Dados deixou de ser um conjunto de ilhas e passou a ser um sistema de verdade.</p>
+                        
+                        <div class="mt-12 px-10 py-4 bg-brand-primary text-white rounded-2xl font-black text-xl shadow-xl inline-block border-b-4 border-brand-dark/30">
+                            Fim da Aula 09
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active">
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-10 text-brand-dark">${step.title}</h2>
+                    <div class="content-body">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 
+                ? 'FINALIZAR <i class="fas fa-check-circle ml-2"></i>' 
+                : 'AVANÇAR <i class="fas fa-arrow-right ml-2"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Banco de Dados I</h1>
+                <p class="font-bold text-xl">Aula 09 - Mapeamento de Relacionamentos (Chaves Estrangeiras)</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-12 border-b-2 border-brand-dark/20 pb-10">
+                    <h2 class="text-3xl font-black mb-6 text-brand-dark border-l-8 border-brand-primary pl-4">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>
