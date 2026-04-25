@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Exercício C: O Duelo Final</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1e1e1e; color: #d4d4d4; padding: 40px; }
+        .card { background: #2d2d2d; border-radius: 8px; padding: 20px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1 { color: #4ec9b0; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .rule { background: #3e3e42; padding: 15px; border-left: 4px solid #ce9178; margin: 15px 0; }
+        code { color: #9cdcfe; font-weight: bold; }
+        pre { background: #000; padding: 15px; border-radius: 5px; color: #d7ba7d; overflow-x: auto; }
+        .highlight { color: #f44336; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>⚔️ RPG Logic: O Duelo de Turno Único</h1>
+    <p>O mestre da masmorra desafiou você a criar o sistema de combate do jogo. Como você ainda não aprendeu <code>else if</code>, seu desafio é usar <strong>Operadores Lógicos</strong> para manter o código organizado!</p>
+
+    <div class="rule">
+        <strong>Objetivo:</strong> Determinar se o jogador <code>acertouAtaque</code> (1 ou 0) e se o jogador <code>foiAtingido</code> (1 ou 0).
+    </div>
+
+    <h3>📋 Regras de Negócio</h3>
+    <ul>
+        <li><strong>Guerreiro (Classe 1):</strong> Acerta se <code>dado > 12</code> <strong>E</strong> <code>distancia < 3</code>.</li>
+        <li><strong>Arqueiro (Classe 2):</strong> Acerta se <code>dado > 10</code> <strong>E</strong> <code>distancia > 5</code>.</li>
+        <li><strong>Mago (Classe 3):</strong> Acerta se <code>dado > 18</code>. Ele ignora a distância.</li>
+        <li><strong>Dano do Monstro:</strong> O monstro te atinge se <code>!(classe == 3)</code> <strong>E</strong> o dado for menor que 10.</li>
+    </ul>
+
+    <p class="highlight">⚠️ Atenção: Você pode usar <code>else</code>, mas não pode usar <code>else if</code>!</p>
+
+    <h3>💻 Ponto de Partida</h3>
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+int main() {
+    int classe, dadoAtaque, distancia;
+    int acertouAtaque = 0;
+    int foiAtingido = 0;
+
+    srand(time(NULL));
+    dadoAtaque = (rand() % 20) + 1;
+
+    printf("Escolha: 1-Guerreiro | 2-Arqueiro | 3-Mago: ");
+    scanf("%d", &classe);
+    printf("Distancia do monstro: ");
+    scanf("%d", &distancia);
+
+    printf("\n>>> Voce rolou o dado: %d <<<\n", dadoAtaque);
+
+    // DICA: Em vez de fazer vários elses aninhados, 
+    // tente usar: if (classe == 1 && ...)
+
+    // ESCREVA SUA LOGICA AQUI
+    
+
+
+    // RESULTADOS FINAIS
+    if (acertouAtaque == 1) {
+        printf("Sucesso! O monstro foi atingido.\n");
+    } else {
+        printf("Voce errou o golpe...\n");
+    }
+
+    if (foiAtingido == 1) {
+        printf("O monstro contra-atacou e te feriu!\n");
+    } else {
+        printf("Voce saiu ileso deste turno.\n");
+    }
+
+    return 0;
+}
+</pre>
+</div>
+
+</body>
+</html>
