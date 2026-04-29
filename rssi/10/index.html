@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 10: Prática de Endereçamento IP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        /* Paleta Requisitada
+           dark      → #000000 (Preto)
+           primary   → #282a3a (Azul Escuro / Slate)
+           secondary → #735f32 (Oliva / Castanho)
+           accent    → #c69749 (Dourado / Ocre)
+        */
+        :root {
+            --primary-color: #282a3a;
+            --secondary-color: #735f32;
+            --dark-color: #000000;
+            --accent-color: #c69749;
+            --muted-color: #fcfbfa; /* Fundo bem claro, quase branco, puxado para o ocre */
+            --background-color: #f0f1f5; /* Fundo geral da página */
+            --card-background: #ffffff;
+            --text-color: #1a1b22;
+            --border-color: #d8dbdf;
+            --success-color: #2c7a4b;
+            --warning-color: #b36b00;
+            --danger-color: #a82033;
+            --info-color: #2b6585;
+            --light-grey: #e8e9ec;
+            --gold-light: #f5eedf;
+        }
+
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        #presentation-container { width: 100%; height: 100%; position: relative; }
+        .slides-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
+        
+        .slide {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(160deg, #ffffff 0%, #f4f5f8 100%);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 36px 56px 76px 56px; box-sizing: border-box;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden; overflow-y: auto;
+        }
+        
+        .slide.active { opacity: 1; transform: translateY(0); visibility: visible; z-index: 1; }
+        
+        /* Barra decorativa superior em cada slide */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--dark-color), var(--primary-color), var(--accent-color));
+        }
+        
+        /* Navegação */
+        .navigation {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 12px; z-index: 100;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+        }
+        
+        .nav-btn {
+            background-color: var(--primary-color); color: white;
+            border: none; border-radius: 50%;
+            width: 44px; height: 44px; font-size: 20px; cursor: pointer;
+            transition: background-color 0.25s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(40,42,58,0.3);
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        .nav-btn:hover { background-color: var(--dark-color); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.4); }
+        .nav-btn:disabled { background-color: #aeb0b8; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .slide-counter {
+            font-size: 15px; font-weight: bold; color: var(--primary-color);
+            min-width: 58px; text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Tipografia */
+        h1 { color: var(--primary-color); margin-bottom: 10px; text-align: center; font-weight: 700; font-size: 2.6em; line-height: 1.2; }
+        h2 {
+            color: var(--primary-color); margin-bottom: 18px; text-align: center;
+            font-weight: 700; font-size: 1.95em; line-height: 1.2;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--accent-color);
+            width: 100%; max-width: 900px;
+        }
+        h3 { color: var(--secondary-color); margin-bottom: 10px; font-weight: 700; font-size: 1.2em; }
+        p  { font-size: 1.05em; line-height: 1.7; max-width: 900px; text-align: center; margin-bottom: 8px; }
+        ul, ol { max-width: 900px; width: 100%; font-size: 1em; line-height: 1.75; }
+        li { margin-bottom: 6px; }
+        
+        .highlight { color: var(--accent-color); font-weight: bold; }
+        .subtitle { font-size: 1.2em; color: var(--secondary-color); margin-top: 6px; text-align: center; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; background: var(--muted-color); color: var(--primary-color); padding: 2px 7px; border-radius: 4px; font-size: 0.9em; border: 1px solid var(--border-color); }
+        
+        /* Layout */
+        .two-col { display: flex; gap: 22px; width: 100%; max-width: 1150px; align-items: flex-start; }
+        .col { flex: 1; }
+        .three-col { display: flex; gap: 16px; width: 100%; max-width: 1100px; }
+        .three-col .col { flex: 1; }
+        
+        /* Cards */
+        .card { background: var(--card-background); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 18px 20px; box-shadow: 0 3px 14px rgba(0,0,0,0.05); }
+        .card-primary   { border-top: 5px solid var(--primary-color); background: linear-gradient(180deg, #f7f7f9 0%, #fff 40%); }
+        .card-secondary { border-top: 5px solid var(--secondary-color); background: linear-gradient(180deg, #f8f6f2 0%, #fff 40%); }
+        .card-accent    { border-top: 5px solid var(--accent-color); background: linear-gradient(180deg, #fcf9f2 0%, #fff 40%); }
+        .card-dark      { border-top: 5px solid var(--dark-color); background: linear-gradient(180deg, #f0f0f0 0%, #fff 40%); }
+        
+        /* Info boxes */
+        .info-box { background-color: var(--muted-color); border-left: 6px solid var(--primary-color); padding: 12px 18px; border-radius: 0 8px 8px 0; margin: 10px 0; width: 100%; max-width: 900px; box-sizing: border-box; font-size: 0.97em; line-height: 1.65; color: var(--text-color); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .info-box.warning { border-left-color: var(--warning-color); background-color: #fef8f0; }
+        .info-box.success { border-left-color: var(--success-color); background-color: #f0fdf4; }
+        .info-box.accent  { border-left-color: var(--accent-color);  background-color: var(--gold-light); }
+        
+        /* Botões Interativos (Gabarito) */
+        .btn-revelar {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 0.3px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(40,42,58,0.2);
+        }
+        .btn-revelar:hover { background: var(--dark-color); transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.3); }
+        
+        /* Passos */
+        .passo-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            background: var(--muted-color);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.95em;
+            line-height: 1.65;
+            margin-bottom: 8px;
+        }
+        .passo-num {
+            min-width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 0.9em;
+            flex-shrink: 0;
+        }
+        
+        /* Gabarito Oculto */
+        .gabarito-box {
+            display: none;
+            margin-top: 15px;
+            background: white;
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 15px;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* IP display customizado */
+        .ip-part { display: inline-block; background: var(--light-grey); border: 2px solid var(--secondary-color); border-radius: 6px; padding: 4px 10px; margin: 2px; font-family: 'JetBrains Mono', monospace; font-weight: bold;}
+
+        /* ── Indicador de progresso textual por slide ── */
+        .slide-progress-label {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78em;
+            color: var(--secondary-color);
+            background: rgba(255,255,255,0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 3px 12px;
+            letter-spacing: 0.3px;
+            z-index: 2;
+        }
+
+        /* Print */
+        @media print {
+            html, body { height: auto; overflow: visible; }
+            #presentation-container, .slides-container { height: auto; overflow: visible; }
+            .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: auto; min-height: 100vh; page-break-after: always; overflow: visible; padding: 30px; background: white !important; }
+            .slide::before { display: none; }
+            .navigation { display: none !important; }
+            .gabarito-box { display: block !important; } /* Imprime com as respostas visíveis */
+            .btn-revelar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="presentation-container">
+        <div class="slides-container">
+            
+            <!-- SLIDE 1: CAPA -->
+            <section class="slide active" style="background: linear-gradient(150deg, #000000 0%, #1a1b24 50%, #282a3a 100%) !important;">
+                <svg width="110" height="110" viewBox="0 0 110 110" style="margin-bottom:22px; filter: drop-shadow(0 6px 18px rgba(198,151,73,0.4));">
+                    <rect x="25" y="25" width="60" height="60" rx="12" fill="rgba(115,95,50,0.5)" stroke="#c69749" stroke-width="2"/>
+                    <line x1="55" y1="15" x2="55" y2="25" stroke="#c69749" stroke-width="3"/>
+                    <line x1="55" y1="85" x2="55" y2="95" stroke="#c69749" stroke-width="3"/>
+                    <line x1="15" y1="55" x2="25" y2="55" stroke="#c69749" stroke-width="3"/>
+                    <line x1="85" y1="55" x2="95" y2="55" stroke="#c69749" stroke-width="3"/>
+                    <text x="55" y="62" text-anchor="middle" font-size="20" font-family="JetBrains Mono" fill="white" font-weight="700">/24</text>
+                </svg>
+                <h1 style="color:white; font-size:2.8em; text-shadow: 0 2px 12px rgba(0,0,0,0.6);">Prática de Endereçamento IP:<br>Cálculo de Sub-redes</h1>
+                <p class="subtitle" style="color:var(--accent-color); font-size:1.2em; margin-top:4px;">Da teoria à prática: 8 exercícios de fixação</p>
+                <p style="margin-top:18px; font-size:0.98em; color:rgba(255,255,255,0.7);">
+                    <strong style="color:white;">Prof. William Paiva</strong> &nbsp;|&nbsp; RSSI — Aula 10
+                </p>
+                <div style="margin-top:28px; background:rgba(255,255,255,0.05); border:1px solid rgba(198,151,73,0.3); border-radius:12px; padding:14px 20px; max-width:820px; width:100%;">
+                    <p style="color:var(--accent-color); font-size:0.85em; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Nesta Aula</p>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+                        <span style="background:rgba(40,42,58,0.8); border:1px solid #735f32; border-radius:6px; padding:6px 14px; font-size:0.85em; color:white;">Slides 1–4: Revisão Rápida</span>
+                        <span style="background:rgba(198,151,73,0.2); border:1px solid #c69749; border-radius:6px; padding:6px 14px; font-size:0.85em; color:#c69749; font-weight:bold;">Slides 5–12: 8 Exercícios Práticos</span>
+                        <span style="background:rgba(40,42,58,0.8); border:1px solid #735f32; border-radius:6px; padding:6px 14px; font-size:0.85em; color:white;">Slide 13: Conclusão</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: REVISAO FORMULA -->
+            <section class="slide">
+                <h2>Recapitulação: A Fórmula Mágica</h2>
+                <div class="two-col" style="margin-top: 10px;">
+                    <div class="col card card-primary">
+                        <h3 style="color: var(--primary-color);">1. Identificando a Rede e o Host</h3>
+                        <p style="text-align: left; font-size: 0.95em;">O IPv4 possui 32 bits. O <strong>prefixo (CIDR)</strong> indica quantos bits pertencem à REDE.</p>
+                        <div style="background: var(--light-grey); padding: 10px; border-radius: 8px; text-align: center; margin: 15px 0;">
+                            <span style="font-family: 'JetBrains Mono'; font-size: 1.2em; color: var(--primary-color); font-weight: bold;">/26</span><br>
+                            <span style="font-size: 0.85em;">26 bits para Rede &rarr; <strong>6 bits para Host</strong></span>
+                        </div>
+                    </div>
+                    <div class="col card card-accent">
+                        <h3 style="color: var(--accent-color);">2. Calculando a Capacidade</h3>
+                        <p style="text-align: left; font-size: 0.95em;">Com os bits de host encontrados (chamemos de <strong style="color: var(--accent-color);">n</strong>), usamos a fórmula para descobrir o total de endereços:</p>
+                        <div style="font-size: 2em; text-align: center; font-family: 'JetBrains Mono'; font-weight: bold; margin: 15px 0; color: var(--dark-color);">
+                            2<sup style="color: var(--accent-color);">n</sup>
+                        </div>
+                        <ul style="font-size: 0.85em;">
+                            <li><strong>Tamanho do Bloco:</strong> 2<sup>n</sup></li>
+                            <li><strong>Hosts Úteis:</strong> 2<sup>n</sup> - 2 (Tiramos o IP da rede e o IP de broadcast).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: REVISAO REGRA DO BLOCO -->
+            <section class="slide">
+                <h2>Recapitulação: A Regra do Bloco</h2>
+                <p>Como encontrar o Endereço de Rede a partir do tamanho do bloco?</p>
+                
+                <div style="background: var(--muted-color); border: 2px solid var(--secondary-color); border-radius: 10px; padding: 20px; max-width: 900px; width: 100%;">
+                    <p style="text-align: left; font-weight: bold; color: var(--primary-color); margin-top: 0;">O octeto "quebrado" sempre conta em múltiplos do tamanho do bloco.</p>
+                    
+                    <p style="text-align: left; font-size: 0.9em;">Se o seu bloco tem tamanho <strong>64</strong>, as redes vão pular de 64 em 64 naquele octeto:</p>
+                    <div style="display: flex; gap: 10px; justify-content: center; margin: 15px 0;">
+                        <span class="ip-part" style="border-color: var(--primary-color);">.0</span> &rarr;
+                        <span class="ip-part" style="border-color: var(--primary-color);">.64</span> &rarr;
+                        <span class="ip-part" style="border-color: var(--primary-color);">.128</span> &rarr;
+                        <span class="ip-part" style="border-color: var(--primary-color);">.192</span>
+                    </div>
+                    
+                    <ul style="text-align: left; font-size: 0.95em;">
+                        <li><strong>A Rede:</strong> É o múltiplo atual.</li>
+                        <li><strong>O Broadcast:</strong> É o número imediatamente anterior ao <em>próximo</em> múltiplo.</li>
+                        <li><strong>Os Hosts:</strong> Tudo que estiver no meio.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: O MÉTODO EM 4 PASSOS -->
+            <section class="slide">
+                <h2>O Método em 4 Passos</h2>
+                <p style="margin-bottom: 20px;">Use este roteiro mental para resolver qualquer um dos exercícios a seguir:</p>
+                
+                <div style="display:flex; flex-direction:column; gap:10px; max-width:850px; width:100%;">
+                    <div class="passo-item">
+                        <div class="passo-num">1</div>
+                        <div><strong>Ache os bits de Host:</strong> Subtraia o prefixo de 32. Ex: 32 - /26 = 6.</div>
+                    </div>
+                    <div class="passo-item" style="border-left-color: var(--secondary-color);">
+                        <div class="passo-num" style="background: var(--secondary-color);">2</div>
+                        <div><strong>Ache o Bloco (Mágica):</strong> Calcule 2 elevado aos bits de host (2<sup>n</sup>). Ex: 2<sup>6</sup> = 64.</div>
+                    </div>
+                    <div class="passo-item" style="border-left-color: var(--accent-color);">
+                        <div class="passo-num" style="background: var(--accent-color); color: black;">3</div>
+                        <div><strong>Posicione o IP:</strong> Encontre em qual "fatia" do bloco o IP do problema se encaixa. Ex: O IP .70 está na fatia entre 64 e 128. Logo, a rede é 64.</div>
+                    </div>
+                    <div class="passo-item" style="border-left-color: var(--success-color);">
+                        <div class="passo-num" style="background: var(--success-color);">4</div>
+                        <div><strong>Defina os limites:</strong> A Rede é o início do bloco. O Broadcast é o limite final (próximo bloco - 1). O útil é o meio.</div>
+                    </div>
+                </div>
+                <div class="info-box accent" style="text-align:center; margin-top: 15px;">
+                    Pegue papel e caneta. Os exercícios começam agora!
+                </div>
+            </section>
+
+            <!-- SLIDE 5: EXERCICIO 1 (COM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 1: Cálculo Básico</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Um computador recebeu o endereço IP <strong>192.168.1.10 /26</strong>.
+                </div>
+                
+                <p>Encontre os seguintes dados para esta máquina:</p>
+                <ul style="font-size: 1.1em;">
+                    <li>Endereço da Rede</li>
+                    <li>Endereço de Broadcast</li>
+                    <li>Faixa de IPs Úteis (Primeiro e Último válidos)</li>
+                </ul>
+
+                <button class="btn-revelar" onclick="document.getElementById('gab-ex1').style.display='block'; this.style.display='none';">
+                    Resolver e Ver Gabarito
+                </button>
+
+                <div id="gab-ex1" class="gabarito-box" style="max-width: 800px; width: 100%;">
+                    <h3 style="color: var(--primary-color); margin-top: 0;">Solução</h3>
+                    <div class="passo-item" style="background: transparent; padding: 5px;">
+                        <div class="passo-num">1</div>
+                        <div>Bits de Host: 32 - 26 = <strong>6</strong></div>
+                    </div>
+                    <div class="passo-item" style="background: transparent; padding: 5px; border-left-color: var(--secondary-color);">
+                        <div class="passo-num" style="background: var(--secondary-color);">2</div>
+                        <div>Tamanho do Bloco: 2<sup>6</sup> = <strong>64</strong></div>
+                    </div>
+                    <div class="passo-item" style="background: transparent; padding: 5px; border-left-color: var(--accent-color);">
+                        <div class="passo-num" style="background: var(--accent-color); color: black;">3</div>
+                        <div>O octeto de host é "10". O valor 10 cai no primeiro bloco que vai de <strong>0 até 63</strong>.</div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Rede:</strong> <code>192.168.1.0</code></li>
+                        <li><strong>Broadcast:</strong> <code>192.168.1.63</code></li>
+                        <li><strong>IPs Úteis:</strong> <code>192.168.1.1</code> até <code>192.168.1.62</code></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: EXERCICIO 2 (COM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 2: Onde estou?</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Durante uma configuração de servidor, identificou o IP <strong>10.0.5.150 /23</strong>.
+                </div>
+                
+                <p>Neste caso, a máscara "invadiu" o 3º octeto. Qual é o IP de <strong>Rede</strong> e o <strong>Broadcast</strong> deste servidor?</p>
+
+                <button class="btn-revelar" onclick="document.getElementById('gab-ex2').style.display='block'; this.style.display='none';">
+                    Resolver e Ver Gabarito
+                </button>
+
+                <div id="gab-ex2" class="gabarito-box" style="max-width: 800px; width: 100%;">
+                    <h3 style="color: var(--primary-color); margin-top: 0;">Solução</h3>
+                    <div class="passo-item" style="background: transparent; padding: 5px;">
+                        <div class="passo-num">1</div>
+                        <div>O prefixo /23 significa 23 bits de rede. A divisão cai no 3º octeto (que comporta os bits do 17 ao 24).<br>Bits de host totais: 32 - 23 = 9. Desses, 8 estão no 4º octeto e <strong>1 está no 3º octeto</strong>.</div>
+                    </div>
+                    <div class="passo-item" style="background: transparent; padding: 5px; border-left-color: var(--secondary-color);">
+                        <div class="passo-num" style="background: var(--secondary-color);">2</div>
+                        <div>No 3º octeto, sobrou 1 bit para host. Bloco: 2<sup>1</sup> = <strong>2</strong>. <br>As redes pulam de 2 em 2 no terceiro octeto (0.0, 2.0, 4.0, 6.0...).</div>
+                    </div>
+                    <div class="passo-item" style="background: transparent; padding: 5px; border-left-color: var(--accent-color);">
+                        <div class="passo-num" style="background: var(--accent-color); color: black;">3</div>
+                        <div>O IP é 10.0.<strong>5</strong>.150. O valor 5 cai no bloco que começa no <strong>4</strong> e vai até antes do 6.</div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Rede:</strong> <code>10.0.4.0</code></li>
+                        <li><strong>Broadcast:</strong> <code>10.0.5.255</code> (Último IP antes da rede 10.0.6.0)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: EXERCICIO 3 (COM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 3: Planeamento de Rede</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Uma empresa comprou a rede <strong>192.168.10.0 /24</strong>. Eles precisam dividir essa rede para os departamentos. Cada departamento precisa de, no máximo, <strong>30 computadores</strong>.
+                </div>
+                
+                <p>Qual é o prefixo CIDR (/?) ideal que o administrador deve escolher para não desperdiçar endereços?</p>
+
+                <button class="btn-revelar" onclick="document.getElementById('gab-ex3').style.display='block'; this.style.display='none';">
+                    Resolver e Ver Gabarito
+                </button>
+
+                <div id="gab-ex3" class="gabarito-box" style="max-width: 800px; width: 100%;">
+                    <h3 style="color: var(--primary-color); margin-top: 0;">Solução</h3>
+                    <div class="passo-item" style="background: transparent; padding: 5px;">
+                        <div class="passo-num">1</div>
+                        <div>Precisamos de acomodar até 30 IPs úteis. Usamos a fórmula: <strong>2<sup>n</sup> - 2 &ge; 30</strong>.</div>
+                    </div>
+                    <div class="passo-item" style="background: transparent; padding: 5px; border-left-color: var(--secondary-color);">
+                        <div class="passo-num" style="background: var(--secondary-color);">2</div>
+                        <div>Testando os valores de <em>n</em> (bits de host):<br>
+                            Se n=4 &rarr; 2<sup>4</sup> - 2 = 14 (Insuficiente)<br>
+                            Se n=5 &rarr; 2<sup>5</sup> - 2 = 30 (Exato!)
+                        </div>
+                    </div>
+                    <div class="passo-item" style="background: transparent; padding: 5px; border-left-color: var(--success-color);">
+                        <div class="passo-num" style="background: var(--success-color);">3</div>
+                        <div>Se precisamos de 5 bits de host, quantos bits sobram para a rede? <br>32 - 5 = <strong>27</strong>.</div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+                    <p style="text-align: left; margin: 0; font-size: 1.1em;"><strong>A resposta é a máscara <span class="highlight">/27</span></strong>. A rede seria dividida em blocos de 32.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: EXERCICIO 4 (SEM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 4: Identificação de Limites</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Foi atribuído o IP <strong>172.16.50.10 /20</strong> a um router principal.
+                </div>
+                
+                <p style="text-align:left; max-width: 800px; line-height:1.8;">
+                    <strong style="color: var(--accent-color); font-size: 1.1em;">Atenção: Resolução para entrega no Classroom</strong><br>
+                    1. Em que octeto atua esta máscara e qual é o tamanho do bloco?<br>
+                    2. Qual é o <strong>Endereço de Rede</strong> a que pertence este router?<br>
+                    3. Qual é o <strong>Endereço de Broadcast</strong> desta rede?
+                </p>
+
+                <div class="info-box warning" style="max-width: 800px; margin-top: 30px;">
+                    Dica: Use a fórmula <code>32 - 20</code> para achar os bits de host totais, divida entre o 3º e 4º octeto e calcule o tamanho do bloco no octeto alterado.
+                </div>
+            </section>
+
+            <!-- SLIDE 9: EXERCICIO 5 (SEM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 5: Cálculo de Capacidade</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Um colega configurou a máscara de um servidor Windows como <strong>255.255.248.0</strong>.
+                </div>
+                
+                <p style="text-align:left; max-width: 800px; line-height:1.8;">
+                    <strong style="color: var(--accent-color); font-size: 1.1em;">Atenção: Resolução para entrega no Classroom</strong><br>
+                    1. Qual é o valor equivalente em notação <strong>CIDR (Prefixo /x)</strong>?<br>
+                    2. Exatamente quantos <strong>Hosts Úteis</strong> podem existir numa sub-rede com esta configuração?
+                </p>
+
+                <div class="info-box warning" style="max-width: 800px; margin-top: 30px;">
+                    Dica: Converta o número <code>248</code> para binário para descobrir quantos bits a "1" existem no 3º octeto.
+                </div>
+            </section>
+
+            <!-- SLIDE 10: EXERCICIO 6 (SEM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 6: Análise de Comunicação</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> O PC-A tem o IP <code>192.168.100.5 /27</code> e o PC-B tem o IP <code>192.168.100.35 /27</code>. Eles estão conectados ao mesmo switch L2.
+                </div>
+                
+                <p style="text-align:left; max-width: 800px; line-height:1.8;">
+                    <strong style="color: var(--accent-color); font-size: 1.1em;">Atenção: Resolução para entrega no Classroom</strong><br>
+                    Eles estão na <strong>mesma sub-rede</strong> ou em <strong>sub-redes diferentes</strong>? Se o PC-A enviar um "ping" diretamente para o PC-B sem a ajuda de um router (gateway), irá funcionar? Justifique com o tamanho do bloco.
+                </p>
+                
+                <div class="info-box warning" style="max-width: 800px; margin-top: 30px;">
+                    Dica: Calcule primeiro o tamanho do bloco da máscara /27. Depois, veja em quais múltiplos (blocos) os valores 5 e 35 se encaixam.
+                </div>
+            </section>
+
+            <!-- SLIDE 11: EXERCICIO 7 (SEM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 7: Engenharia de Redes</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Tens disponível o enorme bloco de IPs <strong>10.1.0.0 /16</strong>. O cliente pediu-te para criar um design onde suportes <strong>500 sub-redes</strong> distintas, utilizando essa mesma faixa.
+                </div>
+                
+                <p style="text-align:left; max-width: 800px; line-height:1.8;">
+                    <strong style="color: var(--accent-color); font-size: 1.1em;">Atenção: Resolução para entrega no Classroom</strong><br>
+                    Qual é a <strong>nova máscara (prefixo CIDR)</strong> que deverás aplicar para conseguir, pelo menos, 500 sub-redes? Quantos hosts vão sobrar por sub-rede no teu design?
+                </p>
+
+                <div class="info-box warning" style="max-width: 800px; margin-top: 30px;">
+                    Dica: Para calcular <em>sub-redes</em>, a fórmula é 2<sup>s</sup> &ge; X, onde 's' é o número de bits que vais "roubar" da porção de hosts para dar à porção de rede.
+                </div>
+            </section>
+
+            <!-- SLIDE 12: EXERCICIO 8 (SEM GABARITO) -->
+            <section class="slide">
+                <h2>Exercício 8: O Último Host</h2>
+                <div class="info-box info" style="text-align:center; font-size:1.1em; margin-bottom:20px; border-left-color: var(--primary-color);">
+                    <strong>Enunciado:</strong> Configuraste um router com o endereço IP <strong>192.168.200.120 /29</strong>.
+                </div>
+                
+                <p style="text-align:left; max-width: 800px; line-height:1.8;">
+                    <strong style="color: var(--accent-color); font-size: 1.1em;">Atenção: Resolução para entrega no Classroom</strong><br>
+                    1. Descobre a qual Rede pertence este IP.<br>
+                    2. Descobre qual é o <strong>último endereço IP configurável (útil)</strong> nesta exata sub-rede antes do endereço de broadcast.
+                </p>
+
+                <div class="info-box warning" style="max-width: 800px; margin-top: 30px;">
+                    Dica: A máscara /29 é muito restrita. Deixa quantos bits de host? Qual o tamanho do bloco? A que bloco pertence o valor 120?
+                </div>
+            </section>
+
+            <!-- SLIDE 13: CONCLUSÃO -->
+            <section class="slide" style="background: linear-gradient(150deg, #000000 0%, #1a1b24 50%, #282a3a 100%) !important;">
+                <svg width="90" height="90" viewBox="0 0 90 90" style="margin-bottom:20px; filter: drop-shadow(0 6px 18px rgba(198,151,73,0.4));">
+                    <circle cx="45" cy="45" r="42" fill="rgba(115,95,50,0.4)" stroke="#c69749" stroke-width="2.5"/>
+                    <path d="M25 45 L40 60 L65 30" fill="none" stroke="#c69749" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <blockquote style="background:rgba(255,255,255,0.05); border-left-color:#c69749; color:#f0f1f5; max-width:760px; text-align:left;">
+                    "O cálculo de sub-redes não é adivinhação, é apenas matemática base 2. Dominar a Regra do Bloco transforma qualquer máscara num mapa óbvio da rede."
+                </blockquote>
+                <p style="font-size:1.1em; margin-top:16px; font-weight:700; color:var(--accent-color); text-align:center;">
+                    Fim da Prática. O Roteamento agradece a sua precisão!
+                </p>
+                <div style="margin-top:28px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+                    <span style="background:var(--accent-color); color:#000000; padding:10px 28px; border-radius:30px; font-weight:bold; box-shadow: 0 4px 14px rgba(198,151,73,0.3);">Aula 10 — Concluída</span>
+                </div>
+            </section>
+            
+        </div>
+
+        <!-- NAVEGAÇÃO -->
+        <div class="navigation">
+            <button class="nav-btn" id="prev-btn" title="Voltar (Seta Esquerda)">&#8592;</button>
+            <div class="slide-counter" id="slide-counter">1 / 13</div>
+            <button class="nav-btn" id="next-btn" title="Avançar (Seta Direita)">&#8594;</button>
+            <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+            
+            /* Injeta o indicador textual de progresso em cada slide */
+            slides.forEach((slide, index) => {
+                const label = document.createElement('div');
+                label.className = 'slide-progress-label';
+                label.setAttribute('aria-label', `Slide ${index + 1} de ${totalSlides}`);
+                label.textContent = `Slide ${index + 1} de ${totalSlides}`;
+                
+                /* Correcção visual para slides escuros (1 e 13) */
+                if (slide.style.background && slide.style.background.includes('000000')) {
+                    label.style.background = 'rgba(40,42,58,0.8)';
+                    label.style.color = '#c69749';
+                    label.style.borderColor = 'rgba(198,151,73,0.5)';
+                }
+                slide.appendChild(label);
+            });
+            
+            function updateSlideView() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                });
+                
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                slideCounter.setAttribute('aria-label', `Slide ${currentSlide + 1} de ${totalSlides}`);
+                
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+                
+                const slideTitle = slides[currentSlide].querySelector('h1, h2');
+                if (slideTitle) {
+                    document.title = `[${currentSlide + 1}/${totalSlides}] ${slideTitle.textContent.trim()} — RSSI Aula 10`;
+                }
+            }
+            
+            function changeSlide(direction) {
+                currentSlide += direction;
+                if (currentSlide < 0) currentSlide = 0;
+                if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+                updateSlideView();
+            }
+            
+            nextBtn.addEventListener('click', () => changeSlide(1));
+            prevBtn.addEventListener('click', () => changeSlide(-1));
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); }
+            });
+            
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => {
+                        alert(`Erro ao entrar em tela cheia: ${err.message}`);
+                    });
+                } else { document.exitFullscreen(); }
+            });
+            
+            updateSlideView();
+        });
+    </script>
+</body>
+</html>

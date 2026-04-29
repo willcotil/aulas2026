@@ -141,6 +141,20 @@
         padding-left: 1.5rem;
         border-left: 4px solid var(--primary);
     }
+  
+      /* Item de Link Estilizado */
+    .link-muted {
+        display: block;
+        padding: 0.8rem 1.2rem;
+        color: #7a8598;
+        text-decoration: none;
+        border-radius: 8px;
+        margin: 0.4rem 0;
+        font-size: 0.95rem;
+        font-style: italic;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
 
     /* --- RESPONSIVIDADE --- */
     @media (max-width: 768px) {
@@ -195,8 +209,14 @@
             else if (item.text && item.link) {
                 const linkItem = document.createElement('a');
                 linkItem.href = item.link;
-                linkItem.textContent = item.text;
+                linkItem.innerHTML = item.text;
                 linkItem.className = 'link-item';
+                return linkItem;
+            }
+            else if (item.text && item.linkmuted) {
+                const linkItem = document.createElement('span');
+                linkItem.innerHTML = item.text;
+                linkItem.className = 'link-muted';
                 return linkItem;
             }
 

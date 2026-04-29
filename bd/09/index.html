@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados - Aula 10: Exercícios de Modelagem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#576A8F', /* Dark/Muted Blue */
+                            primary:   '#FF7444', /* Bright Orange */
+                            secondary: '#B7BDF7', /* Light Blue */
+                            muted:     '#FFF8DE', /* Cream/Very Light Yellow */
+                            surface:   '#FFFFFF', /* White cards */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FCFCFC; /* Fundo suave para não cansar a vista */
+            color: #576A8F;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* Cores consistentes para o SVG baseadas na nova paleta */
+        .node-rect { fill: #ffffff; stroke: #576A8F; stroke-width: 4; rx: 12px; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; fill: #576A8F; }
+        .edge { stroke: #576A8F; stroke-width: 3; fill: none; }
+        .rel-polygon { fill: #FFF8DE; stroke: #FF7444; stroke-width: 3; }
+        .rel-text { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; fill: #576A8F; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #ffffff; border: 2px solid #576A8F; padding: 2px 8px; border-radius: 6px; color: #576A8F; font-weight: 700; }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FCFCFC; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #576A8F; border-radius: 10px; border: 2px solid #FCFCFC; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="no-print h-20 bg-white text-brand-dark px-8 flex items-center justify-between sticky top-0 z-50 shadow-md border-b-4 border-brand-dark" role="banner">
+        <div class="flex items-center gap-4 z-10">
+            <div class="bg-brand-dark text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-inner" aria-hidden="true">
+                <i class="fas fa-dumbbell text-xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl tracking-tight">Banco de Dados <span class="text-brand-primary opacity-90">| Exercícios</span></h1>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-brand-muted hover:bg-brand-secondary hover:text-brand-dark rounded-xl text-brand-dark font-bold transition shadow-sm border border-brand-dark/20" aria-label="Imprimir a aula atual">
+                <i class="fas fa-print" aria-hidden="true"></i> IMPRIMIR
+            </button>
+            <button onclick="toggleFullscreen()" class="w-10 h-10 bg-brand-muted rounded-xl text-brand-dark hover:bg-brand-dark hover:text-white transition flex items-center justify-center border border-brand-dark/20" aria-label="Alternar tela cheia">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="no-print h-2 w-full bg-white overflow-hidden border-b border-brand-dark/10" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="aria-progress">
+        <div id="progress-bar" class="h-full bg-brand-primary transition-all duration-500 w-0"></div>
+    </div>
+
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-10 overflow-y-auto custom-scrollbar" role="main">
+        <div id="steps-container" class="w-full max-w-5xl" aria-live="polite"></div>
+    </main>
+
+    <footer class="no-print h-24 bg-white border-t-4 border-brand-dark px-8 flex items-center justify-between sticky bottom-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Navegação da Aula">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-3 px-8 py-3 bg-brand-muted text-brand-dark rounded-2xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark border-2 border-brand-dark/20 disabled:border-transparent text-lg" aria-label="Voltar para o tópico anterior">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> VOLTAR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center" aria-hidden="true">
+            <span id="step-counter" class="text-sm font-black text-brand-dark uppercase tracking-widest bg-brand-muted px-4 py-1 rounded-full border border-brand-dark/20">1 / 8</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-3 px-10 py-3 bg-brand-dark text-white rounded-2xl font-black hover:bg-brand-primary transition shadow-lg text-lg border-b-4 border-black/30 hover:border-b-0 hover:translate-y-1" aria-label="Avançar para o próximo tópico">
+            AVANÇAR <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01: Título ──────────────────────────────────────────────────
+            {
+                title: "Hora de Treinar!",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] text-brand-primary mb-4 shadow-xl shadow-brand-dark/10" aria-hidden="true">
+                            <i class="fas fa-pencil-ruler text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-6xl font-black text-brand-dark leading-tight">Lista de Exercícios</h2>
+                        <div class="bg-brand-muted p-6 rounded-2xl border-l-8 border-brand-primary max-w-3xl mx-auto text-left">
+                            <p class="text-xl text-brand-dark font-semibold">Nesta aula, vamos praticar o que aprendemos:</p>
+                            <ul class="list-disc ml-8 mt-4 text-lg space-y-2 font-medium">
+                                <li>Como ler os pedidos de um sistema.</li>
+                                <li>Como desenhar o Diagrama Visual (DER).</li>
+                                <li>Como construir o Dicionário de Dados.</li>
+                            </ul>
+                        </div>
+                        <div class="flex justify-center gap-4 text-brand-dark text-sm mt-12 font-bold opacity-70">
+                            <span class="px-4 py-2 bg-white rounded-xl shadow-sm border-2 border-brand-dark/20" aria-hidden="true"><i class="fas fa-arrow-left mr-2"></i> USE AS SETAS DO TECLADO <i class="fas fa-arrow-right ml-2"></i></span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02: Exercício 1 ──────────────────────────────────────────────
+            {
+                title: "Exercício 1: App de Música",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <h3 class="text-2xl font-black text-brand-dark mb-4 flex items-center gap-3">
+                                <i class="fas fa-headphones text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg text-brand-dark leading-relaxed mb-4">
+                                Vamos criar uma App de música. Precisamos guardar informações sobre 3 elementos principais:
+                            </p>
+                            
+                            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-brand-muted p-4 rounded-xl border border-brand-dark/20">
+                                    <p class="font-bold text-brand-primary text-xl mb-2">1. USUÁRIO</p>
+                                    <ul class="text-md space-y-1">
+                                        <li>• ID (Código Único)</li>
+                                        <li>• Nome</li>
+                                        <li>• Email (Não se pode repetir)</li>
+                                        <li>• É Premium? (Sim ou Não)</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-brand-muted p-4 rounded-xl border border-brand-dark/20">
+                                    <p class="font-bold text-brand-primary text-xl mb-2">2. PLAYLIST</p>
+                                    <ul class="text-md space-y-1">
+                                        <li>• ID (Código Único)</li>
+                                        <li>• Título</li>
+                                        <li>• Data de Criação</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-brand-muted p-4 rounded-xl border border-brand-dark/20">
+                                    <p class="font-bold text-brand-primary text-xl mb-2">3. MUSICA</p>
+                                    <ul class="text-md space-y-1">
+                                        <li>• ID (Código Único)</li>
+                                        <li>• Título</li>
+                                        <li>• Duração (Ex: 3.50 minutos)</li>
+                                        <li>• Gênero (Opções restritas: 'Pop', 'Rock', 'Rap')</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-brand-dark text-white p-4 rounded-xl">
+                                <p class="font-bold text-lg mb-2">As Ações (Verbos = Losangos):</p>
+                                <ul class="list-disc ml-6 space-y-1 text-brand-secondary">
+                                    <li>O Usuário <strong>CRIA</strong> a Playlist.</li>
+                                    <li>A Playlist <strong>CONTÉM</strong> a Música.</li>
+                                    <li>Um Usuário pode <strong>SEGUIR</strong> outro Usuário.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-l-8 border-brand-primary rounded-r-2xl shadow-sm flex flex-col gap-2">
+                            <p class="font-black text-brand-dark text-xl"><i class="fas fa-check-circle text-brand-primary mr-2" aria-hidden="true"></i> O Que Deve Fazer:</p>
+                            <p class="text-lg text-brand-dark font-medium">Desenhe o <strong>Diagrama Visual (DER)</strong> no seu caderno. Faça as 3 caixas (Entidades), as linhas com elipses (Atributos) e una tudo com os losangos (Relacionamentos).</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 03: Exercício 2 ──────────────────────────────────────────────
+            {
+                title: "Exercício 2: Escola de Magia (RPG)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <h3 class="text-2xl font-black text-brand-dark mb-4 flex items-center gap-3">
+                                <i class="fas fa-hat-wizard text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg text-brand-dark leading-relaxed mb-4">
+                                Bem-vindo ao universo RPG! Nosso jogo tem 4 entidades: <strong>FEITICEIRO</strong>, <strong>VARINHA</strong>, <strong>FEITIÇO</strong> e <strong>CASA</strong>.
+                            </p>
+                            
+                            <ul class="list-none space-y-4 text-brand-dark text-lg mb-6">
+                                <li class="bg-brand-muted p-3 rounded-lg border border-brand-dark/10"><strong>FEITICEIRO:</strong> ID, Nome e Tipo Sanguíneo (Opções fechadas: 'Puro' ou 'Mestiço').</li>
+                                <li class="bg-brand-muted p-3 rounded-lg border border-brand-dark/10"><strong>VARINHA:</strong> ID, Madeira e Comprimento.</li>
+                                <li class="bg-brand-muted p-3 rounded-lg border border-brand-dark/10"><strong>FEITIÇO:</strong> ID, Palavra Mágica e Nível de Dificuldade.</li>
+                                <li class="bg-brand-muted p-3 rounded-lg border border-brand-dark/10"><strong>CASA:</strong> ID, Nome e Fundador.</li>
+                            </ul>
+
+                            <div class="bg-brand-dark text-white p-4 rounded-xl">
+                                <p class="font-bold text-lg mb-2">As Ações (Atenção ao último!):</p>
+                                <ul class="list-disc ml-6 space-y-1 text-brand-secondary">
+                                    <li>O Feiticeiro <strong>PERTENCE</strong> a uma Casa.</li>
+                                    <li>O Feiticeiro <strong>POSSUI</strong> uma Varinha.</li>
+                                    <li><span class="text-white bg-brand-primary px-2 py-1 rounded">Relacionamento Ternário:</span> O Feiticeiro <strong>APRENDE</strong> o Feitiço na Casa.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-l-8 border-brand-primary rounded-r-2xl shadow-sm flex flex-col gap-2">
+                            <p class="font-black text-brand-dark text-xl"><i class="fas fa-check-circle text-brand-primary mr-2" aria-hidden="true"></i> O Que Deve Fazer:</p>
+                            <p class="text-lg text-brand-dark font-medium">Desenhe o <strong>Diagrama Visual (DER)</strong>. Lembre-se: no relacionamento ternário, as 3 entidades ligam-se ao <u>mesmo losango</u>!</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 04: Exercício 3 ──────────────────────────────────────────────
+            {
+                title: "Exercício 3: Torneio de eSports",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <h3 class="text-2xl font-black text-brand-dark mb-4 flex items-center gap-3">
+                                <i class="fas fa-trophy text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg text-brand-dark leading-relaxed mb-4">
+                                Precisamos organizar a base de dados de um campeonato de eSports. Temos 5 entidades.
+                            </p>
+                            
+                            <div class="flex flex-wrap gap-3 mb-6 font-bold text-brand-primary text-xl justify-center">
+                                <span class="bg-brand-muted px-4 py-2 border border-brand-primary/30 rounded-lg">EQUIPE</span>
+                                <span class="bg-brand-muted px-4 py-2 border border-brand-primary/30 rounded-lg">JOGADOR</span>
+                                <span class="bg-brand-muted px-4 py-2 border border-brand-primary/30 rounded-lg">JOGO</span>
+                                <span class="bg-brand-muted px-4 py-2 border border-brand-primary/30 rounded-lg">TORNEIO</span>
+                                <span class="bg-brand-muted px-4 py-2 border border-brand-primary/30 rounded-lg">PATROCINADOR</span>
+                            </div>
+
+                            <div class="bg-brand-dark text-white p-4 rounded-xl">
+                                <p class="font-bold text-lg mb-2">As Ações (Ligue as Caixas!):</p>
+                                <ul class="list-disc ml-6 space-y-1 text-brand-secondary">
+                                    <li>O Jogador <strong>JOGA_POR</strong> uma Equipe.</li>
+                                    <li>A Equipe <strong>PARTICIPA</strong> no Torneio.</li>
+                                    <li>A Equipe <strong>COMPETE_NO</strong> Jogo (Ex: LoL, Valorant).</li>
+                                    <li>O Patrocinador <strong>APOIA</strong> a Equipe.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-l-8 border-brand-primary rounded-r-2xl shadow-sm flex flex-col gap-2">
+                            <p class="font-black text-brand-dark text-xl"><i class="fas fa-check-circle text-brand-primary mr-2" aria-hidden="true"></i> O Que Deve Fazer:</p>
+                            <p class="text-lg text-brand-dark font-medium">Desenhe o <strong>Diagrama Visual (DER)</strong>. 
+                            <br><strong>Regra Extra:</strong> Invente 2 atributos importantes para cada uma das entidades (Não se esqueça do ID).</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 05: Exercício 4 ──────────────────────────────────────────────
+            {
+                title: "Exercício 4: App de Delivery",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark font-bold text-center bg-brand-muted p-4 rounded-2xl border-2 border-brand-dark/10">A partir de agora, vamos criar o <strong>Dicionário de Dados</strong> no Google Sheets!</p>
+                        
+                        <div class="bg-white rounded-3xl py-6 flex items-center justify-center border-4 border-brand-dark shadow-sm overflow-x-auto" aria-label="Diagrama Entidade Relacionamento mostrando Restaurante fornece Prato, e Cliente encomenda Prato">
+                            <svg width="740" height="240" viewBox="0 0 740 240">
+                                <!-- Linhas Atributos RESTAURANTE -->
+                                <line x1="100" y1="160" x2="50" y2="100" class="edge" stroke-width="2"/>
+                                <line x1="100" y1="160" x2="100" y2="80" class="edge" stroke-width="2"/>
+                                <line x1="100" y1="160" x2="150" y2="100" class="edge" stroke-width="2"/>
+
+                                <!-- Linhas Atributos PRATO -->
+                                <line x1="370" y1="160" x2="300" y2="100" class="edge" stroke-width="2"/>
+                                <line x1="370" y1="160" x2="340" y2="80" class="edge" stroke-width="2"/>
+                                <line x1="370" y1="160" x2="400" y2="80" class="edge" stroke-width="2"/>
+                                <line x1="370" y1="160" x2="440" y2="100" class="edge" stroke-width="2"/>
+
+                                <!-- Linhas Atributos CLIENTE -->
+                                <line x1="640" y1="160" x2="590" y2="100" class="edge" stroke-width="2"/>
+                                <line x1="640" y1="160" x2="640" y2="80" class="edge" stroke-width="2"/>
+                                <line x1="640" y1="160" x2="690" y2="100" class="edge" stroke-width="2"/>
+
+                                <!-- Linhas de Relacionamentos -->
+                                <line x1="160" y1="185" x2="310" y2="185" class="edge"/>
+                                <line x1="430" y1="185" x2="580" y2="185" class="edge"/>
+                                
+                                <!-- Entidades e Rels -->
+                                <rect x="40" y="160" width="120" height="50" class="node-rect"/>
+                                <text x="100" y="190" text-anchor="middle" class="node-text">RESTAURANTE</text>
+                                
+                                <polygon points="235,160 275,185 235,210 195,185" class="rel-polygon"/>
+                                <text x="235" y="189" text-anchor="middle" class="rel-text">FORNECE</text>
+                                
+                                <rect x="310" y="160" width="120" height="50" class="node-rect"/>
+                                <text x="370" y="190" text-anchor="middle" class="node-text">PRATO</text>
+
+                                <polygon points="505,160 545,185 505,210 465,185" class="rel-polygon"/>
+                                <text x="505" y="189" text-anchor="middle" class="rel-text">ENCOMENDA</text>
+
+                                <rect x="580" y="160" width="120" height="50" class="node-rect"/>
+                                <text x="640" y="190" text-anchor="middle" class="node-text">CLIENTE</text>
+
+                                <!-- Atributos RESTAURANTE -->
+                                <ellipse cx="50" cy="100" rx="30" ry="15" fill="#FFF8DE" stroke="#FF7444" stroke-width="2" />
+                                <text x="50" y="104" text-anchor="middle" font-size="10" fill="#FF7444" style="text-decoration:underline; font-weight:bold;">id</text>
+                                <ellipse cx="100" cy="80" rx="35" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="100" y="84" text-anchor="middle" font-size="10" fill="#576A8F">nome</text>
+                                <ellipse cx="150" cy="100" rx="35" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="150" y="104" text-anchor="middle" font-size="10" fill="#576A8F">categoria</text>
+
+                                <!-- Atributos PRATO -->
+                                <ellipse cx="300" cy="100" rx="30" ry="15" fill="#FFF8DE" stroke="#FF7444" stroke-width="2" />
+                                <text x="300" y="104" text-anchor="middle" font-size="10" fill="#FF7444" style="text-decoration:underline; font-weight:bold;">id</text>
+                                <ellipse cx="340" cy="80" rx="30" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="340" y="84" text-anchor="middle" font-size="10" fill="#576A8F">nome</text>
+                                <ellipse cx="400" cy="80" rx="30" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="400" y="84" text-anchor="middle" font-size="10" fill="#576A8F">preco</text>
+                                <ellipse cx="440" cy="100" rx="40" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="440" y="104" text-anchor="middle" font-size="10" fill="#576A8F">vegetariano</text>
+
+                                <!-- Atributos CLIENTE -->
+                                <ellipse cx="590" cy="100" rx="30" ry="15" fill="#FFF8DE" stroke="#FF7444" stroke-width="2" />
+                                <text x="590" y="104" text-anchor="middle" font-size="10" fill="#FF7444" style="text-decoration:underline; font-weight:bold;">id</text>
+                                <ellipse cx="640" cy="80" rx="35" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="640" y="84" text-anchor="middle" font-size="10" fill="#576A8F">nome</text>
+                                <ellipse cx="690" cy="100" rx="40" ry="15" fill="#ffffff" stroke="#576A8F" stroke-width="2" />
+                                <text x="690" y="104" text-anchor="middle" font-size="10" fill="#576A8F" style="text-decoration:underline; text-decoration-style:dashed;">celular</text>
+                            </svg>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-l-8 border-brand-secondary rounded-r-2xl shadow-sm text-brand-dark">
+                            <p class="font-black text-xl mb-4"><i class="fas fa-list-check text-brand-secondary mr-2" aria-hidden="true"></i>O Que Deve Fazer no Google Sheets:</p>
+                            <p class="text-lg font-medium mb-2">Crie 3 abas (uma para cada tabela) e preencha as 7 colunas do Dicionário, respeitando:</p>
+                            <ul class="list-disc ml-5 space-y-2 text-lg">
+                                <li>A <span class="font-bold">categoria</span> do restaurante é uma lista fechada (Ex: 'Sushi', 'Pizza', 'Vegan'). <span class="bg-brand-muted px-2 py-1 rounded text-sm font-mono border border-brand-dark/20">Dica: Use ENUM</span></li>
+                                <li>O <span class="font-bold">preco</span> do prato é dinheiro. <span class="bg-brand-muted px-2 py-1 rounded text-sm font-mono border border-brand-dark/20">Dica: DECIMAL</span></li>
+                                <li>O prato ser <span class="font-bold">vegetariano</span> é Sim ou Não. <span class="bg-brand-muted px-2 py-1 rounded text-sm font-mono border border-brand-dark/20">Dica: BOOLEAN</span></li>
+                                <li><strong>O Prato precisa do ID do Restaurante (FK). O Cliente precisa do ID do Prato (FK).</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 06: Exercício 5 ──────────────────────────────────────────────
+            {
+                title: "Exercício 5: Plataforma de Anime",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <h3 class="text-2xl font-black text-brand-dark mb-4 flex items-center gap-3">
+                                <i class="fas fa-tv text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg text-brand-dark leading-relaxed mb-4">
+                                Uma nova plataforma de streaming de Anime precisa documentar sua base de dados.
+                            </p>
+                            
+                            <ul class="list-none space-y-4 text-brand-dark text-lg mb-6">
+                                <li class="bg-brand-muted p-4 rounded-lg border border-brand-dark/10"><strong>SERIE:</strong> id, título, classificação etária (Livre, +12, +16, +18) e um campo "ainda_em_exibicao" (Sim/Não).</li>
+                                <li class="bg-brand-muted p-4 rounded-lg border border-brand-dark/10"><strong>EPISODIO:</strong> id, título, duração em minutos, e data exata de lançamento.</li>
+                                <li class="bg-brand-muted p-4 rounded-lg border border-brand-dark/10"><strong>DIRETOR:</strong> id, nome e o país de origem.</li>
+                            </ul>
+
+                            <div class="bg-brand-dark text-white p-4 rounded-xl text-lg">
+                                <p class="font-bold mb-2">Ação:</p>
+                                <p>O Diretor <span class="text-brand-primary font-black">DIRIGE</span> a Série. A Série <span class="text-brand-primary font-black">POSSUI</span> o Episódio.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-l-8 border-brand-primary rounded-r-2xl shadow-sm flex flex-col gap-2">
+                            <p class="font-black text-brand-dark text-xl"><i class="fas fa-check-circle text-brand-primary mr-2" aria-hidden="true"></i> O Que Deve Fazer:</p>
+                            <p class="text-lg text-brand-dark font-medium">Faça o Diagrama Visual (DER) no caderno. Depois, vá ao Google Sheets e crie o Dicionário de Dados. <strong>Pense com cuidado onde colocar as Chaves Estrangeiras (FK).</strong></p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 07: Exercício 6 ──────────────────────────────────────────────
+            {
+                title: "Exercício 6: Loja de Roupa (Streetwear)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                            <h3 class="text-2xl font-black text-brand-dark mb-4 flex items-center gap-3">
+                                <i class="fas fa-tshirt text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg text-brand-dark leading-relaxed mb-4">
+                                Uma loja online de roupa urbana precisa estruturar o sistema de compras.
+                            </p>
+                            
+                            <ul class="list-none space-y-4 text-brand-dark text-lg mb-6">
+                                <li class="bg-brand-muted p-4 rounded-lg border border-brand-dark/10"><strong>MARCA:</strong> id, nome da marca e o site oficial (este campo pode ficar vazio se a marca não tiver site).</li>
+                                <li class="bg-brand-muted p-4 rounded-lg border border-brand-dark/10"><strong>PECA_ROUPA:</strong> id, modelo, tamanho (Apenas S, M, L ou XL) e o preço.</li>
+                                <li class="bg-brand-muted p-4 rounded-lg border border-brand-dark/10"><strong>CARRINHO:</strong> id, data de criação e um código de cupom (que nem sempre é preenchido pelo cliente).</li>
+                            </ul>
+
+                            <div class="bg-brand-dark text-white p-4 rounded-xl text-lg">
+                                <p class="font-bold mb-2">Ação:</p>
+                                <p>A Marca <span class="text-brand-primary font-black">PRODUZ</span> a Peça de Roupa. A Peça de Roupa é colocada no <span class="text-brand-primary font-black">CARRINHO</span>.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-white border-l-8 border-brand-primary rounded-r-2xl shadow-sm flex flex-col gap-2">
+                            <p class="font-black text-brand-dark text-xl"><i class="fas fa-check-circle text-brand-primary mr-2" aria-hidden="true"></i> O Que Deve Fazer:</p>
+                            <p class="text-lg text-brand-dark font-medium">Faça o Diagrama Visual (DER) no caderno. Depois, no Google Sheets, crie o Dicionário de Dados. <strong>Atenção às colunas que permitem NULL! Registre isso no dicionário.</strong></p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 08: Fechamento ────────────────────────────────────────────────
+            {
+                title: "Bom Trabalho!",
+                content: `
+                    <div class="text-center space-y-10 py-10">
+                        <div class="inline-block p-10 bg-white rounded-full border-8 border-brand-secondary shadow-2xl" aria-hidden="true">
+                            <i class="fas fa-clipboard-check text-brand-dark text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl font-black text-brand-dark">Fim dos Exercícios</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto font-semibold">Guarde o link do seu Google Sheets e envie na plataforma escolar.<br>Lembre-se: A prática constante é o segredo para modelar dados com perfeição!</p>
+                        
+                        <div class="mt-12 px-10 py-4 bg-brand-primary text-white rounded-2xl font-black text-xl shadow-xl inline-block border-b-4 border-brand-dark/30">
+                            Até a Próxima Aula!
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active" role="region" aria-live="polite">
+                    <h2 class="no-print text-4xl md:text-5xl font-black mb-10 text-brand-dark">${step.title}</h2>
+                    <div class="content-body">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            document.getElementById('aria-progress').setAttribute('aria-valuenow', Math.round(((currentStep + 1) / steps.length) * 100));
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 
+                ? 'FINALIZAR <i class="fas fa-check-circle ml-2" aria-hidden="true"></i>' 
+                : 'AVANÇAR <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark">Apostila: Banco de Dados I</h1>
+                <p class="font-bold text-xl">Aula 10 - Lista de Exercícios de Modelagem</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-12 border-b-2 border-brand-dark/20 pb-10">
+                    <h2 class="text-3xl font-black mb-6 text-brand-dark border-l-8 border-brand-primary pl-4">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>
