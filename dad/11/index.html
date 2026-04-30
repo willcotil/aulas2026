@@ -23,7 +23,7 @@
             /* Paleta: https://colorhunt.co/palette/16c47fffd65aff9d23f93827 */
             --bg: #f8fafc;         
             --slide-bg: #ffffff;   
-            --text: #1e293b;       /* Dark Slate para legibilidade */
+            --text: #1e293b;       
             --text-muted: #475569; 
             
             --primary: #16C47F;    /* Verde Vibrante */
@@ -112,10 +112,12 @@
             border-radius: 8px;
             margin: 15px 0;
             padding: 20px 20px 20px 10px;
+            max-height: 480px; /* Habilita rolagem para códigos longos */
+            overflow-y: auto;
         }
         code[class*="language-"], pre[class*="language-"] {
             font-family: 'Fira Code', monospace;
-            font-size: 0.95rem;
+            font-size: 0.90rem; /* Reduzido levemente para caber mais */
             text-shadow: none;
         }
         .line-numbers .line-numbers-rows {
@@ -162,50 +164,6 @@
         .col { background: #ffffff; padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
         .col h3 { font-size: 1.1rem; text-transform: uppercase; color: var(--text); margin-bottom: 15px; letter-spacing: 1px; font-weight: 800; display: flex; align-items: center; gap: 10px;}
 
-        /* Interactive Grid Visualizer */
-        .grid-visualizer {
-            border: 2px dashed var(--text-muted);
-            padding: 20px;
-            border-radius: 12px;
-            background: #f1f5f9;
-            resize: horizontal;
-            overflow: hidden;
-            min-width: 300px;
-            max-width: 100%;
-            margin: 20px 0;
-            position: relative;
-            container-type: inline-size; /* Isolamento de responsividade */
-        }
-
-        /* Força a quebra de linha simulando o Bootstrap quando a caixa ficar pequena */
-        @container (max-width: 768px) {
-            .grid-visualizer .col-md-4 {
-                width: 100% !important;
-                flex: 0 0 100% !important;
-                max-width: 100% !important;
-                margin-bottom: 10px;
-            }
-        }
-
-        .grid-visualizer::after {
-            content: "↔ Arraste a lateral para redimensionar";
-            position: absolute;
-            bottom: 5px; right: 25px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: bold;
-        }
-        .demo-col {
-            background-color: var(--primary);
-            color: white;
-            border: 2px solid white;
-            padding: 20px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
         /* Final List */
         .final-list ol { counter-reset: item; list-style: none; padding: 0; }
         .final-list li { 
@@ -232,10 +190,10 @@
             .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
             .fixed-link-bar a { color: black; }
             .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
-            .controls, .progress-bar, .grid-visualizer::after { display: none !important; }
+            .controls, .progress-bar { display: none !important; }
             .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
             .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
-            pre, .col, .grid-visualizer { border: 1px solid #000 !important; color: black; box-shadow: none; background: white !important; }
+            pre, .col { border: 1px solid #000 !important; color: black; box-shadow: none; background: white !important; max-height: none !important; overflow: visible !important; }
             h1, h2, p, li, strong { color: black !important; }
             code { background: #eee; color: black; border: none; }
         }
@@ -274,15 +232,15 @@
         <div class="slide-content-wrapper">
             <div class="slide-number">01</div>
             <h1>Aula 11: Interface Gráfica II</h1>
-            <h2>Dinâmica, Responsividade e Inputs</h2>
+            <h2>Dinamismo, Entradas e Filtragem</h2>
             <br>
             <p><strong>Roteiro da Aula:</strong></p>
             <ol>
-                <li><strong>Responsividade:</strong> O Sistema de Grid (12 Colunas) do Bootstrap.</li>
                 <li><strong>O Perigo dos Formulários:</strong> Como evitar que o App Desktop recarregue.</li>
                 <li><strong>A Mágica do FormData:</strong> Coletando inputs do jeito moderno e profissional.</li>
                 <li><strong>Busca em Tempo Real:</strong> Eventos de <code>input</code> e filtragem dinâmica.</li>
-                <li><strong>Live Coding:</strong> Adicionando Pesquisa e Cadastro ao nosso Dashboard.</li>
+                <li><strong>Live Coding Pt. 1:</strong> Refatoração e Barra de Busca.</li>
+                <li><strong>Live Coding Pt. 2:</strong> Formulário de Cadastro e Envio.</li>
                 <li><strong>Missão Prática:</strong> Exercícios e Desafios.</li>
             </ol>
             <div style="margin-top: 40px; color: var(--text-muted); font-weight: 600;">
@@ -291,92 +249,25 @@
         </div>
     </div>
 
-    <!-- TÓPICO 1: RESPONSIVIDADE -->
-    <div class="slide topic">
-        <div class="slide-content-wrapper">
-            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-            <h1>Parte 1: Responsividade</h1>
-            <p>Adaptando a interface para qualquer tamanho de janela</p>
-        </div>
-    </div>
-
-    <!-- SLIDE 3: O SISTEMA DE GRID -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">03</div>
-            <h2>A Mágica das 12 Colunas</h2>
-            <p>O Bootstrap divide a tela em <strong>12 colunas invisíveis</strong>. Quando você cria uma <code>div</code>, você diz quantas colunas ela deve ocupar.</p>
-            
-            <div class="comparison">
-                <div class="col" style="border-top: 4px solid var(--primary);">
-                    <h3 style="color: var(--primary);"><i class="fa-solid fa-border-all"></i> Como funciona?</h3>
-                    <p>Você cria um container de linha <code>&lt;div class="row"&gt;</code> e coloca colunas <code>&lt;div class="col-..."&gt;</code> dentro.</p>
-                    <ul>
-                        <li><code>col-12</code>: Ocupa a tela inteira (12/12).</li>
-                        <li><code>col-6</code>: Ocupa metade da tela (6/12).</li>
-                        <li><code>col-4</code>: Ocupa um terço da tela (4/12).</li>
-                    </ul>
-                </div>
-                <div class="col" style="border-top: 4px solid var(--accent-orange);">
-                    <h3 style="color: var(--accent-orange);"><i class="fa-solid fa-mobile-screen"></i> Breakpoints</h3>
-                    <p>Podemos dizer ao Bootstrap para mudar o tamanho dependendo da largura da tela usando prefixos:</p>
-                    <ul>
-                        <li><code>sm</code> (Small / Celular Deitado)</li>
-                        <li><code>md</code> (Medium / Tablet)</li>
-                        <li><code>lg</code> (Large / Desktop)</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 4: SIMULADOR DE GRID -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">04</div>
-            <h2>O Grid na Prática</h2>
-            <p>Abaixo temos 3 colunas com a classe <code>col-12 col-md-4</code>. Isso significa: <em>"Seja tamanho total (12) no celular, mas seja um terço (4) em telas médias/grandes"</em>.</p>
-            
-            <!-- Simulador Interativo -->
-            <div class="grid-visualizer">
-                <div class="row g-2">
-                    <div class="col-12 col-md-4">
-                        <div class="demo-col">Card 1</div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="demo-col" style="background-color: var(--accent-orange);">Card 2</div>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <div class="demo-col" style="background-color: var(--danger);">Card 3</div>
-                    </div>
-                </div>
-            </div>
-            
-            <p style="text-align: center; font-weight: bold; color: var(--primary);">
-                <i class="fa-solid fa-arrow-pointer"></i> Arraste a borda direita da caixa cinza acima para testar a responsividade!
-            </p>
-        </div>
-    </div>
-
-    <!-- TÓPICO 2: FORMULÁRIOS E INPUTS -->
+    <!-- TÓPICO 1: FORMULÁRIOS E INPUTS -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-keyboard"></i>
-            <h1>Parte 2: Inputs & Formulários</h1>
+            <h1>Parte 1: Inputs & Formulários</h1>
             <p>Lendo dados do usuário do jeito profissional</p>
         </div>
     </div>
 
-    <!-- SLIDE 6: O PERIGO DO FORM -->
+    <!-- SLIDE 02: O PERIGO DO FORM -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">06</div>
+            <div class="slide-number">02</div>
             <h2>A Armadilha do <code>&lt;form&gt;</code></h2>
             <p>Na Web antiga, clicar em "Salvar" num formulário fazia o navegador pegar os dados, enviar para o servidor e <strong>recarregar a página inteira</strong>.</p>
             
             <div class="alert-box">
                 <h4><i class="fa-solid fa-triangle-exclamation"></i> O Problema no Electron e React</h4>
-                <p>Se o seu HTML recarregar, todo o Javascript do Front-end (variáveis, listas, estado do app) será <strong>apagado da memória RAM</strong>. A tela vai piscar e voltar ao zero!</p>
+                <p>Se o seu HTML recarregar, todo o Javascript do Front-end (variáveis globais, listas, estado do app) será <strong>apagado da memória RAM</strong>. A tela vai piscar e voltar ao zero!</p>
             </div>
             
             <p style="font-size: 1.2rem; text-align: center; margin-top: 20px;">
@@ -385,10 +276,10 @@
         </div>
     </div>
 
-    <!-- SLIDE 7: PREVENT DEFAULT -->
+    <!-- SLIDE 03: PREVENT DEFAULT -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">07</div>
+            <div class="slide-number">03</div>
             <h2>O Salvador: <code>preventDefault()</code></h2>
             <p>A primeira regra de um formulário moderno: interceptar o evento <code>submit</code> e usar o comando <code>preventDefault()</code> para travar o comportamento destrutivo do navegador.</p>
             
@@ -406,10 +297,10 @@ form.addEventListener("submit", (e) => {
         </div>
     </div>
 
-    <!-- SLIDE 8: O PROBLEMA DOS QUERIES -->
+    <!-- SLIDE 04: O PROBLEMA DOS QUERIES -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">08</div>
+            <div class="slide-number">04</div>
             <h2>Coletando Dados: O Antigo vs O Moderno</h2>
             <p>Até agora, usávamos <code>document.querySelector("#id").value</code>. Imagine um formulário de cadastro de cliente com 20 campos (Nome, CPF, Rua, Bairro, etc). O seu código viraria um pesadelo espaguete.</p>
             
@@ -430,10 +321,10 @@ const obj = { nome: nome, cpf: cpf, cep: cep ... }</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 9: FORMDATA HTML -->
+    <!-- SLIDE 05: FORMDATA HTML -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">09</div>
+            <div class="slide-number">05</div>
             <h2>O Segredo do FormData: O Atributo <code>name</code></h2>
             <p>Para o `FormData` funcionar, a única coisa que o HTML exige é que <strong>todos os seus inputs tenham o atributo `name`</strong>. O `id` não importa para ele.</p>
             
@@ -456,10 +347,10 @@ const obj = { nome: nome, cpf: cpf, cep: cep ... }</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 10: FORMDATA JS -->
+    <!-- SLIDE 06: FORMDATA JS -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">10</div>
+            <div class="slide-number">06</div>
             <h2>A Extração Mágica</h2>
             <p>No Javascript, passamos o elemento do formulário para o <code>new FormData()</code>, e depois usamos <code>Object.fromEntries()</code> para transformar os dados num JSON perfeito!</p>
             
@@ -484,19 +375,19 @@ form.addEventListener("submit", (e) => {
         </div>
     </div>
 
-    <!-- TÓPICO 3: BUSCA EM TEMPO REAL -->
+    <!-- TÓPICO 2: BUSCA EM TEMPO REAL -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <h1>Parte 3: Busca Dinâmica</h1>
+            <h1>Parte 2: Busca Dinâmica</h1>
             <p>Filtros em tempo real (Estilo Google)</p>
         </div>
     </div>
 
-    <!-- SLIDE 12: O EVENTO INPUT -->
+    <!-- SLIDE 08: O EVENTO INPUT -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">12</div>
+            <div class="slide-number">08</div>
             <h2>Pesquisa Instantânea</h2>
             <p>Diferente de um formulário que precisa do botão "Salvar", uma barra de pesquisa moderna filtra os dados <strong>a cada letra que o usuário digita</strong>.</p>
             <p>Para isso, não usamos o evento <code>click</code> ou <code>submit</code>. Usamos o evento <code>input</code> num campo de texto isolado.</p>
@@ -519,140 +410,184 @@ barraBusca.addEventListener("input", () => {
         </div>
     </div>
 
-    <!-- TÓPICO 4: LIVE CODING -->
+    <!-- TÓPICO 3: LIVE CODING PARTE 1 -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-laptop-code"></i>
-            <h1>Parte 4: Live Coding</h1>
-            <p style="font-size: 1.5rem; margin-bottom: 25px;">Adicionando Interatividade ao Dashboard</p>
+            <h1>Live Coding: Parte 1</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 25px;">A Barra de Busca</p>
             
             <div style="background: rgba(255,255,255,0.1); padding: 25px; border-radius: 12px; max-width: 800px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.2); text-align: left;">
                 <h3 style="color: var(--accent-yellow); font-size: 1.3rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fa-solid fa-bullseye"></i> O que vamos construir?
+                    <i class="fa-solid fa-bullseye"></i> O Desafio
                 </h3>
                 <p style="font-size: 1.1rem; color: #ffffff; margin-bottom: 0; line-height: 1.6;">
-                    Pegaremos o código da Aula 10 (Dashboard com JSON). 
-                    <br>1. Adicionaremos uma <strong>Barra de Busca</strong> na Topbar.
-                    <br>2. Função de <strong>Filtro Dinâmico</strong> no <code>renderer.js</code>.
-                    <br>3. Criaremos um <strong>Formulário de Cadastro</strong> na Sidebar.
-                    <br>4. Usaremos <strong>FormData</strong> para salvar o novo item e atualizar a tela.
+                    Pegaremos o <strong>código exato da Aula 10</strong> que vocês fizeram.
+                    <br>1. <strong>Refatorar:</strong> O <code>renderer.js</code> estava fechado. Vamos separar a busca da renderização.
+                    <br>2. <strong>HTML:</strong> Adicionar uma Barra de Busca na Topbar.
+                    <br>3. <strong>JS:</strong> Aplicar o filtro dinâmico de pesquisa.
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 14: LIVE CODING - HTML -->
+    <!-- SLIDE 10: REFATORANDO O JS COMPLETO -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">14</div>
-            <h2>Passo 1: O HTML (Barra de Busca)</h2>
-            <p>Na Topbar do nosso <code>index.html</code> (Aula 10), vamos adicionar um input de texto do Bootstrap.</p>
-            <div class="file-label html">src/renderer/index.html (Topbar)</div>
-<pre class="language-html line-numbers" data-line="3-7"><code>&lt;!-- HEADER (Topbar) --&gt;
+            <div class="slide-number">10</div>
+            <h2>Passo 1: Refatorando o `renderer.js`</h2>
+            <p>Substitua <strong>todo</strong> o código antigo do seu `renderer.js` por esta versão modular. Separamos a função que desenha a tela (agora recebe um parâmetro) da função que inicializa o app.</p>
+            
+            <div class="file-label js">renderer.js (Código Completo Base)</div>
+<pre class="language-javascript line-numbers" data-line="1, 3, 22-26, 29-33"><code>let listaProdutos = []; // A variável agora é GLOBAL para que a busca possa ler!
+
+const desenharTela = (listaParaDesenhar) => {
+    const htmlCards = listaParaDesenhar.map(produto => {
+        const bordaEstoque = produto.estoque > 0 ? 'border-warning' : 'border-danger';
+        const badgeEstoque = produto.estoque > 0 ? '' : '&lt;span class="badge bg-danger"&gt;ESGOTADO&lt;/span&gt;'; 
+        
+        return `
+        &lt;div class="col"&gt;
+            &lt;div class="card shadow-sm border-0 border-start border-4 ${bordaEstoque} h-100"&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;h5 class="card-title"&gt;${produto.nome} ${badgeEstoque}&lt;/h5&gt;
+                    &lt;p class="card-text text-muted mb-1"&gt;Preço: ${produto.preco.toFixed(2)}&lt;/p&gt;
+                    &lt;p class="card-text text-muted mb-0"&gt;Estoque: ${produto.estoque}&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;`
+    }).join("");
+
+    document.querySelector("#conteudo").innerHTML = `&lt;div class="row row-cols-1 row-cols-md-3 g-4"&gt;${htmlCards}&lt;/div&gt;`;
+
+    // Re-calcula o total baseado na lista que foi desenhada!
+    let total = 0;
+    listaParaDesenhar.forEach(produto => {
+        total += (produto.estoque * produto.preco);
+    });
+    document.querySelector("#total").innerText = `Total: ${total.toFixed(2)}`;
+};
+
+const iniciarApp = async () => {
+    listaProdutos = await window.api.pedirProdutos(); // Busca os dados do Node
+    desenharTela(listaProdutos); // Manda desenhar a lista completa
+};
+
+iniciarApp(); // Dá a partida no programa</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: HTML DA BUSCA -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">11</div>
+            <h2>Passo 2: Adicionando a Busca (HTML)</h2>
+            <p>Vá no seu <code>index.html</code>. Substitua o bloco do seu <code>&lt;header&gt;</code> pelo código abaixo. Adicionamos apenas o input de pesquisa no meio.</p>
+            
+            <div class="file-label html">index.html (Substitua apenas o Header)</div>
+<pre class="language-html line-numbers" data-line="5"><code>&lt;!-- 2. HEADER (Topbar) --&gt;
 &lt;header class="bg-white border-bottom p-3 d-flex justify-content-between align-items-center shadow-sm z-1"&gt;
     &lt;h4 class="m-0 text-secondary"&gt;Catálogo&lt;/h4&gt;
     
-    &lt;!-- Nossa nova barra de busca --&gt;
+    &lt;!-- NOSSA NOVA BARRA DE BUSCA --&gt;
     &lt;input type="text" id="inputBusca" class="form-control w-50" placeholder="Pesquisar produto..."&gt;
     
-    &lt;span class="badge bg-secondary p-2"&gt;Admin&lt;/span&gt;
+    &lt;div&gt;
+        &lt;span id="total" class="badge bg-success p-2 fs-6 me-2"&gt;Total: --&lt;/span&gt;
+        &lt;span class="badge bg-secondary p-2"&gt;Admin&lt;/span&gt;
+    &lt;/div&gt;
 &lt;/header&gt;</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 15: LIVE CODING - JS -->
+    <!-- SLIDE 12: LÓGICA DA BUSCA -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">15</div>
-            <h2>Passo 2: O JS (Refatorando)</h2>
-            <p>No <code>renderer.js</code>, vamos salvar a lista original vinda do Node numa variável global para podermos filtrá-la várias vezes sem perder os dados originais.</p>
+            <div class="slide-number">12</div>
+            <h2>Passo 3: A Lógica da Busca (JS)</h2>
+            <p>No final do seu <code>renderer.js</code> (abaixo de onde você chamou `iniciarApp();`), cole o código que vai escutar a digitação e filtrar a tela.</p>
             
-            <div class="file-label js">src/renderer/renderer.js (Parte 1)</div>
-<pre class="language-javascript line-numbers" data-line="1, 8"><code>let listaProdutos = []; // Estado Global do Front-end
-
-// Função que pega os dados e desenha a tela
-const renderizarCatalogo = async () => {
-    
-    // Se a lista estiver vazia (primeira vez que abre o app), busca no Node
-    if (listaProdutos.length === 0) {
-        listaProdutos = await window.api.pedirProdutos();
-    }
-    
-    // Aqui vai o map() que já tínhamos na Aula 10...
-    const html = listaProdutos.map(prod => `...`).join("");
-    document.querySelector("#conteudo").innerHTML = html;
-};
-
-renderizarCatalogo();</code></pre>
-        </div>
-    </div>
-
-    <!-- SLIDE 16: LIVE CODING - JS FILTRO -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">16</div>
-            <h2>Passo 3: A Lógica da Busca</h2>
-            <p>Agora adicionamos o "escutador" na barra de busca que fará o filtro e desenhará o catálogo novamente (usando a lista filtrada)!</p>
-            
-            <div class="file-label js">src/renderer/renderer.js (Parte 2)</div>
-<pre class="language-javascript line-numbers" data-line="8, 12"><code>// ... código anterior ...
-
+            <div class="file-label js">renderer.js (Cole no final do arquivo)</div>
+<pre class="language-javascript line-numbers" data-line="3, 7, 12"><code>// ---------------------------------------------
+// LÓGICA DE PESQUISA (Adicionado no Passo 3)
 const barraBusca = document.querySelector("#inputBusca");
 
 barraBusca.addEventListener("input", () => {
     const textoDigitado = barraBusca.value.toLowerCase();
     
-    // Filtra a lista global baseada no que foi digitado
-    const listaFiltrada = listaProdutos.filter(prod => {
-        return prod.nome.toLowerCase().includes(textoDigitado);
+    // Filtramos a listaGlobal usando includes()
+    const listaFiltrada = listaProdutos.filter(produto => {
+        return produto.nome.toLowerCase().includes(textoDigitado);
     });
     
-    // Redesenha a tela passando a nova lista!
-    // (Atenção: precisará alterar a função renderizarCatalogo para receber parâmetros)
-    desenharCards(listaFiltrada); 
+    // Mandamos a tela se redesenhar com a lista cortada!
+    desenharTela(listaFiltrada); 
 });</code></pre>
-            <p style="font-size: 0.9rem; color: var(--danger);">*Dica de Arquitetura: Teremos que separar a função que <strong>Busca</strong> no Node da função que apenas <strong>Desenha</strong> o HTML.</p>
         </div>
     </div>
 
-    <!-- SLIDE 17: LIVE CODING - HTML FORM -->
+    <!-- TÓPICO 4: LIVE CODING PARTE 2 -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-list-check"></i>
+            <h1>Live Coding: Parte 2</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 25px;">O Formulário de Cadastro</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: HTML DO FORMULÁRIO -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">17</div>
-            <h2>Passo 4: O HTML (Formulário)</h2>
-            <p>Na nossa Sidebar escura, vamos substituir os links de navegação por um pequeno formulário de cadastro, lembrando de colocar a tag <code>name</code> nos inputs.</p>
-            <div class="file-label html">src/renderer/index.html (Sidebar)</div>
-<pre class="language-html line-numbers" data-line="4-8"><code>&lt;!-- SIDEBAR --&gt;
+            <div class="slide-number">14</div>
+            <h2>Passo 4: O Formulário de Cadastro (HTML)</h2>
+            <p>Na sua Sidebar escura (<code>index.html</code>), remova a tag <code>&lt;ul&gt;</code> (os links "Home" e "Produtos") e coloque o nosso formulário com as tags `name` no lugar.</p>
+            
+            <div class="file-label html">index.html (Substitua apenas o Menu Lateral)</div>
+<pre class="language-html line-numbers" data-line="7, 8-10, 13"><code>&lt;!-- 1. MENU LATERAL (Largura Fixa) --&gt;
 &lt;div class="bg-dark text-white p-3 d-flex flex-column shadow z-2" style="width: 250px;"&gt;
-    &lt;h3 class="text-warning fw-bold mb-3"&gt;DevSystem&lt;/h3&gt;
-    
+    &lt;h3 class="text-warning fw-bold mb-0"&gt;DevSystem&lt;/h3&gt;
+    &lt;hr&gt;
+
+    &lt;!-- FORMULÁRIO ENTRA NO LUGAR DA LISTA (UL) --&gt;
     &lt;form id="formProduto"&gt;
         &lt;input type="text" name="nome" class="form-control mb-2" placeholder="Nome do Produto" required&gt;
-        &lt;input type="number" name="preco" class="form-control mb-3" placeholder="Preço" required&gt;
+        &lt;input type="number" name="preco" class="form-control mb-2" placeholder="Preço" required&gt;
+        &lt;input type="number" name="estoque" class="form-control mb-3" placeholder="Estoque" required&gt;
+        
         &lt;button type="submit" class="btn btn-success w-100"&gt;Cadastrar&lt;/button&gt;
     &lt;/form&gt;
 &lt;/div&gt;</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 18: LIVE CODING - JS FORM -->
+    <!-- SLIDE 15: LÓGICA DO FORMULÁRIO -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">18</div>
-            <h2>Passo 5: A Lógica do Cadastro</h2>
-            <p>No <code>renderer.js</code>, interceptamos o evento <code>submit</code>, usamos a magia do <code>FormData</code> para extrair os dados, e injetamos no Array Global!</p>
-            <div class="file-label js">src/renderer/renderer.js (Parte 3)</div>
-<pre class="language-javascript line-numbers" data-line="4-6, 9-10"><code>const form = document.querySelector("#formProduto");
+            <div class="slide-number">15</div>
+            <h2>Passo 5: A Magia do FormData (JS)</h2>
+            <p>Para finalizar, no final do seu <code>renderer.js</code>, cole a lógica que intercepta o envio do form, extrai os dados, salva e redesenha!</p>
+            
+            <div class="file-label js">renderer.js (Cole no final do arquivo)</div>
+<pre class="language-javascript line-numbers" data-line="4, 7-8, 11-12, 15, 18"><code>// ---------------------------------------------
+// LÓGICA DE CADASTRO (Adicionado no Passo 5)
+const form = document.querySelector("#formProduto");
 
 form.addEventListener("submit", (e) => {
     e.preventDefault(); // Trava o recarregamento da página!
     
+    // Extrai tudo de uma vez usando os 'names' do HTML
     const extrator = new FormData(form);
     const novoProduto = Object.fromEntries(extrator);
     
-    // Adiciona na lista global e redesenha a tela!
+    // Converte texto pra número pra não bugar cálculos matemáticos
+    novoProduto.preco = Number(novoProduto.preco);
+    novoProduto.estoque = Number(novoProduto.estoque);
+
+    // Adiciona no Array global
     listaProdutos.push(novoProduto);
-    desenharCards(listaProdutos);
+    
+    // Manda desenhar de novo a tela com o produto novo
+    desenharTela(listaProdutos);
     
     form.reset(); // Limpa os inputs
 });</code></pre>
@@ -662,40 +597,25 @@ form.addEventListener("submit", (e) => {
     <!-- TÓPICO 5: EXERCÍCIOS -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
-            <i class="fa-solid fa-code-branch"></i>
-            <h1>Parte 5: Missão Prática</h1>
-            <p>Dinamismo e Formulários</p>
+            <i class="fa-solid fa-bolt"></i>
+            <h1>Missão Prática</h1>
+            <p>Aprimorando o seu Catálogo</p>
         </div>
     </div>
 
-    <!-- SLIDE 20: EXERCICIOS PARTE 1 -->
+    <!-- SLIDE 17: EXERCICIOS FINAIS -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">20</div>
-            <h2>Exercícios: Responsividade & Busca</h2>
-            <p style="margin-bottom: 15px; color: var(--text-muted);">Use o projeto da Aula 10 (Dashboard de Inventário) como base.</p>
+            <div class="slide-number">17</div>
+            <h2>Desafios Finais do Dashboard</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Você já tem um software que pesquisa e adiciona itens. Agora melhore a usabilidade!</p>
             
             <div class="final-list">
                 <ol>
-                    <li><strong>Grid Responsivo:</strong> No seu <code>renderer.js</code> (Aula 10), o Grid dos cards estava fixo em 3 colunas (<code>row-cols-md-3</code>). Altere a string HTML do container no JavaScript para que fique: 1 coluna no celular (<code>col-12</code>), 2 colunas em tablets (<code>col-md-6</code>) e 4 colunas em telas grandes (<code>col-lg-3</code>). Redimensione a janela do seu app para testar.</li>
-                    <li><strong>Separando Responsabilidades:</strong> Refatore seu <code>renderer.js</code>. Crie uma função <code>buscarDados()</code> que faz o <code>invoke</code> e salva na variável global, e uma função <code>desenharTela(lista)</code> que recebe um array e faz o <code>map()</code>.</li>
-                    <li><strong>A Busca Dinâmica:</strong> Implemente a barra de busca (vista no Live Coding). Ao digitar qualquer letra na Topbar, o Dashboard deve atualizar instantaneamente mostrando apenas os produtos cujo nome ou categoria correspondam ao texto digitado.</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 21: EXERCICIOS PARTE 2 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">21</div>
-            <h2>Exercícios: Aprimorando o Cadastro</h2>
-            
-            <div class="final-list">
-                <ol start="4">
-                    <li><strong>Evoluindo o Formulário:</strong> O formulário do Live Coding está muito simples. Adicione mais dois campos HTML nele: Um <code>&lt;select name="categoria"&gt;</code> com opções (Hardware, Periféricos, Móveis) e um input de quantidade. Como usamos o <code>FormData</code>, o seu JS vai capturar esses campos novos automaticamente sem você mudar 1 linha de JS! Mude a função de desenhar os cards para exibir essas novas informações na tela.</li>
-                    <li><strong>Validação Simples:</strong> No JS, antes de dar o <code>.push()</code> na variável global, faça um <code>if</code>: Se o preço do produto for menor ou igual a 0, dê um <code>alert("Preço inválido!")</code> e use o <code>return</code> para cancelar o cadastro de dados errados.</li>
-                    <li><strong style="color: var(--primary);"><i class="fa-solid fa-robot"></i> Desafio IA (Modais Dinâmicos):</strong> Peça ao ChatGPT: <em>"Usando Bootstrap 5, como crio uma Janela Modal oculta no HTML e a abro via Javascript usando a API nativa do Bootstrap, quando o usuário clica num botão?"</em>. Remova o formulário de cadastro da Sidebar e coloque-o dentro dessa Modal! O cadastro (com FormData) deve continuar funcionando perfeitamente.</li>
+                    <li><strong>Formatação de Moeda:</strong> O JavaScript possui uma ferramenta nativa chamada <code>Intl.NumberFormat</code> para moedas. Pesquise como utilizá-la e altere o seu `renderer.js` para que os preços dos produtos apareçam formatados como Moeda Brasileira (ex: <code>R$ 1.200,00</code>), em vez de usar apenas o <code>toFixed(2)</code>.</li>
+                    <li><strong>Validação de Preço:</strong> No evento <code>submit</code> do seu formulário, adicione uma trava lógica (<code>if</code>). Se o preço digitado for menor ou igual a ZERO, exiba um <code>alert()</code> com mensagem de erro e use o <code>return</code> para abortar a função antes do <code>.push()</code> acontecer.</li>
+                    <li><strong>Filtro de Categoria:</strong> Adicione um input <code>name="categoria"</code> no seu form do HTML. Como estamos usando FormData, você não precisará alterar nada no seu JS de envio para que esse dado seja capturado! Apenas exiba a categoria no HTML do Card.</li>
+                    <li><strong style="color: var(--primary);"><i class="fa-solid fa-robot"></i> Desafio IA (Exclusão):</strong> Adicione um botão "X" vermelho em cada Card gerado. Peça ajuda à IA com o prompt: <em>"Tenho um array global renderizado na tela. Adicionei um botão de deletar em cada item. Como faço no JS para que, ao clicar nesse botão, eu identifique qual produto foi clicado, remova ele do Array Global e re-chame a função que desenha a tela?"</em>.</li>
                 </ol>
             </div>
         </div>
@@ -703,10 +623,11 @@ form.addEventListener("submit", (e) => {
 
 </div>
 
-<!-- Prism.js Scripts -->
+<!-- Prism.js Scripts para Syntax Highlighting -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
 
@@ -716,6 +637,7 @@ form.addEventListener("submit", (e) => {
     const totalSlides = slides.length;
     const progressBar = document.getElementById('progressBar');
 
+    // Navegação de Slides
     function showSlide(index) {
         if (index < 0) index = 0;
         if (index >= totalSlides) index = totalSlides - 1;
@@ -730,7 +652,7 @@ form.addEventListener("submit", (e) => {
 
     function nextSlide() { showSlide(currentSlide + 1); }
     function prevSlide() { showSlide(currentSlide - 1); }
-    function goToExercises() { showSlide(19); } // Vai para o Slide 20 (Índice 19)
+    function goToExercises() { showSlide(16); } 
     
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
