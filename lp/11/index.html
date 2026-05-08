@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 11: Condicionais Aninhadas (else if)</title>
+    
+    <!-- FontAwesome para ícones visuais claros -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Prism.js para o código não ficar visualmente cansativo -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta Extraída da Imagem (Acessibilidade e Alto Contraste) */
+            --color-navy: #0A1128;
+            --color-blue: #1D3A74;
+            --color-rust: #DD5327;
+            --color-orange: #FF8E32;
+            --color-yellow: #FFD13B;
+            
+            /* Fundo suave para reduzir sobrecarga sensorial */
+            --bg-body: #FDFBF7; 
+            --slide-bg: #FFFFFF;
+            
+            --text-main: var(--color-navy);
+            --text-muted: #4A5568; 
+            
+            --border-soft: #E2E8F0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link e Progresso */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--color-blue);
+            text-align: center;
+            padding: 10px;
+            z-index: 1000;
+            border-bottom: 4px solid var(--color-yellow);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* Estrutura de Slides com transição suave */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease; 
+            z-index: 0; overflow-y: auto; 
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico (Separador visual claro) */
+        .slide.topic {
+            background-color: var(--color-navy);
+            text-align: center;
+            border: 8px solid var(--color-yellow);
+            justify-content: center;
+        }
+        .slide.topic h1 { color: #ffffff; font-size: 3.5rem; }
+        .slide.topic p { color: var(--color-yellow); font-size: 1.5rem; font-weight: 800; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--color-orange); }
+
+        .slide-content-wrapper { max-width: 1000px; width: 100%; margin: auto 0; text-align: left; }
+        
+        .slide-number { 
+            display: inline-block;
+            background: var(--color-blue); color: white;
+            padding: 5px 15px; border-radius: 20px;
+            font-size: 1rem; font-weight: 800; 
+            margin-bottom: 1rem;
+        }
+
+        /* Tipografia focada em legibilidade */
+        h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px; color: var(--color-navy); }
+        h2 { font-size: 2rem; font-weight: 800; color: var(--color-blue); margin-bottom: 20px; border-bottom: 3px solid var(--color-orange); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.2rem; color: var(--text-main); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--color-rust); font-weight: 800; }
+
+        /* Estilos de Código bem definidos (Estático com Prism) */
+        pre[class*="language-"] {
+            background: var(--color-navy);
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-variant-ligatures: none;
+            font-size: 1.05rem;
+            margin: 15px 0;
+            padding: 20px;
+            border-left: 6px solid var(--color-yellow);
+            max-height: 450px; 
+            overflow-y: auto;
+        }
+        code[class*="language-"] { font-family: 'Fira Code', monospace; font-variant-ligatures: none; text-shadow: none; }
+        
+        /* ========================================================
+           DESTAQUE ABSOLUTO NO DEPURADOR (BYPASS PRISM)
+        ======================================================== 
+        */
+        .manual-lines {
+            counter-reset: line;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #f8fafc;
+            font-variant-ligatures: none !important;
+        }
+        .manual-lines .debug-line { 
+            display: block;
+            position: relative;
+            padding: 0.2rem 1rem 0.2rem 3.5rem !important; 
+            margin: 0;
+            transition: background-color 0.2s ease, opacity 0.3s ease; 
+            white-space: pre;
+            border-radius: 0;
+        }
+        .manual-lines .debug-line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 1rem;
+            width: 1.5rem;
+            text-align: right;
+            color: #858585;
+            user-select: none;
+            font-size: 1rem;
+        }
+        
+        /* --- ESTADO ATIVO: ALTO CONTRASTE --- */
+        .manual-lines .debug-line.active { 
+            background-color: var(--color-yellow) !important; 
+            color: var(--color-navy) !important;
+            font-weight: 900 !important;
+            box-shadow: inset 6px 0 0 var(--color-rust) !important; 
+        }
+        .manual-lines .debug-line.active::before { color: var(--color-navy) !important; font-weight: 900; }
+        /* Quando ativa, todas as tags span perdem as cores de sintaxe para ficar legível sobre o amarelo */
+        .manual-lines .debug-line.active span { color: var(--color-navy) !important; text-shadow: none !important;}
+        
+        /* Estado pulado */
+        .manual-lines .debug-line.skipped { opacity: 0.2 !important; }
+
+        /* Cores Fixas para Depurador (Evitando conflito com Prism) */
+        .sy-kw { color: #ff79c6 !important; font-weight: bold; }
+        .sy-func { color: #50fa7b !important; }
+        .sy-str { color: #f1fa8c !important; }
+        .sy-num { color: #bd93f9 !important; }
+        .sy-cmt { color: #6272a4 !important; font-style: italic !important; }
+        .sy-op { color: #ff79c6 !important; font-weight: bold; }
+        
+        /* Código Inline */
+        :not(pre) > code { 
+            font-family: 'Fira Code', monospace; 
+            font-variant-ligatures: none;
+            background: #EDF2F7; 
+            color: var(--color-blue); 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-size: 0.9em; 
+            font-weight: 800;
+        }
+        
+        /* Etiquetas e Blocos */
+        .file-label {
+            display: inline-block;
+            background: var(--color-blue);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px 8px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: -15px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 3px solid var(--color-yellow);
+        }
+        .code-block-wrapper { position: relative; width: 100%; max-width: 850px; margin: 1.5rem auto; }
+        .copy-button {
+            position: absolute; top: 1rem; right: 1rem;
+            background-color: var(--color-navy); color: var(--color-yellow);
+            border: 1px solid var(--color-yellow); padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem; font-size: 0.8rem; cursor: pointer;
+            opacity: 0; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 0.5rem; z-index: 10;
+        }
+        .copy-button:hover { background-color: var(--color-yellow); color: var(--color-navy); }
+        .code-block-wrapper:hover .copy-button { opacity: 1; }
+
+        /* Caixas de Foco */
+        .focus-box { background: #FFFaf0; border: 2px solid var(--color-orange); border-left: 8px solid var(--color-orange); padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .focus-box h3 { color: var(--color-rust); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;}
+
+        /* Grids e Elementos base */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+        .card-info { background: var(--slide-bg); padding: 25px; border-radius: 12px; border: 2px solid var(--border-soft); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .card-info h3 { color: var(--color-blue); margin-bottom: 15px; font-weight: 800; }
+        .quest-list ol { counter-reset: quest; list-style: none; padding: 0; }
+        .quest-list li { background: white; margin-bottom: 15px; padding: 20px 20px 20px 70px; border-radius: 12px; position: relative; border: 2px solid var(--quest-color, var(--color-yellow)); font-size: 1.15rem; font-weight: 600; }
+        .quest-list li::before { content: counter(quest); counter-increment: quest; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: var(--quest-color, var(--color-rust)); color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; font-size: 1.2rem; line-height: 35px; font-weight: 800; }
+
+        /* Controles Base */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--color-blue); }
+        .btn { background: var(--color-blue); border: none; color: #ffffff; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.2s; }
+        .btn:hover { background: var(--color-orange); }
+        
+        /* Estilos do Input e Botão do Depurador */
+        .debug-input-group {
+            display: flex; align-items: center; gap: 15px; background: var(--slide-bg); 
+            padding: 15px 25px; border-radius: 12px; border: 2px solid var(--color-blue);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .debug-input-label { font-weight: 800; color: var(--color-navy); font-size: 1.2rem; }
+        .debug-input {
+            border: 2px solid var(--border-soft); border-radius: 8px; padding: 8px 15px; 
+            font-size: 1.2rem; font-weight: 800; color: var(--color-blue); width: 100px; text-align: center;
+            outline: none; transition: border-color 0.2s; font-family: 'Nunito', sans-serif;
+        }
+        .debug-input:focus { border-color: var(--color-orange); }
+        .debug-btn {
+            background-color: var(--color-rust); color: white; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s; display: flex; align-items: center; gap: 8px;
+            font-family: 'Nunito', sans-serif;
+        }
+        .debug-btn:hover { background-color: var(--color-orange); transform: translateY(-2px); }
+        .debug-btn:active { transform: translateY(0); }
+        
+        /* Barra de Progresso visual clara */
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 10px; background: var(--color-rust); width: 0%; transition: width 0.4s ease; z-index: 101; }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; padding-top: 0; }
+            .fixed-link-bar, .controls, .progress-bar { display: none !important; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: auto; min-height: 100vh; padding: 40px; background: white; border-bottom: 2px solid #ccc;}
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; }
+            pre, .card-info, .focus-box { border: 2px solid #000; color: black; background: white; page-break-inside: avoid; }
+            h1, h2, p, li, strong { color: black !important; }
+            .manual-lines .debug-line { opacity: 1 !important; color: black !important; background: none !important; }
+            .manual-lines .debug-line span { color: black !important; font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- BOTOES DE CONTROLE -->
+<div class="controls">
+    <button class="btn" id="btn-fs" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
+    <button class="btn" id="btn-prev" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
+    <button class="btn" id="btn-next" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
+    <button class="btn" id="btn-print" title="Imprimir Material" style="background: var(--color-yellow); color: var(--color-navy);"><i class="fa-solid fa-print"></i></button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper text-center">
+            <div class="slide-number">Slide 01</div>
+            <h1>Aula 11: Mais condições</h1>
+            <h2>Condicionais Aninhadas (else if)</h2>
+            <br>
+            <div class="focus-box text-left" style="border-color: var(--color-blue); border-left-color: var(--color-blue); background: #f0f4f8;">
+                <h3 style="color: var(--color-blue);"><i class="fa-solid fa-map-location-dot"></i> Mapa da Nossa Missão Hoje:</h3>
+                <ol style="margin-bottom: 0;">
+                    <li><strong>A Limitação:</strong> Quando o IF/ELSE clássico não é suficiente.</li>
+                    <li><strong>O Anti-Padrão:</strong> Escrevendo IFs demais (e porque é mau).</li>
+                    <li><strong>O Código Hadouken:</strong> O perigo do aninhamento excessivo.</li>
+                    <li><strong>A Solução:</strong> A escada <code>else if</code>.</li>
+                    <li><strong>A Rede de Segurança:</strong> O papel do <code>else</code> solitário.</li>
+                    <li><strong>Prática:</strong> Criando menus, classificações e calculadora segura.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1 -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper text-center">
+            <i class="fa-solid fa-code-branch"></i>
+            <h1>Fase 1: Múltiplos Caminhos</h1>
+            <p>Saindo do "Sim" e "Não"</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 03: O LIMITE -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 03</div>
+            <h2>O Limite do IF / ELSE Clássico</h2>
+            <p>Na última aula, vimos que o <code>if / else</code> cria uma <strong>bifurcação simples</strong>. É como uma estrada que se divide em exatamente duas: ou você vai para a esquerda, ou vai para a direita.</p>
+            
+            <div class="grid-2">
+                <div class="card-info" style="border-color: var(--color-blue);">
+                    <h3>Apenas 2 Situações</h3>
+                    <ul>
+                        <li>Aprovado <strong>OU</strong> Reprovado.</li>
+                        <li>Maior de idade <strong>OU</strong> Menor de idade.</li>
+                        <li>Senha Correta <strong>OU</strong> Senha Incorreta.</li>
+                    </ul>
+                </div>
+                <div class="card-info" style="border-color: var(--color-rust); background: #fffaf0;">
+                    <h3 style="color: var(--color-rust);">Mas e se houver mais?</h3>
+                    <ul>
+                        <li>Aprovado, <strong>Recuperação</strong>, ou Reprovado? (3 caminhos)</li>
+                        <li>Bebê, Criança, Adolescente, Adulto ou Idoso? (5 caminhos)</li>
+                        <li>Menu de Opções com 10 escolhas?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="focus-box">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> O Desafio</h3>
+                <p>O mundo real raramente é apenas "preto ou branco". Como escrevemos um código que lida com zonas cinzentas e múltiplas categorias sem se tornar uma bagunça?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 04: A SOLUÇÃO RUIM -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 04</div>
+            <h2>A Solução Ruim: Vários IFs Separados</h2>
+            <p>A primeira ideia de muitos alunos é colocar vários <code>if</code>s um debaixo do outro. Funciona? Às vezes sim. É correto? <strong>Não.</strong></p>
+            
+            <div class="file-label">Péssimo Desempenho</div>
+<pre class="line-numbers"><code class="language-c">int nota = 9;
+
+if (nota >= 7) {
+    printf("Aprovado"); // Entra aqui!
+}
+
+// O computador CONTINUA testando desnecessariamente!
+if (nota >= 5 && nota < 7) {
+    printf("Recuperacao");
+}
+
+if (nota < 5) {
+    printf("Reprovado");
+}</code></pre>
+            
+            <p style="margin-top: 15px;"><strong>Por que é mau?</strong> O computador faz todas as perguntas, mesmo que já tenha encontrado a resposta correta na primeira linha. Num sistema grande, isso deixa tudo muito lento.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 05: A SOLUÇÃO ELEGANTE E DEPURADOR -->
+    <div class="slide" id="slide-debugger">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 05</div>
+            <h2>A Solução Elegante: <code>else if</code> (Senão Se)</h2>
+            <p>Combine o <code>else</code> com um novo <code>if</code> na mesma linha. Isso cria uma "escada" de condições organizadas.</p>
+            
+            <div class="flex flex-col md:flex-row gap-6 mt-6">
+                <!-- Coluna Esquerda: Controles e Código (Bypass Prism) -->
+                <div class="w-full md:w-3/5">
+                    <div class="debug-input-group">
+                        <label for="notaInput" class="debug-input-label">Digite a nota:</label>
+                        <input type="number" id="notaInput" min="0" max="10" step="0.1" value="7.5" class="debug-input">
+                        <button id="btnStartDebug" class="debug-btn"><i class="fa-solid fa-play"></i> Testar</button>
+                        <span style="font-size: 0.95rem; color: var(--text-muted); margin-left: auto; font-weight: 600;">(Ou use a seta <i class="fa-solid fa-arrow-right"></i>)</span>
+                    </div>
+
+                    <div class="code-block-wrapper">
+                        <div class="file-label">A Escada Perfeita</div>
+                        <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+                        <!-- Código Formatado Manualmente, livre das garras do Prism -->
+                        <div id="debug-code-container" class="manual-lines" style="font-family: 'Fira Code', monospace; background: var(--color-navy); padding: 1.5rem 0; border-radius: 12px; border-left: 6px solid var(--color-yellow); overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+<div class="debug-line" data-line="1"><span class="sy-kw">if</span> (nota <span class="sy-op">&gt;</span><span class="sy-op">=</span> <span class="sy-num">7.0</span>) {</div>
+<div class="debug-line" data-line="2">    <span class="sy-func">printf</span>(<span class="sy-str">"Aprovado!\\n"</span>);</div>
+<div class="debug-line" data-line="3">} <span class="sy-kw">else if</span> (nota <span class="sy-op">&gt;</span><span class="sy-op">=</span> <span class="sy-num">5.0</span>) { <span class="sy-cmt">// Lê-se: "Senão, SE..."</span></div>
+<div class="debug-line" data-line="4">    <span class="sy-func">printf</span>(<span class="sy-str">"Recuperacao!\\n"</span>);</div>
+<div class="debug-line" data-line="5">} <span class="sy-kw">else</span> { <span class="sy-cmt">// A rede de segurança</span></div>
+<div class="debug-line" data-line="6">    <span class="sy-func">printf</span>(<span class="sy-str">"Reprovado!\\n"</span>);</div>
+<div class="debug-line" data-line="7">}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Painel de Depuração -->
+                <div class="w-full md:w-2/5 flex flex-col gap-4">
+                    <div class="grid grid-cols-2 gap-4 w-full">
+                        <div class="card-info m-0" style="border-color: var(--color-blue); padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <h3 style="margin-bottom: 5px; font-size: 1rem; text-align: center;"><i class="fa-solid fa-microchip"></i> Memória</h3>
+                            <p class="font-mono text-2xl text-center mt-2">nota=<span id="mem-nota" class="font-bold text-[var(--color-rust)]">?</span></p>
+                        </div>
+                        <div class="card-info m-0" style="border-color: var(--color-yellow); padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <h3 style="margin-bottom: 5px; font-size: 1rem; text-align: center;"><i class="fa-solid fa-scale-balanced"></i> Avaliador</h3>
+                            <div class="flex-grow flex items-center justify-center w-full">
+                                <p id="eval-text" class="font-mono text-[0.95rem] leading-tight text-gray-600 text-center m-0">Aguardando...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-info flex-grow flex flex-col m-0" style="border-color: var(--color-navy); padding: 15px; background: #1e1e1e; color: #4ade80;">
+                        <h3 style="margin-bottom: 5px; font-size: 1rem; color: #888; border-bottom: 1px solid #333;"><i class="fa-solid fa-terminal"></i> Terminal</h3>
+                        <div id="term-text" class="font-mono text-lg mt-2 flex-grow" style="color: #4ade80; text-align: left; margin-bottom: 0;">> _</div>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-6 text-center text-[var(--color-rust)] font-bold text-sm bg-[#FFFaf0] border border-[var(--color-orange)] p-2 rounded w-full">A Regra de Ouro: O computador testa de cima para baixo. APENAS O PRIMEIRO bloco verdadeiro é executado!</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 06: A REDE DE SEGURANÇA -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 06</div>
+            <h2>O <code>else</code> solitário: A Rede de Segurança</h2>
+            <p>Você pode empilhar dezenas de <code>else if</code> na sua escada. Mas, no final, é altamente recomendado colocar um <code>else</code> sozinho.</p>
+            
+            <div class="grid-2">
+                <div class="card-info" style="border-color: var(--color-navy); display: flex; flex-direction: column; justify-content: center; align-items: center; background: #E2E8F0;">
+                    <i class="fa-solid fa-life-ring" style="font-size: 5rem; color: var(--color-blue); margin-bottom: 20px;"></i>
+                    <p style="text-align: center; font-weight: bold; margin: 0;">Capturando Exceções</p>
+                </div>
+                <div class="card-info">
+                    <h3>O que sobrou!</h3>
+                    <p>O <code>else</code> final diz: <em>"Se o programa chegou até aqui e falhou em TODAS as perguntas lá de cima, caia aqui obrigatoriamente."</em></p>
+                    <p>É a forma ideal de tratar erros, como quando um utilizador digita uma opção que não existe num menu.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 07: EXEMPLO COMPLETO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 07</div>
+            <h2>Exemplo Prático: Menu de Jogo</h2>
+            <p>Veja como aplicamos a escada para ler a escolha de um menu interativo.</p>
+            
+            <div class="code-block-wrapper">
+                <div class="file-label">jogo.c</div>
+                <button class="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg><span>Copiar</span></button>
+<pre class="line-numbers"><code class="language-c">#include &lt;stdio.h&gt;
+
+int main() {
+    int opcao;
+    printf("--- MENU PRINCIPAL ---\\n");
+    printf("1 - Novo Jogo\\n2 - Carregar Jogo\\n3 - Opcoes\\n0 - Sair\\n");
+    printf("Escolha: ");
+    scanf("%d", &opcao);
+
+    if (opcao == 1) {
+        printf("Iniciando nova aventura...\\n");
+    } else if (opcao == 2) {
+        printf("Carregando save game...\\n");
+    } else if (opcao == 3) {
+        printf("Abrindo definicoes...\\n");
+    } else if (opcao == 0) {
+        printf("A sair do jogo. Adeus!\\n");
+    } else {
+        // A nossa rede de segurança!
+        printf("Opcao Invalida! Tente novamente.\\n");
+    }
+    return 0;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: MISSÕES PRÁTICAS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper text-center">
+            <i class="fa-solid fa-laptop-code"></i>
+            <h1>Missões Práticas</h1>
+            <p>Laboratório de Lógica e Múltiplas Condições</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 09: EXERCÍCIOS PARTE 1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 09</div>
+            <h2>Desafios (Teoria e Prática Inicial)</h2>
+            <p>Crie um arquivo <code>.c</code> para cada desafio, compile e teste no terminal.</p>
+            
+            <div class="quest-list mt-8">
+                <ol>
+                    <li style="--quest-color: var(--color-blue); border-color: var(--color-blue);">
+                        <strong style="color: var(--color-blue); font-size: 1.3rem;">O Teste do Menu (Mental):</strong> <br>
+                        Baseado no código do Menu do Jogo no slide anterior. O que acontece exatamente (na memória e na tela) se o usuário digitar a opção <code>9</code>? Descreva por quais <code>if</code>s o computador passa.
+                    </li>
+                    <li style="--quest-color: var(--color-rust); border-color: var(--color-rust);">
+                        <strong style="color: var(--color-rust); font-size: 1.3rem;">A Ordem Importa (Mental):</strong> <br>
+                        Um programador fez este código: <code>if (peso >= 60) printf("Leve"); else if (peso >= 90) printf("Pesado");</code>. O lutador tem 100kg. O que vai imprimir? Por que a ordem dos <code>if</code>s está errada?
+                    </li>
+                    <li style="--quest-color: var(--color-orange); border-color: var(--color-orange); background: #FFFaf0;">
+                        <strong style="color: var(--color-orange); font-size: 1.3rem;">Categorias de Idade (Prática):</strong> <br>
+                        Peça a idade de uma pessoa e classifique-a: <br>
+                        - Menor que 13: Criança<br>
+                        - Entre 13 e 17 (inclusive): Adolescente<br>
+                        - Entre 18 e 59 (inclusive): Adulto<br>
+                        - Maior ou igual a 60: Idoso
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: EXERCÍCIOS PARTE 2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 10</div>
+            <h2>Desafios (Avançados)</h2>
+            
+            <div class="quest-list mt-8">
+                <ol start="4">
+                    <li style="--quest-color: var(--color-navy); border-color: var(--color-navy);">
+                        <strong style="color: var(--color-navy); font-size: 1.3rem;">Calculadora Segura (ex4.c):</strong> <br>
+                        Peça dois números decimais (float). Depois exiba o menu: "1. Somar | 2. Subtrair | 3. Multiplicar | 4. Dividir". Leia a opção escolhida. Use a escada de <code>else if</code> para fazer a conta certa e imprimir o resultado. <br><strong>Atenção:</strong> Na operação de divisão, adicione um <code>if/else</code> interno para verificar se o segundo número é zero. Se for, exiba um erro, caso contrário, faça a divisão. Adicione um <code>else</code> no final para opções inválidas do menu.
+                    </li>
+                    <li style="--quest-color: var(--color-blue); border-color: var(--color-blue);">
+                        <strong style="color: var(--color-blue); font-size: 1.3rem;">O Radar de Trânsito:</strong> <br>
+                        Leia a velocidade de um carro. <br>
+                        - Até 80 km/h: "Velocidade Permitida".<br>
+                        - De 81 a 100 km/h: "Multa Leve".<br>
+                        - Acima de 100 km/h: "Multa Gravíssima!".
+                    </li>
+                    <li style="--quest-color: var(--color-rust); border-color: var(--color-rust); background: #fffaf0;">
+                        <strong style="color: var(--color-rust); font-size: 1.3rem;">Desafio Supremo: Imposto de Renda:</strong> <br>
+                        Leia um salário (float). Calcule e exiba o desconto de imposto baseado na tabela:<br>
+                        - Até R$ 2.000: Isento (0%).<br>
+                        - De R$ 2.000,01 a R$ 5.000: Desconto de 10%.<br>
+                        - Acima de R$ 5.000: Desconto de 20%.<br>
+                        Mostre na tela: O Salário Bruto, O Valor Descontado e O Salário Líquido.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scripts Prism.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+
+        // --- LÓGICA DO DEPURADOR INTERATIVO ---
+        let debugSteps = [];
+        let currentDebugStep = -1;
+
+        function initDebugger() {
+            const notaInput = document.getElementById('notaInput');
+            if (!notaInput) return;
+            
+            const notaStr = notaInput.value || "7.5"; // Fallback seguro
+            const nota = parseFloat(notaStr);
+            if(isNaN(nota)) return;
+            
+            document.getElementById('mem-nota').innerText = nota.toFixed(1);
+            
+            debugSteps = [];
+            debugSteps.push({ line: null, eval: "Iniciando verificação...", term: "> _", skipped: [] });
+            debugSteps.push({ line: 1, eval: `${nota.toFixed(1)} >= 7.0 ?`, term: "> _", skipped: [] });
+            
+            if (nota >= 7.0) {
+                debugSteps.push({ line: 1, eval: `${nota.toFixed(1)} >= 7.0 ? <br><strong style="color: #10b981; font-size: 1.2rem;">VERDADEIRO</strong>`, term: "> _", skipped: [] });
+                debugSteps.push({ line: 2, eval: "Executando bloco...", term: "> Aprovado!<br>> _", skipped: [] });
+                debugSteps.push({ line: null, eval: "Fim da verificação.<br>Resto ignorado.", term: "> Aprovado!<br>> _", skipped: [3,4,5,6,7] });
+            } else {
+                debugSteps.push({ line: 1, eval: `${nota.toFixed(1)} >= 7.0 ? <br><strong style="color: #ef4444; font-size: 1.2rem;">FALSO</strong>`, term: "> _", skipped: [] });
+                debugSteps.push({ line: 3, eval: `${nota.toFixed(1)} >= 5.0 ?`, term: "> _", skipped: [2] });
+                
+                if (nota >= 5.0) {
+                    debugSteps.push({ line: 3, eval: `${nota.toFixed(1)} >= 5.0 ? <br><strong style="color: #10b981; font-size: 1.2rem;">VERDADEIRO</strong>`, term: "> _", skipped: [2] });
+                    debugSteps.push({ line: 4, eval: "Executando bloco...", term: "> Recuperacao!<br>> _", skipped: [2] });
+                    debugSteps.push({ line: null, eval: "Fim da verificação.<br>Resto ignorado.", term: "> Recuperacao!<br>> _", skipped: [2,5,6,7] });
+                } else {
+                    debugSteps.push({ line: 3, eval: `${nota.toFixed(1)} >= 5.0 ? <br><strong style="color: #ef4444; font-size: 1.2rem;">FALSO</strong>`, term: "> _", skipped: [2] });
+                    debugSteps.push({ line: 5, eval: `Caindo no <strong>else</strong><br>(Rede segura)`, term: "> _", skipped: [2,4] });
+                    debugSteps.push({ line: 6, eval: "Executando bloco...", term: "> Reprovado!<br>> _", skipped: [2,4] });
+                    debugSteps.push({ line: null, eval: "Fim da verificação.", term: "> Reprovado!<br>> _", skipped: [2,4] });
+                }
+            }
+            
+            currentDebugStep = 0;
+            applyDebugStep();
+        }
+
+        function applyDebugStep() {
+            if(currentDebugStep < 0 || currentDebugStep >= debugSteps.length) return;
+            const step = debugSteps[currentDebugStep];
+            
+            const evalText = document.getElementById('eval-text');
+            if (evalText) evalText.innerHTML = step.eval;
+            
+            const termText = document.getElementById('term-text');
+            if (termText) termText.innerHTML = step.term;
+            
+            const lines = document.querySelectorAll('#debug-code-container .debug-line');
+            lines.forEach(line => {
+                line.classList.remove('active', 'skipped');
+                const lineNum = parseInt(line.getAttribute('data-line'));
+                if (lineNum === step.line) {
+                    line.classList.add('active');
+                }
+                if (step.skipped.includes(lineNum)) {
+                    line.classList.add('skipped');
+                }
+            });
+        }
+
+        function resetDebugger() {
+            currentDebugStep = -1;
+            const evalText = document.getElementById('eval-text');
+            if (evalText) evalText.innerHTML = "Aguardando...";
+            const termText = document.getElementById('term-text');
+            if (termText) termText.innerHTML = "> _";
+            const memNota = document.getElementById('mem-nota');
+            if (memNota) memNota.innerText = "?";
+            document.querySelectorAll('#debug-code-container .debug-line').forEach(line => {
+                line.classList.remove('active', 'skipped');
+            });
+        }
+
+        const btnStartDebug = document.getElementById('btnStartDebug');
+        if (btnStartDebug) {
+            btnStartDebug.addEventListener('click', initDebugger);
+        }
+
+        // --- NAVEGAÇÃO DE SLIDES (VIA CLASSE ACTIVE) ---
+        function showSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            
+            currentSlide = index;
+            
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === currentSlide) {
+                    slide.classList.add('active');
+                    slide.scrollTop = 0; 
+                }
+            });
+            
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            if (progressBar) progressBar.style.width = `${progress}%`;
+
+            // Reseta depurador se voltar/avançar pro slide dele
+            if (slides[currentSlide] && slides[currentSlide].id === 'slide-debugger' && currentDebugStep === -1) {
+                resetDebugger();
+            }
+        }
+
+        function nextSlide() { 
+            if (slides[currentSlide] && slides[currentSlide].id === 'slide-debugger') {
+                if (currentDebugStep === -1) {
+                    initDebugger();
+                    return;
+                } else if (currentDebugStep < debugSteps.length - 1) {
+                    currentDebugStep++;
+                    applyDebugStep();
+                    return;
+                }
+            }
+            showSlide(currentSlide + 1); 
+        }
+
+        function prevSlide() { 
+            if (slides[currentSlide] && slides[currentSlide].id === 'slide-debugger') {
+                if (currentDebugStep > 0) {
+                    currentDebugStep--;
+                    applyDebugStep();
+                    return;
+                } else if (currentDebugStep === 0) {
+                    resetDebugger();
+                    return;
+                }
+            }
+            showSlide(currentSlide - 1); 
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // --- BIND EVENTS ---
+        const btnNext = document.getElementById('btn-next');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnFs = document.getElementById('btn-fs');
+
+        if (btnNext) btnNext.addEventListener('click', nextSlide);
+        if (btnPrev) btnPrev.addEventListener('click', prevSlide);
+        if (btnFs) btnFs.addEventListener('click', toggleFullscreen);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault(); 
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key.toLowerCase() === 'f') {
+                toggleFullscreen();
+            }
+        });
+
+        // Botão de Copiar Adaptado para Prism e Manual
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const container = e.currentTarget.closest('.code-block-wrapper');
+                let codeText = '';
+                
+                if (container.querySelector('.manual-lines')) {
+                    container.querySelectorAll('.debug-line').forEach(line => {
+                        codeText += line.innerText + '\n';
+                    });
+                } else {
+                    const pre = container.querySelector('pre');
+                    codeText = pre.textContent || pre.innerText;
+                }
+
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const span = button.querySelector('span');
+                    if (span) {
+                        const originalText = span.innerText;
+                        span.innerText = 'Copiado!';
+                        setTimeout(() => { span.innerText = originalText; }, 2000);
+                    }
+                });
+            });
+        });
+
+        // Inicializa o primeiro slide
+        showSlide(0);
+    });
+</script>
+
+</body>
+</html>

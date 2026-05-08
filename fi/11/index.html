@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 11 - Edição Guiada (Prática)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Extraída da Imagem (Alto Contraste Absoluto) */
+        :root {
+            --color-blue: #0000FF;   /* Azul Puro */
+            --color-gray: #C0C0C0;   /* Cinza Prata */
+            --color-red: #800000;    /* Vermelho Escuro/Bordô */
+            --color-white: #FFFFFF;  /* Branco */
+            --color-black: #000000;  /* Preto */
+        }
+
+        /* --- ESTILOS GERAIS --- */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--color-white); 
+            color: var(--color-black);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-white);
+            background-image: radial-gradient(rgba(0, 0, 0, 0.1) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* --- SLIDES E ANIMAÇÕES --- */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            
+            /* Animação suave para não gerar sobrecarga sensorial */
+            opacity: 0;
+            transform: scale(0.98);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            pointer-events: none;
+            
+            background-color: var(--color-white);
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* --- UTILITÁRIOS DE CORES --- */
+        .text-c-blue { color: var(--color-blue); }
+        .text-c-gray { color: var(--color-gray); }
+        .text-c-red { color: var(--color-red); }
+        .text-c-white { color: var(--color-white); }
+        .text-c-black { color: var(--color-black); }
+        
+        .bg-c-blue { background-color: var(--color-blue); }
+        .bg-c-gray { background-color: var(--color-gray); }
+        .bg-c-red { background-color: var(--color-red); }
+        .bg-c-black { background-color: var(--color-black); }
+        
+        .border-c-blue { border-color: var(--color-blue); }
+        .border-c-gray { border-color: var(--color-gray); }
+        .border-c-red { border-color: var(--color-red); }
+        .border-c-black { border-color: var(--color-black); }
+
+        /* --- COMPONENTES PEDAGÓGICOS --- */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--color-gray);
+            width: 100%;
+            max-width: 1100px;
+        }
+        
+        /* Caixa de Ação (Prática no Documento) */
+        .action-box {
+            background-color: var(--color-white);
+            border: 4px solid var(--color-black);
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: var(--color-black);
+        }
+
+        /* Caixa de Lógica (Explica o porquê para reduzir ansiedade) */
+        .logic-box {
+            background-color: #f3f4f6; /* Slate 100 */
+            border-left: 8px solid var(--color-blue);
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            color: var(--color-black);
+        }
+
+        /* Regras Sociais Explícitas (Para alunos no Espectro) */
+        .social-rule-box {
+            background-color: #f3f4f6;
+            border-left: 8px solid var(--color-red);
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            color: var(--color-black);
+        }
+
+        /* --- IMPRESSÃO --- */
+        @media print {
+            body, html { overflow: visible !important; height: auto !important; background: white !important; }
+            #presentation { display: block !important; height: auto !important; position: static !important; }
+            .slide { position: relative !important; opacity: 1 !important; display: block !important; page-break-after: always; border-bottom: 2px solid #ccc; padding: 2rem 0 !important; }
+            .no-print { display: none !important; }
+            .bg-c-blue, .bg-c-red, .bg-c-gray, .bg-c-black { background-color: #eee !important; color: black !important; border: 2px solid black; }
+            .text-c-white { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle Superior -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/95 border-b-4 border-c-black shadow-md">
+        <div class="flex items-center space-x-6">
+            <span class="font-black text-c-black text-xl tracking-tighter">AULA 11: Formatando a Evolução</span>
+            <div class="h-3 w-48 lg:w-80 bg-gray-200 rounded-full overflow-hidden border border-black">
+                <div id="progressBar" class="h-full bg-c-red transition-all duration-300 w-0"></div>
+            </div>
+            <!-- Total de slides atualizado para 19 -->
+            <span id="slideCounter" class="font-mono font-bold text-gray-600">01 / 19</span>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="toggleFullscreen()" class="p-2 border-2 border-black rounded hover:bg-gray-100 transition" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="bg-c-black text-white px-4 py-2 rounded font-bold hover:opacity-80 transition flex items-center gap-2">
+                <i data-lucide="printer"></i> Apostila (PDF)
+            </button>
+        </div>
+    </div>
+
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-c-red text-white px-6 py-2 rounded-full text-sm font-bold uppercase mb-8 inline-block shadow-lg">Prática Guiada</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight">Formatando a<br><span class="text-c-blue">Evolução</span></h1>
+                <p class="text-2xl text-gray-700 font-bold max-w-3xl mx-auto">Vamos intercalar a teoria com a aplicação direta no documento.</p>
+            </div>
+            <div class="mt-16 text-c-black no-print">
+                <p class="text-xs uppercase tracking-widest mb-2 font-bold opacity-50">Pressione a seta para iniciar</p>
+                <i data-lucide="arrow-down" class="mx-auto animate-bounce"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Previsibilidade -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold mb-10 border-l-8 border-c-red pl-6">Estrutura da Atividade</h2>
+            <div class="card p-10 space-y-6 max-w-5xl">
+                <p class="text-2xl">Aplicaremos regras técnicas no texto <strong>"A Evolução da Tecnologia no Cotidiano"</strong>. A ordem será:</p>
+                <div class="grid grid-cols-2 gap-8 mt-6">
+                    <div class="logic-box font-bold border-c-blue">1. Quebras de Página seguras</div>
+                    <div class="logic-box font-bold border-c-red">2. Identificação de Títulos (Estilos)</div>
+                    <div class="logic-box font-bold border-c-black">3. Geração Automática de Sumário</div>
+                    <div class="logic-box font-bold border-c-gray">4. Comportamento de Imagens</div>
+                    <div class="logic-box font-bold border-c-blue">5. Estruturação de Tabelas</div>
+                    <div class="logic-box font-bold border-c-red">6. Protocolos de Trabalho em Grupo</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: Preparação -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-blue">Passo 0: Abrir o Arquivo Base</h2>
+            <div class="card p-10 max-w-4xl text-center">
+                <i data-lucide="file-text" class="w-20 h-20 mx-auto text-c-blue mb-6"></i>
+                <p class="text-2xl font-bold mb-6">Abram o documento <strong>"A Evolução da Tecnologia no Cotidiano"</strong> no Google Docs.</p>
+                <p class="text-lg text-gray-700">Ele contém o texto cru (sem formatação). Iremos moldá-lo juntos passo a passo.</p>
+                
+                <div class="logic-box border-c-black mt-8 text-left">
+                    <p class="font-bold text-lg mb-2">A Dinâmica da Aula:</p>
+                    <p class="text-base">Apresentaremos um conceito na tela. Em seguida, vocês aplicarão esse conceito exatamente nos locais marcados no texto de vocês.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PARTE 1: AUTOMAÇÃO ================= -->
+
+        <!-- SLIDE 4: Conceito 1 -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-blue text-white px-4 py-2 rounded-xl font-black text-3xl">01</span>
+                <h2 class="text-5xl font-bold text-c-black">Conceito: Quebra de Página 📄</h2>
+            </div>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-6xl">
+                <div class="logic-box border-c-red bg-white border-4 border-l-8 shadow-sm">
+                    <p class="font-black text-c-red mb-4 text-2xl">O Problema do "Enter"</p>
+                    <p class="text-lg leading-relaxed">Apertar `Enter` várias vezes cria espaços invisíveis que quebram o documento se você adicionar uma imagem acima.</p>
+                </div>
+                <div class="logic-box border-c-blue bg-white border-4 border-l-8 shadow-sm">
+                    <p class="font-black text-c-blue mb-4 text-2xl">A Solução</p>
+                    <p class="text-lg leading-relaxed">A <strong>Quebra de Página (<code class="bg-gray-200 px-2 rounded">Ctrl + Enter</code>)</strong> diz ao computador: "O texto que vem depois disso deve sempre começar no topo de uma nova folha."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Prática 1 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 1: Separando Capítulos</h2>
+            <div class="action-box max-w-5xl shadow-lg border-c-blue">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-c-blue">AÇÃO NO DOCUMENTO:</p>
+                <p class="text-lg mb-6 font-bold">Coloque o cursor de texto imediatamente antes das palavras indicadas abaixo e aperte <span class="bg-c-gray px-3 py-1 rounded text-2xl ml-2 border border-black shadow">Ctrl + Enter</span></p>
+                <ul class="list-disc pl-8 space-y-4 text-lg font-bold text-gray-800">
+                    <li>Antes de <strong>"O Papel do Hardware"</strong></li>
+                    <li>Antes de <strong>"A Revolução do Software"</strong></li>
+                    <li>Antes de <strong>"Impacto na Educação"</strong></li>
+                    <li>Antes de <strong>"Conclusão"</strong></li>
+                </ul>
+                <p class="mt-6 text-sm text-gray-600 font-bold border-t border-gray-300 pt-4">Resultado: O seu texto agora está dividido corretamente em várias páginas distintas.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Conceito 2 -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-blue text-white px-4 py-2 rounded-xl font-black text-3xl">02</span>
+                <h2 class="text-5xl font-bold text-c-black">Conceito: Estilos de Título 🏷️</h2>
+            </div>
+            <div class="card p-10 max-w-5xl text-center bg-white shadow-xl border-t-8 border-c-black">
+                <h3 class="text-3xl font-bold mb-6 text-c-black">Etiquetando para a Máquina</h3>
+                <p class="text-xl text-gray-800 leading-relaxed mb-6 font-bold">
+                    O computador não lê. Ele apenas vê letras. Se você aumentar a letra para tamanho 18, para ele continua sendo texto normal.<br><br>
+                    Para criar um <strong>Sumário</strong> depois, você precisa usar o menu superior de "Estilos" (Texto Normal, Título 1, Título 2) para ensinar à máquina onde estão as seções exatas do documento.
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Prática 2 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 2: Aplicando Estilos</h2>
+            <div class="action-box max-w-5xl shadow-lg border-c-red">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-c-red">AÇÃO NO DOCUMENTO:</p>
+                <p class="text-lg mb-6 font-bold">Selecione as frases abaixo no seu texto e altere o estilo na barra superior do Google Docs:</p>
+                
+                <div class="space-y-4 text-base font-bold bg-white p-6 rounded-lg border-2 border-black">
+                    <p>1. Selecione <strong class="bg-gray-200 px-1">"Título: A Evolução da Tecnologia no Cotidiano"</strong><br> ➜ Mude para a opção <strong class="text-c-blue text-lg">Título</strong>.</p>
+                    <hr class="border-gray-300">
+                    <p>2. Selecione as seções principais:<br>
+                       <strong class="bg-gray-200 px-1">"Introdução"</strong>, <strong class="bg-gray-200 px-1">"O Papel do Hardware"</strong>, <strong class="bg-gray-200 px-1">"A Revolução do Software"</strong>, <strong class="bg-gray-200 px-1">"Impacto na Educação"</strong> e <strong class="bg-gray-200 px-1">"Conclusão"</strong>.<br>
+                       ➜ Mude todas elas para a opção <strong class="text-c-red text-lg">Título 1</strong>.
+                    </p>
+                    <hr class="border-gray-300">
+                    <p>3. Selecione o sub-tópico <strong class="bg-gray-200 px-1">"Sistemas de Código Aberto"</strong><br>
+                       ➜ Mude para a opção <strong class="text-c-black text-lg">Título 2</strong>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Conceito 3 -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-blue text-white px-4 py-2 rounded-xl font-black text-3xl">03</span>
+                <h2 class="text-5xl font-bold text-c-black">Conceito: Sumário Automático 📑</h2>
+            </div>
+            <div class="card p-10 max-w-5xl bg-white shadow-xl border-l-8 border-c-blue flex gap-8 items-center">
+                <div class="w-1/3">
+                    <i data-lucide="list-ordered" class="w-32 h-32 text-c-blue mx-auto"></i>
+                </div>
+                <div class="w-2/3">
+                    <p class="text-2xl font-bold mb-4">A Colheita</p>
+                    <p class="text-lg text-gray-800">Como você acabou de etiquetar o texto na Prática 2, o Google Docs agora sabe exatamente a estrutura do seu trabalho e em qual página cada "Título 1" e "Título 2" foi parar após a quebra de página. A geração do índice será automática.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: Prática 3 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 3: Gerando o Sumário</h2>
+            <div class="action-box max-w-5xl shadow-lg border-black">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2">AÇÃO NO DOCUMENTO:</p>
+                <ol class="list-decimal pl-6 space-y-5 text-xl font-bold text-gray-800">
+                    <li>Volte ao topo do documento, logo abaixo do Título Principal.</li>
+                    <li>No menu superior, clique em: <strong class="text-c-blue bg-white border-2 border-black px-2 py-1 rounded mx-1">Inserir ➜ Sumário</strong>.</li>
+                    <li>Escolha a primeira opção (aquela com linhas pontilhadas e números de página).</li>
+                </ol>
+                <p class="mt-8 text-base bg-c-gray border-l-4 border-c-black p-4 font-bold text-black shadow-sm">
+                    Veja a geração automática! Se você adicionar texto futuramente e os capítulos descerem, basta clicar sobre o sumário e apertar o ícone circular de "Atualizar".
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: Conceito 4 -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-blue text-white px-4 py-2 rounded-xl font-black text-3xl">04</span>
+                <h2 class="text-5xl font-bold text-c-black">Conceito: Comportamento de Imagens 🖼️</h2>
+            </div>
+            <p class="text-xl font-bold text-gray-700 mb-8 text-center max-w-4xl">O computador precisa de uma regra matemática para saber como o texto deve se comportar ao redor de uma imagem inserida.</p>
+            
+            <div class="grid grid-cols-3 gap-8 w-full max-w-7xl">
+                <!-- Inline SVG -->
+                <div class="card p-6 text-center border-c-gray flex flex-col items-center">
+                    <div class="w-full h-32 mb-4 bg-white border-2 border-c-gray rounded-xl p-3 flex items-center justify-center">
+                        <svg viewBox="0 0 100 80" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="10" width="100" height="6" rx="3" fill="#C0C0C0" />
+                            <rect x="0" y="44" width="25" height="6" rx="3" fill="#C0C0C0" />
+                            <rect x="30" y="24" width="35" height="26" rx="4" fill="#0000FF" />
+                            <rect x="70" y="44" width="30" height="6" rx="3" fill="#C0C0C0" />
+                            <rect x="0" y="64" width="85" height="6" rx="3" fill="#C0C0C0" />
+                        </svg>
+                    </div>
+                    <h3 class="font-black text-xl text-c-black mb-2">Em Linha</h3>
+                    <p class="text-sm text-gray-800 font-bold">A imagem atua como se fosse uma letra gigante na frase. Move-se com a linha.</p>
+                </div>
+                <!-- Wrap SVG -->
+                <div class="card p-6 text-center border-4 border-c-red flex flex-col items-center transform scale-105 shadow-xl">
+                    <div class="w-full h-32 mb-4 bg-white border-2 border-c-red rounded-xl p-3 flex items-center justify-center">
+                        <svg viewBox="0 0 100 80" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="5" width="100" height="6" rx="3" fill="#C0C0C0" />
+                            <rect x="0" y="18" width="40" height="38" rx="4" fill="#800000" />
+                            <rect x="47" y="18" width="53" height="6" rx="3" fill="#000000" />
+                            <rect x="47" y="34" width="45" height="6" rx="3" fill="#000000" />
+                            <rect x="47" y="50" width="53" height="6" rx="3" fill="#000000" />
+                            <rect x="0" y="66" width="90" height="6" rx="3" fill="#C0C0C0" />
+                        </svg>
+                    </div>
+                    <h3 class="font-black text-xl text-c-red mb-2">Ajustar Texto</h3>
+                    <p class="text-sm text-gray-800 font-bold">A imagem fixa-se no local e o texto flui fluidamente ao redor das suas bordas.</p>
+                </div>
+                <!-- Break SVG -->
+                <div class="card p-6 text-center border-c-gray flex flex-col items-center">
+                    <div class="w-full h-32 mb-4 bg-white border-2 border-c-gray rounded-xl p-3 flex items-center justify-center">
+                        <svg viewBox="0 0 100 80" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0" y="5" width="100" height="6" rx="3" fill="#C0C0C0" />
+                            <rect x="0" y="18" width="60" height="6" rx="3" fill="#C0C0C0" />
+                            <rect x="25" y="31" width="50" height="24" rx="4" fill="#0000FF" />
+                            <rect x="0" y="65" width="100" height="6" rx="3" fill="#C0C0C0" />
+                        </svg>
+                    </div>
+                    <h3 class="font-black text-xl text-c-black mb-2">Quebrar Texto</h3>
+                    <p class="text-sm text-gray-800 font-bold">Cria uma barreira. O texto só existe acima ou abaixo da imagem, isolando-a.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Prática 4 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-black">Prática 4: Inserindo Imagens Corretamente</h2>
+            <div class="action-box max-w-6xl shadow-lg border-c-blue">
+                <p class="font-black text-xl mb-4 border-b-2 border-black pb-2 text-c-blue">AÇÃO NO DOCUMENTO:</p>
+                <p class="text-base mb-4 font-bold">Localize no texto as frases marcadas como <strong class="bg-yellow-200 px-1 border border-black">(ATIVIDADE: Inserir...)</strong>, apague a frase e faça a ação pedida:</p>
+                
+                <div class="space-y-4 text-sm font-bold bg-white p-6 rounded-lg border-2 border-black text-gray-800">
+                    <p><strong class="text-c-black">Imagem 1 (Introdução):</strong> Pesquise "Tecnologia", insira a imagem e defina-a como <strong class="text-c-red underline">Ajustar Texto</strong>. Reduza o tamanho puxando pelas diagonais.</p>
+                    <hr class="border-gray-300">
+                    <p><strong class="text-c-black">Imagem 2 (Hardware):</strong> Pesquise "Processador", insira a imagem e defina-a como <strong class="text-c-blue underline">Quebrar Texto</strong>. Centralize-a na folha.</p>
+                    <hr class="border-gray-300">
+                    <p><strong class="text-c-black">Imagem 3 (Educação):</strong> Pesquise "Educação", insira a imagem e mantenha a opção padrão <strong class="text-gray-600 underline">Em Linha</strong>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Conceito 5 -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-blue text-white px-4 py-2 rounded-xl font-black text-3xl">05</span>
+                <h2 class="text-5xl font-bold text-c-black">Conceito: Tabelas e Mesclagem 📊</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl w-full items-center">
+                <div class="logic-box border-c-black bg-white border-4 border-l-8 shadow-sm">
+                    <p class="font-bold mb-2 text-xl">Estruturando Dados Visuais</p>
+                    <p class="text-base leading-relaxed">Tabelas alinham verticalmente as informações para facilitar a comparação mental rápida.</p>
+                    <p class="text-base mt-4 font-bold text-c-red">O recurso "Mesclar Células" permite quebrar as paredes de várias colunas no topo, criando um espaço unificado perfeito para o Título principal da tabela.</p>
+                </div>
+                <div class="card p-6 flex flex-col items-center">
+                    <p class="font-bold text-c-black mb-2 text-sm">Exemplo Visual de Mesclagem:</p>
+                    <table class="w-full border-collapse border-2 border-c-black bg-white shadow-sm">
+                        <tr><td colspan="3" class="border border-c-black p-3 bg-c-gray text-center font-bold text-c-black">TÍTULO UNIFICADO</td></tr>
+                        <tr><td class="border border-c-black p-3 font-bold">Processador</td><td class="border border-c-black p-3">Dado</td><td class="border border-c-black p-3">Dado</td></tr>
+                        <tr><td class="border border-c-black p-3 font-bold">Memória</td><td class="border border-c-black p-3">Dado</td><td class="border border-c-black p-3">Dado</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: Prática 5 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-black">Prática 5: A Tabela de Hardware</h2>
+            <div class="action-box max-w-6xl shadow-lg border-c-red">
+                <p class="font-black text-xl mb-4 border-b-2 border-black pb-2 text-c-red">AÇÃO NO DOCUMENTO:</p>
+                <p class="text-base mb-4 font-bold">Localize o aviso da Atividade de Tabela e siga os passos rigorosamente:</p>
+                
+                <ol class="list-decimal pl-6 space-y-3 text-sm font-bold bg-white p-6 rounded-lg border-2 border-black text-gray-800">
+                    <li>Vá em <strong>Inserir ➜ Tabela</strong> e escolha o tamanho <strong>3x4</strong>.</li>
+                    <li>Copie e cole os dados que estão espalhados no texto (Componente, Função, Exemplo, etc.) para dentro de cada célula (quadradinho) correspondente.</li>
+                    <li>Após preencher tudo, apague o texto original bagunçado que sobrou.</li>
+                    <li class="text-c-blue">Clique com o Botão Direito na primeira linha da sua tabela ➜ Inserir linha acima.</li>
+                    <li class="text-c-blue">Selecione as 3 novas células vazias ➜ Botão Direito ➜ <strong>Mesclar Células</strong>.</li>
+                    <li class="text-c-blue">Escreva lá dentro: "Tabela de Comparação Técnica" e centralize.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: Conceito 6 -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-blue text-white px-4 py-2 rounded-xl font-black text-3xl">06</span>
+                <h2 class="text-5xl font-bold text-c-black">Conceito: Colaboração em Nuvem 👥</h2>
+            </div>
+            <div class="card p-10 max-w-5xl border-4 border-c-blue">
+                <div class="social-rule-box mb-8 border-c-red bg-white border-2">
+                    <p class="font-bold text-xl mb-2 text-c-red">Regra Social de Informática:</p>
+                    <p class="text-lg text-gray-800">Ao trabalhar em um documento com outras pessoas, nunca apague o texto delas de forma definitiva sem avisar. Para sugerir mudanças de forma respeitosa, usamos o <strong>Modo de Sugestão</strong>.</p>
+                </div>
+                <p class="text-lg font-bold text-center bg-gray-100 p-4 border border-black rounded">Neste modo de segurança, o que você apagar ficará <span class="line-through text-red-600">riscado de vermelho</span>. O dono original do texto revisa as alterações e clica no ícone (✔️) para aceitar pacificamente.</p>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Prática 6 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-black">Prática 6: Testando as Sugestões</h2>
+            <div class="action-box max-w-5xl shadow-lg border-black">
+                <p class="font-black text-xl mb-4 border-b-2 border-black pb-2 text-c-black">AÇÃO NO DOCUMENTO:</p>
+                
+                <ol class="list-decimal pl-6 space-y-5 text-lg font-bold text-gray-800 bg-white p-6 rounded-lg border-2 border-black">
+                    <li>No canto superior direito da tela do Docs, mude o botão de "Edição" (Lápis) para <strong>"Sugestão"</strong>.</li>
+                    <li>Vá no último parágrafo do seu texto (Conclusão) e apague a palavra "competência".</li>
+                    <li>Em seguida, escreva a palavra "habilidade" exatamente no mesmo lugar.</li>
+                    <li class="text-c-red">Observe que a palavra original não sumiu, ficou riscada aguardando aprovação!</li>
+                    <li>Aprove a sua própria sugestão clicando no botão de "Check" (✔️) no balão lateral direito.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: Checklist Visual -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-5xl font-bold mb-10 text-c-black">Estrutura Finalizada ✔️</h2>
+            <p class="text-xl font-bold text-gray-700 mb-8">Olhe para o seu texto original e veja a estrutura visual que construímos na Aula 10:</p>
+            <div class="grid grid-cols-2 gap-6 w-full max-w-4xl text-left font-bold text-lg">
+                <div class="p-6 bg-white border-2 border-black rounded shadow-sm">🔲 Páginas divididas logicamente</div>
+                <div class="p-6 bg-white border-2 border-black rounded shadow-sm">🔲 Sumário identificando capítulos</div>
+                <div class="p-6 bg-white border-2 border-black rounded shadow-sm">🔲 3 Imagens posicionadas</div>
+                <div class="p-6 bg-white border-2 border-black rounded shadow-sm">🔲 Tabela alinhada e mesclada</div>
+            </div>
+            
+            <p class="mt-8 text-lg font-bold text-c-red text-center">Mas espere... As regras da ABNT (Aula 09) ainda não foram aplicadas!</p>
+        </section>
+
+        <!-- SLIDE 17: DESAFIO INTEGRADOR (AULA 10 + 11) -->
+        <section class="slide bg-gray-100">
+            <h2 class="text-5xl font-bold mb-8 text-c-black">Desafio Final Integrador 🏆</h2>
+            <p class="text-2xl font-bold text-c-blue mb-6">O Chefe Final da Formatação (Unindo Aulas 10 e 11).</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-7xl items-center">
+                <div class="action-box max-w-full shadow-xl border-c-red bg-white">
+                    <p class="font-black text-xl mb-4 border-b-2 border-black pb-2 text-c-red">AÇÃO NO DOCUMENTO:</p>
+                    <ol class="list-decimal pl-6 space-y-4 text-sm font-bold text-gray-800">
+                        <li>Vá em <em>Arquivo > Configuração da Página</em> e aplique as margens ABNT <strong class="text-c-red">(Sup/Esq: 3cm | Inf/Dir: 2cm)</strong>.</li>
+                        <li>Selecione um parágrafo comum. Aplique a fonte <strong class="text-c-blue">Arial 12</strong>, alinhamento <strong class="text-c-blue">Justificado</strong> e espaçamento <strong class="text-c-blue">1,5</strong>.</li>
+                        <li>Use o triângulo da régua superior para dar o recuo de <strong class="text-c-red">1,25cm</strong> na primeira linha desse parágrafo.</li>
+                        <li class="bg-gray-200 p-2 rounded">No menu de Estilos, clique em "Texto Normal" e <strong>Atualize para corresponder</strong>. (Todo o trabalho vai assumir o padrão ABNT instantaneamente!).</li>
+                        <li>Vá no seu Sumário e aperte o botão <strong>Atualizar (⟳)</strong>.</li>
+                    </ol>
+                </div>
+                <div class="logic-box border-c-black bg-white shadow-md">
+                    <p class="font-bold text-c-black mb-2 text-xl">Por que atualizar o Sumário no final?</p>
+                    <p class="text-sm leading-relaxed">Quando alteramos a fonte (para Arial 12) ou o espaçamento (para 1,5), o texto passa a ocupar mais espaço físico no papel. Com isso, um capítulo que estava na página 2 pode escorregar para a página 3.</p>
+                    <p class="text-sm mt-4 font-bold text-c-red border-l-4 border-c-red pl-2">A regra de ouro profissional é clara: A geração/atualização do Sumário e a exportação em PDF são sempre as <strong>ÚLTIMAS</strong> coisas que você faz em um trabalho!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: Exportação para PDF -->
+        <section class="slide bg-c-black text-white">
+            <h2 class="text-5xl font-bold text-c-gray mb-10">Exportando o Resultado Final (PDF)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl w-full">
+                <div class="space-y-6">
+                    <p class="text-xl font-bold">O formato PDF (Portable Document Format) tira uma "fotografia digital" do seu trabalho.</p>
+                    <p class="text-lg text-gray-300">Se você enviar o arquivo do Google Docs para o professor, e a tela do computador dele for de um tamanho diferente do seu, a imagem que você "Ajustou" vai sair do lugar e o documento ABNT vai desconfigurar. O PDF "congela" a tinta virtual.</p>
+                </div>
+                <div class="action-box bg-white text-black text-center">
+                    <p class="font-black text-xl mb-4 border-b-2 border-black pb-2 text-c-blue">PASSO FINAL DE ENTREGA:</p>
+                    <p class="text-3xl font-black uppercase my-8">Arquivo<br>⬇️<br>Fazer Download<br>⬇️<br>Documento PDF</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 19: Fim -->
+        <section class="slide bg-white border-t-[12px] border-c-black shadow-inner">
+            <div class="text-center">
+                <i data-lucide="award" class="w-32 h-32 mx-auto text-c-black mb-8"></i>
+                <h1 class="text-6xl font-black mb-6 text-c-black">FIM DA AULA 11</h1>
+                <p class="text-2xl text-gray-800 mb-16 font-bold">O texto cru transformou-se em uma obra técnica e estruturada.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-c-black text-white px-10 py-5 rounded-lg font-black shadow-xl hover:opacity-80 transition flex items-center gap-3 text-xl border-4 border-transparent hover:border-c-gray">
+                        <i data-lucide="printer" class="w-8 h-8"></i> Imprimir Apostila (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-sm text-gray-500 font-mono font-bold tracking-widest uppercase">COTIL - FUNDAMENTOS DE INFORMÁTICA</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Inferior -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-5 bg-white border-4 border-c-black rounded-full shadow-lg hover:bg-gray-100 transition active:scale-90 text-c-black">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-5 bg-c-red text-white border-4 border-c-black rounded-full shadow-lg hover:opacity-90 transition active:scale-90">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            counter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 13: Gestão de Janelas</title>
+    
+    <!-- FontAwesome para ícones visuais claros -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Prism.js para o código não ficar visualmente cansativo -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Paleta Extraída da Imagem (Acessibilidade e Alto Contraste) */
+            --color-navy: #0A1128;
+            --color-blue: #1D3A74;
+            --color-rust: #DD5327;
+            --color-orange: #FF8E32;
+            --color-yellow: #FFD13B;
+            
+            /* Fundo suave para reduzir sobrecarga sensorial (Off-white levemente quente) */
+            --bg-body: #FDFBF7; 
+            --slide-bg: #FFFFFF;
+            
+            --text-main: var(--color-navy);
+            --text-muted: #4A5568; 
+            
+            --border-soft: #E2E8F0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Fontes arredondadas (Nunito) são mais amigáveis e fáceis de ler */
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link e Progresso */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--color-blue);
+            text-align: center;
+            padding: 10px;
+            z-index: 1000;
+            border-bottom: 4px solid var(--color-yellow);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* Estrutura de Slides com transição suave */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease; /* Transição mais longa e suave */
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico (Separador visual claro) */
+        .slide.topic {
+            background-color: var(--color-navy);
+            text-align: center;
+            border: 8px solid var(--color-yellow);
+        }
+        .slide.topic h1 { color: #ffffff; font-size: 3.5rem; }
+        .slide.topic p { color: var(--color-yellow); font-size: 1.5rem; font-weight: 800; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--color-orange); }
+
+        .slide-content-wrapper { max-width: 1000px; width: 100%; margin: 0 auto; }
+        
+        /* Contador de slide ajuda na previsibilidade (Saber onde estamos) */
+        .slide-number { 
+            position: absolute; top: 70px; right: 40px; 
+            background: var(--color-blue); color: white;
+            padding: 5px 15px; border-radius: 20px;
+            font-size: 1.2rem; font-weight: 800; 
+        }
+
+        /* Tipografia focada em legibilidade */
+        h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px; color: var(--color-navy); }
+        h2 { font-size: 2rem; font-weight: 800; color: var(--color-blue); margin-bottom: 20px; border-bottom: 3px solid var(--color-orange); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.2rem; color: var(--text-main); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--color-rust); font-weight: 800; }
+
+        /* Estilos de Código bem definidos */
+        pre[class*="language-"] {
+            background: var(--color-navy);
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+            margin: 15px 0;
+            padding: 20px;
+            border-left: 6px solid var(--color-yellow);
+            max-height: 400px; 
+            overflow-y: auto;
+        }
+        code[class*="language-"] { font-family: 'Fira Code', monospace; text-shadow: none; }
+        
+        /* Código Inline */
+        :not(pre) > code { 
+            font-family: 'Fira Code', monospace; 
+            background: #EDF2F7; 
+            color: var(--color-blue); 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-size: 0.9em; 
+            font-weight: 800;
+        }
+        
+        /* Etiquetas de Arquivos */
+        .file-label {
+            display: inline-block;
+            background: var(--color-blue);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px 8px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: -15px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 3px solid var(--color-yellow);
+        }
+
+        /* Caixas de Foco (Para informações importantes e literais) */
+        .focus-box {
+            background: #FFFaf0; 
+            border: 2px solid var(--color-orange);
+            border-left: 8px solid var(--color-orange);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .focus-box h3 { color: var(--color-rust); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;}
+
+        /* Grid Simples */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+        .card-info { background: var(--slide-bg); padding: 25px; border-radius: 12px; border: 2px solid var(--border-soft); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .card-info h3 { color: var(--color-blue); margin-bottom: 15px; font-weight: 800; }
+
+        /* --- DIAGRAMA IPC VISUAL --- */
+        .diagram-container { display: flex; flex-direction: column; gap: 20px; width: 100%; margin-top: 15px; }
+        .diagram-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg-body); padding: 15px 30px; border-radius: 12px; border: 2px solid var(--border-soft); }
+        
+        /* Círculo com número */
+        .diag-number {
+            background: var(--route-color, var(--color-rust)); color: white; width: 35px; height: 35px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 800; margin-right: 15px; flex-shrink: 0;
+        }
+        
+        .diag-box { padding: 15px; border-radius: 8px; font-weight: 800; text-align: center; width: 220px; font-size: 1.2rem; display: flex; flex-direction: column; gap: 5px; }
+        .diag-box span { font-size: 0.9rem; font-family: 'Fira Code', monospace; background: rgba(255,255,255,0.2); padding: 2px 5px; border-radius: 4px; }
+        .diag-front { background: var(--color-blue); color: white; border: 3px solid var(--color-navy); }
+        .diag-back { background: var(--color-navy); color: var(--color-yellow); border: 3px solid var(--color-blue); }
+        
+        .diag-arrow-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 0 20px; }
+        .diag-label { font-size: 1.1rem; font-weight: 800; color: var(--route-color, var(--color-rust)); margin-bottom: 5px; background: white; padding: 2px 10px; border-radius: 12px; z-index: 2; border: 1px solid var(--route-color, var(--color-rust));}
+        
+        .diag-line { height: 6px; background: var(--route-color, var(--color-rust)); width: 100%; position: relative; border-radius: 10px;}
+        .diag-line.right::after { content: ''; position: absolute; right: -4px; top: -7px; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 15px solid var(--route-color, var(--color-rust)); }
+        .diag-line.left::before { content: ''; position: absolute; left: -4px; top: -7px; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-right: 15px solid var(--route-color, var(--color-rust)); }
+        .diag-line.double::after { content: ''; position: absolute; right: -4px; top: -7px; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 15px solid var(--route-color, var(--color-rust)); }
+        .diag-line.double::before { content: ''; position: absolute; left: -4px; top: -7px; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-right: 15px solid var(--route-color, var(--color-rust)); }
+
+        /* Elemento Visualizador */
+        .window-viz { position: relative; width: 100%; height: 300px; background: var(--bg-body); border: 3px dashed var(--color-blue); border-radius: 12px; margin-top: 20px; }
+        .mock-win { position: absolute; background: white; border: 2px solid var(--color-navy); border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .mock-header { height: 30px; background: var(--color-blue); display: flex; align-items: center; padding: 0 10px; }
+        .mock-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--color-yellow); }
+        .mock-content { padding: 20px; flex: 1; text-align: center; font-weight: 800; color: var(--color-navy); display: flex; align-items: center; justify-content: center;}
+
+        /* Listas de Missões */
+        .quest-list ol { counter-reset: quest; list-style: none; padding: 0; }
+        .quest-list li { background: white; margin-bottom: 15px; padding: 20px 20px 20px 70px; border-radius: 12px; position: relative; border: 2px solid var(--quest-color, var(--color-yellow)); font-size: 1.15rem; font-weight: 600; }
+        .quest-list li::before { content: counter(quest); counter-increment: quest; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: var(--quest-color, var(--color-rust)); color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; font-size: 1.2rem; line-height: 35px; font-weight: 800; }
+
+        /* Controles Base */
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--color-blue); }
+        .btn { background: var(--color-blue); border: none; color: #ffffff; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.2s; }
+        .btn:hover { background: var(--color-orange); }
+        
+        /* Barra de Progresso visual clara */
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 10px; background: var(--color-rust); width: 0%; transition: width 0.4s ease; z-index: 101; }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar, .controls, .progress-bar { display: none !important; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: auto; min-height: 100vh; padding: 40px; background: white; border-bottom: 2px solid #ccc;}
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; }
+            pre, .card-info, .focus-box, .diagram-row { border: 2px solid #000; color: black; background: white; }
+            h1, h2, p, li, strong { color: black !important; }
+            .diag-front, .diag-back { background: white; color: black; border: 2px solid black; }
+            .diag-label, .diag-number { border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
+    <button class="btn" onclick="window.print()" title="Imprimir Material" style="background: var(--color-yellow); color: var(--color-navy);"><i class="fa-solid fa-print"></i></button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 01</div>
+            <h1>Aula 13: Gestão de Janelas</h1>
+            <h2>Criando Pop-ups e Telas Extras no Electron</h2>
+            <br>
+            <div class="focus-box" style="border-color: var(--color-blue); border-left-color: var(--color-blue); background: #f0f4f8;">
+                <h3 style="color: var(--color-blue);"><i class="fa-solid fa-map-location-dot"></i> Mapa da Nossa Missão Hoje:</h3>
+                <ol style="margin-bottom: 0;">
+                    <li><strong>O Problema:</strong> Telas muito cheias de informação.</li>
+                    <li><strong>A Fábrica:</strong> Como criar uma segunda janela.</li>
+                    <li><strong>O Bloqueio (Modal):</strong> Fazendo o usuário focar em uma tela só.</li>
+                    <li><strong>Revisão:</strong> Como o Front e o Node conversam.</li>
+                    <li><strong>Aviso Reverso:</strong> O Node avisando o HTML para atualizar.</li>
+                    <li><strong>Live Coding:</strong> Vamos programar juntos!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: O CONCEITO -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-layer-group"></i>
+            <h1>Fase 1: Múltiplas Janelas</h1>
+            <p>Saindo da tela única</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 03: A NECESSIDADE -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 03</div>
+            <h2>Por que criar outra janela?</h2>
+            <p>Olá equipe! Até agora, o nosso App tem apenas <strong>uma tela principal</strong>. Esprememos o formulário de cadastro na barra lateral (Sidebar) para caber tudo no mesmo espaço.</p>
+            
+            <div class="focus-box">
+                <h3><i class="fa-solid fa-gamepad"></i> Pensem num Jogo de Videogame</h3>
+                <p>Imaginem jogar um game onde a tela de "Configurações" ou o "Inventário" ficam sempre abertas tampando metade da sua visão. Fica confuso, certo?</p>
+                <p>No Electron é igual. É melhor abrir uma <strong>janela separada (um pop-up)</strong> só para o cadastro, deixando o catálogo principal limpo e organizado.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 04: COMO CRIAR -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 04</div>
+            <h2>A Fábrica de Janelas</h2>
+            <p>Lembram do comando <code>new BrowserWindow()</code> que usamos no <code>index.js</code> na primeira aula? Ele é uma fábrica. Podemos chamá-lo quantas vezes quisermos para criar telas novas!</p>
+            
+            <div class="file-label">index.js (Cozinha / Back-end)</div>
+<pre><code class="language-javascript">// Quando recebermos o aviso para abrir a tela de cadastro:
+ipcMain.on('abrir-cadastro', () => {
+    
+    // 1. Fabricamos uma SEGUNDA janela menor
+    const janelaCadastro = new BrowserWindow({
+        width: 400, 
+        height: 500,
+        webPreferences: { preload: path.join(__dirname, 'preload.js') }
+    });
+
+    // 2. Carregamos um arquivo HTML DIFERENTE só para ela
+    janelaCadastro.loadFile(path.join(__dirname, '../renderer/cadastro.html'));
+    
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 05: O BUG DAS JANELAS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 05</div>
+            <h2>O Bug da Janela Solta</h2>
+            <p>Se nós apenas criarmos a janela nova, ela fica "solta". O usuário pode clicar na janela principal atrás dela, e a janela de cadastro vai se esconder lá no fundo.</p>
+            
+            <div class="window-viz">
+                <div class="mock-win" style="width: 500px; height: 250px; top: 25px; left: 50px; z-index: 2;">
+                    <div class="mock-header"><div class="mock-dot"></div></div>
+                    <div class="mock-content" style="background: #E2E8F0;">Janela Principal<br>(Ficou por cima sem querer!)</div>
+                </div>
+                <div class="mock-win" style="width: 250px; height: 180px; top: 60px; left: 350px; z-index: 1; border-color: var(--color-rust);">
+                    <div class="mock-header" style="background: var(--color-rust);"><div class="mock-dot"></div></div>
+                    <div class="mock-content">Cadastro<br>(Escondida)</div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 15px; text-align: center; color: var(--color-rust); font-weight: 800; font-size: 1.3rem;">Isso confunde o usuário e causa bugs! Precisamos conectá-las.</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 06: A SOLUÇÃO (PARENT E MODAL) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 06</div>
+            <h2>A Solução: Regra de Parentesco</h2>
+            <p>Para resolver, usamos duas palavras mágicas na configuração da nossa nova janela:</p>
+            
+            <div class="grid-2">
+                <div class="card-info" style="border-color: var(--color-blue);">
+                    <h3>1. parent: janelaPrincipal</h3>
+                    <p>Avisa o sistema que a janela nova é <strong>filha</strong> da janela principal.</p>
+                </div>
+                <div class="card-info" style="border-color: var(--color-rust);">
+                    <h3 style="color: var(--color-rust);">2. modal: true</h3>
+                    <p>Funciona como um <strong>"Pause" no jogo</strong>. Trava a janela principal inteira. O usuário é obrigado a preencher o formulário ou fechar a janela menor para voltar a usar o App.</p>
+                </div>
+            </div>
+
+            <div class="file-label" style="margin-top: 20px;">Configuração Correta</div>
+<pre><code class="language-javascript">const janelaModal = new BrowserWindow({
+    width: 400, 
+    height: 500,
+    parent: janelaPrincipal, // Define quem é a MÃE
+    modal: true              // TRAVA a tela de trás
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: COMUNICAÇÃO REVERSA E O MAPA IPC -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-walkie-talkie"></i>
+            <h1>Fase 2: As Rotas do Electron</h1>
+            <p>O Mapa da Comunicação (IPC)</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 08: MAPA VISUAL DO IPC (NUMERADO) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 08</div>
+            <h2>O Trânsito do App: Resumo Visual</h2>
+            <p>Antes de avançarmos, vamos desenhar o mapa exato de como a Interface (HTML) e o Cérebro (Node.js) conversam entre si.</p>
+
+            <div class="diagram-container">
+                <!-- Rota 1: Ordem Direta (Azul) -->
+                <div class="diagram-row" style="--route-color: var(--color-blue); border-color: var(--border-soft);">
+                    <div class="diag-number">1</div>
+                    <div class="diag-box diag-front">Front-end <span>(HTML / UI)</span></div>
+                    <div class="diag-arrow-container">
+                        <div class="diag-label">AÇÃO (Ida)</div>
+                        <div class="diag-line right"></div>
+                    </div>
+                    <div class="diag-box diag-back">Back-end <span>(Node.js / Main)</span></div>
+                </div>
+
+                <!-- Rota 2: Consulta (Ferrugem) -->
+                <div class="diagram-row" style="--route-color: var(--color-rust); border-color: var(--border-soft);">
+                    <div class="diag-number">2</div>
+                    <div class="diag-box diag-front">Front-end <span>(HTML / UI)</span></div>
+                    <div class="diag-arrow-container">
+                        <div class="diag-label">CONSULTA (Bate-e-Volta)</div>
+                        <div class="diag-line double"></div>
+                    </div>
+                    <div class="diag-box diag-back">Back-end <span>(Node.js / Main)</span></div>
+                </div>
+
+                <!-- Rota 3: Aviso Reverso (Laranja) -->
+                <div class="diagram-row" style="--route-color: var(--color-orange); border-color: var(--color-orange); background: #FFFaf0;">
+                    <div class="diag-number">3</div>
+                    <div class="diag-box diag-front">Front-end <span>(HTML / UI)</span></div>
+                    <div class="diag-arrow-container">
+                        <div class="diag-label">AVISO (Volta)</div>
+                        <div class="diag-line left"></div>
+                    </div>
+                    <div class="diag-box diag-back">Back-end <span>(Node.js / Main)</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 09: TRADUÇÃO LITERAL DO MAPA (NUMERADA E COLORIDA) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 09</div>
+            <h2>Entendendo cada Rota de Código</h2>
+            
+            <div class="quest-list">
+                <ol>
+                    <li style="--quest-color: var(--color-blue); border-color: var(--color-blue);">
+                        <strong style="color: var(--color-blue); font-size: 1.3rem;">AÇÃO: <code>ipcMain.on</code></strong> <br>
+                        O Front-end envia uma ordem para o Backend. É como enviar uma carta: "Node, abre a janela!". O Front não precisa ficar esperando resposta. Ele dispara a ordem e segue em frente.
+                    </li>
+                    <li style="--quest-color: var(--color-rust); border-color: var(--color-rust);">
+                        <strong style="color: var(--color-rust); font-size: 1.3rem;">CONSULTA: <code>ipcMain.handle</code> (e <code>invoke</code>)</strong> <br>
+                        O Front-end faz um pedido e <strong>espera</strong> (usando <code>await</code>). É como pedir no iFood: "Node, salva os dados?". O Backend recebe o pedido, processa, e devolve a resposta de confirmação (usando <code>return</code>).
+                    </li>
+                    <li style="--quest-color: var(--color-orange); border-color: var(--color-orange); background: #FFFaf0;">
+                        <strong style="color: var(--color-orange); font-size: 1.3rem;">AVISO: <code>webContents.send</code> (O Novo!)</strong> <br>
+                        O Backend avisa o Front-end de surpresa. É como receber uma notificação no celular: "Atenção Front, atualiza a tela aí!".
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: O ENIGMA DA ATUALIZAÇÃO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 10</div>
+            <h2>O Enigma da Atualização</h2>
+            
+            <div class="grid-2" style="align-items: center; margin-top: 10px;">
+                <div>
+                    <p>Vamos aplicar a <strong>ROTA 3 (Aviso)</strong> no nosso problema do Pop-up de Cadastro:</p>
+                    <ol>
+                        <li>A Janela Filha (Cadastro) usa a <strong>Rota 2</strong> (Consulta/Invoke) para pedir ao Node para salvar os dados e fica à espera.</li>
+                        <li>O Node.js salva no banco de dados e <strong>devolve uma resposta de sucesso (True)</strong>. A janela filha recebe a confirmação e só então se fecha.</li>
+                        <li><strong>O PROBLEMA:</strong> A <em>Janela Principal</em> não sabe que isso aconteceu! Ela continua mostrando a lista antiga de produtos!</li>
+                    </ol>
+                </div>
+                
+                <!-- Animação SVG do Enigma -->
+                <div style="background: white; border-radius: 12px; border: 2px solid var(--border-soft); box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 15px; display: flex; justify-content: center;">
+                    <svg width="100%" height="220" viewBox="0 0 400 220" style="overflow: visible;">
+                        <style>
+                            .anim-modal { animation: fadeModal 9s infinite; transform-origin: center; }
+                            .anim-fill { animation: fillAction 9s infinite; }
+                            .anim-btn { animation: btnClick 9s infinite; transform-origin: center; }
+                            .anim-success { animation: fadeSuccess 9s infinite; transform-origin: 200px 115px; }
+                            .anim-sad { animation: fadeSad 9s infinite; transform-origin: 320px 100px; font-size: 35px; }
+                            .anim-question { animation: fadeQuestion 9s infinite; font-size: 22px; font-weight: bold; }
+                            
+                            @keyframes fadeModal {
+                                0%, 10%, 75%, 100% { opacity: 0; transform: translateY(15px); pointer-events: none; }
+                                15%, 70% { opacity: 1; transform: translateY(0); pointer-events: auto; }
+                            }
+                            @keyframes fillAction {
+                                0%, 20%, 75%, 100% { stroke-dasharray: 0, 100; }
+                                30%, 70% { stroke-dasharray: 100, 100; }
+                            }
+                            @keyframes btnClick {
+                                0%, 35%, 45%, 100% { transform: scale(1); fill: #1D3A74; }
+                                40% { transform: scale(0.95); fill: #DD5327; }
+                            }
+                            @keyframes fadeSuccess {
+                                0%, 45%, 68%, 100% { opacity: 0; transform: scale(0.5); }
+                                50%, 65% { opacity: 1; transform: scale(1); }
+                            }
+                            @keyframes fadeSad {
+                                0%, 75%, 100% { opacity: 0; transform: scale(0) rotate(-20deg); }
+                                78%, 95% { opacity: 1; transform: scale(1) rotate(0deg); }
+                            }
+                            @keyframes fadeQuestion {
+                                0%, 75%, 100% { opacity: 0; transform: translateY(10px); }
+                                80%, 95% { opacity: 1; transform: translateY(0); }
+                            }
+                        </style>
+                        
+                        <!-- Main Window -->
+                        <g>
+                            <rect x="40" y="30" width="240" height="160" rx="8" fill="#FDFBF7" stroke="#0A1128" stroke-width="3"/>
+                            <rect x="40" y="30" width="240" height="25" rx="8" fill="#1D3A74"/>
+                            <circle cx="55" cy="42" r="5" fill="#FFD13B"/>
+                            
+                            <!-- Fake List content (Old) -->
+                            <rect x="60" y="70" width="160" height="15" rx="4" fill="#E2E8F0"/>
+                            <rect x="60" y="95" width="130" height="15" rx="4" fill="#E2E8F0"/>
+                            <rect x="60" y="120" width="150" height="15" rx="4" fill="#E2E8F0"/>
+                            
+                            <!-- Badge saying "Desatualizado" -->
+                            <rect x="60" y="155" width="90" height="20" rx="10" fill="#FFE4E6"/>
+                            <text x="105" y="169" font-family="sans-serif" font-size="10" fill="#E11D48" font-weight="bold" text-anchor="middle">Lista Antiga</text>
+                        </g>
+
+                        <!-- Sad Emoji and Question Marks (Appears after modal closes) -->
+                        <text x="310" y="125" class="anim-sad">😢</text>
+                        <text x="350" y="95" class="anim-question" fill="#DD5327">❓</text>
+                        <text x="300" y="75" class="anim-question" fill="#1D3A74" style="animation-delay: 0.2s;">❓</text>
+
+                        <!-- Child Window / Modal -->
+                        <g class="anim-modal">
+                            <!-- Drop shadow backdrop -->
+                            <rect x="110" y="55" width="180" height="140" rx="8" fill="rgba(0,0,0,0.15)"/>
+                            
+                            <!-- Window Body -->
+                            <rect x="105" y="50" width="180" height="140" rx="8" fill="#FFFFFF" stroke="#DD5327" stroke-width="2"/>
+                            <rect x="105" y="50" width="180" height="25" rx="8" fill="#DD5327"/>
+                            <text x="195" y="67" font-family="sans-serif" font-size="12" fill="#fff" font-weight="bold" text-anchor="middle">Novo Cadastro</text>
+                            
+                            <!-- Inputs backgrounds -->
+                            <rect x="125" y="85" width="140" height="15" rx="4" fill="#E2E8F0"/>
+                            <rect x="125" y="110" width="140" height="15" rx="4" fill="#E2E8F0"/>
+                            
+                            <!-- Filling Inputs Animation -->
+                            <line x1="130" y1="92.5" x2="250" y2="92.5" stroke="#1D3A74" stroke-width="7" stroke-linecap="round" class="anim-fill" pathLength="100"/>
+                            <line x1="130" y1="117.5" x2="200" y2="117.5" stroke="#1D3A74" stroke-width="7" stroke-linecap="round" class="anim-fill" pathLength="100"/>
+                            
+                            <!-- Save Button -->
+                            <rect x="125" y="140" width="140" height="25" rx="6" class="anim-btn"/>
+                            <text x="195" y="157" font-family="sans-serif" font-size="12" fill="#fff" font-weight="bold" text-anchor="middle">Salvar</text>
+
+                            <!-- Success Feedback Overlay -->
+                            <g class="anim-success">
+                                <circle cx="195" cy="115" r="35" fill="#10b981"/>
+                                <path d="M180 115 L190 125 L210 100" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="focus-box" style="border-color: var(--color-blue); border-left-color: var(--color-blue); margin-top: 15px;">
+                <h3><i class="fa-solid fa-lightbulb"></i> A Solução de Arquitetura:</h3>
+                <p>Nós precisamos que o Node.js (Back-end) utilize a <strong>Rota 3</strong> para mandar um "Alerta de Celular" para a Janela Principal dizendo: <strong>"Atenção: atualiza a tela agora!"</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: WEBCONTENTS SEND -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 11</div>
+            <h2>O Código do Rádio Inverso: <code>webContents.send</code></h2>
+            
+            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                <p style="flex: 1; margin: 0; font-size: 1.15rem;">Veja como o Node e o Front-end configuram esta Rota 3 de "Avisos":</p>
+                <div style="flex: 1.5; background: white; border-radius: 12px; border: 2px solid var(--border-soft); box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 10px; display: flex; justify-content: center;">
+                    <svg width="100%" height="150" viewBox="0 0 400 150" style="overflow: visible;">
+                        <style>
+                            .anim-modal-11 { animation: fadeModal11 6s infinite; transform-origin: center; }
+                            .anim-signal-11 { animation: travelSignal11 6s infinite; }
+                            .anim-new-item-11 { animation: newItem11 6s infinite; }
+                            .anim-badge-11 { animation: badgeUpdate11 6s infinite; }
+                            .anim-text-old-11 { animation: textUpdate11 6s infinite; }
+                            .anim-text-new-11 { animation: textUpdateNew11 6s infinite; }
+                            .anim-party-11 { animation: popParty11 6s infinite; transform-origin: 320px 60px; font-size: 35px; }
+
+                            @keyframes fadeModal11 {
+                                0%, 15% { opacity: 1; transform: translateY(0) scale(1); }
+                                25%, 100% { opacity: 0; transform: translateY(15px) scale(0.9); pointer-events: none; }
+                            }
+                            @keyframes travelSignal11 {
+                                0%, 20% { opacity: 0; transform: translate(30px, 0); }
+                                25% { opacity: 1; transform: translate(30px, 0); }
+                                40% { opacity: 1; transform: translate(-60px, 0); }
+                                45%, 100% { opacity: 0; transform: translate(-60px, 0); }
+                            }
+                            @keyframes newItem11 {
+                                0%, 40% { opacity: 0; transform: translateX(-10px); }
+                                45%, 100% { opacity: 1; transform: translateX(0); }
+                            }
+                            @keyframes badgeUpdate11 {
+                                0%, 40% { fill: #FFE4E6; }
+                                45%, 100% { fill: #D1FAE5; }
+                            }
+                            @keyframes textUpdate11 {
+                                0%, 40% { opacity: 1; }
+                                40.1%, 100% { opacity: 0; }
+                            }
+                            @keyframes textUpdateNew11 {
+                                0%, 40% { opacity: 0; }
+                                40.1%, 100% { opacity: 1; }
+                            }
+                            @keyframes popParty11 {
+                                0%, 45% { opacity: 0; transform: scale(0) rotate(-20deg); }
+                                50%, 95% { opacity: 1; transform: scale(1) rotate(0deg); }
+                                100% { opacity: 0; transform: scale(0); }
+                            }
+                        </style>
+
+                        <!-- Main Window -->
+                        <g>
+                            <rect x="20" y="10" width="180" height="120" rx="8" fill="#FDFBF7" stroke="#0A1128" stroke-width="3"/>
+                            <rect x="20" y="10" width="180" height="20" rx="8" fill="#1D3A74"/>
+                            <circle cx="35" cy="20" r="4" fill="#FFD13B"/>
+                            
+                            <!-- Fake List content -->
+                            <rect x="35" y="40" width="120" height="10" rx="4" fill="#E2E8F0"/>
+                            <rect x="35" y="60" width="100" height="10" rx="4" fill="#E2E8F0"/>
+                            
+                            <!-- New Item appearing -->
+                            <rect x="35" y="80" width="130" height="10" rx="4" fill="#10b981" class="anim-new-item-11"/>
+
+                            <!-- Badge saying "Atualizada" -->
+                            <rect x="35" y="105" width="90" height="16" rx="8" class="anim-badge-11"/>
+                            <text x="80" y="117" font-family="sans-serif" font-size="9" fill="#E11D48" font-weight="bold" text-anchor="middle" class="anim-text-old-11">Desatualizada</text>
+                            <text x="80" y="117" font-family="sans-serif" font-size="9" fill="#059669" font-weight="bold" text-anchor="middle" class="anim-text-new-11">Atualizada!</text>
+                        </g>
+
+                        <!-- Party Emoji -->
+                        <text x="215" y="80" class="anim-party-11">🎉</text>
+
+                        <!-- Node Box -->
+                        <g>
+                            <rect x="290" y="55" width="90" height="35" rx="6" fill="#0A1128"/>
+                            <text x="335" y="77" fill="#FFD13B" font-size="11" font-family="sans-serif" font-weight="bold" text-anchor="middle">Node.js</text>
+                        </g>
+
+                        <!-- Signal -->
+                        <g class="anim-signal-11">
+                            <rect x="250" y="62" width="24" height="16" rx="4" fill="#FF8E32" />
+                            <path d="M 250 62 L 262 70 L 274 62" stroke="#fff" stroke-width="1.5" fill="none" />
+                            <text x="262" y="55" fill="#FF8E32" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">.send()</text>
+                        </g>
+
+                        <!-- Child Window / Modal -->
+                        <g class="anim-modal-11">
+                            <!-- Sombra base -->
+                            <rect x="62" y="27" width="130" height="90" rx="6" fill="rgba(0,0,0,0.15)"/>
+                            <rect x="60" y="25" width="130" height="90" rx="6" fill="#FFFFFF" stroke="#DD5327" stroke-width="2"/>
+                            <rect x="60" y="25" width="130" height="18" rx="6" fill="#DD5327"/>
+                            <text x="125" y="38" font-family="sans-serif" font-size="10" fill="#fff" font-weight="bold" text-anchor="middle">Fechando...</text>
+                            <rect x="75" y="55" width="100" height="8" rx="4" fill="#E2E8F0"/>
+                            <rect x="75" y="75" width="100" height="8" rx="4" fill="#E2E8F0"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 0;">
+                <div class="card-info">
+                    <h3 style="color: var(--color-rust); margin-bottom: 5px;">No Back-end (Node)</h3>
+<pre style="padding: 10px; margin: 0; font-size: 0.95rem;"><code class="language-javascript">// O Node grita para a janela!
+janelaPrincipal.webContents.send('atualizar-tela');</code></pre>
+                </div>
+                <div class="card-info">
+                    <h3 style="margin-bottom: 5px;">No Front-end (Garçom)</h3>
+<pre style="padding: 10px; margin: 0; font-size: 0.95rem;"><code class="language-javascript">// Quando ouvir 'atualizar-tela'
+onAtualizar: (minhaFuncao) => {
+    ipcRenderer.on('atualizar-tela', minhaFuncao);
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: LIVE CODING -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-laptop-code"></i>
+            <h1>Live Coding</h1>
+            <p>Mãos no Teclado: Construindo nosso Pop-up juntos</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: O QUE VAMOS FAZER -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 13</div>
+            <h2>Nosso Plano de Ação</h2>
+            <p>Abram o código da aula passada (O Dashboard). Vamos alterá-lo passo a passo, no seu tempo. Se precisar, peça pausa.</p>
+            
+            <div class="quest-list">
+                <ol>
+                    <li>Ajustar o <code>index.js</code> (Tornar a janela global).</li>
+                    <li>Modificar o <code>index.html</code> (Trocar o form antigo por um Botão).</li>
+                    <li>Configurar o <code>preload.js</code> (Os 2 novos canais).</li>
+                    <li>Criar a Janela Filha no Node.</li>
+                    <li>Criar a interface da Janela Filha: <code>modal.html</code>.</li>
+                    <li>Criar a lógica para salvar com Rota 2: <code>modal.js</code>.</li>
+                    <li>O Grande Final: Fechar o ciclo usando as Rotas 2 e 3.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: PASSO 1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 1</div>
+            <h2>Tornando a Janela Global</h2>
+            <p>No seu <code>index.js</code> (Main), a variável <code>janela</code> nasce e morre trancada dentro da função. Precisamos tirá-la de lá para podermos enviar os avisos depois.</p>
+            
+            <div class="file-label">src/main/index.js</div>
+<pre><code class="language-javascript">const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+
+// 1. CRIAMOS A VARIÁVEL AQUI FORA (Global)
+let janelaPrincipal; 
+
+const db = require('../../dados.json');
+
+app.whenReady().then(() => {
+    // 2. ATRIBUÍMOS O VALOR A ELA AQUI DENTRO (Sem o 'const')
+    janelaPrincipal = new BrowserWindow({
+        width: 1000, height: 700,
+        webPreferences: { preload: path.join(__dirname, 'preload.js') }
+    });
+    
+    janelaPrincipal.loadFile(path.join(__dirname, '../renderer/index.html'));
+    
+    // ... restante do código continua igual ...
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 15: PASSO 2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 2</div>
+            <h2>Limpando a Tela Principal</h2>
+            <p>Vá no seu <code>index.html</code> (O Principal). Apague todo aquele formulário grande da aba lateral escura e coloque apenas um botão novo.</p>
+            
+            <div class="file-label">src/renderer/index.html (Menu Lateral)</div>
+<pre><code class="language-html">&lt;!-- MENU LATERAL --&gt;
+&lt;div class="bg-dark text-white p-3 d-flex flex-column shadow z-2" style="width: 250px;"&gt;
+    &lt;h3 class="text-warning fw-bold mb-0"&gt;DevSystem&lt;/h3&gt;
+    &lt;hr&gt;
+
+    &lt;!-- APAGAMOS O FORMULÁRIO ANTIGO. COLOQUE ESTE BOTÃO: --&gt;
+    &lt;button id="btnAbrirModal" class="btn btn-warning fw-bold"&gt;+ Novo Produto&lt;/button&gt;
+    
+&lt;/div&gt;</code></pre>
+
+            <p style="margin-top: 15px;">No começo do seu <code>renderer.js</code>, crie o clique desse botão:</p>
+            <div class="file-label">src/renderer/renderer.js</div>
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">document.querySelector("#btnAbrirModal").addEventListener("click", () => {
+    window.api.abrirModalCadastro(); // Pede ao garçom para abrir a tela
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 16: PASSO 3 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 3</div>
+            <h2>Ensinando Novos Truques ao Garçom</h2>
+            <p>Abram o <code>preload.js</code>. Vamos adicionar o pedido para abrir a janela e o "ouvido" biônico para escutar a ordem de atualizar a tela.</p>
+            
+            <div class="file-label">src/main/preload.js</div>
+<pre><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+    
+    pedirProdutos: () => {
+        return ipcRenderer.invoke('pedir-produtos');
+    },
+
+    // NOVO: Rota 1 (Ação) para abrir a janela
+    abrirModalCadastro: () => {
+        ipcRenderer.send('abrir-modal');
+    },
+
+    // NOVO: Rota 3 (Ouvinte) Escuta o Main e roda uma função
+    onAtualizarTela: (funcaoCallback) => {
+        ipcRenderer.on('atualizar-tela', funcaoCallback);
+    }
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 17: PASSO 4 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 4</div>
+            <h2>Construindo a Janela Modal</h2>
+            <p>Volte ao <code>index.js</code> (Onde fica o Node). No final de tudo, crie a regra de fabricação da Janela Filha.</p>
+            
+            <div class="file-label">src/main/index.js (Adicione no final)</div>
+<pre><code class="language-javascript">ipcMain.on('abrir-modal', () => {
+    
+    const janelaModal = new BrowserWindow({
+        width: 400, height: 500,
+        
+        parent: janelaPrincipal, // ATENÇÃO: Define a MÃE
+        modal: true,             // ATENÇÃO: TRAVA a tela de trás
+        
+        // Vamos usar o mesmo garçom (preload) para facilitar
+        webPreferences: { preload: path.join(__dirname, 'preload.js') } 
+    });
+
+    janelaModal.loadFile(path.join(__dirname, '../renderer/modal.html'));
+});</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 18: PASSO 5 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 5</div>
+            <h2>A Interface da Janela Nova</h2>
+            <p>Crie um <strong>arquivo NOVO</strong> chamado <code>modal.html</code> dentro da pasta <code>renderer</code>. Este é o HTML exclusivo do pop-up.</p>
+            
+            <div class="file-label" style="background: var(--color-rust); border-color: var(--color-rust);">src/renderer/modal.html</div>
+<pre style="border-left-color: var(--color-rust);"><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Novo Produto&lt;/title&gt;
+    &lt;link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body class="p-4 bg-light"&gt;
+    &lt;h4 class="mb-3 text-primary"&gt;Cadastrar Produto&lt;/h4&gt;
+    
+    &lt;form id="formProduto"&gt;
+        &lt;input type="text" name="nome" class="form-control mb-3" placeholder="Nome" required&gt;
+        &lt;input type="number" name="preco" class="form-control mb-3" placeholder="Preço" required&gt;
+        &lt;input type="number" name="estoque" class="form-control mb-4" placeholder="Estoque" required&gt;
+        &lt;button type="submit" class="btn btn-primary w-100 fw-bold"&gt;Salvar&lt;/button&gt;
+    &lt;/form&gt;
+    
+    &lt;!-- Script exclusivo do Modal --&gt;
+    &lt;script src="modal.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- SLIDE 19: PASSO 6 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 6</div>
+            <h2>A Lógica do Modal</h2>
+            <p>Crie o <code>modal.js</code>. O papel dele é extrair os dados, enviar a Ordem (Rota 2) para o Node salvar e esperar a confirmação para se fechar.</p>
+            
+            <div class="file-label" style="background: var(--color-rust); border-color: var(--color-navy);">src/renderer/modal.js</div>
+<pre style="border-left-color: var(--color-rust);"><code class="language-javascript">document.querySelector("#formProduto").addEventListener("submit", async (e) => {
+    e.preventDefault(); // Evita o piscar da tela
+    
+    // Sugador Mágico (FormData)
+    const dados = Object.fromEntries(new FormData(e.target));
+    dados.preco = Number(dados.preco);
+    dados.estoque = Number(dados.estoque);
+
+    // O Garçom envia para o Node e ESPERA a confirmação (Rota 2)
+    const salvouComSucesso = await window.api.salvarProduto(dados);
+    
+    // Só fecha a janela se o Node confirmar que salvou!
+    if (salvouComSucesso) {
+        window.close();
+    }
+});</code></pre>
+
+            <div class="focus-box" style="padding: 10px; margin-top: 10px;">
+                <p style="margin:0; font-size: 1rem;"><i class="fa-solid fa-screwdriver-wrench"></i> Adicione no seu <code>preload.js</code>: <br><code>salvarProduto: (dados) => ipcRenderer.invoke('salvar', dados)</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 20: PASSO 7 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Passo 7</div>
+            <h2>O Grande Final (Fechando o Ciclo)</h2>
+            <p>O Node recebe o dado, salva, avisa a janela principal para redesenhar a tela (Rota 3) e envia a resposta de sucesso (Rota 2).</p>
+            
+            <div class="grid-2">
+                <div>
+                    <div class="file-label">index.js (Adicione no final)</div>
+<pre style="padding: 15px; font-size: 0.8rem; min-height: 200px;"><code class="language-javascript">ipcMain.handle('salvar', (e, dados) => {
+    // 1. Salva no banco de dados (array)
+    db.push(dados);
+
+    // 2. ROTA 3! Grita para a tela principal
+    janelaPrincipal.webContents.send('atualizar-tela');
+
+    // 3. ROTA 2! Devolve a confirmação de sucesso
+    return true; 
+});</code></pre>
+                </div>
+                <div>
+                    <div class="file-label">renderer.js (Principal)</div>
+<pre style="padding: 15px; font-size: 0.8rem; min-height: 200px;"><code class="language-javascript">// Usamos o "ouvido" que criamos no preload
+window.api.onAtualizarTela(() => {
+    console.log("Ouvi o chamado do Node!");
+    
+    // Volta a executar a função que limpa e desenha a tela
+    // (Ela que possui o invoke para pedir a lista atualizada)
+    carregarTela();
+});</code></pre>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 10px; font-weight: 800; color: var(--color-rust); font-size: 1.3rem;">Rode <code>npm start</code> e admire seu App profissional! 🚀</p>
+        </div>
+    </div>
+
+    <!-- TÓPICO 4: EXERCÍCIOS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-gamepad"></i>
+            <h1>Missões Práticas</h1>
+            <p>Os desafios secundários do dia</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 22: EXERCICIOS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Desafios</div>
+            <h2>Missões Extras (XP Adicional)</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Trabalhar com pop-ups é muito interessante. Vamos testar os limites do nosso sistema!</p>
+            
+            <div class="quest-list">
+                <ol>
+                    <li><strong>Modal Elegante:</strong> Altere a configuração da sua <code>BrowserWindow</code> filha (Modal) no <code>index.js</code> para remover a barra superior do Windows (use a opção <code>frame: false</code>) e remova a opção de redimensionar a janela (<code>resizable: false</code>).</li>
+                    <li><strong>Botão Cancelar:</strong> Como removeu o "X" de fechar janela na missão 1, crie um botão "Cancelar" no seu <code>modal.html</code> (com estilo vermelho). Faça com que ele use o <code>window.close()</code> ou envie uma Ordem (Rota 1) para o Main forçar o fechamento da janela Modal sem salvar nada.</li>
+                    <li><strong>Janela Sobre:</strong> Na Topbar da Janela Principal, adicione um botão "Info". Ao clicar, o sistema deve abrir uma janela pequena (<strong>sem ser Modal</strong>) contendo o seu nome e versão do sistema.</li>
+                    <li><strong>Prevenção de Bugs:</strong> Se clicar no botão "Info" da missão anterior várias vezes seguidas, ele vai abrir 10 janelas iguais! Pesquise no Google ou peça ajuda à IA: <em>"No Electron, como o Node pode verificar se uma janela secundária já está aberta e impedir que ela abra novamente no mesmo clique?"</em>.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scripts Prism.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    // Navegação de Slides com progressão suave
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    showSlide(0);
+</script>
+
+</body>
+</html>
