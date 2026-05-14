@@ -850,7 +850,7 @@ contextBridge.exposeInMainWorld('api', {
 <pre style="border-left-color: var(--color-rust);"><code class="language-javascript">document.querySelector("#formProduto").addEventListener("submit", async (e) => {
     e.preventDefault(); // Evita o piscar da tela
     
-    // Sugador Mágico (FormData)
+    // Captura Mágica (FormData)
     const dados = Object.fromEntries(new FormData(e.target));
     dados.preco = Number(dados.preco);
     dados.estoque = Number(dados.estoque);
