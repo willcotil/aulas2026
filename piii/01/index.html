@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Avançada - Aula 05: Gemini CLI e Agentes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#563A9C', /* Roxo Escuro */
+                            primary:   '#6A42C2', /* Roxo Médio (Destaques) */
+                            secondary: '#8B5DFF', /* Roxo Brilhante (Acentos) */
+                            muted:     '#FFF7D1', /* Creme/Amarelo Claro */
+                            surface:   '#FFFFFF', /* White cards */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FCFCFC; 
+            color: #563A9C;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* Terminal Styles */
+        .terminal-box {
+            background-color: #1E1E1E;
+            color: #4AF626;
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: left;
+            border: 1px solid #333;
+        }
+
+        .terminal-prompt::before {
+            content: "$ ";
+            color: #8B5DFF;
+            font-weight: bold;
+        }
+
+        /* SVG Styles */
+        .node-rect { fill: #ffffff; stroke: #563A9C; stroke-width: 4; rx: 12px; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; fill: #563A9C; }
+        .edge { stroke: #563A9C; stroke-width: 3; fill: none; }
+        .rel-polygon { fill: #FFF7D1; stroke: #6A42C2; stroke-width: 3; }
+        .rel-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 800; fill: #563A9C; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #ffffff; border: 2px solid #563A9C; padding: 2px 8px; border-radius: 6px; color: #563A9C; font-weight: 700; }
+        .code-block { background: #f4f4f5; border: 2px solid #e4e4e7; padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; color: #3f3f46; font-size: 14px; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FCFCFC; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #563A9C; border-radius: 10px; border: 2px solid #FCFCFC; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="no-print h-20 bg-white text-brand-dark border-b-4 border-brand-dark px-8 flex items-center justify-between sticky top-0 z-50 shadow-md" role="banner">
+        <div class="flex items-center gap-4 z-10">
+            <div class="bg-brand-dark text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-inner" aria-hidden="true">
+                <i class="fas fa-terminal text-xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl tracking-tight">IA Avançada <span class="text-brand-primary opacity-90">| Aula 05</span></h1>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-brand-muted hover:bg-brand-secondary hover:text-brand-dark rounded-xl text-brand-dark font-bold transition shadow-sm border border-brand-dark/20" aria-label="Imprimir a aula atual">
+                <i class="fas fa-print" aria-hidden="true"></i> IMPRIMIR
+            </button>
+            <button onclick="toggleFullscreen()" class="w-10 h-10 bg-brand-muted rounded-xl text-brand-dark hover:bg-brand-dark hover:text-white transition flex items-center justify-center border border-brand-dark/20" aria-label="Alternar tela cheia">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Barra de Progresso -->
+    <div class="no-print h-2 w-full bg-white overflow-hidden border-b border-brand-dark/10" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="aria-progress">
+        <div id="progress-bar" class="h-full bg-brand-primary transition-all duration-500 w-0"></div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-10 overflow-y-auto custom-scrollbar" role="main">
+        <div id="steps-container" class="w-full max-w-5xl" aria-live="polite"></div>
+    </main>
+
+    <!-- Footer de Navegação -->
+    <footer class="no-print h-24 bg-white border-t-4 border-brand-dark px-8 flex items-center justify-between sticky bottom-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Navegação da Aula">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-3 px-8 py-3 bg-brand-muted text-brand-dark rounded-2xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark border-2 border-brand-dark/20 disabled:border-transparent text-lg" aria-label="Voltar para o tópico anterior">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> VOLTAR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center" aria-hidden="true">
+            <span id="step-counter" class="text-sm font-black text-brand-dark uppercase tracking-widest bg-brand-muted px-4 py-1 rounded-full border border-brand-dark/20">1 / 11</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-3 px-10 py-3 bg-brand-dark text-white rounded-2xl font-black hover:bg-brand-primary transition shadow-lg text-lg border-b-4 border-black/30 hover:border-b-0 hover:translate-y-1" aria-label="Avançar para o próximo tópico">
+            AVANÇAR <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01: Título ──────────────────────────────────────────────────
+            {
+                title: "O Poder do Terminal",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] text-brand-primary mb-4 shadow-xl shadow-brand-dark/10" aria-hidden="true">
+                            <i class="fas fa-terminal text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-6xl font-black text-brand-dark leading-tight">Dominando o Gemini CLI</h2>
+                        <div class="bg-brand-muted p-6 rounded-2xl border-l-8 border-brand-primary max-w-3xl mx-auto text-left text-brand-dark font-medium">
+                            <p class="text-xl font-semibold text-center mb-2">Chegou a hora de sair da interface web e levar a IA para o seu ambiente de desenvolvimento:</p>
+                            <p class="text-3xl font-black text-brand-primary text-center uppercase tracking-tight">Automação, Agentes e Linha de Comando!</p>
+                        </div>
+                        <div class="flex justify-center gap-4 text-brand-dark text-sm mt-12 font-bold opacity-70">
+                            <span class="px-4 py-2 bg-white rounded-xl shadow-sm border-2 border-brand-dark/20" aria-hidden="true"><i class="fas fa-arrow-left mr-2"></i> USE AS SETAS PARA NAVEGAR <i class="fas fa-arrow-right ml-2"></i></span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02: O que é Gemini CLI ───────────────────────────────────
+            {
+                title: "O Que é o Gemini CLI?",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-lg">
+                            <p class="leading-relaxed font-medium">
+                                O <strong>Gemini CLI</strong> (Command Line Interface) é uma ferramenta poderosa que permite interagir com os modelos do Google Gemini diretamente pelo seu terminal, sem precisar abrir o navegador.
+                            </p>
+                            <p class="leading-relaxed font-medium mt-4">
+                                Por que isso é um superpoder para desenvolvedores?
+                            </p>
+                            <ul class="mt-6 space-y-4 font-bold">
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-bolt text-brand-primary text-2xl"></i>
+                                    <span>Velocidade: Faça perguntas rápidas enquanto codifica.</span>
+                                </li>
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-cogs text-brand-primary text-2xl"></i>
+                                    <span>Integração: Conecte respostas da IA em seus scripts.</span>
+                                </li>
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-users-cog text-brand-primary text-2xl"></i>
+                                    <span>Agentes: Crie personas especializadas para tarefas específicas.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl border-b-4 border-brand-primary text-center text-brand-muted">
+                            <p class="text-xl font-bold">Com o CLI, a Inteligência Artificial passa a morar <span class="text-brand-muted font-black underline">dentro do seu projeto</span>.</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 03: Instalação ─────────────────────────────────────────
+            {
+                title: "Como Rodar o Gemini CLI",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl text-brand-dark font-semibold text-center">Temos dois caminhos diferentes dependendo de onde você está programando:</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Em Casa -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-brand-dark/20 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-brand-primary"></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-4 mt-2 uppercase flex items-center gap-2"><i class="fas fa-home"></i> Em Casa</h3>
+                                <p class="mb-4 font-medium opacity-90 text-sm">No seu computador, onde você tem permissão total, instale globalmente via <strong>npm</strong>. Isso permite usar o comando <code>gemini</code> de forma nativa.</p>
+                                
+                                <div class="terminal-box mt-4 text-sm">
+                                    <p class="terminal-prompt">npm install -g @google/gemini-cli</p>
+                                </div>
+                            </div>
+
+                            <!-- Na Sala -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-brand-dark/20 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-brand-secondary"></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-4 mt-2 uppercase flex items-center gap-2"><i class="fas fa-school"></i> Na Sala de Aula</h3>
+                                <p class="mb-4 font-medium opacity-90 text-sm">Devido às restrições de permissão nos computadores da escola, não podemos instalar globalmente. Vamos usar o <strong>npx</strong> para baixar e rodar diretamente do repositório oficial.</p>
+                                
+                                <div class="terminal-box mt-4 text-sm">
+                                    <p class="terminal-prompt">npx @google/gemini-cli</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 04: O /init ────────────────────────────────────
+            {
+                title: "Preparando o Terreno: O comando /init",
+                content: `
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6 p-6 bg-brand-muted rounded-3xl border-l-8 border-brand-primary shadow-sm text-brand-dark">
+                            <i class="fas fa-folder-open text-5xl" aria-hidden="true"></i>
+                            <div>
+                                <h3 class="text-2xl font-black">Indo com Calma</h3>
+                                <p class="text-lg font-medium opacity-80 mt-1">Antes de usar os superpoderes, precisamos dar o contexto do projeto à IA.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                            <p class="font-bold text-brand-dark text-lg mb-2">
+                                1. Navegue até o diretório do seu projeto.<br>
+                                2. Digite apenas <code>gemini</code> (ou <code>npx @google/gemini-cli</code> na sala) para abrir o <strong>modo interativo</strong>.<br>
+                                3. Dentro do modo interativo, digite <code>/init</code>.
+                            </p>
+                            <p class="text-sm italic font-bold text-brand-primary mb-4">* Não se preocupe, eu farei esse passo a passo com vocês agora num projeto meu!</p>
+                            
+                            <div class="terminal-box text-sm">
+                                <p class="terminal-prompt">cd meu-projeto-de-aula</p>
+                                <p class="terminal-prompt">npx @google/gemini-cli</p>
+                                <p class="text-gray-400 mt-2">Bem-vindo ao modo interativo! O que deseja fazer?</p>
+                                <p class="text-white mt-1">> /init</p>
+                                <p class="text-brand-secondary mt-2">✔ Arquivo GEMINI.md criado com sucesso!</p>
+                            </div>
+
+                            <div class="mt-6 p-4 bg-brand-muted rounded-xl border border-brand-dark/10 font-medium">
+                                <p><i class="fas fa-info-circle text-brand-primary mr-2"></i> <strong>O que esse /init faz na prática?</strong></p>
+                                <p class="text-sm mt-2">Ele cria um arquivo chamado <code>GEMINI.md</code> na pasta do projeto. É neste arquivo que fica salva a <strong>descrição geral do seu projeto</strong>, e o Gemini usará esse documento como um <em>guia mestre</em> para entender o contexto de tudo que vocês vão desenvolver juntos.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 05: Comandos Básicos ───────────────────────────────────────────
+            {
+                title: "Conceitos e Slash Commands",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-medium text-brand-dark text-center mb-6">Como agora estamos dentro do <strong>modo interativo</strong>, usamos a barra <code>/</code> para enviar comandos especiais (Slash Commands):</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Comando Ask -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <h4 class="font-black text-xl text-brand-dark mb-2"><code class="bg-brand-muted text-brand-dark text-lg">/ask</code></h4>
+                                <p class="font-medium opacity-90 text-sm mb-3">Faz uma pergunta rápida e direta ao modelo.</p>
+                                <div class="terminal-box text-xs p-3">
+                                    <p class="text-white mt-1">> /ask "Qual a porta padrão do React?"</p>
+                                    <p class="text-white mt-1">A porta padrão do React (Create React App) é a 3000.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Comando Chat -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <h4 class="font-black text-xl text-brand-dark mb-2"><code class="bg-brand-muted text-brand-dark text-lg">/chat</code></h4>
+                                <p class="font-medium opacity-90 text-sm mb-3">Inicia ou gerencia uma sessão contínua (onde o modelo lembra do contexto anterior).</p>
+                                <div class="terminal-box text-xs p-3">
+                                    <p class="text-white mt-1">> /chat</p>
+                                    <p class="text-brand-secondary mt-1">Entrou no modo chat. Digite 'exit' para sair.</p>
+                                </div>
+                            </div>
+
+                            <!-- Comando Agent -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <h4 class="font-black text-xl text-brand-dark mb-2"><code class="bg-brand-muted text-brand-dark text-lg">/agent</code></h4>
+                                <p class="font-medium opacity-90 text-sm mb-3">O coração da automação. Gerencia as personas personalizadas (criar, listar, rodar).</p>
+                                <div class="terminal-box text-xs p-3">
+                                    <p class="text-white mt-1">> /agent list</p>
+                                    <p class="text-white mt-1">- tradutor_pt_en</p>
+                                    <p class="text-white">- revisor_codigo</p>
+                                </div>
+                            </div>
+
+                            <!-- Comando Help -->
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <h4 class="font-black text-xl text-brand-dark mb-2"><code class="bg-brand-muted text-brand-dark text-lg">/help</code></h4>
+                                <p class="font-medium opacity-90 text-sm mb-3">Sempre que esquecer algo, este comando lista todos os recursos disponíveis.</p>
+                                <div class="terminal-box text-xs p-3">
+                                    <p class="text-white mt-1">> /help</p>
+                                    <p class="text-gray-400 mt-1">Available commands: /ask, /chat, /agent, /init...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 06: Agentes ──────────────────────────────────────────
+            {
+                title: "O Que são Agentes no Gemini CLI?",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl font-bold text-brand-dark text-center">A verdadeira magia do CLI acontece quando criamos <span class="bg-brand-muted px-2 rounded">Agentes</span>.</p>
+                        
+                        <div class="p-6 bg-brand-dark text-brand-muted rounded-3xl shadow-xl border-l-8 border-brand-primary flex flex-col md:flex-row items-center gap-8">
+                            <i class="fas fa-user-astronaut text-7xl" aria-hidden="true"></i>
+                            <div>
+                                <h3 class="font-black text-2xl mb-2 text-brand-muted uppercase">O Conceito de Agente:</h3>
+                                <p class="text-lg">Um Agente é uma <strong>configuração pré-definida</strong> que instrui o Gemini a agir com uma persona, comportamento ou conjunto de regras específicas.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-4 mt-4">
+                            <div class="p-4 bg-white rounded-xl border-2 border-brand-dark/10 shadow-sm text-center">
+                                <i class="fas fa-comment-dots text-brand-secondary text-3xl mb-3"></i>
+                                <h4 class="font-bold text-brand-dark">Sem Agente</h4>
+                                <p class="text-xs mt-2 opacity-80">Você precisa explicar o contexto toda vez: <i>"Aja como um revisor de código Python e avalie isso..."</i></p>
+                            </div>
+                            <div class="flex items-center justify-center">
+                                <i class="fas fa-arrow-right text-brand-primary text-4xl"></i>
+                            </div>
+                            <div class="p-4 bg-white rounded-xl border-2 border-brand-primary shadow-sm text-center">
+                                <i class="fas fa-robot text-brand-primary text-3xl mb-3"></i>
+                                <h4 class="font-bold text-brand-dark">Com Agente</h4>
+                                <p class="text-xs mt-2 opacity-80">Você salva as instruções (System Prompt) uma vez. Depois é só chamar o agente pelo nome e enviar o dado.</p>
+                            </div>
+                        </div>
+                        <p class="mt-2 font-bold text-brand-dark italic text-center">Pense nos agentes como os seus funcionários especialistas guardados no terminal!</p>
+                    </div>
+                `
+            },
+            // ── 07: Criando Agente ──────────────────────────────────────────
+            {
+                title: "Criando seu Primeiro Agente",
+                content: `
+                    <div class="space-y-6">
+                        <div class="bg-white p-8 rounded-3xl border-2 border-brand-dark/10 shadow-sm text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                                <i class="fas fa-plus-circle text-brand-primary" aria-hidden="true"></i> Passo a Passo
+                            </h3>
+                            <p class="text-lg font-medium leading-relaxed mb-6">
+                                Para criar um agente, usamos o comando <code class="text-lg">/agent create</code> seguido do nome que queremos dar a ele. Não use espaços no nome.
+                            </p>
+                            
+                            <div class="terminal-box">
+                                <p class="text-white mt-1">> /agent create revisor-css</p>
+                                <p class="text-brand-secondary mt-2">✔ Agente 'revisor-css' criado com sucesso!</p>
+                                <p class="text-gray-400">Arquivo de configuração gerado em: ./agents/revisor-css.yaml</p>
+                            </div>
+
+                            <div class="mt-6 p-4 bg-brand-muted border-l-4 border-brand-secondary rounded-r-xl">
+                                <p class="font-bold"><i class="fas fa-folder-open text-brand-dark mr-2"></i> O que acontece por baixo dos panos?</p>
+                                <p class="text-sm mt-1 opacity-90">O CLI cria uma pasta (geralmente chamada <code>agents</code> ou um arquivo YAML) com um arquivo em branco pronto para receber a "alma" do seu agente. É lá que vamos definir quem ele é.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 08: Descrevendo o Agente ────────────────────────────────────
+            {
+                title: "Descrevendo o Agente (A Alma)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6 p-6 bg-brand-muted rounded-3xl border-l-8 border-brand-primary shadow-sm text-brand-dark">
+                            <i class="fas fa-code-branch text-5xl" aria-hidden="true"></i>
+                            <div>
+                                <h3 class="text-2xl font-black">Editando as Instruções (System Prompt)</h3>
+                                <p class="text-lg font-medium opacity-80 mt-1">O arquivo criado é geralmente um YAML ou JSON onde você define as diretrizes.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <p class="font-bold text-lg mb-4">Abra o arquivo <code>revisor-css.yaml</code> em seu editor favorito.</p>
+                                <p class="opacity-90 text-sm mb-4">Você verá uma estrutura para preencher com o **System Prompt** (a instrução mestra do comportamento).</p>
+                                <div class="bg-brand-dark text-white text-xs p-2 rounded text-center font-bold tracking-widest uppercase mb-1">Conteúdo do Arquivo</div>
+                                <div class="code-block whitespace-pre-wrap">name: revisor-css
+model: gemini-1.5-flash
+temperature: 0.2
+
+system_instruction: |
+  Você é um Desenvolvedor Front-end Especialista em CSS.
+  Sua única função é receber códigos CSS e retornar o MESMO código, porém otimizado, sem redundâncias e usando variáveis adequadas.
+  Não dê explicações, retorne apenas o código.</div>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10 flex flex-col justify-center">
+                                <h4 class="font-black text-brand-dark text-xl mb-3"><i class="fas fa-cogs text-brand-primary mr-2"></i> Anatomia da Config</h4>
+                                <ul class="space-y-4 text-sm font-medium mb-6">
+                                    <li><code class="bg-brand-muted text-brand-dark px-1 rounded">model</code>: Define qual versão do Gemini o agente usará.</li>
+                                    <li><code class="bg-brand-muted text-brand-dark px-1 rounded">temperature</code>: De 0.0 a 1.0. Zero faz ele ser mais técnico. Mais alto o deixa criativo.</li>
+                                    <li><code class="bg-brand-muted text-brand-dark px-1 rounded">system_instruction</code>: A regra de ouro. Define quem ele é.</li>
+                                </ul>
+                                
+                                <div class="bg-brand-muted p-4 rounded-xl border-l-4 border-brand-secondary">
+                                    <h4 class="font-black text-brand-dark mb-2 text-sm uppercase"><i class="fas fa-exclamation-triangle text-brand-secondary mr-1"></i> Detalhamento é Tudo!</h4>
+                                    <p class="text-xs font-bold text-brand-dark opacity-90 leading-relaxed">
+                                        A inteligência do seu agente é proporcional aos detalhes da instrução. Diga seu papel, tecnologias dominadas, tom de voz, o que ele DEVE e o que <strong>NÃO DEVE</strong> fazer. Descrição genérica = Agente genérico. Descrição detalhada = Especialista sênior.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 09: Usando o Agente ───────────────────────────────────────────
+            {
+                title: "Usando o Agente na Prática",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-medium text-brand-dark text-center">Agente criado e configurado! Como chamá-lo para trabalhar?</p>
+                        
+                        <div class="bg-white rounded-3xl py-8 px-6 flex flex-col border-4 border-brand-dark shadow-sm">
+                            <p class="font-bold mb-4">Como estamos no modo interativo, passamos o nome do agente usando a flag <code class="text-lg">--agent</code> (ou <code>-a</code>) junto ao comando:</p>
+                            
+                            <div class="terminal-box">
+                                <p class="text-white mt-1">> /ask --agent revisor-css ".botao { margin-top: 10px; margin-bottom: 10px; color: #ff0000; color: red; }"</p>
+                                <p class="text-white mt-4">.botao {</p>
+                                <p class="text-white">  margin: 10px 0;</p>
+                                <p class="text-white">  color: red;</p>
+                                <p class="text-white">}</p>
+                            </div>
+                            
+                            <div class="mt-6 grid md:grid-cols-2 gap-4">
+                                <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <h4 class="font-black text-brand-dark mb-1"><i class="fas fa-file-import text-brand-primary mr-2"></i> Dica Ninja: Lendo Arquivos</h4>
+                                    <p class="text-xs opacity-90 font-medium">Você pode pedir pro agente ler um arquivo do seu computador em vez de digitar o código!</p>
+                                    <code class="block mt-2 text-xs text-center border-brand-primary">/ask -a revisor-css < style.css</code>
+                                </div>
+                                <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <h4 class="font-black text-brand-dark mb-1"><i class="fas fa-comments text-brand-primary mr-2"></i> Chat com Agente</h4>
+                                    <p class="text-xs opacity-90 font-medium">Você também pode iniciar uma conversa contínua com seu agente.</p>
+                                    <code class="block mt-2 text-xs text-center border-brand-primary">/chat --agent revisor-css</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 10: Exemplos de Agentes (Equipe) ──────────────────────────────────────────────
+            {
+                title: "A Equipe dos Sonhos (Exemplos de Prompts)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-brand-dark font-medium text-center">Copie e cole essas descrições no <code>system_instruction</code> dos seus agentes para criar uma software house autônoma no seu terminal!</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-[55vh] overflow-y-auto custom-scrollbar pr-2">
+                            
+                            <!-- Arquiteto -->
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-t-4 border-brand-primary border-l-2 border-r-2 border-b-2 border-brand-dark/10 flex flex-col">
+                                <h4 class="font-black text-brand-dark text-lg mb-1"><i class="fas fa-user-tie text-brand-primary mr-2"></i> agente-arquiteto</h4>
+                                <p class="text-[10px] font-bold opacity-70 mb-3 uppercase tracking-widest">Líder e Gestor Ágil</p>
+                                <div class="code-block whitespace-pre-wrap text-[11px] leading-tight flex-grow overflow-y-auto custom-scrollbar">Você é um Tech Lead, Arquiteto de Software e Scrum Master extremamente experiente em gestão de pessoas e metodologias ágeis (Scrum).
+Sua função é ser a ponte entre os clientes (sejam eles técnicos ou totalmente leigos) e a equipe de desenvolvimento. 
+Sua missão é:
+1. Ouvir e entender as demandas de negócios dos usuários.
+2. Traduzir esses pedidos em tarefas técnicas organizadas e priorizadas (User Stories).
+3. Gerenciar e delegar as tarefas para a sua equipe subordinada de agentes (api, backend, frontend, desktop e mobile) para transformar as demandas em realidade estruturada.
+Aja sempre com liderança, empatia e clareza técnica.</div>
+                            </div>
+
+                            <!-- API / Banco -->
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-brand-dark/10 flex flex-col">
+                                <h4 class="font-black text-brand-dark text-lg mb-1"><i class="fas fa-database text-brand-secondary mr-2"></i> agente-api</h4>
+                                <p class="text-[10px] font-bold opacity-70 mb-3 uppercase tracking-widest">Spring Boot & PostgreSQL</p>
+                                <div class="code-block whitespace-pre-wrap text-[11px] leading-tight flex-grow overflow-y-auto custom-scrollbar">Você é um Engenheiro de Dados e Especialista Backend, com profundo domínio em banco de dados PostgreSQL e criação de APIs RESTful usando Java e Spring Boot.
+Sua missão é projetar e modelar dados com altíssima eficiência, criar queries otimizadas e expor endpoints seguros, escaláveis e bem documentados.
+Siga estritamente as melhores práticas do padrão REST, garantindo tratamento de erros adequado, status HTTP corretos e integridade transacional no banco de dados.
+Sempre que outro agente precisar acessar o banco de dados, você é o responsável por fornecer a API necessária.</div>
+                            </div>
+
+                            <!-- Backend Java -->
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-brand-dark/10 flex flex-col">
+                                <h4 class="font-black text-brand-dark text-lg mb-1"><i class="fab fa-java text-brand-secondary mr-2"></i> agente-backend</h4>
+                                <p class="text-[10px] font-bold opacity-70 mb-3 uppercase tracking-widest">Especialista Java Core</p>
+                                <div class="code-block whitespace-pre-wrap text-[11px] leading-tight flex-grow overflow-y-auto custom-scrollbar">Você é um Desenvolvedor Java Senior focado em regras de negócio e integrações.
+Você domina a JVM, concorrência, design patterns, arquitetura limpa e clean code. Seu objetivo é escrever códigos lógicos que sejam extremamente elegantes, performáticos e fáceis de dar manutenção.
+IMPORTANTE: Para realizar a persistência ou leitura de informações, você NÃO deve criar queries SQL diretamente nem acessar o banco; você deve sempre solicitar as informações consumindo as rotas criadas pelo 'agente-api'. Trabalhe em equipe para manter as responsabilidades separadas.</div>
+                            </div>
+
+                            <!-- Frontend Web -->
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-brand-dark/10 flex flex-col">
+                                <h4 class="font-black text-brand-dark text-lg mb-1"><i class="fab fa-html5 text-brand-secondary mr-2"></i> agente-frontend</h4>
+                                <p class="text-[10px] font-bold opacity-70 mb-3 uppercase tracking-widest">HTML, JS & Tailwind</p>
+                                <div class="code-block whitespace-pre-wrap text-[11px] leading-tight flex-grow overflow-y-auto custom-scrollbar">Você é um Desenvolvedor Web Front-end Especialista, com olhar apurado para design.
+Seu domínio absoluto é HTML5 semântico, JavaScript moderno (ES6+) e estilização avançada utilizando exclusivamente o framework Tailwind CSS.
+Sua missão é criar interfaces web interativas, responsivas e visualmente belíssimas. Seus layouts devem priorizar a acessibilidade, possuir uma excelente usabilidade (UX) e garantir um código limpo e componentizado (mesmo que em JS puro).</div>
+                            </div>
+
+                            <!-- Desktop -->
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-brand-dark/10 flex flex-col">
+                                <h4 class="font-black text-brand-dark text-lg mb-1"><i class="fab fa-python text-brand-secondary mr-2"></i> agente-desktop</h4>
+                                <p class="text-[10px] font-bold opacity-70 mb-3 uppercase tracking-widest">Python & Qt Framework</p>
+                                <div class="code-block whitespace-pre-wrap text-[11px] leading-tight flex-grow overflow-y-auto custom-scrollbar">Você é um Engenheiro de Software Sênior especializado no desenvolvimento de aplicações Desktop utilizando Python e o framework Qt (PyQt/PySide).
+Sua função principal é construir interfaces gráficas profissionais, fluídas e nativas que sejam multiplataforma (rodando perfeitamente em Windows, macOS e Linux).
+Para qualquer operação de leitura, escrita ou manipulação de dados em banco, sua aplicação não fará conexão direta; em vez disso, integre e comunique o seu app via requisições HTTP com os endpoints gerados pelo 'agente-api'.</div>
+                            </div>
+
+                            <!-- Mobile -->
+                            <div class="bg-white p-5 rounded-2xl shadow-sm border-2 border-brand-dark/10 flex flex-col">
+                                <h4 class="font-black text-brand-dark text-lg mb-1"><i class="fas fa-mobile-alt text-brand-secondary mr-2"></i> agente-mobile</h4>
+                                <p class="text-[10px] font-bold opacity-70 mb-3 uppercase tracking-widest">Flutter & Dart</p>
+                                <div class="code-block whitespace-pre-wrap text-[11px] leading-tight flex-grow overflow-y-auto custom-scrollbar">Você é um Desenvolvedor Mobile Especialista com conhecimento profundo em Flutter e Dart.
+Sua especialidade é construir aplicativos móveis de altíssima qualidade visual, com animações fluidas e elegantes (60fps), reaproveitando o mesmo código fonte para iOS e Android.
+Foque incansavelmente em uma excelente experiência de usuário (UX) e implemente gerenciamento de estado eficiente. Você deve obter e salvar todos os dados consumindo as rotas RESTful integrando-se diretamente ao 'agente-api'.</div>
+                            </div>
+
+                        </div>
+                    </div>
+                `
+            },
+            // ── 11: Fechamento ────────────────────────────────────────────────
+            {
+                title: "Conclusão",
+                content: `
+                    <div class="text-center space-y-10 py-10">
+                        <div class="inline-block p-10 bg-white rounded-full border-8 border-brand-primary shadow-2xl" aria-hidden="true">
+                            <i class="fas fa-check-circle text-brand-dark text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl font-black text-brand-dark uppercase">Missão Cumprida!</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto font-semibold italic">"O Gemini CLI transforma o terminal em uma extensão da sua própria mente. Agora, você tem um exército de agentes à sua disposição."</p>
+                        
+                        <div class="mt-12 px-10 py-4 bg-brand-dark text-brand-muted rounded-2xl font-black text-xl shadow-xl inline-block border-b-4 border-brand-primary">
+                            Fim da Aula 05
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active" role="region" aria-live="polite">
+                    <h2 class="no-print text-3xl md:text-4xl font-black mb-10 text-brand-dark border-l-8 border-brand-primary pl-4">${step.title}</h2>
+                    <div class="content-body">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            document.getElementById('aria-progress').setAttribute('aria-valuenow', Math.round(((currentStep + 1) / steps.length) * 100));
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 
+                ? 'FINALIZAR <i class="fas fa-check-circle ml-2" aria-hidden="true"></i>' 
+                : 'AVANÇAR <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark uppercase text-center">Apostila: IA Avançada</h1>
+                <p class="font-bold text-xl text-center">Aula 05 - Gemini CLI e Criação de Agentes</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-12 border-b-2 border-brand-dark/20 pb-10">
+                    <h2 class="text-3xl font-black mb-6 text-brand-dark border-l-8 border-brand-primary pl-4">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

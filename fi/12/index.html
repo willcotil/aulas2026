@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 12 - Planilha Eletrônica: Introdução e Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Nova Paleta Vibrante */
+        :root {
+            --color-pink: #FF2DD1;   /* Rosa / Magenta */
+            --color-yellow: #FDFFB8; /* Amarelo Claro */
+            --color-mint: #4DFFBE;   /* Verde Menta */
+            --color-blue: #63C8FF;   /* Azul Claro */
+            --color-white: #FFFFFF;
+            --color-black: #111827;  /* Preto/Cinza bem escuro para textos */
+        }
+
+        /* --- ESTILOS GERAIS --- */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--color-white); 
+            color: var(--color-black);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-white);
+            background-image: radial-gradient(rgba(0, 0, 0, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* --- SLIDES E ANIMAÇÕES --- */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            
+            opacity: 0;
+            transform: scale(0.98);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            pointer-events: none;
+            
+            background-color: var(--color-white);
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* --- COMPONENTES PEDAGÓGICOS --- */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--color-black);
+            width: 100%;
+            max-width: 1100px;
+            transition: all 0.2s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .action-box {
+            background-color: var(--color-white);
+            border: 4px solid var(--color-black);
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: var(--color-black);
+        }
+
+        .logic-box {
+            background-color: var(--color-yellow);
+            border: 4px solid var(--color-black);
+            border-left: 12px solid var(--color-pink);
+            padding: 1.2rem 1.5rem;
+            border-radius: 8px;
+            color: var(--color-black);
+        }
+
+        /* --- SIMULAÇÃO DE PLANILHA (CSS GRID) --- */
+        .spreadsheet-grid {
+            display: grid;
+            grid-template-columns: 40px repeat(4, 1fr);
+            grid-template-rows: 30px repeat(4, 40px);
+            border: 2px solid var(--color-black);
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            width: 100%;
+            max-width: 600px;
+        }
+        .sheet-header {
+            background-color: var(--color-blue);
+            border: 1px solid var(--color-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--color-black);
+        }
+        .sheet-cell {
+            border: 1px solid var(--color-black);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: var(--color-black);
+            background-color: var(--color-white);
+        }
+        .sheet-cell.active {
+            border: 4px solid var(--color-pink);
+            box-shadow: inset 0 0 0 1px var(--color-pink);
+            z-index: 2;
+        }
+        .sheet-cell.number { justify-content: flex-end; }
+        .sheet-cell.center { justify-content: center; }
+
+        /* --- UTILITÁRIOS DE CORES (Declarados após os componentes para evitar sobreposição errada) --- */
+        .text-c-pink { color: var(--color-pink); }
+        .text-c-yellow { color: #d1b000; }
+        .text-c-mint { color: #10b981; }
+        .text-c-blue { color: #0284c7; }
+        .text-c-black { color: var(--color-black); }
+        .text-c-white { color: var(--color-white); }
+        
+        .bg-c-pink { background-color: var(--color-pink); color: var(--color-white); }
+        .bg-c-yellow { background-color: var(--color-yellow); color: var(--color-black); }
+        .bg-c-mint { background-color: var(--color-mint); color: var(--color-black); }
+        .bg-c-blue { background-color: var(--color-blue); color: var(--color-black); }
+        .bg-c-black { background-color: var(--color-black); color: var(--color-white); }
+        
+        .border-c-pink { border-color: var(--color-pink); }
+        .border-c-yellow { border-color: var(--color-yellow); }
+        .border-c-mint { border-color: var(--color-mint); }
+        .border-c-blue { border-color: var(--color-blue); }
+        .border-c-black { border-color: var(--color-black); }
+
+        /* --- IMPRESSÃO --- */
+        @media print {
+            body, html { overflow: visible !important; height: auto !important; background: white !important; }
+            #presentation { display: block !important; height: auto !important; position: static !important; }
+            .slide { position: relative !important; opacity: 1 !important; display: block !important; page-break-after: always; border-bottom: 2px solid #ccc; padding: 2rem 0 !important; }
+            .no-print { display: none !important; }
+            .bg-c-blue, .bg-c-pink, .bg-c-yellow, .bg-c-mint, .bg-c-black { background-color: #eee !important; color: black !important; border: 2px solid black; }
+            .text-c-white { color: black !important; }
+            .spreadsheet-grid { border: 2px solid black; }
+            .sheet-cell { border: 1px solid black; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra de Controle Superior -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/95 border-b-4 border-c-pink shadow-md">
+        <div class="flex items-center space-x-6">
+            <span class="font-black text-c-black text-xl tracking-tighter">AULA 12: PLANILHAS</span>
+            <div class="h-3 w-48 lg:w-80 bg-gray-200 rounded-full overflow-hidden border border-black">
+                <div id="progressBar" class="h-full bg-c-mint transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="font-mono font-bold text-gray-600">01 / 21</span>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="toggleFullscreen()" class="p-2 border-2 border-black rounded hover:bg-gray-100 transition" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="bg-c-black text-white px-4 py-2 rounded font-bold hover:bg-gray-800 transition flex items-center gap-2">
+                <i data-lucide="printer"></i> Apostila (PDF)
+            </button>
+        </div>
+    </div>
+
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-c-pink text-white px-6 py-2 rounded-full text-sm font-bold uppercase mb-8 inline-block shadow-lg border-2 border-black">Google Sheets / Excel</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-c-black">
+                    Planilhas<br><span class="text-c-pink">Eletrônicas</span>
+                </h1>
+                <p class="text-2xl text-gray-700 font-bold max-w-3xl mx-auto">Arquivos, Grade, Formatação e Dados Interativos.</p>
+            </div>
+            <div class="mt-16 text-c-pink no-print">
+                <p class="text-xs uppercase tracking-widest mb-2 font-bold opacity-70">Avançar</p>
+                <i data-lucide="arrow-down" class="mx-auto animate-bounce w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro Visual -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold mb-10 border-l-8 border-c-pink pl-6">Previsão da Aula</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-6 border-t-8 border-c-blue">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="file-spreadsheet" class="text-c-blue"></i> 1. Arquivos e Grade</h3>
+                    <p class="text-sm text-gray-700 font-bold">xls, xlsx, CSV. O conceito de Célula.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-c-pink">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="type" class="text-c-pink"></i> 2. Tipos de Dados</h3>
+                    <p class="text-sm text-gray-700 font-bold">O que cabe numa célula e máscaras (Moeda, %).</p>
+                </div>
+                <div class="card p-6 border-t-8 border-c-mint">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="mouse-pointer-click" class="text-c-mint"></i> 3. Interatividade</h3>
+                    <p class="text-sm text-gray-700 font-bold">Caixas de Seleção e Listas Suspensas.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-c-yellow">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="wrench" class="text-yellow-600"></i> 4. Ferramentas</h3>
+                    <p class="text-sm text-gray-700 font-bold">O mapa completo da barra superior e Cores Alternadas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: O que é uma Planilha? -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Por que usar Planilhas?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-xl">
+                    <p class="font-black text-c-pink mb-2 text-xl">Docs vs Sheets</p>
+                    <p class="text-base leading-relaxed mb-4 font-bold">No Google Docs (que vimos antes), o objetivo é escrever textos livres e relatórios.</p>
+                    <p class="text-base leading-relaxed font-bold">O Google Sheets (Planilhas) é uma <strong>calculadora gigante unida com um banco de dados</strong>. O foco não é criar parágrafos, mas organizar dados para cálculos, listas e análises.</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-8 bg-c-blue border-4 border-black rounded-xl shadow-lg">
+                    <i data-lucide="calculator" class="w-24 h-24 text-c-black mb-4"></i>
+                    <p class="text-2xl font-black text-center text-c-black">Tudo precisa estar em seu quadrado.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Formatos de Arquivos -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">A Sopa de Letrinhas (Formatos)</h2>
+            <p class="mb-6 text-xl text-center max-w-4xl font-bold">Ao baixar ou enviar uma planilha, você encontrará diferentes extensões. O que elas significam?</p>
+            
+            <div class="grid grid-cols-3 gap-6 w-full max-w-6xl">
+                <div class="card p-6 text-center border-t-8 border-gray-400">
+                    <h3 class="text-3xl font-black font-mono mb-2 text-gray-600">.xls</h3>
+                    <p class="text-sm font-bold bg-gray-200 px-2 py-1 rounded inline-block mb-4 border border-black">O Antigo</p>
+                    <p class="text-sm text-gray-700 font-bold">Formato original do Excel (antes de 2007). Muito pesado e com limite pequeno de linhas. Evite usar hoje em dia.</p>
+                </div>
+                <div class="card p-6 text-center border-t-8 border-c-blue transform scale-105 shadow-2xl">
+                    <h3 class="text-3xl font-black font-mono mb-2 text-c-black">.xlsx</h3>
+                    <p class="text-sm font-bold bg-c-blue text-c-black px-2 py-1 rounded inline-block mb-4 border border-black">O Padrão Moderno</p>
+                    <p class="text-sm text-gray-700 font-bold">Formato atual. Salva as cores, fórmulas, gráficos e suporta milhões de linhas de forma comprimida.</p>
+                </div>
+                <div class="card p-6 text-center border-t-8 border-c-pink">
+                    <h3 class="text-3xl font-black font-mono mb-2 text-c-pink">.csv</h3>
+                    <p class="text-sm font-bold bg-c-pink text-white px-2 py-1 rounded inline-block mb-4 border border-black">O Tradutor Universal</p>
+                    <p class="text-sm text-gray-700 font-bold">Comma Separated Values. É o formato mais importante para transportar dados entre sistemas diferentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Foco no CSV -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-pink">O Poder do CSV</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box">
+                    <p class="font-black text-xl mb-2 text-c-black">A Lógica da Simplicidade</p>
+                    <p class="text-sm mb-4 font-bold">Nem todo programa de software sabe ler planilhas do Excel. Mas TODO programa do mundo sabe ler um arquivo de <strong>Texto Simples</strong>.</p>
+                    <p class="text-sm mt-4 font-bold">O CSV tira todas as cores e fórmulas, e salva apenas os dados, separando as colunas com uma <strong>vírgula</strong> (ou ponto e vírgula).</p>
+                </div>
+                <div class="card p-6 bg-c-black border-4 border-c-mint shadow-2xl">
+                    <p class="text-c-mint text-xs mb-4 font-bold">Como o computador vê o arquivo .csv:</p>
+                    <p class="font-mono text-white text-lg">Nome,Idade,Setor</p>
+                    <p class="font-mono text-white text-lg">Ana,25,TI</p>
+                    <p class="font-mono text-white text-lg">Carlos,42,Vendas</p>
+                    <div class="mt-4 border-t border-gray-700 pt-4 flex justify-center">
+                        <i data-lucide="arrow-down" class="text-white"></i>
+                    </div>
+                    <p class="text-c-mint text-xs my-4 font-bold">Como a Planilha abre isso:</p>
+                    <table class="w-full text-black bg-white border-collapse text-sm border-2 border-black">
+                        <tr class="bg-gray-200 font-bold"><td class="border p-2 border-black">Nome</td><td class="border p-2 border-black">Idade</td><td class="border p-2 border-black">Setor</td></tr>
+                        <tr><td class="border p-2 border-black">Ana</td><td class="border p-2 border-black text-right">25</td><td class="border p-2 border-black">TI</td></tr>
+                        <tr><td class="border p-2 border-black">Carlos</td><td class="border p-2 border-black text-right">42</td><td class="border p-2 border-black">Vendas</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Linhas e Colunas -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">A Grade: Linhas e Colunas</h2>
+            <p class="text-xl font-bold text-gray-700 mb-8 max-w-4xl text-center">Uma planilha é formada pelo cruzamento de duas direções. É exatamente a mesma lógica do jogo "Batalha Naval".</p>
+            
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 bg-c-yellow p-4 rounded shadow-md border-2 border-black">
+                        <span class="bg-c-blue text-black font-mono px-3 py-1 font-bold text-xl rounded border border-black">A, B, C</span>
+                        <div>
+                            <p class="font-bold text-lg">COLUNAS (Verticais)</p>
+                            <p class="text-sm font-bold">São representadas por Letras.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-c-yellow p-4 rounded shadow-md border-2 border-black">
+                        <span class="bg-c-pink text-white font-mono px-3 py-1 font-bold text-xl rounded border border-black">1, 2, 3</span>
+                        <div>
+                            <p class="font-bold text-lg">LINHAS (Horizontais)</p>
+                            <p class="text-sm font-bold">São representadas por Números.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simulador Visual -->
+                <div class="spreadsheet-grid shadow-xl">
+                    <div class="sheet-header border-0 bg-white"></div>
+                    <div class="sheet-header bg-c-blue text-black border-l-0">A</div>
+                    <div class="sheet-header border-l-0">B</div>
+                    <div class="sheet-header border-l-0">C</div>
+                    <div class="sheet-header border-l-0">D</div>
+                    
+                    <div class="sheet-header bg-white border-t-0">1</div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-header bg-c-pink text-white border-t-0">2</div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell active font-bold text-center justify-center border-l-0 border-t-0">B2</div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-header bg-white border-t-0">3</div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-header bg-white border-t-0">4</div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: A Célula -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold mb-8 text-c-pink">A Célula 🔲</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl w-full items-center">
+                <div class="card p-8 border-4 border-c-pink text-center bg-white shadow-xl">
+                    <p class="text-8xl font-black font-mono text-c-pink mb-4">C4</p>
+                    <p class="text-xl font-bold text-gray-700">A intersecção exata entre a <strong>Coluna C</strong> e a <strong>Linha 4</strong>.</p>
+                </div>
+                <div class="logic-box border-c-black bg-c-mint border-left-c-pink">
+                    <p class="font-black text-c-black mb-2 text-xl">Referência Única</p>
+                    <p class="text-base leading-relaxed font-bold">Cada quadradinho da planilha é chamado de Célula. Não existem duas células com o mesmo nome. A coordenada serve para dizermos ao computador exatamente onde buscar um dado para fazer uma conta.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Tipos de Dados -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-10 text-c-black">O que cabe na Célula? (Dados Brutos)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+                <!-- Texto -->
+                <div class="card p-6 border-t-8 border-c-mint bg-white">
+                    <h3 class="font-black text-xl mb-4 text-black">1. Textos (Strings)</h3>
+                    <div class="border border-black p-2 text-left font-mono mb-4 text-sm bg-gray-50 font-bold">João Silva</div>
+                    <div class="border border-black p-2 text-left font-mono mb-4 text-sm bg-gray-50 font-bold">Rua das Flores, 10</div>
+                    <p class="text-xs text-gray-700 font-bold">O computador não faz cálculos com texto.</p>
+                </div>
+                <!-- Número -->
+                <div class="card p-6 border-t-8 border-c-blue bg-white">
+                    <h3 class="font-black text-xl mb-4 text-black">2. Números (Values)</h3>
+                    <div class="border border-black p-2 text-right font-mono mb-4 text-sm font-bold bg-c-blue/20">150</div>
+                    <div class="border border-black p-2 text-right font-mono mb-4 text-sm font-bold bg-c-blue/20">15.5</div>
+                    <div class="border border-black p-2 text-right font-mono mb-4 text-sm font-bold bg-c-blue/20">15/04/2026</div>
+                    <p class="text-xs text-gray-700 font-bold">Atenção: Datas são números disfarçados!</p>
+                </div>
+                <!-- Fórmulas -->
+                <div class="card p-6 border-t-8 border-c-pink bg-white">
+                    <h3 class="font-black text-xl mb-4 text-c-pink">3. Fórmulas</h3>
+                    <div class="border-2 border-c-pink p-2 text-left font-mono mb-4 text-sm font-bold bg-c-pink/10 text-c-pink">=A1+B1</div>
+                    <div class="border-2 border-c-pink p-2 text-left font-mono mb-4 text-sm font-bold bg-c-pink/10 text-c-pink">=SOMA(C1:C10)</div>
+                    <p class="text-xs text-gray-700 font-bold">A mágica. Toda célula que começa com o sinal de <strong class="text-black text-base bg-c-yellow px-1 border border-black">= (Igual)</strong> é uma ordem de cálculo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: A Lógica do Alinhamento -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">A Lógica Visual (Direita e Esquerda)</h2>
+            <div class="flex flex-col md:flex-row gap-10 max-w-6xl items-center">
+                <div class="spreadsheet-grid shadow-lg bg-white">
+                    <div class="sheet-header bg-white border-0"></div><div class="sheet-header border-l-0">A</div><div class="sheet-header border-l-0">B</div><div class="sheet-header border-l-0">C</div><div class="sheet-header border-l-0 text-gray-400">D</div>
+                    <div class="sheet-header border-t-0">1</div><div class="sheet-cell bg-c-mint font-bold text-xs border-t-0 border-l-0">Produto</div><div class="sheet-cell bg-c-mint font-bold text-xs border-t-0 border-l-0 number">Qtd</div><div class="sheet-cell bg-c-mint font-bold text-xs border-t-0 border-l-0 number">Preço</div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                    <div class="sheet-header border-t-0">2</div><div class="sheet-cell font-bold text-sm border-t-0 border-l-0 text-gray-800">Monitor</div><div class="sheet-cell number font-bold text-sm border-t-0 border-l-0 text-c-blue">15</div><div class="sheet-cell number font-bold text-sm border-t-0 border-l-0 text-c-blue">850,50</div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                    <div class="sheet-header border-t-0">3</div><div class="sheet-cell font-bold text-sm border-t-0 border-l-0 text-gray-800">Teclado</div><div class="sheet-cell number font-bold text-sm border-t-0 border-l-0 text-c-blue">42</div><div class="sheet-cell number font-bold text-sm border-t-0 border-l-0 text-c-blue">120,00</div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                    <div class="sheet-header border-t-0">4</div><div class="sheet-cell font-bold text-sm border-t-0 border-l-0 text-gray-800">Mouse</div><div class="sheet-cell number font-bold text-sm border-t-0 border-l-0 text-c-blue">108</div><div class="sheet-cell number font-bold text-sm border-t-0 border-l-0 text-c-blue">45,90</div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                </div>
+                <div class="logic-box shadow-lg">
+                    <p class="font-black text-c-black mb-2 text-lg">O Sistema Alinha Sozinho</p>
+                    <p class="text-base leading-relaxed mb-4 font-bold">Textos grudam na esquerda para lermos como num livro.</p>
+                    <p class="text-base leading-relaxed font-bold bg-white p-3 border-2 border-black rounded shadow-sm">Números grudam na direita para que as vírgulas fiquem perfeitamente alinhadas (unidade embaixo de unidade), facilitando a soma visual pelo cérebro humano.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: Formatando Valores -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-black">Formatando Valores (A Roupa do Número)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full max-w-6xl">
+                <div class="card p-8 border-4 border-c-pink shadow-xl">
+                    <p class="text-2xl font-black text-c-pink mb-4">O Erro Iniciante ❌</p>
+                    <p class="text-base font-bold mb-4">Se você digitar "R$ 1500,00" usando as letras do teclado, o sistema vai achar que isso é um <strong>TEXTO</strong>. Quando tentar somar com outro valor, vai dar um erro: <code class="bg-gray-200 px-1 text-red-600 font-black border border-black">#VALOR!</code></p>
+                    <p class="text-base font-black border-t-2 border-black pt-4">Você deve digitar APENAS o número puro: <code>1500</code></p>
+                </div>
+                <div class="space-y-4">
+                    <div class="logic-box border-c-blue bg-c-blue shadow-lg">
+                        <p class="font-black text-lg mb-2">Como vestir a Roupa do Número?</p>
+                        <p class="text-sm font-bold mb-2">1. Selecione a célula.</p>
+                        <p class="text-sm font-bold mb-2">2. Vá na barra e clique no botão <strong class="bg-white px-2 py-1 rounded border border-black text-black">123 ▼</strong> (ou o botão <strong>R$</strong> direto na barra).</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-1 bg-white border-2 border-black p-3 text-center rounded shadow-sm"><p class="text-xs font-bold mb-1">Você digita:</p><p class="font-mono font-black text-2xl">10</p></div>
+                        <div class="flex items-center text-3xl font-black text-black">➜</div>
+                        <div class="flex-1 bg-c-mint border-2 border-black p-3 text-center rounded shadow-sm"><p class="text-xs text-black font-bold mb-1">Aparece na tela:</p><p class="font-mono font-black text-2xl text-black">R$ 10,00</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Inserindo Interatividade (Checkboxes) -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Interatividade: Caixa de Seleção ☑️</h2>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-6xl items-center">
+                <div class="spreadsheet-grid shadow-xl bg-white border-4 border-black">
+                    <div class="sheet-header border-0 bg-white"></div><div class="sheet-header border-l-0">A</div><div class="sheet-header border-l-0">B</div><div class="sheet-header border-l-0 text-gray-400">C</div><div class="sheet-header border-l-0 text-gray-400">D</div>
+                    <div class="sheet-header border-t-0">1</div><div class="sheet-cell bg-c-yellow font-bold text-sm border-t-0 border-l-0">Tarefa</div><div class="sheet-cell bg-c-yellow font-bold text-sm border-t-0 border-l-0">Feito?</div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                    <div class="sheet-header border-t-0">2</div><div class="sheet-cell text-sm font-bold border-t-0 border-l-0">Comprar Leite</div><div class="sheet-cell center border-t-0 border-l-0"><input type="checkbox" checked class="w-6 h-6 accent-pink-500"></div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                    <div class="sheet-header border-t-0">3</div><div class="sheet-cell text-sm font-bold border-t-0 border-l-0">Pagar Conta</div><div class="sheet-cell center border-t-0 border-l-0"><input type="checkbox" class="w-6 h-6"></div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div><div class="sheet-cell border-t-0 border-l-0 bg-gray-50"></div>
+                    <div class="sheet-header border-t-0">4</div><div class="sheet-cell border-t-0 border-l-0"></div><div class="sheet-cell border-t-0 border-l-0"></div><div class="sheet-cell border-t-0 border-l-0"></div><div class="sheet-cell border-t-0 border-l-0"></div>
+                </div>
+                <div class="space-y-6">
+                    <p class="text-xl font-bold">Você pode transformar uma célula num botão clicável para criar listas de tarefas ou controles.</p>
+                    <div class="bg-white p-4 border-2 border-black rounded shadow-md text-base font-black font-mono">
+                        Caminho: Inserir > Caixa de Seleção
+                    </div>
+                    <div class="logic-box border-c-pink shadow-lg">
+                        <p class="font-black text-c-pink mb-2 text-lg">Como o computador lê isso?</p>
+                        <p class="text-sm mt-2 font-bold">Para a máquina, não é um desenho. Se o quadrado está marcado, a célula vale <strong class="bg-white px-1 border border-black rounded text-green-600">VERDADEIRO</strong>. Se vazio, vale <strong class="bg-white px-1 border border-black rounded text-red-600">FALSO</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Validação de Dados (Dropdowns) -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Evitando Erros: Lista Suspensa 🔽</h2>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-6xl items-center">
+                <div class="space-y-6">
+                    <p class="text-lg text-gray-800 font-bold leading-relaxed">Se você deixar as pessoas digitarem o status livremente, uma vai escrever "Aprovado", a outra "Aprovdo". Sua tabela vai virar um caos.</p>
+                    <p class="text-lg font-black text-white bg-c-pink p-4 border-2 border-black rounded shadow-md">A solução é criar um "Menu Suspenso" (Dropdown). O usuário só pode escolher as opções que você permitir!</p>
+                    <div class="bg-white p-4 border-2 border-black rounded text-base font-black font-mono shadow-md">
+                        Caminho: Inserir > Menu Suspenso
+                    </div>
+                </div>
+                <div class="card p-8 flex flex-col items-center bg-c-mint border-4 border-black shadow-2xl">
+                    <p class="font-black mb-4 text-c-black text-xl">Exemplo de Status:</p>
+                    <div class="w-full border-2 border-black rounded-lg p-3 flex justify-between items-center cursor-pointer bg-white shadow-sm mb-1">
+                        <span class="bg-c-pink text-white px-3 py-1 rounded-full font-bold text-sm border border-black">Aprovado</span>
+                        <i data-lucide="chevron-down" class="w-6 h-6 text-black"></i>
+                    </div>
+                    <div class="w-full border-x-2 border-b-2 border-black rounded-b-lg p-2 bg-white flex flex-col gap-2 shadow-xl">
+                        <span class="bg-c-yellow text-black p-2 rounded cursor-pointer text-sm font-bold border border-black">Pendente</span>
+                        <span class="bg-gray-200 text-black p-2 rounded cursor-pointer text-sm font-bold border border-black">Rejeitado</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: BARRA FERRAMENTAS 1 - Controle e Números -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-6">
+                <i data-lucide="wrench" class="w-12 h-12 text-c-black bg-c-yellow p-2 rounded-lg border-2 border-black shadow"></i>
+                <h2 class="text-4xl font-black text-c-black">A Barra de Ferramentas (1/4): Controle</h2>
+            </div>
+            <p class="mb-6 text-gray-800 font-bold text-center max-w-4xl text-lg">Vamos fatiar a barra superior para o cérebro entender. Esta primeira parte controla o sistema e a aparência matemática da célula.</p>
+            
+            <div class="card p-8 w-full max-w-6xl border-4 border-black bg-white shadow-xl">
+                <div class="grid grid-cols-2 gap-8 text-sm text-black font-bold">
+                    <!-- Controles do Sistema -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-yellow pb-2">Controles do Sistema</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3"><span class="bg-c-yellow px-2 py-1 rounded font-black border-2 border-black">🔍 Menus</span> <div>Busca inteligente. Não achou um botão? Digite aqui e ele faz para você.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-c-yellow px-2 py-1 rounded font-black border-2 border-black flex items-center gap-1"><i data-lucide="undo" class="w-4 h-4"></i> <i data-lucide="redo" class="w-4 h-4"></i></span> <div><strong>Desfazer/Refazer:</strong> Volte no tempo se errar (Ctrl+Z).</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-c-yellow px-2 py-1 rounded font-black border-2 border-black"><i data-lucide="printer" class="w-4 h-4"></i></span> <div><strong>Imprimir:</strong> Prepara a planilha para o papel.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-c-yellow px-2 py-1 rounded font-black border-2 border-black"><i data-lucide="paint-roller" class="w-4 h-4"></i></span> <div><strong>Pintar Formatação:</strong> Copia o visual de uma célula e cola em outra.</div></li>
+                        </ul>
+                    </div>
+                    <!-- Formatação Numérica Rápida -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-pink pb-2">Identidade Numérica</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3"><span class="bg-c-pink text-white px-2 py-1 rounded font-black border-2 border-black">R$</span> <div><strong>Moeda:</strong> Botão rápido para transformar dígito '15' em 'R$ 15,00'.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 px-2 py-1 rounded font-black border-2 border-black">%</span> <div><strong>Porcentagem:</strong> Converte decimais (ex: 0,15 vira 15%).</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 px-2 py-1 rounded font-black border-2 border-black">.0← / .00→</span> <div><strong>Casas Decimais:</strong> Aumenta ou esconde os zeros depois da vírgula.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 px-2 py-1 rounded font-black border-2 border-black">123 ▼</span> <div><strong>Mais Formatos:</strong> Menu para transformar números em Datas (25/12), Horas (14:00) ou Texto Simples.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: BARRA FERRAMENTAS 2 - Tipografia e Cores -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-6">
+                <i data-lucide="type" class="w-12 h-12 text-white bg-c-pink p-2 rounded-lg border-2 border-black shadow"></i>
+                <h2 class="text-4xl font-black text-c-black">A Barra de Ferramentas (2/4): Estilo Visual</h2>
+            </div>
+            <p class="mb-6 text-gray-800 font-bold text-center max-w-4xl text-lg">Este bloco inteiro cuida apenas da estética: a tinta e o formato das letras dentro dos quadrados.</p>
+            
+            <div class="card p-8 w-full max-w-6xl border-4 border-black bg-white shadow-xl">
+                <div class="grid grid-cols-2 gap-8 text-sm text-black font-bold">
+                    <!-- Tipografia -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-mint pb-2">Design do Texto</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3"><span class="bg-c-mint px-2 py-1 rounded font-black border-2 border-black">Padrão... ▼</span> <div><strong>Fonte:</strong> Muda a "caligrafia" (Arial, Roboto).</div></li>
+                            <li class="flex items-center gap-3"><span class="bg-c-mint px-2 py-1 rounded font-black border-2 border-black">- 10 +</span> <div><strong>Tamanho:</strong> Aumenta ou diminui a letra.</div></li>
+                            <li class="flex items-center gap-3"><span class="bg-gray-200 px-3 py-1 rounded font-black border-2 border-black font-serif">B</span> <div><strong>Negrito:</strong> Letra gorda. Ideal para cabeçalhos.</div></li>
+                            <li class="flex items-center gap-3"><span class="bg-gray-200 px-3 py-1 rounded font-black italic border-2 border-black font-serif">I</span> <div><strong>Itálico:</strong> Letra deitada. Para notas.</div></li>
+                            <li class="flex items-center gap-3"><span class="bg-gray-200 px-2 py-1 rounded font-black line-through border-2 border-black font-serif">S</span> <div><strong>Tachado:</strong> Risco no meio. Sinaliza tarefa cancelada.</div></li>
+                        </ul>
+                    </div>
+                    <!-- Cores -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-blue pb-2">Tinta e Pigmento</h3>
+                        <ul class="space-y-4 mt-6">
+                            <li class="flex items-start gap-4">
+                                <span class="bg-c-blue px-2 py-1 rounded font-black border-2 border-black flex flex-col items-center leading-none"><span class="font-serif">A</span><div class="w-full h-1 bg-black mt-1"></div></span> 
+                                <div><strong>Cor do Texto:</strong> Muda a cor da tinta da caneta. O padrão é preto.</div>
+                            </li>
+                            <li class="flex items-start gap-4 mt-8">
+                                <span class="bg-c-blue px-2 py-2 rounded font-black border-2 border-black"><i data-lucide="paint-bucket" class="w-5 h-5 text-black"></i></span> 
+                                <div><strong>Cor de Preenchimento:</strong> Derrama tinta no <em>fundo</em> do quadrado. A letra não muda. Essencial para criar alertas.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: BARRA FERRAMENTAS 3 - Estrutura e Alinhamento -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-6">
+                <i data-lucide="layout-grid" class="w-12 h-12 text-black bg-c-mint p-2 rounded-lg border-2 border-black shadow"></i>
+                <h2 class="text-4xl font-black text-c-black">A Barra de Ferramentas (3/4): Estrutura</h2>
+            </div>
+            <p class="mb-6 text-gray-800 font-bold text-center max-w-4xl text-lg">Aqui manipulamos a arquitetura física da grade e onde o texto se encosta nas paredes.</p>
+            
+            <div class="card p-8 w-full max-w-6xl border-4 border-black bg-white shadow-xl">
+                <div class="grid grid-cols-2 gap-8 text-sm text-black font-bold">
+                    <!-- Paredes -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-black pb-2">As Paredes (Físico)</h3>
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 p-2 rounded font-black border-2 border-black"><i data-lucide="layout-grid" class="w-4 h-4"></i></span> <div><strong>Bordas:</strong> Pinta de preto as linhas invisíveis da grade. Necessário para a tabela aparecer na impressão.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 p-2 rounded font-black border-2 border-black"><i data-lucide="combine" class="w-4 h-4"></i></span> <div><strong>Mesclar Células:</strong> Quebra as paredes entre duas ou mais células, fundindo-as em uma sala gigante (ótimo para Títulos).</div></li>
+                        </ul>
+                    </div>
+                    <!-- Posição -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-pink pb-2">Posicionamento Lógico</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3"><span class="bg-c-pink text-white p-2 rounded font-black border-2 border-black"><i data-lucide="align-left" class="w-4 h-4"></i></span> <div><strong>Alinhamento Horizontal:</strong> Empurra o texto para a parede Esquerda, Centro ou Direita.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 p-2 rounded font-black border-2 border-black"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i></span> <div><strong>Alinhamento Vertical:</strong> Cola o texto no Teto, no Meio ou no Chão da célula.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 p-2 rounded font-black border-2 border-black"><i data-lucide="wrap-text" class="w-4 h-4"></i></span> <div><strong>Ajuste de Texto:</strong> Se o texto for enorme, força ele a pular de linha e crescer a célula para baixo.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: BARRA FERRAMENTAS 4 - Dados e Inteligência -->
+        <section class="slide">
+            <div class="flex items-center gap-4 mb-6">
+                <i data-lucide="sigma" class="w-12 h-12 text-black bg-c-blue p-2 rounded-lg border-2 border-black shadow"></i>
+                <h2 class="text-4xl font-black text-c-black">A Barra de Ferramentas (4/4): Inteligência</h2>
+            </div>
+            <p class="mb-6 text-gray-800 font-bold text-center max-w-4xl text-lg">Estes botões são as ferramentas avançadas. Eles transformam células mortas em dados interativos e cálculos.</p>
+            
+            <div class="card p-8 w-full max-w-6xl border-4 border-black bg-white shadow-xl">
+                <div class="grid grid-cols-2 gap-8 text-sm text-black font-bold">
+                    <!-- Inserções -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-blue pb-2">Inserções Extras</h3>
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-3"><span class="bg-c-blue p-2 rounded font-black border-2 border-black"><i data-lucide="link" class="w-4 h-4 text-black"></i></span> <div><strong>Link:</strong> Transforma a palavra num botão que abre um site externo.</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-c-yellow p-2 rounded font-black border-2 border-black"><i data-lucide="message-square-plus" class="w-4 h-4 text-black"></i></span> <div><strong>Comentário:</strong> Prende um "post-it" amarelo na célula para colegas de trabalho lerem (Nuvem).</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-c-pink text-white p-2 rounded font-black border-2 border-black"><i data-lucide="bar-chart-2" class="w-4 h-4 text-white"></i></span> <div><strong>Gráfico:</strong> Transforma uma coluna de números em um gráfico de fatias de pizza instantâneo.</div></li>
+                        </ul>
+                    </div>
+                    <!-- Operações -->
+                    <div>
+                        <h3 class="font-black text-c-black text-xl mb-4 border-b-4 border-c-mint pb-2">Operações de Dados</h3>
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-3"><span class="bg-c-mint p-2 rounded font-black border-2 border-black"><i data-lucide="filter" class="w-4 h-4 text-black"></i></span> <div><strong>Criar Filtro:</strong> Oculta o que você não quer ver (Ex: Mostre apenas produtos "Aprovados").</div></li>
+                            <li class="flex items-start gap-3"><span class="bg-gray-200 px-2 py-1 rounded font-black border-2 border-black text-black text-lg">Σ ▼</span> <div><strong>Funções:</strong> O botão mais poderoso. Abre o catálogo com as fórmulas matemáticas (SOMA, MÉDIA, PROCV).</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: Cores Alternadas -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-pink text-white px-4 py-2 rounded-xl font-black text-3xl border-2 border-black">!</span>
+                <h2 class="text-5xl font-black text-c-pink">O Truque Profissional 🎨</h2>
+            </div>
+            <p class="text-2xl font-bold mb-8 text-black">Formatação: Cores Alternadas</p>
+            
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl">
+                <!-- Tabela Ruim -->
+                <div class="card p-6 bg-white flex flex-col items-center border-t-8 border-gray-400">
+                    <p class="font-black text-gray-600 mb-2">Difícil de Ler (Linhas longas)</p>
+                    <table class="w-full text-xs border-collapse text-left font-bold text-gray-800 border border-gray-300">
+                        <tr class="border-b border-gray-400 font-black bg-gray-100 text-black"><td class="p-2 border-r">ID</td><td class="p-2 border-r">Nome Completo</td><td class="p-2 text-right">Faturamento</td></tr>
+                        <tr class="border-b border-gray-200"><td class="p-2 border-r">01</td><td class="p-2 border-r">Empresa Alfa Beta SA</td><td class="p-2 text-right">R$ 4.500,00</td></tr>
+                        <tr class="border-b border-gray-200"><td class="p-2 border-r">02</td><td class="p-2 border-r">Comercial Zeta LTDA</td><td class="p-2 text-right">R$ 1.200,00</td></tr>
+                        <tr class="border-b border-gray-200"><td class="p-2 border-r">03</td><td class="p-2 border-r">Indústria Gama Corp</td><td class="p-2 text-right">R$ 8.900,00</td></tr>
+                        <tr class="border-b border-gray-200"><td class="p-2 border-r">04</td><td class="p-2 border-r">Serviços Delta ME</td><td class="p-2 text-right">R$ 3.100,00</td></tr>
+                    </table>
+                </div>
+                <!-- Tabela Boa -->
+                <div class="card p-6 bg-white border-t-8 border-c-pink flex flex-col items-center transform scale-105 shadow-2xl">
+                    <p class="font-black text-c-pink mb-2">Fácil de Ler (Zebrado)</p>
+                    <table class="w-full text-xs border-collapse text-left font-bold text-black border-2 border-black">
+                        <tr class="bg-c-pink text-white font-black"><td class="p-2 border-r border-black">ID</td><td class="p-2 border-r border-black">Nome Completo</td><td class="p-2 text-right">Faturamento</td></tr>
+                        <tr class="bg-c-yellow"><td class="p-2 border-r border-black">01</td><td class="p-2 border-r border-black">Empresa Alfa Beta SA</td><td class="p-2 text-right">R$ 4.500,00</td></tr>
+                        <tr class="bg-white"><td class="p-2 border-r border-black">02</td><td class="p-2 border-r border-black">Comercial Zeta LTDA</td><td class="p-2 text-right">R$ 1.200,00</td></tr>
+                        <tr class="bg-c-yellow"><td class="p-2 border-r border-black">03</td><td class="p-2 border-r border-black">Indústria Gama Corp</td><td class="p-2 text-right">R$ 8.900,00</td></tr>
+                        <tr class="bg-white"><td class="p-2 border-r border-black">04</td><td class="p-2 border-r border-black">Serviços Delta ME</td><td class="p-2 text-right">R$ 3.100,00</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-8 logic-box shadow-lg w-full max-w-4xl text-base">
+                <p class="font-black">Lógica Visual (UX):</p>
+                <p class="font-bold">O olho humano se perde facilmente ao ler linhas horizontais longas cheias de números. Pintar uma linha sim e outra não cria um "trilho" visual. <br><br><span class="bg-white px-2 py-1 border border-black rounded">Atalho: Selecione a tabela ➜ Menu Formatar ➜ Cores Alternadas.</span></p>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: Prática Guiada -->
+        <section class="slide bg-c-blue text-black">
+            <h2 class="text-5xl font-black mb-8 text-black">Mão na Massa 💻</h2>
+            <div class="card p-10 max-w-5xl w-full bg-white text-black shadow-2xl border-4 border-c-pink">
+                <p class="text-2xl font-black mb-6 text-c-pink border-b-4 border-black pb-2 uppercase">AÇÃO: Seu primeiro banco de dados</p>
+                <ol class="list-decimal pl-6 space-y-4 text-lg font-bold">
+                    <li>Abra o <strong>Google Sheets (Planilhas)</strong> e crie um arquivo Em Branco.</li>
+                    <li>Na linha 1, crie o Cabeçalho: <span class="bg-c-yellow px-2 py-1 rounded border border-black">Produto</span> | <span class="bg-c-yellow px-2 py-1 rounded border border-black">Qtd</span> | <span class="bg-c-yellow px-2 py-1 rounded border border-black">Preço Unitário</span> | <span class="bg-c-yellow px-2 py-1 rounded border border-black">Pronto?</span></li>
+                    <li>Coloque o Cabeçalho em <strong>Negrito</strong> e centralizado.</li>
+                    <li>Adicione 4 produtos fictícios de tecnologia abaixo.</li>
+                    <li>Preencha a quantidade e o preço puramente numérico (ex: 150,50).</li>
+                    <li class="text-c-pink">Selecione toda a coluna de "Preço", vá na barra e clique no botão <strong class="bg-black text-white px-2 rounded">R$</strong>.</li>
+                    <li class="text-c-blue">Selecione a coluna "Pronto?", vá em <strong>Inserir > Caixa de Seleção</strong>.</li>
+                    <li class="text-c-mint">Selecione a tabela inteira e aplique <strong>Formatar > Cores Alternadas</strong>.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- SLIDE 19: Desafio de Hiperfoco -->
+        <section class="slide">
+            <h2 class="text-5xl font-black text-c-black mb-8">Desafio de Interface 🔍</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl w-full items-center">
+                <div class="logic-box border-c-pink bg-c-yellow shadow-xl border-2 border-l-[16px] border-r-0">
+                    <p class="font-black text-c-pink mb-4 text-2xl uppercase">Missão Extra:</p>
+                    <p class="text-lg font-bold text-gray-900 leading-relaxed">Imagine que sua tabela tem 500 produtos. Ao rolar a tela para baixo, o cabeçalho (Produto, Qtd, Preço) vai sumir, e você não saberá mais o que cada coluna significa.</p>
+                    <p class="text-lg font-black text-black mt-6 border-t-4 border-black pt-4 bg-white p-4 rounded border-2">Existe uma ferramenta no menu "Ver" (ou "Exibir") que "Congela" a linha 1 no topo da tela para sempre. Descubra como usá-la!</p>
+                </div>
+                <div class="img-placeholder w-full h-64 border-4 border-c-pink bg-white shadow-lg text-c-pink font-bold">
+                    [Imagem: Demonstração de uma tela rolada para baixo onde a linha 1 permanece fixa no topo]
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-5xl font-black mb-10 text-c-black">Resumo da Estrutura</h2>
+            <div class="flex gap-6 w-full max-w-6xl text-center">
+                <div class="flex-1 border-4 border-c-blue p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105">
+                    <p class="text-2xl font-black text-c-blue mb-4 border-b-4 border-c-blue pb-2">A GRADE E ARQUIVOS</p>
+                    <p class="text-base font-bold text-black mb-2">Linhas (1,2,3) x Colunas (A,B,C).</p>
+                    <p class="text-base font-bold text-black mb-2">Célula é a coordenada (Ex: A1).</p>
+                    <p class="text-base font-bold text-black">O formato CSV é o mais simples e universal.</p>
+                </div>
+                <div class="flex-1 border-4 border-c-pink p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105">
+                    <p class="text-2xl font-black text-c-pink mb-4 border-b-4 border-c-pink pb-2">VISUAL E INTERATIVO</p>
+                    <p class="text-base font-bold text-black mb-2">Máscaras vestem o número (Botão R$ ou %).</p>
+                    <p class="text-base font-bold text-black mb-2">Listas Suspensas evitam erros de digitação.</p>
+                    <p class="text-base font-bold text-black">Cores Alternadas guiam a leitura humana.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 21: Fim -->
+        <section class="slide bg-c-mint border-t-[16px] border-c-black shadow-inner">
+            <div class="text-center">
+                <i data-lucide="calculator" class="w-32 h-32 mx-auto text-c-black mb-8"></i>
+                <h1 class="text-7xl font-black mb-6 text-c-black">FIM DA AULA 12</h1>
+                <p class="text-3xl text-gray-800 mb-16 font-bold">A sua planilha base está estruturada e pop.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-c-black text-white px-10 py-5 rounded-full font-black shadow-2xl hover:scale-105 transition flex items-center gap-3 text-2xl border-4 border-transparent hover:border-c-pink">
+                        <i data-lucide="printer" class="w-8 h-8"></i> Imprimir Apostila (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-sm text-black font-mono font-black tracking-widest uppercase">COTIL - FUNDAMENTOS DE INFORMÁTICA</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Inferior -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-5 bg-white border-4 border-c-black rounded-full shadow-lg hover:bg-c-yellow transition active:scale-90 text-c-black">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-5 bg-c-pink text-white border-4 border-c-black rounded-full shadow-lg hover:opacity-80 transition active:scale-90">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            counter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>

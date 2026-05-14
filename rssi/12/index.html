@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 12: Protocolos de Transporte e Portas Lógicas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --primary-color: #FF9E9E; /* Rosa */
+            --secondary-color: #C0EEE4; /* Verde Água */
+            --dark-color: #FFCAC8; /* Pêssego */
+            --accent-color: #F8F988; /* Amarelo */
+            --background-color: #fafafa;
+            --card-background: #ffffff;
+            --text-color: #1a1b22;
+            --border-color: #1a1b22;
+            --success-color: #2c7a4b;
+            --danger-color: #a82033;
+            --light-grey: #f0f0f0;
+        }
+
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        #presentation-container { width: 100%; height: 100%; position: relative; }
+        .slides-container { width: 100%; height: 100%; position: relative; overflow: hidden; }
+        
+        .slide {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--card-background);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 40px 80px 100px 80px; box-sizing: border-box;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden; overflow-y: auto;
+        }
+        
+        .slide.active { opacity: 1; transform: translateY(0); visibility: visible; z-index: 1; }
+        
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 12px;
+            background: var(--primary-color);
+            border-bottom: 3px solid var(--border-color);
+        }
+        
+        /* Navegação Neobrutalista */
+        .navigation {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 15px; z-index: 100;
+            background: #ffffff;
+            padding: 10px 25px;
+            border-radius: 12px;
+            box-shadow: 5px 5px 0px var(--text-color);
+            border: 3px solid var(--text-color);
+        }
+        
+        .nav-btn {
+            background-color: var(--primary-color); color: var(--text-color);
+            border: 2px solid var(--text-color); border-radius: 8px;
+            width: 44px; height: 44px; font-size: 20px; cursor: pointer;
+            transition: all 0.1s;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold;
+            box-shadow: 2px 2px 0px var(--text-color);
+        }
+        
+        .nav-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0px var(--text-color); }
+        .nav-btn:disabled { background-color: #eee; cursor: not-allowed; box-shadow: none; border-color: #ccc; }
+        
+        .slide-counter {
+            font-size: 16px; font-weight: 900; color: var(--text-color);
+            min-width: 80px; text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        h1 { color: var(--text-color); margin-bottom: 10px; text-align: center; font-weight: 900; font-size: 2.8em; }
+        h2 {
+            color: var(--text-color); margin-bottom: 25px; text-align: center;
+            font-weight: 900; font-size: 2.2em;
+            padding-bottom: 10px;
+            border-bottom: 6px solid var(--primary-color);
+            width: 100%; max-width: 1000px;
+        }
+        h3 { font-weight: 900; font-size: 1.4em; margin-bottom: 12px; color: var(--text-color); text-align: left; width: 100%; }
+        p { font-size: 1.2em; line-height: 1.6; max-width: 1000px; text-align: center; }
+        
+        .card { 
+            background: var(--card-background); border: 3px solid var(--text-color); 
+            border-radius: 12px; padding: 25px; box-shadow: 8px 8px 0px var(--text-color);
+            margin: 10px; width: 100%;
+        }
+        .card-primary { border-top: 15px solid var(--primary-color); }
+        .card-secondary { border-top: 15px solid var(--secondary-color); }
+        .card-accent { border-top: 15px solid var(--accent-color); }
+
+        .info-box { 
+            border: 3px solid var(--text-color); border-left: 15px solid var(--primary-color); 
+            padding: 20px; border-radius: 8px; margin: 15px 0; width: 100%; max-width: 1000px;
+            background: #fff; box-shadow: 5px 5px 0px var(--text-color);
+            text-align: left;
+        }
+
+        .passo-item {
+            display: flex; gap: 15px; align-items: flex-start;
+            padding: 15px; background: var(--light-grey);
+            border-radius: 10px; border: 2px solid var(--text-color);
+            font-size: 1.1em; margin-bottom: 10px; width: 100%;
+        }
+        .passo-num {
+            min-width: 35px; height: 35px; border-radius: 50%;
+            background: var(--primary-color); color: var(--text-color);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; border: 2px solid var(--text-color);
+            flex-shrink: 0;
+        }
+
+        /* Tabelas e Cabeçalhos */
+        .header-diagram {
+            display: grid; width: 100%; max-width: 900px;
+            border: 3px solid var(--text-color); border-radius: 12px;
+            overflow: hidden; font-family: 'JetBrains Mono', monospace;
+            text-align: center; margin: 15px 0;
+        }
+        .header-row { display: flex; border-bottom: 2px solid var(--text-color); background: white; }
+        .header-row:last-child { border-bottom: none; }
+        .header-cell {
+            flex: 1; padding: 15px; border-right: 2px solid var(--text-color);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .header-cell:last-child { border-right: none; }
+        .header-cell.bits { font-size: 0.8em; color: #555; margin-bottom: 4px; font-weight: bold; }
+        .header-cell.field { font-weight: 800; color: var(--text-color); font-size: 1.1em; }
+
+        table.custom-table {
+            width: 100%; max-width: 1000px; border-collapse: collapse;
+            margin-top: 15px; border: 3px solid var(--text-color);
+        }
+        table.custom-table th, table.custom-table td {
+            border: 2px solid var(--text-color); padding: 12px; text-align: left;
+        }
+        table.custom-table th { background-color: var(--primary-color); color: var(--text-color); font-weight: 900; }
+        table.custom-table tr:nth-child(even) { background-color: var(--light-grey); }
+
+        /* Simulações */
+        .simulation-container {
+            width: 100%; max-width: 950px; height: 400px;
+            background: white; border: 4px solid var(--text-color);
+            border-radius: 16px; position: relative; overflow: hidden;
+            margin: 15px 0; display: flex; flex-direction: column;
+            box-shadow: 10px 10px 0px var(--text-color);
+        }
+        .sim-header { background: var(--text-color); color: white; padding: 8px 15px; font-family: 'JetBrains Mono'; font-weight: bold; font-size: 13px; display: flex; justify-content: space-between; }
+        
+        /* UDP Animation */
+        .udp-view { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 60px; }
+        .server-icon { width: 60px; height: 60px; background: var(--dark-color); border: 3px solid var(--text-color); border-radius: 8px; position: relative; }
+        .smartphone { width: 70px; height: 120px; border: 4px solid var(--text-color); border-radius: 12px; background: #333; overflow: hidden; position: relative; }
+        .pixel-block { width: 10%; height: 10%; position: absolute; background: #666; border: 0.1px solid #555; }
+        .pixel-glitch { background: #f0f !important; filter: contrast(200%) brightness(150%); animation: flash 0.2s infinite; }
+        .packet-udp { position: absolute; width: 22px; height: 22px; border: 2px solid var(--text-color); border-radius: 4px; left: 160px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; z-index: 5; }
+
+        /* TCP Animation */
+        .tcp-view { flex: 1; display: flex; justify-content: space-between; padding: 30px 60px; position: relative; }
+        .tcp-matrix { display: grid; grid-template-columns: repeat(4, 38px); gap: 4px; background: #ddd; padding: 4px; border: 2px solid var(--text-color); }
+        .matrix-cell { width: 38px; height: 38px; border: 1px solid #999; background: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+        .matrix-cell.filled { background: var(--secondary-color); animation: pop 0.3s; }
+        .matrix-cell.waiting { background: var(--accent-color); }
+        .tcp-packet { position: absolute; width: 28px; height: 28px; border: 2px solid var(--text-color); border-radius: 4px; font-weight: bold; display: none; align-items: center; justify-content: center; z-index: 10; }
+        .ack-packet { position: absolute; width: 35px; height: 18px; background: var(--accent-color); border: 2px solid var(--text-color); border-radius: 10px; font-size: 9px; font-weight: bold; text-align: center; display: none; line-height: 14px; }
+        
+        .sim-controls { padding: 12px; border-top: 3px solid var(--text-color); background: #f0f0f0; display: flex; justify-content: center; gap: 15px; }
+        .btn-sim { background: var(--secondary-color); border: 2px solid var(--text-color); padding: 8px 25px; font-weight: 900; cursor: pointer; border-radius: 8px; box-shadow: 3px 3px 0px var(--text-color); }
+        
+        .slide-progress-label { position: absolute; top: 20px; right: 30px; font-family: 'JetBrains Mono'; font-size: 0.85em; color: var(--text-color); background: var(--accent-color); border: 2px solid var(--text-color); border-radius: 6px; padding: 4px 12px; font-weight: 800; z-index: 2; }
+        
+        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+        @keyframes flash { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div id="presentation-container">
+        <div class="slides-container">
+            
+            <!-- SLIDE 1: CAPA -->
+            <section class="slide active" style="background-color: var(--dark-color) !important;">
+                <svg width="120" height="120" viewBox="0 0 110 110" style="margin-bottom:24px;">
+                    <rect x="25" y="15" width="60" height="80" rx="8" fill="white" stroke="var(--text-color)" stroke-width="4"/>
+                    <text x="55" y="65" text-anchor="middle" font-size="40" font-family="JetBrains Mono" fill="var(--text-color)" font-weight="900">L4</text>
+                </svg>
+                <h1 style="text-transform:uppercase; letter-spacing:2px;">Camada de Transporte</h1>
+                <p class="subtitle" style="font-weight: 900; font-size: 1.4em;">TCP, UDP e a Engenharia das Portas Lógicas</p>
+                <div class="info-box" style="text-align:center; border-left:none; background:rgba(255,255,255,0.5)">
+                    <strong>Aulas de Redes — Aula 12</strong> | Prof. William Paiva
+                </div>
+            </section>
+
+            <!-- SLIDE 2: CONTEXTUALIZAÇÃO OSI -->
+            <section class="slide">
+                <h2>Onde estamos no Modelo OSI?</h2>
+                <div style="display:flex; gap:20px; width:100%;">
+                    <div class="card col" style="opacity:0.5">L1 a L3: Infraestrutura, Cabos e Roteamento (IP)</div>
+                    <div class="card col card-primary">L4: Camada de Transporte (O Coração do SO)</div>
+                    <div class="card col" style="opacity:0.5">L5 a L7: Aplicações e Usuário (HTTP, Game, Mail)</div>
+                </div>
+                <p style="margin-top:20px;">A Camada 4 é a ponte entre a <strong>Rede Física</strong> e o <strong>Software</strong>. Sem ela, o computador não saberia para qual programa enviar os dados.</p>
+            </section>
+
+            <!-- SLIDE 3: RESPONSABILIDADES L4 -->
+            <section class="slide">
+                <h2>As Missões da Camada de Transporte</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; width:100%;">
+                    <div class="passo-item"><div class="passo-num">1</div><div><strong>Rastreamento:</strong> Identifica cada conversa individual entre aplicações.</div></div>
+                    <div class="passo-item"><div class="passo-num">2</div><div><strong>Segmentação:</strong> Divide dados em blocos aceitáveis pela rede.</div></div>
+                    <div class="passo-item"><div class="passo-num">3</div><div><strong>Reunificação:</strong> Remonta os blocos na ordem original no destino.</div></div>
+                    <div class="passo-item"><div class="passo-num">4</div><div><strong>Endereçamento:</strong> Usa números de porta para entregar ao processo correto.</div></div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: INTRO UDP -->
+            <section class="slide">
+                <h2>UDP: O Protocolo "Speed"</h2>
+                <h3>User Datagram Protocol</h3>
+                <p>O UDP é um protocolo simplificado. Ele foi desenhado para ser rápido, sacrificando a confiabilidade.</p>
+                <div class="info-box" style="border-left-color: var(--accent-color);">
+                    <strong>Conceito Chave:</strong> "Best Effort Delivery" (Melhor Esforço). O protocolo tenta entregar, mas se não conseguir, ele não avisa ninguém e não tenta de novo.
+                </div>
+            </section>
+
+            <!-- SLIDE 5: CARACTERÍSTICAS UDP -->
+            <section class="slide">
+                <h2>Por que o UDP é assim?</h2>
+                <div style="display:flex; gap:20px; width:100%;">
+                    <div class="card card-accent col">
+                        <h3>Sem Conexão</h3>
+                        <p style="text-align:left; font-size:0.9em;">Não existe aperto de mão. O dado é enviado instantaneamente.</p>
+                    </div>
+                    <div class="card card-accent col">
+                        <h3>Sem ACK</h3>
+                        <p style="text-align:left; font-size:0.9em;">Não há confirmação de recebimento. O emissor nunca sabe se o dado chegou.</p>
+                    </div>
+                    <div class="card card-accent col">
+                        <h3>Sem Ordem</h3>
+                        <p style="text-align:left; font-size:0.9em;">Se o pacote 2 chegar antes do 1, ele é entregue assim mesmo para a aplicação.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: CABEÇALHO UDP -->
+            <section class="slide">
+                <h2>Anatomia do Cabeçalho UDP</h2>
+                <p>Apenas <strong>8 Bytes</strong>. É o segredo da sua velocidade.</p>
+                <div class="header-diagram">
+                    <div class="header-row">
+                        <div class="header-cell bg-accent"><span class="bits">16 bits</span><span class="field">Porta de Origem</span></div>
+                        <div class="header-cell bg-accent"><span class="bits">16 bits</span><span class="field">Porta de Destino</span></div>
+                    </div>
+                    <div class="header-row">
+                        <div class="header-cell"><span class="bits">16 bits</span><span class="field">Comprimento Total</span></div>
+                        <div class="header-cell"><span class="bits">16 bits</span><span class="field">Checksum (Soma de Verificação)</span></div>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <strong>Checksum:</strong> O único mecanismo de erro do UDP. Se os bits chegarem fisicamente alterados, o pacote é descartado. Mas o UDP <strong>não solicita reenvio</strong>.
+                </div>
+            </section>
+
+            <!-- SLIDE 7: USOS DO UDP -->
+            <section class="slide">
+                <h2>Quando perder dados é aceitável?</h2>
+                <div class="card card-secondary">
+                    <ul style="text-align:left; font-size:1.1em;">
+                        <li><strong>Streaming de Vídeo:</strong> Se um frame falhar, o vídeo continua.</li>
+                        <li><strong>Voz sobre IP (VoIP):</strong> É melhor um estalo no áudio do que a voz chegar 5 segundos atrasada.</li>
+                        <li><strong>Jogos Online:</strong> Sua posição no mapa precisa ser atualizada AGORA. Se um pacote se perdeu, a próxima atualização já trará a posição nova.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: ANIMAÇÃO UDP -->
+            <section class="slide">
+                <h2>Simulação: UDP e os Artefatos</h2>
+                <div class="simulation-container">
+                    <div class="sim-header"><span>UDP STREAMING MONITOR</span><span id="udp-status">CONEXÃO ATIVA</span></div>
+                    <div class="udp-view">
+                        <div class="device"><div class="server-icon"></div><span style="font-weight:900; font-size:12px;">SERVER</span></div>
+                        <div id="udp-packet-container" style="position:absolute; width:100%; height:100%; pointer-events:none;"></div>
+                        <div class="device"><div class="smartphone"><div class="stream-screen" id="udp-screen"></div></div><span style="font-weight:900; font-size:12px;">USER</span></div>
+                    </div>
+                    <div class="sim-controls">
+                        <button class="btn-sim" onclick="sendUdpPacket(false)">ENVIAR DADO ÍNTEGRO</button>
+                        <button class="btn-sim" style="background:var(--primary-color)" onclick="sendUdpPacket(true)">SIMULAR DADO CORROMPIDO</button>
+                    </div>
+                </div>
+                <p style="color:var(--danger-color); font-weight:900;">Note: No UDP, o vídeo não pausa, ele apenas exibe o erro visual!</p>
+            </section>
+
+            <!-- SLIDE 9: INTRO TCP -->
+            <section class="slide">
+                <h2>TCP: O Protocolo "Heavy Duty"</h2>
+                <h3>Transmission Control Protocol</h3>
+                <p>O TCP é o oposto do UDP. Ele é obcecado por <strong>ordem, integridade e controle</strong>.</p>
+                <div class="info-box" style="border-left-color: var(--success-color); background: #f0fdf4;">
+                    <strong>O que ele garante?</strong>
+                    1. Que o dado chegou.<br>
+                    2. Que o dado chegou na ordem certa.<br>
+                    3. Que o dado não tem erros de bit.
+                </div>
+            </section>
+
+            <!-- SLIDE 10: CARACTERÍSTICAS TCP -->
+            <section class="slide">
+                <h2>Por que o TCP é tão robusto?</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; width:100%;">
+                    <div class="card card-primary">
+                        <h3>Orientado a Conexão</h3>
+                        <p style="text-align:left; font-size:0.9em;">Estabelece uma sessão lógica antes de qualquer transmissão.</p>
+                    </div>
+                    <div class="card card-primary">
+                        <h3>Entrega Confiável</h3>
+                        <p style="text-align:left; font-size:0.9em;">Usa confirmações (ACKs) para garantir que cada bloco foi recebido.</p>
+                    </div>
+                    <div class="card card-primary">
+                        <h3>Controle de Fluxo</h3>
+                        <p style="text-align:left; font-size:0.9em;">Evita que o emissor sobrecarregue o receptor lento.</p>
+                    </div>
+                    <div class="card card-primary">
+                        <h3>Recuperação de Erros</h3>
+                        <p style="text-align:left; font-size:0.9em;">Reenvia automaticamente tudo o que falhou.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 11: THREE-WAY HANDSHAKE -->
+            <section class="slide">
+                <h2>O Aperto de Mão: 3-Way Handshake</h2>
+                <p>Nenhuma aplicação envia dados via TCP sem antes passar por este ritual:</p>
+                <div class="passo-item"><div class="passo-num">1</div><div><strong>SYN (Synchronize):</strong> O cliente envia um número de sequência inicial.</div></div>
+                <div class="passo-item"><div class="passo-num">2</div><div><strong>SYN-ACK:</strong> O servidor confirma o número do cliente e envia o seu.</div></div>
+                <div class="passo-item"><div class="passo-num">3</div><div><strong>ACK:</strong> O cliente confirma o número do servidor.</div></div>
+                <div class="highlight-box" style="margin-top:10px;">Agora a estrada está aberta para os dados.</div>
+            </section>
+
+            <!-- SLIDE 12: CABEÇALHO TCP -->
+            <section class="slide">
+                <h2>O Cabeçalho TCP (20 Bytes+)</h2>
+                <p>Tanta inteligência exige um cabeçalho muito maior que o do UDP.</p>
+                <div class="header-diagram" style="font-size:0.8em;">
+                    <div class="header-row">
+                        <div class="header-cell bg-primary"><span class="field">Porta Origem</span></div>
+                        <div class="header-cell bg-primary"><span class="field">Porta Destino</span></div>
+                    </div>
+                    <div class="header-row">
+                        <div class="header-cell" style="flex:2;"><span class="field">Sequence Number (A "cola" do arquivo)</span></div>
+                    </div>
+                    <div class="header-row">
+                        <div class="header-cell bg-secondary" style="flex:2;"><span class="field">Acknowledgment Number (O "OK")</span></div>
+                    </div>
+                    <div class="header-row">
+                        <div class="header-cell"><span class="field">Flags (SYN, FIN, ACK...)</span></div>
+                        <div class="header-cell bg-accent"><span class="field">Janela (Flow Control)</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: SEQUENCE NUMBERS -->
+            <section class="slide">
+                <h2>Números de Sequência: A Identidade</h2>
+                <div class="info-box">
+                    Imagine um livro de 1000 páginas. O TCP arranca cada página e coloca um número nela antes de enviar.
+                </div>
+                <p>Se as páginas chegarem voando e desordenadas, o destinatário usa o <strong>Sequence Number</strong> para colocar a página 1 antes da 2, a 2 antes da 3, e assim por diante.</p>
+                <p><strong>Sem isso, seu arquivo .exe ou .pdf chegaria corrompido.</strong></p>
+            </section>
+
+            <!-- SLIDE 14: SIMULAÇÃO TCP -->
+            <section class="slide">
+                <h2>Simulação TCP: Integridade Total</h2>
+                <div class="simulation-container" style="height: 480px;">
+                    <div class="sim-header"><span>TCP TRAFFIC ANALYZER</span><span id="tcp-state">IDLE</span></div>
+                    <div class="tcp-view">
+                        <div class="device" id="tcp-client-pos"><div class="server-icon" style="background:var(--secondary-color)"></div><span style="font-weight:900; font-size:12px;">CLIENTE</span></div>
+                        <div id="tcp-bubble" style="position:absolute; top:20px; left:50%; transform:translateX(-50%); background:var(--accent-color); border:2px solid #1a1b22; padding:8px 18px; border-radius:20px; font-size:12px; font-weight:bold; display:none; z-index:20; box-shadow: 4px 4px 0px #000;"></div>
+                        <div class="tcp-packet" id="tcp-p"></div>
+                        <div class="ack-packet" id="tcp-ack">ACK</div>
+                        <div class="device" id="tcp-server-pos"><div class="tcp-matrix" id="tcp-matrix-view"></div><span style="font-weight:900; font-size:12px; margin-top:10px;">ARQUIVO NO DESTINO</span></div>
+                    </div>
+                    <div class="status-msg" id="tcp-status">Aguardando início da simulação...</div>
+                    <div class="sim-controls"><button class="btn-sim" id="btn-start-tcp" onclick="runTcpFullSimulation()">INICIAR ENVIO SEGURO</button></div>
+                </div>
+            </section>
+
+            <!-- SLIDE 15: FLOW CONTROL -->
+            <section class="slide">
+                <h2>Controle de Fluxo: Janela Deslizante</h2>
+                <p>O destinatário informa ao remetente quanto espaço ele tem no "estoque" (Buffer).</p>
+                <div class="card card-accent">
+                    <strong>Receptor:</strong> "Ei, minha memória está cheia! Diminua a Janela para 100 bytes."<br>
+                    <strong>Emissor:</strong> "Entendido, vou mandar mais devagar."
+                </div>
+                <p style="margin-top:15px;">Isso evita o descarte de pacotes por falta de memória no receptor.</p>
+            </section>
+
+            <!-- SLIDE 16: FINISH -->
+            <section class="slide">
+                <h2>Encerrando a Conversa (FIN)</h2>
+                <p>O TCP também é educado para dizer adeus. Ele usa o <strong>4-Way Handshake</strong> para fechar.</p>
+                <ol style="text-align:left; width:100%; max-width:800px;">
+                    <li><strong>Cliente:</strong> [FIN] "Não tenho mais nada pra dizer."</li>
+                    <li><strong>Servidor:</strong> [ACK] "Ok, recebi seu pedido."</li>
+                    <li><strong>Servidor:</strong> [FIN] "Eu também não. Tchau!"</li>
+                    <li><strong>Cliente:</strong> [ACK] "Tchau! Conexão Fechada."</li>
+                </ol>
+            </section>
+
+            <!-- SLIDE 17: COMPARATIVO -->
+            <section class="slide">
+                <h2>TCP vs UDP: Resumo</h2>
+                <table class="custom-table">
+                    <thead><tr><th>Recurso</th><th>TCP</th><th>UDP</th></tr></thead>
+                    <tbody>
+                        <tr><td>Confiabilidade</td><td>Garantida</td><td>Melhor Esforço</td></tr>
+                        <tr><td>Ordenação</td><td>Sim</td><td>Não</td></tr>
+                        <tr><td>Handshake</td><td>Sim</td><td>Não</td></tr>
+                        <tr><td>Uso</td><td>HTTP, Email</td><td>Streaming, Jogos</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- SLIDE 18: PORTAS -->
+            <section class="slide">
+                <h1 style="font-size:3.5em;">Portas Lógicas</h1>
+                <p class="subtitle">Como o SO identifica a aplicação de destino</p>
+                <div class="info-box">
+                    O Endereço IP localiza a <strong>máquina</strong>. O Número de Porta localiza o <strong>serviço</strong> dentro dela.
+                </div>
+            </section>
+
+            <!-- SLIDE 19: SOCKET -->
+            <section class="slide">
+                <h2>O Conceito de Socket</h2>
+                <p>O endereço completo de um serviço na rede.</p>
+                <div class="card" style="font-family:'JetBrains Mono'; font-size:2em; font-weight:900; background:var(--secondary-color)">
+                    192.168.1.10 : <span style="background:var(--primary-color); border:2px solid #000; padding:0 10px;">443</span>
+                </div>
+            </section>
+
+            <!-- SLIDE 20: CATEGORIAS -->
+            <section class="slide">
+                <h2>As 65.535 Portas</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; width:100%;">
+                    <div class="card card-primary"><h3>0-1023</h3><p>Bem Conhecidas</p></div>
+                    <div class="card card-secondary"><h3>1024-49151</h3><p>Registradas</p></div>
+                    <div class="card card-accent"><h3>49152+</h3><p>Efêmeras</p></div>
+                </div>
+            </section>
+
+            <!-- SLIDE 21: WEB -->
+            <section class="slide">
+                <h2>Portas de Ouro: Web</h2>
+                <div style="display:flex; gap:20px; width:100%;">
+                    <div class="card col card-primary"><h1>80</h1><h3>HTTP</h3><p>Dados em texto puro.</p></div>
+                    <div class="card col card-secondary"><h1>443</h1><h3>HTTPS</h3><p>Dados criptografados.</p></div>
+                </div>
+            </section>
+
+            <!-- SLIDE 22: FTP / SMB -->
+            <section class="slide">
+                <h2>Portas de Ouro: Arquivos</h2>
+                <div style="display:flex; gap:20px; width:100%;">
+                    <div class="card col card-dark"><h1>21</h1><h3>FTP</h3><p>Protocolo de arquivos.</p></div>
+                    <div class="card col card-accent"><h1>445</h1><h3>SMB</h3><p>Compartilhamento Windows.</p></div>
+                </div>
+            </section>
+
+            <!-- SLIDE 23: SSH / TELNET -->
+            <section class="slide">
+                <h2>Portas de Ouro: Gestão</h2>
+                <div style="display:flex; gap:20px; width:100%;">
+                    <div class="card col card-primary"><h1>22</h1><h3>SSH</h3><p>Terminal seguro.</p></div>
+                    <div class="card col card-dark"><h1>23</h1><h3>Telnet</h3><p>Inseguro.</p></div>
+                </div>
+            </section>
+
+            <!-- SLIDE 24: TABELA -->
+            <section class="slide">
+                <h2>E-mail e Infra</h2>
+                <table class="custom-table">
+                    <thead><tr><th>Porta</th><th>Serviço</th></tr></thead>
+                    <tbody>
+                        <tr><td>25</td><td>SMTP (Envio)</td></tr>
+                        <tr><td>110</td><td>POP3 (Recebimento)</td></tr>
+                        <tr><td>53</td><td>DNS (Nomes)</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- SLIDE 25: RDP -->
+            <section class="slide">
+                <h2>RDP (Remote Desktop)</h2>
+                <div class="card card-dark" style="max-width:600px;">
+                    <h1 style="font-size:4em; margin:0; color:var(--text-color);">3389</h1>
+                    <p>Acesso remoto gráfico do Windows.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 26: NETSTAT -->
+            <section class="slide">
+                <h2>Monitoramento</h2>
+                <p>Veja as portas no seu PC:</p>
+                <div class="card" style="background:#000; color:#0f0; font-family:monospace; text-align:left;">C:\> netstat -an</div>
+            </section>
+
+            <!-- SLIDE 27: RESUMO -->
+            <section class="slide">
+                <h2>Resumo da Aula</h2>
+                <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                    <div class="passo-item">🔹 <strong>UDP:</strong> Focado em velocidade e tempo real. Sem garantias.</div>
+                    <div class="passo-item">🔹 <strong>TCP:</strong> Focado em integridade e ordem. Usa ACKs e Handshakes.</div>
+                    <div class="passo-item">🔹 <strong>Portas:</strong> Identificam o serviço/aplicação no destino.</div>
+                    <div class="passo-item">🔹 <strong>Segurança:</strong> Portas abertas desnecessárias são riscos.</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 28: CONCLUSÃO -->
+            <section class="slide" style="background-color: var(--secondary-color) !important;">
+                <svg width="100" height="100" viewBox="0 0 110 110" style="margin-bottom:20px;"><circle cx="55" cy="55" r="50" fill="white" stroke="var(--text-color)" stroke-width="4"/><path d="M35 55 L50 70 L75 40" fill="none" stroke="var(--text-color)" stroke-width="8" stroke-linecap="round"/></svg>
+                <h2 style="border:none;">Aula 12 Concluída!</h2>
+                <div style="margin-top:20px; background:var(--accent-color); border:3px solid var(--text-color); border-radius:30px; padding:10px 30px; font-weight:900;">FIM DA APRESENTAÇÃO</div>
+            </section>
+            
+        </div>
+
+        <!-- NAVEGAÇÃO -->
+        <div class="navigation">
+            <button class="nav-btn" id="prev-btn" title="Voltar">&#8592;</button>
+            <div class="slide-counter" id="slide-counter">1 / 28</div>
+            <button class="nav-btn" id="next-btn" title="Avançar">&#8594;</button>
+            <button class="nav-btn" id="fullscreen-btn" title="Tela Cheia">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            const udpScreen = document.getElementById('udp-screen');
+            if(udpScreen) {
+                for(let i=0; i<100; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'pixel-block';
+                    p.style.left = (i % 10) * 10 + '%';
+                    p.style.top = Math.floor(i / 10) * 10 + '%';
+                    udpScreen.appendChild(p);
+                }
+            }
+
+            const tcpMatrixView = document.getElementById('tcp-matrix-view');
+            if(tcpMatrixView) {
+                for(let i=1; i<=16; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'matrix-cell';
+                    c.id = `tcp-cell-${i}`;
+                    c.textContent = i;
+                    tcpMatrixView.appendChild(c);
+                }
+            }
+
+            window.sendUdpPacket = function(isBad) {
+                const container = document.getElementById('udp-packet-container');
+                const status = document.getElementById('udp-status');
+                const packet = document.createElement('div');
+                packet.className = 'packet-udp';
+                packet.textContent = isBad ? "?" : "OK";
+                packet.style.background = isBad ? "white" : "var(--secondary-color)";
+                container.appendChild(packet);
+
+                packet.animate([{ left: '160px', opacity: 1 }, { left: '720px', opacity: 1 }], { duration: 2500, easing: 'linear' }).onfinish = () => {
+                    packet.remove();
+                    if(isBad) {
+                        status.textContent = "ALERTA: ARTEFATOS NA IMAGEM"; status.style.color = "var(--danger-color)";
+                        const pixels = udpScreen.children;
+                        for(let j=0; j<20; j++) {
+                            const idx = Math.floor(Math.random() * 100);
+                            pixels[idx].classList.add('pixel-glitch');
+                            setTimeout(() => pixels[idx].classList.remove('pixel-glitch'), 2000);
+                        }
+                    } else {
+                        status.textContent = "STREAMING ESTÁVEL"; status.style.color = "white";
+                    }
+                };
+            };
+
+            window.runTcpFullSimulation = async function() {
+                const btn = document.getElementById('btn-start-tcp');
+                const state = document.getElementById('tcp-state');
+                const status = document.getElementById('tcp-status');
+                const bubble = document.getElementById('tcp-bubble');
+                const p = document.getElementById('tcp-p');
+                const ack = document.getElementById('tcp-ack');
+                
+                btn.disabled = true;
+                for(let i=1; i<=16; i++) document.getElementById(`tcp-cell-${i}`).classList.remove('filled', 'waiting');
+
+                const showBubble = (text, duration = 2000) => {
+                    bubble.textContent = text; bubble.style.display = 'block';
+                    return new Promise(res => setTimeout(() => { bubble.style.display = 'none'; res(); }, duration));
+                };
+
+                const movePacket = (from, to, text, color = 'var(--primary-color)', isAck = false) => {
+                    const fromEl = document.getElementById(from);
+                    const toEl = document.getElementById(to);
+                    const packet = isAck ? ack : p;
+                    const fromRect = fromEl.getBoundingClientRect();
+                    const toRect = toEl.getBoundingClientRect();
+                    const containerRect = document.querySelector('.simulation-container').getBoundingClientRect();
+
+                    packet.style.display = 'flex'; packet.textContent = text; packet.style.background = color;
+                    packet.style.top = (fromRect.top - containerRect.top + 20) + 'px';
+                    packet.style.left = (fromRect.left - containerRect.left + 20) + 'px';
+
+                    return new Promise(res => {
+                        packet.animate([{ left: packet.style.left }, { left: (toRect.left - containerRect.left + 20) + 'px' }], { duration: isAck ? 800 : 1500, easing: 'ease-in-out' }).onfinish = () => {
+                            packet.style.display = 'none'; res();
+                        };
+                    });
+                };
+
+                // Handshake
+                status.textContent = "Iniciando Handshake...";
+                state.textContent = "SYN_SENT";
+                await movePacket('tcp-client-pos', 'tcp-server-pos', 'SYN');
+                state.textContent = "SYN_RECEIVED";
+                await movePacket('tcp-server-pos', 'tcp-client-pos', 'SYN/ACK', 'var(--secondary-color)');
+                state.textContent = "ESTABLISHED";
+                await movePacket('tcp-client-pos', 'tcp-server-pos', 'ACK');
+                await showBubble("Conexão Estabelecida! Iniciando envio.");
+
+                // Dados
+                const sequences = [1, 2, 4, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+                for(let i=0; i < sequences.length; i++) {
+                    const seq = sequences[i];
+                    status.textContent = `Enviando Segmento ${seq}...`;
+                    
+                    if (seq === 5) {
+                        status.textContent = "ERRO: Segmento 5 corrompido!";
+                        await movePacket('tcp-client-pos', 'tcp-server-pos', 'ERR', 'var(--danger-color)');
+                        await showBubble("Servidor: Erro no 5! Reenvie.");
+                        status.textContent = "Retransmitindo Segmento 5...";
+                        await movePacket('tcp-client-pos', 'tcp-server-pos', '5', 'white');
+                        document.getElementById(`tcp-cell-5`).classList.add('filled');
+                    } else if (seq === 4 && !document.getElementById('tcp-cell-3').classList.contains('filled')) {
+                        await movePacket('tcp-client-pos', 'tcp-server-pos', '4');
+                        document.getElementById('tcp-cell-4').classList.add('waiting');
+                        await showBubble("Servidor: Recebi o 4, mas o 3 falta. Aguardando...");
+                    } else if (seq === 3) {
+                        await movePacket('tcp-client-pos', 'tcp-server-pos', '3');
+                        document.getElementById('tcp-cell-3').classList.add('filled');
+                        document.getElementById('tcp-cell-4').classList.remove('waiting');
+                        document.getElementById('tcp-cell-4').classList.add('filled');
+                        await showBubble("Servidor: Agora o 3 chegou, posso processar o 4!");
+                    } else {
+                        await movePacket('tcp-client-pos', 'tcp-server-pos', seq.toString());
+                        document.getElementById(`tcp-cell-${seq}`).classList.add('filled');
+                    }
+                    await movePacket('tcp-server-pos', 'tcp-client-pos', 'ACK', 'var(--accent-color)', true);
+                }
+                status.textContent = "Arquivo completo e perfeito!";
+                state.textContent = "CLOSED";
+                btn.disabled = false;
+            };
+
+            function updateSlideView() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                    const label = slide.querySelector('.slide-progress-label') || document.createElement('div');
+                    if(!slide.querySelector('.slide-progress-label')) {
+                        label.className = 'slide-progress-label'; slide.appendChild(label);
+                    }
+                    label.textContent = `Página ${index + 1} de ${totalSlides}`;
+                });
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+            
+            nextBtn.addEventListener('click', () => { currentSlide++; updateSlideView(); });
+            prevBtn.addEventListener('click', () => { currentSlide--; updateSlideView(); });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') { currentSlide++; updateSlideView(); }
+                if (e.key === 'ArrowLeft') { currentSlide--; updateSlideView(); }
+            });
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) presentationContainer.requestFullscreen();
+                else document.exitFullscreen();
+            });
+            updateSlideView();
+        });
+    </script>
+</body>
+</html>

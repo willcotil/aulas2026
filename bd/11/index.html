@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados - Aula 11: Cardinalidade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#563A9C', /* Roxo Escuro */
+                            primary:   '#6A42C2', /* Roxo Médio (PKs/Destaques) */
+                            secondary: '#8B5DFF', /* Roxo Brilhante (FKs/Acentos) */
+                            muted:     '#FFF7D1', /* Creme/Amarelo Claro */
+                            surface:   '#FFFFFF', /* White cards */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FCFCFC; 
+            color: #563A9C;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* SVG Styles */
+        .node-rect { fill: #ffffff; stroke: #563A9C; stroke-width: 4; rx: 12px; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; fill: #563A9C; }
+        .edge { stroke: #563A9C; stroke-width: 3; fill: none; }
+        .rel-polygon { fill: #FFF7D1; stroke: #6A42C2; stroke-width: 3; }
+        .rel-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 800; fill: #563A9C; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #ffffff; border: 2px solid #563A9C; padding: 2px 8px; border-radius: 6px; color: #563A9C; font-weight: 700; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FCFCFC; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #563A9C; border-radius: 10px; border: 2px solid #FCFCFC; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="no-print h-20 bg-white text-brand-dark border-b-4 border-brand-dark px-8 flex items-center justify-between sticky top-0 z-50 shadow-md" role="banner">
+        <div class="flex items-center gap-4 z-10">
+            <div class="bg-brand-dark text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-inner" aria-hidden="true">
+                <i class="fas fa-project-diagram text-xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl tracking-tight">Banco de Dados <span class="text-brand-primary opacity-90">| Aula 11</span></h1>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-brand-muted hover:bg-brand-secondary hover:text-brand-dark rounded-xl text-brand-dark font-bold transition shadow-sm border border-brand-dark/20" aria-label="Imprimir a aula atual">
+                <i class="fas fa-print" aria-hidden="true"></i> IMPRIMIR
+            </button>
+            <button onclick="toggleFullscreen()" class="w-10 h-10 bg-brand-muted rounded-xl text-brand-dark hover:bg-brand-dark hover:text-white transition flex items-center justify-center border border-brand-dark/20" aria-label="Alternar tela cheia">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Barra de Progresso -->
+    <div class="no-print h-2 w-full bg-white overflow-hidden border-b border-brand-dark/10" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="aria-progress">
+        <div id="progress-bar" class="h-full bg-brand-primary transition-all duration-500 w-0"></div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-10 overflow-y-auto custom-scrollbar" role="main">
+        <div id="steps-container" class="w-full max-w-5xl" aria-live="polite"></div>
+    </main>
+
+    <!-- Footer de Navegação -->
+    <footer class="no-print h-24 bg-white border-t-4 border-brand-dark px-8 flex items-center justify-between sticky bottom-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Navegação da Aula">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-3 px-8 py-3 bg-brand-muted text-brand-dark rounded-2xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark border-2 border-brand-dark/20 disabled:border-transparent text-lg" aria-label="Voltar para o tópico anterior">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> VOLTAR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center" aria-hidden="true">
+            <span id="step-counter" class="text-sm font-black text-brand-dark uppercase tracking-widest bg-brand-muted px-4 py-1 rounded-full border border-brand-dark/20">1 / 16</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-3 px-10 py-3 bg-brand-dark text-white rounded-2xl font-black hover:bg-brand-primary transition shadow-lg text-lg border-b-4 border-black/30 hover:border-b-0 hover:translate-y-1" aria-label="Avançar para o próximo tópico">
+            AVANÇAR <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01: Título ──────────────────────────────────────────────────
+            {
+                title: "As Regras do Jogo",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] text-brand-primary mb-4 shadow-xl shadow-brand-dark/10" aria-hidden="true">
+                            <i class="fas fa-traffic-light text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-6xl font-black text-brand-dark leading-tight">Introdução à Cardinalidade</h2>
+                        <div class="bg-brand-muted p-6 rounded-2xl border-l-8 border-brand-primary max-w-3xl mx-auto text-left text-brand-dark font-medium">
+                            <p class="text-xl font-semibold text-center mb-2">Hoje vamos aprender a responder à pergunta mais importante:</p>
+                            <p class="text-3xl font-black text-brand-primary text-center uppercase tracking-tight">"Quantas vezes essa relação acontece?"</p>
+                        </div>
+                        <div class="flex justify-center gap-4 text-brand-dark text-sm mt-12 font-bold opacity-70">
+                            <span class="px-4 py-2 bg-white rounded-xl shadow-sm border-2 border-brand-dark/20" aria-hidden="true"><i class="fas fa-arrow-left mr-2"></i> USE AS SETAS PARA NAVEGAR <i class="fas fa-arrow-right ml-2"></i></span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02: O que é Cardinalidade ───────────────────────────────────
+            {
+                title: "O Que é Cardinalidade?",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-lg">
+                            <p class="leading-relaxed font-medium">
+                                No DER, aprendemos a ligar tabelas: <strong>O Candidato REALIZA a Inscrição</strong>.
+                            </p>
+                            <p class="leading-relaxed font-medium mt-4">
+                                Mas precisamos definir as regras de negócio:
+                            </p>
+                            <ul class="mt-6 space-y-4 font-bold">
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-question-circle text-brand-primary text-2xl"></i>
+                                    <span>Um candidato pode fazer mais de uma inscrição para o mesmo curso?</span>
+                                </li>
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-question-circle text-brand-primary text-2xl"></i>
+                                    <span>Uma inscrição pode pertencer a dois candidatos diferentes?</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl border-b-4 border-brand-primary text-center text-brand-muted">
+                            <p class="text-xl font-bold">A <strong>Cardinalidade</strong> define os números <span class="text-brand-muted font-black underline">Mínimos</span> e <span class="text-brand-muted font-black underline">Máximos</span> de vezes que uma entidade se relaciona com a outra.</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 03: Mínimo e Máximo ─────────────────────────────────────────
+            {
+                title: "Lendo os Números (Min, Max)",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark font-semibold text-center">A cardinalidade é escrita sempre entre parênteses: <code class="text-2xl font-mono tracking-tighter">(Mínimo , Máximo)</code></p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Minimo -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-brand-dark/20 text-center relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-brand-secondary"></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-6 mt-2 uppercase">Mínimo</h3>
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/10 flex items-center gap-4 text-left">
+                                        <span class="text-3xl font-black text-brand-primary">0</span>
+                                        <p class="font-bold text-brand-dark leading-tight">Opcional.<br><span class="font-normal text-xs opacity-80 italic">Pode existir sem estar ligado a ninguém.</span></p>
+                                    </div>
+                                    <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/10 flex items-center gap-4 text-left">
+                                        <span class="text-3xl font-black text-brand-primary">1</span>
+                                        <p class="font-bold text-brand-dark leading-tight">Obrigatório.<br><span class="font-normal text-xs opacity-80 italic">Não pode existir sem estar ligado a alguém.</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Maximo -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-brand-dark/20 text-center relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-brand-primary"></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-6 mt-2 uppercase">Máximo</h3>
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-brand-muted rounded-xl border border-brand-primary/30 flex items-center gap-4 text-left">
+                                        <span class="text-3xl font-black text-brand-dark">1</span>
+                                        <p class="font-bold text-brand-dark leading-tight">Único.<br><span class="font-normal text-xs opacity-80 italic">No máximo uma vez.</span></p>
+                                    </div>
+                                    <div class="p-4 bg-brand-muted rounded-xl border border-brand-primary/30 flex items-center gap-4 text-left">
+                                        <span class="text-3xl font-black text-brand-dark">N</span>
+                                        <p class="font-bold text-brand-dark leading-tight">Muitos.<br><span class="font-normal text-xs opacity-80 italic">Várias ou infinitas vezes.</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 04: Relacionamento 1:1 ────────────────────────────────────
+            {
+                title: "Relacionamento 1:1 (Candidato e Inscrição)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6 p-6 bg-brand-muted rounded-3xl border-l-8 border-brand-primary shadow-sm text-brand-dark">
+                            <i class="fas fa-file-signature text-5xl" aria-hidden="true"></i>
+                            <div>
+                                <h3 class="text-2xl font-black">Análise do Processo Seletivo</h3>
+                                <p class="text-lg font-medium opacity-80 mt-1">Este relacionamento é do tipo Um para Um.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <p class="font-bold text-brand-dark text-lg mb-2"><i class="fas fa-eye text-brand-primary mr-2" aria-hidden="true"></i> Olhando do CANDIDATO:</p>
+                                <p class="text-brand-dark/90">O candidato pode se cadastrar e não fazer a inscrição ainda (Mín 0). Se fizer, só pode ter uma (Máx 1).</p>
+                                <p class="font-mono font-black text-brand-dark text-xl mt-3 bg-brand-muted inline-block px-3 py-1 rounded">(0 , 1)</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <p class="font-bold text-brand-dark text-lg mb-2"><i class="fas fa-eye text-brand-primary mr-2" aria-hidden="true"></i> Olhando da INSCRIÇÃO:</p>
+                                <p class="text-brand-dark/90">Uma inscrição não existe no "vácuo". Ela precisa de um candidato dono (Mín 1) e pertence apenas a ele (Máx 1).</p>
+                                <p class="font-mono font-black text-brand-dark text-xl mt-3 bg-brand-muted inline-block px-3 py-1 rounded border border-brand-primary/30">(1 , 1)</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 05: Visual do 1:1 ───────────────────────────────────────────
+            {
+                title: "Diagrama Visual (DER 1:1)",
+                content: `
+                    <div class="space-y-6 text-center">
+                        <p class="text-lg font-medium text-brand-dark">A cardinalidade que define o relacionamento é o número <strong>Máximo</strong>.</p>
+                        
+                        <div class="bg-white rounded-3xl py-8 flex flex-col items-center justify-center border-4 border-brand-dark shadow-sm overflow-x-auto relative">
+                            <svg width="600" height="150" viewBox="0 0 600 150">
+                                <line x1="160" y1="75" x2="300" y2="75" class="edge" />
+                                <line x1="300" y1="75" x2="440" y2="75" class="edge" />
+                                
+                                <rect x="40" y="50" width="120" height="50" class="node-rect" />
+                                <text x="100" y="80" text-anchor="middle" class="node-text uppercase tracking-tighter">Candidato</text>
+                                
+                                <polygon points="300,45 350,75 300,105 250,75" class="rel-polygon" />
+                                <text x="300" y="79" text-anchor="middle" class="rel-text uppercase tracking-tight">Realiza</text>
+                                
+                                <rect x="440" y="50" width="120" height="50" class="node-rect" />
+                                <text x="500" y="80" text-anchor="middle" class="node-text uppercase tracking-tighter">Inscrição</text>
+
+                                <text x="410" y="65" text-anchor="middle" font-family="JetBrains Mono" font-weight="bold" font-size="16" fill="#563A9C">(0,1)</text>
+                                <text x="190" y="65" text-anchor="middle" font-family="JetBrains Mono" font-weight="bold" font-size="16" fill="#563A9C">(1,1)</text>
+                            </svg>
+                        </div>
+                        <p class="text-sm italic font-bold">Regra: Leia sempre o número que está "na frente" da entidade para onde você está olhando.</p>
+                    </div>
+                `
+            },
+            // ── 06: Dicionário 1:1 ──────────────────────────────────────────
+            {
+                title: "Onde colocar a Chave Estrangeira (FK)?",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl font-bold text-brand-dark text-center">No relacionamento <span class="bg-brand-muted px-2 rounded">1:1</span>, quem deve guardar a FK?</p>
+                        
+                        <div class="p-6 bg-brand-dark text-brand-muted rounded-3xl shadow-xl border-l-8 border-brand-primary">
+                            <h3 class="font-black text-2xl mb-2 text-brand-muted uppercase"><i class="fas fa-balance-scale mr-2" aria-hidden="true"></i> A Regra da Dependência:</h3>
+                            <p class="text-lg">Colocamos a FK na tabela que **não vive sozinha** (a que tem Mínimo 1).</p>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="p-4 bg-white/10 rounded-xl border border-white/20">
+                                    <p class="text-xs uppercase font-black text-brand-muted opacity-80">O Candidato existe sem inscrição?</p>
+                                    <p class="text-brand-muted font-black text-3xl mt-2 underline decoration-brand-primary">SIM.</p>
+                                </div>
+                                <div class="p-4 bg-white/10 rounded-xl border border-white/20">
+                                    <p class="text-xs uppercase font-black text-brand-muted opacity-80">A Inscrição existe sem candidato?</p>
+                                    <p class="text-brand-muted font-black text-3xl mt-2 underline decoration-brand-primary">NÃO.</p>
+                                </div>
+                            </div>
+                            <p class="mt-6 font-bold text-brand-muted italic text-center">Conclusão: A Inscrição precisa anotar o ID do Candidato!</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mt-4">
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-brand-muted font-bold p-3 text-center uppercase text-xs tracking-widest">Tabela Candidato (Dono)</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">can_id</code> (PK)</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>can_nome</code></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-brand-muted font-bold p-3 text-center uppercase text-xs tracking-widest">Tabela Inscrição (Dependente)</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">ins_id</code> (PK)</li>
+                                    <li class="bg-brand-secondary/20 p-2 rounded border border-brand-secondary">
+                                        <i class="fas fa-id-badge text-brand-dark w-5 text-center"></i> <code class="text-brand-dark font-black">ins_can_id_fk</code> (FK)
+                                        <p class="text-[10px] mt-1 font-bold text-brand-dark/70 ml-7 italic underline">Este campo aponta para o dono.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 07: Prova Real 1:1 ──────────────────────────────────────────
+            {
+                title: "Prova Real: Os Dados na Prática (1:1)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-lg font-bold text-center text-brand-dark">A Chave Estrangeira (Tabela 2) aponta para a linha correta na Tabela 1:</p>
+                        
+                        <div class="bg-white p-6 rounded-3xl border-4 border-brand-dark shadow-xl flex flex-col gap-4">
+                            <!-- Títulos das Tabelas independentes do fluxo vertical -->
+                            <div class="grid grid-cols-11 gap-0 w-full mb-2">
+                                <div class="col-span-4 text-center text-xs font-black uppercase text-brand-dark tracking-widest">Tabela 1: Candidato</div>
+                                <div class="col-span-3"></div>
+                                <div class="col-span-4 text-center text-xs font-black uppercase text-brand-dark tracking-widest">Tabela 2: Inscrição</div>
+                            </div>
+
+                            <div class="relative w-full h-[248px]">
+                                <!-- SVG LAYER: Linhas exatas de borda a borda -->
+                                <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 10; overflow: visible;">
+                                    <defs>
+                                        <marker id="dot1" viewBox="0 0 10 10" markerWidth="6" markerHeight="6" refX="5" refY="5">
+                                            <circle cx="5" cy="5" r="4" fill="#8B5DFF"/>
+                                        </marker>
+                                    </defs>
+                                    <line x1="36.36%" y1="50" x2="63.63%" y2="50" stroke="#8B5DFF" stroke-width="2.5" marker-start="url(#dot1)" marker-end="url(#dot1)"/>
+                                    <line x1="36.36%" y1="122" x2="63.63%" y2="86" stroke="#8B5DFF" stroke-width="2.5" marker-start="url(#dot1)" marker-end="url(#dot1)"/>
+                                    <line x1="36.36%" y1="194" x2="63.63%" y2="122" stroke="#8B5DFF" stroke-width="2.5" marker-start="url(#dot1)" marker-end="url(#dot1)"/>
+                                    <line x1="36.36%" y1="86" x2="63.63%" y2="158" stroke="#8B5DFF" stroke-width="2.5" marker-start="url(#dot1)" marker-end="url(#dot1)"/>
+                                </svg>
+
+                                <!-- HTML GRID LAYER -->
+                                <div class="absolute inset-0 grid grid-cols-11 gap-0 w-full">
+                                    <!-- Tabela Candidatos -->
+                                    <div class="col-span-4 flex flex-col border-2 border-brand-dark rounded-md bg-white overflow-hidden shadow-sm h-fit">
+                                        <div class="h-[32px] bg-brand-dark text-brand-muted text-[10px] font-black uppercase flex items-center px-2">
+                                            <div class="w-[30%] pl-2">can_id</div><div class="w-[70%]">can_nome</div>
+                                        </div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[30%] pl-2">1</div><div class="w-[70%]">João Silva</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[30%] pl-2">2</div><div class="w-[70%]">Maria Luz</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[30%] pl-2">3</div><div class="w-[70%]">José Santos</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[30%] pl-2">4</div><div class="w-[70%]">Ana Oliveira</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[30%] pl-2">5</div><div class="w-[70%]">Beto Costa</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold"><div class="w-[30%] pl-2">6</div><div class="w-[70%]">Carla Reis</div></div>
+                                    </div>
+                                    <!-- Espaço Central -->
+                                    <div class="col-span-3"></div>
+                                    <!-- Tabela Inscrições -->
+                                    <div class="col-span-4 flex flex-col border-2 border-brand-dark rounded-md bg-white overflow-hidden shadow-sm h-fit">
+                                        <div class="h-[32px] bg-brand-dark text-brand-muted text-[10px] font-black uppercase flex items-center px-2">
+                                            <div class="w-[35%] pl-2">ins_id</div><div class="w-[65%]">ins_can_id_fk</div>
+                                        </div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[35%] pl-2">101</div><div class="w-[65%] text-brand-secondary font-black">1</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[35%] pl-2">102</div><div class="w-[65%] text-brand-secondary font-black">3</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[35%] pl-2">103</div><div class="w-[65%] text-brand-secondary font-black">5</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold"><div class="w-[35%] pl-2">104</div><div class="w-[65%] text-brand-secondary font-black">2</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-[10px] italic font-bold bg-brand-muted p-2 rounded border border-brand-dark/10 text-brand-dark text-center mt-2">Repare: Os Candidatos 4 e 6 não possuem linha saindo deles. Eles não têm inscrição (Opcional).</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 08: Relacionamento 1:N ────────────────────────────────────
+            {
+                title: "Relacionamento 1:N (Turma e Aluno)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6 p-6 bg-brand-muted rounded-3xl border-l-8 border-brand-primary shadow-sm text-brand-dark">
+                            <i class="fas fa-chalkboard-teacher text-5xl" aria-hidden="true"></i>
+                            <div>
+                                <h3 class="text-2xl font-black">A Nossa Sala de Aula</h3>
+                                <p class="text-lg font-medium opacity-80 mt-1">Este é o relacionamento "Um para Muitos".</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 text-sm text-brand-dark">
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <p class="font-bold text-lg mb-2"><i class="fas fa-eye text-brand-primary mr-2" aria-hidden="true"></i> Olhando da TURMA:</p>
+                                <p class="opacity-90">A turma precisa de no mínimo 1 aluno para existir. Ela pode ter <strong>vários (N)</strong> alunos.</p>
+                                <p class="font-mono font-black text-brand-dark text-xl mt-3 bg-brand-muted inline-block px-3 py-1 rounded">(1 , N)</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border-2 border-brand-dark/10">
+                                <p class="font-bold text-lg mb-2"><i class="fas fa-eye text-brand-primary mr-2" aria-hidden="true"></i> Olhando do ALUNO:</p>
+                                <p class="opacity-90">O aluno pertence obrigatoriamente a uma turma (Mín 1) e apenas a uma de cada vez (Máx 1).</p>
+                                <p class="font-mono font-black text-brand-dark text-xl mt-3 bg-brand-muted inline-block px-3 py-1 rounded border border-brand-primary/30">(1 , 1)</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 09: Visual do 1:N ───────────────────────────────────────────
+            {
+                title: "Diagrama Visual (DER 1:N)",
+                content: `
+                    <div class="space-y-6 text-center">
+                        <p class="text-lg font-medium text-brand-dark">A Turma tem muitos (N) alunos. O Aluno tem uma (1) turma.</p>
+                        
+                        <div class="bg-white rounded-3xl py-8 flex flex-col items-center justify-center border-4 border-brand-dark shadow-sm overflow-x-auto relative">
+                            <svg width="600" height="150" viewBox="0 0 600 150">
+                                <line x1="160" y1="75" x2="300" y2="75" class="edge" />
+                                <line x1="300" y1="75" x2="440" y2="75" class="edge" />
+                                
+                                <rect x="40" y="50" width="120" height="50" class="node-rect" />
+                                <text x="100" y="80" text-anchor="middle" class="node-text uppercase tracking-tighter">Turma</text>
+                                
+                                <polygon points="300,45 350,75 300,105 250,75" class="rel-polygon" />
+                                <text x="300" y="79" text-anchor="middle" class="rel-text uppercase tracking-tight">Possui</text>
+                                
+                                <rect x="440" y="50" width="120" height="50" class="node-rect" />
+                                <text x="500" y="80" text-anchor="middle" class="node-text uppercase tracking-tighter">Aluno</text>
+
+                                <text x="410" y="65" text-anchor="middle" font-family="JetBrains Mono" font-weight="bold" font-size="16" fill="#563A9C">(1,N)</text>
+                                <text x="190" y="65" text-anchor="middle" font-family="JetBrains Mono" font-weight="bold" font-size="16" fill="#563A9C">(1,1)</text>
+                            </svg>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 10: Dicionário 1:N ──────────────────────────────────────────
+            {
+                title: "Dicionário de Dados no 1:N",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-brand-dark text-brand-muted rounded-3xl shadow-xl border-l-8 border-brand-primary">
+                            <h3 class="font-black text-2xl mb-2 text-brand-muted uppercase tracking-tighter text-center"><i class="fas fa-crown mr-2" aria-hidden="true"></i> Regra de Ouro Inquebrável:</h3>
+                            <p class="text-xl font-medium italic text-center underline decoration-brand-secondary underline-offset-4">No relacionamento 1:N, a FK vai sempre para o lado do **N** (Muitos)!</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mt-4">
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-brand-muted font-bold p-3 text-center text-xs tracking-widest uppercase">TURMA (Lado 1)</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">tur_id</code> (PK) - Inteiro</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>tur_nome</code> - Texto</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="border-4 border-brand-primary rounded-xl bg-white shadow-lg overflow-hidden relative">
+                                <div class="absolute -top-3 -right-3 bg-brand-primary text-white w-8 h-8 rounded-full flex items-center justify-center font-black animate-bounce text-xs"><i class="fas fa-arrow-down"></i></div>
+                                <div class="bg-brand-dark text-brand-muted font-bold p-3 text-center text-xs tracking-widest uppercase">ALUNO (Lado N)</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">alu_id</code> (PK) - Inteiro</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>alu_nome</code> - Texto</li>
+                                    <li class="bg-brand-secondary/20 p-2 rounded border border-brand-secondary">
+                                        <i class="fas fa-id-badge text-brand-dark w-5 text-center"></i> <code class="text-brand-dark font-black">alu_tur_id_fk</code> (FK)
+                                        <p class="text-[10px] mt-1 font-bold text-brand-dark/70 ml-7 italic underline">Guarda o ID da Turma.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 11: Prova Real 1:N ──────────────────────────────────────────
+            {
+                title: "Prova Real: Os Dados na Prática (1:N)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-lg font-bold text-center text-brand-dark">Vários Alunos "apontam" para a mesma Turma conectando suas linhas:</p>
+                        
+                        <div class="bg-white p-6 rounded-3xl border-4 border-brand-dark shadow-xl flex flex-col gap-4">
+                            <!-- Títulos das Tabelas independentes do fluxo vertical -->
+                            <div class="grid grid-cols-11 gap-0 w-full mb-2">
+                                <div class="col-span-4 text-center text-xs font-black uppercase text-brand-dark tracking-widest">Tabela 1: Turma</div>
+                                <div class="col-span-3"></div>
+                                <div class="col-span-4 text-center text-xs font-black uppercase text-brand-dark tracking-widest">Tabela 2: Aluno</div>
+                            </div>
+
+                            <div class="relative w-full h-[248px]">
+                                <!-- SVG LAYER -->
+                                <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 10; overflow: visible;">
+                                    <defs>
+                                        <marker id="dot2" viewBox="0 0 10 10" markerWidth="6" markerHeight="6" refX="5" refY="5">
+                                            <circle cx="5" cy="5" r="4" fill="#6A42C2"/>
+                                        </marker>
+                                    </defs>
+                                    <!-- Turma 10 (Y=50) -> Alunos 1, 2, 3 (Y=50, 86, 122) -->
+                                    <line x1="36.36%" y1="50" x2="63.63%" y2="50" stroke="#6A42C2" stroke-width="2.5" marker-start="url(#dot2)" marker-end="url(#dot2)"/>
+                                    <line x1="36.36%" y1="50" x2="63.63%" y2="86" stroke="#6A42C2" stroke-width="2.5" marker-start="url(#dot2)" marker-end="url(#dot2)"/>
+                                    <line x1="36.36%" y1="50" x2="63.63%" y2="122" stroke="#6A42C2" stroke-width="2.5" marker-start="url(#dot2)" marker-end="url(#dot2)"/>
+                                    
+                                    <!-- Turma 20 (Y=86) -> Alunos 4, 5, 6 (Y=158, 194, 230) -->
+                                    <line x1="36.36%" y1="86" x2="63.63%" y2="158" stroke="#6A42C2" stroke-width="2.5" marker-start="url(#dot2)" marker-end="url(#dot2)"/>
+                                    <line x1="36.36%" y1="86" x2="63.63%" y2="194" stroke="#6A42C2" stroke-width="2.5" marker-start="url(#dot2)" marker-end="url(#dot2)"/>
+                                    <line x1="36.36%" y1="86" x2="63.63%" y2="230" stroke="#6A42C2" stroke-width="2.5" marker-start="url(#dot2)" marker-end="url(#dot2)"/>
+                                </svg>
+
+                                <!-- HTML GRID LAYER -->
+                                <div class="absolute inset-0 grid grid-cols-11 gap-0 w-full">
+                                    <!-- Tabela Turmas -->
+                                    <div class="col-span-4 flex flex-col border-2 border-brand-dark rounded-md bg-white overflow-hidden shadow-sm h-fit">
+                                        <div class="h-[32px] bg-brand-dark text-brand-muted text-[10px] font-black uppercase flex items-center px-2">
+                                            <div class="w-[40%] pl-2">tur_id</div><div class="w-[60%]">tur_nome</div>
+                                        </div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[40%] pl-2">10</div><div class="w-[60%]">9º Ano A</div></div>
+                                        <div class="h-[36px] flex items-center px-2 text-xs font-bold"><div class="w-[40%] pl-2">20</div><div class="w-[60%]">9º Ano B</div></div>
+                                    </div>
+                                    <!-- Espaço Central -->
+                                    <div class="col-span-3"></div>
+                                    <!-- Tabela Alunos -->
+                                <div class="col-span-4 flex flex-col border-2 border-brand-dark rounded-md bg-white overflow-hidden shadow-sm h-fit">
+                                    <div class="h-[32px] bg-brand-dark text-brand-muted text-[10px] font-black uppercase flex items-center px-2">
+                                        <div class="w-[20%] pl-1">alu_id</div><div class="w-[45%]">alu_nome</div><div class="w-[35%]">alu_tur_id_fk</div>
+                                    </div>
+                                    <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[20%] pl-1">1</div><div class="w-[45%] truncate pr-1">Fulano</div><div class="w-[35%] text-brand-primary font-black">10</div></div>
+                                    <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[20%] pl-1">2</div><div class="w-[45%] truncate pr-1">Ciclano</div><div class="w-[35%] text-brand-primary font-black">10</div></div>
+                                    <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[20%] pl-1">3</div><div class="w-[45%] truncate pr-1">Beltrano</div><div class="w-[35%] text-brand-primary font-black">10</div></div>
+                                    <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[20%] pl-1">4</div><div class="w-[45%] truncate pr-1">Holano</div><div class="w-[35%] text-brand-primary font-black">20</div></div>
+                                    <div class="h-[36px] flex items-center px-2 text-xs font-bold border-b border-gray-200"><div class="w-[20%] pl-1">5</div><div class="w-[45%] truncate pr-1">Vidrano</div><div class="w-[35%] text-brand-primary font-black">20</div></div>
+                                    <div class="h-[36px] flex items-center px-2 text-xs font-bold"><div class="w-[20%] pl-1">6</div><div class="w-[45%] truncate pr-1">Gelano</div><div class="w-[35%] text-brand-primary font-black">20</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 12: Exercício 1 ──────────────────────────────────────────────
+            {
+                title: "Exercício 1: Pet Shop (1:N)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3 italic">
+                                <i class="fas fa-dog text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg font-medium leading-relaxed">
+                                Um <strong>DONO</strong> cadastra seus <strong>PETS</strong> na clínica. 
+                            </p>
+                            <ul class="list-disc ml-8 mt-4 opacity-80 font-medium space-y-2 text-sm">
+                                <li>Um Dono pode ter vários Pets, mas precisa de pelo menos 1 para se cadastrar.</li>
+                                <li>Um Pet pertence obrigatoriamente a apenas 1 Dono.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-primary rounded-r-2xl shadow-sm space-y-4 text-sm font-bold text-brand-dark">
+                            <p class="font-black text-xl uppercase tracking-widest text-xs opacity-60"><i class="fas fa-tasks mr-2" aria-hidden="true"></i>Sua Missão:</p>
+                            <ol class="list-decimal ml-6 font-medium space-y-2">
+                                <li><strong>Desenhe o DER:</strong> Coloque as cardinalidades (Min, Máx) corretas.</li>
+                                <li><strong>Dicionário de Dados:</strong> Use prefixos <code>don_</code> e <code>pet_</code>.</li>
+                                <li class="text-brand-primary underline text-base">Reflita: Em qual tabela você colocará a FK?</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 13: Exercício 2 ──────────────────────────────────────────────
+            {
+                title: "Exercício 2: Canal de Games (1:N)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3 italic">
+                                <i class="fas fa-gamepad text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg font-medium leading-relaxed">
+                                Temos o <strong>CANAL</strong> de streaming e os seus <strong>VÍDEOS</strong>.
+                            </p>
+                            <ul class="list-disc ml-8 mt-4 opacity-80 font-medium space-y-2 text-sm">
+                                <li>Um Canal pode ter postado zero vídeos (se for novo) ou muitos vídeos.</li>
+                                <li>Um Vídeo pertence obrigatoriamente a apenas 1 Canal.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-primary rounded-r-2xl shadow-sm space-y-4 text-sm font-bold text-brand-dark">
+                            <p class="font-black text-xl uppercase tracking-widest text-xs opacity-60"><i class="fas fa-tasks mr-2" aria-hidden="true"></i>Sua Missão:</p>
+                            <ol class="list-decimal ml-6 font-medium space-y-2">
+                                <li><strong>Desenhe o DER.</strong></li>
+                                <li><strong>Crie o Dicionário no Google Sheets</strong> detalhando os tipos e restrições.</li>
+                                <li class="text-brand-primary underline text-base">Onde fica a FK?</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 14: Exercício 3 ──────────────────────────────────────────────
+            {
+                title: "Exercício 3: Identidade Digital (1:1)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3 italic">
+                                <i class="fas fa-id-card text-brand-primary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <p class="text-lg font-medium leading-relaxed">
+                                O sistema precisa ligar a <strong>PESSOA</strong> ao seu <strong>TÍTULO_ELEITOR</strong>.
+                            </p>
+                            <ul class="list-disc ml-8 mt-4 opacity-80 font-medium space-y-2 text-sm">
+                                <li>Uma Pessoa pode ter 1 título ou nenhum.</li>
+                                <li>Um Título pertence obrigatoriamente a 1 única Pessoa.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-primary rounded-r-2xl shadow-sm space-y-4 text-sm font-bold text-brand-dark">
+                            <p class="font-black text-xl uppercase tracking-widest text-xs opacity-60"><i class="fas fa-tasks mr-2" aria-hidden="true"></i>Sua Missão:</p>
+                            <ol class="list-decimal ml-6 font-medium space-y-2">
+                                <li><strong>Desenhe o DER 1:1.</strong></li>
+                                <li><strong>No Dicionário:</strong> Aplique a Regra da Dependência para colocar a FK.</li>
+                                <li class="text-brand-primary text-base">Explique a sua escolha na coluna 'Descrição'.</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 15: Resumo das Regras ──────────────────────────────────────
+            {
+                title: "Resumo: Onde colocar a Chave Estrangeira?",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-brand-dark/10 space-y-6 text-brand-dark">
+                            <h4 class="font-black text-2xl border-b-4 border-brand-secondary pb-2 inline-block">Regra do 1:1</h4>
+                            <p class="text-lg font-medium opacity-90">A FK vai para o lado **Dependente** (quem não vive sem o outro).</p>
+                            <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/20 text-sm">
+                                <p><strong>Exemplo:</strong> A Inscrição depende do Candidato.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-brand-dark text-brand-muted p-8 rounded-3xl shadow-xl space-y-6">
+                            <h4 class="font-black text-2xl border-b-4 border-brand-primary pb-2 inline-block text-brand-muted">Regra do 1:N</h4>
+                            <p class="text-lg font-medium">A FK vai **Sempre** para o lado do **Muitos** (Lado N).</p>
+                            <div class="p-4 bg-white/10 rounded-xl border border-brand-primary/30 text-sm">
+                                <p><strong>Exemplo:</strong> O Aluno guarda o ID da sua Turma.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 16: Fechamento ────────────────────────────────────────────────
+            {
+                title: "Conclusão",
+                content: `
+                    <div class="text-center space-y-10 py-10">
+                        <div class="inline-block p-10 bg-white rounded-full border-8 border-brand-primary shadow-2xl" aria-hidden="true">
+                            <i class="fas fa-project-diagram text-brand-dark text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl font-black text-brand-dark uppercase">Conceito Dominado!</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto font-semibold italic">"A cardinalidade é o que transforma o desenho em um banco de dados funcional."</p>
+                        
+                        <div class="mt-12 px-10 py-4 bg-brand-dark text-brand-muted rounded-2xl font-black text-xl shadow-xl inline-block border-b-4 border-brand-primary">
+                            Fim da Aula 11
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active" role="region" aria-live="polite">
+                    <h2 class="no-print text-3xl md:text-4xl font-black mb-10 text-brand-dark border-l-8 border-brand-primary pl-4">${step.title}</h2>
+                    <div class="content-body">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            document.getElementById('aria-progress').setAttribute('aria-valuenow', Math.round(((currentStep + 1) / steps.length) * 100));
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 
+                ? 'FINALIZAR <i class="fas fa-check-circle ml-2" aria-hidden="true"></i>' 
+                : 'AVANÇAR <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark uppercase text-center">Apostila: Banco de Dados I</h1>
+                <p class="font-bold text-xl text-center">Aula 11 - Introdução à Cardinalidade (1:1 e 1:N)</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-12 border-b-2 border-brand-dark/20 pb-10">
+                    <h2 class="text-3xl font-black mb-6 text-brand-dark border-l-8 border-brand-primary pl-4">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>
