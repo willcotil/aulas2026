@@ -200,6 +200,11 @@
         .quest-list li { background: white; margin-bottom: 15px; padding: 20px 20px 20px 70px; border-radius: 12px; position: relative; border: 2px solid var(--quest-color, var(--color-yellow)); font-size: 1.15rem; font-weight: 600; }
         .quest-list li::before { content: counter(quest); counter-increment: quest; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: var(--quest-color, var(--color-rust)); color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; font-size: 1.2rem; line-height: 35px; font-weight: 800; }
 
+        /* Tag de Etapa */
+        .etapa-tag { background: var(--color-rust); color: white; padding: 5px 15px; border-radius: 20px; font-size: 1rem; font-weight: bold; margin-left: 15px; vertical-align: middle; text-transform: uppercase; }
+        .etapa-tag.t2 { background: var(--color-blue); }
+        .etapa-tag.t3 { background: var(--color-orange); }
+
         /* Controles Base */
         .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--color-blue); }
         .btn { background: var(--color-blue); border: none; color: #ffffff; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.2s; }
@@ -213,11 +218,12 @@
             .fixed-link-bar, .controls, .progress-bar { display: none !important; }
             .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: auto; min-height: 100vh; padding: 40px; background: white; border-bottom: 2px solid #ccc;}
             .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
-            .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; }
+            .slide.topic h1, .slide.topic p, .slide.topic i { color: black !important; text-shadow: none; }
             pre, .card-info, .focus-box, .diagram-row { border: 2px solid #000; color: black; background: white; }
             h1, h2, p, li, strong { color: black !important; }
             .diag-front, .diag-back { background: white; color: black; border: 2px solid black; }
             .diag-label, .diag-number { border: none; }
+            .etapa-tag { border: 1px solid black; color: black; background: white; }
         }
     </style>
 </head>
@@ -276,8 +282,8 @@
             <p>Olá equipe! Até agora, o nosso App tem apenas <strong>uma tela principal</strong>. Esprememos o formulário de cadastro na barra lateral (Sidebar) para caber tudo no mesmo espaço.</p>
             
             <div class="focus-box">
-                <h3><i class="fa-solid fa-gamepad"></i> Pensem num Jogo de Videogame</h3>
-                <p>Imaginem jogar um game onde a tela de "Configurações" ou o "Inventário" ficam sempre abertas tampando metade da sua visão. Fica confuso, certo?</p>
+                <h3><i class="fa-solid fa-gamepad"></i> Pense num Jogo de Videogame</h3>
+                <p>Imagine jogar um game onde a tela de "Configurações" ou o "Inventário" ficam sempre abertas tampando metade da sua visão. Fica confuso, certo?</p>
                 <p>No Electron é igual. É melhor abrir uma <strong>janela separada (um pop-up)</strong> só para o cadastro, deixando o catálogo principal limpo e organizado.</p>
             </div>
         </div>
@@ -672,67 +678,42 @@ onAtualizar: (minhaFuncao) => {
         <div class="slide-content-wrapper">
             <i class="fa-solid fa-laptop-code"></i>
             <h1>Live Coding</h1>
-            <p>Mãos no Teclado: Construindo nosso Pop-up juntos</p>
+            <p>Mão no Teclado: Construindo nosso Pop-up juntos</p>
         </div>
     </div>
 
-    <!-- SLIDE 13: O QUE VAMOS FAZER -->
+    <!-- SLIDE 13: O PLANO DE AÇÃO -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Slide 13</div>
-            <h2>Nosso Plano de Ação</h2>
-            <p>Abram o código da aula passada (O Dashboard). Vamos alterá-lo passo a passo, no seu tempo. Se precisar, peça pausa.</p>
+            <h2>Nossa Missão em 3 Etapas</h2>
+            <p>Abram o código da aula passada (O Dashboard). Para facilitar, dividimos a criação do nosso pop-up em 3 etapas testáveis. Faremos uma por uma!</p>
             
             <div class="quest-list">
-                <ol>
-                    <li>Ajustar o <code>index.js</code> (Tornar a janela global).</li>
-                    <li>Modificar o <code>index.html</code> (Trocar o form antigo por um Botão).</li>
-                    <li>Configurar o <code>preload.js</code> (Os 2 novos canais).</li>
-                    <li>Criar a Janela Filha no Node.</li>
-                    <li>Criar a interface da Janela Filha: <code>modal.html</code>.</li>
-                    <li>Criar a lógica para salvar com Rota 2: <code>modal.js</code>.</li>
-                    <li>O Grande Final: Fechar o ciclo usando as Rotas 2 e 3.</li>
-                </ol>
+                <ul>
+                    <li style="--quest-color: var(--color-blue); border-color: var(--color-blue);">
+                        <strong style="color: var(--color-blue); font-size: 1.2rem;">Etapa 1: A Rota de Ida (Abrir Janela)</strong> <br>
+                        Tornaremos a janela principal Global. Criaremos o botão no HTML que vai pedir ao Node (via `send`) para abrir a janela de Cadastro.
+                    </li>
+                    <li style="--quest-color: var(--color-rust); border-color: var(--color-rust);">
+                        <strong style="color: var(--color-rust); font-size: 1.2rem;">Etapa 2: A Rota Bate-e-Volta (Salvar no Banco)</strong> <br>
+                        Criaremos o formulário (HTML/JS). Ele enviará os dados para o Node (via `invoke`). O Node salva e devolve a confirmação (via `handle`). Só então, a janela se fecha.
+                    </li>
+                    <li style="--quest-color: var(--color-orange); border-color: var(--color-orange); background: #FFFaf0;">
+                        <strong style="color: var(--color-orange); font-size: 1.2rem;">Etapa 3: A Rota de Volta (Atualizar a Tela Principal)</strong> <br>
+                        O Node avisa a tela principal (via `webContents.send`). A tela principal ouve e re-desenha os cards puxando os novos dados.
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 14: PASSO 1 -->
+    <!-- SLIDE 14: ETAPA 1.1 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 1</div>
-            <h2>Tornando a Janela Global</h2>
-            <p>No seu <code>index.js</code> (Main), a variável <code>janela</code> nasce e morre trancada dentro da função. Precisamos tirá-la de lá para podermos enviar os avisos depois.</p>
-            
-            <div class="file-label">src/main/index.js</div>
-<pre><code class="language-javascript">const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-
-// 1. CRIAMOS A VARIÁVEL AQUI FORA (Global)
-let janelaPrincipal; 
-
-const db = require('../../dados.json');
-
-app.whenReady().then(() => {
-    // 2. ATRIBUÍMOS O VALOR A ELA AQUI DENTRO (Sem o 'const')
-    janelaPrincipal = new BrowserWindow({
-        width: 1000, height: 700,
-        webPreferences: { preload: path.join(__dirname, 'preload.js') }
-    });
-    
-    janelaPrincipal.loadFile(path.join(__dirname, '../renderer/index.html'));
-    
-    // ... restante do código continua igual ...
-});</code></pre>
-        </div>
-    </div>
-
-    <!-- SLIDE 15: PASSO 2 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 2</div>
-            <h2>Limpando a Tela Principal</h2>
-            <p>Vá no seu <code>index.html</code> (O Principal). Apague todo aquele formulário grande da aba lateral escura e coloque apenas um botão novo.</p>
+            <div class="slide-number">Etapa 1</div>
+            <h2>Abrindo a Janela: O Botão <span class="etapa-tag">Parte 1/3</span></h2>
+            <p>Vá no seu <code>index.html</code> (O Principal). Apague aquele formulário enorme da aba lateral escura e coloque apenas este botão novo.</p>
             
             <div class="file-label">src/renderer/index.html (Menu Lateral)</div>
 <pre><code class="language-html">&lt;!-- MENU LATERAL --&gt;
@@ -745,7 +726,7 @@ app.whenReady().then(() => {
     
 &lt;/div&gt;</code></pre>
 
-            <p style="margin-top: 15px;">No começo do seu <code>renderer.js</code>, crie o clique desse botão:</p>
+            <p style="margin-top: 15px;">No começo do seu <code>renderer.js</code>, apague a lógica antiga de formulário e crie o clique desse botão:</p>
             <div class="file-label">src/renderer/renderer.js</div>
 <pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">document.querySelector("#btnAbrirModal").addEventListener("click", () => {
     window.api.abrirModalCadastro(); // Pede ao garçom para abrir a tela
@@ -753,66 +734,67 @@ app.whenReady().then(() => {
         </div>
     </div>
 
-    <!-- SLIDE 16: PASSO 3 -->
+    <!-- SLIDE 15: ETAPA 1.2 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 3</div>
-            <h2>Ensinando Novos Truques ao Garçom</h2>
-            <p>Abram o <code>preload.js</code>. Vamos adicionar o pedido para abrir a janela e o "ouvido" biônico para escutar a ordem de atualizar a tela.</p>
+            <div class="slide-number">Etapa 1</div>
+            <h2>Abrindo a Janela: O Node <span class="etapa-tag">Parte 1/3</span></h2>
+            <p>No <code>preload.js</code>, crie o canal `abrirModalCadastro` que envia `abrir-modal`. Depois, no <code>index.js</code> (Main), torne a janela global e crie a fábrica.</p>
             
-            <div class="file-label">src/main/preload.js</div>
-<pre><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
+            <div class="grid-2">
+                <div>
+                    <div class="file-label" style="background: var(--color-blue); border-color: white;">preload.js</div>
+<pre style="padding: 10px; margin: 0; font-size: 0.75rem; min-height: 180px;"><code class="language-javascript">contextBridge.exposeInMainWorld('api', {
+    pedirProdutos: () => { /* ... */ },
 
-contextBridge.exposeInMainWorld('api', {
-    
-    pedirProdutos: () => {
-        return ipcRenderer.invoke('pedir-produtos');
-    },
-
-    // NOVO: Rota 1 (Ação) para abrir a janela
+    // Adicione a rota para abrir a janela:
     abrirModalCadastro: () => {
         ipcRenderer.send('abrir-modal');
-    },
-
-    // NOVO: Rota 3 (Ouvinte) Escuta o Main e roda uma função
-    onAtualizarTela: (funcaoCallback) => {
-        ipcRenderer.on('atualizar-tela', funcaoCallback);
     }
 });</code></pre>
-        </div>
-    </div>
+                </div>
+                <div>
+                    <div class="file-label" style="background: var(--color-navy); border-color: white;">index.js (Main)</div>
+<pre style="padding: 10px; margin: 0; font-size: 0.7rem; min-height: 180px;"><code class="language-javascript">let janelaPrincipal; // DECLARE FORA!
 
-    <!-- SLIDE 17: PASSO 4 -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 4</div>
-            <h2>Construindo a Janela Modal</h2>
-            <p>Volte ao <code>index.js</code> (Onde fica o Node). No final de tudo, crie a regra de fabricação da Janela Filha.</p>
-            
-            <div class="file-label">src/main/index.js (Adicione no final)</div>
-<pre><code class="language-javascript">ipcMain.on('abrir-modal', () => {
-    
+app.whenReady().then(() => {
+    // Tire o 'const'
+    janelaPrincipal = new BrowserWindow({ ... }); 
+    // ...
+});
+
+ipcMain.on('abrir-modal', () => {
     const janelaModal = new BrowserWindow({
         width: 400, height: 500,
-        
-        parent: janelaPrincipal, // ATENÇÃO: Define a MÃE
-        modal: true,             // ATENÇÃO: TRAVA a tela de trás
-        
-        // Vamos usar o mesmo garçom (preload) para facilitar
+        parent: janelaPrincipal, modal: true,
         webPreferences: { preload: path.join(__dirname, 'preload.js') } 
     });
-
     janelaModal.loadFile(path.join(__dirname, '../renderer/modal.html'));
 });</code></pre>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- SLIDE 18: PASSO 5 -->
+    <!-- SLIDE 16: ETAPA 1 TESTE -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 5</div>
-            <h2>A Interface da Janela Nova</h2>
-            <p>Crie um <strong>arquivo NOVO</strong> chamado <code>modal.html</code> dentro da pasta <code>renderer</code>. Este é o HTML exclusivo do pop-up.</p>
+            <div class="slide-number">Etapa 1</div>
+            <div class="focus-box" style="text-align: center; border-color: var(--color-blue); border-left-color: var(--color-blue); padding: 50px;">
+                <i class="fa-solid fa-play" style="font-size: 4rem; color: var(--color-blue); margin-bottom: 20px;"></i>
+                <h2 style="border: none; margin-bottom: 10px;">O Primeiro Teste!</h2>
+                <p>Crie um arquivo <code>modal.html</code> vazio na sua pasta renderer só para não dar erro.</p>
+                <p>Rode <code>npm start</code>, clique no botão e veja se a janelinha abre e trava a tela de trás!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 17: ETAPA 2.1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 2</div>
+            <h2>Salvando: A Tela de Cadastro <span class="etapa-tag t2">Parte 2/3</span></h2>
+            <p>Construa a tela do seu Pop-up no <code>modal.html</code> que criamos vazio no passo anterior.</p>
             
             <div class="file-label" style="background: var(--color-rust); border-color: var(--color-rust);">src/renderer/modal.html</div>
 <pre style="border-left-color: var(--color-rust);"><code class="language-html">&lt;!DOCTYPE html&gt;
@@ -839,18 +821,18 @@ contextBridge.exposeInMainWorld('api', {
         </div>
     </div>
 
-    <!-- SLIDE 19: PASSO 6 -->
+    <!-- SLIDE 18: ETAPA 2.2 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 6</div>
-            <h2>A Lógica do Modal</h2>
-            <p>Crie o <code>modal.js</code>. O papel dele é extrair os dados, enviar a Ordem (Rota 2) para o Node salvar e esperar a confirmação para se fechar.</p>
+            <div class="slide-number">Etapa 2</div>
+            <h2>Salvando: A Lógica da Janela Filha <span class="etapa-tag t2">Parte 2/3</span></h2>
+            <p>Crie o <code>modal.js</code>. O papel dele é extrair os dados e enviar a Ordem (Rota 2) usando <code>invoke</code> para o Node salvar.</p>
             
             <div class="file-label" style="background: var(--color-rust); border-color: var(--color-navy);">src/renderer/modal.js</div>
 <pre style="border-left-color: var(--color-rust);"><code class="language-javascript">document.querySelector("#formProduto").addEventListener("submit", async (e) => {
     e.preventDefault(); // Evita o piscar da tela
     
-    // Captura Mágica (FormData)
+    // Sugador Mágico (FormData)
     const dados = Object.fromEntries(new FormData(e.target));
     dados.preco = Number(dados.preco);
     dados.estoque = Number(dados.estoque);
@@ -858,52 +840,80 @@ contextBridge.exposeInMainWorld('api', {
     // O Garçom envia para o Node e ESPERA a confirmação (Rota 2)
     const salvouComSucesso = await window.api.salvarProduto(dados);
     
-    // Só fecha a janela se o Node confirmar que salvou!
+    // Só fecha a janela filha se o Node confirmar que salvou!
     if (salvouComSucesso) {
         window.close();
     }
 });</code></pre>
 
-            <div class="focus-box" style="padding: 10px; margin-top: 10px;">
+            <div class="focus-box" style="padding: 10px; margin-top: 10px; border-color: var(--color-rust); border-left-color: var(--color-rust);">
                 <p style="margin:0; font-size: 1rem;"><i class="fa-solid fa-screwdriver-wrench"></i> Adicione no seu <code>preload.js</code>: <br><code>salvarProduto: (dados) => ipcRenderer.invoke('salvar', dados)</code></p>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 20: PASSO 7 -->
+    <!-- SLIDE 19: ETAPA 2.3 -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">Passo 7</div>
-            <h2>O Grande Final (Fechando o Ciclo)</h2>
-            <p>O Node recebe o dado, salva, avisa a janela principal para redesenhar a tela (Rota 3) e envia a resposta de sucesso (Rota 2).</p>
+            <div class="slide-number">Etapa 2</div>
+            <h2>Salvando: A Cozinha (Node) <span class="etapa-tag t2">Parte 2/3</span></h2>
+            <p>O Node recebe o dado, dá o push no array em memória, e devolve a resposta de sucesso (Rota 2).</p>
             
-            <div class="grid-2">
-                <div>
-                    <div class="file-label">index.js (Adicione no final)</div>
-<pre style="padding: 15px; font-size: 0.8rem; min-height: 200px;"><code class="language-javascript">ipcMain.handle('salvar', (e, dados) => {
-    // 1. Salva no banco de dados (array)
+            <div class="file-label">index.js (Adicione no final)</div>
+<pre style="padding: 15px; font-size: 0.9rem; min-height: 200px;"><code class="language-javascript">ipcMain.handle('salvar', (e, dados) => {
+    // 1. Salva no banco de dados em memória (array)
+    db.push(dados);
+
+    // 2. ROTA 2! Devolve a confirmação de sucesso
+    // (O Modal HTML vai receber e acionar o window.close())
+    return true; 
+});</code></pre>
+            <p style="text-align: center; margin-top: 10px; font-weight: bold; color: var(--color-rust);">Rode <code>npm start</code>, preencha o formulário do Pop-up e veja se ele fecha sozinho ao clicar em Salvar!</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 20: ETAPA 3.1 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 3</div>
+            <h2>Atualizando o Fundo: O Rádio Inverso <span class="etapa-tag t3">Parte 3/3</span></h2>
+            <p>O item já está salvando! Mas a janela de trás não está atualizando a lista. Vamos usar a Rota 3 para mandar a ordem de atualização.</p>
+            
+            <div class="file-label">index.js (Altere o handle que acabou de criar)</div>
+<pre style="padding: 15px; font-size: 0.9rem;"><code class="language-javascript">ipcMain.handle('salvar', (e, dados) => {
     db.push(dados);
 
     // 2. ROTA 3! Grita para a tela principal
     janelaPrincipal.webContents.send('atualizar-tela');
 
-    // 3. ROTA 2! Devolve a confirmação de sucesso
+    // 3. ROTA 2! Devolve a confirmação
     return true; 
 });</code></pre>
-                </div>
-                <div>
-                    <div class="file-label">renderer.js (Principal)</div>
-<pre style="padding: 15px; font-size: 0.8rem; min-height: 200px;"><code class="language-javascript">// Usamos o "ouvido" que criamos no preload
+            
+            <div class="focus-box" style="padding: 10px; margin-top: 10px; border-color: var(--color-orange); border-left-color: var(--color-orange);">
+                <p style="margin:0; font-size: 1rem;"><i class="fa-solid fa-screwdriver-wrench"></i> Adicione o ouvinte no seu <code>preload.js</code>: <br><code>onAtualizarTela: (funcaoCallback) => ipcRenderer.on('atualizar-tela', funcaoCallback)</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 21: ETAPA 3.2 -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 3</div>
+            <h2>Atualizando o Fundo: A Tela Principal <span class="etapa-tag t3">Parte 3/3</span></h2>
+            <p>No <code>renderer.js</code> da sua tela principal, nós já tínhamos a função <code>iniciarApp()</code> que busca os dados atualizados do Node e usa o <code>desenharTela()</code>.</p>
+            <p>Basta escutar o rádio do Node e mandar ele executar isso de novo!</p>
+            
+            <div class="file-label" style="background: var(--color-orange); border-color: var(--color-orange);">renderer.js (Principal - Cole no final)</div>
+<pre style="padding: 15px; font-size: 0.95rem; border-left-color: var(--color-orange);"><code class="language-javascript">// Usamos o "ouvido" que criamos no preload
 window.api.onAtualizarTela(() => {
     console.log("Ouvi o chamado do Node!");
     
-    // Volta a executar a função que limpa e desenha a tela
-    // (Ela que possui o invoke para pedir a lista atualizada)
-    carregarTela();
+    // A função iniciarApp já faz o invoke no Node, busca 
+    // a lista mais nova e usa o desenharTela() para atualizar tudo!
+    iniciarApp();
 });</code></pre>
-                </div>
-            </div>
-            <p style="text-align: center; margin-top: 10px; font-weight: 800; color: var(--color-rust); font-size: 1.3rem;">Rode <code>npm start</code> e admire seu App profissional! 🚀</p>
+            <p style="text-align: center; margin-top: 20px; font-weight: 800; color: var(--color-rust); font-size: 1.3rem;"><i class="fa-solid fa-flag-checkered"></i> Rode <code>npm start</code> e admire seu App profissional em múltiplas janelas! 🚀</p>
         </div>
     </div>
 
@@ -916,7 +926,7 @@ window.api.onAtualizarTela(() => {
         </div>
     </div>
 
-    <!-- SLIDE 22: EXERCICIOS -->
+    <!-- SLIDE 23: EXERCICIOS -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Desafios</div>
