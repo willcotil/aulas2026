@@ -206,8 +206,7 @@
     <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
     <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
     <button class="btn" onclick="nextSlide()" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
-    <button class="btn" onclick="goToExercises()" title="Ir para Missões" style="background: var(--color-orange); color: var(--color-navy);"><i class="fa-solid fa-gamepad"></i></button>
-    <button class="btn" onclick="window.print()" title="Imprimir Material" style="background: var(--color-yellow); color: var(--color-navy);"><i class="fa-solid fa-print"></i></button>
+    <button class="btn" onclick="window.print()" title="Imprimir Material" style="background: var(--color-orange); color: var(--color-navy);"><i class="fa-solid fa-print"></i></button>
 </div>
 
 <div class="container">
@@ -225,7 +224,6 @@
                     <li><strong>Menus Nativos:</strong> A barra superior do Windows (Arquivo, Editar).</li>
                     <li><strong>Módulo Menu:</strong> Como construir opções com atalhos de teclado.</li>
                     <li><strong>A Bandeja (Tray):</strong> Escondendo o app perto do relógio.</li>
-                    <li><strong>Alerta Linux:</strong> Por que a bandeja às vezes não aparece?</li>
                     <li><strong>Mão no Teclado:</strong> Vamos adicionar isso ao projeto da aula passada!</li>
                 </ol>
             </div>
@@ -325,7 +323,7 @@
         <div class="slide-content-wrapper">
             <div class="slide-number">Slide 07</div>
             <h2>Fechado ou Escondido?</h2>
-            <p>Quando o usuário clica no "X" vermelho do Windows, geralmente o app fecha de vez (morre). O truque do Tray é interceptar esse fechamento e apenas esconder a janela.</p>
+            <p>Quando o usuário clica no "X" vermelho do Windows, geralmente o app fecha de vez (morre). O truque do Tray é cancelar esse fechamento e apenas esconder a janela.</p>
             
             <!-- Animação do App minimizando para a bandeja -->
             <div style="background: white; border-radius: 12px; border: 2px solid var(--border-soft); box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; display: flex; justify-content: center; margin-top: 20px;">
@@ -402,30 +400,6 @@
         </div>
     </div>
 
-    <!-- SLIDE 08: AVISO LINUX -->
-    <div class="slide">
-        <div class="slide-content-wrapper">
-            <div class="slide-number">Slide 08</div>
-            <h2>Um Aviso para os Pinguins (Linux) <i class="fa-brands fa-linux" style="color: var(--text-main);"></i></h2>
-            <p>Se você usa <strong>Linux</strong> (como o Ubuntu do laboratório ou o Arch Linux), o ícone da bandeja pode simplesmente <strong>não aparecer</strong>. E a culpa não é do seu código!</p>
-            
-            <div class="grid-2">
-                <div class="card-info" style="border-color: var(--color-orange);">
-                    <h3><i class="fa-solid fa-puzzle-piece"></i> Por que isso acontece?</h3>
-                    <p>O Windows e o Mac têm um padrão único para a Bandeja. No Linux, cada interface gráfica (GNOME, KDE, etc.) tem as suas próprias regras. O GNOME moderno, por exemplo, removeu a bandeja nativa padrão do sistema.</p>
-                </div>
-                <div class="card-info" style="border-color: var(--color-blue);">
-                    <h3><i class="fa-solid fa-screwdriver-wrench"></i> Como resolver?</h3>
-                    <p>O Electron precisa de uma biblioteca chamada <code>libappindicator</code> no Linux. Além disso, no Ubuntu, muitas vezes é necessário instalar uma extensão (GNOME Extension) chamada "AppIndicator support".</p>
-                </div>
-            </div>
-            
-            <p style="margin-top: 20px; font-weight: 800; color: var(--color-rust); text-align: center; font-size: 1.3rem;">
-                Se não funcionar no laboratório do colégio, fique tranquilo! A lógica no seu código está certa.
-            </p>
-        </div>
-    </div>
-
     <!-- TÓPICO 3: LIVE CODING -->
     <div class="slide topic">
         <div class="slide-content-wrapper">
@@ -435,43 +409,43 @@
         </div>
     </div>
 
-    <!-- SLIDE 10: O PLANO DE AÇÃO -->
+    <!-- SLIDE 09: O PLANO DE AÇÃO -->
     <div class="slide">
         <div class="slide-content-wrapper">
-            <div class="slide-number">Slide 10</div>
+            <div class="slide-number">Slide 09</div>
             <h2>A Nossa Missão em 3 Etapas</h2>
-            <p>Abram o código da aula passada (O código final da aula 13). Nós vamos continuar daquele exato ponto. Tudo o que faremos hoje é no arquivo <code>index.js</code>!</p>
+            <p>Abram o código da aula passada (O código do <code>aula13.zip</code>). Nós vamos continuar daquele exato ponto. Tudo o que faremos hoje é no arquivo <code>index.js</code>!</p>
             
             <div class="quest-list">
                 <ul>
                     <li style="--quest-color: var(--color-blue); border-color: var(--color-blue);">
                         <strong style="color: var(--color-blue); font-size: 1.2rem;">Etapa 1: O Menu Superior Nativo</strong> <br>
-                        Vamos criar a receita do menu (Template), importar a classe <code>Menu</code> do Electron e mandar aplicar na janela principal.
+                        Vamos criar a receita do menu (Template), importar a classe <code>Menu</code> do Electron e mandar aplicar na janela.
                     </li>
                     <li style="--quest-color: var(--color-rust); border-color: var(--color-rust);">
                         <strong style="color: var(--color-rust); font-size: 1.2rem;">Etapa 2: Preparando o Ícone do Tray</strong> <br>
-                        Vamos baixar uma imagem para o ícone e invocar a classe <code>Tray</code> para colocá-lo na barra.
+                        Vamos precisar de uma imagem para o ícone e da classe <code>Tray</code>.
                     </li>
                     <li style="--quest-color: var(--color-orange); border-color: var(--color-orange); background: #FFFaf0;">
                         <strong style="color: var(--color-orange); font-size: 1.2rem;">Etapa 3: O Menu do Botão Direito</strong> <br>
-                        Ao clicar com o botão direito no ícone pequenininho da bandeja, queremos que um menu de contexto abra com as opções de "Abrir Painel" e "Sair de Vez".
+                        Ao clicar com o botão direito no ícone pequenininho da bandeja, queremos que um menu de contexto abra com as opções de "Abrir Janela" e "Sair de Vez".
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 11: ETAPA 1 -->
+    <!-- SLIDE 10: ETAPA 1 -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Etapa 1</div>
             <h2>Criando o Menu da Janela <span class="etapa-tag">Parte 1/3</span></h2>
-            <p>Vá no seu <code>index.js</code> (O Cérebro). Logo na primeira linha, adicione o <code>Menu</code> à lista de ferramentas importadas do Electron.</p>
+            <p>Vá no seu <code>index.js</code> (O Cérebro). Logo na primeira linha, adicione o <code>Menu</code> à lista de ferramentas do Electron.</p>
             
             <div class="file-label">src/main/index.js (Lá no topo)</div>
 <pre><code class="language-javascript">const { app, BrowserWindow, ipcMain, Menu } = require('electron');</code></pre>
 
-            <p style="margin-top: 15px;">Agora, dentro do bloco <code>app.whenReady().then(() => { ... })</code>, logo após mandar a janela principal carregar o HTML, cole o código do menu:</p>
+            <p style="margin-top: 15px;">Agora, dentro do bloco <code>app.whenReady().then(() => { ... })</code>, logo após criar a janela principal, cole o código do menu:</p>
             <div class="file-label">src/main/index.js (Dentro do whenReady)</div>
 <pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">// 1. A Receita do Menu
 const templateDoMenu = [
@@ -490,21 +464,21 @@ const menuReal = Menu.buildFromTemplate(templateDoMenu);
 
 // 3. Aplica o menu à nossa aplicação inteira!
 Menu.setApplicationMenu(menuReal);</code></pre>
-            <p style="text-align: center; color: var(--color-blue); font-weight: bold; margin-top: 10px;">Rode <code>npm start</code> e veja se a barra de cima mudou!</p>
+            <p style="text-align: center; color: var(--color-blue); font-weight: bold; margin-top: 10px;">Rodem <code>npm start</code> e vejam se a barra de cima mudou!</p>
         </div>
     </div>
 
-    <!-- SLIDE 12: ETAPA 2.1 -->
+    <!-- SLIDE 11: ETAPA 2.1 -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Etapa 2</div>
             <h2>A Imagem da Bandeja <span class="etapa-tag t2">Parte 2/3</span></h2>
-            <p>Antes de codificar o Tray, precisamos de um ícone. O Electron precisa ler uma imagem salva no seu computador.</p>
+            <p>Antes de codificar o Tray, precisamos de um ícone. O Electron precisa do caminho de uma imagem no seu computador.</p>
             
             <div class="focus-box" style="border-color: var(--color-blue); border-left-color: var(--color-blue);">
                 <h3><i class="fa-solid fa-image"></i> Onde colocar a imagem?</h3>
                 <p>1. Vá ao Google e pesquise um ícone pequeno qualquer (procure por <code>icon png 32x32</code>).</p>
-                <p>2. Salve essa imagem dentro da pasta <code>src/main/</code> do seu projeto com o nome exato <strong><code>icone.png</code></strong>.</p>
+                <p>2. Salve essa imagem dentro da pasta <code>src/main/</code> do seu projeto com o nome <strong><code>icone.png</code></strong>.</p>
             </div>
 
             <p style="margin-top: 15px;">Agora, na primeira linha do seu <code>index.js</code>, adicione também o <code>Tray</code> e declare a variável global:</p>
@@ -514,11 +488,11 @@ Menu.setApplicationMenu(menuReal);</code></pre>
 const path = require('path');
 
 let janelaPrincipal;
-let tray = null; // A variável do ícone precisa ser global para o Windows não apagar!</code></pre>
+let tray = null; // A variável do ícone precisa ser global para não sumir!</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 13: ETAPA 2.2 -->
+    <!-- SLIDE 12: ETAPA 2.2 -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Etapa 2</div>
@@ -526,7 +500,7 @@ let tray = null; // A variável do ícone precisa ser global para o Windows não
             <p>Ainda dentro do <code>app.whenReady().then(...)</code>, bem lá no final, mande o Electron ler a sua imagem e construir a bandeja.</p>
             
             <div class="file-label">src/main/index.js (Final do whenReady)</div>
-<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">// ... (depois de aplicar o menu superior) ...
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">// ... (depois de aplicar o menu) ...
 
 // O caminho da imagem que você baixou
 const iconeCaminho = path.join(__dirname, 'icone.png');
@@ -537,17 +511,17 @@ tray = new Tray(iconeCaminho);
 // Define a mensagem que aparece ao passar o mouse por cima
 tray.setToolTip('Meu Super App rodando no fundo!');</code></pre>
 
-            <p style="text-align: center; color: var(--color-rust); font-weight: bold; margin-top: 15px;">Rode <code>npm start</code>. Verifique perto do relógio do Windows se o seu ícone apareceu! (Pode estar escondido na setinha ^).</p>
+            <p style="text-align: center; color: var(--color-rust); font-weight: bold; margin-top: 15px;">Rodem <code>npm start</code>. Verifiquem perto do relógio do Windows se o seu ícone apareceu! (Pode estar escondido na setinha ^).</p>
         </div>
     </div>
 
-    <!-- SLIDE 14: ETAPA 3 -->
+    <!-- SLIDE 13: ETAPA 3 -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Etapa 3</div>
             <h2>O Menu da Bandeja (Context Menu) <span class="etapa-tag t3">Parte 3/3</span></h2>
             <p>Se você clicar com o botão direito no ícone lá embaixo, nada acontece. Vamos criar um <strong>Menu de Contexto</strong> para ele!</p>
-            <p>A lógica é igualzinha a do menu superior: fazemos um Array, passamos para o <code>Menu</code>, e mandamos o <code>tray</code> usar.</p>
+            <p>A lógica é igualzinha a do menu superior: fazemos um Array, passamos pro <code>Menu</code>, e mandamos o <code>tray</code> usar.</p>
             
             <div class="file-label">src/main/index.js (Logo abaixo de criar o Tray)</div>
 <pre style="padding: 15px; font-size: 0.95rem; min-height: auto;"><code class="language-javascript">const menuDoTray = Menu.buildFromTemplate([
@@ -561,7 +535,7 @@ tray.setToolTip('Meu Super App rodando no fundo!');</code></pre>
     { type: 'separator' },
     { 
         label: 'Encerrar', 
-        role: 'quit' // Função pronta do sistema operacional
+        role: 'quit' // Função pronta do sistema
     }
 ]);
 
@@ -570,7 +544,7 @@ tray.setContextMenu(menuDoTray);</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 15: TESTE FINAL -->
+    <!-- SLIDE 14: TESTE FINAL -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Teste Final</div>
@@ -578,8 +552,8 @@ tray.setContextMenu(menuDoTray);</code></pre>
                 <i class="fa-solid fa-flag-checkered" style="font-size: 4rem; color: var(--color-blue); margin-bottom: 20px;"></i>
                 <h2 style="border: none; margin-bottom: 10px;">Testando a Máquina Inteira</h2>
                 <p>1. Rode <code>npm start</code>.</p>
-                <p>2. Clique em "Ações do Sistema" > "Sair" no menu de cima para ver se fecha.</p>
-                <p>3. Rode de novo. Ache o seu ícone perto do relógio.</p>
+                <p>2. Clique em "Arquivo" > "Esconder" no menu de cima (Se não criou, feche ou minimize a janela na mão).</p>
+                <p>3. Ache o seu ícone perto do relógio.</p>
                 <p>4. Clique com o botão direito nele e escolha "Abrir Painel" para reviver o seu app!</p>
             </div>
         </div>
@@ -594,7 +568,7 @@ tray.setContextMenu(menuDoTray);</code></pre>
         </div>
     </div>
 
-    <!-- SLIDE 17: EXERCICIOS -->
+    <!-- SLIDE 16: EXERCICIOS -->
     <div class="slide">
         <div class="slide-content-wrapper">
             <div class="slide-number">Desafios</div>
@@ -604,9 +578,9 @@ tray.setContextMenu(menuDoTray);</code></pre>
             <div class="quest-list">
                 <ol>
                     <li><strong>Novo Botão de Menu:</strong> Adicione uma nova aba principal no Menu Superior chamada "Visualizar". Dentro dela, coloque um botão "Recarregar" (Use a propriedade <code>role: 'reload'</code> ou um clique chamando <code>janelaPrincipal.reload()</code>).</li>
-                    <li><strong>Comunicação Reversa:</strong> Crie um botão no Menu Superior chamado "Zerar Produtos". Quando o usuário clicar, em vez de dar <code>console.log</code>, faça o Menu executar um <code>janelaPrincipal.webContents.send('zerar-tudo')</code>. No seu arquivo `renderer.js`, crie um "ouvido" para esse canal que apague o HTML da tela inteira.</li>
-                    <li><strong>O Fechamento Falso:</strong> Geralmente, apps com Tray não fecham quando o usuário clica no 'X', eles apenas se escondem. Peça ajuda ao Google ou IA com o prompt: <em>"No Electron, como interceptar o evento 'close' da BrowserWindow para cancelar o fechamento da janela usando `e.preventDefault()` e usar o método `hide()` para apenas esconder a tela em vez de matar o processo?"</em>. Implemente isso!</li>
-                    <li><strong style="color: var(--color-blue);"><i class="fa-solid fa-robot"></i> Desafio IA (Atalhos Globais):</strong> Um recurso poderoso é ativar funções mesmo quando o app está minimizado. Peça à IA: <em>"Como usar o módulo 'globalShortcut' do Electron para registrar as teclas 'CommandOrControl+Shift+A' e fazer a minha janela abrir (show) não importa em qual tela o usuário esteja?"</em>. Implemente essa magia hacker!</li>
+                    <li><strong>Comunicação Reversa:</strong> Crie um botão no Menu Superior chamado "Zerar Produtos". Quando o usuário clicar, em vez de dar <code>console.log</code>, faça o Menu executar um <code>janelaPrincipal.webContents.send('zerar-tudo')</code>. No seu arquivo `renderer.js`, crie um "ouvido" para esse canal que apague o HTML da tela.</li>
+                    <li><strong>O Fechamento Falso:</strong> Geralmente, apps com Tray não fecham quando o usuário clica no 'X', eles apenas se escondem. Peça ajuda ao Google ou IA com o prompt: <em>"No Electron, como interceptar o evento 'close' da BrowserWindow para cancelar o fechamento da janela usando `e.preventDefault()` e usar o método `hide()` para apenas esconder a tela?"</em>. Implemente isso!</li>
+                    <li><strong style="color: var(--color-blue);"><i class="fa-solid fa-robot"></i> Desafio IA (Atalhos Globais):</strong> Um recurso poderoso é ativar funções mesmo quando o app está minimizado. Peça à IA: <em>"Como usar o módulo 'globalShortcut' do Electron para registrar as teclas 'CommandOrControl+Shift+A' e fazer a minha janela abrir (show) não importa em qual tela o usuário esteja?"</em>. Implemente essa magia negra!</li>
                 </ol>
             </div>
         </div>
@@ -634,10 +608,6 @@ tray.setContextMenu(menuDoTray);</code></pre>
         });
         const progress = ((currentSlide + 1) / totalSlides) * 100;
         progressBar.style.width = `${progress}%`;
-    }
-
-    function goToExercises() { 
-        showSlide(totalSlides - 1); 
     }
 
     function nextSlide() { showSlide(currentSlide + 1); }

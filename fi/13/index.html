@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 13 - Planilhas: Operadores e Fórmulas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Exata Fornecida */
+        :root {
+            --color-brand1: #000B58; /* Azul Muito Escuro */
+            --color-brand2: #003161; /* Azul Escuro */
+            --color-brand3: #006A67; /* Verde/Teal Escuro */
+            --color-brand4: #FFF4B7; /* Amarelo Claro / Creme */
+            --color-white: #FFFFFF;
+            --color-black: #111827;  /* Preto/Cinza bem escuro para textos gerais */
+        }
+
+        /* --- ESTILOS GERAIS --- */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--color-white); 
+            color: var(--color-black);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-white);
+            background-image: radial-gradient(rgba(0, 0, 0, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            pointer-events: none;
+            background-color: var(--color-white);
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Componentes */
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--color-brand2);
+            width: 100%;
+            max-width: 1100px;
+            transition: all 0.2s ease;
+            color: var(--color-black);
+        }
+        
+        .action-box {
+            background-color: var(--color-white);
+            border: 4px solid var(--color-brand2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: var(--color-black);
+        }
+
+        .logic-box {
+            background-color: var(--color-brand4);
+            border: 4px solid var(--color-brand1);
+            border-left: 12px solid var(--color-brand1);
+            padding: 1.2rem 1.5rem;
+            border-radius: 8px;
+            color: var(--color-black);
+        }
+
+        /* --- SIMULAÇÃO DE PLANILHA (CSS GRID BASE) --- */
+        .spreadsheet-grid {
+            display: grid;
+            border: 2px solid var(--color-black);
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            width: 100%;
+            max-width: 600px;
+            color: var(--color-black);
+        }
+        .sheet-header {
+            background-color: var(--color-brand2);
+            border: 1px solid var(--color-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--color-white);
+        }
+        .sheet-cell {
+            border: 1px solid var(--color-black);
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: var(--color-black);
+            background-color: var(--color-white);
+            position: relative;
+        }
+        .sheet-cell.active {
+            border: 4px solid var(--color-brand3);
+            box-shadow: inset 0 0 0 1px var(--color-brand3);
+            z-index: 2;
+        }
+        .sheet-cell.number { justify-content: flex-end; }
+        .sheet-cell.center { justify-content: center; }
+
+        /* Alça de preenchimento (Fill Handle) */
+        .fill-handle {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-brand1);
+            border: 2px solid white;
+            cursor: crosshair;
+        }
+
+        /* --- UTILITÁRIOS DE CORES (Com !important para não falhar) --- */
+        .text-c-brand1 { color: var(--color-brand1) !important; }
+        .text-c-brand2 { color: var(--color-brand2) !important; }
+        .text-c-brand3 { color: var(--color-brand3) !important; }
+        .text-c-brand4 { color: var(--color-brand4) !important; }
+        .text-c-black { color: var(--color-black) !important; }
+        .text-c-white { color: var(--color-white) !important; }
+        
+        .bg-c-brand1 { background-color: var(--color-brand1) !important; color: var(--color-white) !important; }
+        .bg-c-brand2 { background-color: var(--color-brand2) !important; color: var(--color-white) !important; }
+        .bg-c-brand3 { background-color: var(--color-brand3) !important; color: var(--color-white) !important; }
+        .bg-c-brand4 { background-color: var(--color-brand4) !important; color: var(--color-black) !important; }
+        .bg-c-black { background-color: var(--color-black) !important; color: var(--color-white) !important; }
+        
+        .border-c-brand1 { border-color: var(--color-brand1) !important; }
+        .border-c-brand2 { border-color: var(--color-brand2) !important; }
+        .border-c-brand3 { border-color: var(--color-brand3) !important; }
+        .border-c-brand4 { border-color: var(--color-brand4) !important; }
+        .border-c-black { border-color: var(--color-black) !important; }
+
+        /* --- ESTILOS DE IMPRESSÃO (APOSTILA) --- */
+        @media print {
+            body, html { 
+                overflow: visible !important; 
+                height: auto !important; 
+                background: white !important; 
+                color: black !important;
+                width: auto !important;
+            }
+            
+            #presentation {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                position: static !important;
+            }
+
+            .slide { 
+                position: relative !important; 
+                top: auto !important;
+                left: auto !important;
+                opacity: 1 !important; 
+                transform: none !important; 
+                height: auto !important; 
+                min-height: auto !important; 
+                
+                display: block !important; 
+                
+                page-break-inside: avoid;
+                page-break-after: always; 
+                
+                border-bottom: 2px solid #ccc;
+                background: white !important;
+                padding: 2rem 0 !important;
+                margin-bottom: 2rem;
+            }
+
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            
+            h1 { font-size: 24pt !important; color: black !important; }
+            h2 { font-size: 18pt !important; color: black !important; border-bottom: 1px solid #000; padding-bottom: 5px; }
+            p, li { font-size: 12pt !important; color: #333 !important; }
+            
+            .card {
+                border: 1px solid #ddd;
+                box-shadow: none !important;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            .bg-teal-dark { background-color: #ddd !important; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Barra de Controle -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/90 backdrop-blur-md border-b-4 border-c-brand1 shadow-md">
+        <div class="flex items-center space-x-6">
+            <span class="font-black text-c-brand1 text-xl tracking-tighter">AULA 13: FÓRMULAS</span>
+            <div class="h-3 w-48 lg:w-80 bg-gray-200 rounded-full overflow-hidden border border-black">
+                <div id="progressBar" class="h-full bg-c-brand3 transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="text-xs font-mono text-gray-600 tracking-wider">00 / 00</span>
+        </div>
+        <div class="flex space-x-2">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-100 rounded-lg text-c-brand1 transition" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="p-2 bg-c-brand1 text-white rounded font-bold hover:bg-c-brand2 transition flex items-center gap-2">
+                <i data-lucide="printer"></i> <span class="hidden md:inline">Imprimir PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Container dos Slides -->
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-c-brand1 text-white px-6 py-2 rounded-full text-sm font-bold uppercase mb-8 inline-block shadow-lg border-2 border-white">Google Sheets / Excel</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-c-black">
+                    A Mágica da<br><span class="text-c-brand2">Matemática</span>
+                </h1>
+                <p class="text-2xl text-gray-700 font-bold max-w-3xl mx-auto mt-6">Operadores, Referências e Funções Automáticas.</p>
+            </div>
+            <div class="mt-16 animate-bounce text-c-brand2 no-print">
+                <p class="text-xs uppercase tracking-widest mb-2 font-bold opacity-70">Avançar</p>
+                <i data-lucide="arrow-down" class="mx-auto w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro Visual -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold mb-10 border-l-8 border-c-brand1 pl-6">Previsão da Aula</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-6 border-t-8 border-c-brand2">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><span class="bg-c-brand2 text-white px-2 rounded border border-black">=</span> 1. O Gatilho e a Ordem</h3>
+                    <p class="text-sm text-gray-700 font-bold">O que acontece se esquecer o sinal de igual? E a ordem matemática (igual em C).</p>
+                </div>
+                <div class="card p-6 border-t-8 border-c-brand1">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="scan" class="text-c-brand1"></i> 2. O Erro dos "Números Brutos"</h3>
+                    <p class="text-sm text-gray-700 font-bold">Por que nunca devemos somar os números, mas sim os endereços das células.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-c-brand3">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="copy-down" class="text-c-brand3"></i> 3. A Alça Mágica</h3>
+                    <p class="text-sm text-gray-700 font-bold">Automação: Como arrastar uma fórmula e calcular mil linhas em 1 segundo.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-c-brand4">
+                    <h3 class="font-bold text-2xl mb-2 text-c-black flex items-center gap-3"><i data-lucide="sigma" class="text-c-brand2 bg-c-brand4 rounded p-1 border border-c-brand1"></i> 4. Funções Nativas</h3>
+                    <p class="text-sm text-gray-700 font-bold">As palavras inteligentes do sistema, mastigadas uma a uma.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: Pergunta Inicial -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-10">
+                <span class="bg-c-brand2 text-white border-2 border-black px-4 py-2 rounded-xl font-black text-3xl">01</span>
+                <h2 class="text-5xl font-bold text-c-black">O que acontece se eu digitar 3+2?</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-xl border-l-[12px] border-c-brand1">
+                    <p class="font-black text-c-brand1 mb-2 text-2xl">Expectativa vs Realidade</p>
+                    <p class="text-lg leading-relaxed mb-4 font-bold">Você quer somar 3 e 2. Você abre uma célula, digita <code>3+2</code> e aperta Enter.</p>
+                    <p class="text-lg leading-relaxed font-bold bg-white p-4 border-2 border-c-brand2 rounded text-c-brand2 shadow-sm">O computador NÃO calcula. A tela continua mostrando "3+2". Por que ele não fez a soma?</p>
+                </div>
+                <!-- Tabela 5x5: Header + 4 lines -->
+                <div class="spreadsheet-grid shadow-xl bg-white border-4 border-c-brand1" style="grid-template-columns: 40px repeat(4, 1fr); grid-template-rows: 30px repeat(4, 40px);">
+                    <div class="sheet-header border-0 bg-white"></div>
+                    <div class="sheet-header bg-c-brand1 text-white border-l-0">A (Você digita)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">B</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">C</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">D</div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">1</div>
+                    <div class="sheet-cell border-l-0 border-t-0 text-red-600 font-bold bg-red-50 text-center justify-center">3+2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">3</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">4</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: O Gatilho (Igual) -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">O Gatilho: Sinal de Igual (=)</h2>
+            <div class="grid grid-cols-2 gap-12 w-full max-w-6xl items-center">
+                <div class="space-y-6">
+                    <div class="card p-4 border-4 border-red-500 bg-red-50">
+                        <p class="font-black text-red-800 text-xl mb-2">Sem o Igual (Texto)</p>
+                        <p class="text-sm font-bold text-gray-800">Se você digitar apenas <code>3+2</code>, o computador enxerga como uma palavra. Ele não calcula e alinha para a <strong>esquerda</strong>.</p>
+                    </div>
+                    <div class="card p-4 border-4 border-c-brand3 bg-green-50">
+                        <p class="font-black text-c-brand3 text-xl mb-2">Com o Igual (Fórmula)</p>
+                        <p class="text-sm font-bold text-gray-800">Se você digitar <code>=3+2</code>, o botão de "ligar a calculadora" é ativado. O computador faz a conta e mostra <strong>5</strong> alinhado à <strong>direita</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Tabela 5x5: Header + 4 lines -->
+                <div class="spreadsheet-grid shadow-xl bg-white border-4 border-black col-span-2 mx-auto" style="grid-template-columns: 40px repeat(4, 1fr); grid-template-rows: 30px repeat(4, 40px);">
+                    <div class="sheet-header border-0 bg-white"></div>
+                    <div class="sheet-header bg-c-brand2 text-white border-l-0">A (Você digita)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand4 text-black">B (Vê na tela)</div>
+                    <div class="sheet-header border-l-0 bg-white text-black">C</div>
+                    <div class="sheet-header border-l-0 bg-white text-black">D</div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">1</div>
+                    <div class="sheet-cell border-l-0 border-t-0 text-red-600 font-bold bg-red-50">3+2</div>
+                    <div class="sheet-cell border-l-0 border-t-0 text-red-600 font-bold bg-red-50">3+2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">2</div>
+                    <div class="sheet-cell border-l-0 border-t-0 text-c-brand3 font-bold bg-green-50">=3+2</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-c-brand3 font-bold bg-green-50 text-xl">5</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">3</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header bg-white border-t-0 text-black">4</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: O Poder do CSV e a Localização -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-brand2">Revisão: O Poder do CSV (No Brasil!)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-lg">
+                    <p class="font-bold text-xl mb-2 text-c-brand1">A Lógica da Simplicidade</p>
+                    <p class="text-sm mb-4 font-bold text-black">Nem todo software lê arquivos <code>.xlsx</code>. Mas TODO programa lê arquivos de <strong>Texto Simples</strong>.</p>
+                    <p class="text-sm mt-4 font-bold text-black border-t border-gray-400 pt-4">O CSV salva apenas os dados. <br><br><span class="bg-white text-black px-1 rounded border border-black">No Brasil</span>: Como nós usamos a vírgula para os decimais (ex: 7,5), o nosso arquivo CSV usa o <strong>Ponto e Vírgula ( ; )</strong> para separar as colunas. Se usasse vírgula para tudo, o sistema cortaria o número no meio e quebraria a tabela inteira!</p>
+                </div>
+                
+                <div class="rounded-xl p-8 bg-c-black shadow-2xl border-4 border-c-brand4 w-full">
+                    <p class="text-c-brand3 text-sm mb-4 font-bold font-sans tracking-wide">Como o computador vê o .csv no Brasil:</p>
+                    <pre class="font-mono text-white text-base leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">Nome;Idade;Setor;Nota
+Ana Souza;25;TI;9,5
+Bruno Lima;30;Vendas;8,0
+Carlos Dias;42;Marketing;7,5
+Daniela Paz;28;RH;10,0
+Eduardo Luz;35;TI;8,5
+Fernanda;29;Vendas;9,0
+Gabriel;45;Diretoria;9,5
+Helena;31;TI;8,0
+Igor Silva;27;Marketing;7,0</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Os Operadores -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Os Símbolos da Matemática na Computação</h2>
+            <p class="mb-6 text-xl text-center max-w-4xl font-bold">No computador, não temos a tecla de "vezes" (x) tradicional, nem a de "divisão" (÷). Utilizamos os símbolos universais da programação.</p>
+            
+            <div class="grid grid-cols-4 gap-6 w-full max-w-6xl">
+                <div class="card p-6 text-center border-t-8 border-gray-400">
+                    <h3 class="text-6xl font-black font-mono mb-4 text-black">+</h3>
+                    <p class="text-lg font-bold bg-gray-200 rounded inline-block px-4 py-1 mb-2 border border-black text-black">Soma</p>
+                    <p class="text-base font-mono font-bold text-gray-800 bg-white border border-black p-1">=10+5</p>
+                </div>
+                <div class="card p-6 text-center border-t-8 border-gray-400">
+                    <h3 class="text-6xl font-black font-mono mb-4 text-black">-</h3>
+                    <p class="text-lg font-bold bg-gray-200 rounded inline-block px-4 py-1 mb-2 border border-black text-black">Subtração</p>
+                    <p class="text-base font-mono font-bold text-gray-800 bg-white border border-black p-1">=10-5</p>
+                </div>
+                <div class="card p-6 text-center border-t-8 border-c-brand1 transform scale-105 shadow-xl">
+                    <h3 class="text-6xl font-black font-mono mb-4 text-c-brand1">*</h3>
+                    <p class="text-lg font-bold bg-c-brand1 text-white rounded inline-block px-4 py-1 mb-2 border border-black">Multiplicação</p>
+                    <p class="text-base font-mono font-bold text-gray-800 bg-white border border-black p-1">=10*5</p>
+                    <p class="text-xs text-c-brand1 font-bold mt-2">(Asterisco)</p>
+                </div>
+                <div class="card p-6 text-center border-t-8 border-c-brand3 transform scale-105 shadow-xl">
+                    <h3 class="text-6xl font-black font-mono mb-4 text-c-brand3">/</h3>
+                    <p class="text-lg font-bold bg-c-brand3 text-white rounded inline-block px-4 py-1 mb-2 border border-black">Divisão</p>
+                    <p class="text-base font-mono font-bold text-gray-800 bg-white border border-black p-1">=10/5</p>
+                    <p class="text-xs text-c-brand3 font-bold mt-2">(Barra)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Ordem de Precedência -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-6 text-c-black">Ordem de Precedência (Como na Linguagem C)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-md">
+                    <p class="font-black text-c-brand1 mb-2 text-xl">Quem o computador resolve primeiro?</p>
+                    <p class="text-base font-bold mb-4 text-black">Assim como na Linguagem de Programação C, a planilha obedece à regra estrita da matemática: <strong>A Multiplicação (*) e Divisão (/) SEMPRE acontecem antes da Soma (+) e Subtração (-).</strong></p>
+                    <p class="text-base font-bold bg-white text-black p-3 border-2 border-black rounded">Para forçar a soma a acontecer primeiro, você DEVE colocar a soma dentro de <strong>Parênteses ()</strong>.</p>
+                </div>
+                <div class="flex flex-col gap-6">
+                    <div class="card p-6 border-4 border-red-500 bg-white text-center">
+                        <p class="font-mono text-3xl font-black text-black">=10 + 5 * 2</p>
+                        <p class="text-sm font-bold mt-2 text-gray-700">Faz 5*2 primeiro (10), depois soma 10.</p>
+                        <p class="text-3xl font-black text-red-600 mt-2">Resultado: 20</p>
+                    </div>
+                    <div class="card p-6 border-4 border-c-brand3 bg-white text-center">
+                        <p class="font-mono text-3xl font-black text-black">=(10 + 5) * 2</p>
+                        <p class="text-sm font-bold mt-2 text-gray-700">Os parênteses mandam: soma primeiro (15) e multiplica por 2.</p>
+                        <p class="text-3xl font-black text-c-brand3 mt-2">Resultado: 30</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Prática 1 -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 1: Testando o Motor</h2>
+            <div class="action-box max-w-5xl shadow-lg border-c-brand2 bg-white">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-c-brand2">AÇÃO NO DOCUMENTO:</p>
+                <p class="text-lg mb-6 font-bold text-black">Abra o arquivo da aula. Em qualquer quadrado vazio, fora da tabela:</p>
+                <ol class="list-decimal pl-8 space-y-4 text-lg font-bold text-gray-800">
+                    <li>Digite: <strong class="bg-gray-100 px-2 font-mono text-c-brand1 border border-black rounded">=20*3</strong> e aperte Enter.</li>
+                    <li>Digite: <strong class="bg-gray-100 px-2 font-mono text-c-brand3 border border-black rounded">=100/4</strong> e aperte Enter.</li>
+                </ol>
+                <p class="mt-6 text-base text-gray-800 font-bold border-t border-gray-300 pt-4 bg-c-brand4 p-4 rounded-b border-2 border-black">
+                    Se você der <strong>dois cliques</strong> no número (resultado), a fórmula volta a aparecer para você editar!
+                </p>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: O Erro dos Números Brutos -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-8">
+                <span class="bg-c-brand1 text-white border-2 border-black px-4 py-2 rounded-xl font-black text-3xl">02</span>
+                <h2 class="text-4xl font-bold text-c-black">O Problema dos "Números Brutos"</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl items-center">
+                <div class="space-y-6">
+                    <p class="text-lg font-bold text-black">Vamos somar as notas do aluno João digitando os números diretamente na fórmula (números brutos).</p>
+                    <p class="font-mono text-2xl font-black bg-gray-100 p-4 border-4 border-red-500 text-red-600 rounded">=5,0+7,0+8,0</p>
+                    <div class="logic-box border-c-brand1 bg-white border-l-8">
+                        <p class="font-black text-c-brand1 mb-2">Qual é a grande dor de cabeça aqui?</p>
+                        <p class="text-sm font-bold text-black">O resultado vai dar 20. Mas e se a professora digitou errado e a 'Nota 1' era na verdade 9?</p>
+                        <p class="text-sm font-bold mt-2 bg-gray-50 border border-gray-300 p-3 rounded text-black">Você teria que dar dois cliques na célula do Total, apagar o '5,0', digitar '9,0' e apertar Enter. Imagina ter que refazer isso na mão para 40 alunos numa sala se uma nota mudar!</p>
+                    </div>
+                </div>
+                
+                <!-- Tabela 5x5: Header + 4 lines -->
+                <div class="spreadsheet-grid shadow-xl bg-white border-4 border-red-500" style="grid-template-columns: 40px 1fr repeat(3, 1fr); grid-template-rows: 30px repeat(4, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">A (Aluno)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">B (N1)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">C (N2)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">D (N3)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">1</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold bg-gray-100">João</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number bg-gray-100 font-bold border-2 border-red-500 text-red-600">5,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number bg-gray-100 font-bold">7,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number bg-gray-100 font-bold">8,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">3</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold text-red-600">Total:</div>
+                    <div class="sheet-cell border-l-0 border-t-0 text-red-600 font-bold bg-gray-50 text-xs" style="grid-column: span 3;">=5,0+7,0+8,0 (Não atualiza)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">4</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: Referências (A Solução) -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">A Solução Profissional: Referências</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl items-center">
+                <div class="space-y-6">
+                    <p class="text-lg font-bold text-black">Em vez de somar os números brutos, nós mandamos o computador somar os <strong>Endereços (As Células)</strong>.</p>
+                    <p class="font-mono text-3xl font-black bg-c-brand3 text-white p-4 border-4 border-black rounded">=B1+C1+D1</p>
+                    <div class="logic-box border-c-brand3 bg-white border-l-8">
+                        <p class="font-black text-c-brand3 mb-2">A Mágica da Automação</p>
+                        <p class="text-sm font-bold text-black">Você está dizendo: <em>'Computador, some o que tiver dentro da caixa B1 com a C1 e D1.'</em></p>
+                        <p class="text-sm font-bold mt-2 bg-green-50 border border-green-200 p-3 rounded text-black">Se a nota do aluno mudar amanhã de 5,0 para 9,0 na caixa B1, <strong>o Total se atualiza sozinho e instantaneamente</strong>. Você nunca mais precisará refazer a conta.</p>
+                    </div>
+                </div>
+                
+                <!-- Tabela 5x5: Header + 4 lines -->
+                <div class="spreadsheet-grid shadow-xl bg-white border-4 border-c-brand3" style="grid-template-columns: 40px 1fr repeat(3, 1fr); grid-template-rows: 30px repeat(4, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand3 text-white">A (Aluno)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand3 text-white">B (N1)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand3 text-white">C (N2)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand3 text-white">D (N3)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">1</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold bg-gray-100">João</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number bg-gray-100 border-2 border-c-brand3 font-bold text-c-brand3">9,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number bg-gray-100 font-bold">7,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number bg-gray-100 font-bold">8,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">3</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold text-c-brand3">Total:</div>
+                    <div class="sheet-cell border-l-0 border-t-0 text-c-brand3 font-bold bg-gray-50 text-xs" style="grid-column: span 3;">=B1+C1+D1 (Vira 24,0 auto)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">4</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div><div class="sheet-cell border-l-0 border-t-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Prática 2 - Importando Dados -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 2: A Base de Dados (Boletim)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-c-brand2 bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-c-brand2">AÇÃO NO DOCUMENTO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Vamos importar os alunos usando o formato <strong>CSV</strong> com o separador ponto e vírgula (;).</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Copie todo o texto da caixa ao lado.</li>
+                        <li>Cole na célula <strong>A1</strong> da sua planilha.</li>
+                        <li>Ficará tudo espremido na coluna A. Com a coluna A selecionada, vá no menu superior em: <strong class="text-c-brand2 text-white px-2 rounded border border-black">Dados > Dividir texto em colunas</strong>.</li>
+                        <li>A mágica acontece! A planilha vai separar cada nota para sua própria coluna.</li>
+                    </ol>
+                </div>
+                <div class="rounded-xl p-8 bg-c-black shadow-2xl border-4 border-c-brand4 w-full">
+                    <pre class="font-mono text-white text-[13px] leading-snug select-all text-left overflow-x-auto m-0 p-0 bg-transparent border-none">Aluno;P1;P2;P3;Exercícios
+Ana Souza;7,5;8,0;6,5;2,0
+Bruno Lima;5,0;6,0;5,5;1,5
+Carlos Dias;9,0;8,5;9,5;2,0
+Daniela Paz;4,0;5,5;6,0;1,0
+Eduardo Luz;8,0;7,0;8,0;1,5
+Fernanda Silva;6,5;7,5;7,0;2,0
+Gabriel Lima;3,0;4,5;5,0;0,5
+Helena Reis;9,5;9,0;9,5;2,0
+Igor Costa;7,0;6,5;7,0;1,5
+Julia Dias;8,5;9,0;8,5;2,0</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 12: Prática 3 - Soma Manual -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 3: O Total do Aluno</h2>
+            <div class="action-box max-w-6xl shadow-lg border-c-brand1 bg-white">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-c-brand1">CRIANDO A FÓRMULA:</p>
+                <div class="flex gap-8 items-center">
+                    <div class="flex-1">
+                        <p class="text-lg mb-4 font-bold text-black">Vamos criar a coluna <strong>'Nota Final'</strong> ao lado dos Exercícios. Queremos somar as 3 Provas e os Exercícios usando REFERÊNCIAS.</p>
+                        <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                            <li>Na célula <strong>F1</strong>, digite o cabeçalho: <span class="bg-gray-200 px-2 rounded border border-black text-black">Nota Final</span>.</li>
+                            <li>Na célula <strong>F2</strong> (ao lado da nota da Ana), digite o sinal de <strong class="bg-gray-200 px-2 rounded border border-black text-black">=</strong>.</li>
+                            <li><strong>CLIQUE com o mouse</strong> na célula da P1 da Ana (B2).</li>
+                            <li>Digite o sinal de mais <strong class="text-c-brand1 font-mono text-xl">+</strong> e clique na P2 (C2). Repita para a P3 (D2) e os Exercícios (E2).</li>
+                            <li>Aperte Enter. Ficará <code class="bg-c-brand4 text-black px-2 border border-black font-mono">=B2+C2+D2+E2</code>. A nota da Ana aparecerá calculada (24,0).</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: A Alça de Preenchimento -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-8">
+                <span class="bg-c-brand3 text-white border-2 border-black px-4 py-2 rounded-xl font-black text-3xl">03</span>
+                <h2 class="text-5xl font-bold text-c-black">A Alça Mágica (Auto-Fill) 🪄</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <!-- Tabela 6x4: Header + 3 lines -->
+                <div class="spreadsheet-grid shadow-xl border-4 border-black bg-white text-xs" style="grid-template-columns: 40px 90px 60px 60px 40px 1fr; grid-template-rows: 30px repeat(3, 40px);">
+                    <div class="sheet-header border-0 bg-white"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">A</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">B (P1)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">C (P2)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">...</div>
+                    <div class="sheet-header border-l-0 bg-c-brand1 text-white">F (Final)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">2</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold text-black">Ana Souza</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-black">7,5</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-black">8,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 center text-black">...</div>
+                    <div class="sheet-cell active border-l-0 border-t-0 bg-gray-50 relative border-4 border-c-brand1"><span class="font-mono font-bold text-c-brand1">=B2+C2...</span><div class="fill-handle bg-c-brand2"></div></div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">3</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold text-black">Bruno</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-black">5,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-black">6,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 center text-black">...</div>
+                    <div class="sheet-cell border-l-0 border-t-0 bg-gray-100 flex flex-col items-center justify-center text-gray-500 font-bold">Arraste ↓</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">4</div>
+                    <div class="sheet-cell border-l-0 border-t-0 font-bold text-black">Carlos</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-black">9,0</div>
+                    <div class="sheet-cell border-l-0 border-t-0 number text-black">8,5</div>
+                    <div class="sheet-cell border-l-0 border-t-0 center text-black">...</div>
+                    <div class="sheet-cell border-l-0 border-t-0 bg-gray-100"></div>
+                </div>
+                
+                <div class="logic-box border-c-brand3 bg-white border-l-8">
+                    <p class="font-black text-c-black mb-2 text-xl">Calculando a sala toda em 1 segundo</p>
+                    <p class="text-base font-bold mb-4 text-black">Você não precisa digitar a fórmula na linha 3 do Bruno, nem na do Carlos. O computador é inteligente.</p>
+                    <p class="text-base font-bold bg-gray-100 p-4 border-2 border-c-brand3 rounded text-black">Preste atenção no <strong>quadradinho azul</strong> no canto inferior direito da célula da Ana. Se você clicar nele e arrastar para baixo, ele copia a fórmula e <strong>adapta as linhas sozinho</strong> (O B2 vira B3, B4...).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: Prática - Arrasto -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 4: O Arrasto do Poder</h2>
+            <div class="action-box max-w-5xl shadow-xl border-c-brand3 bg-white">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-c-brand3">AÇÃO NO DOCUMENTO:</p>
+                <div class="text-center py-6 text-black">
+                    <p class="text-2xl font-bold mb-6">1. Clique <strong>uma vez</strong> na célula onde você acabou de calcular a nota da Ana (24,0).</p>
+                    <p class="text-2xl font-bold mb-6">2. Leve o mouse até o <strong>pequeno quadrado azul</strong> no canto inferior direito da célula (o cursor vai virar uma cruz ➕).</p>
+                    <p class="text-2xl font-bold text-white bg-c-black p-4 rounded-xl border-4 border-c-brand3 shadow-md inline-block">3. Clique, segure e arraste até a última aluna (Julia)!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Funções Intro -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-8">
+                <span class="bg-c-brand4 text-black border-2 border-black px-4 py-2 rounded-xl font-black text-3xl">04</span>
+                <h2 class="text-5xl font-bold text-c-black">Funções Nativas (Palavras Mágicas)</h2>
+            </div>
+            <div class="card p-10 max-w-5xl bg-white text-center shadow-xl border-t-8 border-c-brand4">
+                <p class="text-2xl font-bold text-gray-800 mb-6">Imagina ter que somar as notas de 100 alunos na vertical usando a técnica anterior: <br><code class="bg-gray-100 border border-black p-2 mt-4 inline-block text-black">=F2+F3+F4+F5+F6+F7...</code></p>
+                <p class="text-xl font-bold text-gray-700 mb-6">Você perderia horas digitando o sinal de mais (+).</p>
+                <div class="bg-c-brand4 p-6 border-2 border-black rounded text-left inline-block text-black">
+                    <p class="font-black mb-2 text-xl">O que são Funções?</p>
+                    <p class="text-lg font-bold">São palavras que já vêm programadas dentro do sistema para fazer trabalhos matemáticos pesados e repetitivos para você em milissegundos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 16: O Intervalo (Dois Pontos) -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Como as funções leem? O Segredo dos Dois Pontos (:)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl items-center">
+                <div class="logic-box shadow-xl text-black">
+                    <p class="font-black text-c-black mb-2 text-xl">O Intervalo (Até)</p>
+                    <p class="text-base leading-relaxed font-bold">Os dois pontos ` : ` significam "ATÉ". Eles criam um corredor/bloco contínuo de células.</p>
+                    <p class="text-xl leading-relaxed mt-4 font-mono font-black text-white bg-c-black p-4 rounded border-2 border-gray-400 text-center shadow">
+                        =SOMA(F2:F11)
+                    </p>
+                    <p class="text-base mt-4 font-bold text-gray-800 bg-white p-3 border border-black rounded">Tradução: "Some da célula F2 <strong>ATÉ</strong> a célula F11". Isso inclui todos os alunos que estão no meio do caminho.</p>
+                </div>
+                
+                <!-- Tabela 5x4: Header + 3 lines -->
+                <div class="spreadsheet-grid shadow-xl bg-white border-4 border-c-brand4" style="grid-template-columns: 40px 40px 1fr 40px 40px; grid-template-rows: 30px repeat(3, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 text-gray-400 bg-c-brand2 text-white">...</div>
+                    <div class="sheet-header border-l-0 bg-c-brand1 text-white">F (Final)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white"></div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-cell border-l-0 border-t-0 bg-white border-x-4 border-t-4 border-c-brand4 font-bold text-center justify-center text-black shadow-inner">F2</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">3</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-cell border-l-0 border-t-0 bg-white border-x-4 border-c-brand4 font-bold text-center justify-center flex-col text-xs text-black shadow-inner">↓</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">11</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-cell border-l-0 border-t-0 bg-white border-x-4 border-b-4 border-c-brand4 font-bold text-center justify-center text-black shadow-inner">F11</div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                    <div class="sheet-cell border-l-0 border-t-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: Função SOMA -->
+        <section class="slide">
+            <h2 class="text-5xl font-black mb-6 text-c-brand2">=SOMA()</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl items-center">
+                <div class="card p-8 border-4 border-c-brand2 bg-white shadow-xl text-black">
+                    <p class="font-black text-xl mb-2">Para que serve?</p>
+                    <p class="text-lg text-gray-800 mb-6 font-bold">Soma todos os números que estiverem dentro dos parênteses de uma só vez. Excelente para descobrir Totais rapidamente.</p>
+                    <p class="font-mono text-2xl bg-c-brand2 text-white p-4 border-2 border-white font-black text-center rounded">=SOMA(B2:D2)</p>
+                    <p class="text-sm mt-4 font-bold text-gray-600">Neste exemplo, somaríamos apenas as Provas (P1, P2, P3) da Ana, ignorando os exercícios.</p>
+                </div>
+                
+                <!-- Tabela 5x3: Header + 2 lines -->
+                <div class="spreadsheet-grid shadow-lg bg-white border-2 border-black" style="grid-template-columns: 40px 100px repeat(3, 1fr); grid-template-rows: 30px repeat(2, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">A</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">B (P1)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">C (P2)</div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">D (P3)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">2</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 bg-gray-50 text-xs text-black">Ana Souza</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 font-bold border-y-4 border-l-4 border-c-brand2 bg-gray-100 text-black">7,5</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 font-bold border-y-4 border-c-brand2 bg-gray-100 text-black">8,0</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 border-y-4 border-r-4 border-c-brand2 font-bold bg-gray-100 text-black">6,5</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">3</div>
+                    <div class="sheet-cell border-t-0 border-l-0"></div><div class="sheet-cell border-t-0 border-l-0"></div><div class="sheet-cell border-t-0 border-l-0"></div><div class="sheet-cell border-t-0 border-l-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: Função MEDIA -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-5xl font-black mb-6 text-c-brand1">=MÉDIA()</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl items-center">
+                <div class="card p-8 border-4 border-c-brand1 bg-white shadow-xl text-black">
+                    <p class="font-black text-xl mb-2">Para que serve?</p>
+                    <p class="text-lg text-gray-800 mb-6 font-bold">Soma todos os valores e os divide pela sua quantidade automaticamente. Ideal para achar a <strong>Média da Turma</strong> no nosso boletim.</p>
+                    <p class="font-mono text-2xl bg-c-brand1 text-white p-4 border-2 border-white font-black text-center rounded">=MEDIA(F2:F11)</p>
+                </div>
+                
+                <!-- Tabela 4x4: Header + 3 lines -->
+                <div class="spreadsheet-grid shadow-lg bg-white border-2 border-black" style="grid-template-columns: 40px 100px 40px 1fr; grid-template-rows: 30px repeat(3, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">A</div>
+                    <div class="sheet-header border-l-0 text-gray-400 bg-c-brand2 text-white">...</div>
+                    <div class="sheet-header border-l-0 bg-c-brand1 text-white">F (Final)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">10</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 text-xs text-black">Igor Silva</div>
+                    <div class="sheet-cell border-t-0 border-l-0 center text-black">...</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 border-x-4 border-t-4 border-c-brand1 bg-gray-100 font-bold text-black">22,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">11</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 text-xs text-black">Julia Reis</div>
+                    <div class="sheet-cell border-t-0 border-l-0 center text-black">...</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 border-x-4 border-b-4 border-c-brand1 font-bold bg-gray-100 text-black">28,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">13</div>
+                    <div class="sheet-cell font-black text-white border-t-0 border-l-0 bg-c-brand1 text-center justify-center text-xs">MÉDIA GERAL</div>
+                    <div class="sheet-cell border-t-0 border-l-0 bg-white"></div>
+                    <div class="sheet-cell number font-black text-c-brand1 bg-white border-2 border-c-brand1 border-l-0 text-xl">21,8</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 19: Função MAXIMO -->
+        <section class="slide">
+            <h2 class="text-5xl font-black mb-6 text-c-brand3">=MÁXIMO()</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl items-center">
+                <div class="card p-8 border-4 border-c-brand3 bg-white shadow-xl text-black">
+                    <p class="font-black text-xl mb-2">Para que serve?</p>
+                    <p class="text-lg text-gray-800 mb-6 font-bold">Varre uma lista gigantesca e retorna apenas o MAIOR número encontrado nela. Útil para descobrir a nota mais alta da sala ou a venda recorde do mês.</p>
+                    <p class="font-mono text-2xl bg-c-brand3 text-white p-4 border-2 border-white font-black text-center rounded">=MAXIMO(F2:F11)</p>
+                </div>
+                
+                <!-- Tabela 4x4: Header + 3 lines -->
+                <div class="spreadsheet-grid shadow-lg bg-white border-2 border-black" style="grid-template-columns: 40px 100px 40px 1fr; grid-template-rows: 30px repeat(3, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">A</div>
+                    <div class="sheet-header border-l-0 text-gray-400 bg-c-brand2 text-white">...</div>
+                    <div class="sheet-header border-l-0 bg-c-brand3 text-white">F (Final)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">4</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 text-xs text-black">Carlos Dias</div>
+                    <div class="sheet-cell border-t-0 border-l-0 center text-black">...</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 font-black text-white bg-c-brand3 border-x-4 border-c-brand3 text-xl">29,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">5</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 text-xs text-black">Daniela Paz</div>
+                    <div class="sheet-cell border-t-0 border-l-0 center text-black">...</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 border-x-4 border-c-brand3 font-bold bg-gray-100 text-black">16,5</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">14</div>
+                    <div class="sheet-cell font-black text-white border-t-0 border-l-0 bg-c-brand3 text-center justify-center text-[10px]">MAIOR NOTA</div>
+                    <div class="sheet-cell border-t-0 border-l-0 bg-white"></div>
+                    <div class="sheet-cell number font-black text-c-brand3 bg-white border-2 border-c-brand3 border-l-0 text-xl">29,0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 20: Função MINIMO -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-5xl font-black mb-6 text-gray-600">=MÍNIMO()</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl items-center">
+                <div class="card p-8 border-4 border-gray-500 bg-white shadow-xl text-black">
+                    <p class="font-black text-xl mb-2">Para que serve?</p>
+                    <p class="text-lg text-gray-800 mb-6 font-bold">O oposto do MÁXIMO. Varre a lista e extrai o MENOR número encontrado. Genial para ver qual aluno tirou a pior nota.</p>
+                    <p class="font-mono text-2xl bg-gray-500 text-white p-4 border-2 border-white font-black text-center rounded">=MINIMO(F2:F11)</p>
+                </div>
+                
+                <!-- Tabela 4x4: Header + 3 lines -->
+                <div class="spreadsheet-grid shadow-lg bg-white border-2 border-black" style="grid-template-columns: 40px 100px 40px 1fr; grid-template-rows: 30px repeat(3, 40px);">
+                    <div class="sheet-header border-0 bg-white text-black"></div>
+                    <div class="sheet-header border-l-0 bg-c-brand2 text-white">A</div>
+                    <div class="sheet-header border-l-0 text-gray-400 bg-c-brand2 text-white">...</div>
+                    <div class="sheet-header border-l-0 bg-gray-500 text-white">F (Final)</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">7</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 text-xs text-black">Fernanda</div>
+                    <div class="sheet-cell border-t-0 border-l-0 center text-black">...</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 border-x-4 border-gray-500 font-bold bg-gray-100 text-black">23,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">8</div>
+                    <div class="sheet-cell font-bold border-t-0 border-l-0 text-xs text-black">Gabriel</div>
+                    <div class="sheet-cell border-t-0 border-l-0 center text-black">...</div>
+                    <div class="sheet-cell number border-t-0 border-l-0 font-black text-white bg-red-600 border-x-4 border-gray-500 text-xl">13,0</div>
+                    
+                    <div class="sheet-header border-t-0 bg-white text-black">15</div>
+                    <div class="sheet-cell font-black text-white border-t-0 border-l-0 bg-gray-600 text-center justify-center text-xs">PIOR NOTA</div>
+                    <div class="sheet-cell border-t-0 border-l-0 bg-white"></div>
+                    <div class="sheet-cell number font-black text-red-600 bg-white border-2 border-gray-500 border-l-0 text-xl">13,0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 21: Prática 5 -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-c-black">Prática 5: Análise da Turma</h2>
+            <div class="action-box max-w-6xl shadow-xl border-c-brand4 bg-white text-black">
+                <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-black bg-c-brand4 px-2 inline-block rounded">AÇÃO NO DOCUMENTO:</p>
+                <p class="text-xl mb-6 font-bold">No final da sua tabela, nas linhas vazias, descobriremos as estatísticas da sala usando as Funções Nativas.</p>
+                <ol class="list-decimal pl-8 space-y-5 text-lg font-bold text-gray-800">
+                    <li>Na célula <strong>A13</strong>, escreva 'Média da Turma' e, ao lado (F13), utilize a fórmula: <strong class="bg-gray-200 px-2 rounded border border-black font-mono text-c-brand1">=MEDIA(F2:F11)</strong></li>
+                    <li>Na célula <strong>A14</strong>, escreva 'Nota Mais Alta' e, ao lado (F14), utilize a fórmula: <strong class="bg-gray-200 px-2 rounded border border-black font-mono text-c-brand3">=MAXIMO(F2:F11)</strong></li>
+                    <li>Na célula <strong>A15</strong>, escreva 'Pior Nota' e, ao lado (F15), utilize a fórmula: <strong class="bg-gray-200 px-2 rounded border border-black font-mono text-gray-600">=MINIMO(F2:F11)</strong></li>
+                    <li class="mt-6 text-c-brand2 border-t border-gray-300 pt-6">Aperte Enter em cada uma delas e veja a informação gerada automaticamente! O que acontece com a 'Nota Mais Alta' se você mudar a nota do Gabriel para 10,0 em todas as provas?</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- SLIDE 22: Desafio de Lógica (PEMDAS) -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-black text-c-black mb-8">Desafio de Lógica e Sistemas 🧠</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl w-full items-center">
+                <div class="logic-box border-c-brand1 bg-c-brand4 shadow-xl border-2 border-l-[16px] border-r-0 text-black">
+                    <p class="font-black text-c-brand1 mb-4 text-2xl uppercase">Ordem Operacional:</p>
+                    <p class="text-lg font-bold text-gray-900 leading-relaxed mb-4">A planilha obedece estritamente às mesmas regras da Linguagem C de programação. Qual será o resultado da fórmula seguinte se a colocarmos numa célula?</p>
+                    <p class="text-3xl font-mono font-black text-white bg-c-black p-4 rounded border-2 border-black text-center">= 10 + 5 * 2</p>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <button onclick="alert('❌ Incorreto! Você somou primeiro (10+5) e multiplicou por 2 (15*2). Lembra? O computador resolve a multiplicação primeiro!')" class="card p-6 font-black text-2xl hover:bg-gray-200 transition border-2 border-black shadow text-black">30</button>
+                    <button onclick="alert('✅ CORRETO! O computador multiplica primeiro (5*2 = 10), e depois soma (+10), dando 20. Se quisesse somar primeiro, teria que utilizar parênteses: =(10+5)*2')" class="card p-6 font-black text-2xl hover:bg-c-brand4 transition border-2 border-black shadow text-c-brand2">20</button>
+                    <button onclick="alert('❌ Incorreto! Tente lembrar da regra da multiplicação primeiro.')" class="card p-6 font-black text-2xl hover:bg-gray-200 transition border-2 border-black shadow text-black">25</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 23: Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-5xl font-black mb-10 text-c-black">Resumo das Fórmulas</h2>
+            <div class="flex gap-6 w-full max-w-6xl text-center">
+                <div class="flex-1 border-4 border-c-brand2 p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105 text-black">
+                    <p class="text-2xl font-black text-c-brand2 mb-4 border-b-4 border-c-brand2 pb-2">OPERAÇÕES BÁSICAS</p>
+                    <p class="text-base font-bold text-black mb-2">Tudo começa com "=". <br>Se você esquecer, se converte em texto simples.</p>
+                    <p class="text-base font-bold text-black mb-2">Símbolos: + - * /</p>
+                    <p class="text-sm font-bold text-black bg-c-brand4 p-3 rounded border-2 border-black mt-2"><strong>A Regra de Ouro:</strong><br>Some as Referências (A1+B1),<br> nunca os números brutos!</p>
+                </div>
+                <div class="flex-1 border-4 border-c-brand1 p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105 text-black">
+                    <p class="text-2xl font-black text-c-brand1 mb-4 border-b-4 border-c-brand1 pb-2">FUNÇÕES NATIVAS</p>
+                    <p class="text-base font-bold text-black mb-2">SOMA(), MEDIA(), MAXIMO(), MINIMO().</p>
+                    <p class="text-base font-bold text-black mb-2">Os ` : ` criam o Intervalo (ATÉ).</p>
+                    <p class="text-sm font-bold text-white bg-c-brand3 p-3 rounded border-2 border-black mt-2">A <strong>Alça de Preenchimento</strong> (quadrado azul) automatiza as linhas, copiando a fórmula para baixo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 24: Fim -->
+        <section class="slide bg-c-brand3 border-t-[16px] border-c-black shadow-inner">
+            <div class="text-center">
+                <i data-lucide="function-square" class="w-32 h-32 mx-auto text-white mb-8"></i>
+                <h1 class="text-7xl font-black mb-6 text-white">FIM DA AULA 13</h1>
+                <p class="text-3xl text-white mb-16 font-bold">Sua base de dados agora pensa e trabalha por você.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-c-black text-white px-10 py-5 rounded-full font-black shadow-2xl hover:scale-105 transition flex items-center gap-3 text-2xl border-4 border-transparent hover:border-c-brand1">
+                        <i data-lucide="printer" class="w-8 h-8"></i> Imprimir Apostila (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-sm text-white font-mono font-black tracking-widest uppercase opacity-80">COTIL - Fundamentos de Informática</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Inferior -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-5 bg-white border-4 border-c-black rounded-full shadow-lg hover:bg-c-brand4 transition active:scale-90 text-c-black">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-5 bg-c-brand1 text-white border-4 border-c-black rounded-full shadow-lg hover:opacity-80 transition active:scale-90">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            counter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
