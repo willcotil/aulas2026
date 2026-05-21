@@ -522,6 +522,7 @@ tray.setToolTip('Meu Super App rodando no fundo!');</code></pre>
             <h2>O Menu da Bandeja (Context Menu) <span class="etapa-tag t3">Parte 3/3</span></h2>
             <p>Se você clicar com o botão direito no ícone lá embaixo, nada acontece. Vamos criar um <strong>Menu de Contexto</strong> para ele!</p>
             <p>A lógica é igualzinha a do menu superior: fazemos um Array, passamos pro <code>Menu</code>, e mandamos o <code>tray</code> usar.</p>
+            <p>Também precisamos alterar o comportamento de como a janela se fecha, interceptando o <code>quit</code> padrão e trocando por <code>hide</code></p>
             
             <div class="file-label">src/main/index.js (Logo abaixo de criar o Tray)</div>
 <pre style="padding: 15px; font-size: 0.95rem; min-height: auto;"><code class="language-javascript">const menuDoTray = Menu.buildFromTemplate([
@@ -533,11 +534,20 @@ tray.setToolTip('Meu Super App rodando no fundo!');</code></pre>
         } 
     },
     { type: 'separator' },
-    { 
-        label: 'Encerrar', 
-        role: 'quit' // Função pronta do sistema
-    }
+     { label: 'Encerrar', click: () => {
+        app.isQuitting = true; // Define uma flag para fechar de vez
+        app.quit();
+    }}
+    
 ]);
+
+// 3. Intercepte o fechamento da janela
+janelaPrincipal.on('close', (event) => {
+    if (!app.isQuitting) {
+       event.preventDefault(); // Impede o fechamento real
+       janelaPrincipal.hide();      // Apenas esconde a janela
+   }
+ });
 
 // Gruda esse menu no clique com o botão direito do ícone!
 tray.setContextMenu(menuDoTray);</code></pre>
