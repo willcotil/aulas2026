@@ -587,9 +587,9 @@ tray.setContextMenu(menuDoTray);</code></pre>
             
             <div class="quest-list">
                 <ol>
-                    <li><strong>Novo Botão de Menu:</strong> Adicione uma nova aba principal no Menu Superior chamada "Visualizar". Dentro dela, coloque um botão "Recarregar" (Use a propriedade <code>role: 'reload'</code> ou um clique chamando <code>janelaPrincipal.reload()</code>).</li>
-                    <li><strong>Comunicação Reversa:</strong> Crie um botão no Menu Superior chamado "Zerar Produtos". Quando o usuário clicar, em vez de dar <code>console.log</code>, faça o Menu executar um <code>janelaPrincipal.webContents.send('zerar-tudo')</code>. No seu arquivo `renderer.js`, crie um "ouvido" para esse canal que apague o HTML da tela.</li>
-                    <li><strong>O Fechamento Falso:</strong> Geralmente, apps com Tray não fecham quando o usuário clica no 'X', eles apenas se escondem. Peça ajuda ao Google ou IA com o prompt: <em>"No Electron, como interceptar o evento 'close' da BrowserWindow para cancelar o fechamento da janela usando `e.preventDefault()` e usar o método `hide()` para apenas esconder a tela?"</em>. Implemente isso!</li>
+                    <li><strong>Novo Botão de Menu:</strong> Adicione uma nova aba principal no Menu Superior chamada "Visualizar". Dentro dela, coloque um botão "+ Produto" e façca com que esse botão abra a janela de cadastro de produto.</li>
+                    <li><strong>Comunicação Reversa:</strong> Crie um botão no Menu Superior chamado "Zerar Produtos". Quando o usuário clicar, em vez de dar <code>console.log</code>, faça o Menu executar uma função que limpa a lista de produtos (<code>db = [];</code>) e chama <code>janelaPrincipal.webContents.send('atualizar-tela')</code>.</li>
+                    <li><strong>Tela Sobre:</strong> Crie um botão no menu do Tray para que quando o usuário clique, abra uma janela nova chamada "Sobre", que conterá suas informações de aluno (Nome, RA, etc).</li>
                     <li><strong style="color: var(--color-blue);"><i class="fa-solid fa-robot"></i> Desafio IA (Atalhos Globais):</strong> Um recurso poderoso é ativar funções mesmo quando o app está minimizado. Peça à IA: <em>"Como usar o módulo 'globalShortcut' do Electron para registrar as teclas 'CommandOrControl+Shift+A' e fazer a minha janela abrir (show) não importa em qual tela o usuário esteja?"</em>. Implemente essa magia negra!</li>
                 </ol>
             </div>
