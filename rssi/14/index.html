@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 14: HTTP, HTTPS e Segurança</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #FF6500;
+            --secondary-color: #FF8C32;
+            --accent-color: #FFD700;
+            --dark-color: #2D2D2D;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #1a1b22;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #presentation-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--card-background);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 80px 110px 80px;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            visibility: hidden;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            z-index: 1;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: var(--primary-color);
+        }
+
+        /* Numeração de página */
+        .page-number {
+            position: absolute;
+            bottom: 25px;
+            right: 30px;
+            font-size: 0.95em;
+            color: #666;
+            font-weight: 500;
+            background: var(--background-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+        }
+
+        /* Navegação */
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+            background: #ffffff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid var(--text-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: 2px solid var(--text-color);
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.15s;
+        }
+
+        .nav-btn:hover { transform: scale(1.08); }
+        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .slide-counter {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--text-color);
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .fullscreen-btn {
+            background-color: var(--dark-color);
+            color: white;
+            border: 2px solid var(--text-color);
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .fullscreen-btn:hover { transform: scale(1.08); background-color: var(--primary-color); }
+
+        /* Tipografia */
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 2.8em;
+            line-height: 1.1;
+        }
+
+        h2 {
+            color: var(--text-color);
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 2.2em;
+            padding-bottom: 10px;
+            border-bottom: 6px solid var(--primary-color);
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            font-size: 1.4em;
+            margin: 15px 0 10px 0;
+        }
+
+        p {
+            font-size: 1.15em;
+            line-height: 1.6;
+            max-width: 900px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        p.left { text-align: left; }
+
+        ul {
+            font-size: 1.1em;
+            line-height: 1.8;
+            max-width: 800px;
+            text-align: left;
+        }
+
+        ul li { margin-bottom: 8px; }
+
+        strong { color: var(--primary-color); font-weight: 700; }
+        em { color: var(--dark-color); font-style: italic; }
+
+        /* Code block */
+        .code-block {
+            background: var(--dark-color);
+            color: var(--accent-color);
+            padding: 25px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1em;
+            width: 100%;
+            max-width: 800px;
+            border: 3px solid var(--text-color);
+            text-align: left;
+            line-height: 1.6;
+            box-shadow: 4px 4px 0 var(--primary-color);
+        }
+
+        .code-block .comment { color: #8a8a8a; }
+        .code-block .verb { color: #FF8C32; font-weight: bold; }
+        .code-block .header { color: #6BCB77; }
+
+        /* Tabela */
+        table.custom-table {
+            width: 100%;
+            max-width: 1000px;
+            border-collapse: collapse;
+            border: 2px solid var(--text-color);
+            font-size: 1.05em;
+            box-shadow: 4px 4px 0 var(--primary-color);
+        }
+
+        table.custom-table th, table.custom-table td {
+            border: 1px solid var(--text-color);
+            padding: 14px 16px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        table.custom-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        table.custom-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        table.custom-table tr:hover { background-color: #fff5ee; }
+
+        .verb-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        /* Cards de definição */
+        .definition-card {
+            background: #fff5ee;
+            border-left: 6px solid var(--primary-color);
+            padding: 20px 25px;
+            border-radius: 4px;
+            max-width: 800px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .definition-card strong { color: var(--text-color); }
+
+        /* Destaque para dúvida/curiosidade */
+        .question-box {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFEFC1 100%);
+            border: 3px dashed var(--primary-color);
+            padding: 20px 30px;
+            border-radius: 12px;
+            max-width: 800px;
+            margin-top: 25px;
+            font-size: 1.15em;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .question-box::before {
+            content: '🤔 ';
+            font-size: 1.3em;
+            font-style: normal;
+        }
+
+        /* CIA Triangle */
+        .cia-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 1000px;
+            margin-top: 20px;
+        }
+
+        .cia-card {
+            background: var(--card-background);
+            border: 3px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 4px 4px 0 var(--dark-color);
+        }
+
+        .cia-card .letter {
+            font-size: 3em;
+            font-weight: 900;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .cia-card .title-cia {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--text-color);
+        }
+
+        .cia-card p { font-size: 0.95em; margin: 0; }
+
+        /* SVG container */
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            margin: 15px auto;
+        }
+
+        .svg-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Animation controls */
+        .anim-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .anim-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: 2px solid var(--text-color);
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.15s;
+        }
+
+        .anim-btn:hover { transform: scale(1.05); background-color: var(--secondary-color); }
+
+        /* Subtítulo de slide */
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        /* Two-column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .col-card {
+            background: #fafafa;
+            border: 2px solid var(--text-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .col-card h3 { margin-top: 0; }
+
+        /* Layers diagram */
+        .osi-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .osi-layer {
+            padding: 12px 20px;
+            border: 2px solid var(--text-color);
+            border-radius: 4px;
+            font-weight: 500;
+            background: #fafafa;
+            text-align: center;
+        }
+
+        .osi-layer.highlight {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 700;
+            transform: scale(1.05);
+            box-shadow: 3px 3px 0 var(--dark-color);
+        }
+
+        /* Highlight para HTTP/HTTPS comparação */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1000px;
+            margin-top: 20px;
+        }
+
+        .compare-card {
+            border: 3px solid;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .compare-card.bad { border-color: var(--danger-color); background: #ffeaea; }
+        .compare-card.good { border-color: var(--success-color); background: #eaffea; }
+
+        .compare-card h3 { margin-top: 0; }
+        .compare-card.bad h3 { color: var(--danger-color); }
+        .compare-card.good h3 { color: var(--success-color); }
+
+        /* Print/Fullscreen mode adjustments */
+        :fullscreen .slide { padding: 60px 100px 120px 100px; }
+        :fullscreen h1 { font-size: 3.5em; }
+        :fullscreen h2 { font-size: 2.6em; }
+        :fullscreen p { font-size: 1.3em; }
+
+        /* Pequenas animações de entrada */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide.active > * {
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        .slide.active > *:nth-child(1) { animation-delay: 0.1s; }
+        .slide.active > *:nth-child(2) { animation-delay: 0.2s; }
+        .slide.active > *:nth-child(3) { animation-delay: 0.3s; }
+        .slide.active > *:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Responsivo */
+        @media (max-width: 900px) {
+            .slide { padding: 40px 30px 100px 30px; }
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.6em; }
+            .cia-grid { grid-template-columns: 1fr; }
+            .two-col, .compare-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="presentation-container">
+        <div class="slides-container">
+
+            <!-- SLIDE 1: Capa -->
+            <section class="slide active">
+                <h1>Aula 14<br>HTTP, HTTPS e Segurança</h1>
+                <p class="subtitle">Redes de Computadores</p>
+                <p>Como a web realmente funciona, por que ela é segura hoje e quais ameaças ainda existem.</p>
+                <div class="page-number">1 / 22</div>
+            </section>
+
+            <!-- SLIDE 2: Contextualizando o HTTP -->
+            <section class="slide">
+                <h2>O que é o HTTP?</h2>
+                <p><strong>HTTP</strong> (HyperText Transfer Protocol) é o protocolo padrão da World Wide Web.</p>
+                <div class="definition-card">
+                    <p class="left"><strong>Camada:</strong> Reside na <strong>Camada de Aplicação</strong> (camada 7 do modelo OSI / camada 4 do modelo TCP/IP).</p>
+                    <p class="left" style="margin-top:10px;"><strong>Objetivo:</strong> Permitir a transferência de documentos de hipertexto (HTML, imagens, JSON, vídeos, etc.) entre <strong>clientes</strong> (navegadores, apps) e <strong>servidores</strong>.</p>
+                    <p class="left" style="margin-top:10px;"><strong>Modelo:</strong> Cliente-Servidor, sem estado (stateless), baseado em requisição e resposta.</p>
+                </div>
+                <div class="page-number">2 / 22</div>
+            </section>
+
+            <!-- SLIDE 3: Camadas OSI - onde o HTTP mora -->
+            <section class="slide">
+                <h2>O HTTP no Modelo OSI</h2>
+                <p>Cada camada cuida de um aspecto da comunicação. O HTTP fica no topo:</p>
+                <div class="osi-layers">
+                    <div class="osi-layer highlight">7 - Aplicação (HTTP, HTTPS, FTP, DNS, SMTP)</div>
+                    <div class="osi-layer">6 - Apresentação</div>
+                    <div class="osi-layer">5 - Sessão</div>
+                    <div class="osi-layer">4 - Transporte (TCP, UDP)</div>
+                    <div class="osi-layer">3 - Rede (IP)</div>
+                    <div class="osi-layer">2 - Enlace</div>
+                    <div class="osi-layer">1 - Física</div>
+                </div>
+                <p style="margin-top:15px; font-size:1em;"><em>O HTTP delega o transporte confiável dos pacotes ao TCP. Ele apenas define o "idioma" da conversa.</em></p>
+                <div class="page-number">3 / 22</div>
+            </section>
+
+            <!-- SLIDE 4: Anatomia da Requisição -->
+            <section class="slide">
+                <h2>Anatomia de uma Requisição</h2>
+                <p>Quando você abre um site, seu navegador envia algo assim ao servidor:</p>
+                <div class="code-block">
+<span class="verb">GET</span> /fotos/perfil.jpg <span class="comment">HTTP/1.1</span><br>
+<span class="header">Host:</span> www.instagram.com<br>
+<span class="header">User-Agent:</span> Mozilla/5.0 (Chrome/120.0)<br>
+<span class="header">Accept:</span> image/webp,image/png,*/*<br>
+<span class="header">Authorization:</span> Bearer eyJhbGciOiJIUzI1NiIs...
+                </div>
+                <div class="question-box">
+                    O que significa <strong>GET</strong>? Por que <strong>HTTP/1.1</strong>? O navegador está apenas "perguntando" ou "dando ordens"? E todas essas linhas abaixo, para que servem?
+                </div>
+                <div class="page-number">4 / 22</div>
+            </section>
+
+            <!-- SLIDE 5: Verbos HTTP -->
+            <section class="slide">
+                <h2>Verbos HTTP (Métodos)</h2>
+                <p>Cada verbo define a <strong>intenção</strong> da requisição. Em APIs REST, mapeiam o CRUD:</p>
+                <table class="custom-table">
+                    <tr><th>Verbo</th><th>Significado</th><th>Uso em APIs Web</th></tr>
+                    <tr><td class="verb-cell">GET</td><td>Solicita dados sem alterá-los</td><td><strong>Read</strong> — buscar produtos, carregar perfil</td></tr>
+                    <tr><td class="verb-cell">POST</td><td>Envia dados para criar algo novo</td><td><strong>Create</strong> — cadastrar usuário, postar comentário</td></tr>
+                    <tr><td class="verb-cell">PUT</td><td>Substitui um recurso por completo</td><td><strong>Update</strong> — atualizar perfil inteiro</td></tr>
+                    <tr><td class="verb-cell">PATCH</td><td>Atualiza parcialmente um recurso</td><td><strong>Update</strong> — alterar só o e-mail</td></tr>
+                    <tr><td class="verb-cell">DELETE</td><td>Remove um recurso</td><td><strong>Delete</strong> — apagar uma postagem</td></tr>
+                    <tr><td class="verb-cell">HEAD</td><td>Como GET, mas só retorna headers</td><td>Checar se um recurso existe</td></tr>
+                    <tr><td class="verb-cell">OPTIONS</td><td>Pergunta o que o servidor permite</td><td>Usado em CORS pelo navegador</td></tr>
+                </table>
+                <p style="font-size:1em; margin-top:15px;"><em>Ponte com Desenvolvimento Web:</em> em frameworks como Express, Spring ou Django, cada rota é registrada vinculando um <strong>verbo</strong> + <strong>caminho</strong> a uma função do servidor.</p>
+                <div class="page-number">5 / 22</div>
+            </section>
+
+            <!-- SLIDE 6: Resposta do Servidor (Status Codes) -->
+            <section class="slide">
+                <h2>A Resposta do Servidor</h2>
+                <p>Para toda requisição, o servidor responde com um <strong>código de status</strong> de 3 dígitos:</p>
+                <table class="custom-table">
+                    <tr><th>Grupo</th><th>Significado</th></tr>
+                    <tr><td><strong>1xx</strong></td><td>Informativo (raro de ver na prática)</td></tr>
+                    <tr><td><strong>2xx</strong></td><td>Sucesso! (200 OK, 201 Created, 204 No Content)</td></tr>
+                    <tr><td><strong>3xx</strong></td><td>Redirecionamento (301 Moved, 302 Found, 304 Not Modified)</td></tr>
+                    <tr><td><strong>4xx</strong></td><td>Erro do Cliente (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found)</td></tr>
+                    <tr><td><strong>5xx</strong></td><td>Erro do Servidor (500 Internal Error, 502 Bad Gateway, 503 Service Unavailable)</td></tr>
+                </table>
+                <p style="margin-top:15px;"><em>Regra prática: 4xx = "a culpa é sua", 5xx = "a culpa é do servidor".</em></p>
+                <div class="page-number">6 / 22</div>
+            </section>
+
+            <!-- SLIDE 7: Headers -->
+            <section class="slide">
+                <h2>Metadados (Headers)</h2>
+                <p>Headers são pares <strong>chave: valor</strong> que carregam metadados sobre a requisição ou resposta:</p>
+                <table class="custom-table">
+                    <tr><th>Header</th><th>Função</th></tr>
+                    <tr><td class="verb-cell">Host</td><td>Indica o servidor de destino (essencial em servidores que hospedam vários sites).</td></tr>
+                    <tr><td class="verb-cell">Content-Type</td><td>Define o tipo de dado enviado/recebido (text/html, application/json, image/png).</td></tr>
+                    <tr><td class="verb-cell">User-Agent</td><td>Identifica o navegador e sistema operacional do cliente.</td></tr>
+                    <tr><td class="verb-cell">Authorization</td><td>Envia credenciais ou tokens de autenticação (ex: Bearer JWT).</td></tr>
+                    <tr><td class="verb-cell">Cookie</td><td>Envia cookies armazenados pelo navegador (sessão, preferências).</td></tr>
+                    <tr><td class="verb-cell">Cache-Control</td><td>Define se e por quanto tempo o recurso pode ser armazenado em cache.</td></tr>
+                    <tr><td class="verb-cell">Accept</td><td>Diz ao servidor quais formatos o cliente aceita receber.</td></tr>
+                </table>
+                <div class="page-number">7 / 22</div>
+            </section>
+
+            <!-- SLIDE 8: Problema do HTTP -->
+            <section class="slide">
+                <h2>O Problema do HTTP (1991)</h2>
+                <p>O HTTP foi criado por Tim Berners-Lee em 1991, com um objetivo simples: trocar documentos científicos no CERN. Segurança <strong>não era prioridade</strong>.</p>
+                <div class="definition-card">
+                    <p class="left">Todo o tráfego HTTP circula em <strong>texto claro (plaintext)</strong>. Isso significa que <strong>qualquer nó intermediário</strong> entre você e o servidor pode <strong>ler</strong> tudo que passa:</p>
+                    <ul style="margin-top:10px;">
+                        <li>Seu provedor de internet (ISP)</li>
+                        <li>O roteador Wi-Fi público da cafeteria</li>
+                        <li>Qualquer pessoa "escutando" a rede</li>
+                    </ul>
+                </div>
+                <p style="margin-top:15px; color:var(--danger-color); font-weight:700; font-size:1.2em;">Senhas, números de cartão, mensagens privadas — tudo visível.</p>
+                <div class="page-number">8 / 22</div>
+            </section>
+
+            <!-- SLIDE 9: Visualização do MITM em HTTP -->
+            <section class="slide">
+                <h2>Tráfego HTTP Interceptado</h2>
+                <p>Animação: veja como um atacante na rede consegue ler seus dados em HTTP puro.</p>
+                <div class="svg-container">
+                    <svg id="svg-mitm-http" viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Cliente -->
+                        <rect x="30" y="120" width="140" height="80" rx="10" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="100" y="155" text-anchor="middle" fill="white" font-weight="bold" font-size="18">Cliente</text>
+                        <text x="100" y="180" text-anchor="middle" fill="white" font-size="14">(navegador)</text>
+
+                        <!-- Servidor -->
+                        <rect x="730" y="120" width="140" height="80" rx="10" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="800" y="155" text-anchor="middle" fill="white" font-weight="bold" font-size="18">Servidor</text>
+                        <text x="800" y="180" text-anchor="middle" fill="white" font-size="14">(site)</text>
+
+                        <!-- Linha de conexão -->
+                        <line x1="170" y1="160" x2="730" y2="160" stroke="#2D2D2D" stroke-width="3" stroke-dasharray="6,4"/>
+
+                        <!-- Atacante (MITM) -->
+                        <rect x="380" y="220" width="140" height="70" rx="10" fill="#dc3545" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="450" y="250" text-anchor="middle" fill="white" font-weight="bold" font-size="16">Atacante</text>
+                        <text x="450" y="272" text-anchor="middle" fill="white" font-size="12">(escutando)</text>
+                        <line x1="450" y1="220" x2="450" y2="170" stroke="#dc3545" stroke-width="2" stroke-dasharray="3,3"/>
+
+                        <!-- Pacote animado -->
+                        <g id="packet-http">
+                            <rect x="0" y="0" width="180" height="40" rx="6" fill="#FFD700" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="90" y="25" text-anchor="middle" fill="#2D2D2D" font-family="monospace" font-size="13" font-weight="bold">senha=123456</text>
+                            <animateTransform attributeName="transform"
+                                              type="translate"
+                                              from="170 140" to="550 140"
+                                              dur="3s"
+                                              repeatCount="indefinite"/>
+                        </g>
+
+                        <!-- Texto no topo -->
+                        <text x="450" y="40" text-anchor="middle" fill="#dc3545" font-weight="bold" font-size="20">⚠ Dados em texto claro</text>
+                        <text x="450" y="70" text-anchor="middle" fill="#2D2D2D" font-size="14">Qualquer um na rede consegue ler o conteúdo</text>
+                    </svg>
+                </div>
+                <div class="page-number">9 / 22</div>
+            </section>
+
+            <!-- SLIDE 10: A Solução: HTTPS -->
+            <section class="slide">
+                <h2>A Solução: HTTPS (1994)</h2>
+                <p>Em 1994, a <strong>Netscape</strong> (criadora do navegador Netscape Navigator) introduziu o <strong>SSL</strong> (Secure Sockets Layer), depois evoluído para o <strong>TLS</strong> (Transport Layer Security).</p>
+                <div class="definition-card">
+                    <p class="left"><strong>HTTPS = HTTP + TLS.</strong> A ideia é simples e elegante: em vez de modificar o HTTP, <strong>encapsulá-lo</strong> dentro de um túnel criptografado.</p>
+                </div>
+                <div class="compare-grid">
+                    <div class="compare-card bad">
+                        <h3>HTTP puro</h3>
+                        <p>Mensagem visível para qualquer interceptador.</p>
+                        <p style="font-family:monospace; font-size:0.95em;">"senha=123456"</p>
+                    </div>
+                    <div class="compare-card good">
+                        <h3>HTTPS</h3>
+                        <p>Mensagem cifrada, ilegível na rede.</p>
+                        <p style="font-family:monospace; font-size:0.95em;">"7a3f9c1e8d2b6f0a..."</p>
+                    </div>
+                </div>
+                <p style="margin-top:15px;"><em>O HTTP continua sendo a mesma linguagem; o que muda é o "envelope" que o transporta.</em></p>
+                <div class="page-number">10 / 22</div>
+            </section>
+
+            <!-- SLIDE 11: Encapsulamento HTTPS -->
+            <section class="slide">
+                <h2>O Conceito de Túnel</h2>
+                <p>Em redes, um <strong>túnel</strong> é uma técnica em que um protocolo é <strong>encapsulado dentro de outro</strong>, criando um "canal protegido" através de uma rede pública.</p>
+                <div class="definition-card">
+                    <p class="left"><strong>Analogia:</strong> imagine que você precisa entregar uma carta atravessando uma cidade cheia de gente curiosa. Sem túnel, sua carta vai numa bandeja aberta — todo mundo lê. Com um túnel, você passa por baixo da cidade, dentro de um corredor blindado: as pessoas até veem que <em>algo</em> está sendo transportado, mas não conseguem ver <em>o quê</em>.</p>
+                    <p class="left" style="margin-top:10px;">No HTTPS, o "túnel" é o <strong>TLS</strong>: ele envolve o HTTP de ponta a ponta, do navegador até o servidor. Tudo que entra no túnel é cifrado; tudo que sai é decifrado.</p>
+                </div>
+                <div class="svg-container">
+                    <svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Cliente -->
+                        <circle cx="60" cy="140" r="35" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="60" y="146" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Cliente</text>
+
+                        <!-- Servidor -->
+                        <circle cx="740" cy="140" r="35" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="740" y="146" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Servidor</text>
+
+                        <!-- Túnel TLS externo -->
+                        <rect x="110" y="80" width="580" height="120" rx="60" fill="#eaffea" stroke="#28a745" stroke-width="4" stroke-dasharray="10,5"/>
+                        <text x="400" y="60" text-anchor="middle" fill="#28a745" font-weight="bold" font-size="17">🔒 Túnel TLS (canal criptografado)</text>
+
+                        <!-- HTTP interno -->
+                        <rect x="180" y="110" width="440" height="60" rx="8" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="400" y="135" text-anchor="middle" fill="white" font-weight="bold" font-size="16">HTTP</text>
+                        <text x="400" y="158" text-anchor="middle" fill="white" font-size="12" font-family="monospace">GET /perfil — Authorization: Bearer ...</text>
+
+                        <!-- Atacante curioso -->
+                        <text x="400" y="225" text-anchor="middle" fill="#dc3545" font-size="13" font-weight="bold">👀 Atacante vê o túnel passando, mas não enxerga o HTTP lá dentro</text>
+                    </svg>
+                </div>
+                <p style="font-size:1em;">Para o desenvolvedor, <strong>nada muda</strong>: ele escreve o mesmo HTTP. Navegador e servidor cuidam de montar o túnel automaticamente.</p>
+                <div class="page-number">11 / 22</div>
+            </section>
+
+            <!-- SLIDE 12: Conceito de Criptografia -->
+            <section class="slide">
+                <h2>O que é Criptografia?</h2>
+                <p><strong>Criptografia</strong> é a arte de transformar uma mensagem legível em algo ilegível, de modo que apenas quem tem a "chave" possa voltar à mensagem original.</p>
+                <div class="two-col">
+                    <div class="col-card">
+                        <h3>Simétrica</h3>
+                        <p class="left"><strong>Uma única chave</strong> cifra e decifra. Rápida, mas há um problema: como entregar essa chave em segurança?</p>
+                        <p class="left" style="margin-bottom:10px;"><em>Exemplo:</em> AES.</p>
+                        <!-- SVG: Demo de criptografia simétrica -->
+                        <svg id="svg-sim" viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:460px;">
+                            <!-- Texto original -->
+                            <rect x="10" y="80" width="120" height="50" rx="6" fill="white" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="70" y="100" text-anchor="middle" font-size="10" fill="#666">texto original</text>
+                            <text x="70" y="120" text-anchor="middle" font-family="monospace" font-size="13" font-weight="bold" fill="#2D2D2D">senha=123456</text>
+
+                            <!-- Caixa cifrada (centro) -->
+                            <rect x="170" y="80" width="120" height="50" rx="6" fill="#2D2D2D" stroke="#FF6500" stroke-width="2"/>
+                            <text x="230" y="100" text-anchor="middle" font-size="10" fill="#FFD700">cifrado</text>
+                            <text id="sim-cipher-text" x="230" y="120" text-anchor="middle" font-family="monospace" font-size="13" font-weight="bold" fill="#FFD700">vhqkd=456789</text>
+
+                            <!-- Texto decifrado -->
+                            <rect x="330" y="80" width="120" height="50" rx="6" fill="white" stroke="#28a745" stroke-width="2"/>
+                            <text x="390" y="100" text-anchor="middle" font-size="10" fill="#666">decifrado</text>
+                            <text x="390" y="120" text-anchor="middle" font-family="monospace" font-size="13" font-weight="bold" fill="#28a745">senha=123456</text>
+
+                            <!-- Chave 1 (cifrar) - MESMA cor/forma -->
+                            <g id="sim-key1">
+                                <rect x="135" y="35" width="40" height="30" rx="4" fill="#FFD700" stroke="#2D2D2D" stroke-width="2"/>
+                                <text x="155" y="55" text-anchor="middle" font-size="16">🔑</text>
+                                <text x="155" y="80" text-anchor="middle" font-size="10" font-weight="bold" fill="#2D2D2D">chave</text>
+                            </g>
+
+                            <!-- Chave 2 (decifrar) - MESMA cor/forma -->
+                            <g id="sim-key2">
+                                <rect x="285" y="35" width="40" height="30" rx="4" fill="#FFD700" stroke="#2D2D2D" stroke-width="2"/>
+                                <text x="305" y="55" text-anchor="middle" font-size="16">🔑</text>
+                                <text x="305" y="80" text-anchor="middle" font-size="10" font-weight="bold" fill="#2D2D2D">mesma chave</text>
+                            </g>
+
+                            <!-- Setas -->
+                            <path d="M 130 105 L 165 105" stroke="#2D2D2D" stroke-width="2" marker-end="url(#arrow-sim)"/>
+                            <path d="M 290 105 L 325 105" stroke="#2D2D2D" stroke-width="2" marker-end="url(#arrow-sim)"/>
+
+                            <!-- Labels embaixo -->
+                            <text x="155" y="155" text-anchor="middle" font-size="11" fill="#666">cifrar</text>
+                            <text x="305" y="155" text-anchor="middle" font-size="11" fill="#666">decifrar</text>
+
+                            <!-- Destaque -->
+                            <text x="230" y="190" text-anchor="middle" font-size="12" font-weight="bold" fill="#FF6500">⚠ A mesma chave nos dois lados</text>
+                            <text x="230" y="208" text-anchor="middle" font-size="10" fill="#666">Cifra de César: cada letra desloca +3 posições</text>
+
+                            <defs>
+                                <marker id="arrow-sim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M0,0 L10,5 L0,10 Z" fill="#2D2D2D"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <button class="anim-btn" style="margin-top:10px; font-size:0.85em; padding:6px 14px;" onclick="animarSimetrica()">▶ Animar</button>
+                    </div>
+
+                    <div class="col-card">
+                        <h3>Assimétrica</h3>
+                        <p class="left"><strong>Duas chaves</strong> matematicamente ligadas: uma <strong>pública</strong> e uma <strong>privada</strong>. Resolve o problema da entrega da chave.</p>
+                        <p class="left" style="margin-bottom:10px;"><em>Exemplo:</em> RSA, ECDSA.</p>
+                        <!-- SVG: Demo de criptografia assimétrica -->
+                        <svg id="svg-asim" viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:460px;">
+                            <!-- Texto original -->
+                            <rect x="10" y="80" width="120" height="50" rx="6" fill="white" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="70" y="100" text-anchor="middle" font-size="10" fill="#666">texto original</text>
+                            <text x="70" y="120" text-anchor="middle" font-family="monospace" font-size="13" font-weight="bold" fill="#2D2D2D">senha=123456</text>
+
+                            <!-- Caixa cifrada (centro) -->
+                            <rect x="170" y="80" width="120" height="50" rx="6" fill="#2D2D2D" stroke="#FF6500" stroke-width="2"/>
+                            <text x="230" y="100" text-anchor="middle" font-size="10" fill="#FFD700">cifrado</text>
+                            <text id="asim-cipher-text" x="230" y="120" text-anchor="middle" font-family="monospace" font-size="13" font-weight="bold" fill="#FFD700">x9k#2pq8z1</text>
+
+                            <!-- Texto decifrado -->
+                            <rect x="330" y="80" width="120" height="50" rx="6" fill="white" stroke="#28a745" stroke-width="2"/>
+                            <text x="390" y="100" text-anchor="middle" font-size="10" fill="#666">decifrado</text>
+                            <text x="390" y="120" text-anchor="middle" font-family="monospace" font-size="13" font-weight="bold" fill="#28a745">senha=123456</text>
+
+                            <!-- Chave pública (cifrar) - cadeado aberto AMARELO -->
+                            <g id="asim-key-pub">
+                                <rect x="135" y="35" width="40" height="30" rx="4" fill="#FFD700" stroke="#2D2D2D" stroke-width="2"/>
+                                <text x="155" y="55" text-anchor="middle" font-size="16">🔓</text>
+                                <text x="155" y="80" text-anchor="middle" font-size="10" font-weight="bold" fill="#2D2D2D">pública</text>
+                            </g>
+
+                            <!-- Chave privada (decifrar) - cadeado fechado VERMELHO (DIFERENTE) -->
+                            <g id="asim-key-priv">
+                                <rect x="285" y="35" width="40" height="30" rx="4" fill="#dc3545" stroke="#2D2D2D" stroke-width="2"/>
+                                <text x="305" y="55" text-anchor="middle" font-size="16" fill="white">🔑</text>
+                                <text x="305" y="80" text-anchor="middle" font-size="10" font-weight="bold" fill="#dc3545">privada</text>
+                            </g>
+
+                            <!-- Setas -->
+                            <path d="M 130 105 L 165 105" stroke="#2D2D2D" stroke-width="2" marker-end="url(#arrow-asim)"/>
+                            <path d="M 290 105 L 325 105" stroke="#2D2D2D" stroke-width="2" marker-end="url(#arrow-asim)"/>
+
+                            <!-- Labels embaixo -->
+                            <text x="155" y="155" text-anchor="middle" font-size="11" fill="#666">cifrar</text>
+                            <text x="305" y="155" text-anchor="middle" font-size="11" fill="#666">decifrar</text>
+
+                            <!-- Destaque -->
+                            <text x="230" y="190" text-anchor="middle" font-size="12" font-weight="bold" fill="#FF6500">✓ Chaves diferentes, par matemático</text>
+                            <text x="230" y="208" text-anchor="middle" font-size="10" fill="#666">Só a privada abre o que a pública fechou</text>
+
+                            <defs>
+                                <marker id="arrow-asim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                    <path d="M0,0 L10,5 L0,10 Z" fill="#2D2D2D"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <button class="anim-btn" style="margin-top:10px; font-size:0.85em; padding:6px 14px;" onclick="animarAssimetrica()">▶ Animar</button>
+                    </div>
+                </div>
+                <p style="margin-top:15px;"><em>O HTTPS usa as duas: assimétrica para trocar uma chave simétrica com segurança, depois simétrica para o resto da conversa (porque é mais rápida).</em></p>
+                <div class="page-number">12 / 22</div>
+            </section>
+
+            <!-- SLIDE 13: Criptografia Assimétrica - Conceito -->
+            <section class="slide">
+                <h2>Chave Pública vs Chave Privada</h2>
+                <p>Como duas chaves diferentes podem cifrar e decifrar a mesma mensagem? A matemática por trás (números primos enormes) garante uma relação especial:</p>
+                <ul>
+                    <li>O que é cifrado com a <strong>chave pública</strong> só pode ser decifrado com a <strong>chave privada</strong> correspondente.</li>
+                    <li>A chave pública pode ser compartilhada livremente com o mundo todo.</li>
+                    <li>A chave privada <strong>nunca</strong> sai do servidor que a criou.</li>
+                </ul>
+                <div class="definition-card">
+                    <p class="left"><strong>Analogia do cadeado:</strong> imagine que o servidor distribui milhões de <strong>cadeados abertos</strong> (chave pública). Qualquer um pode pegar um cadeado, colocar uma mensagem numa caixa e fechá-la. Mas só o servidor tem a <strong>chave</strong> que abre aquele cadeado (chave privada).</p>
+                </div>
+                <div class="page-number">13 / 22</div>
+            </section>
+
+            <!-- SLIDE 14: Animação - Criptografia Assimétrica -->
+            <section class="slide">
+                <h2>Como Funciona — Animação</h2>
+                <p>Clique em <strong>Iniciar</strong> para ver Alice enviando uma mensagem cifrada para Bob:</p>
+                <div class="svg-container">
+                    <svg id="svg-asym" viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Alice -->
+                        <circle cx="100" cy="180" r="55" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="100" y="175" text-anchor="middle" fill="white" font-weight="bold" font-size="18">Alice</text>
+                        <text x="100" y="200" text-anchor="middle" fill="white" font-size="13">(emissor)</text>
+
+                        <!-- Bob -->
+                        <circle cx="800" cy="180" r="55" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="800" y="175" text-anchor="middle" fill="white" font-weight="bold" font-size="18">Bob</text>
+                        <text x="800" y="200" text-anchor="middle" fill="white" font-size="13">(receptor)</text>
+
+                        <!-- Chave pública de Bob (ao lado de Alice) -->
+                        <g id="bob-public-key" opacity="0">
+                            <rect x="180" y="155" width="70" height="50" rx="6" fill="#FFD700" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="215" y="180" text-anchor="middle" font-size="22">🔓</text>
+                            <text x="215" y="220" text-anchor="middle" font-size="11" font-weight="bold">Pub. Bob</text>
+                        </g>
+
+                        <!-- Mensagem -->
+                        <g id="msg-plain" opacity="0">
+                            <rect x="280" y="155" width="160" height="50" rx="6" fill="white" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="360" y="185" text-anchor="middle" font-size="14" font-family="monospace">"Oi Bob!"</text>
+                        </g>
+
+                        <!-- Mensagem cifrada -->
+                        <g id="msg-cipher" opacity="0">
+                            <rect x="380" y="155" width="180" height="50" rx="6" fill="#2D2D2D" stroke="#FF6500" stroke-width="2"/>
+                            <text x="470" y="185" text-anchor="middle" font-size="13" font-family="monospace" fill="#FFD700">"7a3f9c1e..."</text>
+                        </g>
+
+                        <!-- Chave privada de Bob -->
+                        <g id="bob-private-key" opacity="0">
+                            <rect x="640" y="155" width="80" height="50" rx="6" fill="#dc3545" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="680" y="185" text-anchor="middle" font-size="22" fill="white">🔑</text>
+                            <text x="680" y="220" text-anchor="middle" font-size="11" font-weight="bold">Priv. Bob</text>
+                        </g>
+
+                        <!-- Status do passo -->
+                        <text id="step-text" x="450" y="50" text-anchor="middle" fill="#2D2D2D" font-weight="bold" font-size="18">Pronto para começar</text>
+                        <text id="step-desc" x="450" y="75" text-anchor="middle" fill="#666" font-size="14">Pressione "Iniciar Animação"</text>
+
+                        <!-- Atacante observando -->
+                        <g id="attacker" opacity="0">
+                            <rect x="380" y="280" width="140" height="60" rx="8" fill="#dc3545" stroke="#2D2D2D" stroke-width="2"/>
+                            <text x="450" y="305" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Atacante</text>
+                            <text x="450" y="325" text-anchor="middle" fill="white" font-size="11">vê só "7a3f9c1e..." ❌</text>
+                        </g>
+                    </svg>
+                </div>
+                <div class="anim-controls">
+                    <button class="anim-btn" onclick="iniciarAnimacaoAssimetrica()">▶ Iniciar Animação</button>
+                    <button class="anim-btn" onclick="resetarAnimacaoAssimetrica()">↺ Resetar</button>
+                </div>
+                <div class="page-number">14 / 22</div>
+            </section>
+
+            <!-- SLIDE 15: Autoridades Certificadoras -->
+            <section class="slide">
+                <h2>Autoridades Certificadoras (CAs)</h2>
+                <p>Mas espera: como meu navegador sabe que aquela chave pública é <strong>realmente</strong> do Google, e não de um impostor?</p>
+                <div class="definition-card">
+                    <p class="left">Uma <strong>Autoridade Certificadora (CA)</strong> é uma <strong>empresa</strong> (não um governo) de confiança internacional que <strong>assina digitalmente</strong> certificados, atestando que "a chave pública X pertence ao site Y".</p>
+                </div>
+                <h3>Exemplos de CAs conhecidas:</h3>
+                <ul>
+                    <li><strong>Let's Encrypt</strong> — gratuita, sem fins lucrativos (ISRG)</li>
+                    <li><strong>DigiCert</strong> — uma das maiores comerciais</li>
+                    <li><strong>GlobalSign, Sectigo, GoDaddy</strong> — outras opções pagas</li>
+                </ul>
+                <p style="margin-top:15px;"><em>No Brasil, o ICP-Brasil é uma infraestrutura governamental de certificação, mas para HTTPS na web usamos as CAs internacionais.</em></p>
+                <div class="page-number">15 / 22</div>
+            </section>
+
+            <!-- SLIDE 16: Papel das CAs no HTTPS -->
+            <section class="slide">
+                <h2>O Papel da CA no HTTPS</h2>
+                <p>O navegador <strong>já vem de fábrica com uma lista</strong> de CAs em quem ele confia (o "trust store").</p>
+                <div class="svg-container">
+                    <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Servidor -->
+                        <rect x="30" y="100" width="160" height="80" rx="10" fill="#FF6500" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="110" y="135" text-anchor="middle" fill="white" font-weight="bold" font-size="16">Servidor</text>
+                        <text x="110" y="160" text-anchor="middle" fill="white" font-size="13">(google.com)</text>
+
+                        <!-- CA -->
+                        <rect x="370" y="30" width="160" height="80" rx="10" fill="#17a2b8" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="450" y="60" text-anchor="middle" fill="white" font-weight="bold" font-size="16">CA</text>
+                        <text x="450" y="85" text-anchor="middle" fill="white" font-size="13">(DigiCert)</text>
+
+                        <!-- Navegador -->
+                        <rect x="710" y="100" width="160" height="80" rx="10" fill="#28a745" stroke="#2D2D2D" stroke-width="3"/>
+                        <text x="790" y="135" text-anchor="middle" fill="white" font-weight="bold" font-size="16">Navegador</text>
+                        <text x="790" y="160" text-anchor="middle" fill="white" font-size="13">(seu Chrome)</text>
+
+                        <!-- Setas e textos -->
+                        <line x1="190" y1="130" x2="370" y2="80" stroke="#2D2D2D" stroke-width="2" marker-end="url(#arrow)"/>
+                        <text x="265" y="95" font-size="12" fill="#2D2D2D">1. Pede certificado</text>
+
+                        <line x1="370" y1="100" x2="190" y2="150" stroke="#2D2D2D" stroke-width="2" marker-end="url(#arrow)"/>
+                        <text x="265" y="135" font-size="12" fill="#2D2D2D">2. Assina e devolve</text>
+
+                        <line x1="190" y1="160" x2="710" y2="160" stroke="#FF6500" stroke-width="3" marker-end="url(#arrow-orange)"/>
+                        <text x="450" y="180" text-anchor="middle" font-size="13" fill="#FF6500" font-weight="bold">3. Servidor envia o certificado assinado</text>
+
+                        <line x1="790" y1="100" x2="530" y2="80" stroke="#28a745" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow-green)"/>
+                        <text x="660" y="80" font-size="12" fill="#28a745">4. Navegador valida com a CA</text>
+
+                        <text x="450" y="245" text-anchor="middle" font-size="14" fill="#2D2D2D" font-weight="bold">Se a assinatura confere → 🔒 cadeado verde. Se não → ⚠ aviso de site não confiável.</text>
+
+                        <defs>
+                            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M0,0 L10,5 L0,10 Z" fill="#2D2D2D"/>
+                            </marker>
+                            <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M0,0 L10,5 L0,10 Z" fill="#FF6500"/>
+                            </marker>
+                            <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M0,0 L10,5 L0,10 Z" fill="#28a745"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="page-number">16 / 22</div>
+            </section>
+
+            <!-- SLIDE 17: Tríade CIA -->
+            <section class="slide">
+                <h2>A Tríade CIA da Segurança</h2>
+                <p>Em segurança da informação, três princípios devem ser protegidos. O HTTPS atende aos três:</p>
+                <div class="cia-grid">
+                    <div class="cia-card">
+                        <div class="letter">C</div>
+                        <div class="title-cia">Confidencialidade</div>
+                        <p>Apenas as partes autorizadas leem a mensagem.</p>
+                        <p style="margin-top:10px; color:var(--primary-color); font-weight:700;">→ Criptografia TLS</p>
+                    </div>
+                    <div class="cia-card">
+                        <div class="letter">I</div>
+                        <div class="title-cia">Integridade</div>
+                        <p>A mensagem não foi alterada no caminho.</p>
+                        <p style="margin-top:10px; color:var(--primary-color); font-weight:700;">→ Hashes (MAC/HMAC)</p>
+                    </div>
+                    <div class="cia-card">
+                        <div class="letter">A</div>
+                        <div class="title-cia">Autenticidade</div>
+                        <p>Você fala com quem diz ser, não com um impostor.</p>
+                        <p style="margin-top:10px; color:var(--primary-color); font-weight:700;">→ Certificado da CA</p>
+                    </div>
+                </div>
+                <p style="margin-top:20px;"><em>A tríade CIA é aplicada também em VPNs, e-mails seguros (PGP), assinatura digital de documentos, sistemas bancários e qualquer canal que precise de segurança real.</em></p>
+                <div class="page-number">17 / 22</div>
+            </section>
+
+            <!-- SLIDE 18: Tabela de Ameaças (parte 1) -->
+            <section class="slide">
+                <h2>Principais Ameaças (1/2)</h2>
+                <table class="custom-table">
+                    <tr><th>Ameaça</th><th>Como funciona</th><th>Mitigação</th></tr>
+                    <tr>
+                        <td class="verb-cell">Phishing</td>
+                        <td>Sites/e-mails falsos imitam serviços legítimos para roubar credenciais.</td>
+                        <td>Educação do usuário, verificar URL, 2FA, filtros anti-phishing no e-mail.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">Man-in-the-Middle (MITM)</td>
+                        <td>Atacante se posiciona entre cliente e servidor para interceptar tráfego.</td>
+                        <td>HTTPS obrigatório, HSTS, certificados válidos, VPN em redes públicas.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">SQL Injection</td>
+                        <td>Atacante injeta comandos SQL em formulários para manipular o banco de dados.</td>
+                        <td>Prepared Statements, validação e sanitização de entrada, ORM seguro.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">XSS (Cross-Site Scripting)</td>
+                        <td>Injeção de JavaScript malicioso em páginas que outros usuários carregam.</td>
+                        <td>Sanitização do output, Content Security Policy (CSP), escapar HTML.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">CSRF</td>
+                        <td>Faz o navegador da vítima executar ações em um site onde ela está logada.</td>
+                        <td>Tokens CSRF, atributo SameSite em cookies, validação de Origin/Referer.</td>
+                    </tr>
+                </table>
+                <div class="page-number">18 / 22</div>
+            </section>
+
+            <!-- SLIDE 19: Tabela de Ameaças (parte 2) -->
+            <section class="slide">
+                <h2>Principais Ameaças (2/2)</h2>
+                <table class="custom-table">
+                    <tr><th>Ameaça</th><th>Como funciona</th><th>Mitigação</th></tr>
+                    <tr>
+                        <td class="verb-cell">DDoS</td>
+                        <td>Milhares de máquinas inundam o servidor de requisições até derrubá-lo.</td>
+                        <td>WAF, rate limiting, CDN com proteção (Cloudflare), escalabilidade.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">Força Bruta</td>
+                        <td>Testa milhares de senhas até acertar a do usuário.</td>
+                        <td>Senhas fortes, bloqueio após N tentativas, 2FA, CAPTCHAs.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">Sequestro de Sessão</td>
+                        <td>Atacante rouba o cookie de sessão e finge ser o usuário.</td>
+                        <td>HTTPS, cookies Secure + HttpOnly + SameSite, expiração curta.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">DNS Spoofing</td>
+                        <td>Atacante envenena cache de DNS para redirecionar a vítima a um site falso.</td>
+                        <td>DNSSEC, DNS sobre HTTPS (DoH), verificação de certificado HTTPS.</td>
+                    </tr>
+                    <tr>
+                        <td class="verb-cell">Engenharia Social</td>
+                        <td>Manipulação psicológica da vítima para revelar dados ou agir contra si.</td>
+                        <td>Treinamento de equipe, políticas claras, princípio do menor privilégio.</td>
+                    </tr>
+                </table>
+                <div class="page-number">19 / 22</div>
+            </section>
+
+            <!-- SLIDE 20: Boas Práticas -->
+            <section class="slide">
+                <h2>Boas Práticas Resumidas</h2>
+                <ul style="font-size:1.15em;">
+                    <li><strong>Sempre use HTTPS</strong> (HSTS + redirecionamento automático de HTTP → HTTPS).</li>
+                    <li><strong>Mantenha certificados atualizados</strong> (Let's Encrypt renova automaticamente).</li>
+                    <li><strong>Nunca confie na entrada do usuário</strong> — sempre valide e sanitize.</li>
+                    <li><strong>Use 2FA</strong> em todos os serviços críticos.</li>
+                    <li><strong>Cookies sensíveis</strong> sempre com flags Secure, HttpOnly e SameSite.</li>
+                    <li><strong>Cabeçalhos de segurança</strong>: CSP, X-Frame-Options, X-Content-Type-Options.</li>
+                    <li><strong>Atualize dependências</strong> — bibliotecas desatualizadas têm CVEs conhecidos.</li>
+                </ul>
+                <div class="page-number">20 / 22</div>
+            </section>
+
+            <!-- SLIDE 21: Recapitulando -->
+            <section class="slide">
+                <h2>Recapitulando</h2>
+                <div class="two-col">
+                    <div class="col-card">
+                        <h3>HTTP</h3>
+                        <ul style="font-size:1em;">
+                            <li>Camada de aplicação</li>
+                            <li>Verbos: GET, POST, PUT, DELETE...</li>
+                            <li>Status: 2xx, 3xx, 4xx, 5xx</li>
+                            <li>Headers carregam metadados</li>
+                            <li>Texto claro → inseguro</li>
+                        </ul>
+                    </div>
+                    <div class="col-card">
+                        <h3>HTTPS</h3>
+                        <ul style="font-size:1em;">
+                            <li>HTTP encapsulado em TLS</li>
+                            <li>Chaves pública e privada</li>
+                            <li>Certificado assinado por uma CA</li>
+                            <li>Garante Confidencialidade, Integridade e Autenticidade</li>
+                            <li>Padrão obrigatório na web moderna</li>
+                        </ul>
+                    </div>
+                </div>
+                <p style="margin-top:25px; font-size:1.2em;"><strong>HTTPS não é opcional em 2026 — é o piso.</strong></p>
+                <div class="page-number">21 / 22</div>
+            </section>
+
+            <!-- SLIDE 22: Encerramento -->
+            <section class="slide">
+                <h1>Obrigado!</h1>
+                <p class="subtitle">Próxima aula: DNS e Resolução de Nomes</p>
+                <div class="definition-card" style="margin-top:30px;">
+                    <p class="left"><strong>Para aprofundar:</strong></p>
+                    <ul>
+                        <li>RFC 9110 — HTTP Semantics</li>
+                        <li>RFC 8446 — TLS 1.3</li>
+                        <li>OWASP Top 10 — owasp.org/Top10</li>
+                        <li>MDN Web Docs — developer.mozilla.org/HTTP</li>
+                    </ul>
+                </div>
+                <p style="margin-top:25px;">Dúvidas? Comentem abaixo ou tragam para a próxima aula!</p>
+                <div class="page-number">22 / 22</div>
+            </section>
+
+        </div>
+
+        <!-- Navegação -->
+        <div class="navigation">
+            <button class="nav-btn" id="prev-btn" title="Slide anterior (←)">&#8592;</button>
+            <span class="slide-counter" id="slide-counter">1 / 22</span>
+            <button class="nav-btn" id="next-btn" title="Próximo slide (→)">&#8594;</button>
+            <button class="fullscreen-btn" id="fs-btn" title="Tela cheia (F)">⛶</button>
+        </div>
+    </div>
+
+    <script>
+        // Navegação entre slides
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const counter = document.getElementById('slide-counter');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const fsBtn = document.getElementById('fs-btn');
+
+        function updateCounter() {
+            counter.textContent = (currentSlide + 1) + ' / ' + totalSlides;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === totalSlides - 1;
+        }
+
+        function goToSlide(n) {
+            if (n < 0 || n >= totalSlides) return;
+            slides[currentSlide].classList.remove('active');
+            currentSlide = n;
+            slides[currentSlide].classList.add('active');
+            updateCounter();
+        }
+
+        nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+        prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); goToSlide(currentSlide - 1); }
+            if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
+            if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+            if (e.key === 'End') { e.preventDefault(); goToSlide(totalSlides - 1); }
+        });
+
+        // Tela cheia
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert('Não foi possível entrar em tela cheia: ' + err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        fsBtn.addEventListener('click', toggleFullscreen);
+
+        // Inicializa contador
+        updateCounter();
+
+        // ========== Animação: Criptografia Assimétrica ==========
+        let animTimers = [];
+
+        function resetarAnimacaoAssimetrica() {
+            animTimers.forEach(t => clearTimeout(t));
+            animTimers = [];
+
+            const ids = ['bob-public-key', 'msg-plain', 'msg-cipher', 'bob-private-key', 'attacker'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('opacity', '0');
+                    el.removeAttribute('transform');
+                }
+            });
+
+            document.getElementById('step-text').textContent = 'Pronto para começar';
+            document.getElementById('step-desc').textContent = 'Pressione "Iniciar Animação"';
+        }
+
+        function setOpacity(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('opacity', value);
+        }
+
+        function setStep(title, desc) {
+            document.getElementById('step-text').textContent = title;
+            document.getElementById('step-desc').textContent = desc;
+        }
+
+        function iniciarAnimacaoAssimetrica() {
+            resetarAnimacaoAssimetrica();
+
+            // Passo 1: Bob distribui sua chave pública
+            animTimers.push(setTimeout(() => {
+                setStep('Passo 1: Bob distribui sua chave pública', 'A chave pública pode ir para qualquer um — inclusive Alice.');
+                setOpacity('bob-public-key', '1');
+                const el = document.getElementById('bob-public-key');
+                el.setAttribute('transform', 'translate(-30, 0)');
+            }, 200));
+
+            // Passo 2: Alice escreve mensagem
+            animTimers.push(setTimeout(() => {
+                setStep('Passo 2: Alice escreve a mensagem original', '"Oi Bob!" ainda em texto claro, na máquina dela.');
+                setOpacity('msg-plain', '1');
+            }, 2500));
+
+            // Passo 3: Alice cifra com chave pública de Bob
+            animTimers.push(setTimeout(() => {
+                setStep('Passo 3: Alice cifra usando a chave pública de Bob', 'A mensagem vira algo ilegível.');
+                setOpacity('msg-plain', '0');
+                setOpacity('msg-cipher', '1');
+            }, 4800));
+
+            // Passo 4: Mensagem viaja pela rede (atacante vê só lixo)
+            animTimers.push(setTimeout(() => {
+                setStep('Passo 4: A mensagem cifrada viaja pela rede', 'O atacante consegue ler, mas só vê números sem sentido.');
+                setOpacity('attacker', '1');
+                const el = document.getElementById('msg-cipher');
+                el.setAttribute('transform', 'translate(180, 0)');
+                el.style.transition = 'transform 2s ease-in-out';
+            }, 7000));
+
+            // Passo 5: Bob recebe e decifra com sua chave privada
+            animTimers.push(setTimeout(() => {
+                setStep('Passo 5: Bob decifra com sua chave privada', 'Só Bob tem a chave privada → só ele lê a mensagem.');
+                setOpacity('bob-private-key', '1');
+            }, 9500));
+
+            // Passo 6: Final
+            animTimers.push(setTimeout(() => {
+                setStep('✓ Comunicação segura!', 'O atacante viu o tráfego, mas não conseguiu decifrar nada.');
+            }, 11500));
+        }
+
+        // ========== Animação: Criptografia Simétrica (Cifra de César +3) ==========
+        function cifrarCesar(texto, shift) {
+            return texto.split('').map(c => {
+                if (/[a-z]/.test(c)) return String.fromCharCode((c.charCodeAt(0) - 97 + shift) % 26 + 97);
+                if (/[A-Z]/.test(c)) return String.fromCharCode((c.charCodeAt(0) - 65 + shift) % 26 + 65);
+                if (/[0-9]/.test(c)) return String.fromCharCode((c.charCodeAt(0) - 48 + shift) % 10 + 48);
+                return c;
+            }).join('');
+        }
+
+        let simTimers = [];
+        function animarSimetrica() {
+            simTimers.forEach(t => clearTimeout(t));
+            simTimers = [];
+
+            const original = 'senha=123456';
+            const cipherEl = document.getElementById('sim-cipher-text');
+            const key1 = document.getElementById('sim-key1');
+            const key2 = document.getElementById('sim-key2');
+
+            // Reset visual
+            cipherEl.textContent = original;
+            cipherEl.setAttribute('fill', '#FFD700');
+            key1.style.transition = 'transform 0.4s';
+            key2.style.transition = 'transform 0.4s';
+            key1.setAttribute('transform', 'translate(0,0)');
+            key2.setAttribute('transform', 'translate(0,0)');
+
+            // Passo 1: chave 1 desce e cifra
+            simTimers.push(setTimeout(() => {
+                key1.setAttribute('transform', 'translate(0, 55)');
+            }, 200));
+
+            // Passo 2: progressivamente cifra letra por letra
+            const cifrado = cifrarCesar(original, 3);
+            for (let i = 1; i <= original.length; i++) {
+                simTimers.push(setTimeout(() => {
+                    cipherEl.textContent = cifrado.substring(0, i) + original.substring(i);
+                }, 600 + i * 120));
+            }
+
+            // Passo 3: chave 1 volta
+            simTimers.push(setTimeout(() => {
+                key1.setAttribute('transform', 'translate(0,0)');
+            }, 600 + original.length * 120 + 300));
+
+            // Passo 4: chave 2 desce (MESMA chave) e decifra
+            simTimers.push(setTimeout(() => {
+                key2.setAttribute('transform', 'translate(0, 55)');
+            }, 600 + original.length * 120 + 700));
+
+            // Passo 5: decifra progressivamente (efeito reverso)
+            for (let i = 1; i <= cifrado.length; i++) {
+                simTimers.push(setTimeout(() => {
+                    cipherEl.textContent = original.substring(0, i) + cifrado.substring(i);
+                    cipherEl.setAttribute('fill', '#28a745');
+                }, 600 + original.length * 120 + 1100 + i * 120));
+            }
+
+            // Passo 6: chave 2 volta
+            simTimers.push(setTimeout(() => {
+                key2.setAttribute('transform', 'translate(0,0)');
+            }, 600 + original.length * 120 + 1100 + cifrado.length * 120 + 300));
+        }
+
+        // ========== Animação: Criptografia Assimétrica ==========
+        const cifradoAsim = 'x9k#2pq8z1!@';
+        let asimTimers = [];
+
+        function animarAssimetrica() {
+            asimTimers.forEach(t => clearTimeout(t));
+            asimTimers = [];
+
+            const original = 'senha=123456';
+            const cipherEl = document.getElementById('asim-cipher-text');
+            const keyPub = document.getElementById('asim-key-pub');
+            const keyPriv = document.getElementById('asim-key-priv');
+
+            // Reset visual
+            cipherEl.textContent = original;
+            cipherEl.setAttribute('fill', '#FFD700');
+            keyPub.style.transition = 'transform 0.4s';
+            keyPriv.style.transition = 'transform 0.4s';
+            keyPub.setAttribute('transform', 'translate(0,0)');
+            keyPriv.setAttribute('transform', 'translate(0,0)');
+
+            // Passo 1: chave pública desce e cifra
+            asimTimers.push(setTimeout(() => {
+                keyPub.setAttribute('transform', 'translate(0, 55)');
+            }, 200));
+
+            // Passo 2: cifra progressivamente com caracteres "aleatórios"
+            const len = Math.max(original.length, cifradoAsim.length);
+            for (let i = 1; i <= len; i++) {
+                asimTimers.push(setTimeout(() => {
+                    const cifradoParcial = cifradoAsim.substring(0, i);
+                    const restante = i < original.length ? original.substring(i) : '';
+                    cipherEl.textContent = cifradoParcial + restante;
+                }, 600 + i * 120));
+            }
+
+            // Passo 3: chave pública volta
+            asimTimers.push(setTimeout(() => {
+                keyPub.setAttribute('transform', 'translate(0,0)');
+            }, 600 + len * 120 + 300));
+
+            // Passo 4: chave privada (DIFERENTE) desce e decifra
+            asimTimers.push(setTimeout(() => {
+                keyPriv.setAttribute('transform', 'translate(0, 55)');
+            }, 600 + len * 120 + 700));
+
+            // Passo 5: decifra progressivamente
+            for (let i = 1; i <= original.length; i++) {
+                asimTimers.push(setTimeout(() => {
+                    const decifradoParcial = original.substring(0, i);
+                    const restante = i < cifradoAsim.length ? cifradoAsim.substring(i) : '';
+                    cipherEl.textContent = decifradoParcial + restante;
+                    cipherEl.setAttribute('fill', '#28a745');
+                }, 600 + len * 120 + 1100 + i * 120));
+            }
+
+            // Passo 6: chave privada volta
+            asimTimers.push(setTimeout(() => {
+                keyPriv.setAttribute('transform', 'translate(0,0)');
+            }, 600 + len * 120 + 1100 + original.length * 120 + 300));
+        }
+    </script>
+</body>
+</html>

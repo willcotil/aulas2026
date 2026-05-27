@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 15: Diálogos de Sistema (Dialog)</title>
+    
+    <!-- Preconnect para acelerar a chegada da fonte do FontAwesome -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- FontAwesome para ícones visuais claros -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Prism.js para o código não ficar visualmente cansativo -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
+
+        :root {
+            /* Nova Paleta: Laranja vibrante + Azul-marinho profundo */
+            --color-navy: #000000;   /* Preto absoluto - máximo contraste */
+            --color-blue: #1E3E62;   /* Azul-marinho médio - cor principal */
+            --color-rust: #FF6500;   /* Laranja vibrante - destaques de ação */
+            --color-orange: #FF6500; /* Laranja vibrante - destaques secundários */
+            --color-yellow: #FF6500; /* Laranja vibrante para botões claros */
+            --color-deep: #0B192C;   /* Azul quase preto - fundos escuros */
+            
+            --bg-body: #F5F7FA;      /* Fundo da página (cinza muito claro) */
+            --slide-bg: #FFFFFF;     /* Fundo do slide */
+            
+            --text-main: #0B192C;    /* Texto principal usa o azul profundo */
+            --text-muted: #64748B;   
+            
+            --border-soft: #E2E8F0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Esconde os ícones até o FontAwesome carregar de verdade,
+           evitando o "Flash de Texto Não Estilizado" (FOUT) que mostra códigos como F060 */
+        .fa-solid, .fa-brands, .fa-regular {
+            visibility: hidden;
+        }
+        html.fonts-ready .fa-solid,
+        html.fonts-ready .fa-brands,
+        html.fonts-ready .fa-regular {
+            visibility: visible;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container { width: 100%; height: 100%; position: relative; }
+
+        /* Barra de Link e Progresso */
+        .fixed-link-bar {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--color-blue);
+            text-align: center;
+            padding: 10px;
+            z-index: 1000;
+            border-bottom: 4px solid var(--color-orange);
+        }
+        .fixed-link-bar a { 
+            color: #ffffff; 
+            text-decoration: none; 
+            font-weight: 800; 
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        /* Estrutura de Slides com transição suave */
+        .slide {
+            background: var(--slide-bg);
+            padding: 80px 60px 40px 60px;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 0; overflow-y: auto;
+        }
+        .slide.active { opacity: 1; pointer-events: auto; z-index: 1; }
+
+        /* Slide Tópico (Separador visual claro) */
+        .slide.topic {
+            background-color: var(--color-deep);
+            text-align: center;
+            border: 8px solid var(--color-orange);
+        }
+        .slide.topic h1 { color: #ffffff; font-size: 3.5rem; }
+        .slide.topic p { color: var(--color-orange); font-size: 1.5rem; font-weight: 800; }
+        .slide.topic i { font-size: 5rem; margin-bottom: 20px; color: var(--color-rust); }
+
+        .slide-content-wrapper { max-width: 1000px; width: 100%; margin: 0 auto; }
+        
+        .slide-number { 
+            position: absolute; top: 70px; right: 40px; 
+            background: var(--color-blue); color: white;
+            padding: 5px 15px; border-radius: 20px;
+            font-size: 1.2rem; font-weight: 800; 
+        }
+
+        /* Tipografia focada em legibilidade */
+        h1 { font-size: 2.8rem; font-weight: 800; line-height: 1.2; margin-bottom: 20px; color: var(--color-navy); }
+        h2 { font-size: 2rem; font-weight: 800; color: var(--color-blue); margin-bottom: 20px; border-bottom: 3px solid var(--color-orange); padding-bottom: 10px; display: inline-block;}
+        p, li { font-size: 1.2rem; color: var(--text-main); line-height: 1.6; margin-bottom: 15px; }
+        ul, ol { margin-left: 30px; margin-bottom: 25px; }
+        strong { color: var(--color-rust); font-weight: 800; }
+
+        /* Estilos de Código bem definidos */
+        pre[class*="language-"] {
+            background: var(--color-deep);
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+            margin: 15px 0;
+            padding: 20px;
+            border-left: 6px solid var(--color-orange);
+            max-height: 400px; 
+            overflow-y: auto;
+        }
+        code[class*="language-"] { font-family: 'Fira Code', monospace; text-shadow: none; }
+        
+        :not(pre) > code { 
+            font-family: 'Fira Code', monospace; 
+            background: #EDF2F7; 
+            color: var(--color-blue); 
+            padding: 3px 8px; 
+            border-radius: 6px; 
+            font-size: 0.9em; 
+            font-weight: 800;
+        }
+        
+        .file-label {
+            display: inline-block;
+            background: var(--color-blue);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px 8px 0 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: -15px;
+            position: relative;
+            z-index: 1;
+            border-bottom: 3px solid var(--color-orange);
+        }
+
+        .focus-box {
+            background: #FFFaf0; 
+            border: 2px solid var(--color-orange);
+            border-left: 8px solid var(--color-orange);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .focus-box h3 { color: var(--color-rust); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 1.3rem;}
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .card-info { background: var(--slide-bg); padding: 25px; border-radius: 12px; border: 2px solid var(--border-soft); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .card-info h3 { color: var(--color-blue); margin-bottom: 15px; font-weight: 800; }
+
+        .quest-list ol { counter-reset: quest; list-style: none; padding: 0; }
+        .quest-list li { background: white; margin-bottom: 15px; padding: 20px 20px 20px 70px; border-radius: 12px; position: relative; border: 2px solid var(--quest-color, var(--color-orange)); font-size: 1.15rem; font-weight: 600; }
+        .quest-list li::before { content: counter(quest); counter-increment: quest; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: var(--quest-color, var(--color-rust)); color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; font-size: 1.2rem; line-height: 35px; font-weight: 800; }
+
+        .etapa-tag { background: var(--color-rust); color: white; padding: 5px 15px; border-radius: 20px; font-size: 1rem; font-weight: bold; margin-left: 15px; vertical-align: middle; text-transform: uppercase; }
+        .etapa-tag.t2 { background: var(--color-blue); }
+        .etapa-tag.t3 { background: var(--color-orange); }
+        .etapa-tag.t4 { background: var(--color-navy); }
+
+        .controls { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid var(--color-blue); }
+        .btn { background: var(--color-blue); border: none; color: #ffffff; width: 55px; height: 55px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.2s; }
+        .btn:hover { background: var(--color-orange); }
+        
+        .progress-bar { position: fixed; bottom: 0; left: 0; height: 10px; background: var(--color-rust); width: 0%; transition: width 0.4s ease; z-index: 101; }
+
+        /* Botão fake para o teatrinho dos diálogos */
+        .dialog-preview {
+            background: #e2e8f0;
+            border: 2px solid var(--color-navy);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .dialog-preview .dialog-title {
+            background: var(--color-navy);
+            color: white;
+            padding: 10px;
+            border-radius: 6px 6px 0 0;
+            font-weight: 800;
+            margin: -20px -20px 15px -20px;
+        }
+        .dialog-preview .dialog-btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .dialog-preview .dialog-btn-sample {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            border: 2px solid var(--color-navy);
+            background: white;
+            color: var(--color-navy);
+            font-size: 0.95rem;
+        }
+        .dialog-preview .dialog-btn-sample.primary {
+            background: var(--color-blue);
+            color: white;
+            border-color: var(--color-blue);
+        }
+        .dialog-preview .dialog-btn-sample.danger {
+            background: var(--color-rust);
+            color: white;
+            border-color: var(--color-rust);
+        }
+
+        @media print {
+            body, .container { height: auto; overflow: visible; background: white; }
+            .fixed-link-bar { position: static; margin-bottom: 20px; background: white; border-bottom: 2px solid black; }
+            .fixed-link-bar a { color: black; }
+            .slide { position: relative; opacity: 1; display: block; page-break-after: always; height: 100vh; border-bottom: 1px solid #ccc; overflow: visible; pointer-events: auto; padding: 40px; background: white; }
+            .controls, .progress-bar { display: none !important; }
+            .slide.topic { background: white !important; color: black !important; border: 4px solid black; }
+            .slide.topic h1, .slide.topic p, .slide.topic h2, .slide.topic i { color: black !important; text-shadow: none; }
+            pre, .card-info, .focus-box, .diagram-row { border: 2px solid #000; color: black; background: white; }
+            h1, h2, p, li, strong { color: black !important; }
+            .etapa-tag { border: 1px solid black; color: black; background: white; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="fixed-link-bar">
+    <a href="https://willcotil.github.io/aulas2026/" target="_blank">willcotil.github.io/aulas2026/</a>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="controls">
+    <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
+    <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
+    <button class="btn" onclick="nextSlide()" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
+    <button class="btn" onclick="goToExercises()" title="Ir para Missões" style="background: var(--color-orange); color: #ffffff;"><i class="fa-solid fa-gamepad"></i></button>
+    <button class="btn" onclick="window.print()" title="Imprimir Material" style="background: var(--color-yellow); color: #ffffff;"><i class="fa-solid fa-print"></i></button>
+</div>
+
+<div class="container">
+
+    <!-- CAPA -->
+    <div class="slide active">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 01</div>
+            <h1>Aula 15: Diálogos de Sistema</h1>
+            <h2>Conversando com o Usuário pelo Sistema Operacional</h2>
+            <br>
+            <div class="focus-box" style="border-color: var(--color-blue); border-left-color: var(--color-blue); background: #f0f4f8;">
+                <h3 style="color: var(--color-blue);"><i class="fa-solid fa-map-location-dot"></i> Mapa da Nossa Missão Hoje:</h3>
+                <ol style="margin-bottom: 0;">
+                    <li><strong>Por que diálogos nativos?</strong> Adeus, <code>alert()</code> do navegador!</li>
+                    <li><strong>showMessageBox:</strong> Alertas e confirmações com vários botões.</li>
+                    <li><strong>showErrorBox:</strong> O jeito mais rápido de gritar "Deu Erro!".</li>
+                    <li><strong>showOpenDialog:</strong> Abrir aquela janela de "selecionar arquivo".</li>
+                    <li><strong>showSaveDialog:</strong> A janela do "Salvar Como...".</li>
+                    <li><strong>Mão no Teclado:</strong> Bora manipular o array de produtos via diálogos!</li>
+                </ol>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 1.1rem; text-align: center; color: var(--color-rust); font-weight: bold;">
+                ⚠️ Spoiler: Hoje a Aula é puro "Cérebro" (Main Process) com pitadas de IPC!
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 02: POR QUE NÃO USAR ALERT? -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 02</div>
+            <h2>Por que abandonar o <code>alert()</code>?</h2>
+            <p>Até agora, quando queríamos avisar algo ao usuário, usamos o velho <code>alert("Produto adicionado!")</code> do navegador. Ele funciona, mas...</p>
+            
+            <div class="grid-2">
+                <div class="card-info" style="border-color: var(--color-rust);">
+                    <h3 style="color: var(--color-rust);"><i class="fa-solid fa-thumbs-down"></i> Problemas do <code>alert()</code></h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Visual feio e datado.</li>
+                        <li>Só tem 1 botão ("OK").</li>
+                        <li>Não combina com o sistema.</li>
+                        <li>Travado dentro da janela do app.</li>
+                    </ul>
+                </div>
+                <div class="card-info" style="border-color: var(--color-blue);">
+                    <h3 style="color: var(--color-blue);"><i class="fa-solid fa-thumbs-up"></i> Vantagens do <code>dialog</code></h3>
+                    <ul style="margin-left: 20px;">
+                        <li>Cara de Windows/Mac/Linux de verdade.</li>
+                        <li>Múltiplos botões (Sim, Não, Cancelar...).</li>
+                        <li>Ícones de aviso, erro, pergunta.</li>
+                        <li>Bloqueia o app inteiro até responder.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <p style="margin-top: 20px; text-align: center; font-weight: bold; color: var(--color-blue);">
+                O módulo <code>dialog</code> mora no <strong>Main Process</strong> (index.js) e abre janelas do sistema operacional!
+            </p>
+        </div>
+    </div>
+
+    <!-- TÓPICO 1: MESSAGE BOX -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-comment-dots"></i>
+            <h1>Fase 1: MessageBox</h1>
+            <p>O Canivete Suíço dos Diálogos</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 04: showMessageBox -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 04</div>
+            <h2>O <code>showMessageBox</code></h2>
+            <p>É o diálogo mais flexível. Serve para <strong>avisar</strong>, <strong>perguntar</strong> ou <strong>confirmar</strong> qualquer coisa. Você escolhe título, mensagem, ícone e até os botões!</p>
+            
+            <div class="dialog-preview">
+                <div class="dialog-title"><i class="fa-solid fa-triangle-exclamation"></i> Confirmação</div>
+                <p style="font-size: 1.1rem; margin-bottom: 5px;"><strong style="color: var(--text-main);">Tem certeza que deseja remover o último produto?</strong></p>
+                <p style="font-size: 0.95rem; color: var(--text-muted);">Essa ação não pode ser desfeita.</p>
+                <div class="dialog-btn-row">
+                    <button class="dialog-btn-sample danger">Sim, remover</button>
+                    <button class="dialog-btn-sample primary">Cancelar</button>
+                </div>
+            </div>
+            
+            <p style="margin-top: 15px; text-align: center; color: var(--text-muted);">
+                ☝️ Esse cara aí em cima é um <code>showMessageBox</code> nativo, não é HTML/CSS!
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 05: CÓDIGO DO MESSAGEBOX -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 05</div>
+            <h2>A Receita do MessageBox</h2>
+            <p>O método <code>dialog.showMessageBox()</code> recebe um <strong>objeto de configurações</strong>. Cada propriedade controla uma parte da janela:</p>
+            
+            <div class="file-label">Exemplo Teórico</div>
+<pre><code class="language-javascript">const { dialog } = require('electron');
+
+const resposta = await dialog.showMessageBox({
+    type: 'question',         // 'info', 'error', 'question', 'warning'
+    title: 'Confirmação',
+    message: 'Tem certeza?',
+    detail: 'Detalhes extras em letra menor.',
+    buttons: ['Sim, remover', 'Cancelar'],
+    defaultId: 1,             // Botão pré-selecionado (índice)
+    cancelId: 1               // Qual botão é o "Cancelar"
+});
+
+// resposta.response é o ÍNDICE do botão clicado (0, 1, 2...)
+if (resposta.response === 0) {
+    console.log("Usuário confirmou!");
+}</code></pre>
+            
+            <div class="focus-box">
+                <h3><i class="fa-solid fa-lightbulb"></i> Detalhe importante</h3>
+                <p>O <code>showMessageBox</code> é <strong>assíncrono</strong>: ele devolve uma <em>Promise</em>. Por isso usamos <code>await</code> (ou <code>.then()</code>). Sem <code>await</code>, o resultado vem vazio!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 2: ERRORBOX -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-bug"></i>
+            <h1>Fase 2: ErrorBox</h1>
+            <p>Quando dá ruim, dá ruim rápido!</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 07: showErrorBox -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 07</div>
+            <h2>O <code>showErrorBox</code></h2>
+            <p>É o irmão mais simples do MessageBox. Serve só para uma coisa: <strong>mostrar um erro feio com ícone vermelho</strong>. Não precisa de objeto, não tem botões, não devolve nada.</p>
+            
+            <div class="grid-2">
+                <div>
+                    <div class="dialog-preview" style="border-color: var(--color-rust);">
+                        <div class="dialog-title" style="background: var(--color-rust);"><i class="fa-solid fa-circle-xmark"></i> Erro</div>
+                        <p style="font-size: 1.1rem;"><strong>Arquivo Inválido</strong></p>
+                        <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 5px;">O arquivo selecionado não é um JSON válido.</p>
+                        <div class="dialog-btn-row">
+                            <button class="dialog-btn-sample primary">OK</button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="file-label">A receita é simples!</div>
+<pre style="margin-top: 0; padding: 15px; font-size: 0.95rem; min-height: auto;"><code class="language-javascript">dialog.showErrorBox(
+    'Arquivo Inválido',
+    'O arquivo selecionado não é um JSON válido.'
+);</code></pre>
+                    <p style="margin-top: 15px; font-size: 1rem;">Só dois argumentos: <strong>título</strong> e <strong>mensagem</strong>. E é <strong>síncrono</strong> (sem await)!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 3: OPENDIALOG -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-folder-open"></i>
+            <h1>Fase 3: OpenDialog</h1>
+            <p>"Procurar arquivo..."</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 09: showOpenDialog -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 09</div>
+            <h2>O <code>showOpenDialog</code></h2>
+            <p>Sabe quando você anexa um arquivo no WhatsApp Web ou abre um documento no Word? Aquela janelinha de selecionar arquivo é o que vamos invocar agora!</p>
+            
+            <div class="file-label">Exemplo Teórico</div>
+<pre><code class="language-javascript">const resultado = await dialog.showOpenDialog({
+    title: 'Selecione o arquivo de produtos',
+    properties: ['openFile'],   // 'openDirectory', 'multiSelections'...
+    filters: [
+        { name: 'Arquivos JSON', extensions: ['json'] },
+        { name: 'Todos os Arquivos', extensions: ['*'] }
+    ]
+});
+
+// resultado é um objeto:
+//   resultado.canceled  -> true se clicou em "Cancelar"
+//   resultado.filePaths -> array com os caminhos selecionados
+
+if (!resultado.canceled) {
+    console.log("Arquivo escolhido:", resultado.filePaths[0]);
+}</code></pre>
+            
+            <div class="focus-box">
+                <h3><i class="fa-solid fa-filter"></i> Os Filtros</h3>
+                <p>A propriedade <code>filters</code> é o que faz aparecer aquele dropdown <em>"Arquivos JSON (*.json)"</em> no canto da janela. Ela <strong>não impede</strong> o usuário de selecionar outro tipo de arquivo, só ajuda a esconder os irrelevantes.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO 4: SAVEDIALOG -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <h1>Fase 4: SaveDialog</h1>
+            <p>"Salvar como..."</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: showSaveDialog -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 11</div>
+            <h2>O <code>showSaveDialog</code></h2>
+            <p>Praticamente <strong>idêntico</strong> ao OpenDialog, mas em vez de escolher um arquivo existente, o usuário <strong>nomeia um novo arquivo</strong> e escolhe onde salvar.</p>
+            
+            <div class="file-label">Exemplo Teórico</div>
+<pre><code class="language-javascript">const resultado = await dialog.showSaveDialog({
+    title: 'Salvar lista de produtos',
+    defaultPath: 'produtos.json',   // Nome sugerido
+    filters: [
+        { name: 'Arquivos JSON', extensions: ['json'] }
+    ]
+});
+
+// resultado.canceled  -> true se cancelou
+// resultado.filePath  -> O caminho que o usuário ESCOLHEU
+// ⚠️ Atenção: filePath (singular!) e não filePaths!
+
+if (!resultado.canceled) {
+    console.log("Vai salvar em:", resultado.filePath);
+}</code></pre>
+            
+            <p style="text-align: center; font-weight: bold; color: var(--color-rust); margin-top: 15px;">
+                ⚠️ Atenção! O SaveDialog <strong>não salva nada por si só</strong>. Ele só te <strong>devolve o caminho</strong> escolhido. Quem grava o arquivo seria o módulo <code>fs</code> (que veremos no futuro).
+            </p>
+        </div>
+    </div>
+
+    <!-- TÓPICO 5: LIVE CODING -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-laptop-code"></i>
+            <h1>Fase 5: Mãos no Teclado</h1>
+            <p>Manipulando o Array de Produtos via Diálogos</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: O PLANO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Slide 13</div>
+            <h2>A Nossa Missão de Hoje</h2>
+            <p>Abram o projeto da aula anterior. Nosso array de produtos já é carregado de um JSON no <strong>Main Process</strong>. Hoje vamos manipular esse array em memória usando os diálogos do sistema.</p>
+            
+            <div class="quest-list">
+                <ul>
+                    <li style="--quest-color: var(--color-blue); border-color: var(--color-blue);">
+                        <strong style="color: var(--color-blue); font-size: 1.2rem;">Etapa 1: Preparação</strong> <br>
+                        Importar o módulo <code>dialog</code> e criar um botão no Menu Superior chamado "Operações".
+                    </li>
+                    <li style="--quest-color: var(--color-rust); border-color: var(--color-rust);">
+                        <strong style="color: var(--color-rust); font-size: 1.2rem;">Etapa 2: Confirmar Remoção (MessageBox)</strong> <br>
+                        Botão "Remover Último Produto" que pergunta antes de fazer <code>db.pop()</code>.
+                    </li>
+                    <li style="--quest-color: var(--color-orange); border-color: var(--color-orange);">
+                        <strong style="color: var(--color-orange); font-size: 1.2rem;">Etapa 3: Demonstração do OpenDialog</strong> <br>
+                        Botão "Importar Produtos..." que abre o diálogo de seleção de arquivo. Vai mostrar qual arquivo foi escolhido, mas o processamento fica pro próximo semestre!
+                    </li>
+                    <li style="--quest-color: var(--color-navy); border-color: var(--color-navy); background: #f0f4f8;">
+                        <strong style="color: var(--color-navy); font-size: 1.2rem;">Etapa 4: Onde Salvaria? (SaveDialog)</strong> <br>
+                        Botão "Exportar..." que mostra o SaveDialog, pega o caminho e exibe num MessageBox (sem gravar ainda).
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: ETAPA 1 - PREPARAÇÃO -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 1</div>
+            <h2>Preparando o Terreno <span class="etapa-tag">Parte 1/4</span></h2>
+            <p>Primeiro, você precisa importar o módulo <code>dialog</code> do Electron. Abra seu <code>index.js</code> e procure a linha das importações (lá no topo):</p>
+            
+            <div class="file-label">src/main/index.js (Topo - ANTES)</div>
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">const { app, BrowserWindow, ipcMain, Menu, Tray } = require('electron');</code></pre>
+
+            <p style="margin-top: 15px; text-align: center; color: var(--color-rust); font-weight: bold;">Adicione <code>dialog</code> à lista!</p>
+
+            <div class="file-label">src/main/index.js (Topo - DEPOIS)</div>
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">const { app, BrowserWindow, ipcMain, Menu, Tray, dialog } = require('electron');</code></pre>
+
+            <div class="focus-box">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Ajuste importante na função do menu!</h3>
+                <p>Nossa função <code>criarMenuPrincipal()</code> hoje não recebe nada. Mas agora vamos precisar mandar mensagens para a janela principal, então ela <strong>precisa receber a janela como parâmetro</strong>:</p>
+            </div>
+
+            <div class="file-label">src/main/index.js (Modificações)</div>
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">// Lá no whenReady, mude a chamada:
+criarMenuPrincipal(janelaPrincipal);  // Passa a janela!
+criarTray(janelaPrincipal);
+
+// E a assinatura da função lá embaixo:
+const criarMenuPrincipal = (janela) => {  // Recebe a janela
+    const templateDoMenu = [
+        // ... (o menu "Ações do Sistema" continua igual) ...
+    ];
+    // ... resto igual
+}</code></pre>
+            <p style="text-align: center; color: var(--color-blue); font-weight: bold; margin-top: 10px;">
+                Agora dentro do template do menu, conseguimos acessar a variável <code>janela</code> e o array <code>db</code> (que também está acessível porque está no topo do arquivo).
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 14B: TEMPLATE DO MENU OPERAÇÕES -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 1</div>
+            <h2>O Menu "Operações" <span class="etapa-tag">Parte 1/4</span></h2>
+            <p>Dentro do <code>templateDoMenu</code> (no <code>criarMenuPrincipal</code>), adicione uma <strong>nova aba</strong> com 3 botões vazios. Vamos preencher cada um nas próximas etapas:</p>
+            
+            <div class="file-label">src/main/index.js (Adicione no templateDoMenu)</div>
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">const templateDoMenu = [
+    {
+        label: 'Ações do Sistema',
+        // ... continua igual da aula passada ...
+    },
+    // 👇 NOVO! Adicione esse objeto inteiro:
+    {
+        label: 'Operações',
+        submenu: [
+            { 
+                label: 'Remover Último Produto',
+                click: async () => { /* Etapa 2 vai aqui */ }
+            },
+            { type: 'separator' },
+            { 
+                label: 'Importar Produtos...',
+                click: async () => { /* Etapa 3 vai aqui */ }
+            },
+            { 
+                label: 'Exportar Lista...',
+                click: async () => { /* Etapa 4 vai aqui */ }
+            }
+        ]
+    }
+];</code></pre>
+            <p style="text-align: center; color: var(--color-blue); font-weight: bold; margin-top: 10px;">
+                Rode <code>npm start</code>. A aba "Operações" aparece com 3 opções (que ainda não fazem nada).
+            </p>
+        </div>
+    </div>
+
+    <!-- SLIDE 15: ETAPA 2 - MESSAGEBOX -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 2</div>
+            <h2>Confirmação Antes do Pop <span class="etapa-tag t2">Parte 2/4</span></h2>
+            <p>Vamos preencher o <code>click</code> do botão "Remover Último Produto". A ideia: <strong>perguntar</strong> antes de remover o último item do array <code>db</code>.</p>
+            
+            <div class="file-label">src/main/index.js (Dentro do click do Remover)</div>
+<pre style="margin-top: 0; padding: 15px; min-height: auto;"><code class="language-javascript">click: async () => {
+    // 1. Mostra o diálogo de confirmação
+    const resposta = await dialog.showMessageBox({
+        type: 'warning',
+        title: 'Remover Produto',
+        message: 'Tem certeza que deseja remover o último produto?',
+        detail: `Vai sumir: "${db[db.length - 1].nome}"`,
+        buttons: ['Sim, remover', 'Cancelar'],
+        defaultId: 1,
+        cancelId: 1
+    });
+
+    // 2. Decide com base no índice do botão clicado
+    if (resposta.response === 0) {
+        db.pop(); // Remove do array em memória
+        janela.webContents.send('atualizar-tela');
+    }
+}</code></pre>
+            
+            <div class="focus-box">
+                <h3><i class="fa-solid fa-arrows-rotate"></i> Reutilizando o que já temos!</h3>
+                <p>Olha que legal: o seu <code>renderer.js</code> <strong>já tem</strong> um ouvinte <code>onAtualizarTela()</code> que chama <code>iniciarApp()</code> — exatamente o que precisamos! Quando o Main mandar o sinal, a tela vai buscar a lista nova sozinha. Reaproveitamento puro!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 16: ETAPA 3 - OPEN DIALOG (PLACEHOLDER) -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 3</div>
+            <h2>Importando do JSON <span class="etapa-tag t3">Parte 3/4</span></h2>
+            <p>Aqui vamos abrir um JSON do disco usando o <code>showOpenDialog</code>. O diálogo vai aparecer e deixar o usuário escolher um arquivo.</p>
+            
+            <div class="file-label">src/main/index.js (Dentro do click do Importar)</div>
+<pre style="padding: 15px; font-size: 0.95rem; min-height: auto;"><code class="language-javascript">click: async () => {
+    // 1. Abre o seletor de arquivos
+    const resultado = await dialog.showOpenDialog({
+        title: 'Escolha um arquivo JSON de produtos',
+        properties: ['openFile'],
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+    });
+
+    // 2. Se cancelou, sai fora
+    if (resultado.canceled) return;
+
+    // 3. Aqui é onde vamos ler e processar o arquivo!
+    const caminhoEscolhido = resultado.filePaths[0];
+
+    // Mostra um aviso ao usuário
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'OpenDialog Funcionando!',
+        message: 'Arquivo selecionado:',
+        detail: `${caminhoEscolhido}\n\nNo próximo semestre, vamos aprender a ler e processar esse arquivo com o módulo fs (File System).`
+    });
+}</code></pre>
+
+            <div class="focus-box" style="border-color: var(--color-blue); border-left-color: var(--color-blue);">
+                <h3 style="color: var(--color-blue);"><i class="fa-solid fa-graduation-cap"></i> Ponte para o futuro</h3>
+                <p>Você acaba de fazer a <strong>primeira metade</strong> do processo de importação: <strong>perguntar ao usuário qual arquivo</strong>. A segunda metade — ler o conteúdo, validar se é JSON, adicionar ao array — será abordada no próximo semestre quando estudarmos o módulo <code>fs</code> e tratamento de erros com <code>try/catch</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 17: ETAPA 4 - SAVE DIALOG -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Etapa 4</div>
+            <h2>O Caminho de Salvamento <span class="etapa-tag t4">Parte 4/4</span></h2>
+            <p>Como ainda não dominamos a escrita de arquivos, vamos só demonstrar o <strong>SaveDialog</strong> capturando o caminho escolhido pelo usuário e mostrando num MessageBox:</p>
+            
+            <div class="file-label">src/main/index.js (Dentro do click do Exportar)</div>
+<pre style="padding: 15px; font-size: 0.95rem; min-height: auto;"><code class="language-javascript">click: async () => {
+    // 1. Pergunta ao usuário onde salvaria
+    const resultado = await dialog.showSaveDialog({
+        title: 'Exportar lista de produtos',
+        defaultPath: 'minha-lista-de-produtos.json',
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+    });
+
+    if (resultado.canceled) return;
+
+    // 2. Mostra o caminho num diálogo (só pra ver funcionando)
+    await dialog.showMessageBox({
+        type: 'info',
+        title: 'Caminho Capturado',
+        message: 'Aqui é onde salvaríamos o arquivo:',
+        detail: `${resultado.filePath}\n\nNa próxima aula, vamos aprender a gravar de verdade com o módulo fs.writeFile!`
+    });
+}</code></pre>
+            
+            <div class="focus-box" style="border-color: var(--color-blue); border-left-color: var(--color-blue);">
+                <h3 style="color: var(--color-blue);"><i class="fa-solid fa-graduation-cap"></i> Ponte para a próxima aula</h3>
+                <p>Você acabou de fazer o "meio caminho" do salvamento: <strong>perguntar onde</strong>. Falta só o <strong>como gravar</strong>, que veremos no estudo do módulo <code>fs</code> (File System).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 18: TESTE FINAL -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Teste Final</div>
+            <div class="focus-box" style="text-align: center; border-color: var(--color-blue); border-left-color: var(--color-blue); padding: 50px;">
+                <i class="fa-solid fa-flag-checkered" style="font-size: 4rem; color: var(--color-blue); margin-bottom: 20px;"></i>
+                <h2 style="border: none; margin-bottom: 10px;">Testando os 4 Diálogos!</h2>
+                <p>1. Rode <code>npm start</code>.</p>
+                <p>2. Clique em <strong>"Operações > Remover"</strong>: aparece a janela de pergunta nativa.</p>
+                <p>3. Crie um JSON com 2 produtos novos e use <strong>"Importar..."</strong>: vejam o ErrorBox aparecer se o JSON estiver quebrado!</p>
+                <p>4. Clique em <strong>"Exportar..."</strong>: digite um nome e clique em "Salvar".</p>
+                <p>5. Veja o array crescer e diminuir <strong>sem nenhum F5</strong>!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TÓPICO: EXERCÍCIOS -->
+    <div class="slide topic">
+        <div class="slide-content-wrapper">
+            <i class="fa-solid fa-gamepad"></i>
+            <h1>Missões Práticas</h1>
+            <p>Domando os Diálogos do Sistema</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 20: EXERCICIOS -->
+    <div class="slide">
+        <div class="slide-content-wrapper">
+            <div class="slide-number">Desafios</div>
+            <h2>Missões Extras (XP Adicional)</h2>
+            <p style="margin-bottom: 15px; color: var(--text-muted);">Os 4 diálogos estão dominados. Bora dar a eles superpoderes:</p>
+            
+            <div class="quest-list">
+                <ol>
+                    <li><strong>Limpar Tudo (MessageBox de 3 Botões):</strong> Crie um novo botão "Limpar Lista" no menu. Ele deve mostrar um MessageBox com <strong>três</strong> opções: "Apagar Tudo", "Apagar Só o Primeiro" e "Cancelar". Use <code>resposta.response</code> com <code>if/else if</code> para chamar <code>db.splice(0, db.length)</code>, <code>db.shift()</code> ou nada. Lembre de mandar <code>janela.webContents.send('atualizar-tela')</code> depois!</li>
+                    <li><strong>Ícone Personalizado:</strong> No <code>showMessageBox</code> da Etapa 2, adicione a propriedade <code>icon</code> apontando para o <code>icone.png</code> da aula passada (use <code>path.join(__dirname, 'icone.png')</code>). Veja a janela ficar com a sua cara!</li>
+                    <li><strong>Múltiplos Arquivos (OpenDialog Avançado):</strong> Modifique o OpenDialog da Etapa 3 para aceitar <strong>vários arquivos JSON</strong> de uma vez. Dica: adicione <code>'multiSelections'</code> ao array de <code>properties</code>. A resposta terá vários caminhos em <code>resultado.filePaths</code> — mostre todos num MessageBox com <code>detail</code> listando cada um.</li>
+                    <li><strong style="color: var(--color-blue);"><i class="fa-solid fa-robot"></i> Desafio IA (Gravar Arquivo com fs):</strong> Peça à IA: <em>"Como usar o módulo 'fs' do Node.js para fazer um fs.writeFileSync que grava um array em um arquivo JSON? Preciso gravar o array 'db' inteiro em um arquivo cuja localização o usuário escolheu com showSaveDialog."</em>. Implemente isso na Etapa 4: quando o usuário escolhe o local com SaveDialog, seu app deve <strong>realmente gravar</strong> o array <code>db</code> formatado como JSON no caminho escolhido. Mostre um MessageBox confirmando!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Scripts Prism.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const progressBar = document.getElementById('progressBar');
+
+    // Espera o FontAwesome carregar para mostrar os ícones
+    // (Evita aparecer "F060", "F062" etc. enquanto a fonte está baixando)
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+            document.documentElement.classList.add('fonts-ready');
+        });
+        // Fallback de segurança: se demorar mais de 3s, mostra mesmo assim
+        setTimeout(() => {
+            document.documentElement.classList.add('fonts-ready');
+        }, 3000);
+    } else {
+        // Navegador muito antigo: mostra direto
+        document.documentElement.classList.add('fonts-ready');
+    }
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentSlide = index;
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === currentSlide) slide.classList.add('active');
+        });
+        const progress = ((currentSlide + 1) / totalSlides) * 100;
+        progressBar.style.width = `${progress}%`;
+    }
+
+    function goToExercises() { 
+        showSlide(totalSlides - 1); 
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+        else if (e.key === 'ArrowLeft') prevSlide();
+        else if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    showSlide(0);
+</script>
+
+</body>
+</html>

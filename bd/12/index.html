@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados - Aula 12: Cardinalidade Avançada (N:N)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#0B192C', /* Azul Escuro */
+                            primary:   '#1E3E62', /* Azul Médio (PKs/Destaques) */
+                            secondary: '#FF6500', /* Laranja Brilhante (FKs/Acentos) */
+                            muted:     '#FFF3E0', /* Creme/Laranja Claro */
+                            surface:   '#FFFFFF', /* White cards */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FCFCFC; 
+            color: #0B192C;
+            overflow: hidden;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            min-height: 70vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content {
+                display: block !important;
+                page-break-after: auto;
+                border-bottom: 2px solid #ccc;
+                padding: 40px 0;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* SVG Styles */
+        .node-rect { fill: #ffffff; stroke: #0B192C; stroke-width: 4; rx: 12px; }
+        .node-text { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; fill: #0B192C; }
+        .edge { stroke: #0B192C; stroke-width: 3; fill: none; }
+        .rel-polygon { fill: #FFF3E0; stroke: #1E3E62; stroke-width: 3; }
+        .rel-text { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 800; fill: #0B192C; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #ffffff; border: 2px solid #0B192C; padding: 2px 8px; border-radius: 6px; color: #0B192C; font-weight: 700; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FCFCFC; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #0B192C; border-radius: 10px; border: 2px solid #FCFCFC; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="no-print h-20 bg-white text-brand-dark border-b-4 border-brand-dark px-8 flex items-center justify-between sticky top-0 z-50 shadow-md" role="banner">
+        <div class="flex items-center gap-4 z-10">
+            <div class="bg-brand-dark text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-inner" aria-hidden="true">
+                <i class="fas fa-network-wired text-xl"></i>
+            </div>
+            <h1 class="font-extrabold text-2xl tracking-tight">Banco de Dados <span class="text-brand-primary opacity-90">| Aula 12</span></h1>
+        </div>
+
+        <div class="flex items-center gap-4 z-10">
+            <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-brand-muted hover:bg-brand-secondary hover:text-brand-dark rounded-xl text-brand-dark font-bold transition shadow-sm border border-brand-dark/20" aria-label="Imprimir a aula atual">
+                <i class="fas fa-print" aria-hidden="true"></i> IMPRIMIR
+            </button>
+            <button onclick="toggleFullscreen()" class="w-10 h-10 bg-brand-muted rounded-xl text-brand-dark hover:bg-brand-dark hover:text-white transition flex items-center justify-center border border-brand-dark/20" aria-label="Alternar tela cheia">
+                <i class="fas fa-expand" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Barra de Progresso -->
+    <div class="no-print h-2 w-full bg-white overflow-hidden border-b border-brand-dark/10" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="aria-progress">
+        <div id="progress-bar" class="h-full bg-brand-secondary transition-all duration-500 w-0"></div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-10 overflow-y-auto custom-scrollbar" role="main">
+        <div id="steps-container" class="w-full max-w-5xl" aria-live="polite"></div>
+    </main>
+
+    <!-- Footer de Navegação -->
+    <footer class="no-print h-24 bg-white border-t-4 border-brand-dark px-8 flex items-center justify-between sticky bottom-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Navegação da Aula">
+        <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-3 px-8 py-3 bg-brand-muted text-brand-dark rounded-2xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 disabled:hover:bg-brand-muted disabled:hover:text-brand-dark border-2 border-brand-dark/20 disabled:border-transparent text-lg" aria-label="Voltar para o tópico anterior">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> VOLTAR
+        </button>
+
+        <div class="hidden md:flex flex-col items-center" aria-hidden="true">
+            <span id="step-counter" class="text-sm font-black text-brand-dark uppercase tracking-widest bg-brand-muted px-4 py-1 rounded-full border border-brand-dark/20">1 / 21</span>
+        </div>
+
+        <button id="btn-next" onclick="nextStep()" class="flex items-center gap-3 px-10 py-3 bg-brand-dark text-white rounded-2xl font-black hover:bg-brand-primary transition shadow-lg text-lg border-b-4 border-black/30 hover:border-b-0 hover:translate-y-1" aria-label="Avançar para o próximo tópico">
+            AVANÇAR <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+    </footer>
+
+    <script>
+        const steps = [
+            // ── 01: Título ──────────────────────────────────────────────────
+            {
+                title: "Cardinalidade Avançada",
+                content: `
+                    <div class="text-center space-y-8 py-10">
+                        <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] text-brand-secondary mb-4 shadow-xl shadow-brand-dark/10" aria-hidden="true">
+                            <i class="fas fa-sitemap text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl md:text-6xl font-black text-brand-dark leading-tight">Relacionamentos N:N</h2>
+                        <div class="bg-brand-muted p-6 rounded-2xl border-l-8 border-brand-secondary max-w-3xl mx-auto text-left text-brand-dark font-medium">
+                            <p class="text-xl font-semibold text-center mb-2">Hoje vamos explorar o relacionamento mais complexo:</p>
+                            <p class="text-3xl font-black text-brand-secondary text-center uppercase tracking-tight">"Muitos para Muitos"</p>
+                        </div>
+                        <div class="flex justify-center gap-4 text-brand-dark text-sm mt-12 font-bold opacity-70">
+                            <span class="px-4 py-2 bg-white rounded-xl shadow-sm border-2 border-brand-dark/20" aria-hidden="true"><i class="fas fa-arrow-left mr-2"></i> USE AS SETAS PARA NAVEGAR <i class="fas fa-arrow-right ml-2"></i></span>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 02: O Problema ──────────────────────────────────────────────
+            {
+                title: "O Problema do Mundo Real",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-lg">
+                            <p class="leading-relaxed font-medium mb-6">
+                                Até agora aprendemos: <strong>1:1</strong> e <strong>1:N</strong>.
+                            </p>
+                            <p class="leading-relaxed font-medium mb-6">
+                                Mas a vida real é muito mais complexa:
+                            </p>
+                            <ul class="mt-6 space-y-4 font-bold">
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-university text-brand-secondary text-2xl"></i>
+                                    <span>Um <strong>ALUNO</strong> estuda várias <strong>DISCIPLINAS</strong></span>
+                                </li>
+                                <li class="flex items-center gap-3 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                    <i class="fas fa-book text-brand-secondary text-2xl"></i>
+                                    <span>Uma <strong>DISCIPLINA</strong> é estudada por vários <strong>ALUNOS</strong></span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-secondary/10 text-brand-dark rounded-2xl shadow-sm border-l-4 border-brand-secondary text-center italic font-bold">
+                            <p class="text-xl">E agora? Como representamos isso no banco de dados?</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 03: Cardinalidades N:N ──────────────────────────────────────
+            {
+                title: "Definindo as Cardinalidades N:N",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl text-brand-dark font-semibold text-center">
+                            No relacionamento <strong>N:N (Muitos para Muitos)</strong>, cada registro de uma tabela se relaciona com <strong>vários</strong> registros da outra.
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Aluno -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-brand-dark/20 text-center relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-brand-secondary"></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-6 mt-2 uppercase">Olhando do ALUNO</h3>
+                                <div class="space-y-4">
+                                    <p class="text-lg font-bold text-brand-dark leading-tight mb-4">Um aluno estuda muitas disciplinas:</p>
+                                    <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                        <span class="text-4xl font-black text-brand-secondary">(0, N)</span>
+                                        <p class="font-medium text-xs opacity-80 italic mt-2">Zero ou muitas disciplinas</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Disciplina -->
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border-2 border-brand-dark/20 text-center relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-brand-primary"></div>
+                                <h3 class="text-2xl font-black text-brand-dark mb-6 mt-2 uppercase">Olhando da DISCIPLINA</h3>
+                                <div class="space-y-4">
+                                    <p class="text-lg font-bold text-brand-dark leading-tight mb-4">Uma disciplina tem muitos alunos:</p>
+                                    <div class="p-4 bg-brand-muted rounded-xl border border-brand-primary/30">
+                                        <span class="text-4xl font-black text-brand-dark">(1, N)</span>
+                                        <p class="font-medium text-xs opacity-80 italic mt-2">Pelo menos 1 aluno</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 04: Tentativa 1 - FK na tabela ALUNO ──────────────────────
+            {
+                title: "Tentativa 1: Colocar FK na Tabela ALUNO",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            Vamos pensar... e se colocássemos a FK de Disciplina na tabela ALUNO?
+                        </p>
+
+                        <div class="bg-white p-6 rounded-3xl border-4 border-brand-dark shadow-xl">
+                            <div class="grid grid-cols-3 gap-0 w-full bg-white overflow-hidden rounded-lg border-2 border-brand-dark">
+                                <!-- Header -->
+                                <div class="h-[44px] bg-brand-dark text-white text-[11px] font-black uppercase flex items-center px-3 col-span-1">alu_id</div>
+                                <div class="h-[44px] bg-brand-dark text-white text-[11px] font-black uppercase flex items-center px-3 col-span-1">alu_nome</div>
+                                <div class="h-[44px] bg-brand-dark text-white text-[11px] font-black uppercase flex items-center px-3 col-span-1 border-l-4 border-red-500">dis_id_fk</div>
+
+                                <!-- Dados -->
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">1</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">João</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">2</div>
+
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">2</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">Maria</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">3</div>
+
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">3</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">Pedro</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">1</div>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-red-50 border-l-8 border-red-500 rounded-r-2xl text-red-900 font-bold">
+                            <p class="text-lg mb-3"><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i> Problema Crítico!</p>
+                            <ul class="text-sm space-y-3 ml-6 list-disc">
+                                <li>João estudaria <strong>apenas</strong> Banco de Dados (disciplina 2)</li>
+                                <li>Mas João também estuda Redes (disciplina 1) e Português (disciplina 3)!</li>
+                                <li><strong>Perdemos dados!</strong> Não conseguimos guardar todas as disciplinas de um aluno.</li>
+                            </ul>
+                        </div>
+
+                        <p class="text-center text-brand-dark font-bold text-lg p-4 bg-brand-muted rounded-xl border-l-4 border-brand-secondary">
+                            <i class="fas fa-lightbulb text-brand-secondary mr-2"></i> Cada aluno estuda múltiplas disciplinas, mas só temos 1 campo FK...
+                        </p>
+                    </div>
+                `
+            },
+            // ── 05: Tentativa 2 - FK na tabela DISCIPLINA ─────────────────
+            {
+                title: "Tentativa 2: Colocar FK na Tabela DISCIPLINA",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            E o contrário? Colocar a FK de Aluno na tabela DISCIPLINA?
+                        </p>
+
+                        <div class="bg-white p-6 rounded-3xl border-4 border-brand-dark shadow-xl">
+                            <div class="grid grid-cols-3 gap-0 w-full bg-white overflow-hidden rounded-lg border-2 border-brand-dark">
+                                <!-- Header -->
+                                <div class="h-[44px] bg-brand-dark text-white text-[11px] font-black uppercase flex items-center px-3 col-span-1">dis_id</div>
+                                <div class="h-[44px] bg-brand-dark text-white text-[11px] font-black uppercase flex items-center px-3 col-span-1">dis_nome</div>
+                                <div class="h-[44px] bg-brand-dark text-white text-[11px] font-black uppercase flex items-center px-3 col-span-1 border-l-4 border-red-500">alu_id_fk</div>
+
+                                <!-- Dados -->
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">1</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">Redes</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">1</div>
+
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">2</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">Banco de Dados</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">2</div>
+
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">3</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">Português</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">1</div>
+
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">4</div>
+                                <div class="h-[40px] bg-brand-muted flex items-center px-3 border border-gray-300 text-xs font-bold">História</div>
+                                <div class="h-[40px] bg-red-100 flex items-center px-3 border border-red-300 text-xs font-bold text-red-700 border-l-4 border-red-500">3</div>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-red-50 border-l-8 border-red-500 rounded-r-2xl text-red-900 font-bold">
+                            <p class="text-lg mb-3"><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i> Mesmo Problema!</p>
+                            <ul class="text-sm space-y-3 ml-6 list-disc">
+                                <li>Redes seria estudada <strong>apenas</strong> por João (aluno 1)</li>
+                                <li>Mas Pedro também estuda Redes!</li>
+                                <li><strong>Perdemos dados novamente!</strong> Não conseguimos guardar todos os alunos de uma disciplina.</li>
+                            </ul>
+                        </div>
+
+                        <p class="text-center text-brand-dark font-bold text-lg mt-6 p-4 bg-brand-muted rounded-xl border-l-4 border-brand-secondary">
+                            <i class="fas fa-times text-red-500 mr-2"></i> <strong>Nenhum lado pode guardar a FK!</strong><br/><span class="text-base">Como resolvemos esse impasse?</span>
+                        </p>
+                    </div>
+                `
+            },
+            // ── 06: A Grande Ideia - Descobrindo a Solução ──────────────────
+            {
+                title: "💡 A Grande Ideia: Uma Lista Separada",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            Se não conseguimos guardar a FK em nenhuma das duas... <strong>por que não criar uma lista separada</strong> que anota quem estuda o quê?
+                        </p>
+
+                        <div class="p-8 bg-brand-secondary/10 border-4 border-brand-secondary rounded-3xl text-brand-dark">
+                            <p class="text-xl font-black mb-6 text-center"><i class="fas fa-scroll text-brand-secondary mr-2"></i> Vamos Anotar Manualmente o Relacionamento:</p>
+                            <ul class="text-base font-bold space-y-2 ml-8 list-disc">
+                                <li>João estuda <strong>Banco de Dados</strong> → Anotamos: <code class="text-brand-secondary font-black">(1, 2)</code></li>
+                                <li>João estuda <strong>Redes</strong> → Anotamos: <code class="text-brand-secondary font-black">(1, 1)</code></li>
+                                <li>João estuda <strong>Português</strong> → Anotamos: <code class="text-brand-secondary font-black">(1, 3)</code></li>
+                                <li>Maria estuda <strong>Banco de Dados</strong> → Anotamos: <code class="text-brand-secondary font-black">(2, 2)</code></li>
+                                <li>Maria estuda <strong>Redes</strong> → Anotamos: <code class="text-brand-secondary font-black">(2, 1)</code></li>
+                                <li>Pedro estuda <strong>Redes</strong> → Anotamos: <code class="text-brand-secondary font-black">(3, 1)</code></li>
+                                <li>Pedro estuda <strong>História</strong> → Anotamos: <code class="text-brand-secondary font-black">(3, 4)</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl border-l-8 border-brand-secondary text-center">
+                            <p class="text-xl font-black mb-2"><i class="fas fa-star text-brand-secondary mr-2"></i> Eureka!</p>
+                            <p class="text-lg">Essa "lista de anotações" é exatamente o que precisamos.<br/> Vamos transformá-la em uma <strong>tabela</strong>!</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 07: Construindo a Tabela Auxiliar Passo a Passo ────────────
+            {
+                title: "Construindo a Tabela Auxiliar (Visualização Completa)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            Vamos montar as 3 tabelas: ALUNO, DISCIPLINA e a tabela auxiliar MATRÍCULA:
+                        </p>
+
+                        <div class="bg-white p-6 rounded-3xl border-4 border-brand-dark shadow-xl">
+                            <div class="grid grid-cols-12 gap-4 w-full">
+                                <!-- Tabela ALUNO -->
+                                <div class="col-span-4">
+                                    <div class="text-xs font-black uppercase text-center mb-2 text-brand-dark">Tabela ALUNO</div>
+                                    <div class="flex flex-col border-2 border-brand-dark rounded-lg overflow-hidden">
+                                        <div class="h-[36px] bg-brand-dark text-white text-[10px] font-black uppercase flex items-center px-2 justify-center">alu_id</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold border-b border-gray-300 justify-center">1</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold border-b border-gray-300 justify-center">2</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold justify-center">3</div>
+                                    </div>
+                                    <div class="text-center text-xs font-bold mt-2 text-brand-dark">João, Maria, Pedro</div>
+                                </div>
+
+                                <!-- Tabela DISCIPLINA -->
+                                <div class="col-span-4">
+                                    <div class="text-xs font-black uppercase text-center mb-2 text-brand-dark">Tabela DISCIPLINA</div>
+                                    <div class="flex flex-col border-2 border-brand-dark rounded-lg overflow-hidden">
+                                        <div class="h-[36px] bg-brand-dark text-white text-[10px] font-black uppercase flex items-center px-2 justify-center">dis_id</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold border-b border-gray-300 justify-center">1</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold border-b border-gray-300 justify-center">2</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold border-b border-gray-300 justify-center">3</div>
+                                        <div class="h-[36px] bg-brand-muted flex items-center px-2 text-xs font-bold justify-center">4</div>
+                                    </div>
+                                    <div class="text-center text-xs font-bold mt-2 text-brand-dark">Redes, BD, Port, Hist</div>
+                                </div>
+
+                                <!-- Tabela MATRÍCULA (Auxiliar) -->
+                                <div class="col-span-4">
+                                    <div class="text-xs font-black uppercase text-center mb-2 text-brand-secondary">Tabela MATRÍCULA ✓</div>
+                                    <div class="flex flex-col border-4 border-brand-secondary rounded-lg overflow-hidden shadow-lg">
+                                        <div class="h-[36px] bg-brand-secondary text-white text-[10px] font-black uppercase flex items-center px-1 justify-around">
+                                            <span>alu_id</span>
+                                            <span>dis_id</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 border-b border-brand-secondary text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">1</span>
+                                            <span class="text-brand-secondary">2</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 border-b border-brand-secondary text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">1</span>
+                                            <span class="text-brand-secondary">1</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 border-b border-brand-secondary text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">1</span>
+                                            <span class="text-brand-secondary">3</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 border-b border-brand-secondary text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">2</span>
+                                            <span class="text-brand-secondary">2</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 border-b border-brand-secondary text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">2</span>
+                                            <span class="text-brand-secondary">1</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 border-b border-brand-secondary text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">3</span>
+                                            <span class="text-brand-secondary">1</span>
+                                        </div>
+                                        <div class="h-[36px] bg-yellow-100 flex items-center px-1 text-xs font-black justify-around">
+                                            <span class="text-brand-secondary">3</span>
+                                            <span class="text-brand-secondary">4</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl border-l-8 border-brand-secondary">
+                            <p class="text-lg font-black mb-2"><i class="fas fa-check-circle text-brand-secondary mr-2"></i> Perfeito! A Solução Nasceu!</p>
+                            <p class="text-sm">A tabela MATRÍCULA guarda todos os relacionamentos. Nenhum dado é perdido, nenhum campo fica confuso!</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 08: O Diagrama DER N:N ──────────────────────────────────────
+            {
+                title: "O Diagrama DER N:N Completo",
+                content: `
+                    <div class="space-y-8">
+                        <p class="text-xl font-bold text-brand-dark text-center">
+                            A tabela auxiliar "quebra" o N:N em dois relacionamentos 1:N:
+                        </p>
+
+                        <div class="bg-white rounded-3xl py-8 flex flex-col items-center justify-center border-4 border-brand-dark shadow-sm overflow-x-auto relative">
+                            <svg width="750" height="200" viewBox="0 0 750 200" style="min-width: 100%; height: auto;">
+                                <!-- Aluno para Matricula -->
+                                <line x1="160" y1="100" x2="295" y2="100" class="edge" />
+                                <!-- Disciplina para Matricula -->
+                                <line x1="455" y1="100" x2="590" y2="100" class="edge" />
+                                
+                                <!-- Aluno -->
+                                <rect x="40" y="75" width="120" height="50" class="node-rect" />
+                                <text x="100" y="105" text-anchor="middle" class="node-text uppercase tracking-tighter">Aluno</text>
+                                
+                                <!-- Matrícula (LOSANGO/DIAMANTE - Relacionamento) -->
+                                <polygon points="375,75 455,100 375,125 295,100" class="rel-polygon" />
+                                <text x="375" y="105" text-anchor="middle" font-family="Inter" font-size="13px" font-weight="800" fill="#FF6500" uppercase tracking-tighter="">Matrícula</text>
+                                
+                                <!-- Disciplina -->
+                                <rect x="590" y="75" width="120" height="50" class="node-rect" />
+                                <text x="650" y="105" text-anchor="middle" class="node-text uppercase tracking-tighter">Disciplina</text>
+
+                                <!-- Cardinalidades -->
+                                <text x="225" y="85" text-anchor="middle" font-family="JetBrains Mono" font-weight="bold" font-size="15" fill="#0B192C">(0,N)</text>
+                                <text x="520" y="85" text-anchor="middle" font-family="JetBrains Mono" font-weight="bold" font-size="15" fill="#0B192C">(1,N)</text>
+
+                                <!-- Labels informativos -->
+                                <text x="100" y="165" text-anchor="middle" font-family="Inter" font-size="11px" font-weight="800" fill="#0B192C" uppercase="">Entidade</text>
+                                <text x="375" y="165" text-anchor="middle" font-family="Inter" font-size="11px" font-weight="800" fill="#FF6500" uppercase="">Relacionamento</text>
+                                <text x="650" y="165" text-anchor="middle" font-family="Inter" font-size="11px" font-weight="800" fill="#0B192C" uppercase="">Entidade</text>
+                            </svg>
+                        </div>
+
+                        <div class="p-6 bg-brand-secondary/10 border-l-8 border-brand-secondary rounded-r-2xl text-brand-dark font-bold text-center">
+                            <p class="text-lg"><i class="fas fa-lightbulb text-brand-secondary mr-2"></i> O losango (diamante) representa o relacionamento N:N que liga as duas entidades!</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 09: Estrutura da Tabela Auxiliar ────────────────────────────
+            {
+                title: "Estrutura da Tabela Auxiliar",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-xl font-bold text-brand-dark text-center">A tabela MATRÍCULA é a ponte entre ALUNO e DISCIPLINA:</p>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <!-- Aluno -->
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-white font-bold p-3 text-center uppercase text-xs tracking-widest">ALUNO</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">alu_id</code> (PK)</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>alu_nome</code></li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Matrícula (Tabela Auxiliar) -->
+                            <div class="border-4 border-brand-secondary rounded-xl bg-white shadow-lg overflow-hidden relative">
+                                <div class="absolute -top-3 -right-3 bg-brand-secondary text-white w-10 h-10 rounded-full flex items-center justify-center font-black text-xs">⚡</div>
+                                <div class="bg-brand-secondary text-white font-bold p-3 text-center uppercase text-xs tracking-widest">MATRÍCULA</div>
+                                <ul class="p-4 text-xs space-y-2 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-secondary w-5 text-center"></i> <code class="text-brand-secondary font-black">mat_alu_id_fk</code> (PK+FK)</li>
+                                    <li><i class="fas fa-key text-brand-secondary w-5 text-center"></i> <code class="text-brand-secondary font-black">mat_dis_id_fk</code> (PK+FK)</li>
+                                </ul>
+                            </div>
+
+                            <!-- Disciplina -->
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-white font-bold p-3 text-center uppercase text-xs tracking-widest">DISCIPLINA</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">dis_id</code> (PK)</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>dis_nome</code></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/20 text-xs font-bold text-brand-dark text-center">
+                            <i class="fas fa-info-circle text-brand-secondary mr-2"></i> A tabela MATRÍCULA tem <strong>duas FKs</strong>: uma para cada tabela que ela conecta!
+                        </div>
+                    </div>
+                `
+            },
+            // ── 10: Chave Primária Composta ─────────────────────────────────
+            {
+                title: "Chave Primária Composta (PK Múltipla)",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            A PK da tabela auxiliar é <strong>composta</strong> pelas duas FKs:
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-6 mt-8">
+                            <!-- Sem PK Composta -->
+                            <div class="border-2 border-red-300 rounded-xl bg-red-50 shadow-sm overflow-hidden">
+                                <div class="bg-red-500 text-white font-bold p-3 text-center uppercase text-xs tracking-widest">❌ Problema</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-red-900">
+                                    <li><i class="fas fa-key text-red-500 w-5 text-center"></i> <code class="text-red-700 font-black">mat_id</code> (PK)</li>
+                                    <li><i class="fas fa-arrow-right text-red-500 w-5 text-center"></i> Pode ter linhas duplicadas!</li>
+                                    <li class="text-xs italic opacity-80">Se 2 linhas apontam para o mesmo aluno e disciplina...</li>
+                                </ul>
+                            </div>
+
+                            <!-- Com PK Composta -->
+                            <div class="border-4 border-brand-secondary rounded-xl bg-white shadow-lg overflow-hidden relative">
+                                <div class="absolute -top-3 -right-3 bg-brand-secondary text-white w-10 h-10 rounded-full flex items-center justify-center font-black text-xs">✓</div>
+                                <div class="bg-brand-secondary text-white font-bold p-3 text-center uppercase text-xs tracking-widest">✅ Solução</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-secondary w-5 text-center"></i> <code class="text-brand-secondary font-black">mat_alu_id_fk</code> (PK+FK)</li>
+                                    <li><i class="fas fa-key text-brand-secondary w-5 text-center"></i> <code class="text-brand-secondary font-black">mat_dis_id_fk</code> (PK+FK)</li>
+                                    <li class="text-xs italic opacity-80">Garantia: 1 Aluno + 1 Disciplina = 1 linha única!</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-secondary rounded-r-2xl text-brand-dark font-bold text-center">
+                            <p class="text-lg"><i class="fas fa-lock text-brand-secondary mr-2"></i> PK Composta = Impossível ter duplicatas!</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 11: Atributos na Tabela Auxiliar ────────────────────────────
+            {
+                title: "Adicionando Dados à Tabela Auxiliar",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            A tabela auxiliar não é apenas "conector"! Ela pode guardar dados sobre o relacionamento:
+                        </p>
+
+                        <div class="bg-white p-6 rounded-3xl border-4 border-brand-dark shadow-xl flex flex-col gap-4 text-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-brand-dark text-white">
+                                            <th class="p-2 text-left font-black border border-white">mat_alu_id</th>
+                                            <th class="p-2 text-left font-black border border-white">mat_dis_id</th>
+                                            <th class="p-2 text-left font-black border border-white">mat_data</th>
+                                            <th class="p-2 text-left font-black border border-white">mat_nota</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border border-gray-200">
+                                            <td class="p-2 font-bold text-brand-secondary border border-gray-200">1</td>
+                                            <td class="p-2 font-bold text-brand-secondary border border-gray-200">2</td>
+                                            <td class="p-2 font-mono border border-gray-200">2024-01-15</td>
+                                            <td class="p-2 font-mono border border-gray-200">8.5</td>
+                                        </tr>
+                                        <tr class="border border-gray-200 bg-brand-secondary/5">
+                                            <td class="p-2 font-bold text-brand-secondary border border-gray-200">1</td>
+                                            <td class="p-2 font-bold text-brand-secondary border border-gray-200">1</td>
+                                            <td class="p-2 font-mono border border-gray-200">2024-01-15</td>
+                                            <td class="p-2 font-mono border border-gray-200">7.2</td>
+                                        </tr>
+                                        <tr class="border border-gray-200">
+                                            <td class="p-2 font-bold text-brand-secondary border border-gray-200">2</td>
+                                            <td class="p-2 font-bold text-brand-secondary border border-gray-200">2</td>
+                                            <td class="p-2 font-mono border border-gray-200">2024-01-16</td>
+                                            <td class="p-2 font-mono border border-gray-200">9.0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/20 text-xs font-bold text-brand-dark">
+                                <i class="fas fa-calendar text-brand-secondary mr-2"></i> <code>mat_data</code> - Data da matrícula
+                            </div>
+                            <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/20 text-xs font-bold text-brand-dark">
+                                <i class="fas fa-star text-brand-secondary mr-2"></i> <code>mat_nota</code> - Nota obtida
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-brand-secondary/10 border-l-8 border-brand-secondary rounded-r-2xl text-brand-dark font-bold text-center">
+                            <p class="text-lg"><i class="fas fa-plus text-brand-secondary mr-2"></i> Atributos do relacionamento vivem na tabela auxiliar!</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 12: Caso Real - Biblioteca ───────────────────────────────────
+            {
+                title: "Exemplo Real: Biblioteca (N:N Completo)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                                <i class="fas fa-book-open text-brand-secondary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <ul class="text-lg font-medium space-y-3 ml-8 list-disc">
+                                <li>Um <strong>LEITOR</strong> pode pegar emprestado muitos <strong>LIVROS</strong>.</li>
+                                <li>Um <strong>LIVRO</strong> pode ser emprestado para muitos <strong>LEITORES</strong> (em momentos diferentes).</li>
+                                <li>Cada empréstimo tem data de saída, data de retorno, etc.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white rounded-3xl py-12 px-8 border-4 border-brand-dark shadow-sm flex flex-col items-center justify-center overflow-x-auto">
+                            <img src="diagrama_livro.svg">
+                        </div>
+
+                        <div class="mt-6 space-y-3 text-sm">
+                            <div class="flex items-start gap-3 text-brand-dark font-bold">
+                                <span class="text-base">✓</span>
+                                <span><span class="font-black">Elipses</span> = atributos das entidades ou relacionamentos</span>
+                            </div>
+                            <div class="flex items-start gap-3 text-brand-dark font-bold">
+                                <span class="text-base">✓</span>
+                                <span><span class="font-black">Retângulos</span> = entidades | <span class="font-black">Losango laranja</span> = relacionamento N:N</span>
+                            </div>
+                            <div class="flex items-start gap-3 text-brand-dark font-bold">
+                                <span class="text-base">✓</span>
+                                <span>Esta estrutura ER é exatamente o que você vai transformar em <span class="font-black">dicionário de dados!</span></span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 13: Dicionário Biblioteca ────────────────────────────────────
+            {
+                title: "Dicionário de Dados: Biblioteca",
+                content: `
+                    <div class="space-y-6">
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <!-- Leitor -->
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-white font-bold p-3 text-center uppercase text-xs tracking-widest">LEITOR</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">lei_id</code> (PK)</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>lei_nome</code></li>
+                                                                        <li><i class="fas fa-at text-brand-dark/40 w-5 text-center"></i> <code>lei_email</code></li>
+                                    <li><i class="fas fa-phone text-brand-dark/40 w-5 text-center"></i> <code>lei_telefone</code></li>
+                                                                        <li><i class="fas fa-envelope text-brand-dark/40 w-5 text-center"></i> <code>lei_endereco</code></li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Empréstimo -->
+                            <div class="border-4 border-brand-secondary rounded-xl bg-white shadow-lg overflow-hidden">
+                                <div class="bg-brand-secondary text-white font-bold p-3 text-center uppercase text-xs tracking-widest">EMPRÉSTIMO</div>
+                                <ul class="p-4 text-xs space-y-2 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-secondary w-5 text-center"></i> <code class="text-brand-secondary font-black">emp_lei_id_fk</code> (PK+FK)</li>
+                                    <li><i class="fas fa-key text-brand-secondary w-5 text-center"></i> <code class="text-brand-secondary font-black">emp_liv_id_fk</code> (PK+FK)</li>
+                                    <li class="border-t border-gray-300 pt-2"><i class="fas fa-calendar text-brand-dark/40 w-5 text-center"></i> <code>emp_data_saida</code></li>
+                                    <li><i class="fas fa-calendar text-brand-dark/40 w-5 text-center"></i> <code>emp_data_retorno</code></li>
+                                </ul>
+                            </div>
+
+                            <!-- Livro -->
+                            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden">
+                                <div class="bg-brand-dark text-white font-bold p-3 text-center uppercase text-xs tracking-widest">LIVRO</div>
+                                <ul class="p-4 text-xs space-y-3 font-medium text-brand-dark">
+                                    <li><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">liv_id</code> (PK)</li>
+                                    <li><i class="fas fa-font text-brand-dark/40 w-5 text-center"></i> <code>liv_titulo</code></li>
+                                    <li><i class="fas fa-pen text-brand-dark/40 w-5 text-center"></i> <code>liv_autor</code></li>
+                                                                        <li><i class="fas fa-book text-brand-dark/40 w-5 text-center"></i> <code>liv_isbn</code></li>
+                                                                                                            <li><i class="fas fa-calendar text-brand-dark/40 w-5 text-center"></i> <code>liv_ano_pub</code></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-brand-muted rounded-xl border border-brand-dark/20 text-xs font-bold text-brand-dark text-center">
+                            <i class="fas fa-info-circle text-brand-secondary mr-2"></i> As datas ficam na tabela EMPRÉSTIMO porque são específicas de cada relacionamento!
+                        </div>
+                    </div>
+                `
+            },
+            // ── 14: Exercício 1 ─────────────────────────────────────────────
+            {
+                title: "Exercício 1: Escola (Alunos & Projetos)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                                <i class="fas fa-flask text-brand-secondary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <ul class="text-lg font-medium space-y-3 ml-8 list-disc">
+                                <li>Alunos (obrigatoriamente) participam de Projetos.</li>
+                                <li>Projetos (obrigatoriamente) têm vários Alunos.</li>
+                                <li>Cada participação tem um papel e uma data de início.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-secondary rounded-r-2xl shadow-sm space-y-4 text-sm font-bold text-brand-dark">
+                            <p class="font-black text-xl uppercase tracking-widest text-xs opacity-60"><i class="fas fa-tasks mr-2" aria-hidden="true"></i>Sua Missão:</p>
+                            <ol class="list-decimal ml-6 font-medium space-y-2">
+                                <li><strong>Desenhe o DER N:N</strong> com cardinalidades (1..N em ambos os lados)</li>
+                                <li><strong>Crie o Dicionário:</strong> Use prefixos <code>alu_</code>, <code>pro_</code> e <code>par_</code></li>
+                                <li class="text-brand-secondary underline text-base">Identifique: Qual é a tabela auxiliar? Quais são suas FKs?</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 15: Exercício 2 ─────────────────────────────────────────────
+            {
+                title: "Exercício 2: Clínica (Médicos & Pacientes)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                                <i class="fas fa-stethoscope text-brand-secondary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <ul class="text-lg font-medium space-y-3 ml-8 list-disc">
+                                <li>Um Médico pode atender vários Pacientes.</li>
+                                <li>Um Paciente pode ser atendido por vários Médicos.</li>
+                                <li>Cada atendimento tem data, hora e diagnóstico.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-secondary rounded-r-2xl shadow-sm space-y-4 text-sm font-bold text-brand-dark">
+                            <p class="font-black text-xl uppercase tracking-widest text-xs opacity-60"><i class="fas fa-tasks mr-2" aria-hidden="true"></i>Sua Missão:</p>
+                            <ol class="list-decimal ml-6 font-medium space-y-2">
+                                <li><strong>Desenhe o DER</strong> (N:N com 0..N de ambos os lados)</li>
+                                <li><strong>No Google Sheets:</strong> Crie as 3 tabelas com exemplo de dados</li>
+                                <li class="text-brand-secondary text-base">Pense: Qual tabela é a junção? O que ela guarda?</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 16: Exercício 3 ─────────────────────────────────────────────
+            {
+                title: "Exercício 3: Loja de Roupas (Roupas & Tamanhos)",
+                content: `
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10 text-brand-dark">
+                            <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                                <i class="fas fa-shirt text-brand-secondary" aria-hidden="true"></i> O Cenário
+                            </h3>
+                            <ul class="text-lg font-medium space-y-3 ml-8 list-disc">
+                                <li>Uma peça de roupa pode estar disponível em vários Tamanhos.</li>
+                                <li>Um Tamanho pode ser usado por várias Roupas.</li>
+                                <li>Cada combinação roupa+tamanho tem uma quantidade em estoque.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-muted border-l-8 border-brand-secondary rounded-r-2xl shadow-sm space-y-4 text-sm font-bold text-brand-dark">
+                            <p class="font-black text-xl uppercase tracking-widest text-xs opacity-60"><i class="fas fa-tasks mr-2" aria-hidden="true"></i>Sua Missão:</p>
+                            <ol class="list-decimal ml-6 font-medium space-y-2">
+                                <li><strong>Desenhe o DER N:N</strong></li>
+                                <li><strong>Dicionário de Dados:</strong> Prefixos <code>rou_</code>, <code>tam_</code> e <code>est_</code></li>
+                                <li class="text-brand-secondary text-base">Por que a quantidade de estoque precisa estar na tabela auxiliar?</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 17: Comparação Resumida ─────────────────────────────────────
+            {
+                title: "Resumo: 1:1 vs 1:N vs N:N",
+                content: `
+                    <div class="space-y-8">
+                        <div class="p-6 bg-brand-secondary text-white rounded-3xl shadow-xl border-l-8 border-white font-black text-center">
+                            <p class="text-2xl mb-2"><i class="fas fa-crown mr-2"></i> REGRA DE OURO:</p>
+                            <p class="text-xl">Todo relacionamento N:N <strong>SEMPRE</strong> gera uma tabela auxiliar!</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <!-- 1:1 -->
+                            <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                                <h4 class="font-black text-2xl text-brand-dark mb-4 border-b-4 border-brand-primary pb-2 inline-block">1:1</h4>
+                                <ul class="text-xs space-y-3 font-bold text-brand-dark">
+                                    <li><i class="fas fa-arrow-right text-brand-secondary mr-2"></i> FK em tabela dependente</li>
+                                    <li><i class="fas fa-arrow-right text-brand-secondary mr-2"></i> Uma linha aponta para uma</li>
+                                    <li><i class="fas fa-arrow-right text-brand-secondary mr-2"></i> <strong>Sem tabela auxiliar</strong></li>
+                                    <li class="text-xs italic opacity-70 mt-2">Exemplo: Pessoa ↔ Título</li>
+                                </ul>
+                            </div>
+
+                            <!-- 1:N -->
+                            <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                                <h4 class="font-black text-2xl text-brand-dark mb-4 border-b-4 border-brand-primary pb-2 inline-block">1:N</h4>
+                                <ul class="text-xs space-y-3 font-bold text-brand-dark">
+                                    <li><i class="fas fa-arrow-right text-brand-secondary mr-2"></i> FK no lado dos "Muitos"</li>
+                                    <li><i class="fas fa-arrow-right text-brand-secondary mr-2"></i> Muitos apontam para um</li>
+                                    <li><i class="fas fa-arrow-right text-brand-secondary mr-2"></i> <strong>Sem tabela auxiliar</strong></li>
+                                    <li class="text-xs italic opacity-70 mt-2">Exemplo: Turma ← Aluno</li>
+                                </ul>
+                            </div>
+
+                            <!-- N:N -->
+                            <div class="bg-brand-secondary/10 p-6 rounded-3xl shadow-lg border-4 border-brand-secondary relative">
+                                <div class="absolute -top-4 -right-4 bg-brand-secondary text-white w-12 h-12 rounded-full flex items-center justify-center font-black text-sm">⚡</div>
+                                <h4 class="font-black text-2xl text-brand-dark mb-4 border-b-4 border-brand-secondary pb-2 inline-block">N:N</h4>
+                                <ul class="text-xs space-y-3 font-bold text-brand-dark">
+                                    <li><i class="fas fa-star text-brand-secondary mr-2"></i> <strong>SEMPRE</strong> tabela auxiliar!</li>
+                                    <li><i class="fas fa-star text-brand-secondary mr-2"></i> Duas FKs (PK composta)</li>
+                                    <li><i class="fas fa-star text-brand-secondary mr-2"></i> Pode guardar atributos</li>
+                                    <li class="text-xs italic opacity-70 mt-2">Exemplo: Aluno ↔ Disciplina</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-brand-dark text-white rounded-2xl shadow-xl border-l-8 border-brand-secondary text-center">
+                            <p class="text-lg font-black mb-2"><i class="fas fa-lightbulb text-brand-secondary mr-2"></i> Lembre-se:</p>
+                            <p class="text-base font-bold">Quando você vê <strong>N:N</strong>, pense automaticamente em <strong>3 tabelas</strong> (2 originais + 1 auxiliar)</p>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 18: Checklist de Implementação ──────────────────────────────
+            {
+                title: "Checklist: Implementando N:N",
+                content: `
+                    <div class="space-y-4">
+                        <div class="bg-white p-8 rounded-3xl shadow-lg border-2 border-brand-dark/10 space-y-4">
+                            <div class="flex items-start gap-4 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                <input type="checkbox" class="w-6 h-6 mt-1 accent-brand-secondary rounded cursor-pointer" />
+                                <div>
+                                    <p class="font-black text-brand-dark">Identifiquei os dois "Muitos"</p>
+                                    <p class="text-xs opacity-70">Cada lado tem capacidade de múltiplos registros</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                <input type="checkbox" class="w-6 h-6 mt-1 accent-brand-secondary rounded cursor-pointer" />
+                                <div>
+                                    <p class="font-black text-brand-dark">Criei uma tabela auxiliar (Junção)</p>
+                                    <p class="text-xs opacity-70">Nome deve descrever o relacionamento</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                <input type="checkbox" class="w-6 h-6 mt-1 accent-brand-secondary rounded cursor-pointer" />
+                                <div>
+                                    <p class="font-black text-brand-dark">Colocar duas FKs na tabela auxiliar</p>
+                                    <p class="text-xs opacity-70">Uma para cada tabela que ela conecta</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                <input type="checkbox" class="w-6 h-6 mt-1 accent-brand-secondary rounded cursor-pointer" />
+                                <div>
+                                    <p class="font-black text-brand-dark">PK Composta = Essas duas FKs juntas</p>
+                                    <p class="text-xs opacity-70">Garante unicidade e evita duplicatas</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-4 p-4 bg-brand-muted rounded-xl border border-brand-dark/10">
+                                <input type="checkbox" class="w-6 h-6 mt-1 accent-brand-secondary rounded cursor-pointer" />
+                                <div>
+                                    <p class="font-black text-brand-dark">Atributos específicos do relacionamento</p>
+                                    <p class="text-xs opacity-70">Colocar na tabela auxiliar (ex: data, nota)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 19: Erro Comum ──────────────────────────────────────────────
+            {
+                title: "❌ Erro Comum: Confundir Tabelas",
+                content: `
+                    <div class="space-y-6">
+                        <p class="text-lg font-bold text-brand-dark text-center">
+                            Alguns alunos tentam colocar múltiplas FKs na mesma tabela:
+                        </p>
+
+                        <div class="bg-red-50 p-6 rounded-3xl border-4 border-red-500 shadow-xl">
+                            <p class="font-black text-red-700 mb-4 text-lg text-center">❌ ERRADO</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="border border-red-300 rounded-lg p-3 bg-white">
+                                    <p class="text-xs font-black text-red-700 mb-2">ALUNO</p>
+                                    <ul class="text-xs space-y-1">
+                                        <li>alu_id</li>
+                                        <li class="text-red-700 font-black">dis_id_fk (FK 1)</li>
+                                        <li class="text-red-700 font-black">dis_id_fk2 (FK 2)</li>
+                                        <li class="text-red-700 font-black">dis_id_fk3 (FK 3)</li>
+                                    </ul>
+                                </div>
+                                <div class="flex items-center justify-center">
+                                    <p class="text-red-700 font-black text-2xl">≠</p>
+                                </div>
+                            </div>
+                            <p class="text-red-700 font-bold mt-4 text-center">Viola a 1ª Forma Normal!</p>
+                        </div>
+
+                        <div class="bg-brand-muted p-6 rounded-3xl border-4 border-brand-secondary shadow-xl">
+                            <p class="font-black text-brand-dark mb-4 text-lg text-center">✅ CORRETO</p>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="border border-brand-dark rounded-lg p-3 bg-white">
+                                    <p class="text-xs font-black text-brand-dark mb-2">ALUNO</p>
+                                    <ul class="text-xs space-y-1">
+                                        <li><i class="fas fa-key mr-1"></i> alu_id</li>
+                                        <li>alu_nome</li>
+                                    </ul>
+                                </div>
+                                <div class="border border-brand-secondary rounded-lg p-3 bg-white">
+                                    <p class="text-xs font-black text-brand-secondary mb-2">MATRÍCULA</p>
+                                    <ul class="text-xs space-y-1">
+                                        <li><i class="fas fa-key mr-1"></i> mat_alu_id_fk</li>
+                                        <li><i class="fas fa-key mr-1"></i> mat_dis_id_fk</li>
+                                    </ul>
+                                </div>
+                                <div class="border border-brand-dark rounded-lg p-3 bg-white">
+                                    <p class="text-xs font-black text-brand-dark mb-2">DISCIPLINA</p>
+                                    <ul class="text-xs space-y-1">
+                                        <li><i class="fas fa-key mr-1"></i> dis_id</li>
+                                        <li>dis_nome</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            // ── 20: Conclusão ────────────────────────────────────────────────
+            {
+                title: "Conclusão",
+                content: `
+                    <div class="text-center space-y-10 py-10">
+                        <div class="inline-block p-10 bg-white rounded-full border-8 border-brand-secondary shadow-2xl" aria-hidden="true">
+                            <i class="fas fa-sitemap text-brand-dark text-8xl"></i>
+                        </div>
+                        <h2 class="text-5xl font-black text-brand-dark uppercase">Dominou os Relacionamentos!</h2>
+                        <p class="text-2xl text-brand-dark/80 max-w-2xl mx-auto font-semibold italic">"N:N é o segredo para representar as relações complexas do mundo real em bancos de dados."</p>
+                        
+                        <div class="mt-12 space-y-4">
+                            <div class="px-10 py-4 bg-brand-dark text-white rounded-2xl font-black text-xl shadow-xl inline-block border-b-4 border-brand-secondary">
+                                Parabéns! Você completou a Aula 12
+                            </div>
+                            <p class="text-lg text-brand-dark opacity-80 font-bold">Próxima: Aula 13 - Formas Normais (1NF, 2NF, 3NF)</p>
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        let currentStep = 0;
+
+        function renderStep() {
+            const container = document.getElementById('steps-container');
+            const counter = document.getElementById('step-counter');
+            const bar = document.getElementById('progress-bar');
+            
+            const step = steps[currentStep];
+            container.innerHTML = `
+                <div class="step-content active" role="region" aria-live="polite">
+                    <h2 class="no-print text-3xl md:text-4xl font-black mb-10 text-brand-dark border-l-8 border-brand-secondary pl-4">${step.title}</h2>
+                    <div class="content-body">${step.content}</div>
+                </div>
+            `;
+
+            counter.innerText = `${currentStep + 1} / ${steps.length}`;
+            bar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+            document.getElementById('aria-progress').setAttribute('aria-valuenow', Math.round(((currentStep + 1) / steps.length) * 100));
+            
+            document.getElementById('btn-prev').disabled = currentStep === 0;
+            document.getElementById('btn-next').innerHTML = currentStep === steps.length - 1 
+                ? 'FINALIZAR <i class="fas fa-check-circle ml-2" aria-hidden="true"></i>' 
+                : 'AVANÇAR <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>';
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+            else if (e.key === 'ArrowLeft') prevStep();
+        });
+
+        window.onbeforeprint = function() {
+            let fullHtml = `<div class="text-center mb-10 border-b-8 border-brand-dark pb-4">
+                <h1 class="text-4xl font-black text-brand-dark uppercase text-center">Apostila: Banco de Dados I</h1>
+                <p class="font-bold text-xl text-center">Aula 12 - Cardinalidade Avançada (N:N com Tabelas Auxiliares)</p>
+            </div>`;
+            steps.forEach((s, i) => {
+                fullHtml += `<div class="step-content block mb-12 border-b-2 border-brand-dark/20 pb-10">
+                    <h2 class="text-3xl font-black mb-6 text-brand-dark border-l-8 border-brand-secondary pl-4">${i+1}. ${s.title}</h2>
+                    <div>${s.content}</div>
+                </div>`;
+            });
+            document.getElementById('steps-container').innerHTML = fullHtml;
+        };
+        window.onafterprint = renderStep;
+
+        renderStep();
+    </script>
+</body>
+</html>

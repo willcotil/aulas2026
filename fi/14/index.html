@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 14 - Planilhas: Gráficos e Visualização</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta Exata Solicitada */
+        :root {
+            --color-orange: #FF6500;
+            --color-blue-light: #1E3E62;
+            --color-blue-dark: #0B192C;
+            --color-black: #000000;
+            --color-bg: #FFFFFF;
+        }
+
+        /* --- ESTILOS GERAIS --- */
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: var(--color-bg); 
+            color: var(--color-black);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Container Principal */
+        #presentation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--color-bg);
+            background-image: radial-gradient(rgba(30, 62, 98, 0.05) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* Slide Individual */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            
+            opacity: 0;
+            transform: scale(0.95);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            pointer-events: none;
+            
+            overflow-y: auto; 
+            z-index: 1;
+        }
+
+        .slide.active { 
+            opacity: 1; 
+            transform: scale(1);
+            pointer-events: auto; 
+            z-index: 10; 
+        }
+
+        /* Utilitários de Cor */
+        .text-orange { color: var(--color-orange) !important; }
+        .text-blue-light { color: var(--color-blue-light) !important; }
+        .text-blue-dark { color: var(--color-blue-dark) !important; }
+        .text-black { color: var(--color-black) !important; }
+        .text-white { color: #FFFFFF !important; }
+        
+        .bg-orange { background-color: var(--color-orange) !important; color: #000 !important; }
+        .bg-blue-light { background-color: var(--color-blue-light) !important; color: #FFF !important; }
+        .bg-blue-dark { background-color: var(--color-blue-dark) !important; color: #FFF !important; }
+        .bg-black { background-color: var(--color-black) !important; color: #FFF !important; }
+        
+        .border-orange { border-color: var(--color-orange) !important; }
+        .border-blue-light { border-color: var(--color-blue-light) !important; }
+        .border-blue-dark { border-color: var(--color-blue-dark) !important; }
+
+        /* Componentes */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid rgba(30, 62, 98, 0.1);
+            transition: all 0.3s ease;
+            color: var(--color-black);
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--color-orange); box-shadow: 0 15px 35px rgba(255, 101, 0, 0.15); }
+        
+        .logic-box {
+            background-color: #f8fafc;
+            border: 4px solid var(--color-blue-dark);
+            border-left: 12px solid var(--color-orange);
+            padding: 1.2rem 1.5rem;
+            border-radius: 8px;
+            color: var(--color-black);
+        }
+
+        .csv-box {
+            background-color: var(--color-blue-dark);
+            border: 4px solid var(--color-orange);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+
+        /* Gráfico de Pizza CSS puro */
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--color-orange) 0% 40%, 
+                var(--color-blue-light) 40% 75%, 
+                var(--color-blue-dark) 75% 100%
+            );
+            border: 4px solid var(--color-black);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* --- IMPRESSÃO --- */
+        @media print {
+            body, html { overflow: visible !important; height: auto !important; background: white !important; color: black !important; width: auto !important; }
+            #presentation { display: block !important; height: auto !important; overflow: visible !important; position: static !important; }
+            .slide { position: relative !important; top: auto !important; left: auto !important; opacity: 1 !important; transform: none !important; height: auto !important; min-height: auto !important; display: block !important; page-break-inside: avoid; page-break-after: always; border-bottom: 2px solid #ccc; background: white !important; padding: 2rem 0 !important; margin-bottom: 2rem; }
+            .no-print { display: none !important; }
+            button { display: none !important; }
+            h1 { font-size: 24pt !important; color: black !important; }
+            h2 { font-size: 18pt !important; color: black !important; border-bottom: 2px solid var(--color-blue-dark); padding-bottom: 10px; margin-bottom: 20px; }
+            p, li { font-size: 12pt !important; color: #000 !important; line-height: 1.5; }
+            .card, .csv-box, .logic-box { border: 1px solid #ddd !important; box-shadow: none !important; margin-bottom: 1rem; page-break-inside: avoid; background: white !important; color: black !important; }
+            .bg-blue-dark, .bg-blue-light, .bg-orange, .bg-black { background-color: #eee !important; color: black !important; border: 2px solid black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <!-- Barra de Controle Superior -->
+    <div class="no-print fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center bg-white/95 border-b-4 border-blue-dark shadow-md">
+        <div class="flex items-center space-x-6">
+            <span class="font-black text-blue-dark text-xl tracking-tighter">AULA 14: GRÁFICOS</span>
+            <div class="h-3 w-48 lg:w-80 bg-gray-200 rounded-full overflow-hidden border border-black">
+                <div id="progressBar" class="h-full bg-orange transition-all duration-300 w-0"></div>
+            </div>
+            <span id="slideCounter" class="font-mono font-bold text-gray-600 tracking-wider">01 / 19</span>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="toggleFullscreen()" class="p-2 hover:bg-gray-100 rounded text-blue-dark transition border border-transparent hover:border-blue-dark" title="Tela Cheia"><i data-lucide="maximize"></i></button>
+            <button onclick="window.print()" class="bg-blue-dark text-white px-4 py-2 rounded font-bold hover:opacity-90 transition flex items-center gap-2">
+                <i data-lucide="printer"></i> Apostila (PDF)
+            </button>
+        </div>
+    </div>
+
+    <div id="presentation">
+
+        <!-- SLIDE 1: Capa -->
+        <section class="slide active">
+            <div class="text-center">
+                <span class="bg-orange text-black px-6 py-2 rounded-full text-sm font-bold uppercase mb-8 inline-block shadow-lg border-2 border-black">Google Sheets / Excel</span>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight text-blue-dark">
+                    Visualização de<br><span class="text-orange">Dados</span>
+                </h1>
+                <p class="text-2xl text-gray-700 font-bold max-w-3xl mx-auto">Desenhando com números: Gráficos de Pizza, Barras e Linhas.</p>
+            </div>
+            <div class="mt-16 text-blue-light no-print">
+                <p class="text-xs uppercase tracking-widest mb-2 font-bold opacity-70 text-center">Avançar</p>
+                <i data-lucide="arrow-down" class="mx-auto animate-bounce w-8 h-8"></i>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Roteiro Visual -->
+        <section class="slide">
+            <h2 class="text-5xl font-bold mb-10 border-l-8 border-orange pl-6 text-blue-dark">Previsão da Aula</h2>
+            <div class="grid grid-cols-2 gap-8 w-full max-w-6xl">
+                <div class="card p-6 border-t-8 border-blue-dark">
+                    <h3 class="font-bold text-2xl mb-2 flex items-center gap-3 text-blue-dark"><i data-lucide="eye" class="text-blue-dark"></i> 1. O Poder Visual</h3>
+                    <p class="text-sm text-gray-700 font-bold">Por que o nosso cérebro odeia ler tabelas gigantes e ama desenhos.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-blue-light">
+                    <h3 class="font-bold text-2xl mb-2 flex items-center gap-3 text-blue-light"><i data-lucide="mouse-pointer-2" class="text-blue-light"></i> 2. A Regra de Ouro</h3>
+                    <p class="text-sm text-gray-700 font-bold">Como selecionar os dados corretamente antes de apertar o botão.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-orange">
+                    <h3 class="font-bold text-2xl mb-2 flex items-center gap-3 text-orange"><i data-lucide="bar-chart-2" class="text-orange"></i> 3. Os 3 Clássicos</h3>
+                    <p class="text-sm text-gray-700 font-bold">Quando usar Pizza, quando usar Coluna, quando usar Linha.</p>
+                </div>
+                <div class="card p-6 border-t-8 border-black">
+                    <h3 class="font-bold text-2xl mb-2 flex items-center gap-3 text-black"><i data-lucide="palette" class="text-black"></i> 4. Prática</h3>
+                    <p class="text-sm text-gray-700 font-bold">Importando CSVs e gerando gráficos com dados reais.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: Por que Gráficos? -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Por que usamos Gráficos?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-xl border-l-[12px] border-blue-dark bg-white">
+                    <p class="font-black text-blue-dark mb-2 text-2xl">O Cérebro Humano</p>
+                    <p class="text-base leading-relaxed mb-4 font-bold text-gray-800">Olhar para uma planilha com 500 linhas de texto e números é exaustivo. Você não consegue ver quem vendeu mais só batendo o olho.</p>
+                    <p class="text-base leading-relaxed font-bold bg-gray-100 p-4 border-2 border-orange rounded text-orange shadow-sm">O cérebro processa imagens <strong>60.000 vezes mais rápido</strong> do que texto. O gráfico transforma matemática "chata" em uma história visual instantânea.</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="card p-4 border-4 border-blue-light bg-white font-mono text-xs text-center flex-1">
+                        <p class="border-b mb-2 font-bold text-black">JAN</p>
+                        <p class="mb-1 text-black">15.420</p>
+                        <p class="border-b mb-2 font-bold text-black">FEV</p>
+                        <p class="mb-1 text-black">28.900</p>
+                        <p class="border-b mb-2 font-bold text-black">MAR</p>
+                        <p class="mb-1 text-black">12.100</p>
+                    </div>
+                    <div class="text-4xl font-black text-orange">➜</div>
+                    <!-- Gráfico Visual Puro CSS -->
+                    <div class="flex items-end justify-around h-32 w-48 bg-white border-b-4 border-l-4 border-black p-2 shadow-lg">
+                        <div class="w-8 bg-blue-light h-16 rounded-t-sm"></div>
+                        <div class="w-8 bg-blue-dark h-28 rounded-t-sm"></div>
+                        <div class="w-8 bg-orange h-12 rounded-t-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: A Regra de Ouro -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">A Regra de Ouro da Criação 🥇</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="space-y-6">
+                    <p class="text-xl font-bold text-black">O computador não tem bola de cristal. Ele não sabe o que você quer desenhar se você não apontar o dedo.</p>
+                    <p class="font-black text-2xl text-white bg-blue-dark p-4 border-4 border-black rounded shadow-lg">
+                        Ação Nº 1: SEMPRE selecione os dados COM o cabeçalho antes de clicar em criar gráfico!
+                    </p>
+                    <p class="text-base font-bold text-gray-700 bg-white p-3 border-l-4 border-orange rounded shadow-sm">Se você selecionar o cabeçalho (ex: "Mês" e "Vendas"), o computador usa essas palavras para colocar os nomes automaticamente embaixo das barras.</p>
+                </div>
+
+                <div class="card p-6 bg-blue-light border-4 border-black shadow-2xl">
+                    <p class="text-white text-xs mb-2 font-bold">O jeito certo de selecionar:</p>
+                    <table class="w-full text-center border-collapse text-sm bg-white font-bold border-4 border-orange text-black">
+                        <tr class="bg-blue-dark text-white">
+                            <td class="border p-2">Mês</td>
+                            <td class="border p-2">Vendas</td>
+                        </tr>
+                        <tr><td class="border p-2 bg-orange/20">Janeiro</td><td class="border p-2 bg-orange/20">150</td></tr>
+                        <tr><td class="border p-2 bg-orange/20">Fevereiro</td><td class="border p-2 bg-orange/20">200</td></tr>
+                        <tr><td class="border p-2 bg-orange/20">Março</td><td class="border p-2 bg-orange/20">120</td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: O Caminho -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">O Botão Mágico</h2>
+            <p class="text-2xl text-center mb-8 font-bold text-black">Com a tabela selecionada, onde eu clico?</p>
+            
+            <div class="card p-10 max-w-4xl text-center bg-white border-4 border-blue-dark shadow-2xl">
+                <div class="flex items-center justify-center gap-6 text-3xl font-black font-mono">
+                    <span class="text-blue-light">Menu Inserir</span>
+                    <span class="text-black">➜</span>
+                    <span class="bg-gray-100 text-black px-4 py-2 border-2 border-black rounded flex items-center gap-3">
+                        <i data-lucide="bar-chart-2" class="text-orange w-8 h-8"></i> Gráfico
+                    </span>
+                </div>
+                <p class="mt-8 text-lg font-bold text-gray-700">O Google Sheets vai ler os seus dados e "chutar" qual é o melhor desenho para eles. Ele quase sempre acerta, mas nós podemos mudar o tipo de gráfico no painel lateral.</p>
+            </div>
+        </section>
+
+        <!-- ================= TIPO 1: PIZZA ================= -->
+
+        <!-- SLIDE 6: Gráfico de Pizza -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-8">
+                <span class="bg-blue-dark text-white px-4 py-2 rounded-xl font-black text-3xl">01</span>
+                <h2 class="text-5xl font-bold text-blue-dark">Gráfico de Pizza (Setores) 🍕</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-xl border-l-[12px] border-blue-dark bg-white text-black">
+                    <p class="font-black text-blue-dark mb-2 text-2xl">Quando usar?</p>
+                    <p class="text-base leading-relaxed mb-4 font-bold">Use EXCLUSIVAMENTE quando você quiser mostrar <strong>Partes de um Todo (100%)</strong>.</p>
+                    <p class="text-base leading-relaxed font-bold bg-gray-100 p-3 border-2 border-gray-300 rounded shadow-sm">Ele é perfeito para mostrar fatias de uma mesma coisa.<br>Ex: Resultados de uma eleição. Ou para onde vai o seu salário no mês.</p>
+                </div>
+                <div class="flex flex-col items-center justify-center">
+                    <div class="pie-chart shadow-2xl mb-4 relative">
+                        <span class="absolute top-10 right-8 text-white font-black text-sm drop-shadow-md">40%</span>
+                        <span class="absolute bottom-6 left-12 text-white font-black text-sm drop-shadow-md">35%</span>
+                        <span class="absolute top-10 left-6 text-white font-black text-sm drop-shadow-md">25%</span>
+                    </div>
+                    <div class="flex gap-4 text-xs font-bold font-mono border border-black p-2 bg-white rounded text-black">
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-orange border border-black"></div> Chrome</div>
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-blue-dark border border-black"></div> Safari</div>
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-blue-light border border-black"></div> Edge</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Prática Pizza -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Prática 1: Desenhando a Pizza</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-blue-dark bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-blue-dark">AÇÃO NO DOCUMENTO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Queremos ver para onde o nosso dinheiro está indo (Fatias do Salário). Para isso:</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Copie o texto da caixa preta e cole no Sheets.</li>
+                        <li>Use <strong>Dados > Dividir texto em colunas</strong>.</li>
+                        <li>Selecione a tabela inteira (A1 até B5).</li>
+                        <li>Vá em <strong>Inserir > Gráfico</strong>.</li>
+                        <li>Mude o "Tipo" para <strong>Gráfico de Pizza</strong>.</li>
+                    </ol>
+                </div>
+                
+                <!-- Bloco de Código CSV -->
+                <div class="csv-box">
+                    <p class="text-orange text-xs mb-4 font-bold font-sans tracking-wide">DADOS PARA COPIAR (CSV):</p>
+                    <pre class="font-mono text-white text-[15px] leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">Despesa;Valor
+Aluguel;1200,00
+Mercado;800,00
+Lazer;300,00
+Transporte;200,00</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TIPO 2: BARRAS ================= -->
+
+        <!-- SLIDE 8: Gráfico de Colunas/Barras -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-8">
+                <span class="bg-blue-light text-white px-4 py-2 rounded-xl font-black text-3xl">02</span>
+                <h2 class="text-5xl font-bold text-blue-dark">Gráfico de Colunas/Barras 📊</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-xl border-l-[12px] border-blue-light bg-white text-black">
+                    <p class="font-black text-blue-light mb-2 text-2xl">Quando usar?</p>
+                    <p class="text-base leading-relaxed mb-4 font-bold">Use para <strong>Comparar Diferentes Categorias</strong> que não necessariamente somam 100%.</p>
+                    <p class="text-base leading-relaxed font-bold bg-gray-100 p-3 border-2 border-gray-300 rounded shadow-sm">A altura da barra permite que o olho humano compare quem é maior e quem é menor instantaneamente.<br>Ex: Vendas de 3 produtos diferentes. População de 5 países.</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-8 bg-white border-4 border-black rounded-xl shadow-2xl relative w-full h-64">
+                    <div class="absolute left-4 top-4 bottom-8 w-1 bg-black"></div> <!-- Eixo Y -->
+                    <div class="absolute left-4 bottom-8 right-4 h-1 bg-black"></div> <!-- Eixo X -->
+                    
+                    <div class="flex items-end justify-around w-full h-full pl-6 pb-2 pt-4">
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-12 bg-blue-dark h-32 border-2 border-black rounded-t-sm shadow-md flex items-end justify-center pb-1"><span class="text-white text-xs font-bold">320</span></div>
+                            <span class="font-mono text-xs font-bold text-black">Tênis</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-12 bg-blue-light h-16 border-2 border-black rounded-t-sm shadow-md flex items-end justify-center pb-1"><span class="text-white text-xs font-bold">150</span></div>
+                            <span class="font-mono text-xs font-bold text-black">Meia</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-12 bg-orange h-40 border-2 border-black rounded-t-sm shadow-md flex items-end justify-center pb-1"><span class="text-black text-xs font-bold">450</span></div>
+                            <span class="font-mono text-xs font-bold text-black">Camisa</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: Prática Barras -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Prática 2: Levantando as Colunas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-blue-light bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-blue-light">AÇÃO NO DOCUMENTO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Queremos comparar o Estoque da Loja para ver quem tem mais unidades guardadas.</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Crie uma nova aba na planilha (+).</li>
+                        <li>Cole o CSV ao lado e divida em colunas.</li>
+                        <li><strong>SELECIONE TUDO</strong> (De A1 até B5).</li>
+                        <li>Vá em <strong>Inserir > Gráfico</strong>.</li>
+                        <li>Mude o Tipo para <strong>Gráfico de Colunas</strong>.</li>
+                    </ol>
+                </div>
+                
+                <!-- Bloco de Código CSV -->
+                <div class="csv-box">
+                    <p class="text-orange text-xs mb-4 font-bold font-sans tracking-wide">DADOS PARA COPIAR (CSV):</p>
+                    <pre class="font-mono text-white text-[15px] leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">Produto;Quantidade
+Monitor;45
+Teclado;120
+Mouse;210
+Cadeira;30</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TIPO 3: LINHAS ================= -->
+
+        <!-- SLIDE 10: Gráfico de Linhas -->
+        <section class="slide bg-gray-50">
+            <div class="flex items-center gap-6 mb-8">
+                <span class="bg-orange text-black border-2 border-black px-4 py-2 rounded-xl font-black text-3xl">03</span>
+                <h2 class="text-5xl font-bold text-blue-dark">Gráfico de Linhas 📈</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="logic-box shadow-xl border-l-[12px] border-orange bg-white text-black">
+                    <p class="font-black text-orange mb-2 text-2xl">Quando usar?</p>
+                    <p class="text-base leading-relaxed mb-4 font-bold">Use EXCLUSIVAMENTE para mostrar a <strong>Evolução no Tempo (Tendências)</strong>.</p>
+                    <p class="text-base leading-relaxed font-bold bg-gray-100 p-3 border-2 border-gray-300 rounded shadow-sm">Se o eixo X (o de baixo) tiver Meses, Anos, Dias ou Horas, o gráfico de linha é o rei.<br>Ex: A variação do preço do dólar. A temperatura de uma semana.</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-8 bg-white border-4 border-black rounded-xl shadow-2xl relative w-full h-64 overflow-hidden">
+                    <div class="absolute left-4 top-4 bottom-8 w-1 bg-black"></div> <!-- Eixo Y -->
+                    <div class="absolute left-4 bottom-8 right-4 h-1 bg-black"></div> <!-- Eixo X -->
+                    
+                    <!-- Linha desenhada com SVG puro -->
+                    <svg viewBox="0 0 100 50" class="w-full h-full ml-4 mb-2 overflow-visible" style="preserveAspectRatio: none;">
+                        <polyline fill="none" stroke="#FF6500" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                            points="0,40 25,20 50,25 75,5 100,10" />
+                        <circle cx="0" cy="40" r="2" fill="#0B192C" />
+                        <circle cx="25" cy="20" r="2" fill="#0B192C" />
+                        <circle cx="50" cy="25" r="2" fill="#0B192C" />
+                        <circle cx="75" cy="5" r="2" fill="#0B192C" />
+                        <circle cx="100" cy="10" r="2" fill="#0B192C" />
+                    </svg>
+                    
+                    <div class="flex justify-between w-full ml-6 pr-4 font-mono text-[10px] font-bold mt-2 text-black">
+                        <span>JAN</span><span>FEV</span><span>MAR</span><span>ABR</span><span>MAI</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Prática Linhas -->
+        <section class="slide">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Prática 3: Traçando a Linha do Tempo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-orange bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-orange">AÇÃO NO DOCUMENTO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Vamos analisar o <strong>Faturamento Mensal</strong>. O tempo vai passar e veremos se a loja cresceu.</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Crie uma nova aba na planilha (+).</li>
+                        <li>Cole o CSV ao lado e divida em colunas.</li>
+                        <li><strong>SELECIONE TUDO</strong> (De A1 até B6).</li>
+                        <li>Vá em <strong>Inserir > Gráfico</strong>.</li>
+                        <li>Mude o Tipo para <strong>Gráfico de Linha</strong>.</li>
+                    </ol>
+                </div>
+                
+                <!-- Bloco de Código CSV -->
+                <div class="csv-box">
+                    <p class="text-orange text-xs mb-4 font-bold font-sans tracking-wide">DADOS PARA COPIAR (CSV):</p>
+                    <pre class="font-mono text-white text-[15px] leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">Mês;Faturamento
+Jan;1500,00
+Fev;1800,00
+Mar;1400,00
+Abr;2200,00
+Mai;2500,00</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CUSTOMIZAÇÃO ================= -->
+
+        <!-- SLIDE 12: Editor de Gráficos -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-6 text-blue-dark">Embelezando: O Editor de Gráficos 🎨</h2>
+            <p class="text-xl font-bold text-gray-700 mb-8 text-center max-w-4xl">Dê 2 cliques sobre qualquer gráfico que você criou. Um painel vai abrir no lado direito da tela.</p>
+            
+            <div class="grid grid-cols-2 gap-10 w-full max-w-5xl">
+                <div class="card p-6 border-t-8 border-blue-dark bg-white">
+                    <h3 class="font-black text-2xl mb-4 text-blue-dark border-b-2 border-black pb-2">Aba: Configuração</h3>
+                    <p class="text-sm font-bold text-gray-700 mb-4">Mexe na MÁQUINA do gráfico.</p>
+                    <ul class="list-disc pl-5 space-y-2 text-sm font-mono text-gray-800 font-bold">
+                        <li>Troca o Tipo (Barra -> Pizza).</li>
+                        <li>Muda qual coluna é o Eixo X (Embaixo) e o Eixo Y (Lateral).</li>
+                        <li>Inverte linhas e colunas.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 border-t-8 border-orange bg-white">
+                    <h3 class="font-black text-2xl mb-4 text-orange border-b-2 border-black pb-2">Aba: Personalizar</h3>
+                    <p class="text-sm font-bold text-gray-700 mb-4">Mexe na TINTA do gráfico.</p>
+                    <ul class="list-disc pl-5 space-y-2 text-sm font-mono text-gray-800 font-bold">
+                        <li><strong>Títulos:</strong> Dá um nome ao gráfico e aos Eixos.</li>
+                        <li><strong>Séries:</strong> Muda a cor da barra ou da linha. Adiciona <strong class="bg-gray-200 px-1 rounded border border-black">Rótulos de Dados</strong> (O número exato em cima da barra).</li>
+                        <li><strong>Legenda:</strong> Move os nomes pra direita, baixo, topo.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 13: O Maior Erro -->
+        <section class="slide">
+            <div class="flex items-center gap-6 mb-8">
+                <i data-lucide="alert-triangle" class="w-12 h-12 text-red-600"></i>
+                <h2 class="text-4xl font-bold text-black">O Maior Erro dos Iniciantes</h2>
+            </div>
+            
+            <div class="card p-10 max-w-5xl bg-white border-4 border-red-500 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-red-500 text-white font-black px-4 py-1 rounded-bl-xl">CUIDADO!</div>
+                <p class="text-2xl font-bold text-gray-800 mb-6 text-center leading-relaxed">
+                    "Vou usar um Gráfico de Pizza para mostrar como o preço da gasolina variou de 2020 até 2025."
+                </p>
+                <div class="grid grid-cols-2 gap-8 items-center mt-8">
+                    <div class="flex flex-col items-center justify-center p-4 bg-red-50 rounded-xl border border-red-200">
+                        <div class="pie-chart shadow-md mb-4 scale-75"></div>
+                        <p class="font-black text-red-700 text-center uppercase tracking-widest text-lg">Incorreto ❌</p>
+                    </div>
+                    <div class="logic-box bg-white border-l-8 border-blue-dark">
+                        <p class="font-black text-blue-dark text-lg mb-2">Por que está errado?</p>
+                        <p class="text-sm font-bold text-gray-700">A Pizza serve para FATIAS de um total de 100% num mesmo momento. O tempo é uma estrada contínua.</p>
+                        <p class="text-sm font-bold text-gray-700 mt-2 bg-gray-100 p-2 rounded border border-gray-300">Tempo contínuo exige a visão de montanha-russa do <strong class="text-blue-dark uppercase">Gráfico de Linha</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 14: Quiz Interativo -->
+        <section class="slide no-print bg-gray-100">
+            <h2 class="text-4xl font-bold text-blue-dark mb-8">Qual gráfico eu escolho? 🤔</h2>
+            
+            <div class="grid grid-cols-1 gap-6 w-full max-w-4xl font-bold text-gray-800">
+                <!-- Cena 1 -->
+                <div class="card p-6 border-l-8 border-gray-800 flex flex-col md:flex-row items-center gap-6 bg-white">
+                    <div class="flex-1 text-lg">1. Mostrar que 60% da sala tem Android e 40% tem iPhone.</div>
+                    <div class="flex gap-2">
+                        <button onclick="alert('Errado! Colunas servem pra quantidades brutas de categorias separadas.')" class="px-4 py-2 border-2 border-black rounded hover:bg-gray-200 transition">Barras</button>
+                        <button onclick="alert('CERTO! Fatias de um grupo fechado (100% da sala) = Pizza!')" class="px-4 py-2 border-2 border-black rounded bg-blue-dark text-white hover:bg-blue-light transition">Pizza</button>
+                        <button onclick="alert('Errado! Não há evolução de tempo aqui.')" class="px-4 py-2 border-2 border-black rounded hover:bg-gray-200 transition">Linha</button>
+                    </div>
+                </div>
+                <!-- Cena 2 -->
+                <div class="card p-6 border-l-8 border-gray-800 flex flex-col md:flex-row items-center gap-6 bg-white">
+                    <div class="flex-1 text-lg">2. Comparar as alturas de 5 montanhas diferentes do mundo.</div>
+                    <div class="flex gap-2">
+                        <button onclick="alert('CERTO! Categorias isoladas lado a lado para ver quem é maior = Barras!')" class="px-4 py-2 border-2 border-black rounded bg-blue-light text-white hover:bg-blue-dark transition">Barras</button>
+                        <button onclick="alert('Errado! Altura de montanhas não são pedaços de um total de 100%.')" class="px-4 py-2 border-2 border-black rounded hover:bg-gray-200 transition">Pizza</button>
+                        <button onclick="alert('Errado! Não há evolução de tempo entre as montanhas.')" class="px-4 py-2 border-2 border-black rounded hover:bg-gray-200 transition">Linha</button>
+                    </div>
+                </div>
+                <!-- Cena 3 -->
+                <div class="card p-6 border-l-8 border-gray-800 flex flex-col md:flex-row items-center gap-6 bg-white">
+                    <div class="flex-1 text-lg">3. Mostrar que a temperatura subiu de manhã e caiu a noite.</div>
+                    <div class="flex gap-2">
+                        <button onclick="alert('Errado! Funciona, mas não é o ideal para tempo.')" class="px-4 py-2 border-2 border-black rounded hover:bg-gray-200 transition">Barras</button>
+                        <button onclick="alert('Errado! Totalmente errado.')" class="px-4 py-2 border-2 border-black rounded hover:bg-gray-200 transition">Pizza</button>
+                        <button onclick="alert('CERTO! Evolução através das horas do dia = Gráfico de Linhas!')" class="px-4 py-2 border-2 border-black rounded bg-orange text-black hover:bg-yellow-200 transition">Linha</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 15: Mapa Mental -->
+        <section class="slide">
+            <h2 class="text-5xl font-black mb-10 text-black">Resumo Visual</h2>
+            <div class="flex gap-6 w-full max-w-6xl text-center">
+                <div class="flex-1 border-4 border-blue-dark p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105 text-black">
+                    <div class="text-6xl mx-auto mb-4">🍕</div>
+                    <p class="text-2xl font-black text-blue-dark mb-4 border-b-4 border-blue-dark pb-2">PIZZA</p>
+                    <p class="text-lg font-bold text-black bg-gray-100 p-2 rounded border border-black mt-2">Partes de um Todo (100%)</p>
+                    <p class="text-sm font-bold text-gray-500 mt-2">Ex: Fatias de mercado, Votos.</p>
+                </div>
+                
+                <div class="flex-1 border-4 border-blue-light p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105 text-black">
+                    <div class="text-6xl mx-auto mb-4">📊</div>
+                    <p class="text-2xl font-black text-blue-light mb-4 border-b-4 border-blue-light pb-2">BARRAS</p>
+                    <p class="text-lg font-bold text-black bg-gray-100 p-2 rounded border border-black mt-2">Comparação Direta</p>
+                    <p class="text-sm font-bold text-gray-500 mt-2">Ex: Vendas de Produtos, Populações.</p>
+                </div>
+
+                <div class="flex-1 border-4 border-orange p-8 rounded-xl bg-white shadow-xl flex flex-col justify-center transform transition hover:scale-105 text-black">
+                    <div class="text-6xl mx-auto mb-4">📈</div>
+                    <p class="text-2xl font-black text-orange mb-4 border-b-4 border-orange pb-2">LINHAS</p>
+                    <p class="text-lg font-bold text-black bg-gray-100 p-2 rounded border border-black mt-2">Evolução no Tempo</p>
+                    <p class="text-sm font-bold text-gray-500 mt-2">Ex: Preços por Mês, Temperatura.</p>
+                </div>
+            </div>
+            <p class="mt-10 font-bold text-xl text-red-600 bg-red-50 px-6 py-2 rounded-lg border-2 border-red-200 shadow-sm">⚠️ A Regra de Ouro: Selecione o Cabeçalho da tabela ANTES de gerar o gráfico!</p>
+        </section>
+
+        <!-- ================= EXERCÍCIOS FINAIS ================= -->
+
+        <!-- SLIDE 16: Exercício 1 -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Exercício 1: Preferência de Navegadores</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-blue-dark bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-blue-dark">MISSÃO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Crie um gráfico para mostrar a fatia de mercado de cada navegador em uma escola.</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Crie a aba "Ex1" no Sheets.</li>
+                        <li>Cole os dados ao lado e divida as colunas.</li>
+                        <li>Gere o Gráfico ideal para "Partes de um todo".</li>
+                        <li>Personalize: Coloque um título e adicione os <strong>Rótulos de Dados</strong> (Porcentagem).</li>
+                    </ol>
+                </div>
+                <div class="csv-box">
+                    <p class="text-orange text-xs mb-4 font-bold font-sans tracking-wide">DADOS PARA COPIAR (CSV):</p>
+                    <pre class="font-mono text-white text-[15px] leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">Navegador;Votos
+Chrome;450
+Edge;120
+Safari;85
+Firefox;45</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 17: Exercício 2 -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Exercício 2: População da América do Sul</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-blue-light bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-blue-light">MISSÃO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Crie um gráfico para comparar lado a lado o tamanho da população de 4 países.</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Crie a aba "Ex2" no Sheets.</li>
+                        <li>Cole os dados ao lado e divida as colunas.</li>
+                        <li>Gere o Gráfico ideal para "Comparação de Categorias".</li>
+                        <li>Personalize: Pinte a barra do Brasil de verde no Editor de Gráficos.</li>
+                    </ol>
+                </div>
+                <div class="csv-box">
+                    <p class="text-orange text-xs mb-4 font-bold font-sans tracking-wide">DADOS PARA COPIAR (CSV):</p>
+                    <pre class="font-mono text-white text-[15px] leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">País;População(Milhões)
+Brasil;214
+Argentina;46
+Colômbia;51
+Chile;19</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 18: Exercício 3 -->
+        <section class="slide bg-gray-50">
+            <h2 class="text-4xl font-bold mb-8 text-blue-dark">Exercício 3: Evolução de Inscritos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center w-full max-w-6xl">
+                <div class="action-box shadow-lg border-orange bg-white">
+                    <p class="font-black text-2xl mb-4 border-b-2 border-black pb-2 text-orange">MISSÃO:</p>
+                    <p class="text-lg mb-4 font-bold text-black">Acompanhe o crescimento do seu canal no YouTube ao longo do primeiro semestre de 2025.</p>
+                    <ol class="list-decimal pl-6 space-y-3 text-base font-bold text-gray-800">
+                        <li>Crie a aba "Ex3" no Sheets.</li>
+                        <li>Cole os dados ao lado e divida as colunas.</li>
+                        <li>Gere o Gráfico ideal para "Evolução no Tempo".</li>
+                        <li>Personalize: Engrosse a linha e coloque pontos nos meses.</li>
+                    </ol>
+                </div>
+                <div class="csv-box">
+                    <p class="text-orange text-xs mb-4 font-bold font-sans tracking-wide">DADOS PARA COPIAR (CSV):</p>
+                    <pre class="font-mono text-white text-[15px] leading-relaxed overflow-x-auto m-0 p-0 bg-transparent border-none">Mês;Inscritos
+Jan;1500
+Fev;2100
+Mar;2800
+Abr;3500
+Mai;4200</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 19: Fim -->
+        <section class="slide bg-blue-dark border-t-[16px] border-black shadow-inner">
+            <div class="text-center">
+                <i data-lucide="bar-chart-2" class="w-32 h-32 mx-auto text-white mb-8"></i>
+                <h1 class="text-7xl font-black mb-6 text-white">FIM DA AULA 14</h1>
+                <p class="text-3xl text-white mb-16 font-bold">Você aprendeu a desenhar histórias com números.</p>
+                
+                <div class="flex justify-center no-print">
+                    <button onclick="window.print()" class="bg-white text-blue-dark px-10 py-5 rounded-full font-black shadow-2xl hover:scale-105 transition flex items-center gap-3 text-2xl border-4 border-transparent hover:border-orange">
+                        <i data-lucide="printer" class="w-8 h-8"></i> Imprimir Apostila (PDF)
+                    </button>
+                </div>
+                
+                <p class="mt-24 text-sm text-white font-mono font-black tracking-widest uppercase opacity-80">COTIL - Fundamentos de Informática</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Navegação Inferior -->
+    <div class="no-print fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button id="prevBtn" class="p-5 bg-white border-4 border-black rounded-full shadow-lg hover:bg-gray-200 transition active:scale-90 text-black">
+            <i data-lucide="arrow-left" class="w-8 h-8"></i>
+        </button>
+        <button id="nextBtn" class="p-5 bg-blue-dark text-white border-4 border-black rounded-full shadow-lg hover:opacity-80 transition active:scale-90">
+            <i data-lucide="arrow-right" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlides() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+            
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        }
+
+        updateSlides();
+
+        document.getElementById('nextBtn').addEventListener('click', () => { 
+            if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); } 
+        });
+        document.getElementById('prevBtn').addEventListener('click', () => { 
+            if(currentSlide > 0) { currentSlide--; updateSlides(); } 
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                if(currentSlide < slides.length - 1) { currentSlide++; updateSlides(); }
+            }
+            if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                if(currentSlide > 0) { currentSlide--; updateSlides(); }
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
