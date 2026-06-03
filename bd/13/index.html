@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco de Dados — Aula 13: Relacionamentos Complexos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#6E1A37',
+                            primary:   '#AE2448',
+                            secondary: '#72BAA9',
+                            muted:     '#D5E7B5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+
+        body { font-family: 'Inter', sans-serif; background-color: #FCFCFC; color: #6E1A37; overflow: hidden; }
+
+        .step-content { display: none; animation: fadeIn 0.5s ease-out forwards; }
+        .step-content.active { display: flex; flex-direction: column; min-height: 70vh; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        @media print {
+            body { overflow: visible !important; background: white !important; }
+            .no-print { display: none !important; }
+            #main-content { padding: 0 !important; }
+            .step-content { display: block !important; page-break-after: auto; border-bottom: 2px solid #ccc; padding: 40px 0; opacity: 1 !important; transform: none !important; }
+        }
+
+        .node-rect  { fill: #ffffff; stroke: #6E1A37; stroke-width: 4; }
+        .node-text  { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; fill: #6E1A37; }
+        .edge       { stroke: #6E1A37; stroke-width: 3; fill: none; }
+        .rel-polygon{ fill: #D5E7B5; stroke: #AE2448; stroke-width: 3; }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #fff; border: 2px solid #6E1A37; padding: 2px 8px; border-radius: 6px; color: #6E1A37; font-weight: 700; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #6E1A37; border-radius: 10px; border: 2px solid #FCFCFC; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<!-- Header -->
+<header class="no-print h-20 bg-white border-b-4 border-brand-dark px-8 flex items-center justify-between sticky top-0 z-50 shadow-md">
+    <div class="flex items-center gap-4">
+        <div class="bg-brand-dark text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-inner">
+            <i class="fas fa-code-branch text-xl"></i>
+        </div>
+        <h1 class="font-extrabold text-2xl tracking-tight text-brand-dark">Banco de Dados <span class="text-brand-primary opacity-90">| Aula 13</span></h1>
+    </div>
+    <div class="flex items-center gap-4">
+        <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-brand-muted hover:bg-brand-secondary hover:text-white rounded-xl text-brand-dark font-bold transition shadow-sm border border-brand-dark/20">
+            <i class="fas fa-print"></i> IMPRIMIR
+        </button>
+        <button onclick="toggleFullscreen()" class="w-10 h-10 bg-brand-muted rounded-xl text-brand-dark hover:bg-brand-dark hover:text-white transition flex items-center justify-center border border-brand-dark/20">
+            <i class="fas fa-expand"></i>
+        </button>
+    </div>
+</header>
+
+<!-- Barra de Progresso -->
+<div class="no-print h-2 w-full bg-white overflow-hidden border-b border-brand-dark/10">
+    <div id="progress-bar" class="h-full bg-brand-secondary transition-all duration-500 w-0"></div>
+</div>
+
+<!-- Conteúdo -->
+<main id="main-content" class="flex-grow flex items-center justify-center p-6 md:p-10 overflow-y-auto custom-scrollbar">
+    <div id="steps-container" class="w-full max-w-5xl"></div>
+</main>
+
+<!-- Footer -->
+<footer class="no-print h-24 bg-white border-t-4 border-brand-dark px-8 flex items-center justify-between sticky bottom-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+    <button id="btn-prev" onclick="prevStep()" class="flex items-center gap-3 px-8 py-3 bg-brand-muted text-brand-dark rounded-2xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 border-2 border-brand-dark/20 disabled:border-transparent text-lg">
+        <i class="fas fa-arrow-left"></i> VOLTAR
+    </button>
+    <span id="step-counter" class="text-sm font-black text-brand-dark uppercase tracking-widest bg-brand-muted px-4 py-1 rounded-full border border-brand-dark/20">1 / 17</span>
+    <button id="btn-next" onclick="nextStep()" class="flex items-center gap-3 px-10 py-3 bg-brand-dark text-white rounded-2xl font-black hover:bg-brand-primary transition shadow-lg text-lg border-b-4 border-black/30 hover:border-b-0 hover:translate-y-1">
+        AVANÇAR <i class="fas fa-arrow-right"></i>
+    </button>
+</footer>
+
+<script>
+const steps = [
+    // 01
+    {
+        title: "Relacionamentos Complexos",
+        content: `
+        <div class="text-center space-y-8 py-10">
+            <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] text-brand-secondary mb-4 shadow-xl">
+                <i class="fas fa-code-branch text-8xl"></i>
+            </div>
+            <h2 class="text-5xl md:text-6xl font-black text-brand-dark leading-tight">Relacionamentos<br>Complexos</h2>
+            <div class="bg-brand-muted p-6 rounded-2xl border-l-8 border-brand-secondary max-w-3xl mx-auto text-left text-brand-dark font-medium">
+                <p class="text-lg font-semibold mb-3">Vamos explorar dois casos especiais:</p>
+                <p class="text-xl font-black text-brand-primary mb-2">✓ Auto-relacionamentos</p>
+                <p class="text-xl font-black text-brand-primary">✓ Relacionamentos Ternários</p>
+            </div>
+            <p class="text-sm font-bold opacity-50"><i class="fas fa-arrow-left mr-2"></i>USE AS SETAS PARA NAVEGAR<i class="fas fa-arrow-right ml-2"></i></p>
+        </div>`
+    },
+    // 02
+    {
+        title: "Auto-relacionamento: O que é?",
+        content: `
+        <div class="space-y-6">
+            <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                    <i class="fas fa-arrow-rotate-left text-brand-secondary"></i> Conceito
+                </h3>
+                <p class="text-lg font-medium mb-6">Um <strong>auto-relacionamento</strong> ocorre quando uma entidade se relaciona <strong>com ela mesma</strong>.</p>
+                <div class="bg-brand-muted rounded-2xl p-6 border-l-4 border-brand-secondary mb-6">
+                    <p class="font-bold text-base mb-2">📌 Pense assim:</p>
+                    <p class="text-sm">Na vida real, às vezes elementos de um mesmo grupo se relacionam entre si. Um funcionário supervisionado por outro funcionário. Uma categoria que é subcategoria de outra categoria.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="border-2 border-brand-primary rounded-xl p-4 bg-white">
+                        <p class="font-bold text-brand-primary mb-2">✗ Sem auto-relacionamento:</p>
+                        <p class="text-sm">Criar tabelas separadas FUNCIONÁRIO e CHEFE — dados duplicados, difícil manter.</p>
+                    </div>
+                    <div class="border-2 border-brand-secondary rounded-xl p-4 bg-white">
+                        <p class="font-bold text-brand-secondary mb-2">✓ Com auto-relacionamento:</p>
+                        <p class="text-sm">Uma única tabela FUNCIONÁRIO com FK apontando para ela mesma.</p>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    },
+    // 03
+    {
+        title: "Exemplo 1: Hierarquia de Funcionários",
+        content: `
+        <div class="space-y-6">
+            <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                    <i class="fas fa-sitemap text-brand-secondary"></i> Funcionário → Supervisor
+                </h3>
+                <ul class="text-lg font-medium space-y-3 ml-8 list-disc mb-6">
+                    <li><strong>Pedro</strong> é supervisionado por <strong>Maria</strong></li>
+                    <li><strong>João</strong> também é supervisionado por <strong>Maria</strong></li>
+                    <li><strong>Maria</strong> é supervisionada pelo <strong>Gerente</strong></li>
+                    <li><strong>Gerente</strong> não tem supervisor — é o topo da hierarquia</li>
+                </ul>
+                <div class="bg-brand-muted rounded-2xl p-6 border-l-4 border-brand-secondary">
+                    <p class="font-bold text-base mb-2">💡 Como resolver no banco de dados?</p>
+                    <p class="text-sm mb-2">A tabela FUNCIONÁRIO terá <strong>dois campos de chave</strong>:</p>
+                    <p class="text-sm"><code>fun_id</code> (PK) — identifica cada funcionário</p>
+                    <p class="text-sm"><code>fun_supervisor_id_fk</code> (FK) — aponta para outro registro da <strong>mesma tabela</strong></p>
+                </div>
+            </div>
+        </div>`
+    },
+    // 04
+    {
+        title: "Diagrama ER: Auto-relacionamento",
+        content: `
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl py-10 px-8 border-4 border-brand-dark shadow-sm overflow-x-auto flex items-center justify-center">
+                <svg width="820" height="280" viewBox="0 0 820 280" style="min-width:100%; height:auto;">
+                    <!-- Atributo fun_id (topo) -->
+                    <ellipse cx="200" cy="30" rx="55" ry="20" fill="white" stroke="#6E1A37" stroke-width="2"/>
+                    <text x="200" y="35" font-family="JetBrains Mono" font-size="9" font-weight="bold" fill="#6E1A37" text-anchor="middle" text-decoration="underline">fun_id (PK)</text>
+                    <line x1="200" y1="50" x2="200" y2="110" stroke="#6E1A37" stroke-width="2"/>
+
+                    <!-- Atributo fun_nome (esq cima) -->
+                    <ellipse cx="110" cy="65" rx="45" ry="18" fill="white" stroke="#6E1A37" stroke-width="2"/>
+                    <text x="110" y="70" font-family="Inter" font-size="8" font-weight="600" fill="#6E1A37" text-anchor="middle">fun_nome</text>
+                    <line x1="128" y1="80" x2="162" y2="110" stroke="#6E1A37" stroke-width="2"/>
+
+                    <!-- Atributo fun_salario (dir cima) -->
+                    <ellipse cx="290" cy="65" rx="50" ry="18" fill="white" stroke="#6E1A37" stroke-width="2"/>
+                    <text x="290" y="70" font-family="Inter" font-size="8" font-weight="600" fill="#6E1A37" text-anchor="middle">fun_salario</text>
+                    <line x1="272" y1="80" x2="238" y2="110" stroke="#6E1A37" stroke-width="2"/>
+
+                    <!-- Entidade FUNCIONÁRIO -->
+                    <rect x="130" y="110" width="140" height="60" class="node-rect" rx="8"/>
+                    <text x="200" y="145" font-family="Inter" font-size="13" font-weight="900" fill="#6E1A37" text-anchor="middle">FUNCIONÁRIO</text>
+
+                    <!-- Atributo fun_supervisor_id_fk (baixo) -->
+                    <ellipse cx="200" cy="250" rx="72" ry="20" fill="#D5E7B5" stroke="#AE2448" stroke-width="2"/>
+                    <text x="200" y="255" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#AE2448" text-anchor="middle">fun_supervisor_id_fk (FK)</text>
+                    <line x1="200" y1="230" x2="200" y2="170" stroke="#AE2448" stroke-width="2"/>
+
+                    <!-- Losango: SUPERVISÃO (auto-relacionamento) -->
+                    <polygon points="530,110 610,145 530,180 450,145" class="rel-polygon"/>
+                    <text x="530" y="150" font-family="Inter" font-size="11" font-weight="800" fill="#AE2448" text-anchor="middle">supervisiona</text>
+
+                    <!-- Linhas Funcionário → losango → Funcionário -->
+                    <line x1="270" y1="145" x2="450" y2="145" stroke="#6E1A37" stroke-width="2.5"/>
+                    <path d="M610,145 Q700,145 700,110 Q700,60 200,80 Q200,85 200,110" stroke="#AE2448" stroke-width="2.5" fill="none" stroke-dasharray="6,3"/>
+
+                    <!-- Cardinalidades -->
+                    <text x="360" y="135" font-family="JetBrains Mono" font-size="11" font-weight="900" fill="#6E1A37" text-anchor="middle">(1,1)</text>
+                    <text x="490" y="100" font-family="JetBrains Mono" font-size="11" font-weight="900" fill="#AE2448" text-anchor="middle">(0,N)</text>
+
+                    <!-- Label da seta curva -->
+                    <text x="680" y="75" font-family="Inter" font-size="10" font-weight="700" fill="#AE2448" text-anchor="middle">Aponta para</text>
+                    <text x="680" y="90" font-family="Inter" font-size="10" font-weight="700" fill="#AE2448" text-anchor="middle">ela mesma!</text>
+                </svg>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 text-sm font-bold text-brand-dark">
+                <div class="flex gap-3 items-start bg-brand-muted p-4 rounded-xl">
+                    <span>✓</span><span><strong>Elipses</strong> = atributos da entidade</span>
+                </div>
+                <div class="flex gap-3 items-start bg-brand-muted p-4 rounded-xl">
+                    <span>✓</span><span>A seta tracejada representa a FK <strong>voltando para a própria tabela</strong></span>
+                </div>
+            </div>
+        </div>`
+    },
+    // 05
+    {
+        title: "Dicionário: FUNCIONÁRIO (Auto-relacionamento)",
+        content: `
+        <div class="space-y-6">
+            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden max-w-xl mx-auto">
+                <div class="bg-brand-dark text-white font-bold p-4 text-center uppercase text-sm tracking-widest">FUNCIONÁRIO</div>
+                <ul class="p-6 text-sm space-y-4 font-medium text-brand-dark">
+                    <li class="border-b border-gray-100 pb-3"><i class="fas fa-key text-brand-primary w-5 text-center"></i> <code class="text-brand-primary">fun_id</code> <span class="text-xs opacity-60 ml-1">(PK)</span></li>
+                    <li class="border-b border-gray-100 pb-3"><i class="fas fa-user text-brand-dark/30 w-5 text-center"></i> <code>fun_nome</code></li>
+                    <li class="border-b border-gray-100 pb-3"><i class="fas fa-dollar-sign text-brand-dark/30 w-5 text-center"></i> <code>fun_salario</code></li>
+                    <li class="border-b border-gray-100 pb-3"><i class="fas fa-phone text-brand-dark/30 w-5 text-center"></i> <code>fun_telefone</code></li>
+                    <li class="bg-brand-muted/60 p-3 rounded-lg border-2 border-brand-primary">
+                        <i class="fas fa-key text-brand-primary w-5 text-center"></i>
+                        <code class="text-brand-primary">fun_supervisor_id_fk</code>
+                        <span class="text-xs opacity-60 ml-1">(FK → FUNCIONÁRIO)</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="p-6 bg-brand-muted rounded-2xl border-l-4 border-brand-secondary text-brand-dark">
+                <p class="font-bold text-base mb-3">⚙️ Registros de exemplo:</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs border-collapse">
+                        <thead><tr class="bg-brand-dark text-white">
+                            <th class="p-2 text-left">fun_id</th>
+                            <th class="p-2 text-left">fun_nome</th>
+                            <th class="p-2 text-left">fun_supervisor_id_fk</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-b border-brand-dark/10"><td class="p-2 font-bold">1</td><td class="p-2">Pedro</td><td class="p-2 text-brand-primary font-bold">2</td></tr>
+                            <tr class="border-b border-brand-dark/10 bg-white"><td class="p-2 font-bold">2</td><td class="p-2">Maria</td><td class="p-2 text-brand-primary font-bold">3</td></tr>
+                            <tr><td class="p-2 font-bold">3</td><td class="p-2">Gerente</td><td class="p-2 text-brand-dark/40 italic">NULL</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-l-4 border-brand-primary rounded-r-xl text-sm font-bold text-brand-dark">
+                🔑 <strong>Regra do Auto-relacionamento:</strong> PK simples (<code>fun_id</code>) + FK que aponta para a própria tabela (<code>fun_supervisor_id_fk</code>). O chefe do topo recebe <strong>NULL</strong> na FK.
+            </div>
+        </div>`
+    },
+    // 06
+    {
+        title: "Relacionamento Ternário: O que é?",
+        content: `
+        <div class="space-y-6">
+            <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                    <i class="fas fa-cube text-brand-secondary"></i> Conceito
+                </h3>
+                <p class="text-lg font-medium mb-6">Um <strong>relacionamento ternário</strong> conecta <strong>3 entidades diferentes</strong> simultaneamente em um único relacionamento.</p>
+
+                <div class="bg-brand-muted rounded-2xl p-6 border-l-4 border-brand-secondary mb-6">
+                    <p class="font-bold text-base mb-2">📌 A diferença do N:N:</p>
+                    <p class="text-sm mb-1">No <strong>N:N</strong> — 2 entidades se relacionam: Aluno ↔ Disciplina</p>
+                    <p class="text-sm">No <strong>Ternário</strong> — 3 entidades se relacionam juntas: Aluno + Disciplina + <strong>Professor</strong></p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-3 text-center text-sm font-bold">
+                    <div class="border-2 border-brand-primary rounded-xl p-4 bg-white">
+                        <p class="text-brand-primary mb-1">ALUNO</p>
+                        <p class="opacity-60 text-xs">João, Maria...</p>
+                    </div>
+                    <div class="border-2 border-brand-primary rounded-xl p-4 bg-white">
+                        <p class="text-brand-primary mb-1">DISCIPLINA</p>
+                        <p class="opacity-60 text-xs">Banco de Dados, Python...</p>
+                    </div>
+                    <div class="border-2 border-brand-secondary rounded-xl p-4 bg-white">
+                        <p class="text-brand-secondary mb-1">PROFESSOR</p>
+                        <p class="opacity-60 text-xs">Prof. Ana, Prof. Carlos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>`
+    },
+    // 07
+    {
+        title: "Exemplo 2: Aulas na Escola (Ternário)",
+        content: `
+        <div class="space-y-6">
+            <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                    <i class="fas fa-school text-brand-secondary"></i> Aula = Aluno × Disciplina × Professor
+                </h3>
+                <ul class="text-lg font-medium space-y-2 ml-8 list-disc mb-6">
+                    <li><strong>João</strong> estuda <strong>Banco de Dados</strong> com a <strong>Prof. Ana</strong></li>
+                    <li><strong>João</strong> estuda <strong>Python</strong> com o <strong>Prof. Carlos</strong></li>
+                    <li><strong>Maria</strong> estuda <strong>Banco de Dados</strong> com a <strong>Prof. Ana</strong></li>
+                    <li><strong>Maria</strong> estuda <strong>Banco de Dados</strong> com o <strong>Prof. Carlos</strong> (turma diferente!)</li>
+                </ul>
+                <div class="bg-brand-muted rounded-2xl p-6 border-l-4 border-brand-secondary">
+                    <p class="font-bold text-base mb-2">💡 Por que não é N:N simples?</p>
+                    <p class="text-sm mb-2">Maria estuda BD com Ana e também com Carlos. Isso só faz sentido com os <strong>três juntos</strong>.</p>
+                    <p class="text-sm font-bold">PK Composta = <code>alu_id_fk</code> + <code>dis_id_fk</code> + <code>prof_id_fk</code></p>
+                </div>
+            </div>
+        </div>`
+    },
+    // 08
+    {
+        title: "Diagrama ER: Relacionamento Ternário",
+        content: `
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl py-8 px-6 border-4 border-brand-dark shadow-sm overflow-x-auto flex items-center justify-center">
+                <svg width="900" height="340" viewBox="0 0 900 340" style="min-width:100%; height:auto;">
+
+                    <!-- ── ENTIDADE ALUNO (centro x=130) ── -->
+                    <ellipse cx="130" cy="30"  rx="50" ry="20" fill="white" stroke="#6E1A37" stroke-width="2"/>
+                    <text x="130" y="35" font-family="JetBrains Mono" font-size="8" font-weight="bold" fill="#6E1A37" text-anchor="middle" text-decoration="underline">alu_id (PK)</text>
+                    <line x1="130" y1="50" x2="130" y2="100" stroke="#6E1A37" stroke-width="2"/>
+                    <rect x="75" y="100" width="110" height="50" class="node-rect" rx="6"/>
+                    <text x="130" y="131" font-family="Inter" font-size="13" font-weight="900" fill="#6E1A37" text-anchor="middle">ALUNO</text>
+
+                    <!-- ── ENTIDADE DISCIPLINA (centro x=450) ── -->
+                    <ellipse cx="450" cy="30" rx="55" ry="20" fill="white" stroke="#6E1A37" stroke-width="2"/>
+                    <text x="450" y="35" font-family="JetBrains Mono" font-size="8" font-weight="bold" fill="#6E1A37" text-anchor="middle" text-decoration="underline">dis_id (PK)</text>
+                    <line x1="450" y1="50" x2="450" y2="100" stroke="#6E1A37" stroke-width="2"/>
+                    <rect x="393" y="100" width="115" height="50" class="node-rect" rx="6"/>
+                    <text x="450" y="131" font-family="Inter" font-size="12" font-weight="900" fill="#6E1A37" text-anchor="middle">DISCIPLINA</text>
+
+                    <!-- ── ENTIDADE PROFESSOR (centro x=770) ── -->
+                    <ellipse cx="770" cy="30" rx="55" ry="20" fill="white" stroke="#6E1A37" stroke-width="2"/>
+                    <text x="770" y="35" font-family="JetBrains Mono" font-size="8" font-weight="bold" fill="#6E1A37" text-anchor="middle" text-decoration="underline">prof_id (PK)</text>
+                    <line x1="770" y1="50" x2="770" y2="100" stroke="#6E1A37" stroke-width="2"/>
+                    <rect x="713" y="100" width="115" height="50" class="node-rect" rx="6"/>
+                    <text x="770" y="131" font-family="Inter" font-size="12" font-weight="900" fill="#6E1A37" text-anchor="middle">PROFESSOR</text>
+
+                    <!-- ── LOSANGO AULA (centro x=450, y=230) ── -->
+                    <!-- As 3 linhas saem dos centros dos retângulos e chegam aos vértices do losango -->
+                    <!-- ALUNO (130,125) → vértice esquerdo (360,230) -->
+                    <line x1="185" y1="125" x2="360" y2="230" stroke="#6E1A37" stroke-width="2.5"/>
+                    <!-- DISCIPLINA (450,150) → vértice topo (450,205) -->
+                    <line x1="450" y1="150" x2="450" y2="205" stroke="#6E1A37" stroke-width="2.5"/>
+                    <!-- PROFESSOR (770,125) → vértice direito (540,230) -->
+                    <line x1="715" y1="125" x2="540" y2="230" stroke="#6E1A37" stroke-width="2.5"/>
+
+                    <polygon points="450,205 540,230 450,255 360,230" class="rel-polygon"/>
+                    <text x="450" y="235" font-family="Inter" font-size="11" font-weight="900" fill="#AE2448" text-anchor="middle">AULA</text>
+
+                    <!-- ── CARDINALIDADES (próximas à entidade, não ao losango) ── -->
+                    <text x="165" y="165" font-family="JetBrains Mono" font-size="11" font-weight="900" fill="#AE2448" text-anchor="middle">(0,N)</text>
+                    <text x="460" y="175" font-family="JetBrains Mono" font-size="11" font-weight="900" fill="#AE2448" text-anchor="middle">(0,N)</text>
+                    <text x="730" y="165" font-family="JetBrains Mono" font-size="11" font-weight="900" fill="#AE2448" text-anchor="middle">(1,1)</text>
+
+                    <!-- ── ATRIBUTO aul_horario ligado ao losango ── -->
+                    <line x1="450" y1="255" x2="450" y2="305" stroke="#AE2448" stroke-width="2"/>
+                    <ellipse cx="450" cy="320" rx="55" ry="18" fill="#D5E7B5" stroke="#AE2448" stroke-width="2"/>
+                    <text x="450" y="325" font-family="Inter" font-size="8" font-weight="700" fill="#AE2448" text-anchor="middle">aul_horario</text>
+                </svg>
+            </div>
+            <div class="p-4 bg-brand-muted rounded-xl text-sm font-bold text-brand-dark">
+                ✓ O <strong>losango</strong> conecta as 3 entidades simultaneamente. A elipse <strong>aul_horario</strong> é um atributo do próprio relacionamento. As cardinalidades serão explicadas no próximo slide.
+            </div>
+        </div>`
+    },
+    // 08b — NOVO: Lendo as Cardinalidades do Ternário
+    {
+        title: "Como Ler as Cardinalidades no Ternário?",
+        content: `
+        <div class="space-y-5">
+            <div class="p-6 bg-white rounded-2xl border-2 border-brand-dark/10 shadow-sm">
+                <h3 class="text-xl font-black mb-3 text-brand-dark">⚠️ No ternário, a leitura é diferente!</h3>
+                <p class="text-sm font-medium text-brand-dark">No ternário, a cardinalidade de uma entidade responde à pergunta:<br/>
+                <strong>"Fixando as outras duas, quantas vezes esta entidade aparece?"</strong></p>
+            </div>
+
+            <!-- ALUNO -->
+            <div class="border-l-4 border-brand-primary bg-white rounded-xl p-5 shadow-sm">
+                <p class="font-black text-brand-primary mb-2">ALUNO → (0,N)</p>
+                <p class="text-sm text-brand-dark mb-1">
+                    <strong>Pergunta:</strong> Fixada uma Disciplina + um Professor, quantos Alunos podem aparecer?
+                </p>
+                <p class="text-sm text-brand-dark">
+                    <strong>Resposta:</strong> Zero (a turma pode estar vazia) ou muitos. Logo <strong>(0,N)</strong>.
+                </p>
+            </div>
+
+            <!-- DISCIPLINA -->
+            <div class="border-l-4 border-brand-secondary bg-white rounded-xl p-5 shadow-sm">
+                <p class="font-black text-brand-secondary mb-2">DISCIPLINA → (0,N)</p>
+                <p class="text-sm text-brand-dark mb-1">
+                    <strong>Pergunta:</strong> Fixado um Aluno + um Professor, quantas Disciplinas esse professor ministra para esse aluno?
+                </p>
+                <p class="text-sm text-brand-dark">
+                    <strong>Resposta:</strong> Zero (professor pode não dar aula para aquele aluno ainda) ou muitas. Logo <strong>(0,N)</strong>.
+                </p>
+            </div>
+
+            <!-- PROFESSOR -->
+            <div class="border-l-4 border-brand-dark bg-white rounded-xl p-5 shadow-sm">
+                <p class="font-black text-brand-dark mb-2">PROFESSOR → (1,1)</p>
+                <p class="text-sm text-brand-dark mb-1">
+                    <strong>Pergunta:</strong> Fixado um Aluno + uma Disciplina, quantos Professores ministram?
+                </p>
+                <p class="text-sm text-brand-dark mb-1">
+                    <strong>Resposta:</strong> Na nossa escola, cada disciplina tem <strong>exatamente 1 professor</strong> por turma — nenhum outro professor ministra a mesma disciplina para os mesmos alunos. Logo <strong>(1,1)</strong>.
+                </p>
+                <p class="text-sm text-brand-dark opacity-70 italic">
+                    O "1,1" significa: no mínimo 1 (é obrigatório ter professor) e no máximo 1 (não há dois professores para a mesma turma+disciplina).
+                </p>
+            </div>
+
+            <div class="p-5 bg-brand-muted rounded-2xl border-l-4 border-brand-primary text-brand-dark text-sm font-bold">
+                💡 <strong>A cardinalidade reflete a regra de negócio!</strong> As cardinalidades de ALUNO e DISCIPLINA são (0,N) porque uma turma pode ter muitos alunos e um professor pode dar muitas disciplinas. Já PROFESSOR é (1,1) porque <em>nesta escola</em> uma disciplina só tem um professor por turma. Em outro contexto — como uma faculdade onde dois professores co-ministram uma matéria — poderia ser (1,N).
+            </div>
+        </div>`
+    },
+    // 09
+    {
+        title: "Dicionário: AULA (Ternário)",
+        content: `
+        <div class="space-y-6">
+            <div class="border-2 border-brand-dark/20 rounded-xl bg-white shadow-sm overflow-hidden max-w-xl mx-auto">
+                <div class="bg-brand-dark text-white font-bold p-4 text-center uppercase text-sm tracking-widest">AULA (ternário)</div>
+                <ul class="p-6 text-sm space-y-3 font-medium text-brand-dark">
+                    <li class="bg-brand-muted/60 p-3 rounded-lg border-2 border-brand-primary">
+                        <i class="fas fa-key text-brand-primary w-5 text-center"></i>
+                        <code class="text-brand-primary">alu_id_fk</code> <span class="text-xs opacity-60">(PK + FK → ALUNO)</span>
+                    </li>
+                    <li class="bg-brand-muted/60 p-3 rounded-lg border-2 border-brand-primary">
+                        <i class="fas fa-key text-brand-primary w-5 text-center"></i>
+                        <code class="text-brand-primary">dis_id_fk</code> <span class="text-xs opacity-60">(PK + FK → DISCIPLINA)</span>
+                    </li>
+                    <li class="bg-brand-muted/60 p-3 rounded-lg border-2 border-brand-primary">
+                        <i class="fas fa-key text-brand-primary w-5 text-center"></i>
+                        <code class="text-brand-primary">prof_id_fk</code> <span class="text-xs opacity-60">(PK + FK → PROFESSOR)</span>
+                    </li>
+                    <li class="border-t border-gray-100 pt-3"><i class="fas fa-clock text-brand-dark/30 w-5 text-center"></i> <code>aul_horario</code> <span class="text-xs opacity-60">— terça 10h</span></li>
+                    <li><i class="fas fa-building text-brand-dark/30 w-5 text-center"></i> <code>aul_sala</code> <span class="text-xs opacity-60">— Sala 301</span></li>
+                </ul>
+            </div>
+
+            <div class="p-6 bg-brand-muted rounded-2xl border-l-4 border-brand-secondary text-brand-dark text-sm space-y-2">
+                <p class="font-bold text-base mb-1">📊 Registros de exemplo:</p>
+                <p>• João (1) + BD (2) + Prof. Ana (3) → Terça 10h, Sala 101</p>
+                <p>• João (1) + Python (5) + Prof. Carlos (4) → Quarta 14h, Sala 202</p>
+                <p>• Maria (2) + BD (2) + Prof. Ana (3) → Terça 10h, Sala 101</p>
+                <p>• Maria (2) + BD (2) + Prof. Carlos (4) → Quinta 8h, Sala 305</p>
+            </div>
+        </div>`
+    },
+    // 10
+    {
+        title: "Regras de Chaves: Auto vs Ternário",
+        content: `
+        <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="border-4 border-brand-primary rounded-2xl bg-white shadow-lg overflow-hidden">
+                    <div class="bg-brand-primary text-white font-bold p-4 text-center uppercase text-sm tracking-wider">Auto-relacionamento</div>
+                    <div class="p-6 space-y-4 text-sm">
+                        <div class="bg-brand-muted/50 p-3 rounded-lg">
+                            <p class="font-bold mb-1 text-brand-dark">PK normal:</p>
+                            <code>fun_id</code>
+                        </div>
+                        <div class="bg-brand-muted/50 p-3 rounded-lg">
+                            <p class="font-bold mb-1 text-brand-dark">FK especial:</p>
+                            <code>fun_supervisor_id_fk</code>
+                            <p class="text-xs opacity-60 mt-1">↩️ Aponta para a mesma tabela</p>
+                        </div>
+                        <div class="border-2 border-brand-primary p-3 rounded-lg text-center">
+                            <p class="font-bold text-brand-primary">1 PK + 1 FK (mesma tabela)</p>
+                            <p class="text-xs opacity-60">Topo da hierarquia: FK = NULL</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-4 border-brand-secondary rounded-2xl bg-white shadow-lg overflow-hidden">
+                    <div class="bg-brand-secondary text-white font-bold p-4 text-center uppercase text-sm tracking-wider">Ternário</div>
+                    <div class="p-6 space-y-4 text-sm">
+                        <div class="bg-brand-muted/50 p-3 rounded-lg">
+                            <p class="font-bold mb-1 text-brand-dark">PK composta (3 campos):</p>
+                            <code class="text-xs">alu_fk + dis_fk + prof_fk</code>
+                        </div>
+                        <div class="bg-brand-muted/50 p-3 rounded-lg">
+                            <p class="font-bold mb-1 text-brand-dark">3 FKs distintas:</p>
+                            <p class="text-xs">Cada uma apunta para uma tabela diferente</p>
+                        </div>
+                        <div class="border-2 border-brand-secondary p-3 rounded-lg text-center">
+                            <p class="font-bold text-brand-secondary">Toda PK é FK!</p>
+                            <p class="text-xs opacity-60">A identidade = combinação dos 3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-5 bg-brand-muted rounded-2xl border-l-4 border-brand-primary text-brand-dark text-sm font-bold">
+                ✨ <strong>Resumo:</strong> Auto → 1 entidade relaciona-se consigo. Ternário → 3 entidades distintas se relacionam simultaneamente.
+            </div>
+        </div>`
+    },
+    // 11
+    {
+        title: "Checklist: Qual usar?",
+        content: `
+        <div class="space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="border-4 border-brand-primary rounded-2xl bg-white p-6 shadow-lg">
+                    <h3 class="text-base font-black text-brand-primary mb-4 uppercase">Auto-relacionamento quando...</h3>
+                    <ul class="space-y-3 text-sm text-brand-dark">
+                        <li class="flex gap-2"><span class="text-brand-primary font-bold">□</span> Existe uma <strong>hierarquia</strong> dentro da mesma entidade</li>
+                        <li class="flex gap-2"><span class="text-brand-primary font-bold">□</span> Um elemento <strong>referencia outro do mesmo tipo</strong></li>
+                        <li class="flex gap-2"><span class="text-brand-primary font-bold">□</span> Exemplos: organograma, árvore genealógica, categorias e subcategorias, comentários aninhados</li>
+                    </ul>
+                </div>
+                <div class="border-4 border-brand-secondary rounded-2xl bg-white p-6 shadow-lg">
+                    <h3 class="text-base font-black text-brand-secondary mb-4 uppercase">Ternário quando...</h3>
+                    <ul class="space-y-3 text-sm text-brand-dark">
+                        <li class="flex gap-2"><span class="text-brand-secondary font-bold">□</span> <strong>3 entidades distintas</strong> precisam se relacionar juntas</li>
+                        <li class="flex gap-2"><span class="text-brand-secondary font-bold">□</span> A <strong>combinação dos 3</strong> é o que tem significado</li>
+                        <li class="flex gap-2"><span class="text-brand-secondary font-bold">□</span> Exemplos: aulas, medicamentos-pacientes-médicos, projetos-funcionários-ferramentas</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="p-5 bg-brand-muted rounded-2xl border-l-4 border-brand-dark text-brand-dark text-sm font-bold">
+                💭 <strong>Dúvida frequente:</strong> "E se forem 4 entidades?" → Mesmo padrão: tabela com 4 FKs compostas na PK. Muito raro na prática — questione se realmente precisa.
+            </div>
+        </div>`
+    },
+    // 12
+    {
+        title: "Exercício 1: Estrutura Organizacional",
+        content: `
+        <div class="space-y-6">
+            <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                <h3 class="text-2xl font-black mb-4">🏗️ Departamentos & Gerentes</h3>
+                <p class="text-lg font-medium mb-6">Modele uma empresa onde:</p>
+                <ul class="text-base font-medium space-y-3 ml-8 list-disc mb-8">
+                    <li>Um <strong>Departamento</strong> tem um <strong>Gerente</strong> (que é um Funcionário)</li>
+                    <li>Um <strong>Funcionário</strong> pertence a um Departamento</li>
+                    <li>Um <strong>Funcionário</strong> pode ter um <strong>Supervisor</strong> (outro Funcionário) — <strong>AUTO-RELACIONAMENTO</strong></li>
+                </ul>
+                <div class="bg-brand-muted rounded-2xl p-6 border-l-4 border-brand-secondary">
+                    <p class="font-bold text-base mb-3">Desafio:</p>
+                    <p class="text-sm mb-2">1. Identifique as entidades: DEPARTAMENTO e FUNCIONÁRIO</p>
+                    <p class="text-sm mb-2">2. Defina PK e FK de cada tabela</p>
+                    <p class="text-sm">3. Mostre o auto-relacionamento supervisor na tabela FUNCIONÁRIO</p>
+                </div>
+            </div>
+        </div>`
+    },
+    // 13
+    {
+        title: "Exercício 2: Sistema de Pedidos (Ternário)",
+        content: `
+        <div class="space-y-6">
+            <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-brand-dark/10">
+                <h3 class="text-2xl font-black mb-4">🛒 Pedidos com Fornecedores</h3>
+                <p class="text-lg font-medium mb-6">Modele uma loja online onde:</p>
+                <ul class="text-base font-medium space-y-3 ml-8 list-disc mb-8">
+                    <li>Um <strong>Pedido</strong> contém <strong>Produtos</strong> de <strong>Fornecedores</strong> específicos</li>
+                    <li>Um mesmo produto pode vir de fornecedores diferentes</li>
+                    <li>Cada combinação Pedido + Produto + Fornecedor é única</li>
+                </ul>
+                <div class="bg-brand-muted rounded-2xl p-6 border-l-4 border-brand-secondary">
+                    <p class="font-bold text-base mb-3">Desafio (Ternário):</p>
+                    <p class="text-sm mb-2">1. Crie a tabela ITEM_PEDIDO ligando PEDIDO + PRODUTO + FORNECEDOR</p>
+                    <p class="text-sm mb-2">2. Qual é a PK composta? Quais são as FKs?</p>
+                    <p class="text-sm">3. Que atributos ITEM_PEDIDO teria? (quantidade, preço, prazo...)</p>
+                </div>
+            </div>
+        </div>`
+    },
+    // 14
+    {
+        title: "Dúvidas Frequentes",
+        content: `
+        <div class="space-y-4">
+            <div class="border-l-4 border-brand-primary bg-white rounded-xl p-6 shadow-sm">
+                <p class="font-bold text-brand-primary mb-2">❓ Auto-relacionamento pode ser N:N?</p>
+                <p class="text-sm text-brand-dark">Raramente, mas sim. Um funcionário pode ser par de outro em projetos (N:N dentro da mesma tabela). Nesse caso cria-se uma tabela auxiliar com duas FKs apontando para FUNCIONÁRIO.</p>
+            </div>
+            <div class="border-l-4 border-brand-secondary bg-white rounded-xl p-6 shadow-sm">
+                <p class="font-bold text-brand-secondary mb-2">❓ Ternário sempre tem PK composta pelos 3 campos?</p>
+                <p class="text-sm text-brand-dark">Na maioria dos casos sim. A PK composta pelas 3 FKs garante que cada combinação seja única. Em alguns casos pode-se adicionar uma PK surrogate (<code>aul_id</code>), mas as 3 FKs continuam obrigatórias.</p>
+            </div>
+            <div class="border-l-4 border-brand-dark bg-white rounded-xl p-6 shadow-sm">
+                <p class="font-bold text-brand-dark mb-2">❓ O ternário pode ter atributos próprios?</p>
+                <p class="text-sm text-brand-dark">Sim! Assim como a tabela auxiliar do N:N, a tabela ternária pode ter atributos específicos do relacionamento. Ex: AULA tem <code>aul_horario</code> e <code>aul_sala</code>.</p>
+            </div>
+            <div class="border-l-4 border-brand-primary bg-white rounded-xl p-6 shadow-sm">
+                <p class="font-bold text-brand-primary mb-2">❓ Auto-relacionamento aparece no DER igual ao N:N?</p>
+                <p class="text-sm text-brand-dark">Não. No DER o auto-relacionamento é representado por um losango que sai e volta para a <strong>mesma</strong> entidade. No N:N o losango conecta duas entidades diferentes.</p>
+            </div>
+        </div>`
+    },
+    // 15
+    {
+        title: "Resumo: As 3 Cardinalidades",
+        content: `
+        <div class="space-y-6">
+            <div class="grid md:grid-cols-3 gap-4 text-center">
+                <div class="border-4 border-brand-dark rounded-2xl bg-white shadow-lg p-5">
+                    <div class="bg-brand-dark text-white font-black p-3 rounded-xl mb-3 text-xl">1:N</div>
+                    <p class="font-bold text-brand-dark mb-2">Um para Muitos</p>
+                    <p class="text-xs opacity-60 mb-3">Depto → Funcionários</p>
+                    <div class="bg-brand-muted p-2 rounded-lg text-xs font-bold">FK na tabela "Muitos"</div>
+                </div>
+                <div class="border-4 border-brand-primary rounded-2xl bg-white shadow-lg p-5">
+                    <div class="bg-brand-primary text-white font-black p-3 rounded-xl mb-3 text-xl">N:N</div>
+                    <p class="font-bold text-brand-dark mb-2">Muitos para Muitos</p>
+                    <p class="text-xs opacity-60 mb-3">Aluno ↔ Disciplina</p>
+                    <div class="bg-brand-muted p-2 rounded-lg text-xs font-bold">Tabela auxiliar (2 FKs)</div>
+                </div>
+                <div class="border-4 border-brand-secondary rounded-2xl bg-white shadow-lg p-5">
+                    <div class="bg-brand-secondary text-white font-black p-3 rounded-xl mb-3 text-xl">N:N:N</div>
+                    <p class="font-bold text-brand-dark mb-2">3 Entidades</p>
+                    <p class="text-xs opacity-60 mb-3">Aula: Aluno+Disc+Prof</p>
+                    <div class="bg-brand-muted p-2 rounded-lg text-xs font-bold">Tabela ternária (3 FKs)</div>
+                </div>
+            </div>
+            <div class="p-6 bg-brand-muted rounded-2xl border-l-4 border-brand-primary text-brand-dark">
+                <p class="font-bold text-base mb-2">🎯 Regra de Ouro:</p>
+                <p class="text-sm"><strong>Conte as entidades envolvidas:</strong> 1 (consigo mesma) → Auto-relacionamento. 2 → N:N (tabela auxiliar). 3 ou mais → Ternário (múltiplas FKs compostas).</p>
+            </div>
+        </div>`
+    },
+    // 16
+    {
+        title: "Conclusão — Aula 13",
+        content: `
+        <div class="text-center space-y-8 py-10">
+            <div class="inline-block p-8 bg-white border-4 border-brand-dark rounded-[2rem] mb-4 shadow-xl">
+                <i class="fas fa-star text-6xl text-brand-secondary"></i>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black text-brand-dark leading-tight">Dominou os<br>Relacionamentos Complexos!</h2>
+
+            <div class="space-y-4 max-w-2xl mx-auto text-brand-dark font-medium text-base">
+                <div class="bg-brand-muted p-4 rounded-xl border-l-4 border-brand-primary">
+                    ✓ Auto-relacionamento — hierarquia dentro da mesma entidade
+                </div>
+                <div class="bg-brand-muted p-4 rounded-xl border-l-4 border-brand-secondary">
+                    ✓ Ternário — 3 entidades distintas, 3 FKs compostas na PK
+                </div>
+                <div class="bg-brand-muted p-4 rounded-xl border-l-4 border-brand-primary">
+                    ✓ Regras de chaves em cada tipo de relacionamento
+                </div>
+            </div>
+
+            <div class="bg-brand-muted p-6 rounded-2xl border-l-8 border-brand-secondary max-w-2xl mx-auto text-left">
+                <p class="text-sm font-black text-brand-secondary mb-1 uppercase tracking-wider">Próxima Aula:</p>
+                <p class="text-lg font-bold text-brand-dark">Normalização de Dados (1FN, 2FN, 3FN)</p>
+            </div>
+        </div>`
+    }
+];
+
+let cur = 0;
+
+function render() {
+    const total = steps.length;
+    const s = steps[cur];
+    document.getElementById('step-counter').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('progress-bar').style.width = `${((cur + 1) / total) * 100}%`;
+    document.getElementById('btn-prev').disabled = cur === 0;
+    document.getElementById('btn-next').innerHTML = cur === total - 1
+        ? 'FINALIZAR <i class="fas fa-check-circle ml-2"></i>'
+        : 'AVANÇAR <i class="fas fa-arrow-right ml-2"></i>';
+    document.getElementById('steps-container').innerHTML = `
+        <div class="step-content active">
+            <h2 class="no-print text-3xl md:text-4xl font-black mb-8 text-brand-dark border-l-8 border-brand-secondary pl-4">${s.title}</h2>
+            <div>${s.content}</div>
+        </div>`;
+}
+
+function nextStep() { if (cur < steps.length - 1) { cur++; render(); } }
+function prevStep() { if (cur > 0) { cur--; render(); } }
+function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextStep(); }
+    else if (e.key === 'ArrowLeft') prevStep();
+});
+
+window.onbeforeprint = function () {
+    let html = '';
+    steps.forEach((s, i) => {
+        html += `<div class="step-content block mb-10 border-b-2 pb-8">
+            <h2 class="text-2xl font-black mb-4 border-l-8 border-brand-secondary pl-4">${i + 1}. ${s.title}</h2>
+            <div>${s.content}</div>
+        </div>`;
+    });
+    document.getElementById('steps-container').innerHTML = html;
+};
+window.onafterprint = render;
+
+render();
+</script>
+</body>
+</html>
