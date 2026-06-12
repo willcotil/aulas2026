@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Prática — Banco de Dados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark:      '#1a1a2e',
+                            primary:   '#16213e',
+                            secondary: '#0f3460',
+                            accent:    '#e94560',
+                            muted:     '#f0f4ff',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8f9fc; color: #1a1a2e; overflow: hidden; margin: 0; }
+
+        .slide { display: none; animation: fadeIn 0.4s ease-out; }
+        .slide.active { display: flex; flex-direction: column; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+        @media print {
+            * { overflow: visible !important; }
+            html, body { height: auto !important; overflow: visible !important; background: white !important; }
+            .no-print { display: none !important; }
+            header, footer, #dots-container { display: none !important; }
+            main { overflow: visible !important; height: auto !important; padding: 0 !important; }
+            #slides-container { overflow: visible !important; }
+            .print-slide {
+                display: block !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                padding: 40px 48px !important;
+                min-height: 100vh !important;
+                box-sizing: border-box !important;
+            }
+            .print-slide:last-child {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+        }
+
+        code { font-family: 'JetBrains Mono', monospace; background: #fff; border: 1.5px solid #1a1a2e40; padding: 1px 7px; border-radius: 5px; font-size: 0.82em; font-weight: 700; color: #1a1a2e; }
+
+        .q-badge { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; font-weight:900; font-size:15px; flex-shrink:0; }
+
+        .field-row { display:grid; grid-template-columns: 160px 100px 80px 80px 1fr; gap:8px; align-items:start; padding:10px 12px; border-bottom:1px solid #e8eaf0; font-size:12px; }
+        .field-row:last-child { border-bottom:none; }
+        .field-row.header { background:#1a1a2e; color:white; font-weight:900; font-size:11px; border-radius:8px 8px 0 0; border-bottom:none; }
+        .tag { display:inline-block; padding:2px 8px; border-radius:999px; font-size:10px; font-weight:800; }
+        .tag-pk  { background:#fff0f3; color:#e94560; border:1px solid #e9456040; }
+        .tag-fk  { background:#f0f4ff; color:#0f3460; border:1px solid #0f346040; }
+        .tag-sim { background:#f0fff4; color:#276749; border:1px solid #27674940; }
+        .tag-nao { background:#fff8f0; color:#9c5700; border:1px solid #9c570040; }
+
+        .custom-scroll::-webkit-scrollbar { width:6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background:#1a1a2e40; border-radius:10px; }
+
+        .entidade-card { border:2px solid #1a1a2e20; border-radius:14px; overflow:hidden; }
+        .entidade-header { padding:10px 16px; font-weight:900; font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+
+        .highlight-box { border-left:5px solid; border-radius:0 12px 12px 0; padding:16px 20px; }
+
+        .step-dot { width:10px; height:10px; border-radius:50%; cursor:pointer; transition:all 0.2s; }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+<!-- Header -->
+<header class="no-print flex-shrink-0 h-16 bg-brand-dark text-white px-8 flex items-center justify-between shadow-lg z-50">
+    <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-brand-accent rounded-lg flex items-center justify-center text-sm">
+            <i class="fas fa-clipboard-check"></i>
+        </div>
+        <span class="font-black text-base tracking-tight">Banco de Dados <span class="text-brand-accent">| Avaliação Prática</span></span>
+    </div>
+    <div class="flex items-center gap-3">
+        <button onclick="window.print()" class="text-xs font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition flex items-center gap-2">
+            <i class="fas fa-print"></i> IMPRIMIR
+        </button>
+        <button onclick="toggleFullscreen()" class="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-sm transition">
+            <i class="fas fa-expand"></i>
+        </button>
+        <span id="step-counter" class="text-xs font-black bg-brand-accent px-3 py-1 rounded-full">1 / 5</span>
+    </div>
+</header>
+
+<!-- Progress -->
+<div class="no-print h-1 bg-white/20 flex-shrink-0">
+    <div id="progress-bar" class="h-full bg-brand-accent transition-all duration-500" style="width:12.5%"></div>
+</div>
+
+<!-- Content -->
+<main class="flex-grow overflow-y-auto custom-scroll p-6 md:p-10">
+    <div id="slides-container" class="max-w-5xl mx-auto"></div>
+</main>
+
+<!-- Footer -->
+<footer class="no-print flex-shrink-0 h-20 bg-white border-t-2 border-brand-dark/10 px-8 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+    <button id="btn-prev" onclick="prev()" class="flex items-center gap-2 px-7 py-3 bg-brand-muted text-brand-dark rounded-xl font-bold hover:bg-brand-dark hover:text-white transition disabled:opacity-30 border border-brand-dark/10 disabled:pointer-events-none text-sm">
+        <i class="fas fa-arrow-left"></i> VOLTAR
+    </button>
+    <div class="flex gap-2 items-center" id="dots-container"></div>
+    <button id="btn-next" onclick="next()" class="flex items-center gap-2 px-9 py-3 bg-brand-dark text-white rounded-xl font-black hover:bg-brand-accent transition shadow-md text-sm border-b-4 border-black/20">
+        AVANÇAR <i class="fas fa-arrow-right"></i>
+    </button>
+</footer>
+
+<script>
+const Q1_COLOR  = '#e94560';
+const Q2_COLOR  = '#0f3460';
+const Q3_COLOR  = '#276749';
+
+const slides = [
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 0 — Capa
+// ─────────────────────────────────────────────────────────────────────────────
+{
+title: "Avaliação Prática",
+content: `
+<div class="text-center py-8 space-y-8">
+    <div class="inline-flex p-8 bg-brand-dark rounded-[2rem] text-brand-accent shadow-2xl">
+        <i class="fas fa-database text-7xl"></i>
+    </div>
+    <div>
+        <h2 class="text-5xl font-black text-brand-dark leading-tight mb-3">Avaliação Prática</h2>
+        <p class="text-xl font-semibold text-brand-dark/60">Banco de Dados — Modelagem Entidade-Relacionamento</p>
+    </div>
+    <div class="bg-white rounded-2xl p-6 border-2 border-brand-dark/10 shadow-sm max-w-2xl mx-auto text-left space-y-3">
+        <p class="font-black text-sm text-brand-dark/50 uppercase tracking-widest mb-4">Instruções Gerais</p>
+        <div class="flex gap-3 text-sm font-semibold text-brand-dark"><span class="text-brand-accent font-black">1.</span><span>Leia o enunciado de cada questão com atenção. O cliente descreveu o sistema com suas próprias palavras — você deve identificar as entidades, atributos e relacionamentos.</span></div>
+        <div class="flex gap-3 text-sm font-semibold text-brand-dark"><span class="text-brand-accent font-black">2.</span><span>Para cada questão, crie o <strong>Diagrama ER</strong> e o <strong>Dicionário de Dados</strong> completo com tipos, restrições e chaves.</span></div>
+        <div class="flex gap-3 text-sm font-semibold text-brand-dark"><span class="text-brand-accent font-black">3.</span><span>Use a ferramenta <strong>MER Online</strong> — ela gera os dois entregáveis de uma vez só. Veja as instruções no próximo slide.</span></div>
+        <div class="flex gap-3 text-sm font-semibold text-brand-dark"><span class="text-brand-accent font-black">4.</span><span>Envie o arquivo <code>.mer</code> gerado pela ferramenta para cada questão.</span></div>
+    </div>
+    <div class="flex justify-center gap-6 text-sm font-bold text-brand-dark/50 pt-4">
+        <span><i class="fas fa-question-circle mr-1 text-brand-accent"></i> 3 Questões</span>
+        <span><i class="fas fa-diagram-project mr-1 text-brand-accent"></i> Diagrama ER</span>
+        <span><i class="fas fa-table mr-1 text-brand-accent"></i> Dicionário de Dados</span>
+        <span><i class="fas fa-file-export mr-1 text-brand-accent"></i> Entrega: arquivo .mer</span>
+    </div>
+</div>`
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 1 — Como usar a ferramenta
+// ─────────────────────────────────────────────────────────────────────────────
+{
+title: "Como entregar",
+content: `
+<div class="space-y-5">
+
+    <p class="text-sm font-bold text-brand-dark/50">Você pode usar <strong>uma das duas opções</strong> abaixo para realizar e entregar a avaliação:</p>
+
+    <!-- OPÇÃO A -->
+    <div class="bg-white rounded-2xl border-2 border-brand-accent/40 shadow-sm overflow-hidden">
+        <div class="bg-brand-accent text-white px-6 py-3 flex items-center gap-3">
+            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-sm font-black">A</div>
+            <div>
+                <p class="font-black text-base">MER Online <span class="font-normal text-white/80 text-sm ml-2">willcotil.github.io/mer/</span></p>
+                <p class="text-xs text-white/70">Gratuito, sem instalação — entrega diagrama + dicionário juntos</p>
+            </div>
+        </div>
+        <div class="p-5 grid md:grid-cols-2 gap-4">
+            <div class="space-y-2 text-sm font-semibold text-brand-dark">
+                <p class="text-xs font-black text-brand-dark/40 uppercase tracking-widest mb-3">O que fazer</p>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-accent text-white flex items-center justify-center text-xs font-black flex-shrink-0">1</span><span>Crie as <strong>entidades</strong> com seus atributos</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-accent text-white flex items-center justify-center text-xs font-black flex-shrink-0">2</span><span>Defina o <strong>tipo</strong> de cada campo (inteiro, decimal, texto, data, booleano…)</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-accent text-white flex items-center justify-center text-xs font-black flex-shrink-0">3</span><span>Marque as <strong>restrições</strong>: PK, FK, NOT NULL, UNIQUE, AUTO INCREMENT</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-accent text-white flex items-center justify-center text-xs font-black flex-shrink-0">4</span><span>Desenhe os <strong>relacionamentos</strong> com a cardinalidade correta</span></div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <p class="text-xs font-black text-brand-dark/40 uppercase tracking-widest mb-3">Por que o .mer entrega tudo?</p>
+                <div class="highlight-box border-brand-accent bg-red-50">
+                    <p class="font-black text-brand-accent text-xs mb-1"><i class="fas fa-project-diagram mr-1"></i> Diagrama ER</p>
+                    <p class="text-xs font-medium">O canvas da ferramenta já é o diagrama, com entidades e relacionamentos posicionados.</p>
+                </div>
+                <div class="highlight-box border-brand-secondary bg-blue-50">
+                    <p class="font-black text-brand-secondary text-xs mb-1"><i class="fas fa-table mr-1"></i> Dicionário de Dados</p>
+                    <p class="text-xs font-medium">O arquivo <code>.mer</code> contém todos os campos, tipos e restrições configurados.</p>
+                </div>
+                <div class="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-3">
+                    <p class="text-xs font-black text-green-700"><i class="fas fa-upload mr-1"></i> Entrega: arquivo <code>.mer</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OPÇÃO B -->
+    <div class="bg-white rounded-2xl border-2 border-brand-secondary/40 shadow-sm overflow-hidden">
+        <div class="bg-brand-secondary text-white px-6 py-3 flex items-center gap-3">
+            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-sm font-black">B</div>
+            <div>
+                <p class="font-black text-base">brModelo + Google Planilhas <span class="font-normal text-white/80 text-sm ml-2">brmodeloweb.com.br</span></p>
+                <p class="text-xs text-white/70">Diagrama no brModelo, dicionário em planilha separada</p>
+            </div>
+        </div>
+        <div class="p-5 grid md:grid-cols-2 gap-4">
+            <div class="space-y-3 text-sm font-semibold text-brand-dark">
+                <p class="text-xs font-black text-brand-dark/40 uppercase tracking-widest mb-3">Diagrama — brModelo</p>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-secondary text-white flex items-center justify-center text-xs font-black flex-shrink-0">1</span><span>Crie o diagrama ER com entidades, atributos e relacionamentos</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-secondary text-white flex items-center justify-center text-xs font-black flex-shrink-0">2</span><span>Indique as cardinalidades em cada relacionamento</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-secondary text-white flex items-center justify-center text-xs font-black flex-shrink-0">3</span><span>Exporte como <strong>imagem (PNG/JPG) ou PDF</strong> para envio</span></div>
+
+                <p class="text-xs font-black text-brand-dark/40 uppercase tracking-widest mt-4 mb-3">Dicionário — Google Planilhas</p>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-secondary text-white flex items-center justify-center text-xs font-black flex-shrink-0">4</span><span>Crie uma aba por entidade com colunas: campo, tipo, NOT NULL, único, observação</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-secondary text-white flex items-center justify-center text-xs font-black flex-shrink-0">5</span><span>Identifique PK e FK claramente em cada linha</span></div>
+                <div class="flex gap-3"><span class="w-5 h-5 rounded-full bg-brand-secondary text-white flex items-center justify-center text-xs font-black flex-shrink-0">6</span><span>Exporte como <strong>PDF</strong> ou envie o link compartilhado</span></div>
+            </div>
+            <div class="space-y-3 text-sm">
+                <p class="text-xs font-black text-brand-dark/40 uppercase tracking-widest mb-3">O que enviar</p>
+                <div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg p-3">
+                    <p class="text-xs font-black text-amber-700 mb-1"><i class="fas fa-triangle-exclamation mr-1"></i> Atenção na entrega</p>
+                    <p class="text-xs font-medium text-amber-800">O brModelo <strong>não salva</strong> os tipos e restrições dos campos — esses detalhes precisam estar na planilha. Entregar só o diagrama sem o dicionário será considerado incompleto.</p>
+                </div>
+                <div class="bg-blue-50 border-l-4 border-brand-secondary rounded-r-lg p-3">
+                    <p class="text-xs font-black text-brand-secondary mb-1"><i class="fas fa-file-image mr-1"></i> Diagrama</p>
+                    <p class="text-xs font-medium">PNG, JPG ou PDF exportado do brModelo.</p>
+                </div>
+                <div class="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-3">
+                    <p class="text-xs font-black text-green-700 mb-1"><i class="fas fa-table mr-1"></i> Dicionário</p>
+                    <p class="text-xs font-medium">PDF exportado do Google Planilhas ou link com permissão de visualização.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 text-sm font-semibold text-brand-dark">
+        <i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>
+        <strong>Atenção (vale para as duas opções):</strong> tipos e restrições errados são descontados. Preço como inteiro, CPF sem UNIQUE, FK sem vínculo correto — tudo conta. Leia bem os enunciados!
+    </div>
+</div>`
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 2 — Q1 Enunciado
+// ─────────────────────────────────────────────────────────────────────────────
+{
+title: "Questão 1 — Clínica Veterinária",
+content: `
+<div class="space-y-5">
+    <div class="flex items-center gap-4 mb-2">
+        <div class="q-badge bg-red-100 text-brand-accent text-xl">1</div>
+        <div>
+            <p class="font-black text-xl text-brand-dark">Clínica Veterinária</p>
+            <p class="text-xs font-bold text-brand-dark/40 uppercase tracking-widest">1:1 e 1:N — 3 entidades</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border-2 border-brand-dark/10 shadow-sm text-sm leading-relaxed text-brand-dark space-y-3 font-medium">
+        <p>"Preciso de um sistema para organizar minha clínica veterinária. Hoje eu anoto tudo em caderno e tô perdendo o controlo das coisas.</p>
+        <p>Cada <strong>animal</strong> que a gente atende tem um nome, uma espécie (cachorro, gato, pássaro…), uma raça, um peso em quilos com casas decimais, e uma data de nascimento. Cada animal pertence a um único <strong>dono</strong>. Um dono pode ter vários animais, mas cada animal só tem um dono.</p>
+        <p>Do dono eu preciso guardar o nome completo, o CPF (que não pode repetir entre donos), o telefone de contato e o endereço.</p>
+        <p>Cada animal pode passar por várias <strong>consultas</strong> ao longo da vida. Numa consulta eu anoto a data, uma descrição do que foi feito (pode ser um texto longo, tipo uma redação), e o valor cobrado em reais com centavos. Cada consulta pertence a um único animal — não existe consulta sem animal.</p>
+        <p>Ah, cada animal também tem um número de cadastro único aqui na clínica, que a gente coloca na carteirinha dele."</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-3 text-xs font-bold">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-brand-accent">
+            <p class="font-black mb-1 uppercase tracking-wide text-xs">Relacionamentos esperados</p>
+            <p>DONO → ANIMAL</p>
+            <p>ANIMAL → CONSULTA</p>
+        </div>
+        <div class="bg-brand-muted border border-blue-100 rounded-xl p-3 text-brand-secondary">
+            <p class="font-black mb-1 uppercase tracking-wide text-xs">Fique atento</p>
+            <p>CPF único (UNIQUE)</p>
+            <p>Cadastro único do animal</p>
+            <p>Valor com decimais</p>
+            <p>Descrição = texto longo</p>
+        </div>
+    </div>
+</div>`
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 4 — Q2 Enunciado
+// ─────────────────────────────────────────────────────────────────────────────
+{
+title: "Questão 2 — Plataforma de Cursos Online",
+content: `
+<div class="space-y-5">
+    <div class="flex items-center gap-4 mb-2">
+        <div class="q-badge bg-blue-100 text-brand-secondary text-xl">2</div>
+        <div>
+            <p class="font-black text-xl text-brand-dark">Plataforma de Cursos Online</p>
+            <p class="text-xs font-bold text-brand-dark/40 uppercase tracking-widest">Auto-relacionamento + N:N — 3 entidades</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border-2 border-brand-dark/10 shadow-sm text-sm leading-relaxed text-brand-dark space-y-3 font-medium">
+        <p>"Estou montando uma plataforma de cursos online e preciso organizar o banco de dados dela.</p>
+        <p>Tenho <strong>cursos</strong> que precisam guardar um título, uma descrição curta (tipo um resumo de até 300 caracteres), a carga horária em horas inteiras, o preço em reais com centavos, e se o curso está ativo ou não (tipo um sim/não mesmo).</p>
+        <p>O ponto mais importante: um curso pode ter um <strong>pré-requisito</strong>, que é outro curso da própria plataforma. Por exemplo, pra fazer 'Banco de Dados Avançado' você precisa antes ter feito 'Banco de Dados Básico'. Tem curso que não tem pré-requisito nenhum. Um curso pode ser pré-requisito de vários outros.</p>
+        <p>Os <strong>alunos</strong> se cadastram na plataforma. Preciso do nome completo, e-mail (que não pode repetir, é o login deles), senha (pode ser texto mesmo, a gente cuida da criptografia depois), e a data em que se cadastrou.</p>
+        <p>Um aluno pode se <strong>matricular</strong> em vários cursos, e um curso pode ter vários alunos matriculados. Quando o aluno se matricula, eu guardo a data da matrícula e uma nota final, que vai de 0 a 10 com uma casa decimal — mas a nota só existe depois que o aluno termina, então ela pode ficar vazia no começo."</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-3 text-xs font-bold">
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-brand-secondary">
+            <p class="font-black mb-1 uppercase tracking-wide text-xs">Fique atento</p>
+            <p>E-mail único (UNIQUE)</p>
+            <p>Ativo = booleano (true/false)</p>
+            <p>Nota = decimal, pode ser NULL</p>
+            <p>Pré-req = FK para mesma tabela</p>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-green-800">
+            <p class="font-black mb-1 uppercase tracking-wide text-xs">Tabela auxiliar</p>
+            <p>Lembre-se: a matrícula guarda</p>
+            <p>dados do relacionamento</p>
+            <p>(data e nota final)</p>
+        </div>
+    </div>
+</div>`
+},
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SLIDE 6 — Q3 Enunciado
+// ─────────────────────────────────────────────────────────────────────────────
+{
+title: "Questão 3 — Sistema de Locação de Equipamentos",
+content: `
+<div class="space-y-5">
+    <div class="flex items-center gap-4 mb-2">
+        <div class="q-badge bg-green-100 text-green-700 text-xl">3</div>
+        <div>
+            <p class="font-black text-xl text-brand-dark">Sistema de Locação de Equipamentos</p>
+            <p class="text-xs font-bold text-brand-dark/40 uppercase tracking-widest">Relacionamento Ternário — 3 entidades</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 border-2 border-brand-dark/10 shadow-sm text-sm leading-relaxed text-brand-dark space-y-3 font-medium">
+        <p>"Sou dono de uma empresa que aluga equipamentos de construção civil para obras. Preciso de um sistema pra controlar tudo isso porque hoje eu faço na memória e já me confundi várias vezes.</p>
+        <p>Tenho um cadastro de <strong>clientes</strong>. Cada cliente tem razão social, CNPJ (que não pode repetir), telefone e cidade onde fica a empresa.</p>
+        <p>Tenho um cadastro de <strong>equipamentos</strong> — tipo betoneira, andaime, compressor e por aí vai. Cada equipamento tem um nome, um número de série (único pra cada máquina), uma descrição técnica mais longa com detalhes e especificações, e um valor de locação por dia em reais com centavos.</p>
+        <p>O controle mais importante é a <strong>locação</strong> em si. Um cliente pode locar vários equipamentos ao mesmo tempo, cada um indo pra uma <strong>obra</strong> diferente. Sim, eu preciso saber também o endereço da obra — porque o mesmo cliente às vezes tem duas obras simultâneas e os equipamentos vão para lugares diferentes.</p>
+        <p>A obra tem um nome ou apelido, um endereço e um responsável técnico (nome da pessoa).</p>
+        <p>Então: em cada locação eu preciso registrar qual <strong>cliente</strong>, qual <strong>equipamento</strong>, para qual <strong>obra</strong>, a data de saída do equipamento, a data prevista de retorno, e a data real de retorno (que fica vazia até o equipamento voltar). Essa combinação de cliente + equipamento + obra é o que define uma locação única."</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-3 text-xs font-bold">
+        <div class="bg-brand-muted border border-blue-100 rounded-xl p-3 text-brand-secondary">
+            <p class="font-black mb-1 uppercase tracking-wide text-xs">Fique atento</p>
+            <p>CNPJ único (UNIQUE)</p>
+            <p>Nº série único (UNIQUE)</p>
+            <p>Descrição = texto longo</p>
+            <p>Valor/dia = decimal</p>
+            <p>Data retorno real = pode ser vazia</p>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-green-800">
+            <p class="font-black mb-1 uppercase tracking-wide text-xs">Tabela ternária</p>
+            <p>A locação é identificada pela</p>
+            <p>combinação dos três elementos.</p>
+            <p>Pense na PK composta.</p>
+        </div>
+    </div>
+</div>`
+},
+
+];
+
+// ─── Engine ───────────────────────────────────────────────────────────────────
+let cur = 0;
+
+function render() {
+    const total = slides.length;
+    const s = slides[cur];
+
+    document.getElementById('step-counter').textContent = `${cur + 1} / ${total}`;
+    document.getElementById('progress-bar').style.width = `${((cur + 1) / total) * 100}%`;
+    document.getElementById('btn-prev').disabled = cur === 0;
+    document.getElementById('btn-next').innerHTML = cur === total - 1
+        ? 'CONCLUIR <i class="fas fa-check-circle ml-2"></i>'
+        : 'AVANÇAR <i class="fas fa-arrow-right ml-2"></i>';
+
+    // Dots
+    const dots = document.getElementById('dots-container');
+    dots.innerHTML = slides.map((_, i) => `
+        <div onclick="goTo(${i})" class="step-dot ${i === cur ? 'bg-brand-accent scale-125' : 'bg-brand-dark/20 hover:bg-brand-dark/40'}"></div>
+    `).join('');
+
+    document.getElementById('slides-container').innerHTML = `
+        <div class="slide active">
+            <h2 class="text-3xl md:text-4xl font-black text-brand-dark mb-8 pb-4 border-b-4 border-brand-accent/30">${s.title}</h2>
+            ${s.content}
+        </div>`;
+
+    document.querySelector('main').scrollTop = 0;
+}
+
+function next()      { if (cur < slides.length - 1) { cur++; render(); } }
+function prev()      { if (cur > 0) { cur--; render(); } }
+function goTo(i)     { cur = i; render(); }
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') prev();
+});
+
+window.onbeforeprint = () => {
+    // Torna o body completamente visível para impressão
+    document.body.style.overflow = 'visible';
+    document.body.style.height = 'auto';
+    document.querySelector('main').style.overflow = 'visible';
+    document.querySelector('main').style.height = 'auto';
+
+    let h = '';
+    slides.forEach((s, i) => {
+        h += `<div class="print-slide">
+            <div style="border-bottom:4px solid #e94560; padding-bottom:12px; margin-bottom:24px;">
+                <span style="font-size:11px; font-weight:900; color:#e94560; text-transform:uppercase; letter-spacing:2px;">Avaliação Prática — Banco de Dados</span>
+                <h2 style="font-size:22px; font-weight:900; color:#1a1a2e; margin:6px 0 0;">${s.title}</h2>
+            </div>
+            ${s.content}
+        </div>`;
+    });
+    document.getElementById('slides-container').innerHTML = h;
+};
+
+window.onafterprint = () => {
+    document.body.style.overflow = '';
+    document.body.style.height = '';
+    document.querySelector('main').style.overflow = '';
+    document.querySelector('main').style.height = '';
+    render();
+};
+
+render();
+</script>
+</body>
+</html>

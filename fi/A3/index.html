@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Prática - Docs e Sheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f3f4f6; color: #000; }
+        
+        .container-print {
+            max-width: 64rem;
+            margin: 0 auto;
+            background: white;
+            padding: 3rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .raw-box {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            word-wrap: break-word; 
+            /* Adicionado limite de altura para não estourar a tela do navegador */
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .quebra-pagina {
+            page-break-before: always;
+        }
+
+        @media print {
+            body { background-color: white; }
+            .container-print { box-shadow: none; padding: 0; max-width: 100%; }
+            .no-print { display: none !important; }
+            .raw-box { 
+                background-color: #f1f5f9 !important; 
+                color: #000 !important; 
+                border: 2px dashed #94a3b8 !important;
+                box-shadow: none !important;
+                /* Na impressão, o texto longo ocupará o espaço necessário */
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+    </style>
+</head>
+<body class="py-10">
+    <!-- PÁGINA DA PROVA -->
+    <div class="container-print">
+        
+        <!-- Cabeçalho -->
+        <div class="border-2 border-black p-3 mb-4">
+            <div class="text-center leading-tight mb-3">
+                <h1 class="text-base md:text-lg font-black uppercase tracking-wider">Colégio Técnico de Limeira - COTIL</h1>
+                <h2 class="text-sm md:text-base font-bold">Avaliação Prática em Dupla - Editores de Texto e Planilhas</h2>
+            </div>
+
+        <!-- Instruções -->
+        <div class="text-sm border border-gray-300 p-3 bg-gray-50 mb-8 italic text-justify">
+            <strong>Instruções:</strong> Esta avaliação deve ser realizada integralmente no computador utilizando o Google Docs e o Google Sheets. Ao finalizar, não é necessário fazer download. Anexem os próprios arquivos do Google Docs e Google Sheets diretamente na tarefa correspondente do Google Classroom. Os arquivos devem ser nomeados como <em>AV3_Turma_Nome1_Nome2</em>.
+        </div>
+
+        <!-- Questão 1: Google Docs -->
+        <div class="mb-10">
+            <h3 class="text-xl font-black text-blue-800 border-b-2 border-blue-800 pb-1 mb-4">QUESTÃO 1: Estruturação Textual e ABNT (Valor: 5,0)</h3>
+            <p class="mb-4 text-sm text-justify">
+                Crie um novo documento no <strong>Google Docs</strong>. Copie o texto longo fornecido abaixo (role a caixa para copiar tudo) e aplique as seguintes formatações estruturais para transformar as páginas brutas num relatório padrão ABNT:
+            </p>
+            <ul class="list-disc pl-8 mb-4 text-sm space-y-2">
+                <li><strong>Configuração da Página:</strong> Margens ABNT (Superior 3cm, Esquerda 3cm, Inferior 2cm, Direita 2cm).</li>
+                <li><strong>Corpo do Texto:</strong> Fonte Arial ou Times New Roman (tamanho 12), Espaçamento 1,5, Alinhamento Justificado e recuo de primeira linha em 1,25cm.</li>
+                <li><strong>Estilos de Título:</strong> O texto contém um título principal e 4 subtítulos ao longo das páginas. Aplique a eles o estilo estrutural <strong>Título 1</strong> (com formatação: Negrito, tamanho 14, alinhado à esquerda).</li>
+                <li><strong>Automação:</strong> Crie uma quebra de página (Ctrl+Enter) antes de iniciar o texto. Na primeira página vazia, insira um <strong>Sumário Automático</strong>.</li>
+            </ul>
+
+            <div class="font-bold text-sm mb-1 mt-6 text-gray-700">TEXTO BRUTO PARA CÓPIA (Atenção: Role a caixa para copiar tudo):</div>
+            <div class="raw-box">A Evolução da Computação e o Impacto da Inteligência Artificial
+A história da computação é um relato fascinante da necessidade humana de superar seus próprios limites biológicos, especialmente no que tange ao processamento de dados e à automação do trabalho intelectual. Desde os primórdios das civilizações, ferramentas foram criadas para auxiliar na contagem, como o ábaco, mas foi apenas no século XX que o conceito moderno de computador começou a tomar forma. Inicialmente, estas máquinas eram colossais, preenchendo salas inteiras e consumindo a energia de pequenos bairros, destinadas quase que exclusivamente a cálculos balísticos e decodificação de mensagens durante a Segunda Guerra Mundial.
+
+Com o advento dos transistores e, posteriormente, dos circuitos integrados, a computação iniciou uma jornada acelerada de miniaturização e democratização. O que antes era restrito aos laboratórios de pesquisa governamentais e grandes corporações, lentamente encontrou espaço nas mesas de escritório e nos lares. O computador pessoal (PC) tornou-se o símbolo de uma nova era, onde o acesso à informação e a capacidade de criar conteúdo digital redefiniriam as dinâmicas sociais, econômicas e culturais de toda a humanidade. 
+
+A fundação desta revolução foi pavimentada por pioneiros que entenderam que as máquinas poderiam fazer muito mais do que simples aritmética. A transição do hardware pesado e das válvulas termiônicas para os microprocessadores de silício mudou completamente as regras do jogo. A capacidade de processamento passou a dobrar em intervalos regulares, seguindo a famosa Lei de Moore, barateando os custos e aumentando a eficiência energética. 
+
+Isso abriu as portas para o desenvolvimento de softwares cada vez mais sofisticados. Linguagens de programação de alto nível permitiram que o ser humano traduzisse lógicas complexas para instruções de máquina com facilidade. Os sistemas operacionais ganharam interfaces gráficas (GUI), removendo a barreira do terminal de linha de comando e tornando o computador uma ferramenta intuitiva. Esta união perfeita entre hardware eficiente e software acessível foi o estopim da era digital.
+
+Hoje, não apenas dependemos dos computadores para trabalhar, estudar e nos comunicar, mas andamos com supercomputadores nos nossos bolsos. A arquitetura de Von Neumann, proposta décadas atrás, ainda rege o funcionamento básico da esmagadora maioria desses dispositivos. No entanto, o paradigma do processamento puro de informações estava prestes a sofrer sua maior disrupção.
+
+O Papel do Aprendizado de Máquina (Machine Learning)
+A Inteligência Artificial (IA), antes um conceito restrito à ficção científica e a teorias acadêmicas, encontrou nos computadores modernos o hardware necessário para finalmente se materializar. O volume colossal de dados gerados diariamente pela internet (Big Data) serviu como o combustível perfeito para alimentar uma subárea revolucionária da IA: o Aprendizado de Máquina, ou Machine Learning.
+
+Diferente da programação tradicional, onde um engenheiro escreve regras explícitas de "se acontecer isso, faça aquilo" (if/else), no Aprendizado de Máquina o computador é alimentado com milhares de exemplos e encarregado de descobrir os padrões por conta própria. É uma mudança de paradigma: a máquina deixa de ser apenas uma executora de tarefas matemáticas e passa a ser uma reconhecedora de padrões complexos.
+
+As redes neurais artificiais, inspiradas na biologia do cérebro humano, permitiram saltos gigantescos em tarefas que antes eram consideradas exclusivas da inteligência biológica. Visão computacional, processamento de linguagem natural (como a capacidade de manter um diálogo coerente) e a condução autônoma de veículos tornaram-se realidades tangíveis. 
+
+Quanto mais dados um modelo recebe, mais precisas se tornam suas previsões. A arquitetura do hardware também teve que evoluir para suportar essa demanda. Placas de vídeo (GPUs), originalmente criadas para renderizar gráficos de jogos em 3D, provaram ser excepcionais na realização dos cálculos simultâneos necessários para treinar redes neurais, criando uma indústria bilionária focada exclusivamente em infraestrutura para IA.
+
+Desafios e Ética na Era Digital
+Apesar dos avanços deslumbrantes que a IA e a computação moderna proporcionam, os desafios colaterais são imensos e profundos. O primeiro deles reside na privacidade e segurança dos dados. Como os modelos de inteligência artificial requerem dados para aprender, a captação maciça de informações pessoais dos usuários levanta questões alarmantes sobre vigilância, consentimento e manipulação de comportamento.
+
+Outro problema crônico é o viés algorítmico. Como a inteligência artificial aprende a partir de dados gerados por humanos e pela sociedade, ela herda e, muitas vezes, amplifica os preconceitos históricos presentes nesses dados. Sistemas de reconhecimento facial, avaliações de crédito e filtros de recrutamento baseados em IA já demonstraram tendências discriminatórias que precisam ser rigorosamente auditadas e corrigidas.
+
+Além disso, existe a preocupação com o consumo energético. O treinamento de grandes modelos de linguagem requer Data Centers gigantescos que consomem quantidades absurdas de eletricidade e água para refrigeração. A sustentabilidade tecnológica tornou-se um debate central, exigindo a criação de hardwares e algoritmos que sejam não apenas rápidos, mas também ecologicamente eficientes.
+
+O Impacto no Mercado de Trabalho
+Uma das discussões mais acaloradas sobre a ascensão da Inteligência Artificial é o seu impacto sobre o futuro do trabalho. Ao longo da história, revoluções industriais automatizaram o trabalho braçal e repetitivo. A revolução digital atual, no entanto, ameaça automatizar o trabalho cognitivo, gerando ansiedade em áreas como direito, programação, design e contabilidade.
+
+A visão pessimista alerta para um desemprego estrutural em massa, onde máquinas farão tarefas de análise e redação com muito mais agilidade e a um custo infinitamente menor que os trabalhadores humanos. Funções de entrada de dados, atendimento primário ao cliente e análise básica de contratos correm sérios riscos de obsolescência a curto prazo.
+
+Por outro lado, a visão otimista sugere que a IA será uma ferramenta de aumento de capacidade ("Augmented Intelligence"). Em vez de substituir o trabalhador, ela assumirá o trabalho tedioso e repetitivo, liberando o humano para focar em estratégia, criatividade, empatia e solução complexa de problemas. Surgirão novas profissões focadas em supervisionar, auditar e integrar esses sistemas à sociedade.
+
+A verdade provavelmente reside num meio termo. Será exigida dos profissionais uma capacidade imensa de adaptação e requalificação constante (Lifelong Learning). A habilidade de saber "conversar" com a máquina e entender suas lógicas e limitações será tão básica quanto ler e escrever.
+
+Conclusão
+A tecnologia continuará a evoluir num ritmo cada vez mais intenso. A computação quântica já surge no horizonte como o próximo salto, prometendo resolver em segundos cálculos que os computadores atuais levariam milênios para processar. Este poder inimaginável abrirá portas para a descoberta de novos medicamentos, materiais e soluções climáticas.
+
+Cabe a nós, como sociedade, garantir que o avanço tecnológico caminhe de mãos dadas com a responsabilidade social. Os sistemas de informação não são neutros; eles refletem as intenções, as prioridades e as falhas dos humanos que os desenham. 
+
+A educação tecnológica e a alfabetização digital são as melhores armas para garantir que as futuras gerações não sejam meros consumidores passivos de caixas pretas governadas por algoritmos. Compreender os fundamentos da informática é, hoje, compreender o tecido da própria realidade em que vivemos. O futuro dependerá de definirmos limites éticos e estruturais claros, garantindo que estas novas ferramentas sirvam para a elevação de toda a humanidade, e não para a sua subserviência.</div>
+        </div>
+
+        <!-- Questão 2: Google Sheets -->
+        <div>
+            <h3 class="text-xl font-black text-blue-800 border-b-2 border-blue-800 pb-1 mb-4">QUESTÃO 2: Organização de Dados e Gráficos (Valor: 5,0)</h3>
+            <p class="mb-4 text-sm text-justify">
+                Crie um novo documento no <strong>Google Sheets</strong>. Copie os dados no formato CSV abaixo contendo o registo de 20 vendedores durante os 12 meses do ano e siga o roteiro:
+            </p>
+            <ul class="list-disc pl-8 mb-4 text-sm space-y-2">
+                <li><strong>Importação:</strong> Cole o texto na célula A1 e utilize a ferramenta "Dividir texto em colunas" (verifique o separador correto!).</li>
+                <li><strong>Formatação Visual:</strong> Aplique a funcionalidade "Cores Alternadas" na tabela inteira. Formate todos os valores numéricos de vendas para <strong>Moeda (R$)</strong>. Congele a 1ª Linha (Cabeçalho) e a 1ª Coluna (Nomes).</li>
+                <li><strong>Cálculos e Referências (Uso de Funções):</strong>
+                    <ul class="list-[circle] pl-6 mt-1 space-y-1">
+                        <li>Crie uma nova coluna no final chamada <strong>"Total Anual"</strong> e calcule a soma de todos os meses para cada funcionário usando a função <code>=SOMA()</code> e a alça de preenchimento.</li>
+                        <li>Abaixo da tabela (na última linha de dados), crie estatísticas para o mês de Janeiro utilizando: a <strong>Média (<code>=MEDIA</code>)</strong>, a <strong>Maior Venda (<code>=MAXIMO</code>)</strong> e a <strong>Pior Venda (<code>=MINIMO</code>)</strong>.</li>
+                    </ul>
+                </li>
+                <li><strong>Visualização (Gráficos):</strong>
+                    <ul class="list-[circle] pl-6 mt-1 space-y-1">
+                        <li>Gere <strong>um gráfico de Colunas</strong> comparando as vendas totais do primeiro trimestre (Jan, Fev, Mar) dos 5 primeiros vendedores.</li>
+                        <li>Gere <strong>um gráfico de Linhas</strong> mostrando a evolução de vendas do vendedor "Bruno Lima" ao longo de todo o ano.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="font-bold text-sm mb-1 mt-6 text-gray-700">DADOS CSV PARA CÓPIA (Role a caixa para copiar tudo):</div>
+            <div class="raw-box">Vendedor;Janeiro;Fevereiro;Março;Abril;Maio;Junho;Julho;Agosto;Setembro;Outubro;Novembro;Dezembro
+Ana Silva;3500,00;4100,50;3800,00;4200,00;3900,00;4500,00;4600,00;4800,00;4700,00;5100,00;5300,00;6000,00
+Carlos Souza;1200,00;2500,00;3100,00;2800,00;2900,00;3300,00;3500,00;3400,00;3600,00;3800,00;4000,00;4500,00
+Bruno Lima;4800,00;4500,00;4900,00;5100,00;5000,00;5200,00;5500,00;5400,00;5800,00;6000,00;6200,00;7000,00
+Daniela Paz;2100,00;1900,00;2250,00;2400,00;2300,00;2600,00;2700,00;2800,00;2900,00;3100,00;3200,00;3800,00
+Eduardo Luz;3300,00;3400,00;3600,00;3800,00;3700,00;3900,00;4100,00;4000,00;4200,00;4500,00;4800,00;5500,00
+Fernanda Dias;2800,00;2900,00;3100,00;3000,00;3200,00;3400,00;3500,00;3700,00;3600,00;3900,00;4100,00;4800,00
+Gabriel Costa;4100,00;4000,00;4200,00;4500,00;4600,00;4800,00;5000,00;5200,00;5100,00;5400,00;5600,00;6500,00
+Helena Reis;1500,00;1600,00;1800,00;1900,00;2100,00;2000,00;2200,00;2400,00;2300,00;2500,00;2700,00;3100,00
+Igor Santos;3900,00;4100,00;4000,00;4300,00;4200,00;4500,00;4700,00;4600,00;4900,00;5100,00;5200,00;6100,00
+Julia Castro;2500,00;2600,00;2800,00;2700,00;2900,00;3100,00;3000,00;3300,00;3500,00;3400,00;3700,00;4200,00
+Lucas Mendes;4600,00;4800,00;4700,00;5000,00;5200,00;5100,00;5400,00;5600,00;5500,00;5800,00;6000,00;6800,00
+Mariana Rocha;3100,00;3200,00;3000,00;3400,00;3500,00;3700,00;3600,00;3900,00;4100,00;4000,00;4300,00;5100,00
+Nicolas Melo;1800,00;1900,00;2100,00;2000,00;2300,00;2200,00;2500,00;2400,00;2700,00;2600,00;2900,00;3400,00
+Olivia Pires;4300,00;4200,00;4500,00;4400,00;4700,00;4900,00;4800,00;5100,00;5000,00;5300,00;5500,00;6400,00
+Pedro Moura;2900,00;3100,00;3000,00;3300,00;3200,00;3500,00;3400,00;3700,00;3600,00;3900,00;3800,00;4600,00
+Quintino Rosa;3700,00;3600,00;3900,00;3800,00;4100,00;4000,00;4300,00;4200,00;4500,00;4400,00;4700,00;5400,00
+Rafael Silva;2200,00;2300,00;2500,00;2400,00;2700,00;2600,00;2900,00;2800,00;3100,00;3000,00;3300,00;3900,00
+Sofia Nogueira;4900,00;5100,00;5000,00;5300,00;5200,00;5500,00;5400,00;5700,00;5600,00;5900,00;6100,00;7200,00
+Tiago Moraes;2700,00;2800,00;3000,00;2900,00;3200,00;3100,00;3400,00;3300,00;3600,00;3500,00;3800,00;4400,00
+Ursula Faria;3400,00;3600,00;3500,00;3800,00;3700,00;4000,00;3900,00;4200,00;4100,00;4400,00;4300,00;5000,00</div>
+        </div>
+
+    </div>
+
+</body>
+</html>

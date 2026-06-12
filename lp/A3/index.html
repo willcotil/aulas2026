@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação III - Lógica de Programação</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: '#1A3644',
+                        teal: '#5FA1B0',
+                        light: '#F8F9FA',
+                        peach: '#FFC2A0',
+                        orange: '#FF5A1F'
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+                        mono: ['Consolas', 'Monaco', 'Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F8F9FA;
+            color: #1A3644;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item.active {
+            background-color: #5FA1B0;
+            color: #F8F9FA;
+            font-weight: bold;
+            border-left: 4px solid #FF5A1F;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F8F9FA;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #5FA1B0;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #1A3644;
+        }
+    </style>
+</head>
+<body class="custom-scrollbar">
+
+    <!-- Chosen Palette: Dark Slate (#1A3644), Teal (#5FA1B0), Off-White (#F8F9FA), Peach (#FFC2A0), Vibrant Orange (#FF5A1F). Extracted from the provided reference image image_49d5c0.png. -->
+    
+    <!-- Application Structure Plan: The SPA uses a dashboard layout with a fixed sidebar (bottom bar on mobile) and a main content area. This structure was chosen because it allows students to easily navigate between the different exam questions without losing context. Each view represents a specific problem from the Source Report, presenting the requirements. -->
+    
+    <!-- Visualization & Content Choices: 
+         1. Q1 (Conditional): Goal -> Inform -> Method -> Text block -> Justification -> Clearly presents the 'if/else if/else' logic requirements. 
+         2. Q2 (Switch): Goal -> Explore -> Method -> Text block -> Justification -> Presents a switch/case menu structure.
+         3. Q3 (Random): Goal -> Analyze -> Method -> Text block -> Justification -> Explains random number generation rules.
+         NO SVG/Mermaid used. Unicode emojis used for iconography. -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <div class="flex flex-col md:flex-row">
+        
+        <nav class="w-full md:w-64 lg:w-72 bg-slate text-light flex flex-col shadow-xl z-20 md:min-h-screen flex-shrink-0">
+            <div class="p-6 border-b border-teal/10">
+                <h1 class="text-2xl font-bold tracking-wide text-peach uppercase">Avaliação III</h1>
+                <p class="text-sm text-teal mt-1">Simulador Interativo</p>
+            </div>
+            <div class="flex flex-row md:flex-col overflow-x-auto md:overflow-visible flex-grow p-2 md:p-4 gap-2">
+                <button onclick="navigate('intro')" id="nav-intro" class="nav-item active flex items-center p-3 md:p-4 rounded-lg transition-colors hover:bg-teal/50 text-left whitespace-nowrap md:whitespace-normal">
+                    <span class="text-xl mr-3">🎓</span> Início
+                </button>
+                <button onclick="navigate('q1')" id="nav-q1" class="nav-item flex items-center p-3 md:p-4 rounded-lg transition-colors hover:bg-teal/50 text-left whitespace-nowrap md:whitespace-normal">
+                    <span class="text-xl mr-3">🎢</span> Q1: Catraca
+                </button>
+                <button onclick="navigate('q2')" id="nav-q2" class="nav-item flex items-center p-3 md:p-4 rounded-lg transition-colors hover:bg-teal/50 text-left whitespace-nowrap md:whitespace-normal">
+                    <span class="text-xl mr-3">🍺</span> Q2: Taverna
+                </button>
+                <button onclick="navigate('q3')" id="nav-q3" class="nav-item flex items-center p-3 md:p-4 rounded-lg transition-colors hover:bg-teal/50 text-left whitespace-nowrap md:whitespace-normal">
+                    <span class="text-xl mr-3">🎁</span> Q3: Loot Box
+                </button>
+            </div>
+            <div class="hidden md:block p-6 text-xs text-teal/50 border-t border-teal/10">
+                Prof. William Paiva<br>Linguagem C
+            </div>
+        </nav>
+
+        <main class="flex-grow p-6 md:p-10 lg:p-12 bg-light overflow-y-auto">
+            
+            <div id="view-intro" class="view-section active max-w-6xl mx-auto">
+                <div class="bg-white p-8 md:p-10 rounded-2xl shadow-lg border-t-8 border-orange">
+                    <div class="text-6xl text-center mb-6">📝</div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate text-center mb-6">Guia Prático da Avaliação</h2>
+                    
+                    <p class="text-lg text-slate/80 leading-relaxed mb-6">
+                        Bem-vindo ao guia prático da <strong>Avaliação III</strong>. Esta aplicação foi desenhada para ajudá-lo a compreender a lógica exigida em cada um dos problemas propostos.
+                    </p>
+                    
+                    <div class="bg-peach/20 p-6 rounded-xl border border-peach mb-8">
+                        <h3 class="text-xl font-bold text-orange mb-3">Como utilizar esta ferramenta?</h3>
+                        <p class="text-slate/80 mb-0">
+                            Navegue pelas abas laterais para acessar cada questão. Leia atentamente o enunciado de cada problema e as regras específicas que deve seguir antes de começar a programar a sua solução em Linguagem C.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white border-2 border-teal/20 p-5 rounded-xl text-center shadow-sm">
+                            <div class="text-3xl mb-3">⚖️</div>
+                            <h4 class="font-bold text-slate mb-2">Q1: Condicionais</h4>
+                            <p class="text-sm text-slate/50">Teste as lógicas de if/else com verificações numéricas exatas.</p>
+                        </div>
+                        <div class="bg-white border-2 border-teal/20 p-5 rounded-xl text-center shadow-sm">
+                            <div class="text-3xl mb-3">🔀</div>
+                            <h4 class="font-bold text-slate mb-2">Q2: Múltipla Escolha</h4>
+                            <p class="text-sm text-slate/50">Compreenda a estrutura do switch/case através de menus interativos.</p>
+                        </div>
+                        <div class="bg-white border-2 border-teal/20 p-5 rounded-xl text-center shadow-sm">
+                            <div class="text-3xl mb-3">🎲</div>
+                            <h4 class="font-bold text-slate mb-2">Q3: Aleatoriedade</h4>
+                            <p class="text-sm text-slate/50">Compreenda a geração de números pseudoaleatórios e faixas de valores.</p>
+                        </div>
+                    </div>
+
+                    <!-- GUIA DE CONSULTA RÁPIDA -->
+                    <div class="mt-10 bg-slate p-6 md:p-8 rounded-xl shadow-inner text-left">
+                        <h3 class="text-peach font-bold text-xl mb-4 border-b border-teal/10 pb-2"><span class="text-2xl mr-2">💻</span>Guia de Consulta Rápida (Exemplo Completo)</h3>
+                        <p class="text-light/80 mb-6 text-sm">Utilize o código abaixo como referência para a sintaxe e estrutura dos comandos exigidos nesta avaliação.</p>
+                        
+                        <div class="relative group">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 1080" width="1050" height="1080">
+    <defs>
+        <style>
+            /* Fundo e Cabeçalho da Janela */
+            .bg { fill: #1e1e1e; rx: 12px; }
+            .header-bg { fill: #2d2d2d; }
+            
+            /* Tipografia base anti-cópia */
+            .txt { 
+                font-family: 'Consolas', 'Courier New', monospace; 
+                font-size: 16px; 
+                fill: #d4d4d4; 
+                user-select: none; 
+                -webkit-user-select: none;
+                pointer-events: none; 
+            }
+            
+            /* Cores de Sintaxe (Dark Theme) */
+            .kw { fill: #c586c0; }       /* Palavras-chave: if, else, return, switch, case */
+            .type { fill: #569cd6; }     /* Tipos: int, float */
+            .func { fill: #dcdcaa; }     /* Funções: printf, scanf, main, rand, time */
+            .str { fill: #ce9178; }      /* Strings */
+            .num { fill: #b5cea8; }      /* Números */
+            .com { fill: #6a9955; font-style: italic; } /* Comentários */
+            .inc { fill: #c586c0; }      /* Includes */
+        </style>
+    </defs>
+    
+    <!-- Linhas de Código Formatadas -->
+    <text x="1" y="20" class="txt">
+        <tspan x="1" dy="0"><tspan class="inc">#include</tspan> &lt;stdio.h&gt;</tspan>
+        <tspan x="1" dy="24"><tspan class="inc">#include</tspan> &lt;stdlib.h&gt;</tspan>
+        <tspan x="1" dy="24"><tspan class="inc">#include</tspan> &lt;time.h&gt;</tspan>
+        
+        <tspan x="1" dy="48"><tspan class="type">int</tspan> <tspan class="func">main</tspan>() {</tspan>
+        <tspan x="40" dy="24"><tspan class="func">srand</tspan>(<tspan class="func">time</tspan>(<tspan class="num">NULL</tspan>));</tspan>
+
+        <tspan x="40" dy="48"><tspan class="type">int</tspan> nivel, classe, forca_base;</tspan>
+        <tspan x="40" dy="24"><tspan class="type">int</tspan> dado_sorte = (<tspan class="func">rand</tspan>() % <tspan class="num">20</tspan>) + <tspan class="num">1</tspan>;</tspan>
+
+        <tspan x="40" dy="48"><tspan class="func">printf</tspan>(<tspan class="str">"Digite o seu nivel (1 a 100): "</tspan>);</tspan>
+        <tspan x="40" dy="24"><tspan class="func">scanf</tspan>(<tspan class="str">"%d"</tspan>, &amp;nivel);</tspan>
+
+        <tspan x="40" dy="48"><tspan class="kw">if</tspan> (nivel &lt; <tspan class="num">10</tspan>) {</tspan>
+        <tspan x="80" dy="24"><tspan class="func">printf</tspan>(<tspan class="str">"Nivel Baixo!\n"</tspan>);</tspan>
+        <tspan x="80" dy="24">forca_base = <tspan class="num">10</tspan>;</tspan>
+        <tspan x="40" dy="24">} <tspan class="kw">else if</tspan> (nivel &gt;= <tspan class="num">10</tspan> &amp;&amp; nivel &lt;= <tspan class="num">50</tspan>) {</tspan>
+        <tspan x="80" dy="24"><tspan class="func">printf</tspan>(<tspan class="str">"Nivel Medio!\n"</tspan>);</tspan>
+        <tspan x="80" dy="24">forca_base = <tspan class="num">1</tspan>;</tspan>
+        <tspan x="40" dy="24">} <tspan class="kw">else</tspan> {</tspan>
+        <tspan x="80" dy="24"><tspan class="func">printf</tspan>(<tspan class="str">"Nivel Alto!\n"</tspan>);</tspan>
+        <tspan x="80" dy="24">forca_base = <tspan class="num">60</tspan>;</tspan>
+        <tspan x="40" dy="24">}</tspan>
+
+        <tspan x="40" dy="48"><tspan class="func">printf</tspan>(<tspan class="str">"\n[1] Guerreiro | [2] Mago\nEscolha sua classe: "</tspan>);</tspan>
+        <tspan x="40" dy="24"><tspan class="func">scanf</tspan>(<tspan class="str">"%d"</tspan>, &amp;classe);</tspan>
+
+        <tspan x="40" dy="48"><tspan class="kw">switch</tspan> (classe) {</tspan>
+        <tspan x="80" dy="24"><tspan class="kw">case</tspan> <tspan class="num">1</tspan>:</tspan>
+        <tspan x="120" dy="24"><tspan class="func">printf</tspan>(<tspan class="str">"Ataque do Guerreiro! Dano: %d\n"</tspan>, forca_base + dado_sorte + <tspan class="num">20</tspan>);</tspan>
+        <tspan x="120" dy="24"><tspan class="kw">break</tspan>;</tspan>
+        <tspan x="80" dy="24"><tspan class="kw">case</tspan> <tspan class="num">2</tspan>:</tspan>
+        <tspan x="120" dy="24"><tspan class="func">printf</tspan>(<tspan class="str">"Magia do Mago! Dano: %d\n"</tspan>, forca_base + dado_sorte + <tspan class="num">35</tspan>);</tspan>
+        <tspan x="120" dy="24"><tspan class="kw">break</tspan>;</tspan>
+        <tspan x="80" dy="24"><tspan class="kw">default</tspan>:</tspan>
+        <tspan x="120" dy="24"><tspan class="func">printf</tspan>(<tspan class="str">"Classe invalida! Ataque falhou.\n"</tspan>);</tspan>
+        <tspan x="120" dy="24"><tspan class="kw">break</tspan>;</tspan>
+        <tspan x="40" dy="24">}</tspan>
+
+        <tspan x="40" dy="48"><tspan class="func">printf</tspan>(<tspan class="str">"\n(O dado de sorte rolou: %d)\n"</tspan>, dado_sorte);</tspan>
+
+        <tspan x="40" dy="48"><tspan class="kw">return</tspan> <tspan class="num">0</tspan>;</tspan>
+        <tspan x="1" dy="24">}</tspan>
+    </text>
+
+    <!-- O SEGREDO: Uma camada transparente por cima de tudo que "engole" o rato e impede a cópia -->
+    <rect x="0" y="0" width="100%" height="100%" fill="transparent" pointer-events="all" />
+</svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-q1" class="view-section max-w-6xl mx-auto">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-8 border-teal">
+                    <h2 class="text-3xl font-bold text-slate mb-2">1. Catraca Virtual da Montanha-Russa</h2>
+                    <span class="inline-block bg-teal/20 text-teal font-bold px-3 py-1 rounded-full text-sm mb-6">Condicionais Múltiplas (if / else if / else)</span>
+                    
+                    <p class="text-lg text-slate/80 leading-relaxed mb-0 border-l-4 border-orange pl-4 bg-light p-4 rounded-r-lg">
+                        Um parque de diversões precisa de um sistema automático para controlar o acesso à sua nova montanha-russa. Escreva um programa em C que peça ao usuário para digitar a sua altura em metros (ex: 1.55). O programa deve classificar o acesso utilizando as estruturas <code>if</code>, <code>else if</code> e <code>else</code>, seguindo as regras:<br><br>
+                        - <strong>Menor que 1.20m:</strong> "Acesso Negado. Altura insuficiente."<br>
+                        - <strong>De 1.20m até 1.39m:</strong> "Acesso Permitido apenas com acompanhante adulto."<br>
+                        - <strong>A partir de 1.40m:</strong> "Acesso Liberado! Boa diversão."
+                    </p>
+                </div>
+            </div>
+
+            <div id="view-q2" class="view-section max-w-6xl mx-auto">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-8 border-teal">
+                    <h2 class="text-3xl font-bold text-slate mb-2">2. Menu da Taverna do Aventureiro</h2>
+                    <span class="inline-block bg-teal/20 text-teal font-bold px-3 py-1 rounded-full text-sm mb-6">Múltipla Escolha (Switch)</span>
+                    
+                    <p class="text-lg text-slate/80 leading-relaxed mb-0 border-l-4 border-orange pl-4 bg-light p-4 rounded-r-lg">
+                        Um jogo de RPG precisa de um menu interativo para a taverna da cidade principal. O jogador tem uma variável que guarda seus pontos de vida. Crie um programa que exiba o seguinte menu na tela para o jogador:<br>
+                        [1] - Água da Fonte (Recupera 10 HP)<br>
+                        [2] - Poção de Cura (Recupera 50 HP)<br>
+                        [3] - Elixir Supremo (Recupera 100 HP)<br><br>
+                        O programa deve ler a opção digitada pelo usuário e utilizar a estrutura <code>switch/case</code> para exibir na tela qual foi o item consumido e quantos pontos de vida foram recuperados, mostrando os pontos de vida do jogador atualizados. Não se esqueça que se o jogador selecionar um item que não existe nas opções, o programa deve mostrar "Opção Inválida! Escolha um item válido no menu.".
+                    </p>
+                </div>
+            </div>
+
+            <div id="view-q3" class="view-section max-w-6xl mx-auto">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-8 border-teal">
+                    <h2 class="text-3xl font-bold text-slate mb-2">3. Simulador de Caixas de Tesouro</h2>
+                    <span class="inline-block bg-teal/20 text-teal font-bold px-3 py-1 rounded-full text-sm mb-6">Números Aleatórios</span>
+                    
+                    <p class="text-lg text-slate/80 leading-relaxed mb-0 border-l-4 border-orange pl-4 bg-light p-4 rounded-r-lg">
+                        A recompensa por derrotar o "Boss" final do jogo é um baú de tesouro misterioso! Escreva um programa que simule a abertura deste baú e o cálculo da recompensa. O programa deve gerar e exibir na tela um número aleatório de moedas de ouro, que pode variar de 10 a 100 moedas. Lembre-se de importar as bibliotecas adequadas, plantar a semente baseada no relógio do sistema, e usar o operador módulo (<code>%</code>) para limitar a faixa.
+                    </p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let currentView = 'intro';
+        const views = ['intro', 'q1', 'q2', 'q3'];
+
+        function navigate(viewId) {
+            views.forEach(v => {
+                document.getElementById('view-' + v).classList.remove('active');
+                document.getElementById('nav-' + v).classList.remove('active');
+            });
+            document.getElementById('view-' + viewId).classList.add('active');
+            document.getElementById('nav-' + viewId).classList.add('active');
+            currentView = viewId;
+        }
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+</body>
+</html>
