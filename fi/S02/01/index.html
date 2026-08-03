@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 1: Git: Sua Linha do Tempo</title>
+<link rel="stylesheet" href="../libs/fonts/fonts.css">
+<link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
+<link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
+<script src="../libs/chart.min.js"></script>
+<script src="../libs/p5.min.js"></script>
+<script src="../libs/gsap.min.js"></script>
+<style>
+:root{
+  --color-navy:#000;--color-blue:#1E3A5F;--color-rust:#F05033;
+  --color-orange:#F05033;--color-yellow:#F05033;--color-deep:#0D1B2A;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10151C;
+  --text-muted:#64748B;--border-soft:#E2E8F0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+.fa-solid,.fa-brands,.fa-regular{visibility:hidden;}
+html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regular{visibility:visible;}
+body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
+.container{width:100%;height:100%;position:relative;}
+.fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
+.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
+.slide.active{opacity:1;pointer-events:auto;z-index:1;}
+.slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
+.slide.topic h1{color:#fff;font-size:3.5rem;}
+.slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
+.slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
+h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
+h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
+p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
+ul,ol{margin-left:30px;margin-bottom:25px;}
+strong{color:var(--color-rust);font-weight:800;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+:not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
+.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
+.focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:20px;}
+.card-info{background:var(--slide-bg);padding:25px;border-radius:12px;border:2px solid var(--border-soft);box-shadow:0 4px 6px rgba(0,0,0,.05);}
+.card-info h3{color:var(--color-blue);margin-bottom:15px;font-weight:800;}
+.quest-list ol{counter-reset:quest;list-style:none;padding:0;}
+.quest-list li{background:#fff;margin-bottom:15px;padding:20px 20px 20px 70px;border-radius:12px;position:relative;border:2px solid var(--color-orange);font-size:1.15rem;font-weight:600;}
+.quest-list li::before{content:counter(quest);counter-increment:quest;position:absolute;left:15px;top:50%;transform:translateY(-50%);background:var(--color-rust);color:#fff;width:35px;height:35px;border-radius:50%;text-align:center;font-size:1.2rem;line-height:35px;font-weight:800;}
+.controls{position:fixed;bottom:30px;right:30px;display:flex;gap:15px;z-index:100;background:rgba(255,255,255,.95);padding:12px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);}
+.btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
+.btn:hover{background:var(--color-orange);}
+.progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+@media print{
+  body,.container{height:auto;overflow:visible;background:#fff;}
+  .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
+  .fixed-link-bar a{color:#000;}
+  .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
+  .controls,.progress-bar{display:none!important;}
+  .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
+  .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
+  pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
+  h1,h2,p,li,strong{color:#000!important;}
+}
+.depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
+.depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
+.depurador-bloco .dbg-titulo-text{flex:1;}
+.depurador-bloco .dbg-layout{display:grid;grid-template-columns:1fr 200px;}
+.depurador-bloco .dbg-code-panel{background:#0B192C;padding:14px 10px;overflow-x:auto;}
+.depurador-bloco .dbg-line{display:flex;gap:8px;padding:2px 6px;border-radius:4px;transition:background .15s;white-space:pre;}
+.depurador-bloco .dbg-line.active{background:rgba(255,150,0,.35);outline:2px solid rgba(255,150,0,.6);}
+.depurador-bloco .dbg-linenum{color:#555;min-width:24px;text-align:right;user-select:none;flex-shrink:0;}
+.depurador-bloco .dbg-codeline{color:#cdd6f4;}
+.depurador-bloco .dbg-vars-panel{background:#111b2e;padding:12px;border-left:1px solid #1e3a5f;}
+.depurador-bloco .dbg-vars-title{color:#94a3b8;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.depurador-bloco .dbg-vars-table{width:100%;border-collapse:collapse;font-size:1rem;}
+.depurador-bloco .dbg-vars-table th{color:#64748b;font-weight:600;padding:3px 6px;text-align:left;border-bottom:1px solid #1e3a5f;}
+.depurador-bloco .dbg-vars-table td{color:#e2e8f0;padding:3px 6px;}
+.depurador-bloco .dbg-vars-table tr.changed td{color:var(--color-rust,#f90);}
+.depurador-bloco .dbg-btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.9rem;font-family:inherit;white-space:nowrap;}
+.depurador-bloco .dbg-btn:hover{background:rgba(255,255,255,.32);}
+.depurador-bloco .dbg-btn:disabled{opacity:.35;cursor:default;}
+.depurador-bloco .dbg-btn.reset{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.2);}
+.depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.9rem;text-align:center;white-space:nowrap;}
+.depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:1rem;border-top:1px solid #1e3a5f;min-height:24px;}
+.depurador-bloco .dbg-output:empty{display:none;}
+.bloco-imagem{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.bloco-imagem img{width:100%;max-height:340px;object-fit:contain;border-radius:12px;display:block;}
+.bloco-imagem figcaption{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
+.bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;align-self:flex-start;}
+.bloco-diagrama{margin:12px 0;}
+.bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow-x:auto;text-align:center;}
+.bloco-diagrama .mermaid svg{max-width:none;}
+.bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao{margin:12px 0;}
+.bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);}
+.bloco-animacao canvas{display:block;max-width:100%;border-radius:12px;}
+.bloco-animacao .bloco-animacao-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-grafico{margin:12px 0;}
+.bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);}
+.bloco-grafico .bloco-grafico-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao-gsap{margin:12px 0;}
+.bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;}
+.bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-tabela{margin:12px 0;}
+.bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-tabela .bloco-tabela-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-soft,#e2e8f0);}
+.bloco-tabela table{width:100%;border-collapse:collapse;font-size:1.15rem;}
+.bloco-tabela thead tr{background:var(--color-blue,#1E3E62);color:#fff;}
+.bloco-tabela thead th{padding:10px 16px;text-align:left;font-weight:700;white-space:nowrap;}
+.bloco-tabela tbody tr:nth-child(odd){background:#f8fafc;}
+.bloco-tabela tbody tr:nth-child(even){background:#ffffff;}
+.bloco-tabela tbody td{padding:9px 16px;border-bottom:1px solid var(--border-soft,#e2e8f0);vertical-align:top;line-height:1.5;}
+.bloco-tabela .bloco-tabela-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-agenda{margin:16px 0;}
+.bloco-agenda .bloco-agenda-titulo{font-weight:800;color:var(--color-blue);font-size:1.15rem;margin-bottom:20px;}
+.bloco-agenda .agenda-lista{position:relative;}
+.bloco-agenda .agenda-item{display:flex;gap:18px;align-items:flex-start;position:relative;padding-bottom:24px;}
+.bloco-agenda .agenda-item:last-child{padding-bottom:0;}
+.bloco-agenda .agenda-item:not(:last-child)::before{content:'';position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--border-soft,#e2e8f0);}
+.bloco-agenda .agenda-numero{flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--color-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+.bloco-agenda .agenda-conteudo{padding-top:6px;}
+.bloco-agenda .agenda-item-titulo{font-weight:800;color:var(--color-navy);font-size:1.2rem;display:flex;align-items:center;gap:10px;}
+.bloco-agenda .agenda-item-titulo i{color:var(--color-orange);font-size:1.05rem;}
+.bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
+.bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
+.bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}</style>
+</head>
+<body>
+<div class="fixed-link-bar">
+  <a href="https://#" target="_blank">Fundamentos de Informática</a>
+</div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="controls">
+  <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
+  <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
+  <button class="btn" onclick="nextSlide()" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
+  <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
+</div>
+<div class="container">
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 01</div>
+        <h1>Git: Sua Linha do Tempo</h1>
+        <h2>Fundamentos do Controle de Versão</h2>
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-clock-rotate-left"></i> Hoje você vai entender...
+      </h3>
+      <p>...por que todo programador precisa de uma linha do tempo pro próprio código — e como um viajante do tempo enxergaria o Git: um jeito de marcar pontos no passado e nunca perder nada.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 02</div>
+        <h1>Nesta Aula</h1>
+        
+        <div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">Roteiro de hoje</div>
+    <div class="agenda-lista">
+      
+        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
+          <div class="agenda-numero">01</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> O Problema: Trabalho Perdido no Tempo</div>
+            <div class="agenda-item-texto">Por que precisamos de uma linha do tempo pro código</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+          <div class="agenda-numero">02</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-route"></i> Git é uma Linha do Tempo</div>
+            <div class="agenda-item-texto">A grande analogia da aula</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+          <div class="agenda-numero">03</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-map-pin"></i> Commit: Marcando um Ponto na Linha do Tempo</div>
+            <div class="agenda-item-texto">O conceito central do Git</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-inbox"></i> Git Add</div>
+            <div class="agenda-item-texto">O diário do tempo</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(16)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-compass"></i> Git Status</div>
+            <div class="agenda-item-texto">Onde você está e o que já rolou (git log)</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(23)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-download"></i> Onde Baixar o Git</div>
+            <div class="agenda-item-texto">Pra quem quiser continuar depois, em casa</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(25)" role="button" tabindex="0">
+          <div class="agenda-numero">07</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-user-clock"></i> Simulação: O Cliente Se Arrependeu</div>
+            <div class="agenda-item-texto">Achando o commit certo com status, log e show</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(31)" role="button" tabindex="0">
+          <div class="agenda-numero">08</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Praticando</div>
+            <div class="agenda-item-texto">Mão no terminal</div>
+          </div>
+        </div>
+    </div>
+  </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <h1>O Problema: Trabalho Perdido no Tempo</h1>
+        <p>Por que precisamos de uma linha do tempo pro código</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 03</div>
+        <h1>Já Aconteceu Com Você?</h1>
+        
+        
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-file-circle-xmark"></i> Salvou por cima
+          </h3>
+          <p>O viajante sobrescreveu o arquivo antigo sem querer e perdeu 3 horas de código que já estava funcionando.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-question"></i> Esqueceu o que mudou
+          </h3>
+          <p>Uma semana depois, ele nem lembra mais o que alterou entre uma versão e outra do projeto.</p>
+          
+        </div>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> O que falta aqui
+      </h3>
+      <p>Falta um jeito de <strong>marcar pontos no tempo</strong> do projeto e poder voltar a qualquer um deles — sem depender da memória nem de nomes de arquivo tipo <code>final<em>v2</em>ESSAAGORAVAI.py</code>.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-route"></i>
+        <h1>Git é uma Linha do Tempo</h1>
+        <p>A grande analogia desta aula</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 04</div>
+        <h1>Git é uma Linha do Tempo</h1>
+        
+        <p>Todo projeto guardado no Git tem uma <strong>linha do tempo própria</strong>. Cada vez que você marca um ponto nela, o Git tira uma fotografia completa do projeto naquele instante — e você pode visitar qualquer um desses pontos depois, quando quiser, como um viajante do tempo revisitando o passado.</p>
+<div class="bloco-diagrama" id="mmdzr8ht">
+    <div class="bloco-diagrama-titulo">A linha do tempo do projeto</div>
+    <div class="mermaid">flowchart LR
+  subgraph SG1["Commit 1"]
+    direction TB
+    A1["Início do projeto"]
+  end
+  subgraph SG2["Commit 2"]
+    direction TB
+    A2["Cria interface da máquina do tempo"]
+  end
+  subgraph SG3["Commit 3"]
+    direction TB
+    A3["Ajusta o motor do tempo"]
+  end
+  subgraph SG4["Commit 4 (estável)"]
+    direction TB
+    A4["Corrige bug de paradoxo"]
+  end
+  subgraph SG5["Commit 5"]
+    direction TB
+    A5["Adiciona pouso suave na chegada"]
+  end
+  SG1 --&gt; SG2 --&gt; SG3 --&gt; SG4 --&gt; SG5</div>
+    <div class="bloco-diagrama-legenda">Cada coluna é um ponto marcado — chamado de commit. Vamos entender exatamente o que isso significa a seguir.</div>
+  </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-map-pin"></i>
+        <h1>Commit: Marcando um Ponto na Linha do Tempo</h1>
+        <p>O conceito central do Git</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 05</div>
+        <h1>O Que é um Commit? (Parte 1)</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-camera"></i> Pensa numa fotografia
+      </h3>
+      <p>Um <strong>commit</strong> é uma foto completa do seu projeto, tirada num instante exato. Diferente de uma foto comum, essa aqui guarda tudo que é preciso pra reconstruir o projeto <strong>exatamente</strong> como ele estava naquele momento.</p>
+      
+    </div>
+<p>Cada commit vira um ponto marcado, fixo, na linha do tempo. Depois de marcado, ele não desaparece — você pode visitá-lo de novo quando quiser, mesmo que o projeto já tenha mudado muito desde então.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 06</div>
+        <h1>O Que é um Commit? (Parte 2)</h1>
+        
+        
+    
+    <pre><code class="language-bash">git commit -m &quot;corrige bug do motor do tempo&quot;</code></pre>
+<div class="bloco-diagrama" id="mmdqyybj">
+    <div class="bloco-diagrama-titulo">Um novo ponto entra na linha do tempo</div>
+    <div class="mermaid">flowchart LR
+  subgraph SG1["Commit 1"]
+    direction TB
+    A1["Início do projeto"]
+  end
+  subgraph SG2["Commit 2"]
+    direction TB
+    A2["Cria interface da máquina do tempo"]
+  end
+  subgraph SG3["Commit 3"]
+    direction TB
+    A3["Ajusta o motor do tempo"]
+  end
+  subgraph SG4["Commit 4 (novo!)"]
+    direction TB
+    A4["Corrige bug do motor do tempo"]
+  end
+  SG1 --&gt; SG2 --&gt; SG3 --&gt; SG4</div>
+    <div class="bloco-diagrama-legenda">Cada <code>git commit</code> adiciona uma nova coluna na linha do tempo, sempre depois da última — aqui, o commit mais novo ainda leva a etiqueta "novo!".</div>
+  </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-tag"></i>
+        <h1>Rótulo do Commit: a Mensagem</h1>
+        <p>Pra não se perder na própria linha do tempo</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 07</div>
+        <h1>Todo Ponto Marcado Leva um Rótulo</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-tag"></i> Por que rotular?
+      </h3>
+      <p>Sem uma mensagem clara, um commit é só uma coluna sem nome no meio da linha do tempo. O rótulo (a <strong>mensagem de commit</strong>) é o que permite entender, meses depois, <strong>o que</strong> foi feito ali e <strong>por quê</strong>.</p>
+      
+    </div>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Rótulo ruim vs. rótulo bom</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Mensagem ruim</th><th>Mensagem boa</th></tr></thead><tbody><tr><td>"mudancas"</td><td>"Corrige cálculo de datas na viagem"</td></tr><tr><td>"fix"</td><td>"Adiciona validação de input do usuário"</td></tr><tr><td>"asdsad"</td><td>"Remove log de debug esquecido"</td></tr></tbody></table></div>
+    
+  </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <h1>Viajando na Linha do Tempo</h1>
+        <p>Voltar num ponto e trazer pro presente</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 08</div>
+        <h1>Voltar, Pegar e Trazer pro Presente</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-arrows-rotate"></i> A intuição por trás disso
+      </h3>
+      <p>Como cada commit guarda uma foto completa do projeto, você pode <strong>voltar</strong> em qualquer ponto antigo da linha do tempo, pegar o que estava lá, e trazer de volta pro presente — podendo editar aquilo ou manter exatamente como estava.</p>
+      
+    </div>
+<p>Isso é uma das partes mais poderosas do Git. Os comandos pra fazer essa viagem de verdade (<code>git checkout</code>, <code>git revert</code>, entre outros) a gente destrincha com calma mais pra frente no nosso módulo de Git — por hoje, o que importa é essa intuição: <strong>nada que virou commit se perde de verdade.</strong></p>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-inbox"></i>
+        <h1>Git Add: o Diário do Tempo</h1>
+        <p>Antes de marcar o ponto, você anota o que entra nele</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 09</div>
+        <h1>Git Add: o Diário do Tempo (Parte 1)</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-book"></i> O diário antes da marca
+      </h3>
+      <p>Antes de marcar um ponto na linha do tempo, você decide <strong>o que</strong> vai entrar nele. É como escrever num diário de bordo: só o que você anota (com <code>git add</code>) é o que o commit vai guardar. Sem isso, o commit não sabe o que salvar.</p>
+      
+    </div>
+
+    <div class="grid-3">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-pen"></i> Editando
+          </h3>
+          <p>Arquivo modificado, mudança ainda solta</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-inbox"></i> git add
+          </h3>
+          <p>Mudança anotada no diário, pronta pra virar commit</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-map-pin"></i> git commit
+          </h3>
+          <p>Ponto marcado, definitivo, na linha do tempo</p>
+          
+        </div>
+    </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 10</div>
+        <h1>O Fluxo Básico do Dia a Dia (Parte 2)</h1>
+        
+        <div class="bloco-diagrama" id="mmdxltpz">
+    <div class="bloco-diagrama-titulo">Do arquivo editado ao ponto marcado</div>
+    <div class="mermaid">flowchart LR
+  A[Edita o arquivo] --&gt; B[git add]
+  B --&gt; C[git commit -m]
+  C --&gt; D[Novo ponto na linha do tempo]</div>
+    <div class="bloco-diagrama-legenda">Esse ciclo se repete o tempo todo: editar, anotar no diário, marcar o ponto.</div>
+  </div>
+
+    
+    <pre><code class="language-bash">git add maquina_do_tempo.py
+git commit -m &quot;Corrige calculo de datas na viagem&quot;</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-fire"></i> Consistência > commit gigante
+      </h3>
+      <p>Assim como quem quer <strong>farmar aura</strong> de verdade sabe que é repetição pequena e constante que funciona, aqui vale o mesmo: commits pequenos e frequentes valem muito mais que um commit gigante e raro no fim do dia.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-compass"></i>
+        <h1>Git Status: Onde Você Está Agora</h1>
+        <p>Consultando o mapa da linha do tempo</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 11</div>
+        <h1>git status: a Bússola do Git (Parte 1)</h1>
+        
+        
+    
+    <pre><code class="language-bash">$ git status
+On branch main
+Changes not staged for commit:
+  modified:   maquina_do_tempo.py
+
+Untracked files:
+  novo_registro.txt</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-compass"></i> Pra que serve
+      </h3>
+      <p><code>git status</code> mostra <strong>onde você está agora</strong>: o que foi modificado mas ainda não entrou no diário (<code>not staged</code>), o que já está anotado pronto pro commit, e o que o Git ainda nem conhece (<code>untracked</code>).</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 12</div>
+        <h1>git status: a Bússola do Git (Parte 2)</h1>
+        
+        <div class="bloco-diagrama" id="mmdpuxyk">
+    <div class="bloco-diagrama-titulo">Os três estados de um arquivo</div>
+    <div class="mermaid">flowchart LR
+  U["Untracked&lt;br/&gt;novo_registro.txt"] --&gt;|git add| S["Staged&lt;br/&gt;no diário"]
+  M["Modified, not staged&lt;br/&gt;maquina_do_tempo.py"] --&gt;|git add| S
+  S --&gt;|git commit| C["Committed&lt;br/&gt;ponto marcado"]</div>
+    <div class="bloco-diagrama-legenda">O <code>git status</code> que você acabou de ver é exatamente uma foto desses estados: ele te diz em qual dessas caixinhas cada arquivo do projeto está agora.</div>
+  </div>
+<p>Repare que <strong>nada vira commit sem passar pelo <code>git add</code> primeiro</strong> — é essa etapa do meio (o "diário do tempo" que vimos antes) que decide o que vai ser marcado na linha do tempo.</p>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-list"></i>
+        <h1>Git Log: Vendo a Linha do Tempo Inteira</h1>
+        <p>Todos os pontos marcados, até agora</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 13</div>
+        <h1>git log: Onde Você Está Agora (Parte 1)</h1>
+        
+        <div class="bloco-diagrama" id="mmdeh8ik">
+    <div class="bloco-diagrama-titulo">A linha do tempo até agora</div>
+    <div class="mermaid">flowchart LR
+  subgraph SG1["1f0d4aa"]
+    direction TB
+    A1["Primeira versão da máquina do tempo"]
+  end
+  subgraph SG2["7b2e881"]
+    direction TB
+    A2["Adiciona validação de input do usuário"]
+  end
+  subgraph SG3["a3f9c21 (você está aqui)"]
+    direction TB
+    A3["Corrige cálculo de datas na viagem"]
+  end
+  SG1 --&gt; SG2 --&gt; SG3</div>
+    <div class="bloco-diagrama-legenda">Antes de rodar <code>git log</code>, pensa assim: você está sempre no ponto mais recente da sua linha do tempo. <code>git log</code> é o comando que revela todos os pontos anteriores a esse.</div>
+  </div>
+<p>Repara nos identificadores (<code>1f0d4aa</code>, <code>7b2e881</code>, <code>a3f9c21</code>) — são os mesmos códigos que você vai ver na tela a seguir, quando rodarmos <code>git log</code> de verdade.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 14</div>
+        <h1>git log: o Histórico Completo (Parte 2)</h1>
+        
+        
+    
+    <pre><code class="language-bash">$ git log --oneline
+a3f9c21 Corrige calculo de datas na viagem
+7b2e881 Adiciona validacao de input do usuario
+1f0d4aa Primeira versao da maquina do tempo</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-clock-rotate-left"></i> Literalmente a linha do tempo
+      </h3>
+      <p><code>git log</code> mostra <strong>todos os commits já feitos</strong>, do mais recente pro mais antigo, cada um com seu identificador único (aquele código tipo <code>a3f9c21</code>) e o rótulo que você escreveu. É a linha do tempo inteira, na tela.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 15</div>
+        <h1>Prévia: Mais Ferramentas da Linha do Tempo</h1>
+        
+        
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-code-compare"></i> git diff
+          </h3>
+          <p>Compara dois pontos da linha do tempo e mostra exatamente o que mudou entre eles, linha por linha.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-code-branch"></i> git branch
+          </h3>
+          <p>Cria uma linha do tempo paralela — um assunto grande demais pra hoje, que vira aula própria (Aula 4: Branches e Merges).</p>
+          
+        </div>
+    </div>
+<p>Não precisa decorar esses dois agora — é só pra você saber que eles existem e onde se encaixam na analogia.</p>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-download"></i>
+        <h1>Onde Baixar o Git (Pra Casa)</h1>
+        <p>Nos laboratórios, ele já vem pronto</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 16</div>
+        <h1>Quer o Git no Seu Computador?</h1>
+        
+        <p>Nos laboratórios da escola o Git <strong>já vem instalado</strong>, e todo o nosso trabalho vai ser sempre pelo terminal — não precisa instalar nada por aqui.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-download"></i> Pra usar em casa
+      </h3>
+      <p>Se você quiser ter o Git no seu próprio computador, baixe o instalador oficial em <strong>git-scm.com</strong> e siga o assistente de instalação — funciona pra Windows, macOS e Linux. Sem mistério, sem pegadinha.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-user-clock"></i>
+        <h1>Simulação: O Cliente Se Arrependeu</h1>
+        <p>Descobrindo qual ponto da linha do tempo tem o que você precisa</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 17</div>
+        <h1>O Pedido do Cliente (Parte 1)</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-comments"></i> O que aconteceu
+      </h3>
+      <p>O viajante vem construindo o site de um cliente. Semana passada, o cliente pediu um <strong>novo layout</strong> — e ele entregou, commit por commit. Hoje o cliente voltou atrás: "pensando bem... eu gostava mais de como estava antes."</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-question"></i> Antes de sair mexendo em qualquer coisa...
+      </h3>
+      <p>Ele não lembra de cabeça qual ponto exato da linha do tempo tinha o site "do jeito antigo". Mas não precisa confiar na memória — a própria linha do tempo do projeto está ali pra consultar.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 18</div>
+        <h1>Passo 1: Onde Estamos Agora? (Parte 2)</h1>
+        
+        
+    
+    <pre><code class="language-bash">$ git status
+On branch main
+nothing to commit, working tree clean</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-compass"></i> Por que checar isso primeiro
+      </h3>
+      <p><code>git status</code> limpo confirma que <strong>não tem nada solto</strong> — nenhuma edição pendurada, nada fora do lugar. Tudo que já existe está seguro, marcado em algum ponto da linha do tempo. Só falta achar o ponto certo.</p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 19</div>
+        <h1>Passo 2: Vasculhando a Linha do Tempo (Parte 3)</h1>
+        
+        
+    
+    <pre><code class="language-bash">$ git log --oneline
+d48ac31 Aplica novo layout pedido pelo cliente
+4de2210 Corrige responsividade no celular
+c02f7e4 Ajusta cores do cabecalho
+9a1e5b0 Primeira entrega do site pro cliente</code></pre>
+<div class="bloco-diagrama" id="mmdbnzot">
+    <div class="bloco-diagrama-titulo">Onde está o "jeito antigo" que o cliente quer</div>
+    <div class="mermaid">flowchart LR
+  subgraph SG1["9a1e5b0"]
+    direction TB
+    A1["Primeira entrega do site"]
+  end
+  subgraph SG2["c02f7e4"]
+    direction TB
+    A2["Ajusta cores do cabeçalho"]
+  end
+  subgraph SG3["4de2210 (o que o cliente quer)"]
+    direction TB
+    A3["Corrige responsividade no celular"]
+  end
+  subgraph SG4["d48ac31"]
+    direction TB
+    A4["Aplica novo layout pedido"]
+  end
+  SG1 --&gt; SG2 --&gt; SG3 --&gt; SG4</div>
+    <div class="bloco-diagrama-legenda">Pelos rótulos, <code>4de2210</code> é o último ponto <strong>antes</strong> do novo layout entrar — o candidato mais forte pro que o cliente descreveu.</div>
+  </div>
+<p>Achamos um candidato só de ler os rótulos. Mas dá pra <strong>confirmar</strong> o que exatamente esse commit continha, sem mexer em nada ainda? É pra isso que serve o próximo comando.</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 20</div>
+        <h1>Passo 3: Espiando com git show (Parte 4)</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-magnifying-glass"></i> git show: só espiar, nada de mexer
+      </h3>
+      <p><code>git show <hash></code> deixa você <strong>ver o conteúdo de um commit específico</strong> — o que mudou ali, quem fez, quando — sem trazer nada de volta pro presente. É só uma espiada na linha do tempo.</p>
+      
+    </div>
+
+    
+    <pre><code class="language-bash">$ git show 4de2210
+commit 4de2210f8a3b5c9e1d2f4a6b8c0d2e4f6a8b0c2d
+Author: Viajante &lt;viajante@maquinadotempo.dev&gt;
+Date:   Wed Jul 15 14:32:00 2026
+
+    Corrige responsividade no celular
+
+diff --git a/estilo.css b/estilo.css
+- .menu { display: none; }
++ .menu { display: flex; flex-wrap: wrap; }</code></pre>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 21</div>
+        <h1>Confirmado! E Agora? (Parte 5)</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-check"></i> Achamos o ponto certo
+      </h3>
+      <p>O <code>git show</code> confirmou: o commit <code>4de2210</code> tem exatamente o estado do site <strong>antes</strong> do novo layout — o que o cliente queria de volta. Sem adivinhar, sem depender de memória: a linha do tempo (e os comandos certos) resolveram sozinhos.</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-arrow-right-long"></i> Próximo passo (spoiler)
+      </h3>
+      <p>Trazer esse ponto de volta pro presente é o passo seguinte — os comandos pra isso (<code>git checkout</code>, <code>git restore</code>) a gente destrincha com calma em breve, como já avisamos lá atrás. Por hoje, o que importa é: <strong>você sabe exatamente onde, na linha do tempo, está o que precisa.</strong></p>
+      
+    </div>
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-pen"></i>
+        <h1>Praticando</h1>
+        <p>Mão no terminal do laboratório</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Desafios</div>
+        <h1>Praticando com o Git</h1>
+        
+        
+    <div class="quest-list">
+      <ol><li>Abra o terminal num projeto com Git já iniciado e rode <code>git status</code>. O que ele te mostra sobre o momento atual da linha do tempo?</li><li>Crie ou edite um arquivo, rode <code>git add nome<em>do</em>arquivo</code> e confirme com <code>git status</code> que ele virou parte do 'diário' (staged).</li><li>Faça seu primeiro commit com uma mensagem clara: <code>git commit -m "minha primeira marca na linha do tempo"</code>.</li><li>Rode <code>git log</code> e identifique: quantos commits existem, qual é o mais recente, e o que cada rótulo te conta sobre a história do projeto.</li><li>Reflexão: qual seria aquele momento do seu passado (num trabalho, projeto ou código) que você mais gostaria de poder 'visitar' de novo com o Git?</li></ol>
+    </div>
+      </div>
+    </div></div>
+<script src="../libs/prism/prism.min.js"></script>
+<script src="../libs/prism/prism-autoloader.min.js"></script>
+<script type="module">
+import mermaid from '../libs/mermaid/mermaid.esm.min.mjs';
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#fce0da',
+    primaryTextColor: '#10151C',
+    primaryBorderColor: '#F05033',
+    lineColor: '#F05033',
+    secondaryColor: '#0D1B2A',
+    tertiaryColor: '#f5f7fa',
+    background: '#ffffff',
+    mainBkg: '#fce0da',
+    nodeBorder: '#F05033',
+    clusterBkg: '#f0f4f8',
+    titleColor: '#F05033',
+    edgeLabelBackground: '#ffffff',
+    fontFamily: 'Nunito, sans-serif',
+    fontSize: '22px',
+    // cScale1 (mermaid timeline section backgrounds, e.g. every 2nd block) defaults to
+    // secondaryColor = cor_deep, which is already near-black — mermaid then darkens it
+    // further, producing a solid black block that clashes with the palette and, combined
+    // with the equally dark default label color, was unreadable. Feed it the same light
+    // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
+    // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
+    cScale1: '#d7dce2'
+  }
+});
+</script>
+<script>
+let cur=0;
+const slides=document.querySelectorAll('.slide');
+const total=slides.length;
+const pb=document.querySelector('#progressBar');
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
+  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+}else document.documentElement.classList.add('fonts-ready');
+const showSlide = (i) => {
+  if(i<0)i=0; if(i>=total)i=total-1;
+  cur=i;
+  slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
+  pb.style.width=((cur+1)/total*100)+'%';
+}
+const nextSlide = () => {showSlide(cur+1);}
+const prevSlide = () => {showSlide(cur-1);}
+const toggleFullscreen = () => {if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
+  else if(e.key==='ArrowLeft')prevSlide();
+  else if(e.key.toLowerCase()==='f')toggleFullscreen();
+});
+showSlide(0);
+const _dbg={};
+function dbgInit(id){
+  const el=document.getElementById(id);
+  const dataEl=document.getElementById(id+'-data');
+  if(!el||!dataEl) return;
+  try{ _dbg[id]={passos:JSON.parse(dataEl.textContent),cur:-1,prevVars:{}}; }catch(e){ return; }
+  dbgRender(id);
+}
+function dbgNext(id){ const s=_dbg[id]; if(s&&s.cur<s.passos.length-1){s.cur++;dbgRender(id);} }
+function dbgPrev(id){ const s=_dbg[id]; if(s&&s.cur>0){s.cur--;dbgRender(id);} }
+function dbgReset(id){ const s=_dbg[id]; if(s){s.cur=-1;s.prevVars={};dbgRender(id);} }
+function dbgRender(id){
+  const el=document.getElementById(id);
+  const s=_dbg[id];
+  if(!el||!s) return;
+  const passo=s.cur>=0?s.passos[s.cur]:null;
+  el.querySelectorAll('.dbg-line').forEach(l=>l.classList.remove('active'));
+  if(passo&&passo.linha!=null){
+    const al=el.querySelector('.dbg-line[data-ln="'+passo.linha+'"]');
+    if(al){ al.classList.add('active'); al.scrollIntoView({block:'nearest'}); }
+  }
+  const tbody=el.querySelector('.dbg-vars-body');
+  if(tbody){
+    const vars=passo?passo.vars:{};
+    tbody.innerHTML=Object.entries(vars).map(([k,v])=>{
+      const changed=s.prevVars[k]!==undefined&&String(s.prevVars[k])!==String(v);
+      return '<tr class="'+(changed?'changed':'')+'"><td>'+k+'</td><td>'+v+'</td></tr>';
+    }).join('');
+    if(passo) s.prevVars={...vars};
+  }
+  const outEl=document.getElementById(id+'-out');
+  if(outEl) outEl.textContent=passo&&passo.saida?passo.saida:'';
+  const curEl=document.getElementById(id+'-cur');
+  if(curEl) curEl.textContent=s.cur>=0?s.cur+1:'—';
+  const prevBtn=document.getElementById(id+'-prev');
+  const nextBtn=document.getElementById(id+'-next');
+  if(prevBtn) prevBtn.disabled=s.cur<=0;
+  if(nextBtn) nextBtn.disabled=!s.passos.length||s.cur>=s.passos.length-1;
+}
+document.querySelectorAll('.depurador-bloco').forEach(el=>dbgInit(el.id));
+</script>
+</body>
+</html>
