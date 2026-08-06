@@ -30,6 +30,9 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
 .slide.topic h1{color:#fff;font-size:3.5rem;}
 .slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
 .slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -87,27 +90,32 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.9rem;text-align:center;white-space:nowrap;}
 .depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:1rem;border-top:1px solid #1e3a5f;min-height:24px;}
 .depurador-bloco .dbg-output:empty{display:none;}
+/* .slide has overflow:hidden and a fixed viewport height, so any block below
+   (diagrama/animacao/grafico) whose native content size is unpredictable at
+   authoring time (e.g. a tall Mermaid flowchart) gets max-height + overflow:auto
+   as a safety net -- it scrolls internally instead of silently clipping past
+   the bottom of the slide. */
 .bloco-imagem{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
 .bloco-imagem img{width:100%;max-height:340px;object-fit:contain;border-radius:12px;display:block;}
 .bloco-imagem figcaption{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
 .bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;align-self:flex-start;}
 .bloco-diagrama{margin:12px 0;}
 .bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow-x:auto;text-align:center;}
-.bloco-diagrama .mermaid svg{max-width:none;}
+.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);}
-.bloco-animacao canvas{display:block;max-width:100%;border-radius:12px;}
+.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
+.bloco-animacao canvas{display:block;max-width:100%;max-height:min(960px,65vh);border-radius:12px;}
 .bloco-animacao .bloco-animacao-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-grafico{margin:12px 0;}
 .bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);}
+.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);overflow:auto;}
 .bloco-grafico .bloco-grafico-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao-gsap{margin:12px 0;}
 .bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;}
+.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;max-height:min(960px,65vh);}
 .bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-tabela{margin:12px 0;}
 .bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
@@ -184,7 +192,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
             <div class="agenda-item-texto">Só o driver mysql2 — o servidor já está pronto</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(30)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(31)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-cube"></i> Projeto prático</div>
@@ -193,6 +201,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         </div>
     </div>
   </div>
+        
       </div>
     </div>
 
@@ -224,6 +233,7 @@ let idade = 22;
 console.log(`Olá, ${nome}! Você tem ${idade} anos.`);
 
 const status = idade &gt;= 18 ? &quot;maior de idade&quot; : &quot;menor de idade&quot;;</code></pre>
+        
       </div>
     </div>
 
@@ -250,6 +260,7 @@ for (let i = 0; i &lt; 5; i++) {
   if (i === 3) continue;
   console.log(i);
 }</code></pre>
+        
       </div>
     </div>
 
@@ -273,6 +284,7 @@ botao.addEventListener('click', () =&gt; {
   const valor = document.querySelector('#input-nome').value;
   document.querySelector('#resultado').textContent = `Olá, ${valor}!`;
 });</code></pre>
+        
       </div>
     </div>
 
@@ -298,6 +310,7 @@ botao.addEventListener('click', () =&gt; {
 
 const nomes = produtos.map(p =&gt; p.nome);
 const caros = produtos.filter(p =&gt; p.preco &gt; 60);</code></pre>
+        
       </div>
     </div>
 
@@ -322,12 +335,13 @@ const caros = produtos.filter(p =&gt; p.preco &gt; 60);</code></pre>
       <p>Todo app Electron tem um processo <strong>Main</strong> (Node.js completo) e um ou mais processos <strong>Renderer</strong> (a interface, isolada por segurança).</p>
       
     </div>
-<figure class="bloco-imagem" id="img92vly">
+<figure class="bloco-imagem" id="imgmri19">
     <div class="bloco-imagem-titulo">Electron.js</div>
     <img src="img/electron-logo.svg" alt="Logo do Electron.js" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
     <figcaption>O framework que une o Chromium (Renderer, a interface) e o Node.js (Main, a lógica) num único app desktop.</figcaption>
   </figure>
+        
       </div>
     </div>
 
@@ -351,6 +365,7 @@ const caros = produtos.filter(p =&gt; p.preco &gt; 60);</code></pre>
 contextBridge.exposeInMainWorld('api', {
   enviarMensagem: (msg) =&gt; ipcRenderer.send('mensagem', msg)
 });</code></pre>
+        
       </div>
     </div>
 
@@ -377,9 +392,10 @@ contextBridge.exposeInMainWorld('api', {
       <h3>
         <i class="fa-solid fa-hourglass-half"></i> O que é async?
       </h3>
-      <p>A palavra <code>async</code> na frente de uma função (como no <code>async () => {...}</code> do handle acima) indica que ela sempre retorna uma <strong>Promise</strong>, e permite usar <code>await</code> dentro dela para esperar operações demoradas — como uma consulta ao banco de dados — sem travar o resto do programa. Por isso quase todo handler de IPC que busca dados é <code>async</code>: buscar no MySQL leva um tempinho, e <code>async/await</code> deixa esse código de espera parecido com código síncrono, mais fácil de ler.</p>
+      <p>A palavra <code>async</code> na frente de uma função (como no <code>async () =&gt; {...}</code> do handle acima) indica que ela sempre retorna uma <strong>Promise</strong>, e permite usar <code>await</code> dentro dela para esperar operações demoradas — como uma consulta ao banco de dados — sem travar o resto do programa. Por isso quase todo handler de IPC que busca dados é <code>async</code>: buscar no MySQL leva um tempinho, e <code>async/await</code> deixa esse código de espera parecido com código síncrono, mais fácil de ler.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -396,13 +412,14 @@ contextBridge.exposeInMainWorld('api', {
       <p>Usamos o <strong>Bootstrap</strong> pra montar interfaces desktop rapidamente, organizamos o projeto em pastas (main, renderer, preload) e separamos dados da lógica num arquivo <strong>JSON</strong> externo.</p>
       
     </div>
-<figure class="bloco-imagem" id="imgnq0zm">
+<figure class="bloco-imagem" id="imgm0plg">
     <div class="bloco-imagem-titulo">Exemplo de Interface Bootstrap</div>
     <img src="img/bootstrap-dashboard-exemplo.png" alt="Interface de um dashboard Bootstrap (AdminLTE), o tipo de layout usado dentro de apps Electron" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
     <figcaption>AdminLTE (MIT License) — esse mesmo estilo de layout com Bootstrap é comumente embutido dentro da janela (Renderer) de um app Electron.</figcaption>
   </figure>
 <p>É exatamente esse arquivo JSON que vamos aposentar hoje, trocando por um banco de dados MySQL.</p>
+        
       </div>
     </div>
 
@@ -419,12 +436,13 @@ contextBridge.exposeInMainWorld('api', {
       <p>Como criar janelas filhas sincronizadas com a principal via IPC, e como integrar o app ao sistema operacional com <strong>menus nativos</strong> e um ícone na <strong>bandeja (Tray)</strong>.</p>
       
     </div>
-<figure class="bloco-imagem" id="imgc63cx">
+<figure class="bloco-imagem" id="img2fgfv">
     <div class="bloco-imagem-titulo">Um App Electron com Várias Janelas</div>
     <img src="img/electron-multiplas-janelas.png" alt="App Electron com quatro janelas abertas simultaneamente, cada uma com um botão para criar mais janelas" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
     <figcaption>Cada janela é seu próprio processo Renderer, controlado pelo mesmo Main process (electron-multiple-windows-demo, domínio público/CC0).</figcaption>
   </figure>
+        
       </div>
     </div>
 
@@ -441,12 +459,13 @@ contextBridge.exposeInMainWorld('api', {
       <p>Os diálogos nativos do Electron — <code>MessageBox</code>, <code>ErrorBox</code>, <code>OpenDialog</code> e <code>SaveDialog</code> — pra confirmar ações, mostrar erros e importar/exportar arquivos.</p>
       
     </div>
-<figure class="bloco-imagem" id="imgovdc1">
+<figure class="bloco-imagem" id="imgaqkpt">
     <div class="bloco-imagem-titulo">Exemplo de Diálogo Nativo (OpenDialog)</div>
     <img src="img/dialogo-nativo-abrir-arquivo.png" alt="Diálogo nativo de sistema operacional para abrir um arquivo" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
     <figcaption>Esse é exatamente o tipo de janela que <code>dialog.showOpenDialog()</code> abre — desenhada pelo próprio sistema operacional, não pelo Electron (imagem de domínio público/CC0, Wikimedia Commons).</figcaption>
   </figure>
+        
       </div>
     </div>
 
@@ -496,6 +515,7 @@ contextBridge.exposeInMainWorld('api', {
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -514,10 +534,11 @@ contextBridge.exposeInMainWorld('api', {
     </div>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">Dados de Conexão do Laboratório</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td>Host</td><td>143.106.241.4</td></tr><tr><td>Porta</td><td>1609</td></tr><tr><td>Usuário</td><td>cl + seu RA (ex.: RA 123456 → usuário cl123456)</td></tr><tr><td>Senha</td><td>cl + sua data de nascimento sem as barras (ex.: 05/03/2004 → senha cl05032004)</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Campo</th><th>Valor</th></tr></thead><tbody><tr><td>Host</td><td>143.106.241.4</td></tr><tr><td>Porta</td><td>3306</td></tr><tr><td>Usuário</td><td>cl + seu RA (ex.: RA 123456 → usuário cl123456)</td></tr><tr><td>Senha</td><td>cl + asterisco + data de nascimento sem as barras (ex.: 05/03/2004 → senha cl*05032004)</td></tr></tbody></table></div>
     <div class="bloco-tabela-legenda">Cada aluno usa seu próprio usuário e senha — não compartilhem credenciais entre vocês.</div>
   </div>
 <p>A única 'instalação' de hoje será a do <strong>driver mysql2</strong> dentro do próprio projeto Node.js — isso não mexe no sistema, só adiciona uma biblioteca ao projeto (como qualquer <code>npm install</code> que já fizemos).</p>
+        
       </div>
     </div>
 
@@ -545,6 +566,7 @@ contextBridge.exposeInMainWorld('api', {
 
     <div class="file-label">terminal</div>
     <pre style="margin-top:0;"><code class="language-bash">npm install mysql2</code></pre>
+        
       </div>
     </div>
 
@@ -558,7 +580,7 @@ contextBridge.exposeInMainWorld('api', {
       <h3>
         <i class="fa-solid fa-folder-tree"></i> Onde exatamente esse código vai
       </h3>
-      <p>Crie um arquivo <strong>novo</strong>, chamado <strong><code>main/database.js</code></strong>, na mesma pasta do <code>main.js</code> e do <code>preload.js</code>. É o único lugar onde esse código de conexão deve existir — nunca no Renderer! Sozinho, esse arquivo não faz nada: adicione <code>require('./database.js')</code> no topo do <code>main.js</code> pra ele ser executado quando o app abrir.</p>
+      <p>Crie um arquivo <strong>novo</strong>, chamado <strong><code>main/database.js</code></strong>, na mesma pasta do <code>main.js</code> e do <code>preload.js</code>. É o único lugar onde esse código de conexão deve existir — nunca no Renderer!</p>
       
     </div>
 
@@ -567,9 +589,9 @@ contextBridge.exposeInMainWorld('api', {
 
 const connection = mysql.createConnection({
   host: '143.106.241.4',
-  port: 1609,
+  port: 3306,
   user: 'cl123456',        // &quot;cl&quot; + seu RA
-  password: 'cl05032004',  // &quot;cl&quot; + sua data de nascimento sem as barras
+  password: 'cl*05032004', // &quot;cl&quot; + &quot;*&quot; + sua data de nascimento sem as barras
   database: 'nome_do_seu_banco' // fornecido pelo professor
 });
 
@@ -579,46 +601,16 @@ connection.connect((erro) =&gt; {
     return;
   }
   console.log('Conectado ao MySQL!');
-});</code></pre>
+});
 
-    <div class="file-label">main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// bem no topo do arquivo, junto com os outros requires
-require('./database.js');</code></pre>
+module.exports = connection;</code></pre>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 16</div>
-        <h1>Criando uma Tabela com Dados de Teste</h1>
-        
-        <p>Criar a tabela e alguns dados de teste é uma tarefa de <strong>administração do banco</strong>, não de código do app — então fazemos isso <strong>direto no MySQL</strong> (linha de comando <code>mysql</code>, phpMyAdmin ou o cliente já disponível no laboratório), sem passar pelo Electron:</p>
-
-    <div class="file-label">setup.sql</div>
-    <pre style="margin-top:0;"><code class="language-sql">CREATE TABLE IF NOT EXISTS produtos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  preco DECIMAL(10,2) NOT NULL
-);
-
-INSERT INTO produtos (nome, preco) VALUES
-  ('Mouse', 50.00),
-  ('Teclado', 120.00),
-  ('Monitor', 850.00);</code></pre>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-terminal"></i> Por que direto no banco?
-      </h3>
-      <p>Criar tabelas e popular dados de teste é feito <strong>uma única vez</strong>, e não faz parte da lógica do app. O código Node.js (dentro de <code>main/</code>) fica reservado pra ler e escrever dados <strong>durante a execução</strong> do programa — por exemplo, quando um usuário cadastra uma peça nova pela interface.</p>
-      
-    </div>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 17</div>
         <h1>Módulos no Node.js</h1>
         <h2>Cada arquivo .js, seu próprio escopo</h2>
         
@@ -647,12 +639,13 @@ console.log(farmarAura(10)); // 10
 console.log(farmarAura(25)); // 35
 
 // a variável 'aura' não existe aqui fora - ficou isolada dentro do módulo</code></pre>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 18</div>
+        <div class="slide-number">Slide 17</div>
         <h1>Onde a Conexão Deve Viver</h1>
         
         
@@ -663,7 +656,7 @@ console.log(farmarAura(25)); // 35
       <p>A conexão com o banco (e a senha!) fica <strong>só no Main process</strong>. O Renderer pede dados via IPC (<code>invoke</code>/<code>handle</code> — Aula 9 do semestre passado) e nunca vê a string de conexão.</p>
       
     </div>
-<div class="bloco-diagrama" id="mmd56kmv">
+<div class="bloco-diagrama" id="mmdpnaad">
     <div class="bloco-diagrama-titulo">O Fluxo Completo de uma Consulta</div>
     <div class="mermaid">sequenceDiagram
   participant R as Renderer
@@ -675,12 +668,13 @@ console.log(farmarAura(25)); // 35
   M--&gt;&gt;R: retorna os dados</div>
     <div class="bloco-diagrama-legenda">O mesmo padrão invoke/handle que vimos na Aula 9 — só que agora o Main busca os dados no MySQL em vez de um array em memória.</div>
   </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 19</div>
+        <div class="slide-number">Slide 18</div>
         <h1>Promises por Dentro: resolve e reject</h1>
         
         
@@ -688,7 +682,7 @@ console.log(farmarAura(25)); // 35
       <h3>
         <i class="fa-solid fa-truck-fast"></i> Pensa numa entrega por aplicativo
       </h3>
-      <p>Você faz o pedido e ele fica <strong>pendente</strong> até um de dois desfechos: <strong>entregue</strong> ou <strong>cancelado</strong>. Uma <code>Promise</code> do JavaScript funciona igual — ela nasce <strong>pendente</strong> e só termina de um jeito ou de outro. <code>resolve(...)</code> é a função que você chama pra avisar "deu certo, aqui está o resultado"; <code>reject(...)</code> avisa "deu errado, aqui está o motivo". O JavaScript já entrega essas duas funções prontas pra você usar dentro de <code>new Promise((resolve, reject) => {...})</code>.</p>
+      <p>Você faz o pedido e ele fica <strong>pendente</strong> até um de dois desfechos: <strong>entregue</strong> ou <strong>cancelado</strong>. Uma <code>Promise</code> do JavaScript funciona igual — ela nasce <strong>pendente</strong> e só termina de um jeito ou de outro. <code>resolve(...)</code> é a função que você chama pra avisar "deu certo, aqui está o resultado"; <code>reject(...)</code> avisa "deu errado, aqui está o motivo". O JavaScript já entrega essas duas funções prontas pra você usar dentro de <code>new Promise((resolve, reject) =&gt; {...})</code>.</p>
       
     </div>
 
@@ -707,26 +701,16 @@ verificarIdade(20)
   .then((mensagem) =&gt; console.log(mensagem))
   .catch((erro) =&gt; console.error(erro));</code></pre>
 <p>Nos próximos slides, <code>connection.ping</code> e <code>connection.query</code> seguem exatamente esse padrão: dentro do callback deles, chamamos <code>resolve(...)</code> quando o banco responde bem, e usamos <code>reject(...)</code> (ou um valor indicando falha) quando dá errado.</p>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 20</div>
-        <h1>Exportando a Conexão pro Resto do App</h1>
+        <div class="slide-number">Slide 19</div>
+        <h1>main.js: Importando e Usando a Conexão</h1>
         
-        
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-share-from-square"></i> Um passo que ainda falta
-      </h3>
-      <p>Só criar a <code>connection</code> dentro de <code>main/database.js</code> não basta — pra outros arquivos (como o <code>main.js</code>) conseguirem usá-la, o arquivo precisa <strong>exportá-la</strong> com <code>module.exports</code>. Sem essa linha, o <code>require('./database.js')</code> que vocês já têm no <code>main.js</code> não devolve nada utilizável.</p>
-      
-    </div>
-
-    <div class="file-label">main/database.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// adicione esta linha no final do arquivo, depois do connection.connect(...)
-module.exports = connection;</code></pre>
+        <p>Com <code>database.js</code> já exportando a <code>connection</code> (Slide 15), o <code>main.js</code> só precisa dar <code>require</code> nela e usá-la dentro de um <code>ipcMain.handle</code> — o primeiro uso real da conexão no app.</p>
 
     <div class="file-label">main.js</div>
     <pre style="margin-top:0;"><code class="language-javascript">const { app, BrowserWindow, ipcMain } = require('electron');
@@ -739,46 +723,16 @@ ipcMain.handle('db:status', async () =&gt; {
     });
   });
 });</code></pre>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 21</div>
-        <h1>Uma Consulta de Negócio no Lugar Certo</h1>
+        <div class="slide-number">Slide 20</div>
+        <h1>preload.js: Expondo o Método pro Renderer</h1>
         
-        
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-layer-group"></i> Por que aqui, e não no database.js?
-      </h3>
-      <p>O <code>database.js</code> só abre a porta (cria e exporta a <code>connection</code>) — quem decide <strong>o que perguntar</strong> ao banco é quem está usando essa porta. Por isso a consulta <code>SELECT * FROM produtos</code> mora dentro de um <code>ipcMain.handle</code>, no <strong>main.js</strong>, junto do <code>db:status</code> que você já tem, reaproveitando a mesma <code>connection</code> importada.</p>
-      
-    </div>
-
-    <div class="file-label">main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// mais um handle, junto do 'db:status' que já existe
-ipcMain.handle('listar-produtos', async () =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    connection.query('SELECT * FROM produtos', (erro, resultados) =&gt; {
-      if (erro) {
-        reject(erro);
-        return;
-      }
-      resolve(resultados);
-    });
-  });
-});</code></pre>
-<p>Mostrar essa lista completa numa tabela na tela é exatamente o assunto da <strong>Aula 3 (Read)</strong>. Por enquanto, fica a regra: <strong>quem faz a pergunta ao banco é quem precisa da resposta</strong> — nunca o módulo que só entrega a conexão.</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 22</div>
-        <h1>Do Preload ao Renderer: Mostrando o Status na Tela</h1>
-        
-        <p>Faltam as duas últimas pontes do fluxo (Aulas 8 e 9 do semestre passado): o <code>preload.js</code> expõe uma função pro Renderer chamar, e o Renderer mostra o resultado na tela.</p>
+        <p>Primeira ponte do fluxo: o <code>preload.js</code> é o único arquivo que enxerga tanto o Main quanto o Renderer. Ele usa <code>contextBridge</code> pra expor, com segurança, uma função que o Renderer vai poder chamar.</p>
 
     <div class="file-label">preload.js</div>
     <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
@@ -786,6 +740,19 @@ ipcMain.handle('listar-produtos', async () =&gt; {
 contextBridge.exposeInMainWorld('api', {
   verificarConexaoBanco: () =&gt; ipcRenderer.invoke('db:status')
 });</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 21</div>
+        <h1>Renderer: Chamando a Função e Mostrando na Tela</h1>
+        
+        <p>No HTML da interface, precisamos de um elemento pra mostrar o resultado — um <code>&lt;div&gt;</code> com um <code>id</code> que o JavaScript consiga encontrar.</p>
+
+    <div class="file-label">index.html</div>
+    <pre style="margin-top:0;"><code class="language-html">&lt;div id=&quot;status-banco&quot;&gt;Verificando conexão...&lt;/div&gt;</code></pre>
 
     <div class="file-label">renderer.js</div>
     <pre style="margin-top:0;"><code class="language-javascript">const verificarBanco = async () =&gt; {
@@ -800,11 +767,71 @@ verificarBanco();</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-route"></i> O caminho completo, de ponta a ponta
+        <i class="fa-solid fa-crosshairs"></i> Repara na conexão
       </h3>
-      <p><code>database.js</code> cria e exporta a conexão → <code>main.js</code> usa essa conexão dentro de um <code>ipcMain.handle('db:status')</code> → <code>preload.js</code> expõe essa função pro Renderer → <code>renderer.js</code> chama e mostra o resultado na tela. É exatamente isso que o exercício de hoje pede.</p>
+      <p>O <code>#status-banco</code> do <code>querySelector</code> é exatamente o <code>id</code> desse <code>&lt;div&gt;</code> do HTML — é assim que o JavaScript acha o elemento certo pra atualizar.</p>
       
     </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 22</div>
+        <h1>O Handle: Mora no main.js, Usa a Conexão do database.js</h1>
+        
+        <p>Quando o Renderer chama <code>invoke('db:status')</code>, alguém do lado do Main precisa estar escutando — esse alguém é o <code>ipcMain.handle</code>. Ele sempre mora no <strong>main.js</strong> (nunca no preload.js, nunca no database.js), porque é lá que o Electron registra os handlers de IPC.</p>
+
+    <div class="file-label">main.js</div>
+    <pre style="margin-top:0;"><code class="language-javascript">const connection = require('./database.js');
+
+ipcMain.handle('db:status', async () =&gt; {
+  return new Promise((resolve) =&gt; {
+    connection.ping((erro) =&gt; {
+      resolve({ conectado: !erro });
+    });
+  });
+});</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-link"></i> Quem faz o trabalho pesado
+      </h3>
+      <p>Dentro do handle, quem realmente conversa com o banco é a <code>connection</code> importada do <code>database.js</code> — o handle só recebe o pedido, pergunta pra conexão (<code>connection.ping</code>), e devolve a resposta pro Renderer.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 23</div>
+        <h1>O Caminho Completo: Do Clique ao Banco e de Volta</h1>
+        
+        <div class="bloco-diagrama" id="mmd0qimc">
+    <div class="bloco-diagrama-titulo">Juntando todas as peças</div>
+    <div class="mermaid">sequenceDiagram
+  participant HTML as Elemento HTML
+  participant R as renderer.js
+  participant P as preload.js
+  participant M as main.js (handle)
+  participant DB as database.js
+  participant SQL as MySQL
+
+  R-&gt;&gt;P: window.api.verificarConexaoBanco()
+  P-&gt;&gt;M: ipcRenderer.invoke('db:status')
+  M-&gt;&gt;DB: connection.ping(...)
+  DB-&gt;&gt;SQL: verifica a conexao
+  SQL--&gt;&gt;DB: resposta
+  DB--&gt;&gt;M: conectado true ou false
+  M--&gt;&gt;P: resolve(resultado)
+  P--&gt;&gt;R: Promise resolvida
+  R-&gt;&gt;HTML: atualiza o texto do #status-banco</div>
+    <div class="bloco-diagrama-legenda">Ida: Renderer -> preload -> main (handle) -> database.js -> MySQL. Volta: exatamente o caminho inverso, até o texto do elemento HTML #status-banco mudar na tela.</div>
+  </div>
+        
       </div>
     </div>
 
@@ -818,7 +845,7 @@ verificarBanco();</code></pre>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 23</div>
+        <div class="slide-number">Slide 24</div>
         <h1>Protegendo as Credenciais</h1>
         
         
@@ -832,17 +859,18 @@ verificarBanco();</code></pre>
 
     <div class="file-label">.env</div>
     <pre style="margin-top:0;"><code class="language-bash">DB_HOST=143.106.241.4
-DB_PORT=1609
+DB_PORT=3306
 DB_USER=cl123456
-DB_PASSWORD=cl05032004
+DB_PASSWORD=cl*05032004
 DB_NAME=nome_do_seu_banco</code></pre>
 <p>Aprofundaremos segurança de aplicações Electron (CSP, XSS) na Aula 9.</p>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 24</div>
+        <div class="slide-number">Slide 25</div>
         <h1>O Que Vem Por Aí</h1>
         
         <div class="bloco-tabela">
@@ -850,15 +878,16 @@ DB_NAME=nome_do_seu_banco</code></pre>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Aula</th><th>O que faremos</th></tr></thead><tbody><tr><td>2</td><td>Create — inserir dados via formulário</td></tr><tr><td>3</td><td>Read — listar dados numa tabela HTML</td></tr><tr><td>4</td><td>Update — editar registros existentes</td></tr><tr><td>5</td><td>Delete — remover com confirmação</td></tr><tr><td>6</td><td>Avaliação 1 — tudo isso junto</td></tr></tbody></table></div>
     <div class="bloco-tabela-legenda">Hoje montamos a base; as próximas 4 aulas constroem o CRUD completo em cima dela.</div>
   </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 25</div>
+        <div class="slide-number">Slide 26</div>
         <h1>Resumo Visual da Aula</h1>
         
-        <div class="bloco-diagrama" id="mmd5okvz">
+        <div class="bloco-diagrama" id="mmd8w4r9">
     <div class="bloco-diagrama-titulo">Mapa da Aula 1</div>
     <div class="mermaid">%%{init: {'themeVariables': {
   'git0': '#FF6500', 'gitBranchLabel0': '#ffffff',
@@ -884,12 +913,13 @@ mindmap
       Query de negócio no Main</div>
     
   </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 26</div>
+        <div class="slide-number">Slide 27</div>
         <h1>Projeto Prático: Gerenciador de Peças 3D — Parte 1</h1>
         
         
@@ -927,6 +957,7 @@ CREATE TABLE IF NOT EXISTS peca_impressa (
       <p>Hoje vocês criam as tabelas e montam a interface <strong>visual</strong>. Ligar tudo ao banco de verdade (salvar, listar, editar, remover) é o que vamos construir juntos nas Aulas 2 a 5.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -940,6 +971,7 @@ CREATE TABLE IF NOT EXISTS peca_impressa (
     <div class="quest-list">
       <ol><li>Crie a estrutura de pastas do projeto (main/, renderer/, preload.js), igual à Aula 10 do semestre passado.</li><li>Rode o script SQL acima no banco do laboratório pra criar as tabelas <code>insumo</code> e <code>peca_impressa</code>.</li><li>Monte o menu principal do app (Aula 14 do semestre passado) com pelo menos duas opções: "Insumos" e "Peças Impressas".</li><li>Crie as janelas (ou seções) e os formulários de cadastro: um pra Insumo (tipo, nome, valor, data de aquisição) e outro pra Peça Impressa (título, cor, peso, quantidade de material, tempo de impressão), usando Bootstrap pro layout.</li><li>Se usar IA pra gerar HTML/CSS/JS da interface, mantenha as regras combinadas no 1º semestre: entenda e saiba explicar o código gerado, e garanta que a arquitetura Main/Renderer/IPC/contextBridge seja respeitada — IA é apoio, não substitui o entendimento.</li><li>Guardem esse esqueleto — vamos ligar tudo ao banco de verdade nas próximas aulas: cadastrar (Aula 2), listar (Aula 3), editar (Aula 4) e remover (Aula 5).</li></ol>
     </div>
+        
       </div>
     </div></div>
 <script src="../libs/prism/prism.min.js"></script>
@@ -998,6 +1030,20 @@ document.addEventListener('keydown',e=>{
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
 });
 showSlide(0);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);
