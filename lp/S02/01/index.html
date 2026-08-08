@@ -30,6 +30,13 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
 .slide.topic h1{color:#fff;font-size:3.5rem;}
 .slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
 .slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -87,26 +94,32 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.9rem;text-align:center;white-space:nowrap;}
 .depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:1rem;border-top:1px solid #1e3a5f;min-height:24px;}
 .depurador-bloco .dbg-output:empty{display:none;}
+/* .slide has overflow:hidden and a fixed viewport height, so any block below
+   (diagrama/animacao/grafico) whose native content size is unpredictable at
+   authoring time (e.g. a tall Mermaid flowchart) gets max-height + overflow:auto
+   as a safety net -- it scrolls internally instead of silently clipping past
+   the bottom of the slide. */
 .bloco-imagem{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
 .bloco-imagem img{width:100%;max-height:340px;object-fit:contain;border-radius:12px;display:block;}
 .bloco-imagem figcaption{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
 .bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;align-self:flex-start;}
 .bloco-diagrama{margin:12px 0;}
 .bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow-x:auto;text-align:center;}
+.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);}
-.bloco-animacao canvas{display:block;max-width:100%;border-radius:12px;}
+.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
+.bloco-animacao canvas{display:block;max-width:100%;max-height:min(960px,65vh);border-radius:12px;}
 .bloco-animacao .bloco-animacao-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-grafico{margin:12px 0;}
 .bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);}
+.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);overflow:auto;}
 .bloco-grafico .bloco-grafico-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao-gsap{margin:12px 0;}
 .bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
-.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;}
+.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;max-height:min(960px,65vh);}
 .bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-tabela{margin:12px 0;}
 .bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
@@ -198,6 +211,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         </div>
     </div>
   </div>
+        
       </div>
     </div>
 
@@ -224,6 +238,7 @@ printf(&quot;Idade: %d anos\n&quot;, idade);
 printf(&quot;Altura: %.2f m\n&quot;, altura);
 printf(&quot;Inicial: %c\n&quot;, inicial);</code></pre>
 <p>Relembrando: <code>int</code> guarda números inteiros, <code>float</code> guarda números com casas decimais e <code>char</code> guarda um único caractere. Cada tipo ocupa um espaço diferente na memória e usa um especificador de formato diferente no <code>printf</code> (<code>%d</code>, <code>%f</code>, <code>%c</code>).</p>
+        
       </div>
     </div>
 
@@ -248,9 +263,10 @@ printf(&quot;Media: %d\n&quot;, (nota1 + nota2) / 2);</code></pre>
       <h3>
         <i class="fa-solid fa-circle-info"></i> Não esqueça do &
       </h3>
-      <p>O <code>&</code> antes da variável no <code>scanf</code> diz pro programa <strong>onde na memória</strong> guardar o valor digitado. Esquecer o <code>&</code> é um dos erros mais comuns em C.</p>
+      <p>O <code>&amp;</code> antes da variável no <code>scanf</code> diz pro programa <strong>onde na memória</strong> guardar o valor digitado. Esquecer o <code>&amp;</code> é um dos erros mais comuns em C.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -269,7 +285,8 @@ printf(&quot;%d\n&quot;, a &gt; b);   // relacional: 1 (verdadeiro)
 if (a &gt; b &amp;&amp; b &gt; 0) {
     printf(&quot;a eh maior que b, e b eh positivo\n&quot;);
 }</code></pre>
-<p>O <code>%</code> devolve o <strong>resto</strong> da divisão inteira — muito usado pra saber se um número é par ou ímpar. Operadores relacionais (<code>></code>, <code><</code>, <code>==</code>...) resultam em verdadeiro ou falso, e o <code>&&</code> combina duas condições: só é verdadeiro se <strong>as duas</strong> forem verdadeiras.</p>
+<p>O <code>%</code> devolve o <strong>resto</strong> da divisão inteira — muito usado pra saber se um número é par ou ímpar. Operadores relacionais (<code>&gt;</code>, <code>&lt;</code>, <code>==</code>...) resultam em verdadeiro ou falso, e o <code>&amp;&amp;</code> combina duas condições: só é verdadeiro se <strong>as duas</strong> forem verdadeiras.</p>
+        
       </div>
     </div>
 
@@ -308,6 +325,7 @@ switch (opcao) {
       <p>Não esqueça o <code>break</code> em cada <code>case</code> — sem ele, a execução <strong>continua</strong> para o próximo case de baixo, mesmo que a condição não bata.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -330,6 +348,7 @@ switch (opcao) {
 
 printf(&quot;Seu apelido de gamer eh: %s\n&quot;, texto);</code></pre>
 <p>Repare no <code>%s</code>, o especificador usado especificamente para strings — diferente do <code>%d</code> (inteiro), <code>%f</code> (decimal) ou <code>%c</code> (um único caractere). O número entre colchetes (<code>[20]</code>) reserva espaço pra até 20 caracteres.</p>
+        
       </div>
     </div>
 
@@ -351,6 +370,7 @@ printf(&quot;Seu apelido de gamer eh: %s\n&quot;, texto);</code></pre>
       <p>C guarda automaticamente um <code>\0</code> (terminador nulo) logo depois do último caractere real. É assim que funções como <code>printf</code> sabem <strong>onde a string termina</strong> — sem ele, o programa continuaria lendo lixo de memória adiante.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -382,6 +402,7 @@ printf(&quot;%d\n&quot;, 5);</code></pre>
       <p>Copiar e colar a mesma linha centenas de vezes é impraticável, difícil de manter e um convite a erros. Precisamos de uma estrutura que <strong>repita um bloco de código automaticamente</strong>.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -390,7 +411,7 @@ printf(&quot;%d\n&quot;, 5);</code></pre>
         <div class="slide-number">Slide 09</div>
         <h1>A Ideia por Trás dos Laços</h1>
         
-        <div class="bloco-diagrama" id="mmdvv218">
+        <div class="bloco-diagrama" id="mmdydyt8">
     <div class="bloco-diagrama-titulo">Estrutura genérica de repetição</div>
     <div class="mermaid">flowchart TD
   A([Início]) --&gt; B{Condição
@@ -402,6 +423,7 @@ bloco de código]
 programa])</div>
     <div class="bloco-diagrama-legenda">Enquanto a condição for verdadeira, o bloco se repete. Quando ela vira falsa, o programa segue em frente.</div>
   </div>
+        
       </div>
     </div>
 
@@ -432,6 +454,7 @@ programa])</div>
       <p>A condição é avaliada <strong>antes</strong> de cada execução do bloco. Se ela já começar falsa, o bloco <strong>nunca</strong> é executado nem uma vez.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -450,7 +473,8 @@ while (aura &lt; 100) {
 }
 
 printf(&quot;Aura maxima atingida: %d\n&quot;, aura);</code></pre>
-<p>Repare nas três partes essenciais: a variável <code>aura</code> <strong>inicializada antes</strong> do laço, a <strong>condição</strong> (<code>aura < 100</code>) que controla quantas vezes ele roda, e o <code>aura = aura + 20</code> que <strong>atualiza</strong> a variável dentro do bloco — sem isso, a condição nunca mudaria e o jogador ficaria preso nesse laço pra sempre.</p>
+<p>Repare nas três partes essenciais: a variável <code>aura</code> <strong>inicializada antes</strong> do laço, a <strong>condição</strong> (<code>aura &lt; 100</code>) que controla quantas vezes ele roda, e o <code>aura = aura + 20</code> que <strong>atualiza</strong> a variável dentro do bloco — sem isso, a condição nunca mudaria e o jogador ficaria preso nesse laço pra sempre.</p>
+        
       </div>
     </div>
 
@@ -459,13 +483,13 @@ printf(&quot;Aura maxima atingida: %d\n&quot;, aura);</code></pre>
         <div class="slide-number">Slide 12</div>
         <h1>Executando Passo a Passo</h1>
         
-        <div class="depurador-bloco" id="dbg4cvn98">
+        <div class="depurador-bloco" id="dbggl8v0t">
   <div class="dbg-titulo">
     <span class="dbg-titulo-text">Teste de mesa do aura.c</span>
-    <button class="dbg-btn" id="dbg4cvn98-prev" onclick="dbgPrev('dbg4cvn98')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbg4cvn98-cur">—</span> / 18</span>
-    <button class="dbg-btn" id="dbg4cvn98-next" onclick="dbgNext('dbg4cvn98')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbg4cvn98')">↺ Reset</button>
+    <button class="dbg-btn" id="dbggl8v0t-prev" onclick="dbgPrev('dbggl8v0t')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbggl8v0t-cur">—</span> / 18</span>
+    <button class="dbg-btn" id="dbggl8v0t-next" onclick="dbgNext('dbggl8v0t')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbggl8v0t')">↺ Reset</button>
   </div>
   <div class="dbg-layout">
     <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">int aura = 0;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">while (aura &lt; 100) {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    printf(&quot;+20 de aura!\n&quot;);</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">    aura = aura + 20;</span></div><div class="dbg-line" data-ln="6"><span class="dbg-linenum">6</span><span class="dbg-codeline">}</span></div><div class="dbg-line" data-ln="7"><span class="dbg-linenum">7</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="8"><span class="dbg-linenum">8</span><span class="dbg-codeline">printf(&quot;Aura maxima atingida: %d\n&quot;, aura);</span></div></div>
@@ -475,9 +499,10 @@ printf(&quot;Aura maxima atingida: %d\n&quot;, aura);</code></pre>
       <tbody class="dbg-vars-body"></tbody></table>
     </div>
   </div>
-  <div class="dbg-output" id="dbg4cvn98-out"></div>
-  <script type="application/json" id="dbg4cvn98-data">[{"linha":1,"vars":{"aura":0},"saida":""},{"linha":3,"vars":{"aura":0},"saida":""},{"linha":4,"vars":{"aura":0},"saida":"+20 de aura!"},{"linha":5,"vars":{"aura":20},"saida":"+20 de aura!"},{"linha":3,"vars":{"aura":20},"saida":"+20 de aura!"},{"linha":4,"vars":{"aura":20},"saida":"+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":40},"saida":"+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":40},"saida":"+20 de aura!\n+20 de aura!"},{"linha":4,"vars":{"aura":40},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":60},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":60},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":4,"vars":{"aura":60},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":80},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":80},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":4,"vars":{"aura":80},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":100},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":100},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":8,"vars":{"aura":100},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\nAura maxima atingida: 100"}]</script>
+  <div class="dbg-output" id="dbggl8v0t-out"></div>
+  <script type="application/json" id="dbggl8v0t-data">[{"linha":1,"vars":{"aura":0},"saida":""},{"linha":3,"vars":{"aura":0},"saida":""},{"linha":4,"vars":{"aura":0},"saida":"+20 de aura!"},{"linha":5,"vars":{"aura":20},"saida":"+20 de aura!"},{"linha":3,"vars":{"aura":20},"saida":"+20 de aura!"},{"linha":4,"vars":{"aura":20},"saida":"+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":40},"saida":"+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":40},"saida":"+20 de aura!\n+20 de aura!"},{"linha":4,"vars":{"aura":40},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":60},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":60},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":4,"vars":{"aura":60},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":80},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":80},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":4,"vars":{"aura":80},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":5,"vars":{"aura":100},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":3,"vars":{"aura":100},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!"},{"linha":8,"vars":{"aura":100},"saida":"+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\n+20 de aura!\nAura maxima atingida: 100"}]</script>
 </div>
+        
       </div>
     </div>
 
@@ -499,9 +524,10 @@ while (aura &lt; 100) {
       <h3>
         <i class="fa-solid fa-triangle-exclamation"></i> Laço Infinito
       </h3>
-      <p>Sem o <code>aura = aura + 20;</code>, a variável <code>aura</code> nunca muda — a condição <code>aura < 100</code> <strong>nunca fica falsa</strong> e o jogador fica preso nesse laço pra sempre, sem nunca terminar de farmar aura. Sempre pergunte: <em>"o que dentro do laço muda a condição?"</em></p>
+      <p>Sem o <code>aura = aura + 20;</code>, a variável <code>aura</code> nunca muda — a condição <code>aura &lt; 100</code> <strong>nunca fica falsa</strong> e o jogador fica preso nesse laço pra sempre, sem nunca terminar de farmar aura. Sempre pergunte: <em>"o que dentro do laço muda a condição?"</em></p>
       
     </div>
+        
       </div>
     </div>
 
@@ -512,7 +538,7 @@ while (aura &lt; 100) {
         
         <div class="bloco-animacao">
     <div class="bloco-animacao-titulo">Simulação do aura.c em execução</div>
-    <div class="p5-canvas-container" id="p5cftnu01n" style="height:440px;"></div>
+    <div class="p5-canvas-container" id="p5c0rv38dt" style="height:440px;"></div>
     <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let aura = 0;
 let phase = 0;
 let t = 0;
@@ -587,9 +613,10 @@ p.draw = function () {
     p.fill(255, 80, 80);
     p.text('aura maxima! condicao falsa -> sai do laco', 415, 55 + outputLines.length * 22 + 12);
   }
-};},'p5cftnu01n');})()</script>
+};},'p5c0rv38dt');})()</script>
     <div class="bloco-animacao-legenda">Cada caixa acende quando aquela parte do código está sendo executada, enquanto o painel escuro simula a saída impressa no terminal — observe a aura subindo de 20 em 20.</div>
   </div>
+        
       </div>
     </div>
 
@@ -601,15 +628,16 @@ p.draw = function () {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide rolavel">
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
         <h1>Praticando com o While</h1>
         
         
     <div class="quest-list">
-      <ol><li>Escreva um programa em C que use <code>while</code> para imprimir os números de 1 a 10.</li><li>Modifique o programa anterior para imprimir apenas os números pares entre 1 e 10.</li><li>Faça uma contagem regressiva de 10 até 1 usando <code>while</code> (dica: agora o incremento precisa diminuir o valor).</li><li>Peça ao usuário um número <code>N</code> com <code>scanf</code> e imprima todos os números de 1 até <code>N</code>.</li><li>Desafio: o trecho <code>int i = 0; while (i < 5) { printf("%d", i); }</code> tem um laço infinito. Identifique o que falta e reescreva o código corrigido.</li></ol>
+      <ol><li>Escreva um programa em C que use <code>while</code> para imprimir os números de 1 a 10.</li><li>Modifique o programa anterior para imprimir apenas os números pares entre 1 e 10.</li><li>Faça uma contagem regressiva de 10 até 1 usando <code>while</code> (dica: agora o incremento precisa diminuir o valor).</li><li>Peça ao usuário um número <code>N</code> com <code>scanf</code> e imprima todos os números de 1 até <code>N</code>.</li><li>Desafio: o trecho <code>int i = 0; while (i &lt; 5) { printf(&quot;%d&quot;, i); }</code> tem um laço infinito. Identifique o que falta e reescreva o código corrigido.</li><li>Peça um número inteiro <code>N</code> e use <code>while</code> para calcular a soma de todos os números de 1 até <code>N</code>.</li><li>Peça uma quantidade <code>N</code> de notas e, usando <code>while</code> com um acumulador, calcule e imprima a média das notas digitadas.</li><li>Dado um número inteiro positivo, use <code>while</code> para contar quantos dígitos ele tem (dica: vá dividindo o número por 10 até ele chegar a zero).</li><li>Declare uma string com seu apelido de gamer e, usando <code>while</code>, percorra caractere por caractere até encontrar o <code>\0</code>, contando quantos caracteres ela tem — sem usar nenhuma função pronta de string.</li><li>Usando a mesma ideia do exercício anterior, percorra uma string com <code>while</code> e conte quantas vezes a letra <code>a</code> aparece nela.</li><li>Peça um número inteiro maior que 1 e use <code>while</code> para verificar se ele é primo (teste se algum número entre 2 e ele-1 divide ele exatamente).</li><li>Construa um mini menu com <code>while</code>: pergunte repetidamente uma opção ao usuário e continue pedindo enquanto a opção digitada não for 0 (sair).</li><li>Peça um número <code>N</code> e use <code>while</code> para calcular o fatorial de <code>N</code> (ex.: fatorial de 5 é 5×4×3×2×1).</li><li>Peça a idade do usuário e, usando <code>while</code> combinado com <code>if</code>, repita a pergunta até que ele digite um valor válido (entre 0 e 120).</li><li>Desafio: escreva um programa que use <code>while</code> para inverter os dígitos de um número inteiro (ex.: 123 vira 321).</li></ol>
     </div>
+        
       </div>
     </div></div>
 <script src="../libs/prism/prism.min.js"></script>
@@ -633,7 +661,14 @@ mermaid.initialize({
     titleColor: '#DB2777',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
-    fontSize: '14px'
+    fontSize: '22px',
+    // cScale1 (mermaid timeline section backgrounds, e.g. every 2nd block) defaults to
+    // secondaryColor = cor_deep, which is already near-black — mermaid then darkens it
+    // further, producing a solid black block that clashes with the palette and, combined
+    // with the equally dark default label color, was unreadable. Feed it the same light
+    // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
+    // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
+    cScale1: '#dfd6ec'
   }
 });
 </script>
@@ -661,6 +696,20 @@ document.addEventListener('keydown',e=>{
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
 });
 showSlide(0);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);
