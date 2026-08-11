@@ -23,13 +23,21 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
 .slide.topic h1{color:#fff;font-size:3.5rem;}
 .slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
 .slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -37,8 +45,8 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
 .file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
@@ -57,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -137,12 +145,74 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
 .bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
 .bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
-.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}</style>
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Banco de Dados</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Banco de Dados</button>
 </div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Normalização de Dados</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate"></i><span>Revisão do Semestre 1</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Entidades, Atributos e Chaves</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Cardinalidade 1:1</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Cardinalidade 1:N</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Cardinalidade N:N</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Da Modelagem à Normalização</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Por Que Normalizar?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>O Problema: Uma Tabela "Larga" Demais</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>O Que Essa Tabela Deveria Ser</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Vendo a Anomalia Acontecer</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>As Três Anomalias</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Primeira Forma Normal (1FN)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>A Regra da 1FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Exemplo: Antes da 1FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Exemplo: Depois da 1FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Checklist: Como Aplicar a 1FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Exemplo Extra 1FN #1: O Problema</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Exemplo Extra 1FN #1: Aplicando o Checklist</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>Exemplo Extra 1FN #2: O Problema</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>Exemplo Extra 1FN #2: Aplicando o Checklist</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><i class="fa-solid fa-link"></i><span>Segunda Forma Normal (2FN)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Slide 19</span><span>Pré-Requisito e Regra da 2FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><span class="agenda-side-label">Slide 20</span><span>O Problema: Dependência Parcial</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Slide 21</span><span>A Solução: Separar as Dependências</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="25" onclick="showSlide(25);closeAgendaSidebar();"><span class="agenda-side-label">Slide 22</span><span>Checklist: Como Aplicar a 2FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="26" onclick="showSlide(26);closeAgendaSidebar();"><span class="agenda-side-label">Slide 23</span><span>Exemplo Extra 2FN #1: O Problema</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="27" onclick="showSlide(27);closeAgendaSidebar();"><span class="agenda-side-label">Slide 24</span><span>Exemplo Extra 2FN #1: Aplicando o Checklist</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="28" onclick="showSlide(28);closeAgendaSidebar();"><span class="agenda-side-label">Slide 25</span><span>Exemplo Extra 2FN #2: O Problema</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="29" onclick="showSlide(29);closeAgendaSidebar();"><span class="agenda-side-label">Slide 26</span><span>Exemplo Extra 2FN #2: Aplicando o Checklist</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="30" onclick="showSlide(30);closeAgendaSidebar();"><span class="agenda-side-label">Slide 27</span><span>O Caminho da Normalização</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="31" onclick="showSlide(31);closeAgendaSidebar();"><span class="agenda-side-label">Slide 28</span><span>Resumo Visual da Aula</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="32" onclick="showSlide(32);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Prática de Normalização</span></button></div>
+</nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
@@ -197,6 +267,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         </div>
     </div>
   </div>
+        
       </div>
     </div>
 
@@ -224,9 +295,10 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <h3>
         <i class="fa-solid fa-circle-info"></i> Lembrando os papéis
       </h3>
-      <p><code>matricula<em>id</code> identifica cada aluno de forma única (<strong>PK</strong>). <code>email</code> não pode se repetir entre alunos (<strong>chave única</strong>). <code>curso</em>id</code> aponta para a tabela <code>CURSO</code> (<strong>FK</strong>) — e é aí que entra a cardinalidade.</p>
+      <p><code>matricula_id</code> identifica cada aluno de forma única (<strong>PK</strong>). <code>email</code> não pode se repetir entre alunos (<strong>chave única</strong>). <code>curso_id</code> aponta para a tabela <code>CURSO</code> (<strong>FK</strong>) — e é aí que entra a cardinalidade.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -236,7 +308,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Cardinalidade 1:1</h1>
         
         <p>Cada ocorrência de uma entidade se relaciona com <strong>no máximo uma</strong> ocorrência da outra — e vice-versa.</p>
-<figure class="bloco-imagem" id="imgqc6rm">
+<figure class="bloco-imagem" id="imgaswcx">
     <div class="bloco-imagem-titulo">Pessoa e Passaporte</div>
     <img src="img/der-cardinalidade-1-1.svg" alt="DER mostrando PESSOA relacionada a PASSAPORTE através do relacionamento possui, com cardinalidade (0,1) do lado de PESSOA e (1,1) do lado de PASSAPORTE" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -250,6 +322,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Uma pessoa tem um único passaporte, e um passaporte pertence a uma única pessoa. A FK pode ficar em qualquer um dos dois lados — normalmente no lado que é opcional (nem toda pessoa tem passaporte).</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -259,7 +332,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Cardinalidade 1:N</h1>
         
         <p>Cada ocorrência de uma entidade pode se relacionar com <strong>várias</strong> ocorrências da outra, mas cada ocorrência da segunda se relaciona com <strong>apenas uma</strong> da primeira.</p>
-<figure class="bloco-imagem" id="imgjbyn2">
+<figure class="bloco-imagem" id="imgxm4rp">
     <div class="bloco-imagem-titulo">Curso e Aluno</div>
     <img src="img/der-cardinalidade-1-n.svg" alt="DER mostrando CURSO relacionado a ALUNO através do relacionamento matricula, com cardinalidade (0,N) do lado de CURSO e (1,1) do lado de ALUNO" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -273,6 +346,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Um curso tem vários alunos, mas cada aluno pertence a um único curso. A chave estrangeira (<code>curso_id</code>) fica do lado "muitos" — na tabela <code>ALUNO</code>.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -282,7 +356,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Cardinalidade N:N</h1>
         
         <p>Cada ocorrência de uma entidade pode se relacionar com <strong>várias</strong> ocorrências da outra, e vice-versa.</p>
-<figure class="bloco-imagem" id="imgydtmb">
+<figure class="bloco-imagem" id="imggdf3q">
     <div class="bloco-imagem-titulo">Aluno e Disciplina</div>
     <img src="img/der-cardinalidade-n-n.svg" alt="DER mostrando ALUNO relacionado a DISCIPLINA através do relacionamento cursa, com cardinalidade (0,N) dos dois lados" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -296,6 +370,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Um aluno cursa várias disciplinas, e uma disciplina tem vários alunos. Isso <strong>não cabe numa FK direta</strong> — precisa de uma tabela associativa (ex: <code>MATRICULA_DISCIPLINA</code>) com chave composta. Guarde essa ideia: ela vai voltar quando falarmos de 2FN.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -320,6 +395,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Modelar bem as entidades e cardinalidades não garante que as tabelas guardem dados sem repetição. É exatamente esse problema que a normalização resolve — e vamos ver isso a partir de agora.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -350,6 +426,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>"Ana Souza" e "Análise e Desenvolvimento" aparecem repetidos. Se o nome do curso mudar, precisa mudar em todas as linhas.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -359,7 +436,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>O Que Essa Tabela Deveria Ser</h1>
         
         <p>A tabela anterior esconde, na verdade, <strong>quatro entidades diferentes</strong> espremidas em uma só — exatamente as que revisamos no início da aula:</p>
-<figure class="bloco-imagem" id="imgj5b2r">
+<figure class="bloco-imagem" id="imgrshqb">
     <div class="bloco-imagem-titulo">As entidades reais por trás da tabela larga</div>
     <img src="img/der-entidades-tabela-larga.svg" alt="DER com quatro entidades: CURSO ligado a ALUNO por pertence (0,N)-(1,1), ALUNO ligado a DISCIPLINA por cursa (0,N)-(0,N), e DISCIPLINA ligado a PROFESSOR por leciona (1,1)-(0,N)" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -373,6 +450,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Quando uma tabela mistura entidades com cardinalidades diferentes numa só estrutura, a redundância é inevitável. Normalizar é devolver cada entidade à sua própria tabela.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -384,7 +462,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <p>Assista: o professor renomeia o curso de "ADS" para o nome completo. Mas ele só tem acesso pra editar <strong>uma linha por vez</strong>.</p>
 <div class="bloco-animacao">
     <div class="bloco-animacao-titulo">Anomalia de atualização em ação</div>
-    <div class="p5-canvas-container" id="p5c2lbp3oh" style="height:400px;"></div>
+    <div class="p5-canvas-container" id="p5c42pqzr6" style="height:400px;"></div>
     <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let ROWS = ["Ana Souza", "Bruno Lima", "Carla Dias", "Diego Prado"];
 let CURSO_ORIGINAL = "ADS";
 let CURSO_NOVO = "Análise e Desenvolvimento de Sistemas";
@@ -459,7 +537,7 @@ p.draw = function () {
       p.text("desatualizado", 650, y + (ROW_H - 15) / 2);
     }
   }
-};},'p5c2lbp3oh');})()</script>
+};},'p5c42pqzr6');})()</script>
     
   </div>
 
@@ -470,6 +548,7 @@ p.draw = function () {
       <p>Trocar o nome do curso em uma linha não troca nas outras — alguem precisa lembrar de editar todas, manualmente. Esquecer uma gera dado inconsistente na hora.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -504,6 +583,7 @@ p.draw = function () {
         </div>
     </div>
 <p>A <strong>normalização</strong> é o processo de reorganizar as tabelas em etapas — as <em>formas normais</em> — para eliminar essas anomalias.</p>
+        
       </div>
     </div>
 
@@ -537,6 +617,7 @@ p.draw = function () {
       <ul><li>Cada célula guarda um único valor atômico — nada de listas dentro de uma coluna</li><li>Não existem grupos de colunas repetidas (ex: telefone1, telefone2, telefone3)</li><li>Cada linha é única, identificada por uma chave primária</li></ul>
     </div>
 <p>É o requisito mínimo para uma tabela ser considerada parte do <strong>modelo relacional</strong> — sem ele, nem faz sentido falar em 2FN ou 3FN.</p>
+        
       </div>
     </div>
 
@@ -559,6 +640,7 @@ p.draw = function () {
       <p>A coluna <code>telefones</code> guarda mais de um valor — não é atômica. Buscar "quem tem o telefone 1133330000" fica muito difícil.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -578,6 +660,7 @@ p.draw = function () {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>cliente_id</th><th>telefone</th></tr></thead><tbody><tr><td>1</td><td>11999990000</td></tr><tr><td>1</td><td>1133330000</td></tr><tr><td>2</td><td>11988887777</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -587,7 +670,7 @@ p.draw = function () {
         <h1>Checklist: Como Aplicar a 1FN</h1>
         
         <p>A regra formal é bonita, mas na hora de corrigir uma tabela de verdade você segue um roteiro mecânico. Guarde este fluxo:</p>
-<div class="bloco-diagrama" id="mmdpmqj8">
+<div class="bloco-diagrama" id="mmdqgg63">
     <div class="bloco-diagrama-titulo">Checklist da 1FN</div>
     <div class="mermaid">flowchart TD
     A["Alguma célula guarda mais de um valor?"] --&gt;|Sim| B["Crie uma tabela nova: uma linha para cada valor, ligada pela chave original"]
@@ -599,6 +682,7 @@ p.draw = function () {
     E --&gt; F</div>
     
   </div>
+        
       </div>
     </div>
 
@@ -621,6 +705,7 @@ p.draw = function () {
       <p>A coluna <code>categorias</code> guarda mais de um valor na mesma célula — não é atômica. Buscar todos os produtos da categoria Áudio vira um problema de texto, não de banco de dados.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -640,6 +725,7 @@ p.draw = function () {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>produto_id</th><th>categoria</th></tr></thead><tbody><tr><td>1</td><td>Eletrônicos</td></tr><tr><td>1</td><td>Informática</td></tr><tr><td>2</td><td>Eletrônicos</td></tr><tr><td>2</td><td>Áudio</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -662,6 +748,7 @@ p.draw = function () {
       <p><code>nota1</code>, <code>nota2</code> e <code>nota3</code> são um grupo de colunas repetidas. E se houver uma 4ª avaliação? Não tem onde guardar sem alterar a estrutura da tabela.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -681,6 +768,7 @@ p.draw = function () {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>numero_avaliacao</th><th>valor</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>7.5</td></tr><tr><td>1</td><td>2</td><td>8.0</td></tr><tr><td>1</td><td>3</td><td>6.5</td></tr><tr><td>2</td><td>1</td><td>8.5</td></tr><tr><td>2</td><td>2</td><td>9.0</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -713,6 +801,7 @@ p.draw = function () {
       <p>Todo atributo que não faz parte da chave deve depender da chave primária <strong>inteira</strong> — não apenas de uma parte dela. Depender só de uma parte é chamado de <strong>dependência parcial</strong>.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -721,7 +810,7 @@ p.draw = function () {
         <div class="slide-number">Slide 20</div>
         <h1>O Problema: Dependência Parcial</h1>
         
-        <p>Uma tabela de itens de pedido, com chave composta <code>(pedido<em>id, produto</em>id)</code>:</p>
+        <p>Uma tabela de itens de pedido, com chave composta <code>(pedido_id, produto_id)</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">pedido_item (fora da 2FN)</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>pedido_id</th><th>produto_id</th><th>quantidade</th><th>nome_produto</th><th>preco_produto</th></tr></thead><tbody><tr><td>101</td><td>P01</td><td>2</td><td>Teclado Mecânico</td><td>250.00</td></tr><tr><td>102</td><td>P01</td><td>1</td><td>Teclado Mecânico</td><td>250.00</td></tr><tr><td>102</td><td>P02</td><td>3</td><td>Mouse Gamer</td><td>120.00</td></tr></tbody></table></div>
@@ -732,9 +821,10 @@ p.draw = function () {
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
-      <p><code>nome<em>produto</code> e <code>preco</em>produto</code> dependem só de <code>produto_id</code>, não da chave composta inteira — por isso se repetem toda vez que o produto aparece em outro pedido.</p>
+      <p><code>nome_produto</code> e <code>preco_produto</code> dependem só de <code>produto_id</code>, não da chave composta inteira — por isso se repetem toda vez que o produto aparece em outro pedido.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -743,7 +833,7 @@ p.draw = function () {
         <div class="slide-number">Slide 21</div>
         <h1>A Solução: Separar as Dependências</h1>
         
-        <p>Tudo que depende só de <code>produto<em>id</code> vai para sua própria tabela; o que depende da chave composta fica em <code>pedido</em>item</code>:</p>
+        <p>Tudo que depende só de <code>produto_id</code> vai para sua própria tabela; o que depende da chave composta fica em <code>pedido_item</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">pedido_item</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>pedido_id</th><th>produto_id</th><th>quantidade</th></tr></thead><tbody><tr><td>101</td><td>P01</td><td>2</td></tr><tr><td>102</td><td>P01</td><td>1</td></tr><tr><td>102</td><td>P02</td><td>3</td></tr></tbody></table></div>
@@ -754,6 +844,7 @@ p.draw = function () {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>produto_id</th><th>nome_produto</th><th>preco_produto</th></tr></thead><tbody><tr><td>P01</td><td>Teclado Mecânico</td><td>250.00</td></tr><tr><td>P02</td><td>Mouse Gamer</td><td>120.00</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -763,7 +854,7 @@ p.draw = function () {
         <h1>Checklist: Como Aplicar a 2FN</h1>
         
         <p>Assim como a 1FN, a 2FN também vira um roteiro mecânico — só que ele só entra em ação quando a chave é composta:</p>
-<div class="bloco-diagrama" id="mmd0xo6j">
+<div class="bloco-diagrama" id="mmd3qy6e">
     <div class="bloco-diagrama-titulo">Checklist da 2FN</div>
     <div class="mermaid">flowchart TD
     A["A chave primária é composta (duas ou mais colunas)?"] --&gt;|Não| B["A tabela já está automaticamente na 2FN"]
@@ -774,6 +865,7 @@ p.draw = function () {
     E --&gt; F</div>
     
   </div>
+        
       </div>
     </div>
 
@@ -782,7 +874,7 @@ p.draw = function () {
         <div class="slide-number">Slide 23</div>
         <h1>Exemplo Extra 2FN #1: O Problema</h1>
         
-        <p>Uma biblioteca registra empréstimos numa tabela com chave composta <code>(livro<em>id, usuario</em>id)</code>:</p>
+        <p>Uma biblioteca registra empréstimos numa tabela com chave composta <code>(livro_id, usuario_id)</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">emprestimo (fora da 2FN)</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>livro_id</th><th>usuario_id</th><th>data_emprestimo</th><th>titulo_livro</th><th>autor_livro</th></tr></thead><tbody><tr><td>L01</td><td>U01</td><td>02/03/2026</td><td>Clean Code</td><td>Robert C. Martin</td></tr><tr><td>L01</td><td>U02</td><td>10/03/2026</td><td>Clean Code</td><td>Robert C. Martin</td></tr><tr><td>L02</td><td>U01</td><td>05/03/2026</td><td>O Programador Pragmático</td><td>Andrew Hunt</td></tr></tbody></table></div>
@@ -793,9 +885,10 @@ p.draw = function () {
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
-      <p><code>titulo<em>livro</code> e <code>autor</em>livro</code> dependem só de <code>livro_id</code> — não da chave composta inteira. Por isso se repetem toda vez que o mesmo livro é emprestado a outro usuário.</p>
+      <p><code>titulo_livro</code> e <code>autor_livro</code> dependem só de <code>livro_id</code> — não da chave composta inteira. Por isso se repetem toda vez que o mesmo livro é emprestado a outro usuário.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -804,7 +897,7 @@ p.draw = function () {
         <div class="slide-number">Slide 24</div>
         <h1>Exemplo Extra 2FN #1: Aplicando o Checklist</h1>
         
-        <p><strong>Passo 2 do checklist:</strong> <code>titulo<em>livro</code> e <code>autor</em>livro</code> dependem só de <code>livro_id</code> (parte da chave) → viram uma tabela <code>livro</code> separada.</p>
+        <p><strong>Passo 2 do checklist:</strong> <code>titulo_livro</code> e <code>autor_livro</code> dependem só de <code>livro_id</code> (parte da chave) → viram uma tabela <code>livro</code> separada.</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">emprestimo</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>livro_id</th><th>usuario_id</th><th>data_emprestimo</th></tr></thead><tbody><tr><td>L01</td><td>U01</td><td>02/03/2026</td></tr><tr><td>L01</td><td>U02</td><td>10/03/2026</td></tr><tr><td>L02</td><td>U01</td><td>05/03/2026</td></tr></tbody></table></div>
@@ -815,6 +908,7 @@ p.draw = function () {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>livro_id</th><th>titulo</th><th>autor</th></tr></thead><tbody><tr><td>L01</td><td>Clean Code</td><td>Robert C. Martin</td></tr><tr><td>L02</td><td>O Programador Pragmático</td><td>Andrew Hunt</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -823,7 +917,7 @@ p.draw = function () {
         <div class="slide-number">Slide 25</div>
         <h1>Exemplo Extra 2FN #2: O Problema</h1>
         
-        <p>Uma empresa aloca funcionários em projetos numa tabela com chave composta <code>(funcionario<em>id, projeto</em>id)</code>:</p>
+        <p>Uma empresa aloca funcionários em projetos numa tabela com chave composta <code>(funcionario_id, projeto_id)</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">alocacao (fora da 2FN)</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>funcionario_id</th><th>projeto_id</th><th>horas_alocadas</th><th>nome_funcionario</th><th>cargo_funcionario</th></tr></thead><tbody><tr><td>F01</td><td>PJ01</td><td>120</td><td>Marina Costa</td><td>Dev Backend</td></tr><tr><td>F01</td><td>PJ02</td><td>40</td><td>Marina Costa</td><td>Dev Backend</td></tr><tr><td>F02</td><td>PJ01</td><td>80</td><td>Yuri Tanaka</td><td>UX Designer</td></tr></tbody></table></div>
@@ -834,9 +928,10 @@ p.draw = function () {
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
-      <p><code>nome<em>funcionario</code> e <code>cargo</em>funcionario</code> dependem só de <code>funcionario_id</code> — repetem toda vez que o mesmo funcionário aparece em outro projeto.</p>
+      <p><code>nome_funcionario</code> e <code>cargo_funcionario</code> dependem só de <code>funcionario_id</code> — repetem toda vez que o mesmo funcionário aparece em outro projeto.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -845,7 +940,7 @@ p.draw = function () {
         <div class="slide-number">Slide 26</div>
         <h1>Exemplo Extra 2FN #2: Aplicando o Checklist</h1>
         
-        <p><strong>Passo 2 do checklist:</strong> <code>nome<em>funcionario</code> e <code>cargo</em>funcionario</code> dependem só de <code>funcionario_id</code> (parte da chave) → viram uma tabela <code>funcionario</code> separada.</p>
+        <p><strong>Passo 2 do checklist:</strong> <code>nome_funcionario</code> e <code>cargo_funcionario</code> dependem só de <code>funcionario_id</code> (parte da chave) → viram uma tabela <code>funcionario</code> separada.</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">alocacao</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>funcionario_id</th><th>projeto_id</th><th>horas_alocadas</th></tr></thead><tbody><tr><td>F01</td><td>PJ01</td><td>120</td></tr><tr><td>F01</td><td>PJ02</td><td>40</td></tr><tr><td>F02</td><td>PJ01</td><td>80</td></tr></tbody></table></div>
@@ -856,6 +951,7 @@ p.draw = function () {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>funcionario_id</th><th>nome</th><th>cargo</th></tr></thead><tbody><tr><td>F01</td><td>Marina Costa</td><td>Dev Backend</td></tr><tr><td>F02</td><td>Yuri Tanaka</td><td>UX Designer</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -864,7 +960,7 @@ p.draw = function () {
         <div class="slide-number">Slide 27</div>
         <h1>O Caminho da Normalização</h1>
         
-        <div class="bloco-diagrama" id="mmd8jp72">
+        <div class="bloco-diagrama" id="mmdck2wt">
     <div class="bloco-diagrama-titulo">Do problema à 2FN</div>
     <div class="mermaid">flowchart LR
     A[Tabela Não Normalizada] --&gt; B[1FN: valores atômicos]
@@ -873,6 +969,7 @@ p.draw = function () {
     
   </div>
 <p>Na <strong>aula 2</strong> vamos completar o processo com a 3FN e resolver casos práticos mais completos.</p>
+        
       </div>
     </div>
 
@@ -881,7 +978,7 @@ p.draw = function () {
         <div class="slide-number">Slide 28</div>
         <h1>Resumo Visual da Aula</h1>
         
-        <div class="bloco-diagrama" id="mmdr6fp0">
+        <div class="bloco-diagrama" id="mmdowl2j">
     
     <div class="mermaid">%%{init: {'themeVariables': {
   'git0': '#DCE8F0', 'gitBranchLabel0': '#101418',
@@ -907,6 +1004,7 @@ mindmap
       SQL (aula 5)</div>
     
   </div>
+        
       </div>
     </div>
 
@@ -932,6 +1030,7 @@ mindmap
     <div class="quest-list">
       <ol><li>Verifique se a tabela respeita a 1FN — se não, corrija primeiro.</li><li>Identifique a chave primária composta e liste os atributos que dependem só de parte dela.</li><li>Separe a tabela em 2FN, criando as tabelas auxiliares necessárias.</li><li>Liste pelo menos uma anomalia (inserção, exclusão ou atualização) que a nova estrutura elimina.</li><li>Guarde o resultado — vamos usá-lo como ponto de partida para aplicar a 3FN na aula 2.</li></ol>
     </div>
+        
       </div>
     </div></div>
 <script src="../libs/prism/prism.min.js"></script>
@@ -967,7 +1066,12 @@ mermaid.initialize({
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::BancodeDados::1';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -975,11 +1079,25 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
 }else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
 const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -988,8 +1106,23 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
   else if(e.key==='ArrowLeft')prevSlide();
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

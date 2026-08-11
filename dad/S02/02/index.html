@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#1E3E62;--color-rust:#FF6500;
-  --color-orange:#FF6500;--color-yellow:#FF6500;--color-deep:#0B192C;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0B192C;
+  --color-navy:#000;--color-blue:#0E7C66;--color-rust:#F2A93B;
+  --color-orange:#F2A93B;--color-yellow:#F2A93B;--color-deep:#0A3B33;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0A1F1B;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -23,7 +23,8 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
@@ -44,8 +45,8 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
 .file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
@@ -64,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -161,28 +162,38 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
 .agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
 .agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
 @media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Desenvolvimento de Aplicações Desktop</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-topic" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><i class="fa-solid fa-plus"></i><span>CRUD: Create (Inserção)</span></button>
-<button class="agenda-side-item" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Agenda de hoje</span></button>
-<button class="agenda-side-item" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Recapitulando rapidinho</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-wand-magic-sparkles"></i><span>O Create entra em cena</span></button>
-<button class="agenda-side-item" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O que é o Create?</span></button>
-<button class="agenda-side-item" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Conhecendo o Projeto Base</span></button>
-<button class="agenda-side-item" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Criando o preload.js</span></button>
-<button class="agenda-side-item" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Ligando o preload à Janela do Insumo</span></button>
-<button class="agenda-side-item" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>main.js: o INSERT de Verdade</span></button>
-<button class="agenda-side-item" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Segurança: Nunca Concatene Valores!</span></button>
-<button class="agenda-side-item" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>frmInsumo.js: Chamando a API de Verdade</span></button>
-<button class="agenda-side-item" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo: o Caminho Completo do Create</span></button>
-<button class="agenda-side-item" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Agora é sua vez: Create na Peça Impressa</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Do TODO no frmInsumo.js ao INSERT de verdade</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Recapitulando rapidinho</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-wand-magic-sparkles"></i><span>O Create entra em cena</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-wand-magic-sparkles"></i><span>O que é o Create?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-folder-tree"></i><span>Conhecendo o projeto base</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Criando o preload.js</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-window-restore"></i><span>Ligando o preload à janela</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>main.js: o INSERT de verdade</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>Destrinchando o código</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>conexao.query: os Três Argumentos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>resolve e reject: Aplicando a Aula 1</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-shield-halved"></i><span>Segurança: nunca concatene valores</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-vial"></i><span>frmInsumo.js: chamando a API</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Resumo do fluxo completo</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-cubes"></i><span>Agora é sua vez: Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
@@ -192,88 +203,88 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plus"></i>
-        <h1>CRUD: Create (Inserção)</h1>
-        <p>Do TODO no frmInsumo.js ao INSERT de verdade</p>
-      </div>
-    </div>
-
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 01</div>
         
-        <h2>Agenda de hoje</h2>
-        <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">O que vamos construir</div>
+        <h2>Do TODO no frmInsumo.js ao INSERT de verdade</h2>
+        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 2</p>
+<div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">CRUD: Create (Inserção)</div>
     <div class="agenda-lista">
       
-        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recapitulando rapidinho</div>
             <div class="agenda-item-texto">conexao.js, formulários e FormData já prontos</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-wand-magic-sparkles"></i> O que é o Create?</div>
             <div class="agenda-item-texto">conceito e fluxo completo</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-folder-tree"></i> Conhecendo o projeto base</div>
             <div class="agenda-item-texto">o que já existe e o que falta</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Criando o preload.js</div>
             <div class="agenda-item-texto">a peça que faltava no projeto</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-window-restore"></i> Ligando o preload à janela</div>
             <div class="agenda-item-texto">webPreferences no main.js</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
           <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> main.js: o INSERT de verdade</div>
             <div class="agenda-item-texto">ipcMain.handle + mysql2</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">07</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> Destrinchando o código</div>
+            <div class="agenda-item-texto">SQL, ?, conexao.query e resolve/reject</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
+          <div class="agenda-numero">08</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-shield-halved"></i> Segurança: nunca concatene valores</div>
             <div class="agenda-item-texto">queries parametrizadas</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
-          <div class="agenda-numero">08</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
+          <div class="agenda-numero">09</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-vial"></i> frmInsumo.js: chamando a API</div>
             <div class="agenda-item-texto">substituindo o TODO</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">09</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
+          <div class="agenda-numero">10</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Resumo do fluxo completo</div>
             <div class="agenda-item-texto">visão de ponta a ponta</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
-          <div class="agenda-numero">10</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+          <div class="agenda-numero">11</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-cubes"></i> Agora é sua vez: Peça Impressa</div>
             <div class="agenda-item-texto">o mesmo padrão em frmPeca</div>
@@ -342,7 +353,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p><strong>Create</strong> = inserir uma linha nova numa tabela do banco (<code>INSERT INTO</code>), a partir de dados que o usuário forneceu na interface (formulário).</p>
       
     </div>
-<div class="bloco-diagrama" id="mmdf8tn8">
+<div class="bloco-diagrama" id="mmd6jifu">
     <div class="bloco-diagrama-titulo">O caminho de um Create</div>
     <div class="mermaid">flowchart TD
   subgraph Parte1["Do formulario ao Main"]
@@ -490,6 +501,126 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 08</div>
         
+        <h2>Anatomia da Query: o SQL e os <code>?</code></h2>
+        <p>Antes de seguir, vale destrinchar esse handler linha a linha. Primeiro, a string SQL em si.</p>
+
+    
+    <pre><code class="language-javascript">const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';</code></pre>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Cada ? tem uma posição fixa</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Posição</th><th>Coluna (na lista após INSERT INTO)</th><th>? correspondente</th></tr></thead><tbody><tr><td>1ª</td><td>tipo</td><td>1º ?</td></tr><tr><td>2ª</td><td>nome</td><td>2º ?</td></tr><tr><td>3ª</td><td>valor</td><td>3º ?</td></tr><tr><td>4ª</td><td>data_aquisicao</td><td>4º ?</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">A ordem das colunas entre parênteses define a ordem que os ? vão ser preenchidos — não é por nome, é por posição.</div>
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-shield-halved"></i> Por que ? em vez do valor direto?
+      </h3>
+      <p>Cada <code>?</code> é um placeholder: na hora de executar, o driver <code>mysql2</code> substitui cada um pelo valor certo do array de forma seguro — o valor nunca é "colado" como texto dentro do comando SQL (é assim que evitamos SQL Injection, como já vimos).</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 09</div>
+        
+        <h2>conexao.query: os Três Argumentos</h2>
+        <p><code>conexao.query(...)</code> é o método do driver <code>mysql2</code> que realmente conversa com o MySQL. Ele sempre recebe os mesmos três argumentos.</p>
+
+    
+    <pre><code class="language-javascript">conexao.query(
+  sql,                                                              // 1. a query com os ?
+  [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao],  // 2. os valores, na mesma ordem
+  (erro, resultado) =&gt; { /* 3. o callback, chamado quando o banco responde */ }
+);</code></pre>
+
+    <div class="grid-3">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-code"></i> 1º: o sql
+          </h3>
+          <p>A string com o comando e os <code>?</code> no lugar dos valores.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-list-ol"></i> 2º: o array
+          </h3>
+          <p>Os valores reais, na MESMA ordem dos <code>?</code> — posição 1 do array vai pro 1º <code>?</code>, e assim por diante.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-reply"></i> 3º: o callback
+          </h3>
+          <p>Uma função <code>(erro, resultado)</code> chamada quando o MySQL termina de processar o INSERT.</p>
+          
+        </div>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> A ordem do array importa
+      </h3>
+      <p>Se você trocar a ordem do array sem trocar a ordem das colunas no SQL, o INSERT não vai dar erro — ele só vai gravar cada valor na coluna errada, silenciosamente. Sempre confira se a ordem do array bate com a ordem das colunas.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 10</div>
+        
+        <h2>resolve e reject: Aplicando a Aula 1</h2>
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-truck-fast"></i> Lembra da entrega por aplicativo?
+      </h3>
+      <p>Na Aula 1, vimos que uma <code>Promise</code> nasce <strong>pendente</strong> e só termina de dois jeitos: <code>resolve(...)</code> ("entregue", deu certo) ou <code>reject(...)</code> ("cancelado", deu errado). É exatamente esse padrão que o handler de hoje usa.</p>
+      
+    </div>
+
+    
+    <pre><code class="language-javascript">return new Promise((resolve, reject) =&gt; {
+  conexao.query(sql, [...], (erro, resultado) =&gt; {
+    if (erro) {
+      reject(erro);          // &quot;cancelado&quot;: algo deu errado
+      return;
+    }
+    resolve({ id: resultado.insertId, ...insumo }); // &quot;entregue&quot;: sucesso
+  });
+});</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-layer-group"></i> O que é esse <code>...insumo</code>?
+      </h3>
+      <p>É o <strong>spread operator</strong> que vocês já viram lá no começo da disciplina — <code>...insumo</code> "espalha" todas as propriedades do objeto <code>insumo</code> (tipo, nome, valor, data_aquisicao) dentro do objeto novo. Ou seja, <code>{ id: resultado.insertId, ...insumo }</code> monta um objeto único com o <code>id</code> que o banco acabou de gerar <strong>mais</strong> todos os campos que já tínhamos, sem precisar listar cada um na mão.</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-question"></i> Por que envolver tudo num new Promise?
+      </h3>
+      <p><code>conexao.query</code> usa o formato antigo de callback do Node.js, que não é "aguardável" com <code>await</code>. Envolvendo ele num <code>new Promise</code>, a gente traduz esse callback pra uma Promise de verdade — é isso que permite o <code>frmInsumo.js</code> fazer <code>await window.api.criarInsumo(dados)</code> mais adiante. <code>resultado.insertId</code> é o id gerado automaticamente pro insumo novo, devolvido junto no resolve.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 11</div>
+        
         <h2>Segurança: Nunca Concatene Valores!</h2>
         
     
@@ -515,7 +646,7 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
+        <div class="slide-number">Slide 12</div>
         
         <h2>frmInsumo.js: Chamando a API de Verdade</h2>
         <p>Voltando pro Renderer: o <code>TODO</code> do <code>frmInsumo.js</code> finalmente vira código de verdade. O resto do arquivo (capturar com FormData) já estava pronto desde a Aula 1.</p>
@@ -550,10 +681,10 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
+        <div class="slide-number">Slide 13</div>
         
         <h2>Resumo: o Caminho Completo do Create</h2>
-        <div class="bloco-diagrama" id="mmdmajyg">
+        <div class="bloco-diagrama" id="mmdt2x2l">
     <div class="bloco-diagrama-titulo">Do clique no botão até a linha gravada no MySQL</div>
     <div class="mermaid">sequenceDiagram
   participant U as Usuário
@@ -614,17 +745,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#ffe3d1',
-    primaryTextColor: '#1E3E62',
-    primaryBorderColor: '#FF6500',
-    lineColor: '#FF6500',
-    secondaryColor: '#0B192C',
+    primaryColor: '#fdf0dc',
+    primaryTextColor: '#0A1F1B',
+    primaryBorderColor: '#F2A93B',
+    lineColor: '#F2A93B',
+    secondaryColor: '#0A3B33',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#ffe3d1',
-    nodeBorder: '#FF6500',
+    mainBkg: '#fdf0dc',
+    nodeBorder: '#F2A93B',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FF6500',
+    titleColor: '#F2A93B',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -634,12 +765,17 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d7dce3'
+    cScale1: '#d4e7e3'
   }
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::2';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -665,6 +801,7 @@ const showSlide = (i) => {
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -675,7 +812,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
   else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
 // Blocks copy/right-click/print only on slides authored with "protegido":true --
 // this is a deterrent (discourages casual copy-paste of an assignment), not real
 // protection: nothing served to a browser can stop an OS-level screenshot, and a

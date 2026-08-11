@@ -23,7 +23,8 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
@@ -44,8 +45,8 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
 .file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
@@ -64,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -144,12 +145,53 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
 .bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
 .bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
-.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}</style>
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Linguagem de Programação</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Linguagem de Programação</button>
 </div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Contadores e Acumuladores</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-hashtag"></i><span>Contadores</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O Que é um Contador?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Contando Ocorrências</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Acumuladores</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O Que é um Acumulador?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Contador vs Acumulador</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Vendo os Dois Crescerem</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-calculator"></i><span>Juntando os Dois</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Executando Passo a Passo</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Praticando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Praticando com Contadores e Acumuladores</span></button></div>
+</nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
@@ -324,7 +366,7 @@ printf(&quot;Soma total: %d\n&quot;, soma);</code></pre>
         
         <div class="bloco-animacao">
     <div class="bloco-animacao-titulo">Contador (passo fixo) vs Acumulador (passo variável)</div>
-    <div class="p5-canvas-container" id="p5cry84nbo" style="height:420px;"></div>
+    <div class="p5-canvas-container" id="p5cy2gdsqg" style="height:420px;"></div>
     <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let step = 0;
 let t = 0;
 let holdFrames = 0;
@@ -386,7 +428,7 @@ p.draw = function () {
   p.fill(30, 30, 30);
   p.textSize(28);
   p.text(acumulador, 570, 355);
-};},'p5cry84nbo');})()</script>
+};},'p5cy2gdsqg');})()</script>
     <div class="bloco-animacao-legenda">O contador sobe sempre do mesmo jeito, em degraus iguais. O acumulador sobe em saltos diferentes, dependendo do valor somado em cada volta.</div>
   </div>
         
@@ -430,13 +472,13 @@ printf(&quot;Media: %d\n&quot;, soma / quantidade);</code></pre>
         <div class="slide-number">Slide 08</div>
         <h1>Executando Passo a Passo</h1>
         
-        <div class="depurador-bloco" id="dbgcak11h">
+        <div class="depurador-bloco" id="dbg54zs4n">
   <div class="dbg-titulo">
     <span class="dbg-titulo-text">Teste de mesa do media.c (notas: 8, 6, 10, 8)</span>
-    <button class="dbg-btn" id="dbgcak11h-prev" onclick="dbgPrev('dbgcak11h')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbgcak11h-cur">—</span> / 23</span>
-    <button class="dbg-btn" id="dbgcak11h-next" onclick="dbgNext('dbgcak11h')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbgcak11h')">↺ Reset</button>
+    <button class="dbg-btn" id="dbg54zs4n-prev" onclick="dbgPrev('dbg54zs4n')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbg54zs4n-cur">—</span> / 23</span>
+    <button class="dbg-btn" id="dbg54zs4n-next" onclick="dbgNext('dbg54zs4n')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbg54zs4n')">↺ Reset</button>
   </div>
   <div class="dbg-layout">
     <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">int quantidade = 4;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline">int contador = 1;</span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">int soma = 0;</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">int nota;</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="6"><span class="dbg-linenum">6</span><span class="dbg-codeline">while (contador &lt;= quantidade) {</span></div><div class="dbg-line" data-ln="7"><span class="dbg-linenum">7</span><span class="dbg-codeline">    printf(&quot;Digite a nota %d: &quot;, contador);</span></div><div class="dbg-line" data-ln="8"><span class="dbg-linenum">8</span><span class="dbg-codeline">    scanf(&quot;%d&quot;, &amp;nota);</span></div><div class="dbg-line" data-ln="9"><span class="dbg-linenum">9</span><span class="dbg-codeline">    soma = soma + nota;</span></div><div class="dbg-line" data-ln="10"><span class="dbg-linenum">10</span><span class="dbg-codeline">    contador++;</span></div><div class="dbg-line" data-ln="11"><span class="dbg-linenum">11</span><span class="dbg-codeline">}</span></div><div class="dbg-line" data-ln="12"><span class="dbg-linenum">12</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="13"><span class="dbg-linenum">13</span><span class="dbg-codeline">printf(&quot;Media: %d\n&quot;, soma / quantidade);</span></div></div>
@@ -446,8 +488,8 @@ printf(&quot;Media: %d\n&quot;, soma / quantidade);</code></pre>
       <tbody class="dbg-vars-body"></tbody></table>
     </div>
   </div>
-  <div class="dbg-output" id="dbgcak11h-out"></div>
-  <script type="application/json" id="dbgcak11h-data">[{"linha":3,"vars":{"contador":1,"soma":0},"saida":""},{"linha":6,"vars":{"contador":1,"soma":0},"saida":""},{"linha":7,"vars":{"contador":1,"soma":0},"saida":"Digite a nota 1: "},{"linha":8,"vars":{"contador":1,"soma":0,"nota":8},"saida":"Digite a nota 1: "},{"linha":9,"vars":{"contador":1,"soma":8,"nota":8},"saida":"Digite a nota 1: "},{"linha":10,"vars":{"contador":2,"soma":8,"nota":8},"saida":"Digite a nota 1: "},{"linha":6,"vars":{"contador":2,"soma":8,"nota":8},"saida":"Digite a nota 1: "},{"linha":7,"vars":{"contador":2,"soma":8,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":8,"vars":{"contador":2,"soma":8,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":9,"vars":{"contador":2,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":10,"vars":{"contador":3,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":6,"vars":{"contador":3,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":7,"vars":{"contador":3,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":8,"vars":{"contador":3,"soma":14,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":9,"vars":{"contador":3,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":10,"vars":{"contador":4,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":6,"vars":{"contador":4,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":7,"vars":{"contador":4,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":8,"vars":{"contador":4,"soma":24,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":9,"vars":{"contador":4,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":10,"vars":{"contador":5,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":6,"vars":{"contador":5,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":13,"vars":{"contador":5,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: \nMedia: 8"}]</script>
+  <div class="dbg-output" id="dbg54zs4n-out"></div>
+  <script type="application/json" id="dbg54zs4n-data">[{"linha":3,"vars":{"contador":1,"soma":0},"saida":""},{"linha":6,"vars":{"contador":1,"soma":0},"saida":""},{"linha":7,"vars":{"contador":1,"soma":0},"saida":"Digite a nota 1: "},{"linha":8,"vars":{"contador":1,"soma":0,"nota":8},"saida":"Digite a nota 1: "},{"linha":9,"vars":{"contador":1,"soma":8,"nota":8},"saida":"Digite a nota 1: "},{"linha":10,"vars":{"contador":2,"soma":8,"nota":8},"saida":"Digite a nota 1: "},{"linha":6,"vars":{"contador":2,"soma":8,"nota":8},"saida":"Digite a nota 1: "},{"linha":7,"vars":{"contador":2,"soma":8,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":8,"vars":{"contador":2,"soma":8,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":9,"vars":{"contador":2,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":10,"vars":{"contador":3,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":6,"vars":{"contador":3,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: "},{"linha":7,"vars":{"contador":3,"soma":14,"nota":6},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":8,"vars":{"contador":3,"soma":14,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":9,"vars":{"contador":3,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":10,"vars":{"contador":4,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":6,"vars":{"contador":4,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: "},{"linha":7,"vars":{"contador":4,"soma":24,"nota":10},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":8,"vars":{"contador":4,"soma":24,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":9,"vars":{"contador":4,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":10,"vars":{"contador":5,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":6,"vars":{"contador":5,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: "},{"linha":13,"vars":{"contador":5,"soma":32,"nota":8},"saida":"Digite a nota 1: \nDigite a nota 2: \nDigite a nota 3: \nDigite a nota 4: \nMedia: 8"}]</script>
 </div>
         
       </div>
@@ -506,7 +548,12 @@ mermaid.initialize({
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::2';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -514,11 +561,25 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
 }else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
 const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -527,8 +588,9 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
   else if(e.key==='ArrowLeft')prevSlide();
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
 // Blocks copy/right-click/print only on slides authored with "protegido":true --
 // this is a deterrent (discourages casual copy-paste of an assignment), not real
 // protection: nothing served to a browser can stop an OS-level screenshot, and a

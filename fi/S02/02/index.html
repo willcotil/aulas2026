@@ -23,7 +23,8 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
@@ -44,8 +45,8 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
 .file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
@@ -64,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -161,33 +162,41 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
 .agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
 .agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
 @media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Fundamentos de Informática</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Fundamentos de Informática</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Git Local: Ciclo de Vida do Arquivo</span></button>
-<button class="agenda-side-item" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que vem por aí</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-folder-plus"></i><span>Começando do Zero</span></button>
-<button class="agenda-side-item" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>git init: criando o repositório</span></button>
-<button class="agenda-side-item" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>.gitignore: nem tudo vira página da linha do tempo</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>Radar de Mudanças</span></button>
-<button class="agenda-side-item" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Onde o diff entra nos três estados</span></button>
-<button class="agenda-side-item" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>git diff na prática</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Múltiplos Arquivos, Um Commit</span></button>
-<button class="agenda-side-item" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>git add: um por um, ou tudo de uma vez</span></button>
-<button class="agenda-side-item" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Simulação: criando um repositório do zero (Parte 1)</span></button>
-<button class="agenda-side-item" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Simulação: criando um repositório do zero (Parte 2)</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-comment-dots"></i><span>Mensagens Que Contam a História Direito</span></button>
-<button class="agenda-side-item" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Mensagem de commit: ajuda ou atrapalha?</span></button>
-<button class="agenda-side-item" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>git log: opções que economizam tela</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Ops, Errei o Commit</span></button>
-<button class="agenda-side-item" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>git commit --amend</span></button>
-<button class="agenda-side-item" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafios</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Git Local: Ciclo de Vida do Arquivo</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que vem por aí</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-folder-plus"></i><span>Começando do Zero</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-folder-plus"></i><span>git init: criando o repositório</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-eye-slash"></i><span>.gitignore: nem tudo vira página</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>Radar de Mudanças</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Onde o diff entra nos três estados</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>git diff na prática</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Múltiplos Arquivos, Um Commit</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>git add: um por um, ou tudo de uma vez</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Simulação: criando um repositório do zero (Parte 1)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Simulação: criando um repositório do zero (Parte 2)</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-comment-dots"></i><span>Mensagens Que Contam a História Direito</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-comment-dots"></i><span>Mensagem de commit: ajuda ou atrapalha?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-list"></i><span>git log: opções que economizam tela</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Ops, Errei o Commit</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>git commit --amend</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafios</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
@@ -285,7 +294,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         
         <h2>git init: criando o repositório</h2>
         <p>Na Aula 1 você já viu commit e add — mas de onde vem o repositório em si? <code>git init</code> transforma uma pasta comum numa pasta que o Git passa a vigiar.</p>
-<div class="bloco-diagrama" id="mmdrjtx9">
+<div class="bloco-diagrama" id="mmdyovwy">
     <div class="bloco-diagrama-titulo">O que git init faz</div>
     <div class="mermaid">flowchart LR
   A["Pasta comum\n(sem controle de versao)"] --&gt;|git init| B["Mesma pasta\n+ pasta oculta .git/"]
@@ -343,7 +352,7 @@ backup/
         
         <h2>Onde o diff entra nos três estados</h2>
         <p>Lembra dos três estados da Aula 1 — modified, staged, committed? O <code>git diff</code> é a lupa que mostra exatamente o que muda entre um estado e outro.</p>
-<div class="bloco-diagrama" id="mmd76mnl">
+<div class="bloco-diagrama" id="mmd99jyv">
     <div class="bloco-diagrama-titulo">git diff nos três estados</div>
     <div class="mermaid">flowchart LR
   WD["Working Directory\n(o que voce edita)"] --&gt;|git add| ST["Staging Area\n(area de stage)"]
@@ -633,7 +642,12 @@ mermaid.initialize({
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::FundamentosdeInformtica::2';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -659,6 +673,7 @@ const showSlide = (i) => {
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -669,7 +684,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
   else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
 // Blocks copy/right-click/print only on slides authored with "protegido":true --
 // this is a deterrent (discourages casual copy-paste of an assignment), not real
 // protection: nothing served to a browser can stop an OS-level screenshot, and a

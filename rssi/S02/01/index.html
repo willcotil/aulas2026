@@ -4,14 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aula 1: Segurança da Informação: Os Pilares CIA</title>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="../libs/fonts/fonts.css">
+<link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
+<link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
+<script src="../libs/chart.min.js"></script>
+<script src="../libs/p5.min.js"></script>
+<script src="../libs/gsap.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
 :root{
   --color-navy:#000;--color-blue:#452E5A;--color-rust:#FF653F;
   --color-orange:#FF653F;--color-yellow:#FF653F;--color-deep:#1E104E;
@@ -24,13 +23,21 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
 .slide.topic h1{color:#fff;font-size:3.5rem;}
 .slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
 .slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -38,10 +45,10 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.05rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:.95rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -58,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -66,8 +73,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
 }
-.depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:.9rem;}
-.depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:.95rem;}
+.depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
+.depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo-text{flex:1;}
 .depurador-bloco .dbg-layout{display:grid;grid-template-columns:1fr 200px;}
 .depurador-bloco .dbg-code-panel{background:#0B192C;padding:14px 10px;overflow-x:auto;}
@@ -76,41 +83,47 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .depurador-bloco .dbg-linenum{color:#555;min-width:24px;text-align:right;user-select:none;flex-shrink:0;}
 .depurador-bloco .dbg-codeline{color:#cdd6f4;}
 .depurador-bloco .dbg-vars-panel{background:#111b2e;padding:12px;border-left:1px solid #1e3a5f;}
-.depurador-bloco .dbg-vars-title{color:#94a3b8;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-.depurador-bloco .dbg-vars-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.depurador-bloco .dbg-vars-title{color:#94a3b8;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.depurador-bloco .dbg-vars-table{width:100%;border-collapse:collapse;font-size:1rem;}
 .depurador-bloco .dbg-vars-table th{color:#64748b;font-weight:600;padding:3px 6px;text-align:left;border-bottom:1px solid #1e3a5f;}
 .depurador-bloco .dbg-vars-table td{color:#e2e8f0;padding:3px 6px;}
 .depurador-bloco .dbg-vars-table tr.changed td{color:var(--color-rust,#f90);}
-.depurador-bloco .dbg-btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.78rem;font-family:inherit;white-space:nowrap;}
+.depurador-bloco .dbg-btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.9rem;font-family:inherit;white-space:nowrap;}
 .depurador-bloco .dbg-btn:hover{background:rgba(255,255,255,.32);}
 .depurador-bloco .dbg-btn:disabled{opacity:.35;cursor:default;}
 .depurador-bloco .dbg-btn.reset{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.2);}
-.depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.78rem;text-align:center;white-space:nowrap;}
-.depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:.82rem;border-top:1px solid #1e3a5f;min-height:24px;}
+.depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.9rem;text-align:center;white-space:nowrap;}
+.depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:1rem;border-top:1px solid #1e3a5f;min-height:24px;}
 .depurador-bloco .dbg-output:empty{display:none;}
+/* .slide has overflow:hidden and a fixed viewport height, so any block below
+   (diagrama/animacao/grafico) whose native content size is unpredictable at
+   authoring time (e.g. a tall Mermaid flowchart) gets max-height + overflow:auto
+   as a safety net -- it scrolls internally instead of silently clipping past
+   the bottom of the slide. */
 .bloco-imagem{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
 .bloco-imagem img{width:100%;max-height:340px;object-fit:contain;border-radius:12px;display:block;}
-.bloco-imagem figcaption{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
-.bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;align-self:flex-start;}
+.bloco-imagem figcaption{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
+.bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;align-self:flex-start;}
 .bloco-diagrama{margin:12px 0;}
-.bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow-x:auto;text-align:center;}
-.bloco-diagrama .bloco-diagrama-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao{margin:12px 0;}
-.bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);}
-.bloco-animacao canvas{display:block;max-width:100%;border-radius:12px;}
-.bloco-animacao .bloco-animacao-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
+.bloco-animacao canvas{display:block;max-width:100%;max-height:min(960px,65vh);border-radius:12px;}
+.bloco-animacao .bloco-animacao-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-grafico{margin:12px 0;}
-.bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);}
-.bloco-grafico .bloco-grafico-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);overflow:auto;}
+.bloco-grafico .bloco-grafico-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao-gsap{margin:12px 0;}
-.bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;}
-.bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;max-height:min(960px,65vh);}
+.bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-tabela{margin:12px 0;}
-.bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
+.bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-tabela .bloco-tabela-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-soft,#e2e8f0);}
 .bloco-tabela table{width:100%;border-collapse:collapse;font-size:1.15rem;}
 .bloco-tabela thead tr{background:var(--color-blue,#1E3E62);color:#fff;}
@@ -118,7 +131,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-tabela tbody tr:nth-child(odd){background:#f8fafc;}
 .bloco-tabela tbody tr:nth-child(even){background:#ffffff;}
 .bloco-tabela tbody td{padding:9px 16px;border-bottom:1px solid var(--border-soft,#e2e8f0);vertical-align:top;line-height:1.5;}
-.bloco-tabela .bloco-tabela-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-tabela .bloco-tabela-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-agenda{margin:16px 0;}
 .bloco-agenda .bloco-agenda-titulo{font-weight:800;color:var(--color-blue);font-size:1.15rem;margin-bottom:20px;}
 .bloco-agenda .agenda-lista{position:relative;}
@@ -129,12 +142,71 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-agenda .agenda-conteudo{padding-top:6px;}
 .bloco-agenda .agenda-item-titulo{font-weight:800;color:var(--color-navy);font-size:1.2rem;display:flex;align-items:center;gap:10px;}
 .bloco-agenda .agenda-item-titulo i{color:var(--color-orange);font-size:1.05rem;}
-.bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}</style>
+.bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
+.bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
+.bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Redes e Sistemas de Segurança de Informação</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Segurança da Informação</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-shield-halved"></i><span>Fundamentos da Segurança da Informação</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que é Segurança da Informação?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Por que a Segurança da Informação Importa?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Conexão com o Semestre Passado</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-circle-nodes"></i><span>A Tríade CIA</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Os 3 Pilares Fundamentais: CIA</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Confidencialidade: Conceito</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Confidencialidade: Como se Protege</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Confidencialidade na Prática</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Integridade: Conceito</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Integridade: Como se Verifica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Verificando a Integridade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Disponibilidade: Conceito</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Disponibilidade: Como se Garante</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Disponibilidade em Números</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><i class="fa-solid fa-fingerprint"></i><span>Além do CIA</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Autenticidade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Resumo: Pilares, Ameaças e Contramedidas</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Ameaça, Vulnerabilidade e Risco</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>Relação entre Ameaça, Vulnerabilidade e Risco</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>Identifique o Pilar Violado</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><i class="fa-solid fa-file-shield"></i><span>Proteção e Governança</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><span class="agenda-side-label">Slide 19</span><span>Boas Práticas Básicas de Proteção</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Slide 20</span><span>Normas e Recomendações de Segurança</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="25" onclick="showSlide(25);closeAgendaSidebar();"><span class="agenda-side-label">Slide 21</span><span>Resumo Visual da Aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="26" onclick="showSlide(26);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios</span></button></div>
+</nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
@@ -204,6 +276,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         </div>
     </div>
   </div>
+        
       </div>
     </div>
 
@@ -253,6 +326,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -294,6 +368,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Em 2023, o custo médio global de um vazamento de dados chegou a <strong>US$ 4,45 milhões</strong> por incidente (IBM Cost of a Data Breach Report). Investir em segurança custa muito menos do que remediar um incidente.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -311,6 +386,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       
     </div>
 <p>Se você lembra do cadeado do navegador (HTTPS), você já tinha visto confidencialidade e autenticidade em ação, só que sem o nome técnico.</p>
+        
       </div>
     </div>
 
@@ -327,7 +403,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 05</div>
         <h1>Os 3 Pilares Fundamentais: CIA</h1>
         
-        <div class="bloco-diagrama" id="mmdlve05">
+        <div class="bloco-diagrama" id="mmdnn6t2">
     <div class="bloco-diagrama-titulo">Modelo CIA (Confidentiality, Integrity, Availability)</div>
     <div class="mermaid">flowchart TD
   CIA[Segurança da Informação] --&gt; C[Confidencialidade]
@@ -338,6 +414,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   D --&gt; D1[Sistema acessível quando necessário]</div>
     <div class="bloco-diagrama-legenda">A tríade CIA é a base de qualquer estratégia de segurança — cada decisão de proteção pode ser mapeada a um (ou mais) desses pilares.</div>
   </div>
+        
       </div>
     </div>
 
@@ -372,6 +449,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -382,7 +460,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         
         <div class="bloco-animacao">
     <div class="bloco-animacao-titulo">A Senha "123456" Cifrada e Entregue com Segurança</div>
-    <div class="p5-canvas-container" id="p5cdeue2om" style="height:220px;"></div>
+    <div class="p5-canvas-container" id="p5cggfywjk" style="height:220px;"></div>
     <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let t = 0;
 let holdFrames = 0;
 const HOLD_AT_END = 45;
@@ -507,7 +585,7 @@ p.draw = function() {
   if (t >= 0.85) {
     drawArrival();
   }
-};},'p5cdeue2om');})()</script>
+};},'p5cggfywjk');})()</script>
     <div class="bloco-animacao-legenda">A senha em texto claro é cifrada caractere por caractere, trancada numa 'caixa' protegida por um cadeado (criptografia) e só então transmitida ao destino — assim a confidencialidade é mantida durante todo o trajeto. (Animação em loop contínuo.)</div>
   </div>
 <div class="bloco-tabela">
@@ -516,6 +594,7 @@ p.draw = function() {
     
   </div>
 <p>Os detalhes de como a criptografia simétrica e assimétrica funcionam por dentro ficam para as <strong>Aulas 6 e 7</strong>.</p>
+        
       </div>
     </div>
 
@@ -524,7 +603,7 @@ p.draw = function() {
         <div class="slide-number">Slide 08</div>
         <h1>Confidencialidade na Prática</h1>
         
-        <div class="bloco-diagrama" id="mmddg22a">
+        <div class="bloco-diagrama" id="mmdngwzx">
     <div class="bloco-diagrama-titulo">Fluxo de Controle de Acesso</div>
     <div class="mermaid">sequenceDiagram
   participant U as Usuário
@@ -538,6 +617,7 @@ p.draw = function() {
   end</div>
     <div class="bloco-diagrama-legenda">O sistema só libera o dado após validar a identidade e a permissão do usuário.</div>
   </div>
+        
       </div>
     </div>
 
@@ -572,6 +652,7 @@ p.draw = function() {
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -606,6 +687,7 @@ p.draw = function() {
         </div>
     </div>
 <p>Vamos detalhar como funcionam hashes e assinaturas digitais na <strong>Aula 7</strong>.</p>
+        
       </div>
     </div>
 
@@ -614,7 +696,7 @@ p.draw = function() {
         <div class="slide-number">Slide 11</div>
         <h1>Verificando a Integridade</h1>
         
-        <div class="bloco-diagrama" id="mmduqdz7">
+        <div class="bloco-diagrama" id="mmdatc71">
     <div class="bloco-diagrama-titulo">Verificação por Hash</div>
     <div class="mermaid">flowchart LR
   A[Arquivo Original] --&gt; H1[Gera Hash A]
@@ -627,6 +709,7 @@ p.draw = function() {
   COMP --&gt;|Não| ALERTA[Violação detectada]</div>
     <div class="bloco-diagrama-legenda">Qualquer alteração no arquivo muda o valor do hash, denunciando a violação.</div>
   </div>
+        
       </div>
     </div>
 
@@ -661,6 +744,7 @@ p.draw = function() {
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -695,6 +779,7 @@ p.draw = function() {
         </div>
     </div>
 <p>Os mecanismos de defesa de perímetro (firewalls, IDS/IPS, VPNs) serão estudados nas <strong>Aulas 8 e 9</strong>; o funcionamento de ataques DDoS, na <strong>Aula 3</strong>.</p>
+        
       </div>
     </div>
 
@@ -714,11 +799,12 @@ p.draw = function() {
 <div class="bloco-grafico">
     <div class="bloco-grafico-titulo">Tempo de Indisponibilidade por Nível de SLA</div>
     <div class="bloco-grafico-wrap" style="position:relative;height:260px;">
-      <canvas id="chrt0fc3x7c"></canvas>
+      <canvas id="chrtu7ttr9m"></canvas>
     </div>
-    <script>(function(){if(typeof Chart==='undefined')return;try{new Chart(document.getElementById('chrt0fc3x7c'),{"type":"bar","data":{"labels":["99%","99.9%","99.99%","99.999%"],"datasets":[{"label":"Downtime (h/ano)","data":[87.6,8.76,0.876,0.0876],"backgroundColor":["#ef4444","#FF653F","#452E5A","#10b981"]}]},"options":{"responsive":true,"maintainAspectRatio":false,"plugins":{"legend":{"display":false}}}});}catch(e){console.warn('Chart.js erro:',e);}})()</script>
+    <script>(function(){if(typeof Chart==='undefined')return;try{new Chart(document.getElementById('chrtu7ttr9m'),{"type":"bar","data":{"labels":["99%","99.9%","99.99%","99.999%"],"datasets":[{"label":"Downtime (h/ano)","data":[87.6,8.76,0.876,0.0876],"backgroundColor":["#ef4444","#FF653F","#452E5A","#10b981"]}]},"options":{"responsive":true,"maintainAspectRatio":false,"plugins":{"legend":{"display":false}}}});}catch(e){console.warn('Chart.js erro:',e);}})()</script>
     <div class="bloco-grafico-legenda">Quanto maior o SLA contratado, menor o tempo de indisponibilidade tolerado por ano — cada 'nove' a mais custa exponencialmente mais caro em redundância.</div>
   </div>
+        
       </div>
     </div>
 
@@ -769,6 +855,7 @@ p.draw = function() {
         </div>
     </div>
 <p>Um e-mail de phishing que finge vir do seu banco é, na essência, um ataque à autenticidade — veremos esse golpe em detalhe na <strong>Aula 2</strong>.</p>
+        
       </div>
     </div>
 
@@ -782,6 +869,7 @@ p.draw = function() {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Pilar</th><th>Protege</th><th>Ameaça típica</th><th>Contramedida</th></tr></thead><tbody><tr><td>Confidencialidade</td><td>Acesso indevido</td><td>Vazamento de dados</td><td>Criptografia</td></tr><tr><td>Integridade</td><td>Alteração indevida</td><td>Adulteração de arquivo</td><td>Hash / assinatura</td></tr><tr><td>Disponibilidade</td><td>Continuidade do acesso</td><td>Ataque DDoS</td><td>Redundância + backup</td></tr><tr><td>Autenticidade</td><td>Identidade da origem</td><td>Spoofing</td><td>Certificados / MFA</td></tr></tbody></table></div>
     <div class="bloco-tabela-legenda">Ataques específicos como DDoS e spoofing serão estudados em detalhe nas Aulas 2 e 3.</div>
   </div>
+        
       </div>
     </div>
 
@@ -798,7 +886,7 @@ p.draw = function() {
         <div class="slide-number">Slide 17</div>
         <h1>Relação entre Ameaça, Vulnerabilidade e Risco</h1>
         
-        <div class="bloco-diagrama" id="mmdtep2q">
+        <div class="bloco-diagrama" id="mmdx1d6m">
     <div class="bloco-diagrama-titulo">Relação entre os Conceitos</div>
     <div class="mermaid">flowchart LR
   AM[Ameaça] --&gt;|explora| VU[Vulnerabilidade]
@@ -815,6 +903,7 @@ p.draw = function() {
       <p><strong>Risco ≈ Ameaça × Vulnerabilidade × Impacto.</strong> Reduzir qualquer um dos três fatores já reduz o risco total — por isso as contramedidas atacam ora a ameaça, ora a vulnerabilidade, ora o impacto.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -828,6 +917,7 @@ p.draw = function() {
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Cenário</th><th>Pilar Violado</th></tr></thead><tbody><tr><td>Ler e-mail sigiloso sem permissão</td><td>Confidencialidade</td></tr><tr><td>Hacker altera planilha financeira</td><td>Integridade</td></tr><tr><td>DDoS derruba o site de vendas</td><td>Disponibilidade</td></tr><tr><td>E-mail falso finge ser do banco</td><td>Autenticidade</td></tr><tr><td>Funcionário entrega a senha por telefone a um golpista</td><td>Confidencialidade</td></tr></tbody></table></div>
     <div class="bloco-tabela-legenda">O último cenário é um exemplo de engenharia social — técnica que será estudada a fundo na Aula 2.</div>
   </div>
+        
       </div>
     </div>
 
@@ -876,6 +966,7 @@ p.draw = function() {
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -903,6 +994,7 @@ p.draw = function() {
         </div>
     </div>
 <p>Seguir normas reduz riscos legais e reforça a confiança de clientes e parceiros. Estudaremos a ISO 27000 em detalhe na Aula 11 e a LGPD na Aula 12.</p>
+        
       </div>
     </div>
 
@@ -911,7 +1003,7 @@ p.draw = function() {
         <div class="slide-number">Slide 21</div>
         <h1>Resumo Visual da Aula</h1>
         
-        <div class="bloco-diagrama" id="mmd848vy">
+        <div class="bloco-diagrama" id="mmdrevnq">
     <div class="bloco-diagrama-titulo">Mapa Mental — Pilares da Segurança</div>
     <div class="mermaid">%%{init: {'themeVariables': {
   'git0': '#FF653F', 'gitBranchLabel0': '#ffffff',
@@ -944,6 +1036,7 @@ mindmap
       Impacto</div>
     
   </div>
+        
       </div>
     </div>
 
@@ -956,12 +1049,13 @@ mindmap
     <div class="quest-list">
       <ol><li>Explique com suas palavras os três pilares da segurança da informação (CIA).</li><li>Dê um exemplo real (notícia ou experiência pessoal) de violação de cada pilar.</li><li>Por que a autenticidade é considerada uma extensão do modelo CIA?</li><li>Qual pilar foi violado no vazamento da Equifax (2017) e no ataque DDoS à Dyn (2016)? Justifique.</li><li>Cite duas contramedidas técnicas e uma organizacional para reduzir riscos de segurança.</li><li>Pesquise: o que a LGPD exige de empresas quanto à confidencialidade e integridade dos dados?</li></ol>
     </div>
+        
       </div>
     </div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="../libs/prism/prism.min.js"></script>
+<script src="../libs/prism/prism-autoloader.min.js"></script>
 <script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+import mermaid from '../libs/mermaid/mermaid.esm.min.mjs';
 mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
@@ -979,12 +1073,24 @@ mermaid.initialize({
     titleColor: '#FF653F',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
-    fontSize: '14px'
+    fontSize: '22px',
+    // cScale1 (mermaid timeline section backgrounds, e.g. every 2nd block) defaults to
+    // secondaryColor = cor_deep, which is already near-black — mermaid then darkens it
+    // further, producing a solid black block that clashes with the palette and, combined
+    // with the equally dark default label color, was unreadable. Feed it the same light
+    // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
+    // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
+    cScale1: '#ded9e1'
   }
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::1';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -992,11 +1098,25 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
 }else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
 const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -1005,8 +1125,23 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
   else if(e.key==='ArrowLeft')prevSlide();
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

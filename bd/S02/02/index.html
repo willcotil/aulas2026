@@ -23,13 +23,21 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
 .slide.topic h1{color:#fff;font-size:3.5rem;}
 .slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
 .slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -37,8 +45,8 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
 .file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
@@ -57,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -137,12 +145,62 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
 .bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
 .bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
-.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}</style>
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Banco de Dados</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Banco de Dados</button>
 </div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>3ª Forma Normal e Casos Práticos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate"></i><span>Relembrando a Aula 1</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Onde Paramos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Terceira Forma Normal (3FN)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>A Ideia por Trás da 3FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Pré-Requisito e Regra da 3FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O Problema: Dependência Transitiva</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>A Solução: Separando o que Depende do Meio</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Checklist: Como Aplicar a 3FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Exemplo Extra 3FN #1: O Problema</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Exemplo Extra 3FN #1: Aplicando o Checklist</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Exemplo Extra 3FN #2: O Problema</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Exemplo Extra 3FN #2: Aplicando o Checklist</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-graduation-cap"></i><span>Caso Prático: Fechando o Ciclo da Matrícula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Relembrando o Desafio da Aula 1</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Até a 2FN: A Tabela de Ligação</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Até a 2FN: Aluno e Disciplina</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Aplicando o Checklist da 3FN</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Decomposição Final (3FN)</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><i class="fa-solid fa-sitemap"></i><span>Resumo Visual: 1FN → 2FN → 3FN</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Prática: Aplique o Checklist da 3FN</span></button></div>
+</nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
@@ -154,10 +212,11 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 01</div>
-        <h1>Normalização de Dados</h1>
+        
         <h2>3ª Forma Normal e Casos Práticos</h2>
-        <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Roteiro da Aula</div>
+        <p>Banco de Dados (BD) — Aula 2</p>
+<div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">Normalização (3FN) e Casos Práticos</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
@@ -197,6 +256,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         </div>
     </div>
   </div>
+        
       </div>
     </div>
 
@@ -239,6 +299,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Mesmo depois da 2FN, um atributo pode depender de OUTRO atributo que também não é chave — e essa redundância escondida é o que a 3FN resolve hoje.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -255,12 +316,11 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 03</div>
         <h1>A Ideia por Trás da 3FN</h1>
         
-        <p>Pensa num jogo online com sistema de ligas: seu <strong>ID de jogador</strong> determina sua <strong>liga</strong> (Bronze, Prata, Ouro...) depois de você farmar pontos a temporada toda. E é a liga — não o seu ID — que determina o <strong>prêmio</strong> de fim de temporada.</p>
-<div class="bloco-diagrama" id="mmdmq2id">
+        <p>Pensa na secretaria da escola: a sua <strong>matrícula</strong> diz qual é a sua <strong>turma</strong> (ex: 2ºB). E é a turma — não você — que define a <strong>sala de aula</strong>. Se a turma 2ºB mudar pra Sala 15, a mudança vale pra turma inteira de uma vez.</p>
+<div class="bloco-diagrama" id="mmdguzps">
     
     <div class="mermaid">flowchart LR
-    A["ID do jogador"] --&gt; B["Liga (Bronze, Prata, Ouro...)"]
-    B --&gt; C["Prêmio de fim de temporada"]</div>
+    A(["Matrícula do aluno"]) --&gt; B(["Turma: 2ºB"]) --&gt; C(["Sala de aula: Sala 12"])</div>
     
   </div>
 
@@ -268,9 +328,10 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <h3>
         <i class="fa-solid fa-route"></i> Isso é uma dependência transitiva
       </h3>
-      <p>O prêmio não depende do seu ID diretamente — depende da liga, que por sua vez depende do ID. Numa tabela, isso é sinal de que falta separar mais uma entidade.</p>
+      <p>A sala não depende do aluno diretamente — depende da turma, que por sua vez depende do aluno. Se uma tabela guardar os três juntos (aluno, turma, sala), a sala fica repetida na linha de CADA aluno da turma — e mudar a turma de sala viraria caçar e corrigir aluno por aluno. Sinal claro de que a turma merece uma tabela própria.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -295,6 +356,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Todo atributo que não faz parte da chave deve depender <strong>apenas</strong> da chave primária — nunca de outro atributo que também não é chave. Depender de um atributo não-chave é chamado de <strong>dependência transitiva</strong>.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -317,6 +379,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       
       <ul><li><code>nome_evento</code> não depende da chave.</li><li><code>local_evento</code> também não depende da chave.</li><li>Os dois dependem de <code>evento_id</code>, que também não é chave.</li><li>Isso é dependência transitiva: a chave aponta pro evento, e é o evento que determina esses dados.</li></ul>
     </div>
+        
       </div>
     </div>
 
@@ -336,6 +399,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="bloco-tabela-wrap"><table><thead><tr><th>evento_id</th><th>nome_evento</th><th>local_evento</th></tr></thead><tbody><tr><td>500</td><td>Festival Batidas</td><td>Allianz Parque</td></tr><tr><td>501</td><td>Turnê Elétrica</td><td>Espaço das Américas</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -345,18 +409,19 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Checklist: Como Aplicar a 3FN</h1>
         
         <p>Mesmo roteiro mecânico das outras formas normais — só que agora de olho em atributos que dependem de outros atributos:</p>
-<div class="bloco-diagrama" id="mmdlo0by">
+<div class="bloco-diagrama" id="mmdydud8">
     <div class="bloco-diagrama-titulo">Checklist da 3FN</div>
-    <div class="mermaid">flowchart TD
-    A["A tabela já está na 2FN?"] --&gt;|Não| B["Aplique a 2FN primeiro (aula 1)"]
-    A --&gt;|Sim| C["Algum atributo não-chave depende de OUTRO atributo não-chave (não da chave)?"]
-    C --&gt;|Não| D["A tabela já está na 3FN"]
-    C --&gt;|Sim| E["Crie uma tabela nova: atributo 'ponte' + os que dependem dele, ligados por FK"]
-    E --&gt; F["Repita a pergunta na tabela original, até não sobrar dependência transitiva"]
-    F --&gt; D
-    B --&gt; A</div>
-    
+    <div class="mermaid">%%{init: {'themeVariables': {'fontSize':'15px'}}}%%
+flowchart LR
+    A{"Está na 2FN?"} -- Não --&gt; B("Aplique a 2FN\nprimeiro - aula 1")
+    B --&gt; A
+    A -- Sim --&gt; C{"Não-chave depende de\noutro não-chave?"}
+    C -- Não --&gt; D(["Está na 3FN ✅"])
+    C -- Sim --&gt; E("Separe numa tabela nova:\nponte + dependentes, com FK")
+    E --&gt; C</div>
+    <div class="bloco-diagrama-legenda">Repita a pergunta do meio até não sobrar nenhuma dependência transitiva — aí a tabela está na 3FN.</div>
   </div>
+        
       </div>
     </div>
 
@@ -379,6 +444,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       
       <ul><li><code>nome_plano</code> não depende da chave.</li><li><code>preco_plano</code> também não depende dela.</li><li>Os dois dependem de <code>plano_id</code>, que não é chave.</li></ul>
     </div>
+        
       </div>
     </div>
 
@@ -398,6 +464,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="bloco-tabela-wrap"><table><thead><tr><th>plano_id</th><th>nome_plano</th><th>preco_plano</th></tr></thead><tbody><tr><td>1</td><td>Plano Padrão</td><td>29.90</td></tr><tr><td>2</td><td>Plano Premium</td><td>44.90</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -420,6 +487,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       
       <ul><li><code>nome_time</code> não depende da chave.</li><li><code>tag_time</code> também não depende dela.</li><li>Os dois dependem de <code>time_id</code>, que não é chave.</li></ul>
     </div>
+        
       </div>
     </div>
 
@@ -439,6 +507,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="bloco-tabela-wrap"><table><thead><tr><th>time_id</th><th>nome_time</th><th>tag_time</th></tr></thead><tbody><tr><td>7</td><td>Fúria Elétrica</td><td>FE</td></tr><tr><td>8</td><td>Aurora Gaming</td><td>AUR</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -461,6 +530,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>aluno_nome</th><th>curso_id</th><th>curso_nome</th><th>disciplina_id</th><th>disciplina_nome</th><th>professor</th></tr></thead><tbody><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td><td>101</td><td>Programação Web</td><td>Diego Alves</td></tr><tr><td>2</td><td>Bruno Lima</td><td>10</td><td>ADS</td><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -483,6 +553,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Sobrou só o essencial: quem cursa o quê. Todo o resto foi pra outras tabelas — vamos ver a seguir.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -502,6 +573,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="bloco-tabela-wrap"><table><thead><tr><th>disciplina_id</th><th>disciplina_nome</th><th>professor</th></tr></thead><tbody><tr><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr><tr><td>101</td><td>Programação Web</td><td>Diego Alves</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
@@ -527,6 +599,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p><code>professor</code> depende diretamente de <code>disciplina_id</code> — a própria chave da tabela disciplina. Não é dependência transitiva, então ele fica onde está.</p>
       
     </div>
+        
       </div>
     </div>
 
@@ -535,7 +608,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 16</div>
         <h1>Decomposição Final (3FN)</h1>
         
-        <div class="bloco-diagrama" id="mmdwc477">
+        <div class="bloco-diagrama" id="mmdgdl8e">
     <div class="bloco-diagrama-titulo">matricula → aluno + curso + disciplina</div>
     <div class="mermaid">erDiagram
     CURSO ||--o{ ALUNO : possui
@@ -569,6 +642,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       
       <ul><li>curso nome mora só na tabela <code>curso</code>.</li><li>disciplina nome e professor moram só na tabela <code>disciplina</code>.</li><li>Eles ficam lá porque dependem diretamente de <code>disciplina_id</code> — não é dependência transitiva.</li></ul>
     </div>
+        
       </div>
     </div>
 
@@ -577,7 +651,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 17</div>
         <h1>Resumo Visual: 1FN → 2FN → 3FN</h1>
         
-        <div class="bloco-diagrama" id="mmdcxn2o">
+        <div class="bloco-diagrama" id="mmdouc14">
     
     <div class="mermaid">%%{init: {'themeVariables': {
   'cScale0': '#DCE8F0', 'cScaleLabel0': '#101418',
@@ -604,6 +678,7 @@ mindmap
       SQL (aula 5)</div>
     
   </div>
+        
       </div>
     </div>
 
@@ -629,6 +704,7 @@ mindmap
     <div class="quest-list">
       <ol><li>Confirme que a tabela já está na 2FN (a chave é simples — por que isso já garante a 2FN automaticamente?).</li><li>Aplique o checklist da 3FN: qual atributo não-chave serve de "ponte" pra outros atributos (dica: é <code>entregador_id</code>)?</li><li>Separe a tabela em duas, ligadas por chave estrangeira.</li><li>Explique qual anomalia essa separação evita.</li><li>Bônus: peçam pra uma IA sugerir a normalização dessa tabela e comparem com o checklist — ela seguiu os mesmos passos, ou pulou alguma etapa?</li></ol>
     </div>
+        
       </div>
     </div></div>
 <script src="../libs/prism/prism.min.js"></script>
@@ -664,7 +740,12 @@ mermaid.initialize({
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::BancodeDados::2';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -672,11 +753,25 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
 }else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
 const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -685,8 +780,23 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
   else if(e.key==='ArrowLeft')prevSlide();
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

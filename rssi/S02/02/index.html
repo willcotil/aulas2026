@@ -4,18 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aula 2: Ameaças e Vulnerabilidades: Malwares, Phishing e Engenharia Social</title>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<link rel="stylesheet" href="../libs/fonts/fonts.css">
+<link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
+<link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
+<script src="../libs/chart.min.js"></script>
+<script src="../libs/p5.min.js"></script>
+<script src="../libs/gsap.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap');
 :root{
-  --color-navy:#000;--color-blue:#452E5A;--color-rust:#FF653F;
-  --color-orange:#FF653F;--color-yellow:#FF653F;--color-deep:#1E104E;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#120B1F;
+  --color-navy:#000;--color-blue:#E9C46A;--color-rust:#E76F51;
+  --color-orange:#E76F51;--color-yellow:#E76F51;--color-deep:#249D8F;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#122420;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -24,13 +23,21 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
 .slide.topic h1{color:#fff;font-size:3.5rem;}
 .slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
 .slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -38,10 +45,10 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.05rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:.95rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -58,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -66,8 +73,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
 }
-.depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:.9rem;}
-.depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:.95rem;}
+.depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
+.depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo-text{flex:1;}
 .depurador-bloco .dbg-layout{display:grid;grid-template-columns:1fr 200px;}
 .depurador-bloco .dbg-code-panel{background:#0B192C;padding:14px 10px;overflow-x:auto;}
@@ -76,41 +83,47 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .depurador-bloco .dbg-linenum{color:#555;min-width:24px;text-align:right;user-select:none;flex-shrink:0;}
 .depurador-bloco .dbg-codeline{color:#cdd6f4;}
 .depurador-bloco .dbg-vars-panel{background:#111b2e;padding:12px;border-left:1px solid #1e3a5f;}
-.depurador-bloco .dbg-vars-title{color:#94a3b8;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-.depurador-bloco .dbg-vars-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.depurador-bloco .dbg-vars-title{color:#94a3b8;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.depurador-bloco .dbg-vars-table{width:100%;border-collapse:collapse;font-size:1rem;}
 .depurador-bloco .dbg-vars-table th{color:#64748b;font-weight:600;padding:3px 6px;text-align:left;border-bottom:1px solid #1e3a5f;}
 .depurador-bloco .dbg-vars-table td{color:#e2e8f0;padding:3px 6px;}
 .depurador-bloco .dbg-vars-table tr.changed td{color:var(--color-rust,#f90);}
-.depurador-bloco .dbg-btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.78rem;font-family:inherit;white-space:nowrap;}
+.depurador-bloco .dbg-btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.9rem;font-family:inherit;white-space:nowrap;}
 .depurador-bloco .dbg-btn:hover{background:rgba(255,255,255,.32);}
 .depurador-bloco .dbg-btn:disabled{opacity:.35;cursor:default;}
 .depurador-bloco .dbg-btn.reset{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.2);}
-.depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.78rem;text-align:center;white-space:nowrap;}
-.depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:.82rem;border-top:1px solid #1e3a5f;min-height:24px;}
+.depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.9rem;text-align:center;white-space:nowrap;}
+.depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:1rem;border-top:1px solid #1e3a5f;min-height:24px;}
 .depurador-bloco .dbg-output:empty{display:none;}
+/* .slide has overflow:hidden and a fixed viewport height, so any block below
+   (diagrama/animacao/grafico) whose native content size is unpredictable at
+   authoring time (e.g. a tall Mermaid flowchart) gets max-height + overflow:auto
+   as a safety net -- it scrolls internally instead of silently clipping past
+   the bottom of the slide. */
 .bloco-imagem{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
 .bloco-imagem img{width:100%;max-height:340px;object-fit:contain;border-radius:12px;display:block;}
-.bloco-imagem figcaption{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
-.bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;align-self:flex-start;}
+.bloco-imagem figcaption{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
+.bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;align-self:flex-start;}
 .bloco-diagrama{margin:12px 0;}
-.bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow-x:auto;text-align:center;}
-.bloco-diagrama .bloco-diagrama-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao{margin:12px 0;}
-.bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);}
-.bloco-animacao canvas{display:block;max-width:100%;border-radius:12px;}
-.bloco-animacao .bloco-animacao-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
+.bloco-animacao canvas{display:block;max-width:100%;max-height:min(960px,65vh);border-radius:12px;}
+.bloco-animacao .bloco-animacao-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-grafico{margin:12px 0;}
-.bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);}
-.bloco-grafico .bloco-grafico-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);overflow:auto;}
+.bloco-grafico .bloco-grafico-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-animacao-gsap{margin:12px 0;}
-.bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
-.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:hidden;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;}
-.bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;max-height:min(960px,65vh);}
+.bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-tabela{margin:12px 0;}
-.bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:0.9rem;margin-bottom:8px;}
+.bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-tabela .bloco-tabela-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-soft,#e2e8f0);}
 .bloco-tabela table{width:100%;border-collapse:collapse;font-size:1.15rem;}
 .bloco-tabela thead tr{background:var(--color-blue,#1E3E62);color:#fff;}
@@ -118,7 +131,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-tabela tbody tr:nth-child(odd){background:#f8fafc;}
 .bloco-tabela tbody tr:nth-child(even){background:#ffffff;}
 .bloco-tabela tbody td{padding:9px 16px;border-bottom:1px solid var(--border-soft,#e2e8f0);vertical-align:top;line-height:1.5;}
-.bloco-tabela .bloco-tabela-legenda{font-size:0.78rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-tabela .bloco-tabela-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-agenda{margin:16px 0;}
 .bloco-agenda .bloco-agenda-titulo{font-weight:800;color:var(--color-blue);font-size:1.15rem;margin-bottom:20px;}
 .bloco-agenda .agenda-lista{position:relative;}
@@ -129,12 +142,79 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-agenda .agenda-conteudo{padding-top:6px;}
 .bloco-agenda .agenda-item-titulo{font-weight:800;color:var(--color-navy);font-size:1.2rem;display:flex;align-items:center;gap:10px;}
 .bloco-agenda .agenda-item-titulo i{color:var(--color-orange);font-size:1.05rem;}
-.bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}</style>
+.bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
+.bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
+.bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Redes e Sistemas de Segurança de Informação</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Ameaças e Vulnerabilidades</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-link"></i><span>Da Teoria à Prática</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-link"></i><span>Conectando com a Aula 1</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-virus"></i><span>Malwares</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que é Malware?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Ciclo de Vida de um Malware</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Como o Malware Chega Até Você</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Vírus: Qual Vulnerabilidade Ele Explora?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Vírus: Como se Proteger</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Worm: Como Ele se Replica Sozinho</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Vendo o Worm se Espalhar pela Rede</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Worm: Como se Proteger</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Trojans: o Cavalo de Troia Digital</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Trojans: Como se Proteger</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Ransomware: Sequestro de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Ransomware: Como se Proteger</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Spyware e Adware</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Spyware/Adware: Como se Proteger</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>Malware x Pilares CIA</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><i class="fa-solid fa-envelope-open-text"></i><span>Phishing</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>O Que é Phishing?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Slide 19</span><span>Anatomia de um Ataque de Phishing</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Slide 20</span><span>Variantes de Phishing</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><span class="agenda-side-label">Slide 21</span><span>Como Identificar um Phishing</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Slide 22</span><span>Phishing: Como se Proteger</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="25" onclick="showSlide(25);closeAgendaSidebar();"><i class="fa-solid fa-user-secret"></i><span>Engenharia Social</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="26" onclick="showSlide(26);closeAgendaSidebar();"><span class="agenda-side-label">Slide 23</span><span>O Que é Engenharia Social?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="27" onclick="showSlide(27);closeAgendaSidebar();"><span class="agenda-side-label">Slide 24</span><span>Gatilhos Psicológicos Explorados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="28" onclick="showSlide(28);closeAgendaSidebar();"><span class="agenda-side-label">Slide 25</span><span>Técnicas Comuns</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="29" onclick="showSlide(29);closeAgendaSidebar();"><span class="agenda-side-label">Slide 26</span><span>Como se Proteger de Cada Técnica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="30" onclick="showSlide(30);closeAgendaSidebar();"><span class="agenda-side-label">Slide 27</span><span>Caso Real: O Hack do Twitter (2020)</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="31" onclick="showSlide(31);closeAgendaSidebar();"><i class="fa-solid fa-shield-halved"></i><span>Defesa e boas práticas</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="32" onclick="showSlide(32);closeAgendaSidebar();"><span class="agenda-side-label">Slide 28</span><span>Como se Proteger (Visão Geral)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="33" onclick="showSlide(33);closeAgendaSidebar();"><span class="agenda-side-label">Slide 29</span><span>Resumo Visual da Aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="34" onclick="showSlide(34);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios</span></button></div>
+</nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
@@ -153,35 +233,35 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="bloco-agenda-titulo">O que veremos hoje</div>
     <div class="agenda-lista">
       
-        <div class="agenda-item">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-link"></i> Conectando com a Aula 1</div>
             <div class="agenda-item-texto">Do risco à ameaça concreta</div>
           </div>
         </div>
-        <div class="agenda-item">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-virus"></i> Malwares</div>
-            <div class="agenda-item-texto">Vírus, worms, trojans, ransomware e spyware</div>
+            <div class="agenda-item-texto">Como cada tipo explora uma vulnerabilidade e como se proteger</div>
           </div>
         </div>
-        <div class="agenda-item">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(19)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-envelope-open-text"></i> Phishing</div>
             <div class="agenda-item-texto">O golpe mais comum da internet</div>
           </div>
         </div>
-        <div class="agenda-item">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(25)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-user-secret"></i> Engenharia Social</div>
             <div class="agenda-item-texto">Explorando pessoas, não sistemas</div>
           </div>
         </div>
-        <div class="agenda-item">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(31)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-shield-halved"></i> Defesa e boas práticas</div>
@@ -190,6 +270,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         </div>
     </div>
   </div>
+        
       </div>
     </div>
 
@@ -215,6 +296,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       
     </div>
 <p>As ameaças de hoje (malware, phishing, engenharia social) exploram principalmente falhas humanas e de software. Ataques de rede como DDoS, Man-in-the-Middle e spoofing — que exploram a infraestrutura — ficam para a <strong>Aula 3</strong>.</p>
+        
       </div>
     </div>
 
@@ -264,6 +346,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
           
         </div>
     </div>
+        
       </div>
     </div>
 
@@ -272,52 +355,138 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 04</div>
         <h1>Ciclo de Vida de um Malware</h1>
         
-        <div class="bloco-diagrama" id="mmdcni9t">
+        <div class="bloco-diagrama" id="mmd4100n">
     <div class="bloco-diagrama-titulo">Do Ponto de Entrada ao Impacto</div>
-    <div class="mermaid">flowchart TD
-  ENTRADA[Ponto de Entrada] --&gt; INFECCAO[Infecção do Sistema]
-  INFECCAO --&gt; EXECUCAO[Execução da Carga Maliciosa]
-  EXECUCAO --&gt; PROPAGACAO[Propagação ou Persistência]
-  PROPAGACAO --&gt; IMPACTO[Impacto: Roubo, Dano ou Sequestro]</div>
+    <div class="mermaid">%%{init: {'themeVariables': {'fontSize':'16px'}}}%%
+flowchart LR
+  subgraph R1[ ]
+    direction LR
+    A[Ponto de Entrada] --&gt; B[Infecção do Sistema] --&gt; C[Execução da Carga]
+  end
+  subgraph R2[ ]
+    direction RL
+    D[Propagação / Persistência] --&gt; E[Impacto: Dano ou Sequestro]
+  end
+  C --&gt; D</div>
     <div class="bloco-diagrama-legenda">Todo malware segue esse ciclo básico — o que muda é COMO ele entra e QUAL é o payload final.</div>
   </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 05</div>
-        <h1>Vírus vs. Worms</h1>
+        <h1>Como o Malware Chega Até Você</h1>
         
-        
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-file-circle-exclamation"></i> Vírus
-          </h3>
-          <p>Se <strong>anexa</strong> a um arquivo ou programa hospedeiro. Só se espalha quando o arquivo infectado é executado por alguém.</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-network-wired"></i> Worm
-          </h3>
-          <p>É <strong>autônomo</strong> — se replica sozinho pela rede, sem precisar de arquivo hospedeiro nem ação humana.</p>
-          
-        </div>
+        <div class="bloco-grafico">
+    <div class="bloco-grafico-titulo">Principais Vetores de Infecção</div>
+    <div class="bloco-grafico-wrap" style="position:relative;height:260px;">
+      <canvas id="chrtpqcuf1x"></canvas>
     </div>
+    <script>(function(){if(typeof Chart==='undefined')return;try{new Chart(document.getElementById('chrtpqcuf1x'),{"type":"bar","data":{"labels":["E-mail (phishing)","Downloads maliciosos","Vulnerabilidades sem patch","Mídia removível (USB)"],"datasets":[{"label":"% dos incidentes","data":[41,24,18,9],"backgroundColor":["#E76F51","#249D8F","#94a3b8","#E9C46A"]}]},"options":{"responsive":true,"maintainAspectRatio":false,"plugins":{"legend":{"display":false}}}});}catch(e){console.warn('Chart.js erro:',e);}})()</script>
+    <div class="bloco-grafico-legenda">O e-mail continua sendo, disparado, a porta de entrada nº 1. A seguir, vamos ver tipo a tipo QUAL vulnerabilidade cada malware explora depois de entrar.</div>
+  </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 06</div>
-        <h1>Como um Worm se Espalha pela Rede</h1>
+        <h1>Vírus: Qual Vulnerabilidade Ele Explora?</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-magnifying-glass"></i> Não é Bem uma Falha Técnica
+      </h3>
+      <p>O vírus, diferente do worm que veremos a seguir, geralmente <strong>não explora uma vulnerabilidade de segurança do sistema</strong> — ele explora a confiança do usuário em executar arquivos, somada à ausência de verificação de integridade: ele se anexa (insere seu próprio código) dentro de um programa <code>.exe</code> ou de macros de um documento do Office.</p>
+      
+    </div>
+
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-paperclip"></i> Como se anexa
+          </h3>
+          <p>Insere seu código dentro de um arquivo hospedeiro (executável ou macro), sem alterar visivelmente o comportamento dele.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-clone"></i> Como se replica depois
+          </h3>
+          <p>Quando a vítima executa o hospedeiro normalmente, o código do vírus roda junto e se copia pra outros arquivos do mesmo sistema.</p>
+          
+        </div>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-file-word"></i> Exemplo: Vírus de Macro
+      </h3>
+      <p>Documentos do Office com macros habilitadas automaticamente foram, por décadas, um vetor clássico — a própria Microsoft passou a bloquear macros de arquivos baixados da internet por padrão, justamente por causa desse tipo de ataque.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 07</div>
+        <h1>Vírus: Como se Proteger</h1>
+        
+        <ul><li>Antivírus atualizado, capaz de reconhecer as assinaturas de vírus já conhecidos</li><li>Nunca executar anexos ou arquivos de fontes desconhecidas, mesmo que pareçam inofensivos</li><li>Manter macros de documentos baixados da internet desabilitadas por padrão</li><li>Fazer backups regulares — permite recuperar arquivos corrompidos sem depender só da remoção do vírus</li></ul>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 08</div>
+        <h1>Worm: Como Ele se Replica Sozinho</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-network-wired"></i> Agora Sim, uma Vulnerabilidade de Verdade
+      </h3>
+      <p>Diferente do vírus, o worm explora uma <strong>falha técnica real</strong> — geralmente num serviço de rede que fica esperando conexões (como compartilhamento de arquivos). Ele não depende de ninguém clicar em nada: se aproveita da falha remotamente, sozinho.</p>
+      
+    </div>
+<div class="bloco-diagrama" id="mmdnivbi">
+    <div class="bloco-diagrama-titulo">Como um Worm se Espalha</div>
+    <div class="mermaid">%%{init: {'themeVariables': {'fontSize':'16px'}}}%%
+flowchart LR
+  A[Maquina infectada] --&gt; B[Escaneia a rede]
+  B --&gt; C[Encontra servico vulneravel exposto]
+  C --&gt; D[Explora a falha remotamente]
+  D --&gt; E[Copia-se para a nova maquina]</div>
+    <div class="bloco-diagrama-legenda">Esse processo se repete automaticamente a partir de cada máquina recém-infectada — é assim que um worm se espalha exponencialmente pela rede, sem nenhuma ação humana.</div>
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-newspaper"></i> Exemplo Real: EternalBlue
+      </h3>
+      <p>O WannaCry (que já vimos) se espalhou sozinho explorando o <strong>EternalBlue</strong> — uma falha no protocolo de compartilhamento de arquivos do Windows (SMB, porta 445) que permitia executar código remotamente, sem senha e sem clique nenhum da vítima.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 09</div>
+        <h1>Vendo o Worm se Espalhar pela Rede</h1>
         
         <div class="bloco-animacao">
     <div class="bloco-animacao-titulo">Propagação Automática</div>
-    <div class="p5-canvas-container" id="p5c2wka6r2" style="height:220px;"></div>
+    <div class="p5-canvas-container" id="p5cuw6cggv" style="height:220px;"></div>
     <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let t = 0;
 let holdFrames = 0;
 const HOLD_AT_END = 50;
@@ -386,15 +555,26 @@ p.draw = function(){
     p.textSize(13);
     p.text('Toda a rede infectada — sem nenhum clique da vítima', 280, 190);
   }
-};},'p5c2wka6r2');})()</script>
+};},'p5cuw6cggv');})()</script>
     <div class="bloco-animacao-legenda">Um único computador vulnerável é suficiente — o worm salta de máquina em máquina sozinho, sem que ninguém precise clicar em nada. (Animação em loop contínuo.)</div>
   </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
+        <div class="slide-number">Slide 10</div>
+        <h1>Worm: Como se Proteger</h1>
+        
+        <ul><li>Manter sistema operacional e serviços de rede sempre atualizados — patches fecham exatamente as falhas que o worm explora</li><li>Firewall ativo, bloqueando portas e serviços que não precisam estar expostos à rede</li><li>Segmentar a rede, limitando até onde um worm consegue se espalhar caso um ponto seja comprometido</li><li>Antivírus/EDR com detecção de comportamento, não só de assinatura — worms novos podem ainda não ter assinatura conhecida</li></ul>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 11</div>
         <h1>Trojans: o Cavalo de Troia Digital</h1>
         
         
@@ -402,11 +582,11 @@ p.draw = function(){
       <h3>
         <i class="fa-solid fa-mask"></i> Definição
       </h3>
-      <p>Um <strong>Trojan</strong> se disfarça de programa legítimo e útil — mas, ao ser executado, abre uma porta para o atacante. Diferente de vírus/worms, ele <strong>não se autorreplica</strong>.</p>
+      <p>Um <strong>Trojan</strong> se disfarça de programa legítimo e útil — mas, ao ser executado, abre uma porta para o atacante. Diferente de vírus/worms, ele <strong>não se autorreplica</strong>: conta inteiramente com a vítima concedendo a execução voluntariamente.</p>
       
     </div>
 
-    <div class="grid-2">
+    <div class="grid-3">
       
         <div class="card-info">
           <h3>
@@ -417,18 +597,36 @@ p.draw = function(){
         </div>
         <div class="card-info">
           <h3>
-            <i class="fa-solid fa-door-open"></i> O que ele faz
+            <i class="fa-solid fa-hand-pointer"></i> Como se instala
           </h3>
-          <p>Cria uma 'porta dos fundos' (backdoor) para acesso remoto não autorizado.</p>
+          <p>A vítima executa o arquivo por conta própria — nesse primeiro passo não há falha técnica sendo explorada, só engenharia social.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-door-open"></i> O que faz depois
+          </h3>
+          <p>Cria uma 'porta dos fundos' (backdoor) para acesso remoto, podendo inclusive baixar outros malwares na sequência.</p>
           
         </div>
     </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
+        <div class="slide-number">Slide 12</div>
+        <h1>Trojans: Como se Proteger</h1>
+        
+        <ul><li>Baixar programas só de fontes oficiais — lojas de aplicativo ou o site do próprio fabricante</li><li>Desconfiar de cracks, ativadores e pirataria — um dos vetores mais comuns de trojan</li><li>Verificar a assinatura digital/hash do instalador quando disponível</li><li>Usar um firewall que avise sobre programas tentando abrir portas ou se conectar à internet sem motivo aparente</li></ul>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 13</div>
         <h1>Ransomware: Sequestro de Dados</h1>
         
         
@@ -438,6 +636,24 @@ p.draw = function(){
       </h3>
       <p>Criptografa os arquivos da vítima e exige um resgate (geralmente em criptomoeda) para devolver o acesso — um ataque direto à <strong>Disponibilidade</strong>.</p>
       
+    </div>
+
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-route"></i> Como costuma chegar
+          </h3>
+          <p>Raramente é o próprio ponto de entrada — geralmente é a carga final entregue por um phishing, trojan ou worm que já comprometeu a máquina.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-key"></i> Por que não dá pra só 'quebrar'
+          </h3>
+          <p>Criptografa os arquivos com uma chave que só o atacante possui — sem ela (ou sem um backup), não existe atalho técnico pra reverter.</p>
+          
+        </div>
     </div>
 
     <div class="grid-2">
@@ -457,12 +673,23 @@ p.draw = function(){
           
         </div>
     </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
+        <div class="slide-number">Slide 14</div>
+        <h1>Ransomware: Como se Proteger</h1>
+        
+        <ul><li>Backups regulares e OFFLINE (desconectados) — a defesa mais eficaz, já que o ransomware não alcança o que está desconectado</li><li>Manter sistemas atualizados — ransomware costuma se aproveitar de outras falhas (worm/trojan) pra se espalhar até chegar aos arquivos</li><li>Segmentar a rede e limitar permissões, reduzindo até onde um ataque consegue chegar</li><li>Nunca pagar o resgate — não há garantia de recuperação, e isso financia novos ataques</li></ul>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 15</div>
         <h1>Spyware e Adware</h1>
         
         
@@ -472,7 +699,7 @@ p.draw = function(){
           <h3>
             <i class="fa-solid fa-eye"></i> Spyware
           </h3>
-          <p>Monitora e rouba dados silenciosamente — teclas digitadas, senhas, histórico de navegação — sem que a vítima perceba.</p>
+          <p>Monitora e rouba dados silenciosamente — teclas digitadas, senhas, histórico de navegação — capturando eventos no nível do sistema operacional, sem que a vítima perceba.</p>
           
         </div>
         <div class="card-info">
@@ -483,35 +710,39 @@ p.draw = function(){
           
         </div>
     </div>
-      </div>
-    </div>
 
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
-        <h1>Como o Malware Chega Até Você</h1>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-box-open"></i> De Onde Costuma Vir
+      </h3>
+      <p>Raramente chega sozinho — costuma vir embutido (<em>bundled</em>) em instaladores de programas 'gratuitos', ou como uma extensão de navegador que pede permissões que vão muito além do que precisaria pra funcionar.</p>
+      
+    </div>
         
-        <div class="bloco-grafico">
-    <div class="bloco-grafico-titulo">Principais Vetores de Infecção</div>
-    <div class="bloco-grafico-wrap" style="position:relative;height:260px;">
-      <canvas id="chrt5a41rw0"></canvas>
-    </div>
-    <script>(function(){if(typeof Chart==='undefined')return;try{new Chart(document.getElementById('chrt5a41rw0'),{"type":"bar","data":{"labels":["E-mail (phishing)","Downloads maliciosos","Vulnerabilidades sem patch","Mídia removível (USB)"],"datasets":[{"label":"% dos incidentes","data":[41,24,18,9],"backgroundColor":["#FF653F","#452E5A","#94a3b8","#1E104E"]}]},"options":{"responsive":true,"maintainAspectRatio":false,"plugins":{"legend":{"display":false}}}});}catch(e){console.warn('Chart.js erro:',e);}})()</script>
-    <div class="bloco-grafico-legenda">O e-mail continua sendo, disparado, a porta de entrada nº 1 — por isso phishing (próximo tópico) é tão perigoso. Números aproximados, com base em relatórios do setor.</div>
-  </div>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 11</div>
+        <div class="slide-number">Slide 16</div>
+        <h1>Spyware/Adware: Como se Proteger</h1>
+        
+        <ul><li>Ler as permissões pedidas por apps/extensões antes de instalar — permissão demais é sinal de alerta</li><li>Preferir lojas oficiais (Chrome Web Store, Microsoft Store etc.) a downloads soltos pela internet</li><li>Antivírus/antispyware atualizado, com verificação de extensões de navegador</li><li>Revisar periodicamente os apps e extensões instalados, removendo o que não usa mais</li></ul>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 17</div>
         <h1>Malware x Pilares CIA</h1>
         
         <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">Qual Pilar Cada Malware Ataca Primeiro</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Tipo</th><th>Como Age</th><th>Pilar Principal</th><th>Exemplo</th></tr></thead><tbody><tr><td>Vírus</td><td>Anexa-se a arquivos e corrompe seu conteúdo</td><td>Integridade</td><td>—</td></tr><tr><td>Worm</td><td>Replica-se sozinho e consome banda/recursos</td><td>Disponibilidade</td><td>WannaCry</td></tr><tr><td>Trojan</td><td>Abre uma porta de entrada disfarçado de app legítimo</td><td>Confidencialidade (viabiliza roubo)</td><td>—</td></tr><tr><td>Ransomware</td><td>Criptografa arquivos e bloqueia o acesso</td><td>Disponibilidade</td><td>Colonial Pipeline</td></tr><tr><td>Spyware</td><td>Monitora e rouba dados silenciosamente</td><td>Confidencialidade</td><td>—</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Assim como vimos na Aula 1, cada ameaça pode ser lida através da lente da tríade CIA.</div>
+    <div class="bloco-tabela-legenda">Assim como vimos na Aula 1, cada ameaça pode ser lida através da lente da tríade CIA — e agora você já sabe qual vulnerabilidade cada uma explora e como se proteger dela.</div>
   </div>
+        
       </div>
     </div>
 
@@ -525,7 +756,7 @@ p.draw = function(){
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 12</div>
+        <div class="slide-number">Slide 18</div>
         <h1>O Que é Phishing?</h1>
         
         
@@ -536,15 +767,16 @@ p.draw = function(){
       <p>Phishing é uma fraude que se passa por uma fonte confiável (banco, empresa, colega) para induzir a vítima a clicar em um link malicioso ou revelar dados sigilosos — um ataque direto à <strong>Confidencialidade</strong> e à <strong>Autenticidade</strong>.</p>
       
     </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 13</div>
+        <div class="slide-number">Slide 19</div>
         <h1>Anatomia de um Ataque de Phishing</h1>
         
-        <div class="bloco-diagrama" id="mmd9jydn">
+        <div class="bloco-diagrama" id="mmd1rthd">
     <div class="bloco-diagrama-titulo">Do E-mail ao Roubo de Credenciais</div>
     <div class="mermaid">sequenceDiagram
   participant A as Atacante
@@ -554,14 +786,33 @@ p.draw = function(){
   V-&gt;&gt;S: Clica no link e insere credenciais
   S-&gt;&gt;A: Envia credenciais capturadas
   A-&gt;&gt;A: Acessa a conta real da vítima</div>
-    <div class="bloco-diagrama-legenda">O site falso costuma ser visualmente idêntico ao site real — a única pista costuma estar no endereço (URL).</div>
+    <div class="bloco-diagrama-legenda">O site falso costuma ser visualmente idêntico ao site real.</div>
   </div>
+
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-brain"></i> Engano psicológico
+          </h3>
+          <p>Usa gatilhos como urgência e autoridade (vamos aprofundar isso na próxima seção) pra fazer a vítima agir sem pensar direito.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-globe"></i> Engano técnico
+          </h3>
+          <p>Domínios parecidos (<em>typosquatting</em>, ex: <code>arnaz0n.com</code>), remetente falsificado (<em>spoofing</em>) e a ausência de verificação de e-mail (SPF/DKIM/DMARC) que denunciaria a farsa.</p>
+          
+        </div>
+    </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 14</div>
+        <div class="slide-number">Slide 20</div>
         <h1>Variantes de Phishing</h1>
         
         
@@ -589,15 +840,27 @@ p.draw = function(){
           
         </div>
     </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 15</div>
+        <div class="slide-number">Slide 21</div>
         <h1>Como Identificar um Phishing</h1>
         
         <ul><li>Urgência artificial ("sua conta será bloqueada em 24h")</li><li>Remetente com domínio estranho ou levemente alterado</li><li>Link cujo destino (ao passar o mouse) não bate com o texto exibido</li><li>Erros de gramática ou formatação incomum para a suposta empresa</li><li>Pedido direto de senha, código de MFA ou dados bancários</li></ul>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 22</div>
+        <h1>Phishing: Como se Proteger</h1>
+        
+        <ul><li>Nunca clique em links de e-mails ou mensagens inesperadas — digite o endereço oficial direto no navegador</li><li>Ative a autenticação multifator (MFA): mesmo com a senha vazada, o atacante não passa dessa barreira</li><li>Confirme pedidos incomuns (transferência, dados sigilosos) por outro canal, como uma ligação para um número oficial já conhecido</li><li>Nunca informe senha, código de MFA ou dados bancários por e-mail, SMS ou ligação — nenhuma empresa séria pede isso</li><li>Reporte e-mails suspeitos ao time de TI/segurança, em vez de só apagar — ajuda a proteger o resto da organização</li></ul>
+        
       </div>
     </div>
 
@@ -611,7 +874,7 @@ p.draw = function(){
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 16</div>
+        <div class="slide-number">Slide 23</div>
         <h1>O Que é Engenharia Social?</h1>
         
         
@@ -622,19 +885,20 @@ p.draw = function(){
       <p>Conjunto de técnicas de <strong>manipulação psicológica</strong> para convencer alguém a quebrar procedimentos normais de segurança — o phishing é, na verdade, um tipo de engenharia social.</p>
       
     </div>
-<figure class="bloco-imagem" id="imglfgyv">
+<figure class="bloco-imagem" id="imge6d9k">
     <div class="bloco-imagem-titulo">Kevin Mitnick</div>
     <img src="img/kevin-mitnick.jpg" alt="Kevin Mitnick discursando sobre engenharia social na Campus Party 2010" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
     <figcaption>Foto: Eneas De Troya, CC BY 2.0 (Wikimedia Commons) — Mitnick na Campus Party 2010, falando justamente sobre engenharia social.</figcaption>
   </figure>
 <p>Kevin Mitnick, um dos hackers mais famosos da história, dizia que era quase sempre mais fácil enganar uma pessoa do que quebrar um sistema técnico.</p>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 17</div>
+        <div class="slide-number">Slide 24</div>
         <h1>Gatilhos Psicológicos Explorados</h1>
         
         
@@ -662,12 +926,25 @@ p.draw = function(){
           
         </div>
     </div>
+<div class="bloco-animacao-gsap">
+    <div class="bloco-animacao-gsap-titulo">Urgência na Prática: um SMS Falso de Banco</div>
+    <div class="gsap-stage" id="gsapnlggu69" style="min-height:430px;">
+      <style>#gsapnlggu69 .phone-mock{width:220px;margin:0 auto;background:#1a1a1a;border-radius:30px;padding:10px 8px;box-shadow:0 10px 30px rgba(0,0,0,.25);}#gsapnlggu69 .phone-notch{width:56px;height:5px;background:#3a3a3a;border-radius:3px;margin:0 auto 8px;}#gsapnlggu69 .phone-screen{background:#fff;border-radius:20px;overflow:hidden;height:340px;display:flex;flex-direction:column;}#gsapnlggu69 .sms-header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eee;}#gsapnlggu69 .sms-avatar{width:34px;height:34px;border-radius:50%;background:#E76F51;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}#gsapnlggu69 .sms-sender{display:flex;flex-direction:column;line-height:1.25;}#gsapnlggu69 .sms-number{font-size:12.5px;font-weight:700;color:#1a1a1a;}#gsapnlggu69 .sms-unknown{font-size:10px;color:#E76F51;font-weight:600;}#gsapnlggu69 .sms-thread{flex:1;padding:14px 12px;display:flex;}#gsapnlggu69 .sms-bubble{background:#eceff1;border-radius:4px 16px 16px 16px;padding:10px 12px;font-size:12.5px;line-height:1.45;max-width:100%;color:#1a1a1a;}#gsapnlggu69 .sms-bank{font-weight:700;}#gsapnlggu69 .sms-link{color:#2563eb;text-decoration:underline;word-break:break-all;}#gsapnlggu69 .sms-time{font-size:9.5px;color:#94a3b8;margin-top:6px;text-align:right;}</style>
+      <div class="phone-mock"><div class="phone-notch"></div><div class="phone-screen"><div class="sms-header"><div class="sms-avatar"><i class="fa-solid fa-building-columns"></i></div><div class="sms-sender"><span class="sms-number">+55 11 4002-8922</span><span class="sms-unknown">Número desconhecido</span></div></div><div class="sms-thread"><div class="sms-bubble"><span class="sms-bank">🏦 Banco União:</span> Uma compra de <strong>R$ 1.847,90</strong> foi identificada em seu nome. Se não reconhece, conteste agora: <span class="sms-link">banco-uniao-seguro.com/confirmar</span><div class="sms-time">agora</div></div></div></div></div>
+    </div>
+    <script>(function(){if(typeof gsap==='undefined')return;try{const tl = gsap.timeline();
+tl.from('.phone-mock', { opacity: 0, y: 20, duration: 0.5 })
+  .from('.sms-header', { opacity: 0, y: -10, duration: 0.4 }, '-=0.15')
+  .from('.sms-bubble', { opacity: 0, y: 20, scale: 0.9, duration: 0.5, ease: 'back.out(1.7)' }, '-=0.1');}catch(e){console.warn('GSAP erro:',e);}})()</script>
+    <div class="bloco-animacao-gsap-legenda">Repara nos gatilhos: número desconhecido se passando por banco (autoridade), valor alto e prazo implícito (urgência) — exatamente o tipo de mensagem que devemos desconfiar antes de clicar.</div>
+  </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 18</div>
+        <div class="slide-number">Slide 25</div>
         <h1>Técnicas Comuns</h1>
         
         <div class="bloco-tabela">
@@ -675,12 +952,27 @@ p.draw = function(){
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Técnica</th><th>Como Funciona</th></tr></thead><tbody><tr><td>Pretexting</td><td>Criar um cenário/pretexto falso e convincente (ex: 'sou da auditoria e preciso confirmar sua senha')</td></tr><tr><td>Baiting</td><td>Oferecer uma isca física ou digital (ex: um pendrive 'esquecido' no estacionamento)</td></tr><tr><td>Tailgating</td><td>Seguir uma pessoa autorizada de perto para entrar em uma área restrita sem crachá próprio</td></tr><tr><td>Quid Pro Quo</td><td>Oferecer algo em troca de informação (ex: 'suporte técnico grátis' em troca da senha)</td></tr></tbody></table></div>
     
   </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 19</div>
+        <div class="slide-number">Slide 26</div>
+        <h1>Como se Proteger de Cada Técnica</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Defesa por Técnica de Engenharia Social</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Técnica</th><th>Como se Proteger</th></tr></thead><tbody><tr><td>Pretexting</td><td>Confirme a identidade de quem pede a informação por um canal independente antes de fornecer qualquer dado</td></tr><tr><td>Baiting</td><td>Nunca conecte dispositivos desconhecidos (pendrives, cabos) encontrados por aí ao computador</td></tr><tr><td>Tailgating</td><td>Nunca permita que outra pessoa entre 'juntinho' numa área restrita sem crachá/autenticação própria</td></tr><tr><td>Quid Pro Quo</td><td>Desconfie de ofertas não solicitadas de suporte/ajuda em troca de informações ou acesso</td></tr></tbody></table></div>
+    
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 27</div>
         <h1>Caso Real: O Hack do Twitter (2020)</h1>
         
         
@@ -692,6 +984,7 @@ p.draw = function(){
       
     </div>
 <p>Nenhuma falha técnica foi explorada — a porta de entrada foram as PESSOAS, não os sistemas.</p>
+        
       </div>
     </div>
 
@@ -705,8 +998,8 @@ p.draw = function(){
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 20</div>
-        <h1>Como se Proteger</h1>
+        <div class="slide-number">Slide 28</div>
+        <h1>Como se Proteger (Visão Geral)</h1>
         
         
     <div class="grid-3">
@@ -733,23 +1026,24 @@ p.draw = function(){
           
         </div>
     </div>
-<p>Note que essa é a mesma estrutura Pessoas/Processos/Tecnologia da Aula 1 — a defesa contra ameaças usa exatamente esses três pilares.</p>
+<p>Essa é a mesma estrutura Pessoas/Processos/Tecnologia da Aula 1 — cada proteção específica que vimos hoje (por tipo de malware, contra phishing e contra cada técnica de engenharia social) se encaixa em uma dessas três colunas.</p>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 21</div>
+        <div class="slide-number">Slide 29</div>
         <h1>Resumo Visual da Aula</h1>
         
-        <div class="bloco-diagrama" id="mmd4gpyv">
+        <div class="bloco-diagrama" id="mmdbnyhz">
     <div class="bloco-diagrama-titulo">Mapa das Ameaças</div>
     <div class="mermaid">%%{init: {'themeVariables': {
-  'git0': '#FF653F', 'gitBranchLabel0': '#ffffff',
-  'cScale0': '#ffe4da', 'cScaleLabel0': '#120B1F',
-  'cScale1': '#ffe4da', 'cScaleLabel1': '#120B1F',
-  'cScale2': '#ece3f2', 'cScaleLabel2': '#120B1F',
-  'cScale3': '#fff2d6', 'cScaleLabel3': '#120B1F'
+  'git0': '#E76F51', 'gitBranchLabel0': '#ffffff',
+  'cScale0': '#fbe3da', 'cScaleLabel0': '#122420',
+  'cScale1': '#fbe3da', 'cScaleLabel1': '#122420',
+  'cScale2': '#d7f0ec', 'cScaleLabel2': '#122420',
+  'cScale3': '#faedd0', 'cScaleLabel3': '#122420'
 }}}%%
 mindmap
   root((Ameaças))
@@ -769,6 +1063,7 @@ mindmap
       Tailgating</div>
     
   </div>
+        
       </div>
     </div>
 
@@ -779,37 +1074,50 @@ mindmap
         
         
     <div class="quest-list">
-      <ol><li>Explique a diferença entre vírus e worm com suas palavras.</li><li>Por que o ransomware é considerado, antes de tudo, um ataque à Disponibilidade?</li><li>Cite três sinais de alerta que ajudam a identificar um e-mail de phishing.</li><li>O hack do Twitter de 2020 usou alguma falha técnica? Justifique com base no conceito de engenharia social.</li><li>Qual gatilho psicológico (autoridade, urgência ou confiança) você acha mais eficaz contra você mesmo? Por quê?</li><li>Pesquise: o que é 'double extortion' em ataques de ransomware modernos?</li></ol>
+      <ol><li>Qual vulnerabilidade um vírus explora pra se espalhar? E um worm — por que ele consegue se replicar sozinho, sem nenhuma ação da vítima?</li><li>Por que o ransomware é considerado, antes de tudo, um ataque à Disponibilidade?</li><li>Cite três sinais de alerta que ajudam a identificar um e-mail de phishing.</li><li>O hack do Twitter de 2020 usou alguma falha técnica? Justifique com base no conceito de engenharia social.</li><li>Qual gatilho psicológico (autoridade, urgência ou confiança) você acha mais eficaz contra você mesmo? Por quê?</li><li>Pesquise: o que é 'double extortion' em ataques de ransomware modernos?</li></ol>
     </div>
+        
       </div>
     </div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script src="../libs/prism/prism.min.js"></script>
+<script src="../libs/prism/prism-autoloader.min.js"></script>
 <script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+import mermaid from '../libs/mermaid/mermaid.esm.min.mjs';
 mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#ffe3dc',
-    primaryTextColor: '#120B1F',
-    primaryBorderColor: '#FF653F',
-    lineColor: '#FF653F',
-    secondaryColor: '#1E104E',
+    primaryColor: '#fbe5e0',
+    primaryTextColor: '#122420',
+    primaryBorderColor: '#E76F51',
+    lineColor: '#E76F51',
+    secondaryColor: '#249D8F',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#ffe3dc',
-    nodeBorder: '#FF653F',
+    mainBkg: '#fbe5e0',
+    nodeBorder: '#E76F51',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FF653F',
+    titleColor: '#E76F51',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
-    fontSize: '14px'
+    fontSize: '22px',
+    // cScale1 (mermaid timeline section backgrounds, e.g. every 2nd block) defaults to
+    // secondaryColor = cor_deep, which is already near-black — mermaid then darkens it
+    // further, producing a solid black block that clashes with the palette and, combined
+    // with the equally dark default label color, was unreadable. Feed it the same light
+    // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
+    // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
+    cScale1: '#fbf4e4'
   }
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::2';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -817,11 +1125,25 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
 }else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
 const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -830,8 +1152,23 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
   else if(e.key==='ArrowLeft')prevSlide();
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

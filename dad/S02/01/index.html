@@ -23,7 +23,8 @@ html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regu
 body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
 .container{width:100%;height:100%;position:relative;}
 .fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
-.fixed-link-bar a{color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
 .slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
 .slide.active{opacity:1;pointer-events:auto;z-index:1;}
 .slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
@@ -33,6 +34,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
 .slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
 .slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
 @media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
 .slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
@@ -40,8 +45,8 @@ h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;bor
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
 .file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
@@ -60,7 +65,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
-  .fixed-link-bar a{color:#000;}
+  .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
   .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
@@ -140,12 +145,74 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
 .bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
 .bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
-.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}</style>
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Desenvolvimento de Aplicações Desktop</a>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
 </div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Setup de Persistência</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate"></i><span>Revisão do Semestre 1: JavaScript</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-rotate"></i><span>Revisão de JavaScript</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Loops e Funções</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>DOM e Eventos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Objetos, Arrays e Métodos Funcionais</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Revisão de Electron</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Arquitetura Main x Renderer</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>IPC: Preload e ContextBridge</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>IPC Bidirecional: invoke/handle</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Layout com Bootstrap e Arquitetura de Pastas</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Múltiplas Janelas, Menus e Bandeja</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Diálogos Nativos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Por que um banco de dados?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Por Que Não Só um Arquivo JSON?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>O MySQL do Laboratório: Já Está Pronto</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Conectando com Node.js</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Instalando o Driver mysql2</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Estabelecendo a Primeira Conexão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Módulos no Node.js</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>Onde a Conexão Deve Viver</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>Promises por Dentro: resolve e reject</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Slide 19</span><span>main.js: Importando e Usando a Conexão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><span class="agenda-side-label">Slide 20</span><span>preload.js: Expondo o Método pro Renderer</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Slide 21</span><span>Renderer: Chamando a Função e Mostrando na Tela</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="25" onclick="showSlide(25);closeAgendaSidebar();"><span class="agenda-side-label">Slide 22</span><span>O Handle: Mora no main.js, Usa a Conexão do database.js</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="26" onclick="showSlide(26);closeAgendaSidebar();"><span class="agenda-side-label">Slide 23</span><span>O Caminho Completo: Do Clique ao Banco e de Volta</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="27" onclick="showSlide(27);closeAgendaSidebar();"><i class="fa-solid fa-road"></i><span>Boas Práticas e Próximos Passos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="28" onclick="showSlide(28);closeAgendaSidebar();"><span class="agenda-side-label">Slide 24</span><span>Protegendo as Credenciais</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="29" onclick="showSlide(29);closeAgendaSidebar();"><span class="agenda-side-label">Slide 25</span><span>O Que Vem Por Aí</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="30" onclick="showSlide(30);closeAgendaSidebar();"><span class="agenda-side-label">Slide 26</span><span>Resumo Visual da Aula</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="31" onclick="showSlide(31);closeAgendaSidebar();"><i class="fa-solid fa-cube"></i><span>Projeto prático</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="32" onclick="showSlide(32);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Construindo a Interface — Parte 2</span></button></div>
+</nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
@@ -335,7 +402,7 @@ const caros = produtos.filter(p =&gt; p.preco &gt; 60);</code></pre>
       <p>Todo app Electron tem um processo <strong>Main</strong> (Node.js completo) e um ou mais processos <strong>Renderer</strong> (a interface, isolada por segurança).</p>
       
     </div>
-<figure class="bloco-imagem" id="imgmri19">
+<figure class="bloco-imagem" id="img8zdt2">
     <div class="bloco-imagem-titulo">Electron.js</div>
     <img src="img/electron-logo.svg" alt="Logo do Electron.js" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -412,7 +479,7 @@ contextBridge.exposeInMainWorld('api', {
       <p>Usamos o <strong>Bootstrap</strong> pra montar interfaces desktop rapidamente, organizamos o projeto em pastas (main, renderer, preload) e separamos dados da lógica num arquivo <strong>JSON</strong> externo.</p>
       
     </div>
-<figure class="bloco-imagem" id="imgm0plg">
+<figure class="bloco-imagem" id="imgjkmna">
     <div class="bloco-imagem-titulo">Exemplo de Interface Bootstrap</div>
     <img src="img/bootstrap-dashboard-exemplo.png" alt="Interface de um dashboard Bootstrap (AdminLTE), o tipo de layout usado dentro de apps Electron" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -436,7 +503,7 @@ contextBridge.exposeInMainWorld('api', {
       <p>Como criar janelas filhas sincronizadas com a principal via IPC, e como integrar o app ao sistema operacional com <strong>menus nativos</strong> e um ícone na <strong>bandeja (Tray)</strong>.</p>
       
     </div>
-<figure class="bloco-imagem" id="img2fgfv">
+<figure class="bloco-imagem" id="imgfv8uk">
     <div class="bloco-imagem-titulo">Um App Electron com Várias Janelas</div>
     <img src="img/electron-multiplas-janelas.png" alt="App Electron com quatro janelas abertas simultaneamente, cada uma com um botão para criar mais janelas" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -459,7 +526,7 @@ contextBridge.exposeInMainWorld('api', {
       <p>Os diálogos nativos do Electron — <code>MessageBox</code>, <code>ErrorBox</code>, <code>OpenDialog</code> e <code>SaveDialog</code> — pra confirmar ações, mostrar erros e importar/exportar arquivos.</p>
       
     </div>
-<figure class="bloco-imagem" id="imgaqkpt">
+<figure class="bloco-imagem" id="imgt43rh">
     <div class="bloco-imagem-titulo">Exemplo de Diálogo Nativo (OpenDialog)</div>
     <img src="img/dialogo-nativo-abrir-arquivo.png" alt="Diálogo nativo de sistema operacional para abrir um arquivo" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -656,7 +723,7 @@ console.log(farmarAura(25)); // 35
       <p>A conexão com o banco (e a senha!) fica <strong>só no Main process</strong>. O Renderer pede dados via IPC (<code>invoke</code>/<code>handle</code> — Aula 9 do semestre passado) e nunca vê a string de conexão.</p>
       
     </div>
-<div class="bloco-diagrama" id="mmdpnaad">
+<div class="bloco-diagrama" id="mmd4yyjb">
     <div class="bloco-diagrama-titulo">O Fluxo Completo de uma Consulta</div>
     <div class="mermaid">sequenceDiagram
   participant R as Renderer
@@ -810,7 +877,7 @@ ipcMain.handle('db:status', async () =&gt; {
         <div class="slide-number">Slide 23</div>
         <h1>O Caminho Completo: Do Clique ao Banco e de Volta</h1>
         
-        <div class="bloco-diagrama" id="mmd0qimc">
+        <div class="bloco-diagrama" id="mmdso6l7">
     <div class="bloco-diagrama-titulo">Juntando todas as peças</div>
     <div class="mermaid">sequenceDiagram
   participant HTML as Elemento HTML
@@ -835,12 +902,59 @@ ipcMain.handle('db:status', async () =&gt; {
       </div>
     </div>
 
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-road"></i>
+        <h1>Boas Práticas e Próximos Passos</h1>
+        <p>Protegendo credenciais e olhando pra frente</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 24</div>
+        <h1>Protegendo as Credenciais</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-key"></i> Nunca no Código-Fonte
+      </h3>
+      <p>Senhas de banco não devem ir direto no código nem em repositórios Git. O padrão é usar um arquivo <strong>.env</strong> com variáveis de ambiente, lido pela biblioteca <code>dotenv</code>.</p>
+      
+    </div>
+
+    <div class="file-label">.env</div>
+    <pre style="margin-top:0;"><code class="language-bash">DB_HOST=143.106.241.4
+DB_PORT=3306
+DB_USER=cl123456
+DB_PASSWORD=cl*05032004
+DB_NAME=nome_do_seu_banco</code></pre>
+<p>Aprofundaremos segurança de aplicações Electron (CSP, XSS) na Aula 9.</p>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 25</div>
+        <h1>O Que Vem Por Aí</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Roteiro do Banco de Dados</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Aula</th><th>O que faremos</th></tr></thead><tbody><tr><td>2</td><td>Create — inserir dados via formulário</td></tr><tr><td>3</td><td>Read — listar dados numa tabela HTML</td></tr><tr><td>4</td><td>Update — editar registros existentes</td></tr><tr><td>5</td><td>Delete — remover com confirmação</td></tr><tr><td>6</td><td>Avaliação 1 — tudo isso junto</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">Hoje montamos a base; as próximas 4 aulas constroem o CRUD completo em cima dela.</div>
+  </div>
+        
+      </div>
+    </div>
+
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 26</div>
         <h1>Resumo Visual da Aula</h1>
         
-        <div class="bloco-diagrama" id="mmd8w4r9">
+        <div class="bloco-diagrama" id="mmd0nrsq">
     <div class="bloco-diagrama-titulo">Mapa da Aula 1</div>
     <div class="mermaid">%%{init: {'themeVariables': {
   'git0': '#FF6500', 'gitBranchLabel0': '#ffffff',
@@ -936,7 +1050,7 @@ mermaid.initialize({
   theme: 'base',
   themeVariables: {
     primaryColor: '#ffe3d1',
-    primaryTextColor: '#1E3E62',
+    primaryTextColor: '#0B192C',
     primaryBorderColor: '#FF6500',
     lineColor: '#FF6500',
     secondaryColor: '#0B192C',
@@ -960,7 +1074,12 @@ mermaid.initialize({
 });
 </script>
 <script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::1';
 let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
@@ -968,11 +1087,25 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
 }else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
 const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
 const nextSlide = () => {showSlide(cur+1);}
 const prevSlide = () => {showSlide(cur-1);}
@@ -981,8 +1114,9 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
   else if(e.key==='ArrowLeft')prevSlide();
   else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
 });
-showSlide(0);
+showSlide(cur);
 // Blocks copy/right-click/print only on slides authored with "protegido":true --
 // this is a deterrent (discourages casual copy-paste of an assignment), not real
 // protection: nothing served to a browser can stop an OS-level screenshot, and a
