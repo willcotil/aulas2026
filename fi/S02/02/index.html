@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 2: CRUD: Create (Inserção) — Formulário UI → IPC → INSERT SQL</title>
+<title>Aula 2: Git Local: Ciclo de Vida do Arquivo (Add, Commit, Log)</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#1E3E62;--color-rust:#FF6500;
-  --color-orange:#FF6500;--color-yellow:#FF6500;--color-deep:#0B192C;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0B192C;
+  --color-navy:#000;--color-blue:#1E3A5F;--color-rust:#F05033;
+  --color-orange:#F05033;--color-yellow:#F05033;--color-deep:#0D1B2A;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10151C;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -165,24 +165,29 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 </head>
 <body>
 <div class="fixed-link-bar">
-  <a href="https://#" target="_blank">Desenvolvimento de Aplicações Desktop</a>
+  <a href="https://#" target="_blank">Fundamentos de Informática</a>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-topic" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><i class="fa-solid fa-plus"></i><span>CRUD: Create (Inserção)</span></button>
-<button class="agenda-side-item" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Agenda de hoje</span></button>
-<button class="agenda-side-item" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Recapitulando rapidinho</span></button>
-<button class="agenda-side-item agenda-side-topic" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-wand-magic-sparkles"></i><span>O Create entra em cena</span></button>
-<button class="agenda-side-item" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O que é o Create?</span></button>
-<button class="agenda-side-item" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Conhecendo o Projeto Base</span></button>
-<button class="agenda-side-item" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Criando o preload.js</span></button>
-<button class="agenda-side-item" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Ligando o preload à Janela do Insumo</span></button>
-<button class="agenda-side-item" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>main.js: o INSERT de Verdade</span></button>
-<button class="agenda-side-item" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Segurança: Nunca Concatene Valores!</span></button>
-<button class="agenda-side-item" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>frmInsumo.js: Chamando a API de Verdade</span></button>
-<button class="agenda-side-item" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo: o Caminho Completo do Create</span></button>
-<button class="agenda-side-item" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Agora é sua vez: Create na Peça Impressa</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Git Local: Ciclo de Vida do Arquivo</span></button>
+<button class="agenda-side-item" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que vem por aí</span></button>
+<button class="agenda-side-item agenda-side-topic" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-folder-plus"></i><span>Começando do Zero</span></button>
+<button class="agenda-side-item" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>git init: criando o repositório</span></button>
+<button class="agenda-side-item" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>.gitignore: nem tudo vira página da linha do tempo</span></button>
+<button class="agenda-side-item agenda-side-topic" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>Radar de Mudanças</span></button>
+<button class="agenda-side-item" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Onde o diff entra nos três estados</span></button>
+<button class="agenda-side-item" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>git diff na prática</span></button>
+<button class="agenda-side-item agenda-side-topic" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Múltiplos Arquivos, Um Commit</span></button>
+<button class="agenda-side-item" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>git add: um por um, ou tudo de uma vez</span></button>
+<button class="agenda-side-item" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Simulação: criando um repositório do zero (Parte 1)</span></button>
+<button class="agenda-side-item" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Simulação: criando um repositório do zero (Parte 2)</span></button>
+<button class="agenda-side-item agenda-side-topic" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-comment-dots"></i><span>Mensagens Que Contam a História Direito</span></button>
+<button class="agenda-side-item" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Mensagem de commit: ajuda ou atrapalha?</span></button>
+<button class="agenda-side-item" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>git log: opções que economizam tela</span></button>
+<button class="agenda-side-item agenda-side-topic" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Ops, Errei o Commit</span></button>
+<button class="agenda-side-item" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>git commit --amend</span></button>
+<button class="agenda-side-item" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafios</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
@@ -192,95 +197,12 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plus"></i>
-        <h1>CRUD: Create (Inserção)</h1>
-        <p>Do TODO no frmInsumo.js ao INSERT de verdade</p>
-      </div>
-    </div>
-
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 01</div>
-        
-        <h2>Agenda de hoje</h2>
-        <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">O que vamos construir</div>
-    <div class="agenda-lista">
-      
-        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
-          <div class="agenda-numero">01</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recapitulando rapidinho</div>
-            <div class="agenda-item-texto">conexao.js, formulários e FormData já prontos</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
-          <div class="agenda-numero">02</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-wand-magic-sparkles"></i> O que é o Create?</div>
-            <div class="agenda-item-texto">conceito e fluxo completo</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-folder-tree"></i> Conhecendo o projeto base</div>
-            <div class="agenda-item-texto">o que já existe e o que falta</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Criando o preload.js</div>
-            <div class="agenda-item-texto">a peça que faltava no projeto</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
-          <div class="agenda-numero">05</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-window-restore"></i> Ligando o preload à janela</div>
-            <div class="agenda-item-texto">webPreferences no main.js</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> main.js: o INSERT de verdade</div>
-            <div class="agenda-item-texto">ipcMain.handle + mysql2</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-shield-halved"></i> Segurança: nunca concatene valores</div>
-            <div class="agenda-item-texto">queries parametrizadas</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
-          <div class="agenda-numero">08</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-vial"></i> frmInsumo.js: chamando a API</div>
-            <div class="agenda-item-texto">substituindo o TODO</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">09</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Resumo do fluxo completo</div>
-            <div class="agenda-item-texto">visão de ponta a ponta</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
-          <div class="agenda-numero">10</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cubes"></i> Agora é sua vez: Peça Impressa</div>
-            <div class="agenda-item-texto">o mesmo padrão em frmPeca</div>
-          </div>
-        </div>
-    </div>
-  </div>
+        <h1>Git Local: Ciclo de Vida do Arquivo</h1>
+        <h2>Add, commit, log — e tudo que rola entre um e outro</h2>
+        <p>Na Aula 1 você conheceu a linha do tempo do Git. Hoje a gente pega o teclado e vive o dia a dia real de quem versiona um projeto do começo ao fim.</p>
         
       </div>
     </div>
@@ -288,43 +210,72 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 02</div>
+        <h1>O que vem por aí</h1>
         
-        <h2>Recapitulando rapidinho</h2>
-        <p>Três peças que a Aula 1 já deixou prontas no projeto — hoje é só encaixar elas.</p>
-
-    <div class="grid-3">
+        <div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">Roteiro de hoje</div>
+    <div class="agenda-lista">
       
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-database"></i> conexao.js
-          </h3>
-          <p>Em <code>src/main/conexao.js</code>, a <code>connection</code> já é criada e exportada via <code>module.exports</code> — é só dar <code>require('./conexao')</code> e usar.</p>
-          
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
+          <div class="agenda-numero">01</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-folder-plus"></i> git init: criando o repositório</div>
+            <div class="agenda-item-texto">Começando um projeto do zero</div>
+          </div>
         </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-file-lines"></i> Formulários prontos
-          </h3>
-          <p><code>frmInsumo.html</code>/<code>frmPeca.html</code> já têm os campos certinhos, com os mesmos <code>name</code> das colunas da tabela.</p>
-          
+        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+          <div class="agenda-numero">02</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-eye-slash"></i> .gitignore: nem tudo vira página</div>
+            <div class="agenda-item-texto">O que NÃO entra na linha do tempo</div>
+          </div>
         </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-clipboard-list"></i> FormData já captura
-          </h3>
-          <p><code>frmInsumo.js</code> já usa <code>Object.fromEntries(new FormData(e.target))</code> — falta só mandar esse objeto pro banco de verdade.</p>
-          
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+          <div class="agenda-numero">03</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-magnifying-glass"></i> git diff na prática</div>
+            <div class="agenda-item-texto">Vendo exatamente o que mudou</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-layer-group"></i> git add: um por um, ou tudo de uma vez</div>
+            <div class="agenda-item-texto">Múltiplos arquivos, um commit</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-comment-dots"></i> Mensagem de commit: ajuda ou atrapalha?</div>
+            <div class="agenda-item-texto">A diferença entre ajudar e atrapalhar</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-list"></i> git log: opções que economizam tela</div>
+            <div class="agenda-item-texto">Opções que economizam tela</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(16)" role="button" tabindex="0">
+          <div class="agenda-numero">07</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> git commit --amend</div>
+            <div class="agenda-item-texto">Corrigindo o último commit</div>
+          </div>
         </div>
     </div>
+  </div>
         
       </div>
     </div>
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <h1>O Create entra em cena</h1>
-        <p>A primeira letra do CRUD: fazer dados existirem</p>
+        <i class="fa-solid fa-folder-plus"></i>
+        <h1>Começando do Zero</h1>
+        <p>git init e o que fica de fora da linha do tempo</p>
       </div>
     </div>
 
@@ -332,35 +283,24 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 03</div>
         
-        <h2>O que é o Create?</h2>
-        <p>Pensa num jogo online: quando você cria um personagem novo, ele não existia antes — a partir daquele momento ele passa a existir no servidor. <strong>Create é exatamente isso pro banco de dados</strong>: pegar dados que não existiam numa tabela e fazer eles passarem a existir, como uma linha nova.</p>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-plus"></i> Definição formal
-      </h3>
-      <p><strong>Create</strong> = inserir uma linha nova numa tabela do banco (<code>INSERT INTO</code>), a partir de dados que o usuário forneceu na interface (formulário).</p>
-      
-    </div>
-<div class="bloco-diagrama" id="mmdf8tn8">
-    <div class="bloco-diagrama-titulo">O caminho de um Create</div>
-    <div class="mermaid">flowchart TD
-  subgraph Parte1["Do formulario ao Main"]
-    direction LR
-    A["Formulario preenchido"] --&gt; B["FormData captura os dados"]
-    B --&gt; C["Renderer chama a API exposta"]
-    C --&gt; D["preload.js repassa via invoke"]
-  end
-  subgraph Parte2["Do Main ao retorno"]
-    direction LR
-    E["ipcMain.handle recebe"] --&gt; F["INSERT INTO tabela"]
-    F --&gt; G["MySQL grava a nova linha"]
-    G --&gt; H["Promise resolve"]
-    H --&gt; I["Renderer mostra sucesso"]
-  end
-  Parte1 --&gt; Parte2</div>
+        <h2>git init: criando o repositório</h2>
+        <p>Na Aula 1 você já viu commit e add — mas de onde vem o repositório em si? <code>git init</code> transforma uma pasta comum numa pasta que o Git passa a vigiar.</p>
+<div class="bloco-diagrama" id="mmdrjtx9">
+    <div class="bloco-diagrama-titulo">O que git init faz</div>
+    <div class="mermaid">flowchart LR
+  A["Pasta comum\n(sem controle de versao)"] --&gt;|git init| B["Mesma pasta\n+ pasta oculta .git/"]
+  B --&gt; C["Pronta pra registrar\ncommits"]</div>
     
   </div>
+
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash">mkdir portfolio-pessoal
+cd portfolio-pessoal
+git init
+
+# a pasta .git/ guarda TODO o historico
+ls -la
+# .git  (nao mexa manualmente aqui dentro)</code></pre>
         
       </div>
     </div>
@@ -369,27 +309,31 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 04</div>
         
-        <h2>Conhecendo o Projeto Base</h2>
-        <p>A partir de hoje, toda a disciplina usa o mesmo projeto base: o <strong>Gerenciador de Peças 3D</strong> (repositório <code>willcotil/dad2s</code>), já com a estrutura de pastas e os formulários da Aula 1 prontos.</p>
+        <h2>.gitignore: nem tudo vira página da linha do tempo</h2>
+        <p>Rascunho pessoal, senha, pasta de backup automático... tem arquivo que não faz sentido (ou é perigoso) versionar. O <code>.gitignore</code> diz pro Git "finge que isso aqui não existe".</p>
 
-    <div class="file-label">estrutura do projeto</div>
-    <pre style="margin-top:0;"><code class="language-text">src/
-  main/
-    main.js       # janela, menu, tray, teste de conexao
-    conexao.js    # conexao MySQL (pronta desde a Aula 1)
-  renderer/
-    frmPrincipal.html/.js
-    frmInsumo.html/.js   # formulario + TODO esperando o INSERT
-    frmPeca.html/.js     # formulario + TODO esperando o INSERT</code></pre>
+    <div class="file-label">.gitignore</div>
+    <pre style="margin-top:0;"><code class="language-text"># arquivos e pastas que o Git vai ignorar
+anotacoes-privadas.txt
+backup/
+*.tmp</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> O Que Falta: o preload.js
+        <i class="fa-solid fa-robot"></i> Dica de ferramenta
       </h3>
-      <p>Repara no <code>frmInsumo.js</code>: o formulário já captura os dados, mas um <code>TODO</code> mostra que falta a chamada IPC. E olhando o <code>main.js</code>, nenhuma janela tem um <code>preload</code> configurado — ou seja, o Renderer ainda não tem NENHUMA porta pro Main. É a primeira coisa que vamos construir hoje.</p>
-      
+      <p>Pedir pra uma IA sugerir um <code>.gitignore</code> pronto pro tipo do seu projeto é um baita atalho — só sempre dê uma conferida se o que ela sugeriu faz sentido pro SEU caso antes de aceitar de olhos fechados.</p>
+      <ul><li>Arquivos com dado sensível (senha, chave)</li><li>Pastas geradas automaticamente (backup, cache)</li><li>Arquivos temporários do editor/sistema</li></ul>
     </div>
         
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <h1>Radar de Mudanças</h1>
+        <p>Botando o git diff pra trabalhar de verdade</p>
       </div>
     </div>
 
@@ -397,22 +341,24 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 05</div>
         
-        <h2>Criando o preload.js</h2>
-        <p>Vamos criar um arquivo novo, <code>src/main/preload.js</code> — a mesma ideia da Aula 1, expondo uma função que segue o padrão invoke.</p>
-
-    <div class="file-label">src/main/preload.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
-
-contextBridge.exposeInMainWorld('api', {
-  criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo)
-});</code></pre>
+        <h2>Onde o diff entra nos três estados</h2>
+        <p>Lembra dos três estados da Aula 1 — modified, staged, committed? O <code>git diff</code> é a lupa que mostra exatamente o que muda entre um estado e outro.</p>
+<div class="bloco-diagrama" id="mmd76mnl">
+    <div class="bloco-diagrama-titulo">git diff nos três estados</div>
+    <div class="mermaid">flowchart LR
+  WD["Working Directory\n(o que voce edita)"] --&gt;|git add| ST["Staging Area\n(area de stage)"]
+  ST --&gt;|git commit| REPO["Repositório\n(commits salvos)"]
+  WD --&gt;|git diff| ST
+  ST --&gt;|git diff --staged| REPO</div>
+    
+  </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> Por Que Não Existia Ainda
+        <i class="fa-solid fa-magnifying-glass"></i> Dois comandos, dois comparativos
       </h3>
-      <p>A Aula 1 só pediu o <strong>esqueleto visual</strong> do projeto — sem persistência. Por padrão, o Electron isola completamente o Renderer do Node.js (<code>contextIsolation</code>); sem um <code>preload.js</code> ligado à janela, <code>window.api</code> simplesmente não existe.</p>
       
+      <ul><li><code>git diff</code> → compara o arquivo editado com o que está staged (ou o último commit, se nada foi staged)</li><li><code>git diff --staged</code> → compara o que está staged com o último commit</li></ul>
     </div>
         
       </div>
@@ -422,34 +368,41 @@ contextBridge.exposeInMainWorld('api', {
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 06</div>
         
-        <h2>Ligando o preload à Janela do Insumo</h2>
-        <p>Ter o arquivo não basta — o <code>main.js</code> precisa dizer pra janela do formulário usar esse <code>preload.js</code>, através de <code>webPreferences</code>. Aproveite também pra importar o <code>ipcMain</code>, que ainda não estava sendo usado.</p>
+        <h2>git diff na prática</h2>
+        
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash"># editou estilo.css e quer ver o que mudou antes de commitar
+git diff
 
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { app, BrowserWindow, Menu, Tray, dialog, ipcMain } = require('electron');
-const path = require('path');
-const conexao = require('./conexao');
+--- a/estilo.css
++++ b/estilo.css
+@@ -1,3 +1,3 @@
+ body {
+-  background: white;
++  background: #0b192c;
+ }
 
-const abrirModalInsumo = (janelaPrincipal) =&gt; {
-    const janelaModal = new BrowserWindow({
-        width: 400, height: 550,
-        parent: janelaPrincipal, modal: true,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
-        }
-    });
-    janelaModal.removeMenu();
-    janelaModal.loadFile(path.join(__dirname, '../renderer/frmInsumo.html'));
-};</code></pre>
+# depois de git add, o comparativo muda de alvo
+git add estilo.css
+git diff --staged
+# mostra a MESMA mudanca, mas agora comparando com o ultimo commit</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Só Nessa Janela, Por Enquanto
+        <i class="fa-solid fa-lightbulb"></i> Lendo o diff
       </h3>
-      <p>Só a janela do Insumo precisa do <code>preload.js</code> agora. <code>abrirModalPeca</code> vai precisar da mesma coisa — é parte do exercício de hoje.</p>
+      <p>Linha com <code>-</code> é o que existia antes e saiu. Linha com <code>+</code> é o que entrou. Se o <code>git diff</code> não mostrar nada, é porque não há mudança pendente pra esse arquivo naquele estado.</p>
       
     </div>
         
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-layer-group"></i>
+        <h1>Múltiplos Arquivos, Um Commit</h1>
+        <p>git add em lote e o fluxo real de trabalho</p>
       </div>
     </div>
 
@@ -457,31 +410,25 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 07</div>
         
-        <h2>main.js: o INSERT de Verdade</h2>
-        <p>Com <code>ipcMain</code> importado e a <code>conexao</code> já disponível, é só registrar o handler que faz o INSERT de verdade na tabela <code>insumo</code>.</p>
+        <h2>git add: um por um, ou tudo de uma vez</h2>
+        
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash"># um arquivo por vez
+git add index.html
 
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:criar', (evento, insumo) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';
+# varios de uma vez, nomeando cada um
+git add index.html estilo.css
 
-    conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao], (erro, resultado) =&gt; {
-      if (erro) {
-        reject(erro);
-        return;
-      }
-      resolve({ id: resultado.insertId, ...insumo });
-    });
-  });
-});</code></pre>
+# todo mundo que ja e rastreado + novos, na pasta atual pra baixo
+git add .
 
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-map-pin"></i> Onde Colocar
-      </h3>
-      <p>Pode declarar esse <code>ipcMain.handle</code> em qualquer lugar do <code>main.js</code>, desde que fora de outra função — um bom lugar é logo abaixo de <code>criarTray</code>, antes do fechamento do arquivo.</p>
-      
-    </div>
+# a pasta inteira do repositorio, mesmo fora da pasta atual
+git add -A</code></pre>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Qual usar?</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Comando</th><th>O que pega</th><th>Cuidado</th></tr></thead><tbody><tr><td>git add .</td><td>Novos e modificados, da pasta atual pra baixo</td><td>Não sobe pra pastas acima da atual</td></tr><tr><td>git add -A</td><td>Tudo no repositório inteiro (inclusive delеções)</td><td>Fácil adicionar algo sem querer — confira com git status antes</td></tr><tr><td>git add arquivo</td><td>Só o que você nomear</td><td>Mais controle, mais digitação</td></tr></tbody></table></div>
+    
+  </div>
         
       </div>
     </div>
@@ -489,26 +436,22 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 08</div>
+        <h1>Simulação: criando um repositório do zero (Parte 1)</h1>
         
-        <h2>Segurança: Nunca Concatene Valores!</h2>
-        
-    
-    <pre><code class="language-javascript">// ❌ NUNCA FAÇA ISSO — concatenar valor direto na query
-const sql = `INSERT INTO insumo (tipo, nome, valor, data_aquisicao)
-             VALUES ('${insumo.tipo}', '${insumo.nome}', ${insumo.valor}, '${insumo.data_aquisicao}')`;
-conexao.query(sql, (erro, resultado) =&gt; { /* ... */ });
+        <p>Você vai começar o repositório do seu portfólio pessoal. Acompanhe a sequência de comandos como se estivesse no seu próprio terminal.</p>
 
-// ✅ Faça assim — &quot;?&quot; é um placeholder, os valores vão num array separado
-const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';
-conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao], (erro, resultado) =&gt; { /* ... */ });</code></pre>
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash">git init
+touch index.html estilo.css anotacoes-privadas.txt
 
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-shield-halved"></i> Por Que Isso Importa: SQL Injection
-      </h3>
-      <p>Se o valor do usuário vira texto direto dentro da query, alguém pode digitar no formulário um texto que <strong>muda o comando SQL de verdade</strong> (ex: fechar as aspas e colar outro comando). O driver <code>mysql2</code> trata o <code>?</code> como um valor puro, nunca como parte do comando — por isso ele é sempre a forma segura de montar a query.</p>
-      
-    </div>
+# cria o .gitignore com anotacoes-privadas.txt dentro
+
+git status
+# Untracked: .gitignore, estilo.css, index.html
+# (anotacoes-privadas.txt nao aparece: esta ignorado)
+
+git add index.html estilo.css .gitignore
+git commit -m &quot;Cria estrutura inicial do portfolio (HTML e CSS)&quot;</code></pre>
         
       </div>
     </div>
@@ -516,32 +459,66 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 09</div>
+        <h1>Simulação: criando um repositório do zero (Parte 2)</h1>
         
-        <h2>frmInsumo.js: Chamando a API de Verdade</h2>
-        <p>Voltando pro Renderer: o <code>TODO</code> do <code>frmInsumo.js</code> finalmente vira código de verdade. O resto do arquivo (capturar com FormData) já estava pronto desde a Aula 1.</p>
+        <p>Agora você edita o CSS e repete o ciclo — só que dessa vez conferindo a mudança com diff antes de commitar.</p>
 
-    <div class="file-label">src/renderer/js/frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">document.querySelector(&quot;#formInsumo&quot;).addEventListener(&quot;submit&quot;, async (e) =&gt; {
-    e.preventDefault(); // Evita o piscar da tela
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash"># editou o estilo.css, mudou a cor de fundo
 
-    const dados = Object.fromEntries(new FormData(e.target));
-    dados.valor = Number(dados.valor);
+git diff
+# mostra a mudanca ainda so no working directory
 
-    try {
-        const resultado = await window.api.criarInsumo(dados);
-        console.log(&quot;Insumo cadastrado:&quot;, resultado);
-        e.target.reset(); // limpa o formulario pro proximo cadastro
-    } catch (erro) {
-        console.error(&quot;Deu ruim ao cadastrar o insumo:&quot;, erro);
-        alert(&quot;Nao foi possivel cadastrar o insumo.&quot;);
-    }
-});</code></pre>
+git add estilo.css
+git diff --staged
+# mesma mudanca, agora comparada com o ultimo commit
+
+git commit -m &quot;Ajusta cor de fundo do portfolio&quot;
+
+git log --oneline
+# a1b2c3d Ajusta cor de fundo do portfolio
+# f9e8d7c Cria estrutura inicial do portfolio (HTML e CSS)</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-comment-dots"></i>
+        <h1>Mensagens Que Contam a História Direito</h1>
+        <p>convenção de commit: o que ajuda e o que atrapalha</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 10</div>
+        
+        <h2>Mensagem de commit: ajuda ou atrapalha?</h2>
+        
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-face-dizzy"></i> Mensagens ruins
+          </h3>
+          
+          <ul style="margin-left:20px"><li>"six seven"</li><li>"wip"</li><li>"fix"</li><li>"asdasd"</li><li>"mudei umas coisas"</li></ul>
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-face-smile"></i> Mensagens boas
+          </h3>
+          
+          <ul style="margin-left:20px"><li>"Corrige bug de login com senha vazia"</li><li>"Adiciona validação de e-mail no cadastro"</li><li>"Remove import não usado no header"</li><li>"Cria estrutura inicial do portfolio"</li></ul>
+        </div>
+    </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-check"></i> Só Isso Mudou
+        <i class="fa-solid fa-pen"></i> A convenção
       </h3>
-      <p>Onde tinha só um <code>console.log</code> de TODO, agora entra a chamada real: <code>window.api.criarInsumo(dados)</code> — exatamente a função que o <code>preload.js</code> expôs.</p>
+      <p>Verbo no imperativo (Corrige, Adiciona, Remove), resumo curto e específico o bastante pra você entender daqui 6 meses — sem precisar abrir o <code>git diff</code> pra lembrar o que fez.</p>
       
     </div>
         
@@ -550,35 +527,61 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
+        <div class="slide-number">Slide 11</div>
         
-        <h2>Resumo: o Caminho Completo do Create</h2>
-        <div class="bloco-diagrama" id="mmdmajyg">
-    <div class="bloco-diagrama-titulo">Do clique no botão até a linha gravada no MySQL</div>
-    <div class="mermaid">sequenceDiagram
-  participant U as Usuário
-  participant R as frmInsumo.js
-  participant P as preload.js
-  participant M as main.js
-  participant DB as MySQL
+        <h2>git log: opções que economizam tela</h2>
+        <p>Você já usou <code>git log</code> na Aula 1 pra ver o histórico completo. Um projeto real tem dezenas (ou milhares) de commits — hora de compactar.</p>
 
-  U-&gt;&gt;R: Preenche e envia o formulário
-  R-&gt;&gt;R: Object.fromEntries(new FormData(...))
-  R-&gt;&gt;P: window.api.criarInsumo(dados)
-  P-&gt;&gt;M: ipcRenderer.invoke("insumo:criar")
-  M-&gt;&gt;DB: INSERT INTO insumo VALUES (?, ?, ?, ?)
-  DB--&gt;&gt;M: Linha criada (insertId)
-  M--&gt;&gt;P: resolve(resultado)
-  P--&gt;&gt;R: Promise resolvida
-  R-&gt;&gt;U: Limpa o formulário (sucesso)</div>
-    
-  </div>
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash">git log --oneline
+# a1b2c3d Ajusta cor de fundo do portfolio
+# f9e8d7c Cria estrutura inicial do portfolio (HTML e CSS)
+
+git log --oneline -n 1
+# so o commit mais recente
+
+git log --oneline --author=&quot;Maria&quot;
+# so os commits de uma pessoa (util em Aula 4, com equipe)</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-check"></i> O Padrão que Você Vai Usar Sempre
+        <i class="fa-solid fa-list"></i> --oneline é seu melhor amigo
       </h3>
-      <p>preload expõe -> webPreferences liga -> handle recebe -> INSERT com <code>?</code> -> resolve -> Renderer trata sucesso/erro. Todo Create da disciplina segue esse mesmo caminho — inclusive o de Peça Impressa, no exercício de hoje.</p>
+      <p>Reduz cada commit a uma linha: hash curto + mensagem. É o formato que a maioria dos devs usa no dia a dia pra não perder tempo rolando tela.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Ops, Errei o Commit</h1>
+        <p>corrigindo o último ponto da linha do tempo</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 12</div>
+        
+        <h2>git commit --amend</h2>
+        <p>Escreveu a mensagem errada ou esqueceu de adicionar um arquivo no último commit? Em vez de criar mais um commit só pra corrigir, você reescreve o último ponto da linha do tempo.</p>
+
+    <div class="file-label">terminal</div>
+    <pre style="margin-top:0;"><code class="language-bash"># corrigir so a mensagem do ultimo commit
+git commit --amend -m &quot;Cria estrutura inicial do portfolio&quot;
+
+# esqueceu um arquivo? adiciona e reaproveita a mesma mensagem
+git add index.html
+git commit --amend --no-edit</code></pre>
+
+    <div class="focus-box" style="border-color:#ef4444;border-left-color:#ef4444;">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Cuidado: isso reescreve a história
+      </h3>
+      <p>Não fica commitando 10 vezes só pra ajustar um detalhezinho — isso não farma nenhuma aura no histórico, só polui o log. Use <code>--amend</code> antes de compartilhar o projeto com alguém (isso é papo pra Aula 3, com GitHub). Depois de publicado, reescrever vira dor de cabeça pra quem já baixou.</p>
       
     </div>
         
@@ -588,20 +591,11 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
-        <h1>Agora é sua vez: Create na Peça Impressa</h1>
+        <h1>Desafios</h1>
         
-        <p>Aplique exatamente o mesmo padrão de hoje na tabela <code>peca_impressa</code>, usando os arquivos que já existem: <code>frmPeca.html</code> e <code>frmPeca.js</code> (que já tem o <code>TODO</code> esperando por você).</p>
-
+        
     <div class="quest-list">
-      <ol><li>No preload.js, exponha uma função <code>criarPeca(peca)</code> que chama <code>ipcRenderer.invoke('peca:criar', peca)</code> — no mesmo objeto que já expõe <code>criarInsumo</code>.</li><li>No main.js, adicione <code>webPreferences: { preload: path.join(__dirname, 'preload.js') }</code> também em <code>abrirModalPeca</code> — sem isso, <code>window.api</code> não existe naquela janela.</li><li>Ainda no main.js, crie o <code>ipcMain.handle('peca:criar', ...)</code> montando o INSERT INTO peca<em>impressa (titulo, cor, peso, quantidade</em>material, tempo<em>impressao, data</em>impressao) VALUES (?, ?, ?, ?, ?, ?) — reaproveitando a conexao.</li><li>No frmPeca.js, troque o TODO/console.log por await window.api.criarPeca(dados), tratando sucesso (limpar o formulário) e erro (avisar o usuário) — igual fizemos em frmInsumo.js.</li><li>Teste cadastrando pelo menos 3 peças diferentes e confira no MySQL se as linhas foram gravadas certinho.</li></ol>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-star"></i> Dica
-      </h3>
-      <p>Se o <code>window.api</code> continuar <code>undefined</code> no formulário de Peça, o motivo quase sempre é esquecer o <code>webPreferences.preload</code> daquela janela específica — cada <code>BrowserWindow</code> precisa da própria configuração.</p>
-      
+      <ol><li>Crie uma pasta nova, rode git init e confirme que apareceu a pasta oculta .git.</li><li>Crie 3 arquivos à sua escolha e um .gitignore que ignore pelo menos um deles.</li><li>Faça 3 commits com mensagens boas, mudando algo diferente em cada um.</li><li>Entre um git add e um git commit, use git diff e git diff --staged pra comparar.</li><li>Rode git log --oneline e confira o histórico compacto do seu projeto.</li><li>Erre de propósito uma mensagem de commit e conserte com git commit --amend.</li></ol>
     </div>
         
       </div>
@@ -614,17 +608,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#ffe3d1',
-    primaryTextColor: '#1E3E62',
-    primaryBorderColor: '#FF6500',
-    lineColor: '#FF6500',
-    secondaryColor: '#0B192C',
+    primaryColor: '#fce0da',
+    primaryTextColor: '#10151C',
+    primaryBorderColor: '#F05033',
+    lineColor: '#F05033',
+    secondaryColor: '#0D1B2A',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#ffe3d1',
-    nodeBorder: '#FF6500',
+    mainBkg: '#fce0da',
+    nodeBorder: '#F05033',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FF6500',
+    titleColor: '#F05033',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -634,7 +628,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d7dce3'
+    cScale1: '#d7dce2'
   }
 });
 </script>
