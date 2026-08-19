@@ -195,7 +195,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-graduation-cap"></i><span>Caso Prático: Fechando o Ciclo da Matrícula</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Relembrando o Desafio da Aula 1</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Até a 2FN: A Tabela de Ligação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Até a 2FN: Aluno e Disciplina</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Até a 2FN: Aluno e Turma (com um Detalhe Escondido)</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Aplicando o Checklist da 3FN</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Decomposição Final (3FN)</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><i class="fa-solid fa-sitemap"></i><span>Resumo Visual: 1FN → 2FN → 3FN</span></button>
@@ -317,7 +317,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>A Ideia por Trás da 3FN</h1>
         
         <p>Pensa na secretaria da escola: a sua <strong>matrícula</strong> diz qual é a sua <strong>turma</strong> (ex: 2ºB). E é a turma — não você — que define a <strong>sala de aula</strong>. Se a turma 2ºB mudar pra Sala 15, a mudança vale pra turma inteira de uma vez.</p>
-<div class="bloco-diagrama" id="mmdguzps">
+<div class="bloco-diagrama" id="mmdvfgks">
     
     <div class="mermaid">flowchart LR
     A(["Matrícula do aluno"]) --&gt; B(["Turma: 2ºB"]) --&gt; C(["Sala de aula: Sala 12"])</div>
@@ -365,10 +365,10 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 05</div>
         <h1>O Problema: Dependência Transitiva</h1>
         
-        <p>Uma bilheteria online guarda os ingressos vendidos numa única tabela, repetindo os dados do evento em cada linha:</p>
+        <p>Uma bilheteria online guarda os ingressos vendidos numa tabela simples, só com o comprador e o local do show. Rafael e Camila compraram ingresso pro mesmo show; Rafael também comprou pra outro, num local diferente:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">ingresso (fora da 3FN)</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>ingresso_id</th><th>comprador</th><th>evento_id</th><th>nome_evento</th><th>local_evento</th></tr></thead><tbody><tr><td>1</td><td>Rafael Nunes</td><td>500</td><td>Festival Batidas</td><td>Allianz Parque</td></tr><tr><td>2</td><td>Camila Rocha</td><td>500</td><td>Festival Batidas</td><td>Allianz Parque</td></tr><tr><td>3</td><td>Rafael Nunes</td><td>501</td><td>Turnê Elétrica</td><td>Espaço das Américas</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>ingresso_id</th><th>comprador</th><th>local</th></tr></thead><tbody><tr><td>1</td><td>Rafael Nunes</td><td>Allianz Parque</td></tr><tr><td>2</td><td>Camila Rocha</td><td>Allianz Parque</td></tr><tr><td>3</td><td>Rafael Nunes</td><td>Espaço das Américas</td></tr></tbody></table></div>
     
   </div>
 
@@ -376,8 +376,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
+      <p>'Allianz Parque' repete nas duas primeiras linhas — não é coincidência, são ingressos do mesmo show. Só que <code>local</code> não é um dado do ingresso: é um dado do EVENTO, uma entidade que essa tabela nem chegou a criar. É o tipo de coisa que passa batido — parece só um detalhe do ingresso, até a repetição chamar atenção.</p>
       
-      <ul><li><code>nome_evento</code> não depende da chave.</li><li><code>local_evento</code> também não depende da chave.</li><li>Os dois dependem de <code>evento_id</code>, que também não é chave.</li><li>Isso é dependência transitiva: a chave aponta pro evento, e é o evento que determina esses dados.</li></ul>
     </div>
         
       </div>
@@ -388,7 +388,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 06</div>
         <h1>A Solução: Separando o que Depende do Meio</h1>
         
-        <p>Tudo que depende só de <code>evento_id</code> vira sua própria tabela; <code>ingresso</code> fica só com o que realmente depende da sua chave:</p>
+        <p>A correção aqui não é só mover uma coluna — é reconhecer uma entidade que faltava: EVENTO. Criamos a tabela <code>evento</code>, com o local, e o ingresso passa a se referir a ela por <code>evento_id</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">ingresso</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>ingresso_id</th><th>comprador</th><th>evento_id</th></tr></thead><tbody><tr><td>1</td><td>Rafael Nunes</td><td>500</td></tr><tr><td>2</td><td>Camila Rocha</td><td>500</td></tr><tr><td>3</td><td>Rafael Nunes</td><td>501</td></tr></tbody></table></div>
@@ -396,7 +396,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   </div>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">evento</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>evento_id</th><th>nome_evento</th><th>local_evento</th></tr></thead><tbody><tr><td>500</td><td>Festival Batidas</td><td>Allianz Parque</td></tr><tr><td>501</td><td>Turnê Elétrica</td><td>Espaço das Américas</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>evento_id</th><th>local</th></tr></thead><tbody><tr><td>500</td><td>Allianz Parque</td></tr><tr><td>501</td><td>Espaço das Américas</td></tr></tbody></table></div>
     
   </div>
         
@@ -409,7 +409,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Checklist: Como Aplicar a 3FN</h1>
         
         <p>Mesmo roteiro mecânico das outras formas normais — só que agora de olho em atributos que dependem de outros atributos:</p>
-<div class="bloco-diagrama" id="mmdydud8">
+<div class="bloco-diagrama" id="mmdg3ifc">
     <div class="bloco-diagrama-titulo">Checklist da 3FN</div>
     <div class="mermaid">%%{init: {'themeVariables': {'fontSize':'15px'}}}%%
 flowchart LR
@@ -430,10 +430,10 @@ flowchart LR
         <div class="slide-number">Slide 08</div>
         <h1>Exemplo Extra 3FN #1: O Problema</h1>
         
-        <p>Um serviço de streaming guarda as assinaturas numa tabela só, repetindo os dados do plano a cada usuário:</p>
+        <p>Um serviço de streaming guarda as assinaturas numa tabela simples, só com o usuário e o preço mensal. Julia e Marcos assinaram o mesmo plano; Rafael assinou um plano diferente:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">assinatura (fora da 3FN)</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>assinatura_id</th><th>usuario</th><th>plano_id</th><th>nome_plano</th><th>preco_plano</th></tr></thead><tbody><tr><td>1</td><td>Julia Prado</td><td>1</td><td>Plano Padrão</td><td>29.90</td></tr><tr><td>2</td><td>Marcos Vieira</td><td>1</td><td>Plano Padrão</td><td>29.90</td></tr><tr><td>3</td><td>Rafael Dias</td><td>2</td><td>Plano Premium</td><td>44.90</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>assinatura_id</th><th>usuario</th><th>preco</th></tr></thead><tbody><tr><td>1</td><td>Julia Prado</td><td>29.90</td></tr><tr><td>2</td><td>Marcos Vieira</td><td>29.90</td></tr><tr><td>3</td><td>Rafael Dias</td><td>44.90</td></tr></tbody></table></div>
     
   </div>
 
@@ -441,8 +441,8 @@ flowchart LR
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
+      <p>29.90 se repete pra Julia e Marcos — não é coincidência, os dois estão no mesmo plano. Só que <code>preco</code> não é um dado da assinatura: é um dado do PLANO, uma entidade que essa tabela nem chegou a criar.</p>
       
-      <ul><li><code>nome_plano</code> não depende da chave.</li><li><code>preco_plano</code> também não depende dela.</li><li>Os dois dependem de <code>plano_id</code>, que não é chave.</li></ul>
     </div>
         
       </div>
@@ -453,7 +453,7 @@ flowchart LR
         <div class="slide-number">Slide 09</div>
         <h1>Exemplo Extra 3FN #1: Aplicando o Checklist</h1>
         
-        <p><strong>Passo do checklist:</strong> existe atributo não-chave que depende de outro atributo não-chave (<code>plano_id</code>) → cria-se uma tabela nova pra ele.</p>
+        <p>A correção aqui não é só mover uma coluna — é reconhecer uma entidade que faltava: PLANO. Criamos a tabela <code>plano</code>, com o preço, e a assinatura passa a se referir a ela por <code>plano_id</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">assinatura</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>assinatura_id</th><th>usuario</th><th>plano_id</th></tr></thead><tbody><tr><td>1</td><td>Julia Prado</td><td>1</td></tr><tr><td>2</td><td>Marcos Vieira</td><td>1</td></tr><tr><td>3</td><td>Rafael Dias</td><td>2</td></tr></tbody></table></div>
@@ -461,7 +461,7 @@ flowchart LR
   </div>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">plano</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>plano_id</th><th>nome_plano</th><th>preco_plano</th></tr></thead><tbody><tr><td>1</td><td>Plano Padrão</td><td>29.90</td></tr><tr><td>2</td><td>Plano Premium</td><td>44.90</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>plano_id</th><th>preco</th></tr></thead><tbody><tr><td>1</td><td>29.90</td></tr><tr><td>2</td><td>44.90</td></tr></tbody></table></div>
     
   </div>
         
@@ -473,10 +473,10 @@ flowchart LR
         <div class="slide-number">Slide 10</div>
         <h1>Exemplo Extra 3FN #2: O Problema</h1>
         
-        <p>Uma plataforma de e-sports guarda os jogadores numa tabela só, repetindo os dados do time:</p>
+        <p>Uma plataforma de e-sports guarda os jogadores numa tabela simples, só com o nick e a tag do time. ShadowFox e NightHawk jogam no mesmo time; PixelQueen joga em outro:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">jogador (fora da 3FN)</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>jogador_id</th><th>nick</th><th>time_id</th><th>nome_time</th><th>tag_time</th></tr></thead><tbody><tr><td>1</td><td>ShadowFox</td><td>7</td><td>Fúria Elétrica</td><td>FE</td></tr><tr><td>2</td><td>NightHawk</td><td>7</td><td>Fúria Elétrica</td><td>FE</td></tr><tr><td>3</td><td>PixelQueen</td><td>8</td><td>Aurora Gaming</td><td>AUR</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>jogador_id</th><th>nick</th><th>tag</th></tr></thead><tbody><tr><td>1</td><td>ShadowFox</td><td>FE</td></tr><tr><td>2</td><td>NightHawk</td><td>FE</td></tr><tr><td>3</td><td>PixelQueen</td><td>AUR</td></tr></tbody></table></div>
     
   </div>
 
@@ -484,8 +484,8 @@ flowchart LR
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
+      <p>'FE' se repete pra ShadowFox e NightHawk — não é coincidência, os dois jogam no mesmo time. Só que <code>tag</code> não é um dado do jogador: é um dado do TIME, uma entidade que essa tabela nem chegou a criar.</p>
       
-      <ul><li><code>nome_time</code> não depende da chave.</li><li><code>tag_time</code> também não depende dela.</li><li>Os dois dependem de <code>time_id</code>, que não é chave.</li></ul>
     </div>
         
       </div>
@@ -496,7 +496,7 @@ flowchart LR
         <div class="slide-number">Slide 11</div>
         <h1>Exemplo Extra 3FN #2: Aplicando o Checklist</h1>
         
-        <p><strong>Passo do checklist:</strong> existe atributo não-chave que depende de outro atributo não-chave (<code>time_id</code>) → cria-se uma tabela nova pra ele.</p>
+        <p>A correção aqui não é só mover uma coluna — é reconhecer uma entidade que faltava: TIME. Criamos a tabela <code>time</code>, com a tag, e o jogador passa a se referir a ela por <code>time_id</code>:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">jogador</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>jogador_id</th><th>nick</th><th>time_id</th></tr></thead><tbody><tr><td>1</td><td>ShadowFox</td><td>7</td></tr><tr><td>2</td><td>NightHawk</td><td>7</td></tr><tr><td>3</td><td>PixelQueen</td><td>8</td></tr></tbody></table></div>
@@ -504,7 +504,7 @@ flowchart LR
   </div>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">time</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>time_id</th><th>nome_time</th><th>tag_time</th></tr></thead><tbody><tr><td>7</td><td>Fúria Elétrica</td><td>FE</td></tr><tr><td>8</td><td>Aurora Gaming</td><td>AUR</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>time_id</th><th>tag</th></tr></thead><tbody><tr><td>7</td><td>FE</td></tr><tr><td>8</td><td>AUR</td></tr></tbody></table></div>
     
   </div>
         
@@ -524,10 +524,10 @@ flowchart LR
         <div class="slide-number">Slide 12</div>
         <h1>Relembrando o Desafio da Aula 1</h1>
         
-        <p>Na aula passada, vocês pegaram esta tabela bruta de matrículas e já devem ter aplicado a 1FN e a 2FN nela. Hoje a gente confere juntos e fecha o ciclo com a 3FN:</p>
+        <p>Na aula passada, vocês pegaram a tabela de matrículas da <strong>escola de idiomas</strong> (lembra? lá o aluno escolhe cursos avulsos, então aluno e turma são N:N de verdade — diferente da nossa escola, onde cada aluno pertence a uma única turma) — aquele atalho que guardava <code>nome_turma</code> e <code>curso_nome</code> direto na matrícula pra evitar um JOIN — e já devem ter aplicado a 1FN e a 2FN nela. Hoje a gente confere juntos e fecha o ciclo com a 3FN:</p>
 <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">matricula (dado bruto)</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>aluno_nome</th><th>curso_id</th><th>curso_nome</th><th>disciplina_id</th><th>disciplina_nome</th><th>professor</th></tr></thead><tbody><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td><td>101</td><td>Programação Web</td><td>Diego Alves</td></tr><tr><td>2</td><td>Bruno Lima</td><td>10</td><td>ADS</td><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr></tbody></table></div>
+    <div class="bloco-tabela-titulo">matricula_turma (dado bruto, da Aula 1)</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>turma_id</th><th>nome_turma</th><th>curso_nome</th></tr></thead><tbody><tr><td>1</td><td>T01</td><td>Inglês Avançado - Turma A</td><td>Inglês Avançado</td></tr><tr><td>1</td><td>T02</td><td>Espanhol Básico - Turma A</td><td>Espanhol Básico</td></tr><tr><td>2</td><td>T01</td><td>Inglês Avançado - Turma A</td><td>Inglês Avançado</td></tr></tbody></table></div>
     
   </div>
         
@@ -539,10 +539,10 @@ flowchart LR
         <div class="slide-number">Slide 13</div>
         <h1>Até a 2FN: A Tabela de Ligação</h1>
         
-        <p>A chave dessa tabela combina aluno e disciplina. Depois de aplicar a 2FN da aula passada, a ligação entre os dois fica bem enxuta:</p>
+        <p>A chave dessa tabela combina aluno e turma (lembrando: aqui, na escola de idiomas, isso é N:N de verdade). Depois de aplicar a 2FN da aula passada, a ligação entre os dois fica bem enxuta:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">matricula</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>disciplina_id</th></tr></thead><tbody><tr><td>1</td><td>100</td></tr><tr><td>1</td><td>101</td></tr><tr><td>2</td><td>100</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>turma_id</th></tr></thead><tbody><tr><td>1</td><td>T01</td></tr><tr><td>1</td><td>T02</td></tr><tr><td>2</td><td>T01</td></tr></tbody></table></div>
     
   </div>
 
@@ -550,7 +550,7 @@ flowchart LR
       <h3>
         <i class="fa-solid fa-link"></i> Só a ligação
       </h3>
-      <p>Sobrou só o essencial: quem cursa o quê. Todo o resto foi pra outras tabelas — vamos ver a seguir.</p>
+      <p>Sobrou só o essencial: quem está em qual turma. Todo o resto foi pra outras tabelas — vamos ver a seguir.</p>
       
     </div>
         
@@ -560,19 +560,27 @@ flowchart LR
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 14</div>
-        <h1>Até a 2FN: Aluno e Disciplina</h1>
+        <h1>Até a 2FN: Aluno e Turma (com um Detalhe Escondido)</h1>
         
-        <p>Tudo que dependia só do aluno foi para uma tabela; tudo que dependia só da disciplina, para outra:</p>
+        <p>Tudo que dependia só do aluno foi pra uma tabela; tudo que dependia só da turma, pra outra — mesmo processo de decomposição que vimos na Aula 1, agora aplicado a essa escola de idiomas:</p>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">aluno</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>aluno_nome</th><th>curso_id</th><th>curso_nome</th></tr></thead><tbody><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td></tr><tr><td>2</td><td>Bruno Lima</td><td>10</td><td>ADS</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>aluno_nome</th></tr></thead><tbody><tr><td>1</td><td>Júlia Prado</td></tr><tr><td>2</td><td>Rafael Dias</td></tr></tbody></table></div>
     
   </div>
 <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">disciplina</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>disciplina_id</th><th>disciplina_nome</th><th>professor</th></tr></thead><tbody><tr><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr><tr><td>101</td><td>Programação Web</td><td>Diego Alves</td></tr></tbody></table></div>
+    <div class="bloco-tabela-titulo">turma</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>turma_id</th><th>nome_turma</th><th>curso_id</th><th>curso_nome</th></tr></thead><tbody><tr><td>T01</td><td>Inglês Avançado - Turma A</td><td>1</td><td>Inglês Avançado</td></tr><tr><td>T02</td><td>Espanhol Básico - Turma A</td><td>2</td><td>Espanhol Básico</td></tr></tbody></table></div>
     
   </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-eye"></i> Repare no <code>curso_id</code> e no <code>curso_nome</code> juntos
+      </h3>
+      <p>Isso resolveu a dependência parcial (2FN) — <code>nome_turma</code> e <code>curso_nome</code> dependem só de <code>turma_id</code>, então tudo bem eles estarem aqui. Mas será que <code>curso_nome</code> realmente depende do <code>turma_id</code>, ou ele só 'pegou carona' até aqui?</p>
+      
+    </div>
         
       </div>
     </div>
@@ -582,21 +590,21 @@ flowchart LR
         <div class="slide-number">Slide 15</div>
         <h1>Aplicando o Checklist da 3FN</h1>
         
-        <p>Rodando o checklist de hoje na tabela <code>aluno</code>: existe algum atributo que depende de outro atributo que não é a chave?</p>
+        <p>Rodando o checklist de hoje na tabela <code>turma</code>: existe algum atributo que depende de outro atributo que não é a chave?</p>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-route"></i> O gatilho: dependência transitiva
       </h3>
       
-      <ul><li>curso nome depende de <code>curso_id</code> — não do aluno, que é a chave.</li><li>Isso é dependência transitiva: <code>curso_id</code> mora na tabela aluno, mas curso nome deveria morar junto do curso.</li></ul>
+      <ul><li>curso_nome depende de <code>curso_id</code> — não de <code>turma_id</code>, que é a chave da tabela.</li><li>Isso é dependência transitiva: <code>curso_id</code> mora na tabela turma, mas curso_nome deveria morar junto do curso.</li></ul>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> E o professor, não deveria sair também?
+        <i class="fa-solid fa-circle-info"></i> E nome_turma, não deveria sair também?
       </h3>
-      <p><code>professor</code> depende diretamente de <code>disciplina_id</code> — a própria chave da tabela disciplina. Não é dependência transitiva, então ele fica onde está.</p>
+      <p>Ele depende diretamente de <code>turma_id</code> — a própria chave da tabela turma. Não é dependência transitiva, então fica onde está.</p>
       
     </div>
         
@@ -608,29 +616,28 @@ flowchart LR
         <div class="slide-number">Slide 16</div>
         <h1>Decomposição Final (3FN)</h1>
         
-        <div class="bloco-diagrama" id="mmdgdl8e">
-    <div class="bloco-diagrama-titulo">matricula → aluno + curso + disciplina</div>
+        <div class="bloco-diagrama" id="mmdt8yee">
+    <div class="bloco-diagrama-titulo">matricula_turma → aluno + curso + turma</div>
     <div class="mermaid">erDiagram
-    CURSO ||--o{ ALUNO : possui
+    CURSO ||--o{ TURMA : possui
+    TURMA ||--o{ MATRICULA : recebe
     ALUNO ||--o{ MATRICULA : faz
-    DISCIPLINA ||--o{ MATRICULA : recebe
     CURSO {
         int curso_id PK
         string curso_nome
     }
+    TURMA {
+        int turma_id PK
+        string nome_turma
+        int curso_id FK
+    }
     ALUNO {
         int aluno_id PK
         string aluno_nome
-        int curso_id FK
-    }
-    DISCIPLINA {
-        int disciplina_id PK
-        string disciplina_nome
-        string professor
     }
     MATRICULA {
         int aluno_id FK
-        int disciplina_id FK
+        int turma_id FK
     }</div>
     
   </div>
@@ -640,7 +647,7 @@ flowchart LR
         <i class="fa-solid fa-circle-check"></i> Zero redundância
       </h3>
       
-      <ul><li>curso nome mora só na tabela <code>curso</code>.</li><li>disciplina nome e professor moram só na tabela <code>disciplina</code>.</li><li>Eles ficam lá porque dependem diretamente de <code>disciplina_id</code> — não é dependência transitiva.</li></ul>
+      <ul><li>curso_nome mora só na tabela <code>curso</code>.</li><li>nome_turma mora só na tabela <code>turma</code>.</li><li>Eles ficam lá porque dependem diretamente de <code>turma_id</code> — não é dependência transitiva.</li></ul>
     </div>
         
       </div>
@@ -651,7 +658,7 @@ flowchart LR
         <div class="slide-number">Slide 17</div>
         <h1>Resumo Visual: 1FN → 2FN → 3FN</h1>
         
-        <div class="bloco-diagrama" id="mmdouc14">
+        <div class="bloco-diagrama" id="mmd2ozyx">
     
     <div class="mermaid">%%{init: {'themeVariables': {
   'cScale0': '#DCE8F0', 'cScaleLabel0': '#101418',
@@ -672,9 +679,9 @@ mindmap
       Sem dependência transitiva
       Atributo só depende da PK
     Caso Prático
-      Matrícula: aluno, curso, disciplina
+      Matrícula de turma: aluno, curso, turma
     Próximos Passos
-      Laboratório (aula 3)
+      Aula 3: as tres formas juntas
       SQL (aula 5)</div>
     
   </div>

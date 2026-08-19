@@ -186,9 +186,9 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Cardinalidade 1:N</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Cardinalidade N:N</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Da Modelagem à Normalização</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Por Que Normalizar?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>O Problema: Uma Tabela "Larga" Demais</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>O Que Essa Tabela Deveria Ser</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-clipboard-check"></i><span>Normalização é um Checklist</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>O Problema: Um Atalho que Parece Inofensivo</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Por Que Isso é uma Dependência Parcial</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Vendo a Anomalia Acontecer</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>As Três Anomalias</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Primeira Forma Normal (1FN)</span></button>
@@ -240,8 +240,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Por Que Normalizar?</div>
-            <div class="agenda-item-texto">Redundância e anomalias</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-clipboard-check"></i> Normalização é um Checklist</div>
+            <div class="agenda-item-texto">Conferir o que pode ter passado batido</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
@@ -262,7 +262,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Prática de Normalização</div>
-            <div class="agenda-item-texto">Do problema à solução</div>
+            <div class="agenda-item-texto">Aplicando o checklist</div>
           </div>
         </div>
     </div>
@@ -308,7 +308,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Cardinalidade 1:1</h1>
         
         <p>Cada ocorrência de uma entidade se relaciona com <strong>no máximo uma</strong> ocorrência da outra — e vice-versa.</p>
-<figure class="bloco-imagem" id="imgaswcx">
+<figure class="bloco-imagem" id="img2hk5z">
     <div class="bloco-imagem-titulo">Pessoa e Passaporte</div>
     <img src="img/der-cardinalidade-1-1.svg" alt="DER mostrando PESSOA relacionada a PASSAPORTE através do relacionamento possui, com cardinalidade (0,1) do lado de PESSOA e (1,1) do lado de PASSAPORTE" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -332,7 +332,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Cardinalidade 1:N</h1>
         
         <p>Cada ocorrência de uma entidade pode se relacionar com <strong>várias</strong> ocorrências da outra, mas cada ocorrência da segunda se relaciona com <strong>apenas uma</strong> da primeira.</p>
-<figure class="bloco-imagem" id="imgxm4rp">
+<figure class="bloco-imagem" id="img4ue15">
     <div class="bloco-imagem-titulo">Curso e Aluno</div>
     <img src="img/der-cardinalidade-1-n.svg" alt="DER mostrando CURSO relacionado a ALUNO através do relacionamento matricula, com cardinalidade (0,N) do lado de CURSO e (1,1) do lado de ALUNO" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -356,7 +356,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h1>Cardinalidade N:N</h1>
         
         <p>Cada ocorrência de uma entidade pode se relacionar com <strong>várias</strong> ocorrências da outra, e vice-versa.</p>
-<figure class="bloco-imagem" id="imggdf3q">
+<figure class="bloco-imagem" id="imgbxoec">
     <div class="bloco-imagem-titulo">Aluno e Disciplina</div>
     <img src="img/der-cardinalidade-n-n.svg" alt="DER mostrando ALUNO relacionado a DISCIPLINA através do relacionamento cursa, com cardinalidade (0,N) dos dois lados" loading="lazy"
          onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
@@ -384,15 +384,15 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <h3>
         <i class="fa-solid fa-book"></i> O que é normalizar?
       </h3>
-      <p><strong>Normalização</strong> é o processo de organizar os atributos e tabelas de um banco de dados relacional seguindo um conjunto de regras formais — as <strong>formas normais</strong> (1FN, 2FN, 3FN...) — com o objetivo de <strong>eliminar redundância de dados</strong> e <strong>evitar as anomalias</strong> de inserção, exclusão e atualização, sem perder nenhuma informação no processo.</p>
+      <p><strong>Normalização</strong> não é sobre desenhar entidades do zero — isso vocês já sabem fazer bem, desde o semestre passado. É um <strong>checklist formal</strong> — as formas normais (1FN, 2FN, 3FN...) — pra CONFERIR se o modelo que a gente já fez direito não deixou passar nenhum detalhe escondido.</p>
       
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-question"></i> Por que isso importa agora?
+        <i class="fa-solid fa-question"></i> Por que isso importa mesmo modelando bem?
       </h3>
-      <p>Modelar bem as entidades e cardinalidades não garante que as tabelas guardem dados sem repetição. É exatamente esse problema que a normalização resolve — e vamos ver isso a partir de agora.</p>
+      <p>Mesmo separando as entidades certinho desde o início, é fácil deixar passar um detalhezinho — um dado guardado 'a mais' por conveniência, sem perceber a consequência. A normalização existe justamente pra isso: um roteiro formal que pega esse tipo de deslize antes que ele vire um problema de verdade.</p>
       
     </div>
         
@@ -401,21 +401,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Por Que Normalizar?</h1>
-        <p>Redundância, inconsistência e anomalias</p>
+        <i class="fa-solid fa-clipboard-check"></i>
+        <h1>Normalização é um Checklist</h1>
+        <p>Não é redesenhar do zero — é conferir o que a gente já fez</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 07</div>
-        <h1>O Problema: Uma Tabela "Larga" Demais</h1>
+        <h1>O Problema: Um Atalho que Parece Inofensivo</h1>
         
-        <p>Imagine uma secretaria que guarda matrículas numa única tabela achatada, misturando dados de aluno, curso e disciplina na mesma linha:</p>
+        <p>Nessa escola: ALUNO, TURMA, CURSO, DEPARTAMENTO, PROFESSOR e DISCIPLINA já nascem como entidades separadas. Um aluno pertence a exatamente UMA turma — então <code>turma_id</code> é só uma FK direta em ALUNO, 1:N puro, sem tabela associativa nenhuma (isso vocês já sabem modelar). Já um professor leciona VÁRIAS disciplinas, e uma disciplina pode ter mais de um professor (em turmas diferentes) — isso sim é N:N, e vira uma tabela associativa: <code>leciona(professor_id, disciplina_id)</code>.</p>
+<p>Só que, pra montar a tela 'minhas disciplinas' do professor sem precisar de JOIN toda vez, alguém decide guardar também o <strong>nome</strong> da disciplina direto em <code>leciona</code>:</p>
 <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">matricula</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>matricula_id</th><th>aluno</th><th>curso</th><th>disciplina</th><th>professor</th></tr></thead><tbody><tr><td>1</td><td>Ana Souza</td><td>Análise e Desenvolvimento</td><td>Banco de Dados</td><td>Carla Reis</td></tr><tr><td>2</td><td>Ana Souza</td><td>Análise e Desenvolvimento</td><td>Programação Web</td><td>Diego Alves</td></tr><tr><td>3</td><td>Bruno Lima</td><td>Análise e Desenvolvimento</td><td>Banco de Dados</td><td>Carla Reis</td></tr></tbody></table></div>
+    <div class="bloco-tabela-titulo">leciona</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>professor_id</th><th>disciplina_id</th><th>nome_disciplina</th></tr></thead><tbody><tr><td>1</td><td>D01</td><td>Programação I</td></tr><tr><td>2</td><td>D01</td><td>Programação I</td></tr><tr><td>1</td><td>D02</td><td>Banco de Dados</td></tr></tbody></table></div>
     
   </div>
 
@@ -423,7 +424,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <h3>
         <i class="fa-solid fa-magnifying-glass"></i> O sintoma
       </h3>
-      <p>"Ana Souza" e "Análise e Desenvolvimento" aparecem repetidos. Se o nome do curso mudar, precisa mudar em todas as linhas.</p>
+      <p>'Programação I' aparece duas vezes — uma pra cada professor que leciona a disciplina D01 (<code>professor_id</code> 1 e <code>professor_id</code> 2). <code>nome_disciplina</code> não depende do professor: depende só da disciplina. É só UMA coluna a mais, não uma entidade inteira jogada na tabela errada — e é exatamente esse tipo de detalhe pequeno que passa batido.</p>
       
     </div>
         
@@ -433,21 +434,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 08</div>
-        <h1>O Que Essa Tabela Deveria Ser</h1>
+        <h1>Por Que Isso é uma Dependência Parcial</h1>
         
-        <p>A tabela anterior esconde, na verdade, <strong>quatro entidades diferentes</strong> espremidas em uma só — exatamente as que revisamos no início da aula:</p>
-<figure class="bloco-imagem" id="imgrshqb">
-    <div class="bloco-imagem-titulo">As entidades reais por trás da tabela larga</div>
-    <img src="img/der-entidades-tabela-larga.svg" alt="DER com quatro entidades: CURSO ligado a ALUNO por pertence (0,N)-(1,1), ALUNO ligado a DISCIPLINA por cursa (0,N)-(0,N), e DISCIPLINA ligado a PROFESSOR por leciona (1,1)-(0,N)" loading="lazy"
-         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+        <p><code>nome_disciplina</code> não depende da linha de <code>leciona</code> inteira (professor + disciplina) — depende só de uma parte dela: a disciplina. Isso se chama <strong>dependência parcial</strong>, e é exatamente o que a 2FN formaliza (regra exata a seguir).</p>
+<div class="bloco-diagrama" id="mmdm8dyq">
+    <div class="bloco-diagrama-titulo">De onde vem o atributo</div>
+    <div class="mermaid">flowchart LR
+    K["Chave: professor_id + disciplina_id"] -.depende so de uma parte.-&gt; D["disciplina_id"]
+    D --&gt; N["nome_disciplina"]</div>
     
-  </figure>
+  </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-eye"></i> O que isso revela
+        <i class="fa-solid fa-eye"></i> A correção
       </h3>
-      <p>Quando uma tabela mistura entidades com cardinalidades diferentes numa só estrutura, a redundância é inevitável. Normalizar é devolver cada entidade à sua própria tabela.</p>
+      <p><code>nome_disciplina</code> sai de <code>leciona</code> — a tabela DISCIPLINA já guarda esse dado desde o início. <code>leciona</code> volta a ser só a ligação pura: <code>professor_id + disciplina_id</code>.</p>
       
     </div>
         
@@ -459,13 +461,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 09</div>
         <h1>Vendo a Anomalia Acontecer</h1>
         
-        <p>Assista: o professor renomeia o curso de "ADS" para o nome completo. Mas ele só tem acesso pra editar <strong>uma linha por vez</strong>.</p>
+        <p>Assista: a coordenação renomeia a disciplina D01. Mas ela só tem acesso pra editar <strong>uma linha de <code>leciona</code> por vez</strong>.</p>
 <div class="bloco-animacao">
     <div class="bloco-animacao-titulo">Anomalia de atualização em ação</div>
-    <div class="p5-canvas-container" id="p5c42pqzr6" style="height:400px;"></div>
-    <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let ROWS = ["Ana Souza", "Bruno Lima", "Carla Dias", "Diego Prado"];
-let CURSO_ORIGINAL = "ADS";
-let CURSO_NOVO = "Análise e Desenvolvimento de Sistemas";
+    <div class="p5-canvas-container" id="p5cqojuyiu" style="height:400px;"></div>
+    <script>(function(){if(typeof p5==='undefined')return;new p5(function(p){let ROWS = ["professor_id 1", "professor_id 2", "professor_id 3", "professor_id 4"];
+let CURSO_ORIGINAL = "Programacao I";
+let CURSO_NOVO = "Programacao I - Fundamentos";
 let ROW_H = 70;
 let t = 0;
 let holdFrames = 0;
@@ -497,9 +499,9 @@ p.draw = function () {
   p.fill(30);
   p.textSize(18);
   p.textAlign(p.LEFT, p.TOP);
-  let titulo = "Estado inicial: mesmo curso repetido em 4 linhas";
-  if (faseUpdate > 0 && faseAlerta === 0) titulo = "O professor atualiza só a linha da Ana Souza...";
-  if (faseAlerta > 0) titulo = "As outras linhas continuam com o dado antigo!";
+  let titulo = "Estado inicial: mesmo nome de disciplina repetido em 4 linhas";
+  if (faseUpdate > 0 && faseAlerta === 0) titulo = "A coordenacao atualiza so a linha do professor_id 1...";
+  if (faseAlerta > 0) titulo = "As outras linhas continuam com o nome antigo!";
   p.text(titulo, 20, 15);
 
   for (let i = 0; i < ROWS.length; i++) {
@@ -537,7 +539,7 @@ p.draw = function () {
       p.text("desatualizado", 650, y + (ROW_H - 15) / 2);
     }
   }
-};},'p5c42pqzr6');})()</script>
+};},'p5cqojuyiu');})()</script>
     
   </div>
 
@@ -545,7 +547,7 @@ p.draw = function () {
       <h3>
         <i class="fa-solid fa-triangle-exclamation"></i> Isso é a anomalia de atualização
       </h3>
-      <p>Trocar o nome do curso em uma linha não troca nas outras — alguem precisa lembrar de editar todas, manualmente. Esquecer uma gera dado inconsistente na hora.</p>
+      <p>Renomear a disciplina numa linha não renomeia nas outras — alguém precisa lembrar de editar todas, manualmente. Esquecer uma gera duas linhas da MESMA disciplina com nomes diferentes no sistema.</p>
       
     </div>
         
@@ -564,25 +566,25 @@ p.draw = function () {
           <h3>
             <i class="fa-solid fa-plus"></i> Anomalia de Inserção
           </h3>
-          <p>Não dá pra cadastrar um curso novo sem já ter um aluno matriculado nele.</p>
+          <p>Não dá pra registrar o nome de uma disciplina nova sem já ter um professor lecionando ela (o nome só existe dentro de uma linha de <code>leciona</code>).</p>
           
         </div>
         <div class="card-info">
           <h3>
             <i class="fa-solid fa-trash"></i> Anomalia de Exclusão
           </h3>
-          <p>Se o único aluno de um curso for removido, a informação do curso some junto.</p>
+          <p>Se o único professor de uma disciplina for desligado dela, o nome dessa disciplina desaparece do sistema junto.</p>
           
         </div>
         <div class="card-info">
           <h3>
             <i class="fa-solid fa-pen"></i> Anomalia de Atualização
           </h3>
-          <p>Como acabamos de ver: mudar o nome do professor ou do curso exige atualizar todas as linhas repetidas — esquecer uma gera inconsistência.</p>
+          <p>Como acabamos de ver: renomear uma disciplina exige atualizar todas as linhas repetidas — esquecer uma gera duas versões do mesmo nome.</p>
           
         </div>
     </div>
-<p>A <strong>normalização</strong> é o processo de reorganizar as tabelas em etapas — as <em>formas normais</em> — para eliminar essas anomalias.</p>
+<p>É pra pegar esse tipo de deslize ANTES que ele vire um desses problemas que existem as formas normais — um checklist de verificação, não uma forma nova de desenhar entidades (isso vocês já sabem fazer bem).</p>
         
       </div>
     </div>
@@ -670,15 +672,15 @@ p.draw = function () {
         <h1>Checklist: Como Aplicar a 1FN</h1>
         
         <p>A regra formal é bonita, mas na hora de corrigir uma tabela de verdade você segue um roteiro mecânico. Guarde este fluxo:</p>
-<div class="bloco-diagrama" id="mmdqgg63">
+<div class="bloco-diagrama" id="mmd0aefm">
     <div class="bloco-diagrama-titulo">Checklist da 1FN</div>
-    <div class="mermaid">flowchart TD
-    A["Alguma célula guarda mais de um valor?"] --&gt;|Sim| B["Crie uma tabela nova: uma linha para cada valor, ligada pela chave original"]
-    A --&gt;|Não| C["Existem colunas repetidas? (telefone1, telefone2...)"]
+    <div class="mermaid">flowchart LR
+    A["Alguma célula guarda mais de um valor?"] --&gt;|Sim| B["Cria tabela nova: 1 linha por valor, ligada pela chave"]
+    A --&gt;|Não| C["Existem colunas repetidas?"]
     C --&gt;|Sim| B
-    C --&gt;|Não| D["Cada linha tem uma chave primária única?"]
-    D --&gt;|Não| E["Defina uma chave primária"]
-    D --&gt;|Sim| F["A tabela já está na 1FN"]
+    C --&gt;|Não| D["Cada linha tem chave primária única?"]
+    D --&gt;|Não| E["Define uma chave primária"]
+    D --&gt;|Sim| F["Tabela já está na 1FN"]
     E --&gt; F</div>
     
   </div>
@@ -854,14 +856,14 @@ p.draw = function () {
         <h1>Checklist: Como Aplicar a 2FN</h1>
         
         <p>Assim como a 1FN, a 2FN também vira um roteiro mecânico — só que ele só entra em ação quando a chave é composta:</p>
-<div class="bloco-diagrama" id="mmd3qy6e">
+<div class="bloco-diagrama" id="mmdyd0p8">
     <div class="bloco-diagrama-titulo">Checklist da 2FN</div>
-    <div class="mermaid">flowchart TD
-    A["A chave primária é composta (duas ou mais colunas)?"] --&gt;|Não| B["A tabela já está automaticamente na 2FN"]
-    A --&gt;|Sim| C["Cada coluna que não é chave depende da chave inteira ou só de uma parte?"]
+    <div class="mermaid">flowchart LR
+    A["Chave primária é composta?"] --&gt;|Não| B["Já está na 2FN"]
+    A --&gt;|Sim| C["Coluna depende da chave inteira ou só de uma parte?"]
     C --&gt;|Inteira| D["Mantém a coluna na mesma tabela"]
-    C --&gt;|Só uma parte| E["Cria uma tabela nova: parte da chave + colunas que dependem só dela"]
-    D --&gt; F["Repita até toda coluna depender da chave completa"]
+    C --&gt;|Só uma parte| E["Cria tabela nova: parte da chave + colunas dependentes"]
+    D --&gt; F["Repete até toda coluna depender da chave completa"]
     E --&gt; F</div>
     
   </div>
@@ -960,7 +962,7 @@ p.draw = function () {
         <div class="slide-number">Slide 27</div>
         <h1>O Caminho da Normalização</h1>
         
-        <div class="bloco-diagrama" id="mmdck2wt">
+        <div class="bloco-diagrama" id="mmdg4xi2">
     <div class="bloco-diagrama-titulo">Do problema à 2FN</div>
     <div class="mermaid">flowchart LR
     A[Tabela Não Normalizada] --&gt; B[1FN: valores atômicos]
@@ -978,7 +980,7 @@ p.draw = function () {
         <div class="slide-number">Slide 28</div>
         <h1>Resumo Visual da Aula</h1>
         
-        <div class="bloco-diagrama" id="mmdowl2j">
+        <div class="bloco-diagrama" id="mmdpyfoq">
     
     <div class="mermaid">%%{init: {'themeVariables': {
   'git0': '#DCE8F0', 'gitBranchLabel0': '#101418',
@@ -1018,17 +1020,17 @@ mindmap
       <h3>
         <i class="fa-solid fa-bullseye"></i> O desafio
       </h3>
-      <p>Abaixo está uma tabela desnormalizada de matrículas. Aplique o que vimos hoje para corrigi-la.</p>
+      <p>Diferente da nossa escola (onde cada aluno pertence a uma única turma), numa escola de idiomas o aluno escolhe os cursos avulsos que quiser — então aluno e turma são N:N de verdade ali, com uma tabela associativa própria. Essa escola também guardou um dado a mais nessa tabela pra facilitar. Aplique o que vimos pra corrigi-la.</p>
       
     </div>
 <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">matricula (dado bruto)</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>aluno_nome</th><th>curso_id</th><th>curso_nome</th><th>disciplina_id</th><th>disciplina_nome</th><th>professor</th></tr></thead><tbody><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr><tr><td>1</td><td>Ana Souza</td><td>10</td><td>ADS</td><td>101</td><td>Programação Web</td><td>Diego Alves</td></tr><tr><td>2</td><td>Bruno Lima</td><td>10</td><td>ADS</td><td>100</td><td>Banco de Dados</td><td>Carla Reis</td></tr></tbody></table></div>
+    <div class="bloco-tabela-titulo">matricula_turma (dado bruto)</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>aluno_id</th><th>turma_id</th><th>nome_turma</th><th>curso_nome</th></tr></thead><tbody><tr><td>1</td><td>T01</td><td>Inglês Avançado - Turma A</td><td>Inglês Avançado</td></tr><tr><td>1</td><td>T02</td><td>Espanhol Básico - Turma A</td><td>Espanhol Básico</td></tr><tr><td>2</td><td>T01</td><td>Inglês Avançado - Turma A</td><td>Inglês Avançado</td></tr></tbody></table></div>
     
   </div>
 
     <div class="quest-list">
-      <ol><li>Verifique se a tabela respeita a 1FN — se não, corrija primeiro.</li><li>Identifique a chave primária composta e liste os atributos que dependem só de parte dela.</li><li>Separe a tabela em 2FN, criando as tabelas auxiliares necessárias.</li><li>Liste pelo menos uma anomalia (inserção, exclusão ou atualização) que a nova estrutura elimina.</li><li>Guarde o resultado — vamos usá-lo como ponto de partida para aplicar a 3FN na aula 2.</li></ol>
+      <ol><li>Verifique se a tabela respeita a 1FN — se não, corrija primeiro.</li><li>Identifique a chave primária composta (<code>aluno_id</code> + <code>turma_id</code>) e liste os atributos que dependem só de uma parte dela.</li><li>Separe a tabela em 2FN — lembre que ALUNO já é uma entidade separada (nem precisa aparecer aqui) e que <code>nome_turma</code>/<code>curso_nome</code> pertencem à tabela TURMA, que já existe.</li><li>Repare que curso_nome também parece 'extra' mesmo depois da 2FN. Guarde essa observação — vamos voltar nela quando falarmos de 3FN na Aula 2.</li><li>Liste pelo menos uma anomalia (inserção, exclusão ou atualização) que a nova estrutura elimina.</li></ol>
     </div>
         
       </div>

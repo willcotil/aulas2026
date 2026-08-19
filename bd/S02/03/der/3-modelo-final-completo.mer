@@ -1,0 +1,182 @@
+{
+  "_type": "mer-editor-v1",
+  "_version": "1.0",
+  "_created": "2026-08-19T17:22:10.139Z",
+  "nodes": [
+    {
+      "id": "dep",
+      "kind": "entity",
+      "x": 60,
+      "y": 60,
+      "width": 149,
+      "height": 46,
+      "autoSize": true,
+      "label": "DEPARTAMENTO",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "func",
+      "kind": "entity",
+      "x": 400,
+      "y": 60,
+      "width": 141,
+      "height": 46,
+      "autoSize": true,
+      "label": "FUNCIONARIO",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "proj",
+      "kind": "entity",
+      "x": 740,
+      "y": 60,
+      "width": 120,
+      "height": 46,
+      "autoSize": true,
+      "label": "PROJETO",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "rel_0",
+      "kind": "relationship",
+      "x": 232.5,
+      "y": 174,
+      "width": 140,
+      "height": 78,
+      "autoSize": true,
+      "label": "emprega",
+      "style": {
+        "fill": "#fef3c7",
+        "stroke": "#d97706"
+      },
+      "props": {}
+    },
+    {
+      "id": "rel_1",
+      "kind": "relationship",
+      "x": 232.5,
+      "y": -86,
+      "width": 140,
+      "height": 78,
+      "autoSize": true,
+      "label": "gerencia",
+      "style": {
+        "fill": "#fef3c7",
+        "stroke": "#d97706"
+      },
+      "props": {}
+    },
+    {
+      "id": "rel_2",
+      "kind": "relationship",
+      "x": 565.25,
+      "y": 44,
+      "width": 140,
+      "height": 78,
+      "autoSize": true,
+      "label": "aloca",
+      "style": {
+        "fill": "#fef3c7",
+        "stroke": "#d97706"
+      },
+      "props": {}
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_0a",
+      "kind": "connection",
+      "sourceId": "dep",
+      "targetId": "rel_0",
+      "sourceCardinality": "(0,N)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_0b",
+      "kind": "connection",
+      "sourceId": "func",
+      "targetId": "rel_0",
+      "sourceCardinality": "(1,1)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_1a",
+      "kind": "connection",
+      "sourceId": "func",
+      "targetId": "rel_1",
+      "sourceCardinality": "(0,1)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_1b",
+      "kind": "connection",
+      "sourceId": "dep",
+      "targetId": "rel_1",
+      "sourceCardinality": "(1,1)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_2a",
+      "kind": "connection",
+      "sourceId": "func",
+      "targetId": "rel_2",
+      "sourceCardinality": "(0,N)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_2b",
+      "kind": "connection",
+      "sourceId": "proj",
+      "targetId": "rel_2",
+      "sourceCardinality": "(0,N)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    }
+  ],
+  "canvas": {
+    "offsetX": 0,
+    "offsetY": 0,
+    "scale": 1
+  }
+}
