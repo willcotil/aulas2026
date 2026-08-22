@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 3: Repetição com Teste no Final (do-while)</title>
+<title>Aula 3: Repetição com Teste no Final</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#BD4444;--color-rust:#F1DEC4;
-  --color-orange:#F1DEC4;--color-yellow:#F1DEC4;--color-deep:#677E61;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#211712;
+  --color-navy:#000;--color-blue:#146C6C;--color-rust:#F2A93B;
+  --color-orange:#F2A93B;--color-yellow:#F2A93B;--color-deep:#0B3B3B;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#151F1D;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -109,6 +109,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -190,7 +198,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>while vs do-while: Quando Usar Cada Um</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>De Olho no Futuro</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Praticando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafio: Painel do Farm de Aura</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafio: Cofrinho Digital (1/2)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafio: Cofrinho Digital (2/2)</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
@@ -234,7 +243,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Praticando</div>
-            <div class="agenda-item-texto">Desafio: Painel do Farm de Aura, em 5 partes</div>
+            <div class="agenda-item-texto">Desafio: Cofrinho Digital, em 10 partes</div>
           </div>
         </div>
     </div>
@@ -274,7 +283,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 03</div>
         <h1>Comparando os Dois Fluxos</h1>
         
-        <div class="bloco-diagrama" id="mmdak5vl">
+        <div class="bloco-diagrama" id="mmda6i01">
     <div class="bloco-diagrama-titulo">while (teste no início) vs do-while (teste no final)</div>
     <div class="mermaid">flowchart LR
   subgraph WHILE["while"]
@@ -368,13 +377,13 @@ int main() {
         <div class="slide-number">Slide 06</div>
         <h1>Executando Passo a Passo</h1>
         
-        <div class="depurador-bloco" id="dbg56mnhg">
+        <div class="depurador-bloco" id="dbgr6f2y7">
   <div class="dbg-titulo">
     <span class="dbg-titulo-text">Teste de mesa do jogo_rodadas.c (respostas: s, n)</span>
-    <button class="dbg-btn" id="dbg56mnhg-prev" onclick="dbgPrev('dbg56mnhg')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbg56mnhg-cur">—</span> / 13</span>
-    <button class="dbg-btn" id="dbg56mnhg-next" onclick="dbgNext('dbg56mnhg')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbg56mnhg')">↺ Reset</button>
+    <button class="dbg-btn" id="dbgr6f2y7-prev" onclick="dbgPrev('dbgr6f2y7')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbgr6f2y7-cur">—</span> / 13</span>
+    <button class="dbg-btn" id="dbgr6f2y7-next" onclick="dbgNext('dbgr6f2y7')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbgr6f2y7')">↺ Reset</button>
   </div>
   <div class="dbg-layout">
     <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">#include &lt;stdio.h&gt;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">int main() {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    int rodada = 0;</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">    char resposta;</span></div><div class="dbg-line" data-ln="6"><span class="dbg-linenum">6</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="7"><span class="dbg-linenum">7</span><span class="dbg-codeline">    do {</span></div><div class="dbg-line" data-ln="8"><span class="dbg-linenum">8</span><span class="dbg-codeline">        rodada++;</span></div><div class="dbg-line" data-ln="9"><span class="dbg-linenum">9</span><span class="dbg-codeline">        printf(&quot;Rodada %d! Quanto e 6 x 7?\n&quot;, rodada);</span></div><div class="dbg-line" data-ln="10"><span class="dbg-linenum">10</span><span class="dbg-codeline">        printf(&quot;Jogar outra rodada? (s/n): &quot;);</span></div><div class="dbg-line" data-ln="11"><span class="dbg-linenum">11</span><span class="dbg-codeline">        scanf(&quot; %c&quot;, &amp;resposta);</span></div><div class="dbg-line" data-ln="12"><span class="dbg-linenum">12</span><span class="dbg-codeline">    } while (resposta == 's' || resposta == 'S');</span></div><div class="dbg-line" data-ln="13"><span class="dbg-linenum">13</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="14"><span class="dbg-linenum">14</span><span class="dbg-codeline">    printf(&quot;Total: %d rodada(s). Valeu!\n&quot;, rodada);</span></div><div class="dbg-line" data-ln="15"><span class="dbg-linenum">15</span><span class="dbg-codeline">    return 0;</span></div><div class="dbg-line" data-ln="16"><span class="dbg-linenum">16</span><span class="dbg-codeline">}</span></div></div>
@@ -384,8 +393,8 @@ int main() {
       <tbody class="dbg-vars-body"></tbody></table>
     </div>
   </div>
-  <div class="dbg-output" id="dbg56mnhg-out"></div>
-  <script type="application/json" id="dbg56mnhg-data">[{"linha":4,"vars":{"rodada":0},"saida":""},{"linha":5,"vars":{"rodada":0},"saida":""},{"linha":8,"vars":{"rodada":1},"saida":""},{"linha":9,"vars":{"rodada":1},"saida":"Rodada 1! Quanto e 6 x 7?"},{"linha":10,"vars":{"rodada":1},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":11,"vars":{"rodada":1,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":12,"vars":{"rodada":1,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":8,"vars":{"rodada":2,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":9,"vars":{"rodada":2,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?"},{"linha":10,"vars":{"rodada":2,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":11,"vars":{"rodada":2,"resposta":"n"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":12,"vars":{"rodada":2,"resposta":"n"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":14,"vars":{"rodada":2,"resposta":"n"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nTotal: 2 rodada(s). Valeu!"}]</script>
+  <div class="dbg-output" id="dbgr6f2y7-out"></div>
+  <script type="application/json" id="dbgr6f2y7-data">[{"linha":4,"vars":{"rodada":0},"saida":""},{"linha":5,"vars":{"rodada":0},"saida":""},{"linha":8,"vars":{"rodada":1},"saida":""},{"linha":9,"vars":{"rodada":1},"saida":"Rodada 1! Quanto e 6 x 7?"},{"linha":10,"vars":{"rodada":1},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":11,"vars":{"rodada":1,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":12,"vars":{"rodada":1,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":8,"vars":{"rodada":2,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":9,"vars":{"rodada":2,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?"},{"linha":10,"vars":{"rodada":2,"resposta":"s"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":11,"vars":{"rodada":2,"resposta":"n"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":12,"vars":{"rodada":2,"resposta":"n"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): "},{"linha":14,"vars":{"rodada":2,"resposta":"n"},"saida":"Rodada 1! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nRodada 2! Quanto e 6 x 7?\nJogar outra rodada? (s/n): \nTotal: 2 rodada(s). Valeu!"}]</script>
 </div>
         
       </div>
@@ -420,27 +429,45 @@ int main() {
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-pen"></i>
         <h1>Praticando</h1>
-        <p>Um programa só, em 5 partes</p>
+        <p>Um programa só, em 10 partes</p>
       </div>
     </div>
 
     <div class="slide protegido">
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
-        <h1>Desafio: Painel do Farm de Aura</h1>
+        <h1>Desafio: Cofrinho Digital (1/2)</h1>
         
-        <p>Hoje é diferente: em vez de vários exercícios soltos, vocês vão construir <strong>um programa só, em 5 partes</strong>, juntando tudo que já vimos (do-while, contador, acumulador, decisão). Sigam a ordem — cada parte usa o que a anterior já deixou pronto.</p>
+        <p>Hoje é diferente: em vez de vários exercícios soltos, vocês vão construir <strong>um programa só, em 10 partes</strong>, juntando tudo que já vimos (do-while, contador, acumulador, decisão). Sigam a ordem — cada parte usa o que a anterior já deixou pronto. Essa é a primeira metade (Partes 1 a 5).</p>
 
     
-    <pre><code class="language-c">printf(&quot;=== Painel do Farm de Aura ===\n&quot;);
-printf(&quot;1 - Farmar aura\n&quot;);
-printf(&quot;2 - Ver aura total\n&quot;);
-printf(&quot;3 - Ver quantas vezes farmou\n&quot;);
-printf(&quot;4 - Ver media de aura por farm\n&quot;);
-printf(&quot;5 - Sair\n&quot;);</code></pre>
+    <pre><code class="language-c">printf(&quot;=== Cofrinho Digital ===\n&quot;);
+printf(&quot;1 - Depositar\n&quot;);
+printf(&quot;2 - Ver total guardado\n&quot;);
+printf(&quot;3 - Ver quantos depositos fez\n&quot;);
+printf(&quot;4 - Ver media por deposito\n&quot;);
+printf(&quot;5 - Ver maior deposito unico\n&quot;);
+printf(&quot;6 - Ver progresso da meta\n&quot;);
+printf(&quot;7 - Sacar (gastar uma parte)\n&quot;);
+printf(&quot;8 - Resetar tudo\n&quot;);
+printf(&quot;9 - Sair\n&quot;);</code></pre>
 
     <div class="quest-list">
-      <ol><li>Parte 1 — Estrutura do menu: usando do-while, mostre o menu acima, leia a opção escolhida e repita até a pessoa escolher 5 (Sair). Por enquanto, cada opção só imprime "Você escolheu a opção X" — ainda sem lógica de verdade.</li><li>Parte 2 — Farmar aura (acumulador): crie uma variável de aura total, iniciada em 0 <strong>antes</strong> do menu começar. Implemente a opção 1 de verdade: pede uma quantidade de pontos e SOMA (acumula) no total, toda vez que for escolhida.</li><li>Parte 3 — Total e contador de farms: implemente a opção 2 pra mostrar o total acumulado até agora. Crie também um contador que aumenta em 1 toda vez que a opção 1 for usada, e implemente a opção 3 pra mostrar esse contador (quantas vezes já farmou).</li><li>Parte 4 — Média por farm: implemente a opção 4, que calcula e mostra a média de aura por farm (total acumulado dividido pelo contador). Cuidado: se a pessoa ainda não farmou nenhuma vez, dividir por zero quebra o programa — use uma decisão pra tratar esse caso e avisar que ainda não há farms suficientes.</li><li>Parte 5 — Fechando com chave de ouro: ao escolher a opção 5 (Sair), mostre um resumo final (total de aura, quantas vezes farmou, média) antes de encerrar com uma mensagem de despedida. Teste o programa fazendo pelo menos 3 farms diferentes antes de sair, conferindo se os números batem.</li></ol>
+      <ol><li>Parte 1 — Estrutura do menu: usando do-while, mostre o menu acima (9 opções), leia a opção escolhida e repita até a pessoa escolher 9 (Sair). Por enquanto, cada opção só imprime "Você escolheu a opção X" — ainda sem lógica de verdade.</li><li>Parte 2 — Depositar (acumulador): crie uma variável de total guardado, iniciada em 0 <strong>antes</strong> do menu começar. Implemente a opção 1 de verdade: pede um valor e SOMA (acumula) no total, toda vez que for escolhida.</li><li>Parte 3 — Total e contador de depósitos: implemente a opção 2 pra mostrar o total guardado até agora. Crie também um contador que aumenta em 1 toda vez que a opção 1 for usada, e implemente a opção 3 pra mostrar esse contador (quantos depósitos já fez).</li><li>Parte 4 — Média por depósito: implemente a opção 4, que calcula e mostra a média guardada por depósito (total dividido pelo contador). Cuidado: se a pessoa ainda não depositou nada, dividir por zero quebra o programa — use uma decisão pra tratar esse caso e avisar que ainda não há depósitos suficientes.</li><li>Parte 5 — Maior depósito único: crie uma variável de recorde, iniciada em 0. Toda vez que a opção 1 for usada, compare o valor depositado NAQUELA vez com o recorde guardado — se for maior, atualize o recorde. Implemente a opção 5 pra mostrar o recorde atual.</li></ol>
+    </div>
+        <p class="protegido-aviso"><i class="fa-solid fa-lock"></i> Conteúdo protegido contra cópia.</p>
+      </div>
+    </div>
+
+    <div class="slide protegido">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Desafios</div>
+        <h1>Desafio: Cofrinho Digital (2/2)</h1>
+        
+        <p>Segunda metade do desafio (Partes 6 a 10) — continuando de onde a Parte 5 parou.</p>
+
+    <div class="quest-list">
+      <ol><li>Parte 6 — Meta de economia: antes do menu aparecer pela primeira vez, pergunte qual é a meta de economia da pessoa (um valor) e guarde numa variável. Implemente a opção 6, que compara o total guardado com a meta e avisa se já bateu, ou mostra quanto ainda falta.</li><li>Parte 7 — Sacar (gastar): implemente a opção 7, que pede um valor a sacar e SUBTRAI do total. Cuidado: se o saque for maior que o total guardado, o total não pode ficar negativo — use uma decisão pra zerar o total nesse caso, em vez de deixá-lo negativo.</li><li>Parte 8 — Resetar tudo: implemente a opção 8, que pergunta "Tem certeza que quer resetar tudo? (s/n)" antes de agir. Só se a resposta for 's', zere o total, o contador E o recorde. Se for 'n', volte pro menu sem mudar nada.</li><li>Parte 9 — Fechando com chave de ouro: ao escolher a opção 9 (Sair), mostre um resumo final completo — total guardado, quantos depósitos fez, média por depósito, maior depósito único e se bateu a meta — antes de encerrar com uma mensagem de despedida.</li><li>Parte 10 — Teste completo: rode o programa fazendo pelo menos 5 depósitos diferentes, incluindo pelo menos um saque (opção 7) e conferindo se o recorde (opção 5) e o progresso da meta (opção 6) batem com o que você esperava. Anote os valores que você usou e o que o programa mostrou, pra comparar.</li></ol>
     </div>
         <p class="protegido-aviso"><i class="fa-solid fa-lock"></i> Conteúdo protegido contra cópia.</p>
       </div>
@@ -453,17 +480,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcf9f4',
-    primaryTextColor: '#211712',
-    primaryBorderColor: '#F1DEC4',
-    lineColor: '#F1DEC4',
-    secondaryColor: '#677E61',
+    primaryColor: '#fdf0dc',
+    primaryTextColor: '#151F1D',
+    primaryBorderColor: '#F2A93B',
+    lineColor: '#F2A93B',
+    secondaryColor: '#0B3B3B',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcf9f4',
-    nodeBorder: '#F1DEC4',
+    mainBkg: '#fdf0dc',
+    nodeBorder: '#F2A93B',
     clusterBkg: '#f0f4f8',
-    titleColor: '#F1DEC4',
+    titleColor: '#F2A93B',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -473,7 +500,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#f3dddd'
+    cScale1: '#d5e5e5'
   }
 });
 </script>
