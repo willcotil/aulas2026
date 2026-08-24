@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 4: Validação de Entrada com Laços</title>
+<title>Aula 4: Revisão: while e do-while (20 Exercícios) + Limpando a Tela</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -109,6 +109,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -179,22 +187,18 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Validação de Entrada com Laços</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que vem por aí</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-bug"></i><span>O problema: nem todo mundo digita direito</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Sem validação, o programa aceita qualquer coisa</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>A solução: repetir até a entrada fazer sentido</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>O padrão: repetir até validar</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>do-while validando a idade</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-code-branch"></i><span>E se a regra tiver mais de uma condição?</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-code-branch"></i><span>Combinando condições com operadores lógicos</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-list-check"></i><span>Juntando tudo: um menu que não aceita gracinha</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>menu_validado.c</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>Vamos ver rodando: o usuário tenta zoar</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>Depurador: acompanhando as tentativas</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag"></i><span>Existe outro jeito?</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag"></i><span>Variação: while com bandeira (flag)</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Sua vez</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Hora de Revisar</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Relembrando o while</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>Relembrando o do-while</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-broom"></i><span>Um Truque Novo: Limpando a Tela</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>system(): chamando o sistema operacional</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>Receita pronta: #ifdef _WIN32</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-list-check"></i><span>20 Exercícios de Revisão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 1/4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 2/4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 3/4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 4/4</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
@@ -207,117 +211,109 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 01</div>
-        <h1>Validação de Entrada com Laços</h1>
-        <h2>Linguagem de Programação — Aula 4</h2>
         
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-shield-halved"></i> Nem sempre o usuário digita o que a gente espera...
-      </h3>
-      <p>Hoje a gente aprende a proteger o programa disso — usando os laços que vocês já conhecem.</p>
+        
+        <p>Linguagem de Programação (LP) — Aula 4</p>
+<div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">Revisão: while e do-while (20 Exercícios) + Limpando a Tela</div>
+    <div class="agenda-lista">
       
+        <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
+          <div class="agenda-numero">01</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Hora de Revisar</div>
+            
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
+          <div class="agenda-numero">02</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Relembrando o while</div>
+            
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
+          <div class="agenda-numero">03</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-arrows-rotate"></i> Relembrando o do-while</div>
+            
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-broom"></i> Um Truque Novo: Limpando a Tela</div>
+            
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> Receita pronta: #ifdef _WIN32</div>
+            
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-list-check"></i> 20 Exercícios de Revisão</div>
+            
+          </div>
+        </div>
     </div>
+  </div>
         
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-dumbbell"></i>
+        <h1>Hora de Revisar</h1>
+        <p>Hoje é (quase) só treino puro pra fixar while e do-while</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 02</div>
-        <h1>O que vem por aí</h1>
+        <h1>Relembrando o while</h1>
         
-        <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Roteiro de hoje</div>
-    <div class="agenda-lista">
-      
-        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
-          <div class="agenda-numero">01</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-bug"></i> O problema: nem todo mundo digita direito</div>
-            
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
-          <div class="agenda-numero">02</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-arrows-rotate"></i> O padrão: repetir até validar</div>
-            
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-code-branch"></i> Combinando condições com operadores lógicos</div>
-            
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-list-check"></i> Juntando tudo: um menu que não aceita gracinha</div>
-            
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
-          <div class="agenda-numero">05</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-magnifying-glass"></i> Depurador: acompanhando as tentativas</div>
-            
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag"></i> Variação: while com bandeira (flag)</div>
-            
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Sua vez</div>
-            
-          </div>
-        </div>
-    </div>
-  </div>
         
-      </div>
-    </div>
+    
+    <pre><code class="language-c">// Sintaxe do while — testa a condicao ANTES de rodar
+while (condicao) {
+    // repete enquanto a condicao for verdadeira
+}</code></pre>
 
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-bug"></i>
-        <h1>O problema: nem todo mundo digita direito</h1>
-        <p>O que acontece quando a entrada foge do esperado?</p>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Lembrete relâmpago (Aula 1)
+      </h3>
+      <p>O <code>while</code> testa a condição <strong>antes</strong> de rodar o bloco — se ela já começar falsa, o laço pode nunca executar nenhuma vez.</p>
+      
+    </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 03</div>
-        <h1>Sem validação, o programa aceita qualquer coisa</h1>
+        <h1>Relembrando o do-while</h1>
         
         
-    <div class="file-label">idade_sem_validacao.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
-
-int main(void) {
-    int idade;
-
-    printf(&quot;Digite sua idade: &quot;);
-    scanf(&quot;%d&quot;, &amp;idade);
-
-    printf(&quot;Voce tem %d anos.\n&quot;, idade);
-
-    return 0;
-}</code></pre>
+    
+    <pre><code class="language-c">// Sintaxe do do-while — testa a condicao DEPOIS de rodar
+do {
+    // roda pelo menos uma vez, sempre
+} while (condicao); // nao esqueca do ;</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> E se o usuário digitar -30? Ou 200?
+        <i class="fa-solid fa-lightbulb"></i> Lembrete relâmpago (Aula 3)
       </h3>
-      <p>O <code>scanf</code> lê o número numa boa. O programa não trava — mas passa a funcionar com um dado que não faz sentido nenhum. Isso é pior que travar: o erro fica escondido.</p>
+      <p>O <code>do-while</code> roda o bloco <strong>pelo menos uma vez</strong> antes de checar a condição — ótimo pra menus e validação de entrada. Cuidado pra não esquecer o <code>;</code> depois do <code>while(condicao)</code>.</p>
       
     </div>
         
@@ -326,26 +322,31 @@ int main(void) {
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-arrows-rotate"></i>
-        <h1>A solução: repetir até a entrada fazer sentido</h1>
-        <p>Um padrão que você já tem as peças pra montar</p>
+        <i class="fa-solid fa-broom"></i>
+        <h1>Um Truque Novo: Limpando a Tela</h1>
+        <p>Só um conceito novo hoje — e ele deixa seus menus muito mais organizados</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 04</div>
-        <h1>O padrão de validação</h1>
+        <h1>system(): chamando o sistema operacional</h1>
         
-        <div class="bloco-diagrama" id="mmdmabgr">
-    <div class="bloco-diagrama-titulo">Pedir → validar → repetir se inválido</div>
-    <div class="mermaid">flowchart TD
-  A[Pedir e ler a entrada] --&gt; B{Entrada valida?}
-  B --&gt;|Nao| A
-  B --&gt;|Sim| C[Continuar o programa]</div>
+        <p>Existe uma função em C chamada <code>system()</code> que executa, de dentro do seu programa, um comando do próprio sistema operacional — como se você tivesse digitado ele no terminal.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Cada sistema tem seu próprio comando de limpar tela</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Sistema Operacional</th><th>Comando em C</th></tr></thead><tbody><tr><td>Windows</td><td>system("cls")</td></tr><tr><td>Linux / Mac</td><td>system("clear")</td></tr></tbody></table></div>
     
   </div>
-<p>Repare: o bloco <strong>sempre roda pelo menos uma vez</strong> antes de checar a condição — não é a cara do <code>do-while</code> que vimos na Aula 3?</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> O problema
+      </h3>
+      <p>Se você usar só <code>system(&quot;cls&quot;)</code>, o programa quebra num Linux/Mac. E vice-versa. Precisamos de um jeito de escolher o comando certo na hora de compilar.</p>
+      
+    </div>
         
       </div>
     </div>
@@ -353,72 +354,23 @@ int main(void) {
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 05</div>
-        <h1>do-while validando a idade</h1>
+        <h1>Receita pronta: #ifdef _WIN32</h1>
         
         
-    <div class="file-label">idade_validada.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
-
-int main(void) {
-    int idade;
-
-    do {
-        printf(&quot;Digite sua idade (0 a 120): &quot;);
-        scanf(&quot;%d&quot;, &amp;idade);
-
-        if (idade &lt; 0 || idade &gt; 120) {
-            printf(&quot;Idade invalida! Tente de novo.\n&quot;);
-        }
-    } while (idade &lt; 0 || idade &gt; 120);
-
-    printf(&quot;Idade registrada: %d anos.\n&quot;, idade);
-
-    return 0;
-}</code></pre>
+    <div class="file-label">limpar_tela.c</div>
+    <pre style="margin-top:0;"><code class="language-c">#ifdef _WIN32
+    system(&quot;cls&quot;);
+#else
+    system(&quot;clear&quot;);
+#endif</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Repare bem
+        <i class="fa-solid fa-broom"></i> Pra que serve isso?
       </h3>
-      <p>A condição do <code>while(...)</code> é <strong>a mesma</strong> usada no <code>if</code> — só que aqui ela decide se o laço REPETE, não se um aviso é mostrado.</p>
+      <p><code>_WIN32</code> é uma macro que o compilador já reconhece automaticamente no Windows. Essa receita é perfeita pra usar dentro de um <code>do-while</code> de menu: a cada volta, a tela é limpa e o histórico de opções anteriores some, deixando o programa mais organizado.</p>
       
     </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-code-branch"></i>
-        <h1>E se a regra tiver mais de uma condição?</h1>
-        <p>Hora de reaproveitar os operadores lógicos</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        <h1>Juntando condições com || e &&</h1>
-        
-        
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Lembrete rápido (Aula 9, sem. passado)
-      </h3>
-      <p><code>||</code> (OU) → verdadeiro se <strong>pelo menos uma</strong> condição for verdadeira. <code>&amp;&amp;</code> (E) → verdadeiro só se <strong>as duas</strong> forem verdadeiras. Hoje é só reaproveitar isso na condição do laço.</p>
-      
-    </div>
-
-    
-    <pre><code class="language-c">// idade valida: entre 0 e 120
-while (idade &lt; 0 || idade &gt; 120) {
-    // pede de novo...
-}
-
-// opcao valida: entre 1 e 3
-do {
-    // pede de novo...
-} while (opcao &lt; 1 || opcao &gt; 3);</code></pre>
         
       </div>
     </div>
@@ -426,109 +378,20 @@ do {
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-list-check"></i>
-        <h1>Juntando tudo: um menu que não aceita gracinha</h1>
-        <p>Exemplo completo com do-while</p>
+        <h1>20 Exercícios de Revisão</h1>
+        <p>Metade while, metade do-while, crescendo em dificuldade — bora</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
-        <h1>menu_validado.c</h1>
+        <div class="slide-number">Desafios</div>
+        <h1>Exercícios de Revisão — Parte 1/4</h1>
         
         
-    <div class="file-label">menu_validado.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
-
-int main(void) {
-    int opcao;
-
-    do {
-        printf(&quot;===== MENU =====\n&quot;);
-        printf(&quot;1 - Jogar\n&quot;);
-        printf(&quot;2 - Ver estatisticas\n&quot;);
-        printf(&quot;3 - Sair\n&quot;);
-        printf(&quot;Escolha uma opcao: &quot;);
-        scanf(&quot;%d&quot;, &amp;opcao);
-
-        if (opcao &lt; 1 || opcao &gt; 3) {
-            printf(&quot;Opcao invalida! Tente de novo.\n\n&quot;);
-        }
-    } while (opcao &lt; 1 || opcao &gt; 3);
-
-    printf(&quot;\nVoce escolheu a opcao %d\n&quot;, opcao);
-
-    return 0;
-}</code></pre>
-        
-      </div>
+    <div class="quest-list">
+      <ol><li>Use um <code>while</code> para imprimir os números de 1 a 10.</li><li>Use um <code>while</code> para imprimir os números de 10 a 1, em ordem decrescente.</li><li>Use um <code>while</code> para somar os números de 1 a 100 (acumulador) e mostrar o total.</li><li>Use um <code>while</code> para contar quantos números pares existem entre 1 e 50 (contador).</li><li>Peça números ao usuário com <code>while</code>, um de cada vez, até ele digitar 0 — some todos (acumulador) e mostre o total no final.</li></ol>
     </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <h1>Vamos ver rodando: o usuário tenta zoar</h1>
-        <p>Depurador passo a passo</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
-        <h1>Acompanhando tentativas inválidas</h1>
-        
-        <div class="depurador-bloco" id="dbg9kouuc">
-  <div class="dbg-titulo">
-    <span class="dbg-titulo-text">menu_validado.c em ação</span>
-    <button class="dbg-btn" id="dbg9kouuc-prev" onclick="dbgPrev('dbg9kouuc')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbg9kouuc-cur">—</span> / 20</span>
-    <button class="dbg-btn" id="dbg9kouuc-next" onclick="dbgNext('dbg9kouuc')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbg9kouuc')">↺ Reset</button>
-  </div>
-  <div class="dbg-layout">
-    <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">#include &lt;stdio.h&gt;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">int main(void) {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    int opcao;</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="6"><span class="dbg-linenum">6</span><span class="dbg-codeline">    do {</span></div><div class="dbg-line" data-ln="7"><span class="dbg-linenum">7</span><span class="dbg-codeline">        printf(&quot;Menu: 1-Jogar  2-Estatisticas  3-Sair\n&quot;);</span></div><div class="dbg-line" data-ln="8"><span class="dbg-linenum">8</span><span class="dbg-codeline">        printf(&quot;Escolha uma opcao: &quot;);</span></div><div class="dbg-line" data-ln="9"><span class="dbg-linenum">9</span><span class="dbg-codeline">        scanf(&quot;%d&quot;, &amp;opcao);</span></div><div class="dbg-line" data-ln="10"><span class="dbg-linenum">10</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="11"><span class="dbg-linenum">11</span><span class="dbg-codeline">        if (opcao &lt; 1 || opcao &gt; 3) {</span></div><div class="dbg-line" data-ln="12"><span class="dbg-linenum">12</span><span class="dbg-codeline">            printf(&quot;Opcao invalida! Tente de novo.\n&quot;);</span></div><div class="dbg-line" data-ln="13"><span class="dbg-linenum">13</span><span class="dbg-codeline">        }</span></div><div class="dbg-line" data-ln="14"><span class="dbg-linenum">14</span><span class="dbg-codeline">    } while (opcao &lt; 1 || opcao &gt; 3);</span></div><div class="dbg-line" data-ln="15"><span class="dbg-linenum">15</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="16"><span class="dbg-linenum">16</span><span class="dbg-codeline">    printf(&quot;Voce escolheu a opcao %d\n&quot;, opcao);</span></div><div class="dbg-line" data-ln="17"><span class="dbg-linenum">17</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="18"><span class="dbg-linenum">18</span><span class="dbg-codeline">    return 0;</span></div><div class="dbg-line" data-ln="19"><span class="dbg-linenum">19</span><span class="dbg-codeline">}</span></div></div>
-    <div class="dbg-vars-panel">
-      <div class="dbg-vars-title">Variáveis</div>
-      <table class="dbg-vars-table"><thead><tr><th>Var</th><th>Valor</th></tr></thead>
-      <tbody class="dbg-vars-body"></tbody></table>
-    </div>
-  </div>
-  <div class="dbg-output" id="dbg9kouuc-out"></div>
-  <script type="application/json" id="dbg9kouuc-data">[{"linha":4,"vars":{"opcao":"?"}},{"linha":6,"vars":{"opcao":"?"}},{"linha":7,"vars":{"opcao":"?"},"saida":"Menu: 1-Jogar  2-Estatisticas  3-Sair"},{"linha":8,"vars":{"opcao":"?"},"saida":"Escolha uma opcao: "},{"linha":9,"vars":{"opcao":0},"saida":"(usuário digita 0)"},{"linha":11,"vars":{"opcao":0}},{"linha":12,"vars":{"opcao":0},"saida":"Opcao invalida! Tente de novo."},{"linha":14,"vars":{"opcao":0}},{"linha":7,"vars":{"opcao":0},"saida":"Menu: 1-Jogar  2-Estatisticas  3-Sair"},{"linha":8,"vars":{"opcao":0},"saida":"Escolha uma opcao: "},{"linha":9,"vars":{"opcao":67},"saida":"(usuário digita 67 — nem é a sorte do six-seven aqui)"},{"linha":11,"vars":{"opcao":67}},{"linha":12,"vars":{"opcao":67},"saida":"Opcao invalida! Tente de novo."},{"linha":14,"vars":{"opcao":67}},{"linha":7,"vars":{"opcao":67},"saida":"Menu: 1-Jogar  2-Estatisticas  3-Sair"},{"linha":8,"vars":{"opcao":67},"saida":"Escolha uma opcao: "},{"linha":9,"vars":{"opcao":2},"saida":"(usuário digita 2)"},{"linha":11,"vars":{"opcao":2}},{"linha":14,"vars":{"opcao":2}},{"linha":16,"vars":{"opcao":2},"saida":"Voce escolheu a opcao 2"}]</script>
-</div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag"></i>
-        <h1>Existe outro jeito?</h1>
-        <p>while + uma variável "bandeira"</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
-        <h1>Variação: while com bandeira (flag)</h1>
-        
-        <p>O <code>do-while</code> é o mais natural pra validação, mas dá pra fazer a mesma coisa com <code>while</code> e uma variável que guarda se a entrada já é válida — a <strong>bandeira</strong>.</p>
-
-    
-    <pre><code class="language-c">int opcao;
-int valido = 0;  // bandeira: 0 = ainda invalido, 1 = valido
-
-while (!valido) {
-    printf(&quot;Escolha uma opcao (1-3): &quot;);
-    scanf(&quot;%d&quot;, &amp;opcao);
-
-    if (opcao &gt;= 1 &amp;&amp; opcao &lt;= 3) {
-        valido = 1;  // levanta a bandeira
-    } else {
-        printf(&quot;Opcao invalida!\n&quot;);
-    }
-}</code></pre>
         
       </div>
     </div>
@@ -536,11 +399,37 @@ while (!valido) {
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
-        <h1>Sua vez</h1>
+        <h1>Exercícios de Revisão — Parte 2/4</h1>
         
         
     <div class="quest-list">
-      <ol><li>Escreva um programa que peça uma nota entre 0 e 10, usando do-while para validar a entrada.</li><li>Modifique o menu_validado.c para ter 5 opções em vez de 3 — ajuste a condição de validação.</li><li>Peça uma resposta 's' ou 'n' (sim/não) e repita até o usuário digitar uma das duas (dica: compare caracteres, como na Aula 8 do semestre passado).</li><li>Desafio: valide dois campos em sequência (idade E opção de menu), usando dois laços de validação, um depois do outro.</li></ol>
+      <ol><li>Use um <code>do-while</code> para pedir uma senha até o usuário acertar (senha fixa no código, tipo "1234").</li><li>Use um <code>do-while</code> para simular um menu com 3 opções + Sair, repetindo até "Sair" ser escolhida — por enquanto cada opção só imprime "Você escolheu a opção X".</li><li>Refaça o exercício anterior, mas agora limpando a tela (<code>system(&quot;cls&quot;)</code>/<code>system(&quot;clear&quot;)</code> com <code>#ifdef _WIN32</code>) toda vez que o menu voltar a aparecer.</li><li>Use um <code>while</code> para calcular o fatorial de um número digitado pelo usuário.</li><li>Use um <code>do-while</code> para pedir números até o usuário digitar um número negativo, contando (contador) quantos números positivos foram digitados.</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Desafios</div>
+        <h1>Exercícios de Revisão — Parte 3/4</h1>
+        
+        
+    <div class="quest-list">
+      <ol><li>Use um <code>while</code> para encontrar o maior número de uma sequência digitada pelo usuário (termina quando ele digitar -1).</li><li>Use um <code>do-while</code> para exibir a tabuada completa (1 a 10) de um número escolhido pelo usuário.</li><li>Faça uma contagem regressiva de 10 até 0 usando <code>while</code>, com uma mensagem de "Lançamento!" no final.</li><li>Use um <code>do-while</code> para validar que o usuário digite um número entre 1 e 100, repetindo enquanto o valor estiver fora da faixa.</li><li>Some apenas os números ímpares de 1 a 50 usando <code>while</code> (acumulador com uma decisão dentro do laço).</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Desafios</div>
+        <h1>Exercícios de Revisão — Parte 4/4</h1>
+        
+        
+    <div class="quest-list">
+      <ol><li>Use um <code>do-while</code> para simular um caixa eletrônico simplificado: menu com "Consultar saldo" e "Sair", repetindo até sair e limpando a tela a cada volta ao menu.</li><li>Calcule a média de N notas digitadas pelo usuário, onde N também é digitado no início, usando <code>while</code> como controle de quantas vezes repetir.</li><li>Use um <code>while</code> para inverter os dígitos de um número digitado pelo usuário (ex: 123 vira 321) — dica: use o resto da divisão por 10 (<code>% 10</code>) e a divisão inteira (<code>/ 10</code>) repetidamente.</li><li>Monte um menu com <code>do-while</code> com pelo menos 4 opções reais (soma, subtração, multiplicação e divisão de dois números digitados, além de Sair), limpando a tela toda vez que voltar ao menu.</li><li>Desafio final — Jogo de Adivinhação: o programa "pensa" num número fixo escondido no código (ex: 7); o jogador digita palpites num <code>do-while</code> até acertar, contando (contador) quantas tentativas usou; ao acertar, limpe a tela e mostre um resumo final com o número de tentativas.</li></ol>
     </div>
         
       </div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 4: Git Colaborativo: Branches, Merges e Resolução de Conflitos</title>
+<title>Aula 4: Prática Consolidada: Repositório Local, Chaves de Acesso e Push pro GitHub</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -109,6 +109,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -180,23 +188,26 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-code-branch"></i><span>Por que branches?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Branches = Linhas do Tempo Paralelas</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-right-left"></i><span>Criando e trocando de branch</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Comandos de Branch</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Visualizando as linhas do tempo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Enxergando o Grafo de Commits</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-code-merge"></i><span>Merge: Juntando as Linhas do Tempo</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-code-merge"></i><span>Merge: fast-forward vs three-way</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Three-Way Merge</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Conflitos de merge</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>O Que é (e Como se Parece) um Conflito</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Resolvendo um Conflito, Passo a Passo</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-screwdriver-wrench"></i><span>Prática guiada com conflito real</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Cenário do Conflito</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Boas Práticas Rápidas</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Prévia: Aula 5 — Revisão e Avaliação 1</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><i class="fa-solid fa-flask"></i><span>Exercício final</span></button></div>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-arrow-rotate-left"></i><span>Hoje é Dia de Praticar</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-arrow-rotate-left"></i><span>Recap rápido</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-key"></i><span>Personal Access Token</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que É um Token de Acesso?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Como Gerar seu Token (Classic)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Como Usar o Token</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-scale-balanced"></i><span>SSH vs Token: qual escolher</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-terminal"></i><span>Exercício Parte 1</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Passo 1: Criando o Repositório e o Primeiro Programa</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Passo 2: Primeiro Commit</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Passo 3: Segundo Programa — Calculadora de IMC</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Passo 4: Segundo Commit</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Passo 5: Uma Melhoria e o Terceiro Commit</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Passo 6: Conferindo o Histórico</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-cloud-arrow-up"></i><span>Exercício Parte 2</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Passo 1: Escolher o Método e Criar o Repositório</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Passo 2: Conectando o Repositório</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Passo 3: Push e Conferência</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><i class="fa-solid fa-graduation-cap"></i><span>Fechamento</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Checklist: Repositório, Commits e Push</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="controls">
@@ -213,56 +224,49 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         
         <p>Fundamentos de Informática (FI) — Aula 4</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Git Colaborativo: Branches, Merges e Resolução de Conflitos</div>
+    <div class="bloco-agenda-titulo">Prática Consolidada: Repositório Local, Chaves de Acesso e Push pro GitHub</div>
     <div class="agenda-lista">
       
-        <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-code-branch"></i> Por que branches?</div>
-            <div class="agenda-item-texto">Experimentar sem bagunçar a linha principal</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-arrow-rotate-left"></i> Recap rápido</div>
+            <div class="agenda-item-texto">Os comandos das Aulas 1-3, só de lembrete</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-right-left"></i> Criando e trocando de branch</div>
-            <div class="agenda-item-texto">git branch, git switch, git checkout</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-key"></i> Personal Access Token</div>
+            <div class="agenda-item-texto">Uma segunda forma de provar quem você é</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Visualizando as linhas do tempo</div>
-            <div class="agenda-item-texto">git log --oneline --graph --all</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-scale-balanced"></i> SSH vs Token: qual escolher</div>
+            <div class="agenda-item-texto">Cada um facilita numa situação diferente</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-code-merge"></i> Merge: fast-forward vs three-way</div>
-            <div class="agenda-item-texto">Dois jeitos de juntar branches</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-terminal"></i> Exercício Parte 1</div>
+            <div class="agenda-item-texto">Repositório local com histórico de verdade</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Conflitos de merge</div>
-            <div class="agenda-item-texto">Quando o Git precisa da sua ajuda</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-cloud-arrow-up"></i> Exercício Parte 2</div>
+            <div class="agenda-item-texto">Autenticação e push pro GitHub</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(19)" role="button" tabindex="0">
           <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-screwdriver-wrench"></i> Prática guiada com conflito real</div>
-            <div class="agenda-item-texto">Provocando e resolvendo de propósito</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(17)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flask"></i> Exercício final</div>
-            <div class="agenda-item-texto">Sua vez de mergear e resolver conflitos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-graduation-cap"></i> Fechamento</div>
+            <div class="agenda-item-texto">Prévia da Aula 5: revisão e Avaliação 1</div>
           </div>
         </div>
     </div>
@@ -273,9 +277,9 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-code-branch"></i>
-        <h1>Por Que Branches?</h1>
-        <p>Uma linha do tempo paralela pra testar sem medo</p>
+        <i class="fa-solid fa-arrow-rotate-left"></i>
+        <h1>Hoje é Dia de Praticar</h1>
+        <p>Pouca teoria nova — o resto é treino pra grudar de vez</p>
       </div>
     </div>
 
@@ -283,34 +287,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 02</div>
         
-        <h2>Branches = Linhas do Tempo Paralelas</h2>
-        <p>Lembra do viajante do tempo lá da Aula 1? Até agora ele só andava numa única linha: a <code>main</code>. Mas e se ele quisesse tentar algo arriscado — tipo um save state de jogo — sem estragar o histórico principal? É pra isso que serve uma <strong>branch</strong>: uma cópia da linha do tempo que se separa da <code>main</code> num certo ponto, pra você experimentar. Se der certo, você junta de volta. Se der ruim, você abandona sem afetar ninguém.</p>
-<div class="bloco-diagrama" id="mmd9o9dg">
-    <div class="bloco-diagrama-titulo">Uma branch se separando da main</div>
-    <div class="mermaid">flowchart LR
-    A["commit 1"] --&gt; B["commit 2 (main)"]
-    B --&gt; C["commit 3 (main)"]
-    B --&gt;|cria branch| D["commit A (feature)"]
-    D --&gt; E["commit B (feature)"]</div>
+        <h2>Recap Rápido (só de lembrete)</h2>
+        <p>Git tem muito passo pra decorar, e só decoreba não fixa — precisa repetir. Antes de ir pro novo, uma olhada rápida nos comandos das Aulas 1-3. Sem reexplicar, só lembrete visual.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">O que já vimos</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Comando</th><th>Pra que serve</th></tr></thead><tbody><tr><td><code>git init</code></td><td>Cria um repositório novo</td></tr><tr><td><code>git add</code></td><td>Manda a mudança pro stage (a "prévia" do commit)</td></tr><tr><td><code>git commit -m &quot;...&quot;</code></td><td>Registra um ponto na linha do tempo</td></tr><tr><td><code>git log --oneline</code></td><td>Mostra o histórico resumido</td></tr><tr><td><code>git remote add origin</code></td><td>Liga o repo local a um repositório no GitHub</td></tr><tr><td><code>git push -u origin main</code></td><td>Envia os commits pro GitHub</td></tr></tbody></table></div>
     
   </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Definição formal
-      </h3>
-      <p>Uma branch é um ponteiro móvel para um commit. Criar uma branch não duplica arquivos — só cria uma nova linha de commits a partir do ponto atual.</p>
-      
-    </div>
         
       </div>
     </div>
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-right-left"></i>
-        <h1>Criando e Trocando de Branch</h1>
-        <p>git branch, git switch e git checkout</p>
+        <i class="fa-solid fa-key"></i>
+        <h1>Um Novo Jeito de Provar Quem Você É</h1>
+        <p>Personal Access Token (Classic)</p>
       </div>
     </div>
 
@@ -318,37 +310,17 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 03</div>
         
-        <h2>Comandos de Branch</h2>
-        
-    
-    <pre><code class="language-bash"># lista as branches existentes (a atual vem marcada com *)
-git branch
+        <h2>O Que É um Token de Acesso?</h2>
+        <p>Na Aula 3 vocês usaram uma chave SSH pra se autenticar no GitHub. Hoje existe uma segunda forma: o <strong>Personal Access Token (Classic)</strong>. O GitHub não aceita mais a senha normal da sua conta pra operações git via HTTPS — então, ou você usa uma chave SSH (Aula 3), ou usa um token no lugar da senha. É tipo entrar numa festa: sem o crachá certo, nem adianta tentar na porta.</p>
 
-# cria uma nova branch (não troca pra ela ainda)
-git branch feature/comentarios
-
-# troca pra outra branch (forma moderna)
-git switch feature/comentarios
-
-# troca pra outra branch (forma clássica, ainda muito usada)
-git checkout feature/comentarios
-
-# atalho: cria E já troca pra branch nova (o mais usado na prática)
-git switch -c feature/comentarios</code></pre>
-<div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">Resumo dos comandos</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Comando</th><th>O que faz</th></tr></thead><tbody><tr><td><code>git branch nome-da-branch</code></td><td>Cria a branch, mas continua na atual</td></tr><tr><td><code>git switch nome-da-branch</code></td><td>Troca de branch (jeito moderno)</td></tr><tr><td><code>git checkout nome-da-branch</code></td><td>Troca de branch (jeito clássico, ainda comum)</td></tr><tr><td><code>git switch -c nome-da-branch</code></td><td>Cria e já troca — atalho mais usado</td></tr></tbody></table></div>
-    
-  </div>
-        
-      </div>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Definição formal
+      </h3>
+      <p>Um Personal Access Token é um código gerado pelo próprio GitHub que funciona como uma senha especial — usado só quando você conecta ao GitHub via HTTPS (em vez de SSH) pra operações como <code>git push</code>.</p>
+      
     </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-diagram-project"></i>
-        <h1>Visualizando as Linhas do Tempo</h1>
-        <p>git log --oneline --graph --all</p>
+        
       </div>
     </div>
 
@@ -356,32 +328,17 @@ git switch -c feature/comentarios</code></pre>
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 04</div>
         
-        <h2>Enxergando o Grafo de Commits</h2>
-        <p>Você já usa <code>git log --oneline</code> desde a Aula 1. Agora acrescente duas flags: <code>--graph</code> desenha as linhas de ramificação em ASCII, e <code>--all</code> mostra TODAS as branches do repositório, não só a atual.</p>
-
-    
-    <pre><code class="language-bash">$ git log --oneline --graph --all
-* a1b2c3d (feature/comentarios) Adiciona comentário explicativo
-| * f4e5d6c (main) Ajusta mensagem no topo do arquivo
-|/
-* 9c8b7a6 Commit inicial do exercício em C</code></pre>
+        <h2>Como Gerar seu Token (Classic)</h2>
+        <ol><li>No GitHub: clique na sua foto de perfil → <strong>Settings</strong></li><li><strong>Developer settings</strong> → <strong>Personal access tokens</strong> → <strong>Tokens (classic)</strong></li><li><strong>Generate new token (classic)</strong></li><li>Marque o escopo <code>repo</code> e defina uma validade</li><li>Clique em <strong>Generate token</strong></li><li><strong>Copie o token na hora</strong> — ele só aparece uma vez!</li></ol>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-eye"></i> Lendo o desenho
+        <i class="fa-solid fa-triangle-exclamation"></i> Atenção
       </h3>
-      <p>Cada <code>*</code> é um commit. Colunas separadas = branches diferentes. Quando as linhas se cruzam de novo, é ali que um merge vai acontecer (ou já aconteceu).</p>
+      <p>Se fechar a página sem copiar, não tem como recuperar o token — só gerando um novo. Cole ele num lugar seguro antes de continuar.</p>
       
     </div>
         
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-code-merge"></i>
-        <h1>Merge: Juntando as Linhas do Tempo</h1>
-        <p>Dois jeitos do Git fazer isso</p>
       </div>
     </div>
 
@@ -389,26 +346,13 @@ git switch -c feature/comentarios</code></pre>
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 05</div>
         
-        <h2>Fast-Forward Merge</h2>
-        <p>Se a <code>main</code> não recebeu nenhum commit novo desde que você criou a branch, o merge é fácil: o Git só <em>avança o ponteiro</em> da <code>main</code> até o último commit da branch. Não precisa criar nada novo — é tipo colar as duas linhas do tempo porque elas nunca chegaram a divergir de verdade.</p>
-<div class="bloco-diagrama" id="mmd9p23l">
-    <div class="bloco-diagrama-titulo">Fast-forward: main só avança o ponteiro</div>
-    <div class="mermaid">flowchart TD
-  subgraph Antes["Antes do merge"]
-    A1["C1"] --&gt; A2["C2 (main)"]
-    A2 --&gt; A3["C3 (feature)"]
-  end
-  subgraph Depois["Depois do merge (fast-forward)"]
-    B1["C1"] --&gt; B2["C2"]
-    B2 --&gt; B3["C3 (main = feature)"]
-  end</div>
-    
-  </div>
+        <h2>Como Usar o Token</h2>
+        <p>Quando você conecta a um repositório pela URL <strong>HTTPS</strong> (não SSH) e roda <code>git push</code>, o Git pede usuário e senha. No campo de senha, é o token que entra — não a senha real da sua conta.</p>
 
     
-    <pre><code class="language-bash">git switch main
-git merge feature/comentarios
-# Fast-forward — nenhum commit de merge é criado</code></pre>
+    <pre><code class="language-bash">$ git push origin main
+Username for 'https://github.com': seu-usuario
+Password for 'https://seu-usuario@github.com': [cole o token aqui]</code></pre>
         
       </div>
     </div>
@@ -417,31 +361,18 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 06</div>
         
-        <h2>Three-Way Merge</h2>
-        <p>Mas se a <code>main</code> também recebeu commits novos enquanto a branch existia, o Git não consegue só avançar o ponteiro — as duas linhas do tempo realmente divergiram. Nesse caso ele cria um <strong>commit de merge</strong>, um commit especial com DOIS pais, que junta as duas histórias.</p>
-<div class="bloco-diagrama" id="mmdcuq59">
-    <div class="bloco-diagrama-titulo">Three-way: um commit de merge junta as duas linhas</div>
-    <div class="mermaid">flowchart TD
-  subgraph Antes["Antes do merge"]
-    A1["C1"] --&gt; A2["C2 (main)"]
-    A2 --&gt; A3["C4 (main)"]
-    A2 --&gt; A4["C3 (feature)"]
-  end
-  subgraph Depois["Depois do merge (three-way)"]
-    B1["C1"] --&gt; B2["C2"]
-    B2 --&gt; B3["C4 (main)"]
-    B2 --&gt; B4["C3 (feature)"]
-    B3 --&gt; B5["M (merge)"]
-    B4 --&gt; B5
-  end</div>
+        <h2>SSH vs Token Classic — Qual Escolher?</h2>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Comparativo rápido</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Critério</th><th>SSH (chave)</th><th>Token Classic</th></tr></thead><tbody><tr><td>Configuração inicial</td><td>Mais passos (gerar par de chaves, cadastrar no GitHub)</td><td>Mais rápido de gerar</td></tr><tr><td>Uso no dia a dia</td><td>Configura uma vez, nunca mais pede nada</td><td>Precisa colar de novo de tempos em tempos, a não ser que o Git guarde em cache</td></tr><tr><td>Se aplica melhor quando...</td><td>Já configurou na Aula 3</td><td>Ainda não tem chave e quer algo rápido hoje</td></tr></tbody></table></div>
     
   </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-code-merge"></i> git merge nome-da-branch
+        <i class="fa-solid fa-check"></i> Escolha só UM dos dois
       </h3>
-      <p>Executado estando na branch de destino (geralmente a <code>main</code>). O Git abre um editor pedindo a mensagem do commit de merge — geralmente já vem sugerida, dá pra só salvar e sair.</p>
+      <p>Pra hoje, use SSH (se já configurou na Aula 3) OU gere um Token Classic (novo). Não precisa fazer os dois.</p>
       
     </div>
         
@@ -450,9 +381,9 @@ git merge feature/comentarios
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Conflitos de Merge</h1>
-        <p>Quando o Git não sabe o que fazer</p>
+        <i class="fa-solid fa-terminal"></i>
+        <h1>Exercício — Parte 1</h1>
+        <p>Repositório local com histórico de verdade</p>
       </div>
     </div>
 
@@ -460,23 +391,26 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 07</div>
         
-        <h2>O Que é (e Como se Parece) um Conflito</h2>
-        <p>Um conflito acontece quando as DUAS branches alteraram a MESMA linha do MESMO arquivo, de formas diferentes. O Git é ótimo pra juntar mudanças em partes diferentes de um arquivo — mas na mesma linha, ele não tem como adivinhar qual versão você quer manter. Ele para o merge no meio do caminho e devolve o arquivo pra VOCÊ decidir.</p>
+        <h2>Passo 1: Criando o Repositório e o Primeiro Programa</h2>
+        <ol><li>Crie uma pasta nova e entre nela (ex: <code>mkdir exercicio-consolidacao &amp;&amp; cd exercicio-consolidacao</code>)</li><li>Rode <code>git init</code></li><li>Crie o arquivo <code>bissexto.c</code> com o código abaixo</li></ol>
 
-    <div class="file-label">par_impar.c</div>
-    <pre style="margin-top:0;"><code class="language-c">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-// Programa que verifica se um número é par ou ímpar
-=======
-// Verifica paridade de um número inteiro
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/comentarios</code></pre>
+    <div class="file-label">bissexto.c</div>
+    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
 
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-code"></i> Anatomia dos marcadores
-      </h3>
-      
-      <ul><li><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> — início da versão que já está na branch atual (onde você rodou o merge)</li><li><code>=======</code> — linha separadora entre as duas versões</li><li><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/comentarios</code> — fim da versão que veio da branch importada</li></ul>
-    </div>
+int main() {
+    int ano;
+
+    printf(&quot;Digite um ano: &quot;);
+    scanf(&quot;%d&quot;, &amp;ano);
+
+    if ((ano % 4 == 0 &amp;&amp; ano % 100 != 0) || ano % 400 == 0) {
+        printf(&quot;%d é bissexto!\n&quot;, ano);
+    } else {
+        printf(&quot;%d não é bissexto.\n&quot;, ano);
+    }
+
+    return 0;
+}</code></pre>
         
       </div>
     </div>
@@ -485,28 +419,13 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 08</div>
         
-        <h2>Resolvendo um Conflito, Passo a Passo</h2>
-        <ol><li>Abrir o arquivo e localizar os marcadores de conflito</li><li>Decidir o que manter: a versão de cima, a de baixo, ou uma combinação das duas</li><li>Apagar os três marcadores manualmente — eles NÃO fazem parte do código, é só o Git te mostrando o conflito</li><li>Rodar <code>git add</code> no arquivo resolvido (ex: <code>par_impar.c</code>) — marca o conflito como resolvido</li><li>Rodar <code>git commit</code> — finaliza o merge (o Git já sugere uma mensagem, dá pra só confirmar)</li></ol>
+        <h2>Passo 2: Primeiro Commit</h2>
+        <p>Lembra da Aula 1: cada commit é um ponto marcado na linha do tempo do projeto. Vamos marcar o primeiro.</p>
 
-    <div class="file-label">par_impar.c</div>
-    <pre style="margin-top:0;"><code class="language-c">// ANTES (com marcadores, do jeito que o Git deixou)
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-// Programa que verifica se um número é par ou ímpar
-=======
-// Verifica paridade de um número inteiro
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/comentarios
-
-// DEPOIS (resolvido — combinando as duas ideias)
-// Programa que verifica a paridade (par ou ímpar) de um número inteiro</code></pre>
+    
+    <pre><code class="language-bash">git add bissexto.c
+git commit -m &quot;Adiciona verificador de ano bissexto&quot;</code></pre>
         
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-        <h1>Prática Guiada</h1>
-        <p>Provocando um conflito de propósito</p>
       </div>
     </div>
 
@@ -514,9 +433,36 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 09</div>
         
-        <h2>Cenário do Conflito</h2>
-        <p>Vamos usar o <code>par_impar.c</code> que vocês versionaram na Aula 3. A ideia é provocar um conflito de verdade, num ambiente controlado, pra treinar a resolução sem risco.</p>
-<ol><li>Na <code>main</code>, garanta que está tudo commitado (<code>git status</code> limpo)</li><li>Crie e troque para uma branch nova: <code>git switch -c feature/comentarios</code></li><li>Nessa branch, edite a primeira linha (comentário) do <code>par_impar.c</code> e faça um commit</li><li>Volte pra <code>main</code>: <code>git switch main</code></li><li>Ainda na <code>main</code>, edite a MESMA primeira linha, de um jeito diferente, e faça outro commit</li><li>Tente juntar: <code>git merge feature/comentarios</code> — o conflito vai aparecer, de propósito</li></ol>
+        <h2>Passo 3: Segundo Programa — Calculadora de IMC</h2>
+        <p>Agora crie, na mesma pasta, o arquivo <code>imc.c</code>: lê peso e altura, calcula o IMC (peso ÷ altura²) e imprime a classificação.</p>
+
+    <div class="file-label">imc.c</div>
+    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
+
+int main() {
+    float peso, altura, imc;
+
+    printf(&quot;Digite seu peso (kg): &quot;);
+    scanf(&quot;%f&quot;, &amp;peso);
+
+    printf(&quot;Digite sua altura (m): &quot;);
+    scanf(&quot;%f&quot;, &amp;altura);
+
+    imc = peso / (altura * altura);
+
+    printf(&quot;Seu IMC é: %.2f\n&quot;, imc);
+
+    if (imc &lt; 18.5)
+        printf(&quot;Classificação: abaixo do peso\n&quot;);
+    else if (imc &lt; 25.0)
+        printf(&quot;Classificação: peso normal\n&quot;);
+    else if (imc &lt; 30.0)
+        printf(&quot;Classificação: sobrepeso\n&quot;);
+    else
+        printf(&quot;Classificação: obesidade\n&quot;);
+
+    return 0;
+}</code></pre>
         
       </div>
     </div>
@@ -525,32 +471,11 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 10</div>
         
-        <h2>Boas Práticas Rápidas</h2>
+        <h2>Passo 4: Segundo Commit</h2>
         
-    <div class="grid-3">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-tag"></i> Nomes descritivos
-          </h3>
-          <p><code>feature/nome</code> pra novidades, <code>fix/nome</code> pra correções — branch com nome claro é puro flex de organização (alguns diriam que é assim que se farma aura no code review).</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-ruler"></i> Branches curtas e focadas
-          </h3>
-          <p>Uma branch, um objetivo. Termine e mergeie logo — branches longas acumulam conflito.</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-magnifying-glass"></i> git status sempre
-          </h3>
-          <p>Antes de qualquer merge, confira em que branch você está e o que já foi commitado.</p>
-          
-        </div>
-    </div>
+    
+    <pre><code class="language-bash">git add imc.c
+git commit -m &quot;Adiciona calculadora de IMC&quot;</code></pre>
         
       </div>
     </div>
@@ -559,14 +484,107 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 11</div>
         
+        <h2>Passo 5: Uma Melhoria e o Terceiro Commit</h2>
+        <p>Commits pequenos e frequentes contam a história do projeto — é assim que se farma um histórico de verdade. Escolha UMA melhoria em um dos programas, por exemplo: validar ano negativo no <code>bissexto.c</code>.</p>
+
+    <div class="file-label">bissexto.c (trecho novo)</div>
+    <pre style="margin-top:0;"><code class="language-c">if (ano &lt;= 0) {
+    printf(&quot;Ano inválido!\n&quot;);
+    return 1;
+}</code></pre>
+
+    
+    <pre><code class="language-bash">git add bissexto.c
+git commit -m &quot;Valida entrada de ano negativo no bissexto.c&quot;</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 12</div>
+        
+        <h2>Passo 6: Conferindo o Histórico</h2>
+        <p>Rode <code>git log --oneline</code> e confira: precisam aparecer os 3 commits, na ordem certa.</p>
+
+    
+    <pre><code class="language-bash">$ git log --oneline
+c3d4e5f Valida entrada de ano negativo no bissexto.c
+b2c3d4e Adiciona calculadora de IMC
+a1b2c3d Adiciona verificador de ano bissexto</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <h1>Exercício — Parte 2</h1>
+        <p>Autenticação e push pro GitHub</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 13</div>
+        
+        <h2>Passo 1: Escolher o Método e Criar o Repositório</h2>
+        <ol><li>Escolha: SSH (se já tem chave da Aula 3) ou Token Classic (gerado agora)</li><li>No GitHub, clique em <strong>New repository</strong></li><li>Dê um nome (ex: <code>exercicio-consolidacao</code>)</li><li><strong>NÃO marque "Add a README file"</strong> — o repositório precisa nascer vazio</li><li>Clique em <strong>Create repository</strong></li></ol>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 14</div>
+        
+        <h2>Passo 2: Conectando o Repositório</h2>
+        <p>Copie a URL do repositório vazio que o GitHub mostrou — SSH ou HTTPS, dependendo do método escolhido — e conecte:</p>
+
+    
+    <pre><code class="language-bash"># se estiver usando SSH (Aula 3)
+git remote add origin git@github.com:seu-usuario/exercicio-consolidacao.git
+
+# se estiver usando Token Classic (HTTPS)
+git remote add origin https://github.com/seu-usuario/exercicio-consolidacao.git</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 15</div>
+        
+        <h2>Passo 3: Push e Conferência</h2>
+        
+    
+    <pre><code class="language-bash">git push -u origin main
+# Se usou Token Classic, o Git vai pedir usuário e senha —
+# cole o token no campo de senha</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-magnifying-glass"></i> Confira no site
+      </h3>
+      <p>Abra o repositório no navegador e confirme que os 3 commits aparecem, com as mensagens certas, no histórico.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 16</div>
+        
         <h2>Prévia: Aula 5 — Revisão e Avaliação 1</h2>
-        <p>A próxima aula é revisão pra prova, cobrindo TUDO desde a Aula 1: <code>init</code>, <code>add</code>, <code>commit</code>, <code>log</code> (Aulas 1-2), remote, SSH, <code>push</code>, <code>pull</code> (Aula 3) e branches, merge e conflito (hoje). Vale revisar o ciclo completo antes de vir pra aula.</p>
+        <p>A próxima aula é revisão pra prova, cobrindo tudo desde a Aula 1: <code>init</code>, <code>add</code>, <code>commit</code>, <code>log</code> (Aulas 1-2), <code>remote</code>, SSH, Token, <code>push</code>, <code>pull</code> (Aulas 3-4). Vale revisar o ciclo completo antes de vir pra aula.</p>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Aula 5: Revisão e Avaliação 1
       </h3>
-      <p>Foco em Controle de Versão com Git — não vamos entrar em terminal ou shell script ainda, isso começa na Aula 6.</p>
+      <p>Foco em Controle de Versão com Git, local e remoto — não entra terminal ou shell script ainda, isso começa na Aula 6.</p>
       
     </div>
         
@@ -577,11 +595,11 @@ git merge feature/comentarios
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
         
-        <h2>Sua Vez: Branch, Merge e Conflito</h2>
-        <p>Escolha o <code>portfolio-pessoal</code> ou o repositório de exercícios em C (Aula 3) e complete as missões abaixo.</p>
+        <h2>Checklist: Repositório, Commits e Push</h2>
+        <p>Confira se você completou tudo antes de encerrar a aula:</p>
 
     <div class="quest-list">
-      <ol><li>Crie uma branch nova com nome descritivo no repositório escolhido</li><li>Faça uma mudança simples nessa branch e commit</li><li>Volte pra <code>main</code> e faça o merge — confirme se foi fast-forward ou three-way</li><li>Agora provoque um conflito de propósito: crie outra branch e altere a MESMA linha de um arquivo que a <code>main</code> também vai alterar</li><li>Resolva o conflito manualmente (marcadores, add, commit)</li><li>Rode <code>git log --oneline --graph --all</code> e confirme que dá pra ver as duas linhas se juntando</li></ol>
+      <ol><li>Pasta nova criada e <code>git init</code> rodado</li><li><code>bissexto.c</code> escrito, adicionado e commitado</li><li><code>imc.c</code> escrito, adicionado e commitado</li><li>Uma melhoria feita em um dos programas, com o 3º commit</li><li>Repositório vazio criado no GitHub e conectado com <code>git remote add origin</code> (SSH ou Token)</li><li><code>git push -u origin main</code> feito e os 3 commits conferidos no site</li></ol>
     </div>
         
       </div>
