@@ -1,0 +1,4 @@
+FROM kalilinux/kali-rolling
+RUN apt-get update && apt-get install -y \
+    bash iproute2 iptables tcpdump hping3 dsniff net-tools iputils-ping busybox-static curl dnsmasq procps \
+    && rm -rf /var/lib/apt/lists/*
