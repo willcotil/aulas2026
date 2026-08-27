@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 4: CRUD: Update (Edição) — Preenchimento de form e Update SQL</title>
+<title>Aula 6: Avaliação 1 — Foco: Persistência de Dados e Operações CRUD</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#5B2A83;--color-rust:#F2B705;
-  --color-orange:#F2B705;--color-yellow:#F2B705;--color-deep:#331A4D;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#1A1A1A;
+  --color-navy:#000;--color-blue:#6B2737;--color-rust:#D4A24E;
+  --color-orange:#D4A24E;--color-yellow:#D4A24E;--color-deep:#3D1420;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#1A1010;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -62,13 +62,12 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
-.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar,.slide-counter{display:none!important;}
+  .controls,.progress-bar{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -189,31 +188,21 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Recapitulando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que já temos</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>O Comando UPDATE e o WHERE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>UPDATE: editando uma linha específica</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O maior perigo do UPDATE</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Preparando o Botão Editar</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Criar ou Editar? O formulário precisa saber</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>A coluna Ações ganha vida</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-tower-broadcast"></i><span>IPC Novo: send/on</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Dois padrões de comunicação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Comparando os dois padrões</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O fluxo completo pra abrir a edição</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>main.js aprende a preencher o modal</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Implementando o UPDATE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O handler do UPDATE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>preload.js completo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>frmInsumo.js completo</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><i class="fa-solid fa-rotate"></i><span>Fechando o Ciclo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>O foco resolve a lista desatualizada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>As duas pernas do fluxo, juntas</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Exercício</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-mug-hot"></i><span>Abertura</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Relaxa, Você Já Viu Tudo Isso</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-table"></i><span>CRUD Completo</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Quadro-Resumo do CRUD</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Padrão Arquitetural</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Um Padrão, Quatro Operações</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Cuidado com o WHERE</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O WHERE é o Seu Filtro</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-right-left"></i><span>send/on vs invoke/handle</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Dois Padrões de Comunicação IPC</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Exercícios de Revisão</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Exercícios — Parte 1</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Exercícios — Parte 2</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
-<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -226,58 +215,58 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 01</div>
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 4</p>
+        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 6</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">CRUD: Update (Edição) — Preenchimento de form e Update SQL</div>
+    <div class="bloco-agenda-titulo">Avaliação 1 — Foco: Persistência de Dados e Operações CRUD</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recapitulando</div>
-            <div class="agenda-item-texto">Create e Read do projeto real</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-mug-hot"></i> Abertura</div>
+            <div class="agenda-item-texto">Hoje não tem conteúdo novo — é revisão pra prova</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> O Comando UPDATE e o WHERE</div>
-            <div class="agenda-item-texto">A cláusula que decide quais linhas mudam</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-table"></i> CRUD Completo</div>
+            <div class="agenda-item-texto">As 4 operações, os comandos SQL e os canais IPC</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Preparando o Botão Editar</div>
-            <div class="agenda-item-texto">Do travessão pro botão de verdade</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Padrão Arquitetural</div>
+            <div class="agenda-item-texto">O que muda e o que nunca muda entre as operações</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Cuidado com o WHERE</div>
+            <div class="agenda-item-texto">O perigo de esquecer o filtro no UPDATE/DELETE</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-tower-broadcast"></i> IPC Novo: send/on</div>
-            <div class="agenda-item-texto">Quando o Main avisa sem que perguntem</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> Implementando o UPDATE</div>
-            <div class="agenda-item-texto">main.js, preload.js e frmInsumo.js</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-right-left"></i> send/on vs invoke/handle</div>
+            <div class="agenda-item-texto">Quando usar cada padrão de comunicação IPC</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(18)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
           <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate"></i> Fechando o Ciclo</div>
-            <div class="agenda-item-texto">A lista sempre atualizada</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Exercícios — Parte 1</div>
+            <div class="agenda-item-texto">Segurança, Read, Update e Delete</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(21)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
           <div class="agenda-numero">07</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Exercício</div>
-            <div class="agenda-item-texto">Update em Peça Impressa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Exercícios — Parte 2</div>
+            <div class="agenda-item-texto">IPC, arquitetura e mais código</div>
           </div>
         </div>
     </div>
@@ -288,36 +277,103 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-rotate-left"></i>
-        <h1>Recapitulando</h1>
-        <p>Create e Read já funcionam — falta fechar o ciclo</p>
+        <i class="fa-solid fa-mug-hot"></i>
+        <h1>Antes de começar...</h1>
+        <p>Hoje é revisão. Nenhum conceito novo — só arrumar a casa pra prova.</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 02</div>
-        <h1>O que já temos</h1>
-        <h2>Create e Read prontos, Update pela frente</h2>
+        <h1>Relaxa, Você Já Viu Tudo Isso</h1>
+        <h2>O objetivo de hoje é organizar, não aprender</h2>
+        <p>Essa aula não traz nada novo. A ideia é simples: pegar tudo que vimos nas Aulas 2 a 5 sobre <code>Create</code>, <code>Read</code>, <code>Update</code> e <code>Delete</code> e deixar redondo pra Avaliação 1. Se você entendeu o padrão preload → handle → Promise → <code>conexao.query</code>, o resto é detalhe.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-clipboard-list"></i> O que cai na prova
+      </h3>
+      
+      <ul><li>As 4 operações CRUD sobre a tabela <code>insumo</code></li><li>Os comandos SQL de cada uma (INSERT, SELECT, UPDATE, DELETE)</li><li>O padrão preload → handle → Promise → <code>conexao.query</code></li><li>A diferença entre <code>send</code>/<code>on</code> e <code>invoke</code>/<code>handle</code></li></ul>
+    </div>
         
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-table"></i>
+        <h1>CRUD Completo</h1>
+        <p>As 4 operações, os comandos SQL e os canais IPC</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 03</div>
+        <h1>Quadro-Resumo do CRUD</h1>
+        <h2>Revisão das Aulas 2 a 5</h2>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">As 4 operações implementadas sobre insumo</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Operação</th><th>Comando SQL</th><th>Canal IPC</th></tr></thead><tbody><tr><td>Create</td><td>INSERT INTO insumo (...) VALUES (...)</td><td>insumo:criar</td></tr><tr><td>Read</td><td>SELECT * FROM insumo</td><td>insumo:listar</td></tr><tr><td>Update</td><td>UPDATE insumo SET ... WHERE id = ?</td><td>insumo:atualizar</td></tr><tr><td>Delete</td><td>DELETE FROM insumo WHERE id = ?</td><td>insumo:excluir</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">Todos os quatro handlers vivem em main.js e seguem exatamente o mesmo padrão interno.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-diagram-project"></i>
+        <h1>O Padrão Arquitetural</h1>
+        <p>O que muda, o que nunca muda entre as 4 operações</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 04</div>
+        <h1>Um Padrão, Quatro Operações</h1>
+        <h2>O que muda e o que nunca muda</h2>
+        <div class="bloco-diagrama" id="mmdhk14i">
+    <div class="bloco-diagrama-titulo">Padrão arquitetural comum ao CRUD</div>
+    <div class="mermaid">sequenceDiagram
+    participant R as Renderer
+    participant P as preload.js
+    participant M as main.js
+    participant C as conexao.js
+    participant DB as MySQL
+
+    R-&gt;&gt;P: window.api.operacao(dados)
+    P-&gt;&gt;M: ipcRenderer.invoke(canal, dados)
+    M-&gt;&gt;M: new Promise
+    M-&gt;&gt;C: conexao.query(sql, valores, callback)
+    C-&gt;&gt;DB: executa SQL
+    DB--&gt;&gt;C: resultado ou erro
+    C--&gt;&gt;M: callback(erro, resultado)
+    M--&gt;&gt;P: resolve ou reject
+    P--&gt;&gt;R: retorno do await</div>
+    <div class="bloco-diagrama-legenda">As 4 operações (insumo:criar, insumo:listar, insumo:atualizar, insumo:excluir) seguem exatamente essa mesma sequência.</div>
+  </div>
+
     <div class="grid-2">
       
         <div class="card-info">
           <h3>
-            <i class="fa-solid fa-plus"></i> Aula 2 — Create
+            <i class="fa-solid fa-shuffle"></i> O que muda
           </h3>
-          <p>Formulário → <code>criarInsumo</code> → <code>ipcMain.handle('insumo:criar', ...)</code> → <code>INSERT INTO insumo</code>.</p>
           
+          <ul style="margin-left:20px"><li>O comando SQL (INSERT/SELECT/UPDATE/DELETE)</li><li>O nome do canal IPC (insumo:criar, insumo:listar...)</li><li>Os parâmetros passados no array</li></ul>
         </div>
         <div class="card-info">
           <h3>
-            <i class="fa-solid fa-list"></i> Aula 3 — Read
+            <i class="fa-solid fa-lock"></i> O que nunca muda
           </h3>
-          <p><code>listarInsumos</code> → <code>SELECT * FROM insumo</code> → tabela HTML via <code>carregarInsumos</code> (map + template string + join).</p>
           
+          <ul style="margin-left:20px"><li>A estrutura do <code>new Promise(resolve, reject)</code></li><li>Os 3 argumentos de <code>conexao.query</code> (sql, array, callback)</li><li>O tratamento erro/resultado dentro do callback</li></ul>
         </div>
     </div>
-<p>Só faltava uma coluna: <strong>Ações</strong>, que a Aula 3 deixou só com um travessão <code>—</code>, esperando a aula de hoje. Chegou a hora dele ganhar vida.</p>
         
       </div>
     </div>
@@ -325,46 +381,55 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>O Comando UPDATE e o WHERE</h1>
-        <p>A cláusula que decide QUAIS linhas mudam</p>
+        <h1>Cuidado com o WHERE</h1>
+        <p>O perigo de esquecer o filtro no UPDATE e no DELETE</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
-        <h1>UPDATE: editando uma linha específica</h1>
-        <h2>SET muda os dados, WHERE escolhe a linha</h2>
-        <p>Pensa no UPDATE como editar um contato no seu celular: você não cria um contato novo nem apaga o antigo — abre AQUELE contato específico e troca só o que mudou. O <code>WHERE</code> é exatamente isso: ele aponta pra LINHA certa da tabela. É a primeira vez que ele aparece na disciplina — SELECT e INSERT nunca precisaram dele.</p>
+        <div class="slide-number">Slide 05</div>
+        <h1>O WHERE é o Seu Filtro</h1>
+        <h2>Sem ele, UPDATE e DELETE afetam a tabela inteira</h2>
+        
+    <div class="file-label">main.js (dentro do handle)</div>
+    <pre style="margin-top:0;"><code class="language-sql">-- CORRETO: atualiza só o insumo com esse id
+UPDATE insumo SET preco = ?, quantidade = ? WHERE id = ?;
 
-    <div class="file-label">UPDATE genérico</div>
-    <pre style="margin-top:0;"><code class="language-sql">UPDATE insumo
-SET tipo = ?, nome = ?, valor = ?, data_aquisicao = ?
-WHERE id = ?;</code></pre>
-        
-      </div>
-    </div>
+-- PERIGOSO: esqueceu o WHERE!
+UPDATE insumo SET preco = ?, quantidade = ?;
+-- Resultado: TODOS os insumos da tabela recebem
+-- o mesmo preço e a mesma quantidade</code></pre>
 
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
-        <h1>O maior perigo do UPDATE</h1>
-        
-        
-    <div class="focus-box" style="border-color:#C0392B;border-left-color:#C0392B;">
-      <h3 style="color:#C0392B;">
-        <i class="fa-solid fa-triangle-exclamation"></i> UPDATE sem WHERE = tragédia
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Por que isso é tão perigoso?
       </h3>
-      <p>Se você esquecer o <code>WHERE</code>, o comando não erra e não avisa nada — ele simplesmente aplica o <code>SET</code> em TODAS as linhas da tabela, de uma vez, sem pedir confirmação.</p>
-      <ul><li>Isso já aconteceu (e continua acontecendo) até com quem programa há anos</li><li>Bancos de produção já foram zerados por um WHERE esquecido — erro clássico, não lenda urbana</li><li>Regra de ouro: escreva o WHERE ANTES de terminar de pensar no SET</li></ul>
+      <p>O WHERE é o único filtro entre "esse registro" e "a tabela inteira". Sem ele, <code>UPDATE</code> e <code>DELETE</code> afetam TODAS as linhas — silenciosamente, sem nenhum erro.</p>
+      
+    </div>
+        
+      </div>
     </div>
 
-    <div class="file-label">comparação</div>
-    <pre style="margin-top:0;"><code class="language-sql">-- CERTO — atualiza só o insumo escolhido
-UPDATE insumo SET valor = ? WHERE id = ?;
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-right-left"></i>
+        <h1>send/on vs invoke/handle</h1>
+        <p>Quando usar cada padrão de comunicação IPC</p>
+      </div>
+    </div>
 
--- ERRADO — sem WHERE, atualiza TODOS os insumos da tabela
-UPDATE insumo SET valor = ?;</code></pre>
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 06</div>
+        <h1>Dois Padrões de Comunicação IPC</h1>
+        <h2>Mão única vs pergunta-resposta</h2>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">send/on vs invoke/handle</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Característica</th><th>send / on</th><th>invoke / handle</th></tr></thead><tbody><tr><td>Direção</td><td>Mão única (main → renderer)</td><td>Pergunta-resposta (renderer pergunta, main responde)</td></tr><tr><td>Espera resposta?</td><td>Não</td><td>Sim, com await</td></tr><tr><td>Onde apareceu</td><td>Aula 4: preencher o modal de edição</td><td>Aulas 2-5: criar, listar, atualizar, excluir</td></tr><tr><td>Exemplo de canal</td><td>insumo:abrirEdicao</td><td>insumo:criar, insumo:listar, insumo:atualizar, insumo:excluir</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">Regra prática: se o renderer precisa de uma resposta do banco, é invoke/handle. Se o main só precisa avisar algo, é send/on.</div>
+  </div>
         
       </div>
     </div>
@@ -372,364 +437,40 @@ UPDATE insumo SET valor = ?;</code></pre>
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-pen"></i>
-        <h1>Preparando o Botão Editar</h1>
-        <p>Do travessão da Aula 3 pro botão de verdade</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
-        <h1>Criar ou Editar? O formulário precisa saber</h1>
-        
-        <p>É o mesmo formulário do Instagram pra editar seu perfil e pra criar um perfil novo — a tela é a mesma, só muda o que acontece quando você aperta salvar. O <code>frmInsumo.js</code> precisa de um jeito de saber em qual dos dois modos ele está.</p>
-
-    <div class="file-label">frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Duas variáveis guardam se estamos criando ou editando
-let modoEdicao = false;
-let idEmEdicao = null;
-
-// (mais pra frente, no submit do formulário)
-// if (modoEdicao) { ...atualizarInsumo... }
-// else            { ...criarInsumo... }</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        <h1>A coluna Ações ganha vida</h1>
-        <h2>De travessão a botão de verdade</h2>
-        <p>Por que guardar <code>insumosCarregados</code> numa variável? Porque quando o botão Editar for clicado, só temos o <code>id</code> da linha — precisamos ir buscar o insumo completo em algum lugar, e esse lugar é essa variável.</p>
-
-    <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">let insumosCarregados = []; // guardamos a lista pra achar o insumo certo depois
-
-const carregarInsumos = async () =&gt; {
-  insumosCarregados = await window.api.listarInsumos();
-
-  const linhas = insumosCarregados.map((insumo) =&gt; `
-    &lt;tr&gt;
-      &lt;td&gt;${insumo.tipo}&lt;/td&gt;
-      &lt;td&gt;${insumo.nome}&lt;/td&gt;
-      &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
-      &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
-      &lt;td&gt;&lt;button onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  `).join('');
-
-  document.querySelector('#tbodyInsumos').innerHTML = linhas;
-};
-
-const editarInsumo = (id) =&gt; {
-  const insumo = insumosCarregados.find((i) =&gt; i.id === id);
-  window.api.editarInsumo(insumo);
-};</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-tower-broadcast"></i>
-        <h1>IPC Novo: invoke/handle vs send/on</h1>
-        <p>Nem toda comunicação espera resposta</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
-        <h1>Dois padrões de comunicação</h1>
-        <h2>Pergunta-resposta vs aviso de mão única</h2>
-        
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-phone"></i> invoke / handle — Pergunta e Espera
-          </h3>
-          <p>O Renderer faz uma pergunta pro Main e FICA ESPERANDO a resposta (por isso o <code>await</code>). Já usamos em Create e Read, e vamos usar de novo pra salvar o Update.</p>
-          <ul style="margin-left:20px"><li>invoke('insumo:criar')</li><li>invoke('insumo:listar')</li><li>invoke('insumo:atualizar')</li></ul>
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-tower-broadcast"></i> send / on — Aviso, sem Resposta
-          </h3>
-          <p>Quando ninguém espera nada de volta, nem o Renderer nem o Main precisam de <code>await</code>/<code>resolve</code> — é só um aviso de mão única. Vale nos DOIS sentidos: o Renderer avisa o Main que quer editar, e o Main avisa o Renderer com os dados pra preencher o formulário.</p>
-          <ul style="margin-left:20px"><li>send('insumo:abrirEdicao', ...)</li><li>on('insumo:abrirEdicao', callback)</li><li>send('insumo:preencher', ...)</li><li>on('insumo:preencher', callback)</li></ul>
-        </div>
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
-        <h1>Comparando os dois padrões</h1>
-        
-        <div class="bloco-diagrama" id="mmd7esdz">
-    <div class="bloco-diagrama-titulo">invoke/handle vs send/on</div>
-    <div class="mermaid">sequenceDiagram
-    participant R as Renderer
-    participant P as Preload
-    participant M as Main
-
-    Note over R,M: Padrão 1 - invoke/handle (pergunta e espera resposta)
-    R-&gt;&gt;P: window.api.criarInsumo(dados)
-    P-&gt;&gt;M: ipcRenderer.invoke('insumo:criar', dados)
-    M-&gt;&gt;M: INSERT INTO insumo...
-    M--&gt;&gt;P: resolve(resultado)
-    P--&gt;&gt;R: return resultado
-
-    Note over R,M: Padrão 2 - send/on (aviso de mao unica)
-    M-&gt;&gt;P: webContents.send('insumo:preencher', insumo)
-    P-&gt;&gt;R: ipcRenderer.on(...) dispara callback
-    Note over R: Renderer recebe sem ter pedido nada</div>
-    <div class="bloco-diagrama-legenda">invoke/handle: pergunta e espera resposta. send/on: aviso de mão única, sem resposta.</div>
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
-        <h1>O fluxo completo pra abrir a edição</h1>
-        
-        <ol><li>Usuário clica no botão <strong>Editar</strong> de uma linha da tabela</li><li><code>frmPrincipal.js</code> chama <code>window.api.editarInsumo(insumo)</code></li><li>Preload dispara <code>ipcRenderer.send('insumo:abrirEdicao', insumo)</code> — um aviso, sem esperar resposta</li><li><code>main.js</code> está <strong>escutando</strong> com <code>ipcMain.on</code> e chama <code>abrirModalInsumo(janelaPrincipal, insumo)</code></li><li>Quando a janela do modal termina de carregar (<code>did-finish-load</code>), o MAIN manda o insumo pro RENDERER com <code>send</code></li><li><code>frmInsumo.js</code> estava <strong>escutando</strong> com <code>on</code> — recebe o insumo e preenche o formulário sozinho</li></ol>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
-        <h1>main.js aprende a preencher o modal</h1>
-        <h2>abrirModalInsumo ganha um segundo parâmetro</h2>
-        
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const abrirModalInsumo = (janelaPai, insumo = null) =&gt; {
-  const janelaModal = new BrowserWindow({
-    width: 500,
-    height: 600,
-    parent: janelaPai,
-    modal: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
-  });
-
-  janelaModal.loadFile(path.join(__dirname, '../renderer/frmInsumo.html'));
-
-  // Só existe insumo quando estamos ABRINDO EM MODO EDIÇÃO
-  if (insumo) {
-    janelaModal.webContents.once('did-finish-load', () =&gt; {
-      janelaModal.webContents.send('insumo:preencher', insumo);
-    });
-  }
-};
-
-// Chamado quando o usuário clica em &quot;Editar&quot; na tabela
-// on, nao handle: ninguem espera resposta nenhuma aqui
-ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
-  abrirModalInsumo(janelaPrincipal, insumo);
-});</code></pre>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-circle-info"></i> Por que on, e não handle
-      </h3>
-      <p><code>abrirModalInsumo</code> não devolve nada que o <code>frmPrincipal.js</code> precise — ele só abre uma janela. Não existindo resposta pra esperar, <code>invoke/handle</code> seria over-engineering: o padrão certo aqui é <code>send/on</code>, o mesmo que a própria abertura do modal já usa mais abaixo pra preencher o formulário.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-database"></i>
-        <h1>Implementando o UPDATE</h1>
-        <p>main.js, preload.js e frmInsumo.js</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 11</div>
-        <h1>O handler do UPDATE</h1>
-        <h2>Mesma receita de sempre, com um novo <code>?</code></h2>
-        
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:atualizar', (evento, insumo) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = 'UPDATE insumo SET tipo = ?, nome = ?, valor = ?, data_aquisicao = ? WHERE id = ?';
-    const valores = [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao, insumo.id];
-
-    conexao.query(sql, valores, (erro, resultado) =&gt; {
-      if (erro) {
-        reject(erro);
-      } else {
-        resolve(resultado);
-      }
-    });
-  });
-});</code></pre>
-<p>Mesma receita de <code>new Promise</code> + <code>conexao.query</code> desde a Aula 2 — a única novidade é que o <code>id</code> também entra como <code>?</code>, por último no array, na mesma ordem do <code>WHERE id = ?</code>. Nunca concatene o id direto na string — mesma regra de sempre.</p>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 12</div>
-        <h1>preload.js completo</h1>
-        <h2>Repare qual padrão cada função usa</h2>
-        
-    <div class="file-label">src/main/preload.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
-
-contextBridge.exposeInMainWorld('api', {
-  // já existiam (Aulas 2 e 3) — invoke/handle
-  criarInsumo: (dados) =&gt; ipcRenderer.invoke('insumo:criar', dados),
-  listarInsumos: () =&gt; ipcRenderer.invoke('insumo:listar'),
-
-  // NOVO — send/on: so avisa o main que quer editar, sem esperar resposta
-  editarInsumo: (insumo) =&gt; ipcRenderer.send('insumo:abrirEdicao', insumo),
-
-  // NOVO — send/on: o main AVISA o formulário, sem que ele pergunte nada
-  aoReceberInsumoParaEditar: (callback) =&gt;
-    ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo)),
-
-  // NOVO — invoke/handle: salva a edição (esse sim precisa do resultado)
-  atualizarInsumo: (dados) =&gt; ipcRenderer.invoke('insumo:atualizar', dados)
-});</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 13</div>
-        <h1>frmInsumo.js completo</h1>
-        <h2>Recebe pra preencher, decide pra salvar</h2>
-        
-    <div class="file-label">src/renderer/frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">let modoEdicao = false;
-let idEmEdicao = null;
-
-// Se o main mandar um insumo pra editar, preenche o formulário (send/on)
-window.api.aoReceberInsumoParaEditar((insumo) =&gt; {
-  document.querySelector('#tipo').value = insumo.tipo;
-  document.querySelector('#nome').value = insumo.nome;
-  document.querySelector('#valor').value = insumo.valor;
-  document.querySelector('#data_aquisicao').value = insumo.data_aquisicao;
-
-  modoEdicao = true;
-  idEmEdicao = insumo.id;
-});
-
-document.querySelector('#formInsumo').addEventListener('submit', async (evento) =&gt; {
-  evento.preventDefault();
-  const dados = Object.fromEntries(new FormData(evento.target));
-
-  if (modoEdicao) {
-    await window.api.atualizarInsumo({ id: idEmEdicao, ...dados });
-  } else {
-    await window.api.criarInsumo(dados);
-  }
-
-  window.close(); // fecha o modal; frmPrincipal recarrega quando o foco voltar
-});</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-rotate"></i>
-        <h1>Fechando o Ciclo</h1>
-        <p>A lista sempre atualizada, como a Aula 3 previu</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 14</div>
-        <h1>O foco resolve a lista desatualizada</h1>
-        <h2>A ideia que a Aula 3 só cogitou, agora de verdade</h2>
-        <p>A Aula 3 já tinha discutido esse problema: a lista da janela principal fica desatualizada enquanto outra janela mexe nos dados. A solução mais simples é essa — toda vez que a janela principal GANHA FOCO (por exemplo, quando o modal de edição fecha e o usuário volta pra ela), a gente recarrega a lista do zero.</p>
-
-    <div class="file-label">src/renderer/frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Recarrega a tabela sempre que a janela principal ganha foco
-window.addEventListener('focus', carregarInsumos);</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 15</div>
-        <h1>As duas pernas do fluxo, juntas</h1>
-        
-        <div class="bloco-diagrama" id="mmdv0k06">
-    <div class="bloco-diagrama-titulo">Fluxo completo do Update</div>
-    <div class="mermaid">sequenceDiagram
-    actor U as Usuario
-    participant R as frmPrincipal.js
-    participant P as preload.js
-    participant M as main.js
-    participant F as frmInsumo.js
-
-    Note over U,F: PERNA 1 - Abrir a edicao (send/on nos dois sentidos)
-    U-&gt;&gt;R: clica em Editar
-    R-&gt;&gt;P: window.api.editarInsumo(insumo)
-    P-&gt;&gt;M: send('insumo:abrirEdicao', insumo)
-    M-&gt;&gt;M: abrirModalInsumo(janelaPrincipal, insumo)
-    M--&gt;&gt;F: did-finish-load: send('insumo:preencher', insumo)
-    F-&gt;&gt;F: aoReceberInsumoParaEditar preenche o form
-
-    Note over U,F: PERNA 2 - Salvar a edicao (invoke/handle: precisa do resultado)
-    U-&gt;&gt;F: clica em Salvar
-    F-&gt;&gt;P: window.api.atualizarInsumo(dados)
-    P-&gt;&gt;M: invoke('insumo:atualizar', dados)
-    M-&gt;&gt;M: UPDATE insumo SET ... WHERE id=?
-    M--&gt;&gt;F: resolve(resultado)
-    F-&gt;&gt;F: window.close()</div>
-    <div class="bloco-diagrama-legenda">As duas pernas do fluxo de edição: abrir o modal já preenchido, depois salvar o UPDATE.</div>
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Exercício</h1>
-        <p>Agora é a sua vez: <code>peca_impressa</code></p>
+        <h1>Exercícios de Revisão</h1>
+        <p>Preparação pra Avaliação 1</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
-        <h1>Exercício</h1>
-        <h2>Update em Peça Impressa</h2>
+        <h1>Exercícios — Parte 1</h1>
+        <h2>Segurança, Read, Update e Delete</h2>
         
-    <div class="quest-list">
-      <ol><li>Adicione o botão <strong>Editar</strong> na tabela de <code>peca_impressa</code> (mesma lógica: guardar o array de peças carregadas numa variável)</li><li>Crie <code>ipcMain.on('peca:abrirEdicao', ...)</code> chamando a função de abrir o modal de peça com a peça selecionada — <code>on</code>, não <code>handle</code>: ninguém espera resposta aqui</li><li>No <code>did-finish-load</code> da janela de edição de peça, dê <code>send('peca:preencher', peca)</code></li><li>No <code>preload.js</code>, exponha <code>editarPeca</code> (via <code>send</code>), <code>aoReceberPecaParaEditar</code> (via <code>on</code>) e <code>atualizarPeca</code> (via <code>invoke</code>, esse sim precisa do resultado)</li><li>Em <code>frmPeca.js</code>, escute com <code>aoReceberPecaParaEditar</code>, preencha o formulário, e no submit decida entre <code>criarPeca</code> e <code>atualizarPeca</code> usando <code>modoEdicao</code></li><li>No <code>main.js</code>, implemente <code>ipcMain.handle('peca:atualizar', ...)</code> com <code>UPDATE peca_impressa SET titulo=?, cor=?, peso=?, quantidade_material=?, tempo_impressao=?, data_impressao=? WHERE id=?</code></li></ol>
+    <div class="file-label">main.js (trecho com problema)</div>
+    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:criar', (event, insumo) =&gt; {
+  return new Promise((resolve, reject) =&gt; {
+    const sql = `INSERT INTO insumo (nome, preco, quantidade)
+                 VALUES ('${insumo.nome}', ${insumo.preco}, ${insumo.quantidade})`;
+
+    conexao.query(sql, (erro, resultado) =&gt; {
+      if (erro) reject(erro);
+      else resolve(resultado.insertId);
+    });
+  });
+});</code></pre>
+<ol><li><strong>Segurança:</strong> o código acima tem uma falha grave. Qual é o nome dela e como você corrigiria a query?</li><li><strong>Read:</strong> o <code>SELECT * FROM insumo</code> devolve um array de objetos pro renderer. O que aconteceria se a tabela estivesse vazia? O <code>carregarInsumos</code> precisa de tratamento especial pra esse caso?</li><li><strong>Update:</strong> escreva a query UPDATE completa (com <code>?</code>) que atualiza <code>preco</code> e <code>quantidade</code> de um insumo, dado o <code>id</code>.</li><li><strong>Delete:</strong> um colega escreveu <code>DELETE FROM insumo</code> sem WHERE dentro de um handle. O que acontece quando esse handler roda? Como evitar esse erro?</li></ol>
+        
+      </div>
     </div>
 
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Dica
-      </h3>
-      <p>Reaproveite ao máximo o padrão que acabamos de construir pro insumo — a lógica é idêntica, só trocam os nomes de tabela, colunas e canais IPC. Repare que só <code>atualizar</code> usa <code>invoke/handle</code> — abrir o modal continua sendo <code>send/on</code>.</p>
-      
-    </div>
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Desafios</div>
+        <h1>Exercícios — Parte 2</h1>
+        <h2>IPC, arquitetura e mais código</h2>
+        <ol><li><strong>Conceitual:</strong> qual a diferença entre <code>send</code>/<code>on</code> e <code>invoke</code>/<code>handle</code>? Dê um exemplo do projeto onde cada um foi usado.</li><li><strong>Arquitetura:</strong> descreva os 4 passos que TODA operação CRUD do projeto segue, do clique do usuário até os dados voltarem pra tela.</li><li><strong>Create:</strong> escreva o <code>ipcMain.handle</code> completo pra criar um novo registro em <code>peca_impressa</code> (INSERT), seguindo o mesmo padrão usado em <code>insumo:criar</code>.</li><li><strong>Read:</strong> por que tratamos (formatamos) moeda e data em <code>frmPrincipal.js</code> em vez de mandar os dados crus do banco direto pra tela? O que passaria batido se pulássemos essa etapa?</li></ol>
         
       </div>
     </div></div>
@@ -741,17 +482,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fdf2d2',
-    primaryTextColor: '#1A1A1A',
-    primaryBorderColor: '#F2B705',
-    lineColor: '#F2B705',
-    secondaryColor: '#331A4D',
+    primaryColor: '#f7eedf',
+    primaryTextColor: '#1A1010',
+    primaryBorderColor: '#D4A24E',
+    lineColor: '#D4A24E',
+    secondaryColor: '#3D1420',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fdf2d2',
-    nodeBorder: '#F2B705',
+    mainBkg: '#f7eedf',
+    nodeBorder: '#D4A24E',
     clusterBkg: '#f0f4f8',
-    titleColor: '#F2B705',
+    titleColor: '#D4A24E',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -761,7 +502,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#e1d9e9'
+    cScale1: '#e4d8db'
   }
 });
 </script>
@@ -769,13 +510,12 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::4';
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::6';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
-const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -797,7 +537,6 @@ const showSlide = (i) => {
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
-  sc.textContent='Slide '+(cur+1)+'/'+total;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }

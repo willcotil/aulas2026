@@ -62,12 +62,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -109,6 +110,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -197,6 +206,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Delete em peca_impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -282,33 +292,35 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 02</div>
         <h1>O botão Excluir</h1>
         
-        <p>A coluna Ações da tabela em <code>frmPrincipal.html</code> já tem o botão Editar desde a Aula 4. Hoje colocamos o irmão dele ao lado: o botão <strong>Excluir</strong>.</p>
+        <p>A coluna Ações da tabela em <code>frmPrincipal.js</code> já tem o botão Editar desde a Aula 4, dentro do mesmo <code>carregarInsumos</code> que já usamos desde a Aula 3. Hoje colocamos o irmão dele ao lado, na mesma célula: o botão <strong>Excluir</strong>.</p>
 
     <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">function carregarInsumosNaTabela(insumos) {
-  const linhas = insumos.map((insumo) =&gt; `
+    <pre style="margin-top:0;"><code class="language-javascript">// carregarInsumos ja existe desde a Aula 3/4 -- so adicionamos
+// o botao Excluir do lado do Editar, na mesma celula de Acoes
+const carregarInsumos = async () =&gt; {
+  insumosCarregados = await window.api.listarInsumos();
+
+  const linhas = insumosCarregados.map((insumo) =&gt; `
     &lt;tr&gt;
+      &lt;td&gt;${insumo.tipo}&lt;/td&gt;
       &lt;td&gt;${insumo.nome}&lt;/td&gt;
-      &lt;td&gt;${formatarMoeda(insumo.preco)}&lt;/td&gt;
+      &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
+      &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
       &lt;td&gt;
-        &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;abrirEdicao(${insumo.id})&quot;&gt;
-          Editar
-        &lt;/button&gt;
-        &lt;button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;
-          Excluir
-        &lt;/button&gt;
+        &lt;button onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
+        &lt;button onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;Excluir&lt;/button&gt;
       &lt;/td&gt;
     &lt;/tr&gt;
   `).join('');
 
-  tabelaInsumos.innerHTML = linhas;
-}</code></pre>
+  document.querySelector('#tbodyInsumos').innerHTML = linhas;
+};</code></pre>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Mesmo truque do id
       </h3>
-      <p>Os dois botões pegam o id do mesmo jeito: <code>insumo.id</code>, vindo do array de insumos que a Aula 4 já guarda na memória para busca.</p>
+      <p>Os dois botões pegam o id do mesmo jeito: <code>insumo.id</code>, vindo do array <code>insumosCarregados</code> que a Aula 4 já guarda na memória para busca.</p>
       
     </div>
         
@@ -337,7 +349,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p>Diferente de um erro de digitação, que dá pra corrigir com um novo Update, uma linha apagada do banco se foi de vez. Por isso toda exclusão precisa de uma confirmação explícita antes de disparar a query.</p>
       
     </div>
-<p>A solução: reaproveitar o <strong>modal do Bootstrap</strong> que a turma já usa desde o semestre 1 — só que agora com uma mensagem clara, tipo <em>"Tem certeza que deseja excluir o insumo X? Essa ação não pode ser desfeita."</em></p>
+<p>A solução: reaproveitar o <strong>modal do Bootstrap</strong> que já usamos desde o semestre 1 — só que agora com uma mensagem clara, tipo <em>"Tem certeza que deseja excluir o insumo X? Essa ação não pode ser desfeita."</em></p>
         
       </div>
     </div>
@@ -422,7 +434,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <pre style="margin-top:0;"><code class="language-javascript">// Array `insumosCarregados` já existe desde a Aula 4 (busca por id)
 let idParaExcluir = null;
 
-function abrirConfirmacaoExclusao(id) {
+const abrirConfirmacaoExclusao = (id) =&gt; {
   const insumo = insumosCarregados.find((item) =&gt; item.id === id);
 
   document.getElementById('nomeInsumoExcluir').textContent = insumo.nome;
@@ -432,7 +444,7 @@ function abrirConfirmacaoExclusao(id) {
     document.getElementById('modalConfirmarExclusao')
   );
   modal.show();
-}</code></pre>
+};</code></pre>
         
       </div>
     </div>
@@ -472,7 +484,7 @@ function abrirConfirmacaoExclusao(id) {
         
         
     <div class="file-label">main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (event, id) =&gt; {
+    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (evento, id) =&gt; {
   return new Promise((resolve, reject) =&gt; {
     const sql = 'DELETE FROM insumo WHERE id = ?';
 
@@ -502,19 +514,22 @@ function abrirConfirmacaoExclusao(id) {
 contextBridge.exposeInMainWorld('api', {
   criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo),
   listarInsumos: () =&gt; ipcRenderer.invoke('insumo:listar'),
-  editarInsumo: (id) =&gt; ipcRenderer.invoke('insumo:abrirEdicao', id),
+  editarInsumo: (insumo) =&gt; ipcRenderer.send('insumo:abrirEdicao', insumo),
   atualizarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:atualizar', insumo),
+
+  // NOVO -- invoke/handle: o frmPrincipal.js espera a exclusao terminar
+  // antes de fechar o modal e recarregar a lista
   excluirInsumo: (id) =&gt; ipcRenderer.invoke('insumo:excluir', id),
 
   aoReceberInsumoParaEditar: (callback) =&gt;
-    ipcRenderer.on('insumo:preencherEdicao', (event, insumo) =&gt; callback(insumo))
+    ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo))
 });</code></pre>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-plug"></i> O mesmo objeto de sempre
       </h3>
-      <p>É o mesmo <code>api</code> exposto desde a Aula 2 — só ganhou mais um método.</p>
+      <p>É o mesmo <code>api</code> exposto desde a Aula 2 — só ganhou o <code>excluirInsumo</code>. Tudo o mais (<code>editarInsumo</code> via <code>send</code>, <code>aoReceberInsumoParaEditar</code> escutando <code>insumo:preencher</code>) continua exatamente como a Aula 4 deixou.</p>
       
     </div>
         
@@ -556,7 +571,7 @@ contextBridge.exposeInMainWorld('api', {
         <div class="slide-number">Slide 10</div>
         <h1>O fluxo completo do Delete</h1>
         
-        <div class="bloco-diagrama" id="mmd4evr4">
+        <div class="bloco-diagrama" id="mmdkcawt">
     <div class="bloco-diagrama-titulo">Do clique em Excluir até a lista atualizada</div>
     <div class="mermaid">sequenceDiagram
     participant U as Usuário
@@ -659,6 +674,7 @@ try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(s
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -680,6 +696,7 @@ const showSlide = (i) => {
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  sc.textContent='Slide '+(cur+1)+'/'+total;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 4: CRUD: Update (Edição) — Preenchimento de form e Update SQL</title>
+<title>Aula 7: Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#5B2A83;--color-rust:#F2B705;
-  --color-orange:#F2B705;--color-yellow:#F2B705;--color-deep:#331A4D;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#1A1A1A;
+  --color-navy:#000;--color-blue:#0891B2;--color-rust:#F97316;
+  --color-orange:#F97316;--color-yellow:#F97316;--color-deep:#164E63;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0B1B1E;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -189,28 +189,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Recapitulando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O que já temos</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>O Comando UPDATE e o WHERE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>UPDATE: editando uma linha específica</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O maior perigo do UPDATE</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Preparando o Botão Editar</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Criar ou Editar? O formulário precisa saber</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>A coluna Ações ganha vida</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-tower-broadcast"></i><span>IPC Novo: send/on</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Dois padrões de comunicação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Comparando os dois padrões</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O fluxo completo pra abrir a edição</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>main.js aprende a preencher o modal</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Implementando o UPDATE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O handler do UPDATE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>preload.js completo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>frmInsumo.js completo</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><i class="fa-solid fa-rotate"></i><span>Fechando o Ciclo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>O foco resolve a lista desatualizada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>As duas pernas do fluxo, juntas</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Exercício</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Saindo do Banco de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Nem todo dado precisa de banco</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-folder-open"></i><span>O Módulo fs do Node</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>fs só existe no Main</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>fs/promises: sem new Promise manual</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-lines"></i><span>Relatório em .txt</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O botão Exportar Relatório</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>main.js: dialog + fs.writeFile</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Backup em .json</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que JSON pra isso</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Exportando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Importando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>O fluxo completo do backup</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: fs em Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -226,58 +220,44 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="slide-number">Slide 01</div>
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 4</p>
+        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">CRUD: Update (Edição) — Preenchimento de form e Update SQL</div>
+    <div class="bloco-agenda-titulo">Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recapitulando</div>
-            <div class="agenda-item-texto">Create e Read do projeto real</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Saindo do Banco de Dados</div>
+            <div class="agenda-item-texto">CRUD completo, Avaliação 1 feita — e agora?</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> O Comando UPDATE e o WHERE</div>
-            <div class="agenda-item-texto">A cláusula que decide quais linhas mudam</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-folder-open"></i> O Módulo fs do Node</div>
+            <div class="agenda-item-texto">Escrever e ler arquivos, com Promises de verdade</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Preparando o Botão Editar</div>
-            <div class="agenda-item-texto">Do travessão pro botão de verdade</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-lines"></i> Relatório em .txt</div>
+            <div class="agenda-item-texto">Exportando os insumos já carregados na tela</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-tower-broadcast"></i> IPC Novo: send/on</div>
-            <div class="agenda-item-texto">Quando o Main avisa sem que perguntem</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> Backup em .json</div>
+            <div class="agenda-item-texto">Exportar e reimportar, reaproveitando o Create</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> Implementando o UPDATE</div>
-            <div class="agenda-item-texto">main.js, preload.js e frmInsumo.js</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(18)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate"></i> Fechando o Ciclo</div>
-            <div class="agenda-item-texto">A lista sempre atualizada</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(21)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Exercício</div>
-            <div class="agenda-item-texto">Update em Peça Impressa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
           </div>
         </div>
     </div>
@@ -289,206 +269,51 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
-        <h1>Recapitulando</h1>
-        <p>Create e Read já funcionam — falta fechar o ciclo</p>
+        <h1>Saindo do Banco de Dados</h1>
+        <p>CRUD completo, Avaliação 1 feita — e agora?</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 02</div>
-        <h1>O que já temos</h1>
-        <h2>Create e Read prontos, Update pela frente</h2>
+        <h1>Nem todo dado precisa de banco</h1>
         
-    <div class="grid-2">
+        <p>Com o CRUD completo sobre <code>insumo</code> (Aulas 2 a 5) e a Avaliação 1 feita, já sabemos guardar dado estruturado no MySQL. Mas nem tudo precisa de banco: um relatório pra imprimir, um backup pra levar pra outro computador, um arquivo de configuração — tudo isso vive bem como arquivo comum, no disco.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-folder-open"></i> Hoje: o módulo fs do Node
+      </h3>
+      <p>Vamos aprender a ler e escrever arquivos locais (<code>.txt</code> e <code>.json</code>) e aplicar isso no mesmo projeto: <strong>exportar um relatório</strong> dos insumos e <strong>fazer backup</strong> deles em JSON.</p>
       
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-plus"></i> Aula 2 — Create
-          </h3>
-          <p>Formulário → <code>criarInsumo</code> → <code>ipcMain.handle('insumo:criar', ...)</code> → <code>INSERT INTO insumo</code>.</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-list"></i> Aula 3 — Read
-          </h3>
-          <p><code>listarInsumos</code> → <code>SELECT * FROM insumo</code> → tabela HTML via <code>carregarInsumos</code> (map + template string + join).</p>
-          
-        </div>
     </div>
-<p>Só faltava uma coluna: <strong>Ações</strong>, que a Aula 3 deixou só com um travessão <code>—</code>, esperando a aula de hoje. Chegou a hora dele ganhar vida.</p>
         
       </div>
     </div>
 
     <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>O Comando UPDATE e o WHERE</h1>
-        <p>A cláusula que decide QUAIS linhas mudam</p>
+        <i class="fa-solid fa-folder-open"></i>
+        <h1>O Módulo fs do Node</h1>
+        <p>Escrever e ler arquivos, com Promises de verdade</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Slide 03</div>
-        <h1>UPDATE: editando uma linha específica</h1>
-        <h2>SET muda os dados, WHERE escolhe a linha</h2>
-        <p>Pensa no UPDATE como editar um contato no seu celular: você não cria um contato novo nem apaga o antigo — abre AQUELE contato específico e troca só o que mudou. O <code>WHERE</code> é exatamente isso: ele aponta pra LINHA certa da tabela. É a primeira vez que ele aparece na disciplina — SELECT e INSERT nunca precisaram dele.</p>
-
-    <div class="file-label">UPDATE genérico</div>
-    <pre style="margin-top:0;"><code class="language-sql">UPDATE insumo
-SET tipo = ?, nome = ?, valor = ?, data_aquisicao = ?
-WHERE id = ?;</code></pre>
+        <h1>fs só existe no Main</h1>
         
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
-        <h1>O maior perigo do UPDATE</h1>
-        
-        
-    <div class="focus-box" style="border-color:#C0392B;border-left-color:#C0392B;">
-      <h3 style="color:#C0392B;">
-        <i class="fa-solid fa-triangle-exclamation"></i> UPDATE sem WHERE = tragédia
-      </h3>
-      <p>Se você esquecer o <code>WHERE</code>, o comando não erra e não avisa nada — ele simplesmente aplica o <code>SET</code> em TODAS as linhas da tabela, de uma vez, sem pedir confirmação.</p>
-      <ul><li>Isso já aconteceu (e continua acontecendo) até com quem programa há anos</li><li>Bancos de produção já foram zerados por um WHERE esquecido — erro clássico, não lenda urbana</li><li>Regra de ouro: escreva o WHERE ANTES de terminar de pensar no SET</li></ul>
-    </div>
-
-    <div class="file-label">comparação</div>
-    <pre style="margin-top:0;"><code class="language-sql">-- CERTO — atualiza só o insumo escolhido
-UPDATE insumo SET valor = ? WHERE id = ?;
-
--- ERRADO — sem WHERE, atualiza TODOS os insumos da tabela
-UPDATE insumo SET valor = ?;</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-pen"></i>
-        <h1>Preparando o Botão Editar</h1>
-        <p>Do travessão da Aula 3 pro botão de verdade</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
-        <h1>Criar ou Editar? O formulário precisa saber</h1>
-        
-        <p>É o mesmo formulário do Instagram pra editar seu perfil e pra criar um perfil novo — a tela é a mesma, só muda o que acontece quando você aperta salvar. O <code>frmInsumo.js</code> precisa de um jeito de saber em qual dos dois modos ele está.</p>
-
-    <div class="file-label">frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Duas variáveis guardam se estamos criando ou editando
-let modoEdicao = false;
-let idEmEdicao = null;
-
-// (mais pra frente, no submit do formulário)
-// if (modoEdicao) { ...atualizarInsumo... }
-// else            { ...criarInsumo... }</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        <h1>A coluna Ações ganha vida</h1>
-        <h2>De travessão a botão de verdade</h2>
-        <p>Por que guardar <code>insumosCarregados</code> numa variável? Porque quando o botão Editar for clicado, só temos o <code>id</code> da linha — precisamos ir buscar o insumo completo em algum lugar, e esse lugar é essa variável.</p>
-
-    <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">let insumosCarregados = []; // guardamos a lista pra achar o insumo certo depois
-
-const carregarInsumos = async () =&gt; {
-  insumosCarregados = await window.api.listarInsumos();
-
-  const linhas = insumosCarregados.map((insumo) =&gt; `
-    &lt;tr&gt;
-      &lt;td&gt;${insumo.tipo}&lt;/td&gt;
-      &lt;td&gt;${insumo.nome}&lt;/td&gt;
-      &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
-      &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
-      &lt;td&gt;&lt;button onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;&lt;/td&gt;
-    &lt;/tr&gt;
-  `).join('');
-
-  document.querySelector('#tbodyInsumos').innerHTML = linhas;
-};
-
-const editarInsumo = (id) =&gt; {
-  const insumo = insumosCarregados.find((i) =&gt; i.id === id);
-  window.api.editarInsumo(insumo);
-};</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-tower-broadcast"></i>
-        <h1>IPC Novo: invoke/handle vs send/on</h1>
-        <p>Nem toda comunicação espera resposta</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
-        <h1>Dois padrões de comunicação</h1>
-        <h2>Pergunta-resposta vs aviso de mão única</h2>
-        
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-phone"></i> invoke / handle — Pergunta e Espera
-          </h3>
-          <p>O Renderer faz uma pergunta pro Main e FICA ESPERANDO a resposta (por isso o <code>await</code>). Já usamos em Create e Read, e vamos usar de novo pra salvar o Update.</p>
-          <ul style="margin-left:20px"><li>invoke('insumo:criar')</li><li>invoke('insumo:listar')</li><li>invoke('insumo:atualizar')</li></ul>
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-tower-broadcast"></i> send / on — Aviso, sem Resposta
-          </h3>
-          <p>Quando ninguém espera nada de volta, nem o Renderer nem o Main precisam de <code>await</code>/<code>resolve</code> — é só um aviso de mão única. Vale nos DOIS sentidos: o Renderer avisa o Main que quer editar, e o Main avisa o Renderer com os dados pra preencher o formulário.</p>
-          <ul style="margin-left:20px"><li>send('insumo:abrirEdicao', ...)</li><li>on('insumo:abrirEdicao', callback)</li><li>send('insumo:preencher', ...)</li><li>on('insumo:preencher', callback)</li></ul>
-        </div>
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
-        <h1>Comparando os dois padrões</h1>
-        
-        <div class="bloco-diagrama" id="mmd7esdz">
-    <div class="bloco-diagrama-titulo">invoke/handle vs send/on</div>
-    <div class="mermaid">sequenceDiagram
-    participant R as Renderer
-    participant P as Preload
-    participant M as Main
-
-    Note over R,M: Padrão 1 - invoke/handle (pergunta e espera resposta)
-    R-&gt;&gt;P: window.api.criarInsumo(dados)
-    P-&gt;&gt;M: ipcRenderer.invoke('insumo:criar', dados)
-    M-&gt;&gt;M: INSERT INTO insumo...
-    M--&gt;&gt;P: resolve(resultado)
-    P--&gt;&gt;R: return resultado
-
-    Note over R,M: Padrão 2 - send/on (aviso de mao unica)
-    M-&gt;&gt;P: webContents.send('insumo:preencher', insumo)
-    P-&gt;&gt;R: ipcRenderer.on(...) dispara callback
-    Note over R: Renderer recebe sem ter pedido nada</div>
-    <div class="bloco-diagrama-legenda">invoke/handle: pergunta e espera resposta. send/on: aviso de mão única, sem resposta.</div>
+        <p>Mesma lógica do <code>mysql2</code> desde a Aula 1: o Renderer roda isolado (<code>contextIsolation</code>), sem acesso direto ao sistema operacional. <code>fs</code> é uma API do Node — só existe no processo <strong>Main</strong>. Pra ler ou escrever um arquivo a pedido do usuário, o caminho continua sendo o mesmo: preload expõe, <code>ipcMain.handle</code> executa.</p>
+<div class="bloco-diagrama" id="mmd210oh">
+    <div class="bloco-diagrama-titulo">Mesma arquitetura, novo destino</div>
+    <div class="mermaid">flowchart LR
+    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
+    P --&gt;|"invoke"| M["main.js"]
+    M --&gt; BD["MySQL"]
+    M --&gt; FS["Sistema de arquivos (fs)"]</div>
+    <div class="bloco-diagrama-legenda">O Main agora fala com duas coisas: o banco (MySQL) e o disco (fs). O caminho até ele nunca muda.</div>
   </div>
         
       </div>
@@ -496,53 +321,99 @@ const editarInsumo = (id) =&gt; {
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
-        <h1>O fluxo completo pra abrir a edição</h1>
+        <div class="slide-number">Slide 04</div>
+        <h1>fs/promises: sem new Promise manual</h1>
         
-        <ol><li>Usuário clica no botão <strong>Editar</strong> de uma linha da tabela</li><li><code>frmPrincipal.js</code> chama <code>window.api.editarInsumo(insumo)</code></li><li>Preload dispara <code>ipcRenderer.send('insumo:abrirEdicao', insumo)</code> — um aviso, sem esperar resposta</li><li><code>main.js</code> está <strong>escutando</strong> com <code>ipcMain.on</code> e chama <code>abrirModalInsumo(janelaPrincipal, insumo)</code></li><li>Quando a janela do modal termina de carregar (<code>did-finish-load</code>), o MAIN manda o insumo pro RENDERER com <code>send</code></li><li><code>frmInsumo.js</code> estava <strong>escutando</strong> com <code>on</code> — recebe o insumo e preenche o formulário sozinho</li></ol>
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-check"></i> Lembra do trabalho que demos com o mysql2?
+      </h3>
+      <p>Toda query precisou de um <code>new Promise</code> manual, porque o <code>mysql2</code> só tinha callback (Aula 1/2). O <code>fs</code> já vem com uma versão baseada em Promise pronta — <code>async</code>/<code>await</code> direto, sem embrulhar nada.</p>
+      
+    </div>
+
+    <div class="file-label">main.js</div>
+    <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+// escrever
+await fs.writeFile('anotacoes.txt', 'Impressora comprada em 10/03/2026');
+
+// ler (com tratamento pra arquivo inexistente)
+try {
+  const conteudo = await fs.readFile('anotacoes.txt', 'utf-8');
+  console.log(conteudo);
+} catch (erro) {
+  console.error('Nao consegui ler o arquivo:', erro.message);
+}</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-file-lines"></i>
+        <h1>Aplicando no Projeto: Relatório em .txt</h1>
+        <p>Exportando os insumos já carregados na tela</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 05</div>
+        <h1>O botão Exportar Relatório</h1>
+        
+        <p>Igual ao modal de exclusão da Aula 5: os dados já estão na tela, em <code>insumosCarregados</code>. Não precisamos de uma consulta nova ao banco — só montar o texto do relatório a partir do que já temos em memória.</p>
+
+    <div class="file-label">frmPrincipal.js</div>
+    <pre style="margin-top:0;"><code class="language-javascript">const exportarRelatorio = () =&gt; {
+  const linhas = insumosCarregados.map(
+    (insumo) =&gt; `${insumo.nome} - ${formatarMoeda(insumo.valor)} - ${formatarData(insumo.data_aquisicao)}`
+  );
+
+  window.api.salvarArquivoTexto(linhas.join('\n'));
+};</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Reaproveitando o que já existe
+      </h3>
+      <p><code>formatarMoeda</code> e <code>formatarData</code> são as mesmas funções da Aula 3 — o relatório usa exatamente o mesmo texto que já aparece formatado na tabela.</p>
+      
+    </div>
         
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
-        <h1>main.js aprende a preencher o modal</h1>
-        <h2>abrirModalInsumo ganha um segundo parâmetro</h2>
+        <div class="slide-number">Slide 06</div>
+        <h1>main.js: dialog + fs.writeFile</h1>
+        
         
     <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const abrirModalInsumo = (janelaPai, insumo = null) =&gt; {
-  const janelaModal = new BrowserWindow({
-    width: 500,
-    height: 600,
-    parent: janelaPai,
-    modal: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+    <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+ipcMain.handle('arquivo:salvarTexto', async (evento, conteudo) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar relatorio',
+    defaultPath: 'relatorio-insumos.txt',
+    filters: [{ name: 'Texto', extensions: ['txt'] }]
   });
 
-  janelaModal.loadFile(path.join(__dirname, '../renderer/frmInsumo.html'));
+  if (canceled) return;
 
-  // Só existe insumo quando estamos ABRINDO EM MODO EDIÇÃO
-  if (insumo) {
-    janelaModal.webContents.once('did-finish-load', () =&gt; {
-      janelaModal.webContents.send('insumo:preencher', insumo);
-    });
-  }
-};
-
-// Chamado quando o usuário clica em &quot;Editar&quot; na tabela
-// on, nao handle: ninguem espera resposta nenhuma aqui
-ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
-  abrirModalInsumo(janelaPrincipal, insumo);
+  await fs.writeFile(filePath, conteudo);
 });</code></pre>
+
+    <div class="file-label">src/main/preload.js</div>
+    <pre style="margin-top:0;"><code class="language-javascript">salvarArquivoTexto: (conteudo) =&gt; ipcRenderer.invoke('arquivo:salvarTexto', conteudo),</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> Por que on, e não handle
+        <i class="fa-solid fa-window-restore"></i> dialog.showSaveDialog: revisão do semestre 1
       </h3>
-      <p><code>abrirModalInsumo</code> não devolve nada que o <code>frmPrincipal.js</code> precise — ele só abre uma janela. Não existindo resposta pra esperar, <code>invoke/handle</code> seria over-engineering: o padrão certo aqui é <code>send/on</code>, o mesmo que a própria abertura do modal já usa mais abaixo pra preencher o formulário.</p>
+      <p>É o mesmo <code>SaveDialog</code> visto na Aula 15 do semestre passado — deixa o USUÁRIO escolher onde salvar, em vez de fixar um caminho no código. Se ele cancelar, <code>filePath</code> some e a função simplesmente retorna.</p>
       
     </div>
         
@@ -552,154 +423,129 @@ ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-database"></i>
-        <h1>Implementando o UPDATE</h1>
-        <p>main.js, preload.js e frmInsumo.js</p>
+        <h1>JSON: Backup Estruturado</h1>
+        <p>Exportar e reimportar, reaproveitando o Create</p>
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 11</div>
-        <h1>O handler do UPDATE</h1>
-        <h2>Mesma receita de sempre, com um novo <code>?</code></h2>
+        <div class="slide-number">Slide 07</div>
+        <h1>Por que JSON pra isso</h1>
+        
+        <p><code>insumosCarregados</code> já é o formato que usamos a disciplina inteira: um array de objetos. JSON é exatamente a representação em texto desse formato — por isso ele é a escolha natural pra guardar (ou transportar) esses dados fora do banco.</p>
+
+    
+    <pre><code class="language-javascript">// transforma o array de objetos em texto JSON (pra escrever no arquivo)
+JSON.stringify(insumosCarregados, null, 2);
+
+// transforma o texto JSON de volta num array de objetos (depois de ler o arquivo)
+JSON.parse(conteudo);</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 08</div>
+        <h1>Exportando o backup</h1>
+        
+        
+    <div class="file-label">src/renderer/frmPrincipal.js</div>
+    <pre style="margin-top:0;"><code class="language-javascript">const exportarBackup = () =&gt; window.api.exportarBackupJson(insumosCarregados);</code></pre>
+
+    <div class="file-label">src/main/main.js</div>
+    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:exportarJson', async (evento, dados) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar backup',
+    defaultPath: 'backup-insumos.json',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, JSON.stringify(dados, null, 2));
+});</code></pre>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 09</div>
+        <h1>Importando o backup</h1>
+        
         
     <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:atualizar', (evento, insumo) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = 'UPDATE insumo SET tipo = ?, nome = ?, valor = ?, data_aquisicao = ? WHERE id = ?';
-    const valores = [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao, insumo.id];
-
-    conexao.query(sql, valores, (erro, resultado) =&gt; {
-      if (erro) {
-        reject(erro);
-      } else {
-        resolve(resultado);
-      }
-    });
+    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:importarJson', async () =&gt; {
+  const { canceled, filePaths } = await dialog.showOpenDialog(janelaPrincipal, {
+    title: 'Escolher backup',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
   });
+
+  if (canceled) return null;
+
+  const conteudo = await fs.readFile(filePaths[0], 'utf-8');
+  return JSON.parse(conteudo);
 });</code></pre>
-<p>Mesma receita de <code>new Promise</code> + <code>conexao.query</code> desde a Aula 2 — a única novidade é que o <code>id</code> também entra como <code>?</code>, por último no array, na mesma ordem do <code>WHERE id = ?</code>. Nunca concatene o id direto na string — mesma regra de sempre.</p>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 12</div>
-        <h1>preload.js completo</h1>
-        <h2>Repare qual padrão cada função usa</h2>
-        
-    <div class="file-label">src/main/preload.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
-
-contextBridge.exposeInMainWorld('api', {
-  // já existiam (Aulas 2 e 3) — invoke/handle
-  criarInsumo: (dados) =&gt; ipcRenderer.invoke('insumo:criar', dados),
-  listarInsumos: () =&gt; ipcRenderer.invoke('insumo:listar'),
-
-  // NOVO — send/on: so avisa o main que quer editar, sem esperar resposta
-  editarInsumo: (insumo) =&gt; ipcRenderer.send('insumo:abrirEdicao', insumo),
-
-  // NOVO — send/on: o main AVISA o formulário, sem que ele pergunte nada
-  aoReceberInsumoParaEditar: (callback) =&gt;
-    ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo)),
-
-  // NOVO — invoke/handle: salva a edição (esse sim precisa do resultado)
-  atualizarInsumo: (dados) =&gt; ipcRenderer.invoke('insumo:atualizar', dados)
-});</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 13</div>
-        <h1>frmInsumo.js completo</h1>
-        <h2>Recebe pra preencher, decide pra salvar</h2>
-        
-    <div class="file-label">src/renderer/frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">let modoEdicao = false;
-let idEmEdicao = null;
-
-// Se o main mandar um insumo pra editar, preenche o formulário (send/on)
-window.api.aoReceberInsumoParaEditar((insumo) =&gt; {
-  document.querySelector('#tipo').value = insumo.tipo;
-  document.querySelector('#nome').value = insumo.nome;
-  document.querySelector('#valor').value = insumo.valor;
-  document.querySelector('#data_aquisicao').value = insumo.data_aquisicao;
-
-  modoEdicao = true;
-  idEmEdicao = insumo.id;
-});
-
-document.querySelector('#formInsumo').addEventListener('submit', async (evento) =&gt; {
-  evento.preventDefault();
-  const dados = Object.fromEntries(new FormData(evento.target));
-
-  if (modoEdicao) {
-    await window.api.atualizarInsumo({ id: idEmEdicao, ...dados });
-  } else {
-    await window.api.criarInsumo(dados);
-  }
-
-  window.close(); // fecha o modal; frmPrincipal recarrega quando o foco voltar
-});</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-rotate"></i>
-        <h1>Fechando o Ciclo</h1>
-        <p>A lista sempre atualizada, como a Aula 3 previu</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 14</div>
-        <h1>O foco resolve a lista desatualizada</h1>
-        <h2>A ideia que a Aula 3 só cogitou, agora de verdade</h2>
-        <p>A Aula 3 já tinha discutido esse problema: a lista da janela principal fica desatualizada enquanto outra janela mexe nos dados. A solução mais simples é essa — toda vez que a janela principal GANHA FOCO (por exemplo, quando o modal de edição fecha e o usuário volta pra ela), a gente recarrega a lista do zero.</p>
 
     <div class="file-label">src/renderer/frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Recarrega a tabela sempre que a janela principal ganha foco
-window.addEventListener('focus', carregarInsumos);</code></pre>
+    <pre style="margin-top:0;"><code class="language-javascript">const importarBackup = async () =&gt; {
+  const insumosImportados = await window.api.importarBackupJson();
+  if (!insumosImportados) return; // usuario cancelou
+
+  for (const insumo of insumosImportados) {
+    await window.api.criarInsumo(insumo);
+  }
+
+  carregarInsumos(); // mesma funcao de sempre, mostra os importados
+};</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Um id novo pra cada um
+      </h3>
+      <p><code>criarInsumo</code> faz um INSERT de verdade — cada insumo importado ganha um <strong>id novo</strong> no banco, diferente do id que tinha no backup. Pra este exercício, tudo bem: o objetivo é reaproveitar os dados, não preservar o id original.</p>
+      
+    </div>
         
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 15</div>
-        <h1>As duas pernas do fluxo, juntas</h1>
+        <div class="slide-number">Slide 10</div>
+        <h1>O fluxo completo do backup</h1>
         
-        <div class="bloco-diagrama" id="mmdv0k06">
-    <div class="bloco-diagrama-titulo">Fluxo completo do Update</div>
+        <div class="bloco-diagrama" id="mmd0rct5">
+    <div class="bloco-diagrama-titulo">Exportar e reimportar</div>
     <div class="mermaid">sequenceDiagram
-    actor U as Usuario
+    participant U as Usuario
     participant R as frmPrincipal.js
     participant P as preload.js
     participant M as main.js
-    participant F as frmInsumo.js
+    participant FS as Sistema de arquivos
+    participant BD as MySQL
 
-    Note over U,F: PERNA 1 - Abrir a edicao (send/on nos dois sentidos)
-    U-&gt;&gt;R: clica em Editar
-    R-&gt;&gt;P: window.api.editarInsumo(insumo)
-    P-&gt;&gt;M: send('insumo:abrirEdicao', insumo)
-    M-&gt;&gt;M: abrirModalInsumo(janelaPrincipal, insumo)
-    M--&gt;&gt;F: did-finish-load: send('insumo:preencher', insumo)
-    F-&gt;&gt;F: aoReceberInsumoParaEditar preenche o form
+    Note over U,BD: Exportar
+    U-&gt;&gt;R: clica em Exportar Backup
+    R-&gt;&gt;P: window.api.exportarBackupJson(insumosCarregados)
+    P-&gt;&gt;M: invoke('arquivo:exportarJson', dados)
+    M-&gt;&gt;FS: writeFile(caminho, JSON.stringify(dados))
 
-    Note over U,F: PERNA 2 - Salvar a edicao (invoke/handle: precisa do resultado)
-    U-&gt;&gt;F: clica em Salvar
-    F-&gt;&gt;P: window.api.atualizarInsumo(dados)
-    P-&gt;&gt;M: invoke('insumo:atualizar', dados)
-    M-&gt;&gt;M: UPDATE insumo SET ... WHERE id=?
-    M--&gt;&gt;F: resolve(resultado)
-    F-&gt;&gt;F: window.close()</div>
-    <div class="bloco-diagrama-legenda">As duas pernas do fluxo de edição: abrir o modal já preenchido, depois salvar o UPDATE.</div>
+    Note over U,BD: Importar
+    U-&gt;&gt;R: clica em Importar Backup
+    R-&gt;&gt;P: window.api.importarBackupJson()
+    P-&gt;&gt;M: invoke('arquivo:importarJson')
+    M-&gt;&gt;FS: readFile(caminho)
+    FS--&gt;&gt;M: conteudo (texto JSON)
+    M--&gt;&gt;R: JSON.parse(conteudo)
+    loop cada insumo importado
+      R-&gt;&gt;M: invoke('insumo:criar', insumo)
+      M-&gt;&gt;BD: INSERT INTO insumo
+    end
+    R-&gt;&gt;R: carregarInsumos()</div>
+    <div class="bloco-diagrama-legenda">Exportar só toca o disco. Importar toca o disco pra ler, e depois volta pro caminho já conhecido do Create pra gravar cada registro.</div>
   </div>
         
       </div>
@@ -708,26 +554,48 @@ window.addEventListener('focus', carregarInsumos);</code></pre>
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Exercício</h1>
-        <p>Agora é a sua vez: <code>peca_impressa</code></p>
+        <h1>Fechando</h1>
+        <p>Resumo e exercício em Peça Impressa</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 11</div>
+        <h1>Resumo da aula</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Recurso x API x Uso no projeto</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Recurso</th><th>API do fs</th><th>Uso no projeto</th></tr></thead><tbody><tr><td>Relatório</td><td><code>fs.writeFile</code> (texto puro)</td><td>Lista formatada de insumos em <code>.txt</code></td></tr><tr><td>Exportar backup</td><td><code>fs.writeFile</code> + <code>JSON.stringify</code></td><td><code>insumosCarregados</code> inteiro em <code>.json</code></td></tr><tr><td>Importar backup</td><td><code>fs.readFile</code> + <code>JSON.parse</code></td><td>Reaproveita <code>criarInsumo</code> pra regravar cada um</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
+      </h3>
+      <p>Na Aula 8 saímos do disco local e vamos consumir uma API REST externa, com Axios.</p>
+      
+    </div>
+        
       </div>
     </div>
 
     <div class="slide">
       <div class="slide-content-wrapper">
         <div class="slide-number">Desafios</div>
-        <h1>Exercício</h1>
-        <h2>Update em Peça Impressa</h2>
+        <h1>Exercício: fs em Peça Impressa</h1>
+        
         
     <div class="quest-list">
-      <ol><li>Adicione o botão <strong>Editar</strong> na tabela de <code>peca_impressa</code> (mesma lógica: guardar o array de peças carregadas numa variável)</li><li>Crie <code>ipcMain.on('peca:abrirEdicao', ...)</code> chamando a função de abrir o modal de peça com a peça selecionada — <code>on</code>, não <code>handle</code>: ninguém espera resposta aqui</li><li>No <code>did-finish-load</code> da janela de edição de peça, dê <code>send('peca:preencher', peca)</code></li><li>No <code>preload.js</code>, exponha <code>editarPeca</code> (via <code>send</code>), <code>aoReceberPecaParaEditar</code> (via <code>on</code>) e <code>atualizarPeca</code> (via <code>invoke</code>, esse sim precisa do resultado)</li><li>Em <code>frmPeca.js</code>, escute com <code>aoReceberPecaParaEditar</code>, preencha o formulário, e no submit decida entre <code>criarPeca</code> e <code>atualizarPeca</code> usando <code>modoEdicao</code></li><li>No <code>main.js</code>, implemente <code>ipcMain.handle('peca:atualizar', ...)</code> com <code>UPDATE peca_impressa SET titulo=?, cor=?, peso=?, quantidade_material=?, tempo_impressao=?, data_impressao=? WHERE id=?</code></li></ol>
+      <ol><li>Adicione um botão <strong>Exportar Relatório</strong> na tela de peças, reaproveitando o array de peças já carregadas (título, cor e peso de cada uma) — mesmo padrão de <code>exportarRelatorio</code>.</li><li>Exponha <code>exportarBackupJson</code>/<code>importarBackupJson</code> no <code>preload.js</code> (podem ser as MESMAS funções genéricas já usadas pra insumo — repare que <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> no <code>main.js</code> não sabem nem precisam saber se os dados são de insumo ou de peça).</li><li>No <code>frmPrincipal.js</code>, crie <code>exportarBackupPecas</code> e <code>importarBackupPecas</code>, reaproveitando <code>criarPeca</code> pra regravar cada peça importada.</li><li>Teste o ciclo completo: exporte um backup de peças, apague uma peça de teste (Delete da Aula 5), e importe o backup de volta.</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Dica
       </h3>
-      <p>Reaproveite ao máximo o padrão que acabamos de construir pro insumo — a lógica é idêntica, só trocam os nomes de tabela, colunas e canais IPC. Repare que só <code>atualizar</code> usa <code>invoke/handle</code> — abrir o modal continua sendo <code>send/on</code>.</p>
+      <p>Repare que os handlers <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> do <code>main.js</code> são <strong>genéricos</strong> — não têm nada de insumo ou peça no nome. Você já pode reaproveitá-los sem duplicar código nenhum no main.js.</p>
       
     </div>
         
@@ -741,17 +609,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fdf2d2',
-    primaryTextColor: '#1A1A1A',
-    primaryBorderColor: '#F2B705',
-    lineColor: '#F2B705',
-    secondaryColor: '#331A4D',
+    primaryColor: '#fee6d5',
+    primaryTextColor: '#0B1B1E',
+    primaryBorderColor: '#F97316',
+    lineColor: '#F97316',
+    secondaryColor: '#164E63',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fdf2d2',
-    nodeBorder: '#F2B705',
+    mainBkg: '#fee6d5',
+    nodeBorder: '#F97316',
     clusterBkg: '#f0f4f8',
-    titleColor: '#F2B705',
+    titleColor: '#F97316',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -761,7 +629,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#e1d9e9'
+    cScale1: '#d3ebf1'
   }
 });
 </script>
@@ -769,7 +637,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::4';
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
