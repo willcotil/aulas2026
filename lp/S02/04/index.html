@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 4: Revisão: while e do-while (20 Exercícios) + Limpando a Tela</title>
+<title>Aula 4: Revisão: while e do-while (20 Exercícios) + Truques de Console</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#BD4444;--color-rust:#F1DEC4;
-  --color-orange:#F1DEC4;--color-yellow:#F1DEC4;--color-deep:#677E61;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#211712;
+  --color-navy:#000;--color-blue:#146C6C;--color-rust:#F2A93B;
+  --color-orange:#F2A93B;--color-yellow:#F2A93B;--color-deep:#0B3B3B;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#151F1D;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -62,12 +62,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -191,16 +192,20 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Hora de Revisar</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Relembrando o while</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>Relembrando o do-while</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-broom"></i><span>Um Truque Novo: Limpando a Tela</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-broom"></i><span>Truques Úteis de Console</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>system(): chamando o sistema operacional</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>Receita pronta: #ifdef _WIN32</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-list-check"></i><span>20 Exercícios de Revisão</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 1/4</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 2/4</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 3/4</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 4/4</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Receita pronta: #ifdef _WIN32</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Pausando por um Tempo</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-clock"></i><span>Pausar e Esperar o Usuário</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Resumo: Comandos Úteis pra Console</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-list-check"></i><span>20 Exercícios de Revisão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 1/4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 2/4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 3/4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios de Revisão — Parte 4/4</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -215,7 +220,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         
         <p>Linguagem de Programação (LP) — Aula 4</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Revisão: while e do-while (20 Exercícios) + Limpando a Tela</div>
+    <div class="bloco-agenda-titulo">Revisão: while e do-while (20 Exercícios) + Truques de Console</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
@@ -242,18 +247,18 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-broom"></i> Um Truque Novo: Limpando a Tela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-broom"></i> Truques Úteis de Console</div>
             
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> Receita pronta: #ifdef _WIN32</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-clock"></i> Pausar e Esperar o Usuário</div>
             
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
           <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-list-check"></i> 20 Exercícios de Revisão</div>
@@ -323,8 +328,8 @@ do {
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-broom"></i>
-        <h1>Um Truque Novo: Limpando a Tela</h1>
-        <p>Só um conceito novo hoje — e ele deixa seus menus muito mais organizados</p>
+        <h1>Truques Úteis de Console</h1>
+        <p>Três truques pequenos que deixam qualquer menu mais profissional</p>
       </div>
     </div>
 
@@ -375,11 +380,86 @@ do {
       </div>
     </div>
 
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 06</div>
+        <h1>Pausando por um Tempo</h1>
+        
+        <p>Às vezes queremos que o programa <strong>espere um pouco sozinho</strong> antes de continuar — tipo dar tempo do usuário ler uma mensagem antes de limpar a tela. Pra isso, usamos a biblioteca <code>&lt;time.h&gt;</code>.</p>
+
+    <div class="file-label">pausar.c</div>
+    <pre style="margin-top:0;"><code class="language-c">#include &lt;time.h&gt;
+
+void pausar(int segundos) {
+    clock_t inicio = clock();
+    while ((clock() - inicio) / CLOCKS_PER_SEC &lt; segundos);
+}
+
+// uso:
+printf(&quot;Processando...\n&quot;);
+pausar(2); // trava por 2 segundos
+printf(&quot;Pronto!\n&quot;);</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-clock"></i> clock() vem do time.h
+      </h3>
+      <p><code>clock()</code> devolve o tempo de processamento decorrido desde que o programa começou. Dividindo pela constante <code>CLOCKS_PER_SEC</code>, convertemos isso pra segundos. O <code>while</code> fica girando (sem fazer nada) até esse tempo passar — repare que é o MESMO <code>while</code> que já dominamos, só que a condição é sobre tempo, não sobre um valor digitado.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 07</div>
+        <h1>Esperando o Usuário Continuar</h1>
+        
+        <p>Outro truque comum: pausar o programa até o usuário apertar ENTER, tipo um "pressione qualquer tecla para continuar".</p>
+
+    <div class="file-label">esperar_enter.c</div>
+    <pre style="margin-top:0;"><code class="language-c">printf(&quot;Pressione ENTER para continuar...&quot;);
+getchar();</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-keyboard"></i> Cuidado com o buffer do scanf
+      </h3>
+      <p>Se um <code>scanf</code> rodou logo antes, ele costuma deixar um <code>\n</code> esperando no buffer de entrada — e esse <code>getchar()</code> vai consumir ESSE <code>\n</code> sozinho, sem pausar nada de verdade. Nesse caso, coloque um <code>getchar()</code> extra logo antes (só pra limpar esse <code>\n</code> perdido) e aí sim o segundo <code>getchar()</code> vai esperar o usuário de verdade.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 08</div>
+        <h1>Resumo: Comandos Úteis pra Console</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Três truques pequenos, muito úteis nos exercícios de hoje</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>O que faz</th><th>Como fazer em C</th></tr></thead><tbody><tr><td>Limpar a tela</td><td><code>#ifdef _WIN32</code> com <code>system(&quot;cls&quot;)</code> / <code>system(&quot;clear&quot;)</code></td></tr><tr><td>Pausar por um tempo</td><td><code>clock()</code> do <code>&lt;time.h&gt;</code>, comparando com <code>CLOCKS_PER_SEC</code></td></tr><tr><td>Esperar o usuário continuar</td><td><code>printf(&quot;Pressione ENTER...&quot;); getchar();</code></td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Combine os três
+      </h3>
+      <p>Nos exercícios de menu (<code>do-while</code>) de hoje, combinar os três — limpar, pausar entre mensagens e esperar antes de continuar — deixa a experiência bem mais parecida com um programa de verdade.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
     <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-list-check"></i>
         <h1>20 Exercícios de Revisão</h1>
-        <p>Metade while, metade do-while, crescendo em dificuldade — bora</p>
+        <p>Metade while, metade do-while, todos inéditos — bora</p>
       </div>
     </div>
 
@@ -390,7 +470,7 @@ do {
         
         
     <div class="quest-list">
-      <ol><li>Use um <code>while</code> para imprimir os números de 1 a 10.</li><li>Use um <code>while</code> para imprimir os números de 10 a 1, em ordem decrescente.</li><li>Use um <code>while</code> para somar os números de 1 a 100 (acumulador) e mostrar o total.</li><li>Use um <code>while</code> para contar quantos números pares existem entre 1 e 50 (contador).</li><li>Peça números ao usuário com <code>while</code>, um de cada vez, até ele digitar 0 — some todos (acumulador) e mostre o total no final.</li></ol>
+      <ol style="counter-reset:quest 0"><li>Use um <code>while</code> para imprimir apenas os múltiplos de 5 entre 1 e 100.</li><li>Use um <code>while</code> para imprimir os números de 10 a 1, em ordem decrescente.</li><li>Use um <code>while</code> para somar os números de 1 a 100 (acumulador) e mostrar o total.</li><li>Use um <code>while</code> para contar quantos números pares existem entre 1 e 50 (contador).</li><li>Peça números ao usuário com <code>while</code>, um de cada vez, até ele digitar 0 — some todos (acumulador) e mostre o total no final.</li></ol>
     </div>
         
       </div>
@@ -403,7 +483,7 @@ do {
         
         
     <div class="quest-list">
-      <ol><li>Use um <code>do-while</code> para pedir uma senha até o usuário acertar (senha fixa no código, tipo "1234").</li><li>Use um <code>do-while</code> para simular um menu com 3 opções + Sair, repetindo até "Sair" ser escolhida — por enquanto cada opção só imprime "Você escolheu a opção X".</li><li>Refaça o exercício anterior, mas agora limpando a tela (<code>system(&quot;cls&quot;)</code>/<code>system(&quot;clear&quot;)</code> com <code>#ifdef _WIN32</code>) toda vez que o menu voltar a aparecer.</li><li>Use um <code>while</code> para calcular o fatorial de um número digitado pelo usuário.</li><li>Use um <code>do-while</code> para pedir números até o usuário digitar um número negativo, contando (contador) quantos números positivos foram digitados.</li></ol>
+      <ol style="counter-reset:quest 5"><li>Use um <code>do-while</code> para pedir uma senha até o usuário acertar (senha fixa no código, tipo "1234").</li><li>Use um <code>do-while</code> para simular um menu com 3 opções + Sair, repetindo até "Sair" ser escolhida — por enquanto cada opção só imprime "Você escolheu a opção X".</li><li>Refaça o exercício anterior, mas agora limpando a tela (<code>system(&quot;cls&quot;)</code>/<code>system(&quot;clear&quot;)</code> com <code>#ifdef _WIN32</code>) toda vez que o menu voltar a aparecer.</li><li>Use um <code>while</code> para calcular a potência de um número (base elevada a um expoente, ambos digitados pelo usuário) SEM usar a função <code>pow()</code> — dica: multiplique a base por ela mesma, expoente vezes.</li><li>Use um <code>do-while</code> para pedir números até o usuário digitar um número negativo, contando (contador) quantos números positivos foram digitados.</li></ol>
     </div>
         
       </div>
@@ -416,7 +496,7 @@ do {
         
         
     <div class="quest-list">
-      <ol><li>Use um <code>while</code> para encontrar o maior número de uma sequência digitada pelo usuário (termina quando ele digitar -1).</li><li>Use um <code>do-while</code> para exibir a tabuada completa (1 a 10) de um número escolhido pelo usuário.</li><li>Faça uma contagem regressiva de 10 até 0 usando <code>while</code>, com uma mensagem de "Lançamento!" no final.</li><li>Use um <code>do-while</code> para validar que o usuário digite um número entre 1 e 100, repetindo enquanto o valor estiver fora da faixa.</li><li>Some apenas os números ímpares de 1 a 50 usando <code>while</code> (acumulador com uma decisão dentro do laço).</li></ol>
+      <ol style="counter-reset:quest 10"><li>Use um <code>while</code> para encontrar o maior número de uma sequência digitada pelo usuário (termina quando ele digitar -1).</li><li>Use um <code>do-while</code> para exibir a tabuada completa (1 a 10) de um número escolhido pelo usuário.</li><li>Use um <code>while</code> para gerar e imprimir os 10 primeiros termos da sequência de Fibonacci (0, 1, 1, 2, 3, 5...).</li><li>Use um <code>do-while</code> para verificar se um número digitado é um palíndromo (ex: 121, 1331) — ao final de cada teste, pergunte 's/n' se o usuário quer testar outro número, repetindo enquanto a resposta for 's'.</li><li>Some apenas os números ímpares de 1 a 50 usando <code>while</code> (acumulador com uma decisão dentro do laço).</li></ol>
     </div>
         
       </div>
@@ -429,7 +509,7 @@ do {
         
         
     <div class="quest-list">
-      <ol><li>Use um <code>do-while</code> para simular um caixa eletrônico simplificado: menu com "Consultar saldo" e "Sair", repetindo até sair e limpando a tela a cada volta ao menu.</li><li>Calcule a média de N notas digitadas pelo usuário, onde N também é digitado no início, usando <code>while</code> como controle de quantas vezes repetir.</li><li>Use um <code>while</code> para inverter os dígitos de um número digitado pelo usuário (ex: 123 vira 321) — dica: use o resto da divisão por 10 (<code>% 10</code>) e a divisão inteira (<code>/ 10</code>) repetidamente.</li><li>Monte um menu com <code>do-while</code> com pelo menos 4 opções reais (soma, subtração, multiplicação e divisão de dois números digitados, além de Sair), limpando a tela toda vez que voltar ao menu.</li><li>Desafio final — Jogo de Adivinhação: o programa "pensa" num número fixo escondido no código (ex: 7); o jogador digita palpites num <code>do-while</code> até acertar, contando (contador) quantas tentativas usou; ao acertar, limpe a tela e mostre um resumo final com o número de tentativas.</li></ol>
+      <ol style="counter-reset:quest 15"><li>Use um <code>do-while</code> para simular um caixa eletrônico simplificado: menu com "Consultar saldo" e "Sair", repetindo até sair e limpando a tela a cada volta ao menu.</li><li>Use um <code>while</code> para simular a fila de um caixa de supermercado: leia o valor de cada item até o cliente digitar 0, acumulando o total da compra, e ao final informe o troco a partir de um valor pago em dinheiro (informado no início).</li><li>Use um <code>while</code> para verificar se um número digitado é um número perfeito (a soma de seus divisores próprios, exceto ele mesmo, é igual a ele — ex: 6 = 1+2+3).</li><li>Monte um menu com <code>do-while</code> com pelo menos 4 opções reais (soma, subtração, multiplicação e divisão de dois números digitados, além de Sair), limpando a tela toda vez que voltar ao menu.</li><li>Desafio final — Jogo de Adivinhação: o programa "pensa" num número fixo escondido no código (ex: 7); o jogador digita palpites num <code>do-while</code> até acertar, contando (contador) quantas tentativas usou; ao acertar, limpe a tela e mostre um resumo final com o número de tentativas.</li></ol>
     </div>
         
       </div>
@@ -442,17 +522,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcf9f4',
-    primaryTextColor: '#211712',
-    primaryBorderColor: '#F1DEC4',
-    lineColor: '#F1DEC4',
-    secondaryColor: '#677E61',
+    primaryColor: '#fdf0dc',
+    primaryTextColor: '#151F1D',
+    primaryBorderColor: '#F2A93B',
+    lineColor: '#F2A93B',
+    secondaryColor: '#0B3B3B',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcf9f4',
-    nodeBorder: '#F1DEC4',
+    mainBkg: '#fdf0dc',
+    nodeBorder: '#F2A93B',
     clusterBkg: '#f0f4f8',
-    titleColor: '#F1DEC4',
+    titleColor: '#F2A93B',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -462,7 +542,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#f3dddd'
+    cScale1: '#d5e5e5'
   }
 });
 </script>
@@ -476,6 +556,7 @@ try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(s
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -497,6 +578,7 @@ const showSlide = (i) => {
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  sc.textContent='Slide '+(cur+1)+'/'+total;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
