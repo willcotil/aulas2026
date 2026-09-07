@@ -48,7 +48,16 @@ strong{color:var(--color-rust);font-weight:800;}
 pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
 code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -62,12 +71,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -109,6 +119,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -196,6 +214,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-cubes"></i><span>Agora é sua vez: Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -309,7 +328,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
           <h3>
             <i class="fa-solid fa-database"></i> conexao.js
           </h3>
-          <p>Em <code>src/main/conexao.js</code>, a <code>connection</code> já é criada e exportada via <code>module.exports</code> — é só dar <code>require('./conexao')</code> e usar.</p>
+          <p>Em <code>src/main/conexao.js</code>, a <code>conexao</code> já é criada e exportada via <code>module.exports</code> — é só dar <code>require('./conexao')</code> e usar.</p>
           
         </div>
         <div class="card-info">
@@ -353,7 +372,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       <p><strong>Create</strong> = inserir uma linha nova numa tabela do banco (<code>INSERT INTO</code>), a partir de dados que o usuário forneceu na interface (formulário).</p>
       
     </div>
-<div class="bloco-diagrama" id="mmd6jifu">
+<div class="bloco-diagrama" id="mmdut00x">
     <div class="bloco-diagrama-titulo">O caminho de um Create</div>
     <div class="mermaid">flowchart TD
   subgraph Parte1["Do formulario ao Main"]
@@ -383,8 +402,9 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h2>Conhecendo o Projeto Base</h2>
         <p>A partir de hoje, toda a disciplina usa o mesmo projeto base: o <strong>Gerenciador de Peças 3D</strong> (repositório <code>willcotil/dad2s</code>), já com a estrutura de pastas e os formulários da Aula 1 prontos.</p>
 
-    <div class="file-label">estrutura do projeto</div>
-    <pre style="margin-top:0;"><code class="language-text">src/
+    <div class="code-wrap">
+      <div class="file-label"><span>estrutura do projeto</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">src/
   main/
     main.js       # janela, menu, tray, teste de conexao
     conexao.js    # conexao MySQL (pronta desde a Aula 1)
@@ -392,6 +412,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
     frmPrincipal.html/.js
     frmInsumo.html/.js   # formulario + TODO esperando o INSERT
     frmPeca.html/.js     # formulario + TODO esperando o INSERT</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -411,12 +432,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <h2>Criando o preload.js</h2>
         <p>Vamos criar um arquivo novo, <code>src/main/preload.js</code> — a mesma ideia da Aula 1, expondo uma função que segue o padrão invoke.</p>
 
-    <div class="file-label">src/main/preload.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo)
 });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -436,22 +459,23 @@ contextBridge.exposeInMainWorld('api', {
         <h2>Ligando o preload à Janela do Insumo</h2>
         <p>Ter o arquivo não basta — o <code>main.js</code> precisa dizer pra janela do formulário usar esse <code>preload.js</code>, através de <code>webPreferences</code>. Aproveite também pra importar o <code>ipcMain</code>, que ainda não estava sendo usado.</p>
 
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { app, BrowserWindow, Menu, Tray, dialog, ipcMain } = require('electron');
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const { app, BrowserWindow, Menu, Tray, dialog, ipcMain } = require('electron');
 const path = require('path');
 const conexao = require('./conexao');
 
 const abrirModalInsumo = (janelaPrincipal) =&gt; {
     const janelaModal = new BrowserWindow({
-        width: 400, height: 550,
+        width: 500, height: 600,
         parent: janelaPrincipal, modal: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
         }
     });
-    janelaModal.removeMenu();
     janelaModal.loadFile(path.join(__dirname, '../renderer/frmInsumo.html'));
 };</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -471,8 +495,9 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
         <h2>main.js: o INSERT de Verdade</h2>
         <p>Com <code>ipcMain</code> importado e a <code>conexao</code> já disponível, é só registrar o handler que faz o INSERT de verdade na tabela <code>insumo</code>.</p>
 
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:criar', (evento, insumo) =&gt; {
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:criar', (evento, insumo) =&gt; {
   return new Promise((resolve, reject) =&gt; {
     const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';
 
@@ -485,6 +510,7 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
     });
   });
 });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -504,8 +530,10 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
         <h2>Anatomia da Query: o SQL e os <code>?</code></h2>
         <p>Antes de seguir, vale destrinchar esse handler linha a linha. Primeiro, a string SQL em si.</p>
 
-    
-    <pre><code class="language-javascript">const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';</code></pre>
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';</code></pre>
+    </div>
 <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">Cada ? tem uma posição fixa</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Posição</th><th>Coluna (na lista após INSERT INTO)</th><th>? correspondente</th></tr></thead><tbody><tr><td>1ª</td><td>tipo</td><td>1º ?</td></tr><tr><td>2ª</td><td>nome</td><td>2º ?</td></tr><tr><td>3ª</td><td>valor</td><td>3º ?</td></tr><tr><td>4ª</td><td>data_aquisicao</td><td>4º ?</td></tr></tbody></table></div>
@@ -530,12 +558,14 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
         <h2>conexao.query: os Três Argumentos</h2>
         <p><code>conexao.query(...)</code> é o método do driver <code>mysql2</code> que realmente conversa com o MySQL. Ele sempre recebe os mesmos três argumentos.</p>
 
-    
-    <pre><code class="language-javascript">conexao.query(
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">conexao.query(
   sql,                                                              // 1. a query com os ?
   [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao],  // 2. os valores, na mesma ordem
   (erro, resultado) =&gt; { /* 3. o callback, chamado quando o banco responde */ }
 );</code></pre>
+    </div>
 
     <div class="grid-3">
       
@@ -587,8 +617,9 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
       
     </div>
 
-    
-    <pre><code class="language-javascript">return new Promise((resolve, reject) =&gt; {
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">return new Promise((resolve, reject) =&gt; {
   conexao.query(sql, [...], (erro, resultado) =&gt; {
     if (erro) {
       reject(erro);          // &quot;cancelado&quot;: algo deu errado
@@ -597,6 +628,7 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
     resolve({ id: resultado.insertId, ...insumo }); // &quot;entregue&quot;: sucesso
   });
 });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -623,8 +655,9 @@ const abrirModalInsumo = (janelaPrincipal) =&gt; {
         
         <h2>Segurança: Nunca Concatene Valores!</h2>
         
-    
-    <pre><code class="language-javascript">// ❌ NUNCA FAÇA ISSO — concatenar valor direto na query
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">// ❌ NUNCA FAÇA ISSO — concatenar valor direto na query
 const sql = `INSERT INTO insumo (tipo, nome, valor, data_aquisicao)
              VALUES ('${insumo.tipo}', '${insumo.nome}', ${insumo.valor}, '${insumo.data_aquisicao}')`;
 conexao.query(sql, (erro, resultado) =&gt; { /* ... */ });
@@ -632,6 +665,7 @@ conexao.query(sql, (erro, resultado) =&gt; { /* ... */ });
 // ✅ Faça assim — &quot;?&quot; é um placeholder, os valores vão num array separado
 const sql = 'INSERT INTO insumo (tipo, nome, valor, data_aquisicao) VALUES (?, ?, ?, ?)';
 conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao], (erro, resultado) =&gt; { /* ... */ });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -651,8 +685,9 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
         <h2>frmInsumo.js: Chamando a API de Verdade</h2>
         <p>Voltando pro Renderer: o <code>TODO</code> do <code>frmInsumo.js</code> finalmente vira código de verdade. O resto do arquivo (capturar com FormData) já estava pronto desde a Aula 1.</p>
 
-    <div class="file-label">src/renderer/js/frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">document.querySelector(&quot;#formInsumo&quot;).addEventListener(&quot;submit&quot;, async (e) =&gt; {
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/js/frmInsumo.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">document.querySelector(&quot;#formInsumo&quot;).addEventListener(&quot;submit&quot;, async (e) =&gt; {
     e.preventDefault(); // Evita o piscar da tela
 
     const dados = Object.fromEntries(new FormData(e.target));
@@ -667,6 +702,7 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
         alert(&quot;Nao foi possivel cadastrar o insumo.&quot;);
     }
 });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -684,7 +720,7 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
         <div class="slide-number">Slide 13</div>
         
         <h2>Resumo: o Caminho Completo do Create</h2>
-        <div class="bloco-diagrama" id="mmdt2x2l">
+        <div class="bloco-diagrama" id="mmdm2p11">
     <div class="bloco-diagrama-titulo">Do clique no botão até a linha gravada no MySQL</div>
     <div class="mermaid">sequenceDiagram
   participant U as Usuário
@@ -724,7 +760,7 @@ conexao.query(sql, [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisica
         <p>Aplique exatamente o mesmo padrão de hoje na tabela <code>peca_impressa</code>, usando os arquivos que já existem: <code>frmPeca.html</code> e <code>frmPeca.js</code> (que já tem o <code>TODO</code> esperando por você).</p>
 
     <div class="quest-list">
-      <ol><li>No preload.js, exponha uma função <code>criarPeca(peca)</code> que chama <code>ipcRenderer.invoke('peca:criar', peca)</code> — no mesmo objeto que já expõe <code>criarInsumo</code>.</li><li>No main.js, adicione <code>webPreferences: { preload: path.join(__dirname, 'preload.js') }</code> também em <code>abrirModalPeca</code> — sem isso, <code>window.api</code> não existe naquela janela.</li><li>Ainda no main.js, crie o <code>ipcMain.handle('peca:criar', ...)</code> montando o INSERT INTO peca<em>impressa (titulo, cor, peso, quantidade</em>material, tempo<em>impressao, data</em>impressao) VALUES (?, ?, ?, ?, ?, ?) — reaproveitando a conexao.</li><li>No frmPeca.js, troque o TODO/console.log por await window.api.criarPeca(dados), tratando sucesso (limpar o formulário) e erro (avisar o usuário) — igual fizemos em frmInsumo.js.</li><li>Teste cadastrando pelo menos 3 peças diferentes e confira no MySQL se as linhas foram gravadas certinho.</li></ol>
+      <ol><li>No preload.js, exponha uma função <code>criarPeca(peca)</code> que chama <code>ipcRenderer.invoke('peca:criar', peca)</code> — no mesmo objeto que já expõe <code>criarInsumo</code>.</li><li>No main.js, adicione <code>webPreferences: { preload: path.join(__dirname, 'preload.js') }</code> também em <code>abrirModalPeca</code> — sem isso, <code>window.api</code> não existe naquela janela.</li><li>Ainda no main.js, crie o <code>ipcMain.handle('peca:criar', ...)</code> montando o <code>INSERT INTO peca_impressa</code> com as colunas <code>titulo</code>, <code>cor</code>, <code>peso</code>, <code>quantidade_material</code>, <code>tempo_impressao</code> e <code>data_impressao</code> — reaproveitando a conexao.</li><li>No frmPeca.js, troque o TODO/console.log por <code>await window.api.criarPeca(dados)</code>, tratando sucesso (limpar o formulário) e erro (avisar o usuário) — igual fizemos em frmInsumo.js.</li><li>Teste cadastrando pelo menos 3 peças diferentes e confira no MySQL se as linhas foram gravadas certinho.</li></ol>
     </div>
 
     <div class="focus-box">
@@ -779,6 +815,7 @@ try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(s
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -800,6 +837,7 @@ const showSlide = (i) => {
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
   pb.style.width=((cur+1)/total*100)+'%';
+  sc.textContent='Slide '+(cur+1)+'/'+total;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -827,6 +865,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

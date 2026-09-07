@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Consumo de API REST — Integração com Serviços Externos via Axios</title>
+<title>Aula 8: Segurança (CSP) — Content Security Policy e Proteção contra XSS</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2D6A4F;--color-rust:#FFB703;
-  --color-orange:#FFB703;--color-yellow:#FFB703;--color-deep:#1B4332;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10241C;
+  --color-navy:#000;--color-blue:#7F1D1D;--color-rust:#FBBF24;
+  --color-orange:#FBBF24;--color-yellow:#FBBF24;--color-deep:#450A0A;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#1A0A0A;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -206,21 +206,21 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>De Onde Vêm os Dados?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Um Terceiro Lugar Pra Buscar Dado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-cloud"></i><span>O que é uma API REST</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Pedindo Informação Pela Internet</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Instalando e Usando o Axios</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Por que um pacote pra isso?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Axios só existe no Main</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-dollar-sign"></i><span>Aplicando no Projeto</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O handler no main.js</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>preload.js e a tela principal</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Mostrando o valor em dólar na tabela</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-bug"></i><span>Uma Falha Que Já Existe no Projeto</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Vamos Olhar de Novo pro carregarInsumos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>O Ataque: XSS</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que é XSS</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Cadastrando um Insumo Malicioso</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-shield-halved"></i><span>Corrigindo com Sanitização</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>A Ideia: Transformar Tag em Texto</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>Uma Segunda Camada: CSP</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>Uma Segunda Camada: CSP</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>E se Esquecermos de Escapar em Algum Lugar?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Sanitização x CSP: Defesas Diferentes</span></button>
 <button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Blindando Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -235,40 +235,40 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
+        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 8</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Consumo de API REST — Integração com Serviços Externos via Axios</div>
+    <div class="bloco-agenda-titulo">Segurança (CSP) — Content Security Policy e Proteção contra XSS</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> De Onde Vêm os Dados?</div>
-            <div class="agenda-item-texto">MySQL, fs e agora uma API externa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-bug"></i> Uma Falha Que Já Existe no Projeto</div>
+            <div class="agenda-item-texto">O innerHTML das Aulas 3 a 7 tem um problema</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cloud"></i> O que é uma API REST</div>
-            <div class="agenda-item-texto">Requisição, resposta, JSON</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> O Ataque: XSS</div>
+            <div class="agenda-item-texto">Vendo o script malicioso rodar de verdade</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Instalando e Usando o Axios</div>
-            <div class="agenda-item-texto">Mesma arquitetura, novo destino</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-shield-halved"></i> Corrigindo com Sanitização</div>
+            <div class="agenda-item-texto">escaparHtml em todo lugar que monta HTML com dado do banco</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dollar-sign"></i> Aplicando no Projeto</div>
-            <div class="agenda-item-texto">Cotação do dólar nos insumos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-lock"></i> Uma Segunda Camada: CSP</div>
+            <div class="agenda-item-texto">Content Security Policy limitando o estrago</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
@@ -283,23 +283,36 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-rotate-left"></i>
-        <h1>De Onde Vêm os Dados?</h1>
-        <p>MySQL, fs e agora uma API externa</p>
+        <i class="fa-solid fa-bug"></i>
+        <h1>Uma Falha Que Já Existe no Projeto</h1>
+        <p>O innerHTML das Aulas 3 a 7 tem um problema</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>Um Terceiro Lugar Pra Buscar Dado</h1>
+        <h1>Vamos Olhar de Novo pro carregarInsumos</h1>
         
-        <p>Até aqui, nosso app já sabe buscar dado em dois lugares: o <strong>MySQL</strong> (Aulas 1 a 5, dado que a gente mesmo criou e controla) e o <strong>disco local</strong> (Aula 6, arquivos <code>.txt</code>/<code>.json</code> no computador do usuário). Hoje entra um terceiro: um <strong>servidor de outra empresa</strong>, na internet, que a gente não controla — só consome.</p>
+        <p>Desde a Aula 3, <code>carregarInsumos</code> monta cada linha da tabela com um template string e joga tudo dentro de <code>innerHTML</code>. Isso funciona perfeitamente... <strong>desde que o dado que vem do banco seja só texto inofensivo</strong>. E se não for?</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js (como está desde a Aula 3)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const linhas = insumosCarregados.map((insumo) =&gt; `
+  &lt;tr&gt;
+    &lt;td&gt;${insumo.tipo}&lt;/td&gt;
+    &lt;td&gt;${insumo.nome}&lt;/td&gt;
+    &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
+  &lt;/tr&gt;
+`).join('');
+
+document.querySelector('#tbodyInsumos').innerHTML = linhas;</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-cloud"></i> Hoje: consumir uma API REST externa
+        <i class="fa-solid fa-triangle-exclamation"></i> insumo.nome vira HTML de verdade
       </h3>
-      <p>Vamos buscar a <strong>cotação do dólar</strong> numa API pública e gratuita, e usar isso no Gerenciador de Peças 3D — afinal, boa parte dos insumos de impressão 3D (filamento importado, peças de impressora) tem preço de referência em dólar.</p>
+      <p><code>innerHTML</code> não trata <code>insumo.nome</code> como texto puro — ele trata como <strong>código HTML</strong>. Se <code>nome</code> guardar uma tag, o navegador vai renderizar essa tag de verdade, não mostrar ela como texto.</p>
       
     </div>
         
@@ -308,157 +321,132 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-cloud"></i>
-        <h1>O que é uma API REST</h1>
-        <p>Requisição, resposta, JSON</p>
+        <i class="fa-solid fa-code"></i>
+        <h1>O Ataque: XSS</h1>
+        <p>Vendo o script malicioso rodar de verdade</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Pedindo Informação Pela Internet</h1>
+        <h1>O Que é XSS</h1>
         
-        <p>Pensa numa API REST como um balcão de atendimento: você faz um <strong>pedido</strong> (uma URL, tipo um endereço) e recebe uma <strong>resposta</strong> — quase sempre em <strong>JSON</strong>, o mesmo formato que a gente já usa desde o semestre passado pra representar array de objetos.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>exemplo de resposta da API</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-text">GET https://economia.awesomeapi.com.br/json/last/USD-BRL
-
-Resposta (JSON):
-{
-  &quot;USDBRL&quot;: {
-    &quot;code&quot;: &quot;USD&quot;,
-    &quot;name&quot;: &quot;Dolar Americano/Real Brasileiro&quot;,
-    &quot;bid&quot;: &quot;5.3521&quot;
-  }
-}</code></pre>
-    </div>
+        <p><strong>Cross-Site Scripting (XSS)</strong> é quando um atacante consegue fazer SEU código JavaScript rodar dentro da SUA página, escondido dentro de um dado que deveria ser só texto — um nome, um comentário, uma descrição.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> bid = cotação de compra
+        <i class="fa-solid fa-shield-halved"></i> Definição formal
       </h3>
-      <p>O campo que interessa pra gente é o <code>bid</code> — a cotação atual do dólar em reais. É só um texto (<code>string</code>) com o número, então vamos precisar converter pra <code>Number</code> antes de fazer conta com ele.</p>
+      <p><strong>XSS</strong> = injetar código malicioso (geralmente JavaScript) através de um campo de entrada, que depois é executado no navegador de quem visualiza esse dado — nesse caso, você mesmo, ao abrir a tela de insumos.</p>
       
     </div>
         
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="4">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plug"></i>
-        <h1>Instalando e Usando o Axios</h1>
-        <p>Mesma arquitetura, novo destino</p>
       </div>
     </div>
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <h1>Por que um pacote pra isso?</h1>
+        <h1>Cadastrando um Insumo Malicioso</h1>
         
-        <p>O JavaScript já tem um jeito nativo de fazer requisição (<code>fetch</code>), mas o <strong>Axios</strong> é o pacote mais usado do mercado pra isso: sintaxe mais simples, já entrega a resposta em JSON pronta, e trata erro de rede de forma mais direta.</p>
+        <p>Imagina que alguém cadastra um insumo pelo formulário da Aula 2, colocando isso no campo <strong>Nome</strong>:</p>
 
     <div class="code-wrap">
-      <div class="file-label"><span>terminal</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-bash">npm install axios</code></pre>
+      <div class="file-label"><span>campo "nome" do formulário</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-html">&lt;img src=&quot;x&quot; onerror=&quot;alert('Hackeado! Isso poderia roubar seus dados.')&quot;&gt;</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo npm install de sempre
+        <i class="fa-solid fa-bomb"></i> O que acontece quando a tabela carrega
       </h3>
-      <p>É o mesmo comando que já usamos pro <code>mysql2</code> (Aula 1) — o Axios só mais um pacote na pasta <code>node_modules</code>.</p>
+      <p><code>insumo.nome</code> guarda literalmente esse texto. Quando <code>carregarInsumos</code> monta a linha e joga no <code>innerHTML</code>, o navegador cria uma tag <code>&lt;img&gt;</code> de verdade. Como <code>src=&quot;x&quot;</code> não existe, o evento <code>onerror</code> dispara — e o <code>alert(...)</code> roda. Um <code>alert</code> é só pra mostrar o problema; um atacante de verdade colocaria ali algo pra roubar dado, não só mostrar uma mensagem.</p>
       
     </div>
         
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="5">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-shield-halved"></i>
+        <h1>Corrigindo com Sanitização</h1>
+        <p>escaparHtml em todo lugar que monta HTML com dado do banco</p>
       </div>
     </div>
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <h1>Axios só existe no Main</h1>
+        <h1>A Ideia: Transformar Tag em Texto</h1>
         
-        <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 6 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdvsul8">
-    <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
-    <div class="mermaid">flowchart LR
-    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
-    P --&gt;|"invoke"| M["main.js"]
-    M --&gt; BD["MySQL (Aulas 1-5)"]
-    M --&gt; FS["Sistema de arquivos (Aula 6)"]
-    M --&gt; API["API externa via Axios (hoje)"]</div>
-    <div class="bloco-diagrama-legenda">O Main agora fala com três coisas: o banco, o disco, e a internet. O caminho até ele é sempre o mesmo.</div>
-  </div>
-        
-      </div>
-    </div>
+        <p>A solução é simples: antes de colocar qualquer dado do banco dentro de <code>innerHTML</code>, trocamos os caracteres que formam tags (<code>&lt;</code>, <code>&gt;</code>, <code>&quot;</code>, <code>'</code>) pelos códigos que o navegador exibe como TEXTO, em vez de interpretar como HTML.</p>
 
-    <div class="slide topic" data-num="6">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-dollar-sign"></i>
-        <h1>Aplicando no Projeto</h1>
-        <p>Cotação do dólar nos insumos</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="6">
-      <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
-        
-        
     <div class="code-wrap">
-      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const axios = require('axios');
-
-ipcMain.handle('cotacao:buscarDolar', async () =&gt; {
-  try {
-    const resposta = await axios.get('https://economia.awesomeapi.com.br/json/last/USD-BRL');
-    return Number(resposta.data.USDBRL.bid);
-  } catch (erro) {
-    console.error('Nao consegui buscar a cotacao:', erro.message);
-    return null;
-  }
-});</code></pre>
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const escaparHtml = (texto) =&gt; String(texto)
+  .replaceAll('&amp;', '&amp;amp;')
+  .replaceAll('&lt;', '&amp;lt;')
+  .replaceAll('&gt;', '&amp;gt;')
+  .replaceAll('&quot;', '&amp;quot;')
+  .replaceAll(&quot;'&quot;, '&amp;#39;');</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> try/catch, não new Promise
+        <i class="fa-solid fa-lightbulb"></i> &lt; não é mais uma tag
       </h3>
-      <p>Igual ao <code>fs/promises</code> da Aula 6, o Axios já devolve uma Promise de verdade — usamos <code>async</code>/<code>await</code> direto, com <code>try</code>/<code>catch</code> pra tratar o caso da internet cair ou a API sair do ar. Se der erro, devolvemos <code>null</code> em vez de travar o app.</p>
+      <p>Depois de escapado, <code>&lt;img src=&quot;x&quot; onerror=&quot;...&quot;&gt;</code> vira o texto <code>&amp;lt;img src=&amp;quot;x&amp;quot; onerror=&amp;quot;...&amp;quot;&amp;gt;</code> — o navegador mostra isso como TEXTO na tela (as letras <code>&lt;img...&gt;</code> aparecendo mesmo), em vez de criar a tag de verdade.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="7">
+    <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>preload.js e a tela principal</h1>
+        <h1>Aplicando no carregarInsumos</h1>
         
         
     <div class="code-wrap">
-      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">buscarCotacaoDolar: () =&gt; ipcRenderer.invoke('cotacao:buscarDolar'),</code></pre>
-    </div>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">let cotacaoDolar = null;
-
-const carregarCotacao = async () =&gt; {
-  cotacaoDolar = await window.api.buscarCotacaoDolar();
-};
-
-carregarCotacao();</code></pre>
+      <div class="file-label"><span>src/renderer/frmPrincipal.js (corrigido)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const linhas = insumosCarregados.map((insumo) =&gt; `
+  &lt;tr&gt;
+    &lt;td&gt;${escaparHtml(insumo.tipo)}&lt;/td&gt;
+    &lt;td&gt;${escaparHtml(insumo.nome)}&lt;/td&gt;
+    &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
+  &lt;/tr&gt;
+`).join('');</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Uma variável, carregada uma vez
+        <i class="fa-solid fa-circle-info"></i> Por que formatarMoeda não precisa de escaparHtml
       </h3>
-      <p>Guardamos a cotação numa variável (igual <code>insumosCarregados</code> da Aula 3) assim que a tela principal abre — não precisamos buscar de novo a cada linha da tabela.</p>
+      <p><code>formatarMoeda(insumo.valor)</code> sempre devolve um número formatado (tipo <code>R$ 89.90</code>) — nunca um texto que veio direto do usuário sem passar por um cálculo. Só precisa escapar o que é <strong>texto livre digitado por alguém</strong>: nome, tipo, e-mail, descrição etc.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="7">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-lock"></i>
+        <h1>Uma Segunda Camada: CSP</h1>
+        <p>Content Security Policy limitando o estrago</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="7">
+      <div class="slide-content-wrapper">
+        <h1>E se Esquecermos de Escapar em Algum Lugar?</h1>
+        
+        <p>Sanitizar resolve o problema, mas depende da gente lembrar de fazer isso em TODO lugar que monta HTML com dado externo. <strong>Content Security Policy (CSP)</strong> é uma segunda camada de defesa: mesmo que um script malicioso consiga ser injetado, o navegador se recusa a executá-lo.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock"></i> Definição formal
+      </h3>
+      <p><strong>CSP</strong> é uma regra que diz ao navegador de onde ele pode carregar/executar script, estilo, imagem etc. — configurada numa tag <code>&lt;meta&gt;</code> no <code>&lt;head&gt;</code> do HTML.</p>
       
     </div>
         
@@ -467,25 +455,20 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>Mostrando o valor em dólar na tabela</h1>
+        <h1>Configurando CSP no HTML</h1>
         
-        <p>Com <code>cotacaoDolar</code> já carregada, é só dividir o <code>valor</code> (em reais) de cada insumo por ela, dentro do mesmo <code>carregarInsumos</code> da Aula 3 — reaproveitando também <code>formatarMoeda</code>.</p>
-
+        
     <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js (dentro do map de carregarInsumos)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const valorEmDolar = cotacaoDolar
-  ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
-  : '—';
-
-// na linha da tabela:
-// &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;</code></pre>
+      <div class="file-label"><span>src/renderer/frmPrincipal.html (dentro do <head>)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-html">&lt;meta http-equiv=&quot;Content-Security-Policy&quot;
+      content=&quot;default-src 'self'; script-src 'self';&quot;&gt;</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
+        <i class="fa-solid fa-triangle-exclamation"></i> script-src 'self'
       </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar), <code>cotacaoDolar</code> continua <code>null</code> — por isso o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
+      <p>Essa regra diz: "só execute script que venha dos MEUS próprios arquivos <code>.js</code> (<code>'self'</code>)". Um <code>&lt;script&gt;</code> injetado via XSS diretamente no HTML (inline) ou vindo de outro site é <strong>bloqueado</strong> pelo navegador, mesmo que a tag tenha sido criada com sucesso.</p>
       
     </div>
         
@@ -494,29 +477,34 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo da requisição</h1>
+        <h1>Sanitização x CSP: Defesas Diferentes</h1>
         
-        <div class="bloco-diagrama" id="mmdozy49">
-    <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
-    <div class="mermaid">sequenceDiagram
-    participant R as frmPrincipal.js
-    participant P as preload.js
-    participant M as main.js
-    participant API as AwesomeAPI
+        
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-shield-halved"></i> escaparHtml (sanitização)
+          </h3>
+          <p>Impede a tag maliciosa de existir na página. Ataca a <strong>causa</strong>: o dado nunca vira código.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-lock"></i> CSP
+          </h3>
+          <p>Mesmo que uma tag maliciosa exista, impede o script dela de RODAR. Ataca a <strong>consequência</strong>: um plano B se a sanitização falhar em algum lugar.</p>
+          
+        </div>
+    </div>
 
-    R-&gt;&gt;P: window.api.buscarCotacaoDolar()
-    P-&gt;&gt;M: invoke('cotacao:buscarDolar')
-    M-&gt;&gt;API: axios.get(...)
-    alt API responde
-      API--&gt;&gt;M: { USDBRL: { bid: "5.3521" } }
-      M--&gt;&gt;R: 5.3521
-    else erro de rede
-      API--&gt;&gt;M: falha
-      M--&gt;&gt;R: null
-    end
-    R-&gt;&gt;R: carregarInsumos() usa cotacaoDolar</div>
-    <div class="bloco-diagrama-legenda">Mesma forma das Aulas 2-5 e 6: preload expõe, main.js faz o trabalho pesado (agora com axios), e devolve o resultado pro renderer usar.</div>
-  </div>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-check"></i> Use os dois juntos
+      </h3>
+      <p>Nenhuma defesa sozinha é 100% à prova de erro humano. <code>escaparHtml</code> evita o ataque na maioria dos casos; CSP é a rede de segurança caso algum <code>escaparHtml</code> seja esquecido em algum canto do código.</p>
+      
+    </div>
         
       </div>
     </div>
@@ -534,16 +522,16 @@ carregarCotacao();</code></pre>
         <h1>Resumo da aula</h1>
         
         <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">MySQL x fs x API externa</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Origem do dado</th><th>Pacote/API</th><th>Onde vive no código</th></tr></thead><tbody><tr><td>Banco de dados</td><td>mysql2 (Aulas 1-5)</td><td>conexao.js + handlers no main.js</td></tr><tr><td>Disco local</td><td>fs/promises (Aula 6)</td><td>handlers no main.js</td></tr><tr><td>Servidor externo</td><td>axios (hoje)</td><td>handlers no main.js</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Os três seguem o mesmo caminho: preload expõe, ipcMain.handle executa, Renderer só recebe o resultado pronto.</div>
+    <div class="bloco-tabela-titulo">As duas defesas de hoje</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Defesa</th><th>O que faz</th><th>Onde aplicar</th></tr></thead><tbody><tr><td>escaparHtml</td><td>Troca <, >, ", ' por código de texto seguro</td><td>Todo dado de texto livre antes de ir pro innerHTML</td></tr><tr><td>CSP (meta tag)</td><td>Bloqueia execução de script fora do permitido</td><td><head> de cada HTML do projeto</td></tr></tbody></table></div>
+    
   </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>Na Aula 8 tratamos segurança em aplicações Electron — Content Security Policy (CSP) e proteção contra XSS.</p>
+      <p>Na Aula 9 organizamos o código do projeto com o padrão MVC (Model-View-Controller) aplicado ao Electron.</p>
       
     </div>
         
@@ -552,18 +540,18 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa</h1>
+        <h1>Exercício: Blindando Peça Impressa</h1>
         
         
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
+      <ol><li>Em <code>carregarPecas</code>, aplique <code>escaparHtml</code> (pode reaproveitar a MESMA função já criada pra insumo) em todo campo de texto livre da peça impressa (título, cor).</li><li>Teste o ataque: cadastre uma peça com <code>&lt;img src=&quot;x&quot; onerror=&quot;alert('XSS!')&quot;&gt;</code> no título, e confirme que, ANTES da correção, o alerta dispara.</li><li>Depois de aplicar <code>escaparHtml</code>, cadastre a mesma peça de teste de novo e confirme que agora o texto aparece na tela como texto puro, sem o alerta disparar.</li><li>Adicione a mesma tag <code>&lt;meta http-equiv=&quot;Content-Security-Policy&quot;&gt;</code> da Aula de hoje em <code>frmPeca.html</code>, <code>frmInsumo.html</code> e <code>frmPrincipal.html</code> (se ainda não tiver).</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Dica
       </h3>
-      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. Mesma ideia dos handlers de arquivo da Aula 6.</p>
+      <p><code>escaparHtml</code> não tem nada de específico de insumo ou peça — é uma função genérica de texto. Pode até mover ela pra um arquivo compartilhado se quiser evitar duplicar em <code>frmPrincipal.js</code>.</p>
       
     </div>
         
@@ -577,17 +565,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fff2d2',
-    primaryTextColor: '#10241C',
-    primaryBorderColor: '#FFB703',
-    lineColor: '#FFB703',
-    secondaryColor: '#1B4332',
+    primaryColor: '#fef3d8',
+    primaryTextColor: '#1A0A0A',
+    primaryBorderColor: '#FBBF24',
+    lineColor: '#FBBF24',
+    secondaryColor: '#450A0A',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fff2d2',
-    nodeBorder: '#FFB703',
+    mainBkg: '#fef3d8',
+    nodeBorder: '#FBBF24',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FFB703',
+    titleColor: '#FBBF24',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -597,7 +585,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9e4df'
+    cScale1: '#e8d6d6'
   }
 });
 </script>
@@ -605,7 +593,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::8';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');

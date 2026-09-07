@@ -39,16 +39,28 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+pre[class*="language-"]::-webkit-scrollbar{width:10px;}
+pre[class*="language-"]::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+pre[class*="language-"]::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+pre[class*="language-"]::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
 code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -221,9 +233,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
         
         
         <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 4</p>
@@ -286,7 +297,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
         <h1>Recapitulando</h1>
@@ -294,9 +305,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
         <h1>O que já temos</h1>
         <h2>Create e Read prontos, Update pela frente</h2>
         
@@ -322,7 +332,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-triangle-exclamation"></i>
         <h1>O Comando UPDATE e o WHERE</h1>
@@ -330,24 +340,24 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
         <h1>UPDATE: editando uma linha específica</h1>
         <h2>SET muda os dados, WHERE escolhe a linha</h2>
         <p>Pensa no UPDATE como editar um contato no seu celular: você não cria um contato novo nem apaga o antigo — abre AQUELE contato específico e troca só o que mudou. O <code>WHERE</code> é exatamente isso: ele aponta pra LINHA certa da tabela. É a primeira vez que ele aparece na disciplina — SELECT e INSERT nunca precisaram dele.</p>
 
-    <div class="file-label">UPDATE genérico</div>
-    <pre style="margin-top:0;"><code class="language-sql">UPDATE insumo
+    <div class="code-wrap">
+      <div class="file-label"><span>UPDATE genérico</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">UPDATE insumo
 SET tipo = ?, nome = ?, valor = ?, data_aquisicao = ?
 WHERE id = ?;</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
         <h1>O maior perigo do UPDATE</h1>
         
         
@@ -359,17 +369,19 @@ WHERE id = ?;</code></pre>
       <ul><li>Isso já aconteceu (e continua acontecendo) até com quem programa há anos</li><li>Bancos de produção já foram zerados por um WHERE esquecido — erro clássico, não lenda urbana</li><li>Regra de ouro: escreva o WHERE ANTES de terminar de pensar no SET</li></ul>
     </div>
 
-    <div class="file-label">comparação</div>
-    <pre style="margin-top:0;"><code class="language-sql">-- CERTO — atualiza só o insumo escolhido
+    <div class="code-wrap">
+      <div class="file-label"><span>comparação</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">-- CERTO — atualiza só o insumo escolhido
 UPDATE insumo SET valor = ? WHERE id = ?;
 
 -- ERRADO — sem WHERE, atualiza TODOS os insumos da tabela
 UPDATE insumo SET valor = ?;</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="5">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-pen"></i>
         <h1>Preparando o Botão Editar</h1>
@@ -377,34 +389,35 @@ UPDATE insumo SET valor = ?;</code></pre>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
         <h1>Criar ou Editar? O formulário precisa saber</h1>
         
         <p>É o mesmo formulário do Instagram pra editar seu perfil e pra criar um perfil novo — a tela é a mesma, só muda o que acontece quando você aperta salvar. O <code>frmInsumo.js</code> precisa de um jeito de saber em qual dos dois modos ele está.</p>
 
-    <div class="file-label">frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Duas variáveis guardam se estamos criando ou editando
+    <div class="code-wrap">
+      <div class="file-label"><span>frmInsumo.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">// Duas variáveis guardam se estamos criando ou editando
 let modoEdicao = false;
 let idEmEdicao = null;
 
 // (mais pra frente, no submit do formulário)
 // if (modoEdicao) { ...atualizarInsumo... }
 // else            { ...criarInsumo... }</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
         <h1>A coluna Ações ganha vida</h1>
         <h2>De travessão a botão de verdade</h2>
         <p>Por que guardar <code>insumosCarregados</code> numa variável? Porque quando o botão Editar for clicado, só temos o <code>id</code> da linha — precisamos ir buscar o insumo completo em algum lugar, e esse lugar é essa variável.</p>
 
-    <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">let insumosCarregados = []; // guardamos a lista pra achar o insumo certo depois
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">let insumosCarregados = []; // guardamos a lista pra achar o insumo certo depois
 
 const carregarInsumos = async () =&gt; {
   insumosCarregados = await window.api.listarInsumos();
@@ -415,7 +428,9 @@ const carregarInsumos = async () =&gt; {
       &lt;td&gt;${insumo.nome}&lt;/td&gt;
       &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
       &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
-      &lt;td&gt;&lt;button onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;&lt;/td&gt;
+      &lt;td&gt;
+        &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
+      &lt;/td&gt;
     &lt;/tr&gt;
   `).join('');
 
@@ -426,11 +441,12 @@ const editarInsumo = (id) =&gt; {
   const insumo = insumosCarregados.find((i) =&gt; i.id === id);
   window.api.editarInsumo(insumo);
 };</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-tower-broadcast"></i>
         <h1>IPC Novo: invoke/handle vs send/on</h1>
@@ -438,9 +454,8 @@ const editarInsumo = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
         <h1>Dois padrões de comunicação</h1>
         <h2>Pergunta-resposta vs aviso de mão única</h2>
         
@@ -465,12 +480,11 @@ const editarInsumo = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
         <h1>Comparando os dois padrões</h1>
         
-        <div class="bloco-diagrama" id="mmd7esdz">
+        <div class="bloco-diagrama" id="mmdeu6ai">
     <div class="bloco-diagrama-titulo">invoke/handle vs send/on</div>
     <div class="mermaid">sequenceDiagram
     participant R as Renderer
@@ -494,9 +508,8 @@ const editarInsumo = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
         <h1>O fluxo completo pra abrir a edição</h1>
         
         <ol><li>Usuário clica no botão <strong>Editar</strong> de uma linha da tabela</li><li><code>frmPrincipal.js</code> chama <code>window.api.editarInsumo(insumo)</code></li><li>Preload dispara <code>ipcRenderer.send('insumo:abrirEdicao', insumo)</code> — um aviso, sem esperar resposta</li><li><code>main.js</code> está <strong>escutando</strong> com <code>ipcMain.on</code> e chama <code>abrirModalInsumo(janelaPrincipal, insumo)</code></li><li>Quando a janela do modal termina de carregar (<code>did-finish-load</code>), o MAIN manda o insumo pro RENDERER com <code>send</code></li><li><code>frmInsumo.js</code> estava <strong>escutando</strong> com <code>on</code> — recebe o insumo e preenche o formulário sozinho</li></ol>
@@ -504,14 +517,14 @@ const editarInsumo = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
         <h1>main.js aprende a preencher o modal</h1>
         <h2>abrirModalInsumo ganha um segundo parâmetro</h2>
         
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const abrirModalInsumo = (janelaPai, insumo = null) =&gt; {
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const abrirModalInsumo = (janelaPai, insumo = null) =&gt; {
   const janelaModal = new BrowserWindow({
     width: 500,
     height: 600,
@@ -537,6 +550,7 @@ const editarInsumo = (id) =&gt; {
 ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
   abrirModalInsumo(janelaPrincipal, insumo);
 });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -549,7 +563,7 @@ ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="11">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-database"></i>
         <h1>Implementando o UPDATE</h1>
@@ -557,14 +571,14 @@ ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 11</div>
         <h1>O handler do UPDATE</h1>
         <h2>Mesma receita de sempre, com um novo <code>?</code></h2>
         
-    <div class="file-label">src/main/main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:atualizar', (evento, insumo) =&gt; {
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:atualizar', (evento, insumo) =&gt; {
   return new Promise((resolve, reject) =&gt; {
     const sql = 'UPDATE insumo SET tipo = ?, nome = ?, valor = ?, data_aquisicao = ? WHERE id = ?';
     const valores = [insumo.tipo, insumo.nome, insumo.valor, insumo.data_aquisicao, insumo.id];
@@ -578,19 +592,20 @@ ipcMain.on('insumo:abrirEdicao', (evento, insumo) =&gt; {
     });
   });
 });</code></pre>
+    </div>
 <p>Mesma receita de <code>new Promise</code> + <code>conexao.query</code> desde a Aula 2 — a única novidade é que o <code>id</code> também entra como <code>?</code>, por último no array, na mesma ordem do <code>WHERE id = ?</code>. Nunca concatene o id direto na string — mesma regra de sempre.</p>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 12</div>
         <h1>preload.js completo</h1>
         <h2>Repare qual padrão cada função usa</h2>
         
-    <div class="file-label">src/main/preload.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   // já existiam (Aulas 2 e 3) — invoke/handle
@@ -607,26 +622,35 @@ contextBridge.exposeInMainWorld('api', {
   // NOVO — invoke/handle: salva a edição (esse sim precisa do resultado)
   atualizarInsumo: (dados) =&gt; ipcRenderer.invoke('insumo:atualizar', dados)
 });</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 13</div>
         <h1>frmInsumo.js completo</h1>
         <h2>Recebe pra preencher, decide pra salvar</h2>
         
-    <div class="file-label">src/renderer/frmInsumo.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">let modoEdicao = false;
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmInsumo.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">let modoEdicao = false;
 let idEmEdicao = null;
 
-// Se o main mandar um insumo pra editar, preenche o formulário (send/on)
+// input type=&quot;date&quot; so aceita o formato aaaa-mm-dd
+const formatarData = (data) =&gt; {
+  const d = new Date(data);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  return `${d.getFullYear()}-${mes}-${dia}`;
+};
+
+// Se o main mandar um insumo pra editar, preenche o formulario (send/on)
 window.api.aoReceberInsumoParaEditar((insumo) =&gt; {
   document.querySelector('#tipo').value = insumo.tipo;
   document.querySelector('#nome').value = insumo.nome;
   document.querySelector('#valor').value = insumo.valor;
-  document.querySelector('#data_aquisicao').value = insumo.data_aquisicao;
+  document.querySelector('#data_aquisicao').value = formatarData(insumo.data_aquisicao);
 
   modoEdicao = true;
   idEmEdicao = insumo.id;
@@ -644,11 +668,20 @@ document.querySelector('#formInsumo').addEventListener('submit', async (evento) 
 
   window.close(); // fecha o modal; frmPrincipal recarrega quando o foco voltar
 });</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-calendar-days"></i> Por que precisa reformatar a data
+      </h3>
+      <p>O banco devolve <code>data_aquisicao</code> num formato que não é necessariamente <code>aaaa-mm-dd</code> — mas é exatamente esse formato que o <code>&lt;input type=&quot;date&quot;&gt;</code> exige pra preencher sozinho. Por isso o <code>frmInsumo.js</code> tem sua própria <code>formatarData</code>, diferente da do <code>frmPrincipal.js</code> (que formata pra <code>dd/mm/aaaa</code>, só pra exibição): mesma ideia, formato de saída diferente, porque o objetivo é diferente.</p>
+      
+    </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="14">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate"></i>
         <h1>Fechando o Ciclo</h1>
@@ -656,26 +689,26 @@ document.querySelector('#formInsumo').addEventListener('submit', async (evento) 
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="14">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 14</div>
         <h1>O foco resolve a lista desatualizada</h1>
         <h2>A ideia que a Aula 3 só cogitou, agora de verdade</h2>
         <p>A Aula 3 já tinha discutido esse problema: a lista da janela principal fica desatualizada enquanto outra janela mexe nos dados. A solução mais simples é essa — toda vez que a janela principal GANHA FOCO (por exemplo, quando o modal de edição fecha e o usuário volta pra ela), a gente recarrega a lista do zero.</p>
 
-    <div class="file-label">src/renderer/frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Recarrega a tabela sempre que a janela principal ganha foco
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">// Recarrega a tabela sempre que a janela principal ganha foco
 window.addEventListener('focus', carregarInsumos);</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="15">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 15</div>
         <h1>As duas pernas do fluxo, juntas</h1>
         
-        <div class="bloco-diagrama" id="mmdv0k06">
+        <div class="bloco-diagrama" id="mmdqo4cb">
     <div class="bloco-diagrama-titulo">Fluxo completo do Update</div>
     <div class="mermaid">sequenceDiagram
     actor U as Usuario
@@ -705,7 +738,7 @@ window.addEventListener('focus', carregarInsumos);</code></pre>
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="16">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Exercício</h1>
@@ -713,9 +746,8 @@ window.addEventListener('focus', carregarInsumos);</code></pre>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="16">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
         <h1>Exercício</h1>
         <h2>Update em Peça Impressa</h2>
         
@@ -774,6 +806,10 @@ let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=16;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
@@ -796,8 +832,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
-  sc.textContent='Slide '+(cur+1)+'/'+total;
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -825,6 +861,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

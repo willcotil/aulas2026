@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 6: Avaliação 1 — Foco: Persistência de Dados e Operações CRUD</title>
+<title>Aula 6: Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#6B2737;--color-rust:#D4A24E;
-  --color-orange:#D4A24E;--color-yellow:#D4A24E;--color-deep:#3D1420;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#1A1010;
+  --color-navy:#000;--color-blue:#0891B2;--color-rust:#F97316;
+  --color-orange:#F97316;--color-yellow:#F97316;--color-deep:#164E63;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0B1B1E;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -39,16 +39,33 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -62,12 +79,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -188,21 +206,25 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-mug-hot"></i><span>Abertura</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Relaxa, Você Já Viu Tudo Isso</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-table"></i><span>CRUD Completo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Quadro-Resumo do CRUD</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Padrão Arquitetural</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Um Padrão, Quatro Operações</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Cuidado com o WHERE</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O WHERE é o Seu Filtro</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-right-left"></i><span>send/on vs invoke/handle</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Dois Padrões de Comunicação IPC</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Exercícios de Revisão</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Exercícios — Parte 1</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-pen"></i><span>Exercícios — Parte 2</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Saindo do Banco de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Nem todo dado precisa de banco</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-folder-open"></i><span>O Módulo fs do Node</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>fs só existe no Main</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>fs/promises: sem new Promise manual</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-lines"></i><span>Relatório em .txt</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O botão Exportar Relatório</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>main.js: dialog + fs.writeFile</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Backup em .json</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que JSON pra isso</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Exportando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Importando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>O fluxo completo do backup</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: fs em Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -210,63 +232,48 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
         
         
         <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 6</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Avaliação 1 — Foco: Persistência de Dados e Operações CRUD</div>
+    <div class="bloco-agenda-titulo">Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-mug-hot"></i> Abertura</div>
-            <div class="agenda-item-texto">Hoje não tem conteúdo novo — é revisão pra prova</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Saindo do Banco de Dados</div>
+            <div class="agenda-item-texto">CRUD completo — e agora?</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-table"></i> CRUD Completo</div>
-            <div class="agenda-item-texto">As 4 operações, os comandos SQL e os canais IPC</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-folder-open"></i> O Módulo fs do Node</div>
+            <div class="agenda-item-texto">Escrever e ler arquivos, com Promises de verdade</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Padrão Arquitetural</div>
-            <div class="agenda-item-texto">O que muda e o que nunca muda entre as operações</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Cuidado com o WHERE</div>
-            <div class="agenda-item-texto">O perigo de esquecer o filtro no UPDATE/DELETE</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-lines"></i> Relatório em .txt</div>
+            <div class="agenda-item-texto">Exportando os insumos já carregados na tela</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> Backup em .json</div>
+            <div class="agenda-item-texto">Exportar e reimportar, reaproveitando o Create</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-right-left"></i> send/on vs invoke/handle</div>
-            <div class="agenda-item-texto">Quando usar cada padrão de comunicação IPC</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Exercícios — Parte 1</div>
-            <div class="agenda-item-texto">Segurança, Read, Update e Delete</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-pen"></i> Exercícios — Parte 2</div>
-            <div class="agenda-item-texto">IPC, arquitetura e mais código</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
           </div>
         </div>
     </div>
@@ -275,202 +282,345 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-mug-hot"></i>
-        <h1>Antes de começar...</h1>
-        <p>Hoje é revisão. Nenhum conceito novo — só arrumar a casa pra prova.</p>
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Saindo do Banco de Dados</h1>
+        <p>CRUD completo — e agora?</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
-        <h1>Relaxa, Você Já Viu Tudo Isso</h1>
-        <h2>O objetivo de hoje é organizar, não aprender</h2>
-        <p>Essa aula não traz nada novo. A ideia é simples: pegar tudo que vimos nas Aulas 2 a 5 sobre <code>Create</code>, <code>Read</code>, <code>Update</code> e <code>Delete</code> e deixar redondo pra Avaliação 1. Se você entendeu o padrão preload → handle → Promise → <code>conexao.query</code>, o resto é detalhe.</p>
+        <h1>Nem todo dado precisa de banco</h1>
+        
+        <p>Com o CRUD completo sobre <code>insumo</code> (Aulas 2 a 5), já sabemos guardar dado estruturado no MySQL. Mas nem tudo precisa de banco: um relatório pra imprimir, um backup pra levar pra outro computador, um arquivo de configuração — tudo isso vive bem como arquivo comum, no disco.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-clipboard-list"></i> O que cai na prova
+        <i class="fa-solid fa-folder-open"></i> Hoje: o módulo fs do Node
       </h3>
+      <p>Vamos aprender a ler e escrever arquivos locais (<code>.txt</code> e <code>.json</code>) e aplicar isso no mesmo projeto: <strong>exportar um relatório</strong> dos insumos e <strong>fazer backup</strong> deles em JSON.</p>
       
-      <ul><li>As 4 operações CRUD sobre a tabela <code>insumo</code></li><li>Os comandos SQL de cada uma (INSERT, SELECT, UPDATE, DELETE)</li><li>O padrão preload → handle → Promise → <code>conexao.query</code></li><li>A diferença entre <code>send</code>/<code>on</code> e <code>invoke</code>/<code>handle</code></li></ul>
     </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-table"></i>
-        <h1>CRUD Completo</h1>
-        <p>As 4 operações, os comandos SQL e os canais IPC</p>
+        <i class="fa-solid fa-folder-open"></i>
+        <h1>O Módulo fs do Node</h1>
+        <p>Escrever e ler arquivos, com Promises de verdade</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
-        <h1>Quadro-Resumo do CRUD</h1>
-        <h2>Revisão das Aulas 2 a 5</h2>
-        <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">As 4 operações implementadas sobre insumo</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Operação</th><th>Comando SQL</th><th>Canal IPC</th></tr></thead><tbody><tr><td>Create</td><td>INSERT INTO insumo (...) VALUES (...)</td><td>insumo:criar</td></tr><tr><td>Read</td><td>SELECT * FROM insumo</td><td>insumo:listar</td></tr><tr><td>Update</td><td>UPDATE insumo SET ... WHERE id = ?</td><td>insumo:atualizar</td></tr><tr><td>Delete</td><td>DELETE FROM insumo WHERE id = ?</td><td>insumo:excluir</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Todos os quatro handlers vivem em main.js e seguem exatamente o mesmo padrão interno.</div>
+        <h1>fs só existe no Main</h1>
+        
+        <p>Mesma lógica do <code>mysql2</code> desde a Aula 1: o Renderer roda isolado (<code>contextIsolation</code>), sem acesso direto ao sistema operacional. <code>fs</code> é uma API do Node — só existe no processo <strong>Main</strong>. Pra ler ou escrever um arquivo a pedido do usuário, o caminho continua sendo o mesmo: preload expõe, <code>ipcMain.handle</code> executa.</p>
+<div class="bloco-diagrama" id="mmdpcyt7">
+    <div class="bloco-diagrama-titulo">Mesma arquitetura, novo destino</div>
+    <div class="mermaid">flowchart LR
+    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
+    P --&gt;|"invoke"| M["main.js"]
+    M --&gt; BD["MySQL"]
+    M --&gt; FS["Sistema de arquivos (fs)"]</div>
+    <div class="bloco-diagrama-legenda">O Main agora fala com duas coisas: o banco (MySQL) e o disco (fs). O caminho até ele nunca muda.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-diagram-project"></i>
-        <h1>O Padrão Arquitetural</h1>
-        <p>O que muda, o que nunca muda entre as 4 operações</p>
+        <h1>fs/promises: sem new Promise manual</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-check"></i> Lembra do trabalho que demos com o mysql2?
+      </h3>
+      <p>Toda query precisou de um <code>new Promise</code> manual, porque o <code>mysql2</code> só tinha callback (Aula 1/2). O <code>fs</code> já vem com uma versão baseada em Promise pronta — <code>async</code>/<code>await</code> direto, sem embrulhar nada.</p>
+      
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+// escrever
+await fs.writeFile('anotacoes.txt', 'Impressora comprada em 10/03/2026');
+
+// ler (com tratamento pra arquivo inexistente)
+try {
+  const conteudo = await fs.readFile('anotacoes.txt', 'utf-8');
+  console.log(conteudo);
+} catch (erro) {
+  console.error('Nao consegui ler o arquivo:', erro.message);
+}</code></pre>
+    </div>
+        
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide topic" data-num="5">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
-        <h1>Um Padrão, Quatro Operações</h1>
-        <h2>O que muda e o que nunca muda</h2>
-        <div class="bloco-diagrama" id="mmdhk14i">
-    <div class="bloco-diagrama-titulo">Padrão arquitetural comum ao CRUD</div>
+        <i class="fa-solid fa-file-lines"></i>
+        <h1>Aplicando no Projeto: Relatório em .txt</h1>
+        <p>Exportando os insumos já carregados na tela</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>O botão Exportar Relatório</h1>
+        
+        <p>Igual ao modal de exclusão da Aula 5: os dados já estão na tela, em <code>insumosCarregados</code>. Não precisamos de uma consulta nova ao banco — só montar o texto do relatório a partir do que já temos em memória.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarRelatorio = () =&gt; {
+  const linhas = insumosCarregados.map(
+    (insumo) =&gt; `${insumo.nome} - ${formatarMoeda(insumo.valor)} - ${formatarData(insumo.data_aquisicao)}`
+  );
+
+  window.api.salvarArquivoTexto(linhas.join('\n'));
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Reaproveitando o que já existe
+      </h3>
+      <p><code>formatarMoeda</code> e <code>formatarData</code> são as mesmas funções da Aula 3 — o relatório usa exatamente o mesmo texto que já aparece formatado na tabela.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
+        <h1>main.js: dialog + fs.writeFile</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+ipcMain.handle('arquivo:salvarTexto', async (evento, conteudo) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar relatorio',
+    defaultPath: 'relatorio-insumos.txt',
+    filters: [{ name: 'Texto', extensions: ['txt'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, conteudo);
+});</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">salvarArquivoTexto: (conteudo) =&gt; ipcRenderer.invoke('arquivo:salvarTexto', conteudo),</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-window-restore"></i> dialog.showSaveDialog: revisão do semestre 1
+      </h3>
+      <p>É o mesmo <code>SaveDialog</code> visto na Aula 15 do semestre passado — deixa o USUÁRIO escolher onde salvar, em vez de fixar um caminho no código. Se ele cancelar, <code>filePath</code> some e a função simplesmente retorna.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="7">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-database"></i>
+        <h1>JSON: Backup Estruturado</h1>
+        <p>Exportar e reimportar, reaproveitando o Create</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="7">
+      <div class="slide-content-wrapper">
+        <h1>Por que JSON pra isso</h1>
+        
+        <p><code>insumosCarregados</code> já é o formato que usamos a disciplina inteira: um array de objetos. JSON é exatamente a representação em texto desse formato — por isso ele é a escolha natural pra guardar (ou transportar) esses dados fora do banco.</p>
+
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">// transforma o array de objetos em texto JSON (pra escrever no arquivo)
+JSON.stringify(insumosCarregados, null, 2);
+
+// transforma o texto JSON de volta num array de objetos (depois de ler o arquivo)
+JSON.parse(conteudo);</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        <h1>Exportando o backup</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarBackup = () =&gt; window.api.exportarBackupJson(insumosCarregados);</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:exportarJson', async (evento, dados) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar backup',
+    defaultPath: 'backup-insumos.json',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, JSON.stringify(dados, null, 2));
+});</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
+      <div class="slide-content-wrapper">
+        <h1>Importando o backup</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:importarJson', async () =&gt; {
+  const { canceled, filePaths } = await dialog.showOpenDialog(janelaPrincipal, {
+    title: 'Escolher backup',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return null;
+
+  const conteudo = await fs.readFile(filePaths[0], 'utf-8');
+  return JSON.parse(conteudo);
+});</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const importarBackup = async () =&gt; {
+  const insumosImportados = await window.api.importarBackupJson();
+  if (!insumosImportados) return; // usuario cancelou
+
+  for (const insumo of insumosImportados) {
+    await window.api.criarInsumo(insumo);
+  }
+
+  carregarInsumos(); // mesma funcao de sempre, mostra os importados
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Um id novo pra cada um
+      </h3>
+      <p><code>criarInsumo</code> faz um INSERT de verdade — cada insumo importado ganha um <strong>id novo</strong> no banco, diferente do id que tinha no backup. Pra este exercício, tudo bem: o objetivo é reaproveitar os dados, não preservar o id original.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>O fluxo completo do backup</h1>
+        
+        <div class="bloco-diagrama" id="mmdqjig3">
+    <div class="bloco-diagrama-titulo">Exportar e reimportar</div>
     <div class="mermaid">sequenceDiagram
-    participant R as Renderer
+    participant U as Usuario
+    participant R as frmPrincipal.js
     participant P as preload.js
     participant M as main.js
-    participant C as conexao.js
-    participant DB as MySQL
+    participant FS as Sistema de arquivos
+    participant BD as MySQL
 
-    R-&gt;&gt;P: window.api.operacao(dados)
-    P-&gt;&gt;M: ipcRenderer.invoke(canal, dados)
-    M-&gt;&gt;M: new Promise
-    M-&gt;&gt;C: conexao.query(sql, valores, callback)
-    C-&gt;&gt;DB: executa SQL
-    DB--&gt;&gt;C: resultado ou erro
-    C--&gt;&gt;M: callback(erro, resultado)
-    M--&gt;&gt;P: resolve ou reject
-    P--&gt;&gt;R: retorno do await</div>
-    <div class="bloco-diagrama-legenda">As 4 operações (insumo:criar, insumo:listar, insumo:atualizar, insumo:excluir) seguem exatamente essa mesma sequência.</div>
+    Note over U,BD: Exportar
+    U-&gt;&gt;R: clica em Exportar Backup
+    R-&gt;&gt;P: window.api.exportarBackupJson(insumosCarregados)
+    P-&gt;&gt;M: invoke('arquivo:exportarJson', dados)
+    M-&gt;&gt;FS: writeFile(caminho, JSON.stringify(dados))
+
+    Note over U,BD: Importar
+    U-&gt;&gt;R: clica em Importar Backup
+    R-&gt;&gt;P: window.api.importarBackupJson()
+    P-&gt;&gt;M: invoke('arquivo:importarJson')
+    M-&gt;&gt;FS: readFile(caminho)
+    FS--&gt;&gt;M: conteudo (texto JSON)
+    M--&gt;&gt;R: JSON.parse(conteudo)
+    loop cada insumo importado
+      R-&gt;&gt;M: invoke('insumo:criar', insumo)
+      M-&gt;&gt;BD: INSERT INTO insumo
+    end
+    R-&gt;&gt;R: carregarInsumos()</div>
+    <div class="bloco-diagrama-legenda">Exportar só toca o disco. Importar toca o disco pra ler, e depois volta pro caminho já conhecido do Create pra gravar cada registro.</div>
   </div>
-
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-shuffle"></i> O que muda
-          </h3>
-          
-          <ul style="margin-left:20px"><li>O comando SQL (INSERT/SELECT/UPDATE/DELETE)</li><li>O nome do canal IPC (insumo:criar, insumo:listar...)</li><li>Os parâmetros passados no array</li></ul>
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-lock"></i> O que nunca muda
-          </h3>
-          
-          <ul style="margin-left:20px"><li>A estrutura do <code>new Promise(resolve, reject)</code></li><li>Os 3 argumentos de <code>conexao.query</code> (sql, array, callback)</li><li>O tratamento erro/resultado dentro do callback</li></ul>
-        </div>
-    </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="11">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Cuidado com o WHERE</h1>
-        <p>O perigo de esquecer o filtro no UPDATE e no DELETE</p>
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Resumo e exercício em Peça Impressa</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
-        <h1>O WHERE é o Seu Filtro</h1>
-        <h2>Sem ele, UPDATE e DELETE afetam a tabela inteira</h2>
+        <h1>Resumo da aula</h1>
         
-    <div class="file-label">main.js (dentro do handle)</div>
-    <pre style="margin-top:0;"><code class="language-sql">-- CORRETO: atualiza só o insumo com esse id
-UPDATE insumo SET preco = ?, quantidade = ? WHERE id = ?;
-
--- PERIGOSO: esqueceu o WHERE!
-UPDATE insumo SET preco = ?, quantidade = ?;
--- Resultado: TODOS os insumos da tabela recebem
--- o mesmo preço e a mesma quantidade</code></pre>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Recurso x API x Uso no projeto</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Recurso</th><th>API do fs</th><th>Uso no projeto</th></tr></thead><tbody><tr><td>Relatório</td><td><code>fs.writeFile</code> (texto puro)</td><td>Lista formatada de insumos em <code>.txt</code></td></tr><tr><td>Exportar backup</td><td><code>fs.writeFile</code> + <code>JSON.stringify</code></td><td><code>insumosCarregados</code> inteiro em <code>.json</code></td></tr><tr><td>Importar backup</td><td><code>fs.readFile</code> + <code>JSON.parse</code></td><td>Reaproveita <code>criarInsumo</code> pra regravar cada um</td></tr></tbody></table></div>
+    
+  </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> Por que isso é tão perigoso?
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>O WHERE é o único filtro entre "esse registro" e "a tabela inteira". Sem ele, <code>UPDATE</code> e <code>DELETE</code> afetam TODAS as linhas — silenciosamente, sem nenhum erro.</p>
+      <p>Na Aula 7 saímos do disco local e vamos consumir uma API REST externa, com Axios.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-right-left"></i>
-        <h1>send/on vs invoke/handle</h1>
-        <p>Quando usar cada padrão de comunicação IPC</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        <h1>Dois Padrões de Comunicação IPC</h1>
-        <h2>Mão única vs pergunta-resposta</h2>
-        <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">send/on vs invoke/handle</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Característica</th><th>send / on</th><th>invoke / handle</th></tr></thead><tbody><tr><td>Direção</td><td>Mão única (main → renderer)</td><td>Pergunta-resposta (renderer pergunta, main responde)</td></tr><tr><td>Espera resposta?</td><td>Não</td><td>Sim, com await</td></tr><tr><td>Onde apareceu</td><td>Aula 4: preencher o modal de edição</td><td>Aulas 2-5: criar, listar, atualizar, excluir</td></tr><tr><td>Exemplo de canal</td><td>insumo:abrirEdicao</td><td>insumo:criar, insumo:listar, insumo:atualizar, insumo:excluir</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Regra prática: se o renderer precisa de uma resposta do banco, é invoke/handle. Se o main só precisa avisar algo, é send/on.</div>
-  </div>
+        <h1>Exercício: fs em Peça Impressa</h1>
         
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-pen"></i>
-        <h1>Exercícios de Revisão</h1>
-        <p>Preparação pra Avaliação 1</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
-        <h1>Exercícios — Parte 1</h1>
-        <h2>Segurança, Read, Update e Delete</h2>
         
-    <div class="file-label">main.js (trecho com problema)</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:criar', (event, insumo) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = `INSERT INTO insumo (nome, preco, quantidade)
-                 VALUES ('${insumo.nome}', ${insumo.preco}, ${insumo.quantidade})`;
-
-    conexao.query(sql, (erro, resultado) =&gt; {
-      if (erro) reject(erro);
-      else resolve(resultado.insertId);
-    });
-  });
-});</code></pre>
-<ol><li><strong>Segurança:</strong> o código acima tem uma falha grave. Qual é o nome dela e como você corrigiria a query?</li><li><strong>Read:</strong> o <code>SELECT * FROM insumo</code> devolve um array de objetos pro renderer. O que aconteceria se a tabela estivesse vazia? O <code>carregarInsumos</code> precisa de tratamento especial pra esse caso?</li><li><strong>Update:</strong> escreva a query UPDATE completa (com <code>?</code>) que atualiza <code>preco</code> e <code>quantidade</code> de um insumo, dado o <code>id</code>.</li><li><strong>Delete:</strong> um colega escreveu <code>DELETE FROM insumo</code> sem WHERE dentro de um handle. O que acontece quando esse handler roda? Como evitar esse erro?</li></ol>
-        
-      </div>
+    <div class="quest-list">
+      <ol><li>Adicione um botão <strong>Exportar Relatório</strong> na tela de peças, reaproveitando o array de peças já carregadas (título, cor e peso de cada uma) — mesmo padrão de <code>exportarRelatorio</code>.</li><li>Exponha <code>exportarBackupJson</code>/<code>importarBackupJson</code> no <code>preload.js</code> (podem ser as MESMAS funções genéricas já usadas pra insumo — repare que <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> no <code>main.js</code> não sabem nem precisam saber se os dados são de insumo ou de peça).</li><li>No <code>frmPrincipal.js</code>, crie <code>exportarBackupPecas</code> e <code>importarBackupPecas</code>, reaproveitando <code>criarPeca</code> pra regravar cada peça importada.</li><li>Teste o ciclo completo: exporte um backup de peças, apague uma peça de teste (Delete da Aula 5), e importe o backup de volta.</li></ol>
     </div>
 
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
-        <h1>Exercícios — Parte 2</h1>
-        <h2>IPC, arquitetura e mais código</h2>
-        <ol><li><strong>Conceitual:</strong> qual a diferença entre <code>send</code>/<code>on</code> e <code>invoke</code>/<code>handle</code>? Dê um exemplo do projeto onde cada um foi usado.</li><li><strong>Arquitetura:</strong> descreva os 4 passos que TODA operação CRUD do projeto segue, do clique do usuário até os dados voltarem pra tela.</li><li><strong>Create:</strong> escreva o <code>ipcMain.handle</code> completo pra criar um novo registro em <code>peca_impressa</code> (INSERT), seguindo o mesmo padrão usado em <code>insumo:criar</code>.</li><li><strong>Read:</strong> por que tratamos (formatamos) moeda e data em <code>frmPrincipal.js</code> em vez de mandar os dados crus do banco direto pra tela? O que passaria batido se pulássemos essa etapa?</li></ol>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Dica
+      </h3>
+      <p>Repare que os handlers <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> do <code>main.js</code> são <strong>genéricos</strong> — não têm nada de insumo ou peça no nome. Você já pode reaproveitá-los sem duplicar código nenhum no main.js.</p>
+      
+    </div>
         
       </div>
     </div></div>
@@ -482,17 +632,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#f7eedf',
-    primaryTextColor: '#1A1010',
-    primaryBorderColor: '#D4A24E',
-    lineColor: '#D4A24E',
-    secondaryColor: '#3D1420',
+    primaryColor: '#fee6d5',
+    primaryTextColor: '#0B1B1E',
+    primaryBorderColor: '#F97316',
+    lineColor: '#F97316',
+    secondaryColor: '#164E63',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#f7eedf',
-    nodeBorder: '#D4A24E',
+    mainBkg: '#fee6d5',
+    nodeBorder: '#F97316',
     clusterBkg: '#f0f4f8',
-    titleColor: '#D4A24E',
+    titleColor: '#F97316',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -502,7 +652,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#e4d8db'
+    cScale1: '#d3ebf1'
   }
 });
 </script>
@@ -515,7 +665,12 @@ let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=12;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -536,7 +691,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -564,6 +720,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

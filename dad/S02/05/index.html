@@ -48,7 +48,16 @@ strong{color:var(--color-rust);font-weight:800;}
 pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
 code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -294,8 +303,9 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         
         <p>A coluna Ações da tabela em <code>frmPrincipal.js</code> já tem o botão Editar desde a Aula 4, dentro do mesmo <code>carregarInsumos</code> que já usamos desde a Aula 3. Hoje colocamos o irmão dele ao lado, na mesma célula: o botão <strong>Excluir</strong>.</p>
 
-    <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// carregarInsumos ja existe desde a Aula 3/4 -- so adicionamos
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">// carregarInsumos ja existe desde a Aula 3/4 -- so adicionamos
 // o botao Excluir do lado do Editar, na mesma celula de Acoes
 const carregarInsumos = async () =&gt; {
   insumosCarregados = await window.api.listarInsumos();
@@ -307,20 +317,29 @@ const carregarInsumos = async () =&gt; {
       &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
       &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
       &lt;td&gt;
-        &lt;button onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
-        &lt;button onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;Excluir&lt;/button&gt;
+        &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
+        &lt;button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;Excluir&lt;/button&gt;
       &lt;/td&gt;
     &lt;/tr&gt;
   `).join('');
 
   document.querySelector('#tbodyInsumos').innerHTML = linhas;
 };</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Mesmo truque do id
       </h3>
       <p>Os dois botões pegam o id do mesmo jeito: <code>insumo.id</code>, vindo do array <code>insumosCarregados</code> que a Aula 4 já guarda na memória para busca.</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-table-cells"></i> Não esqueça do colspan
+      </h3>
+      <p>Como agora são dois botões na mesma célula, atualize o cabeçalho em <code>frmPrincipal.html</code>: <code>&lt;th&gt;Ações&lt;/th&gt;</code> vira <code>&lt;th colspan=&quot;2&quot;&gt;Ações&lt;/th&gt;</code>.</p>
       
     </div>
         
@@ -360,8 +379,9 @@ const carregarInsumos = async () =&gt; {
         <h1>O modal de confirmação</h1>
         
         
-    <div class="file-label">frmPrincipal.html</div>
-    <pre style="margin-top:0;"><code class="language-html">&lt;div class=&quot;modal fade&quot; id=&quot;modalConfirmarExclusao&quot; tabindex=&quot;-1&quot;&gt;
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-html">&lt;div class=&quot;modal fade&quot; id=&quot;modalConfirmarExclusao&quot; tabindex=&quot;-1&quot;&gt;
   &lt;div class=&quot;modal-dialog&quot;&gt;
     &lt;div class=&quot;modal-content&quot;&gt;
       &lt;div class=&quot;modal-header&quot;&gt;
@@ -386,6 +406,7 @@ const carregarInsumos = async () =&gt; {
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -430,8 +451,9 @@ const carregarInsumos = async () =&gt; {
         </div>
     </div>
 
-    <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">// Array `insumosCarregados` já existe desde a Aula 4 (busca por id)
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">// Array `insumosCarregados` já existe desde a Aula 4 (busca por id)
 let idParaExcluir = null;
 
 const abrirConfirmacaoExclusao = (id) =&gt; {
@@ -445,6 +467,7 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
   );
   modal.show();
 };</code></pre>
+    </div>
         
       </div>
     </div>
@@ -463,8 +486,10 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
         <h1>A query do Delete</h1>
         
         
-    <div class="file-label">main.js</div>
-    <pre style="margin-top:0;"><code class="language-sql">DELETE FROM insumo WHERE id = ?</code></pre>
+    <div class="code-wrap">
+      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">DELETE FROM insumo WHERE id = ?</code></pre>
+    </div>
 
     <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
       <h3>
@@ -483,8 +508,9 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
         <h1>O handler no main.js</h1>
         
         
-    <div class="file-label">main.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (evento, id) =&gt; {
+    <div class="code-wrap">
+      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (evento, id) =&gt; {
   return new Promise((resolve, reject) =&gt; {
     const sql = 'DELETE FROM insumo WHERE id = ?';
 
@@ -497,6 +523,7 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
     });
   });
 });</code></pre>
+    </div>
 <p>Mesmo padrão do Create/Read/Update: <code>new Promise</code> por fora, <code>conexao.query</code> por dentro, <code>resolve</code> no sucesso e <code>reject</code> no erro.</p>
         
       </div>
@@ -508,8 +535,9 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
         <h1>preload.js — expondo excluirInsumo</h1>
         
         
-    <div class="file-label">preload.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
+    <div class="code-wrap">
+      <div class="file-label"><span>preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
   criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo),
@@ -524,6 +552,7 @@ contextBridge.exposeInMainWorld('api', {
   aoReceberInsumoParaEditar: (callback) =&gt;
     ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo))
 });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -542,8 +571,9 @@ contextBridge.exposeInMainWorld('api', {
         <h1>frmPrincipal.js — disparando a exclusão</h1>
         
         
-    <div class="file-label">frmPrincipal.js</div>
-    <pre style="margin-top:0;"><code class="language-javascript">document.getElementById('btnConfirmarExclusao')
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">document.getElementById('btnConfirmarExclusao')
   .addEventListener('click', async () =&gt; {
     await window.api.excluirInsumo(idParaExcluir);
 
@@ -554,6 +584,7 @@ contextBridge.exposeInMainWorld('api', {
 
     carregarInsumos(); // mesma função da Aula 3
   });</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
@@ -571,7 +602,7 @@ contextBridge.exposeInMainWorld('api', {
         <div class="slide-number">Slide 10</div>
         <h1>O fluxo completo do Delete</h1>
         
-        <div class="bloco-diagrama" id="mmdkcawt">
+        <div class="bloco-diagrama" id="mmdcn6un">
     <div class="bloco-diagrama-titulo">Do clique em Excluir até a lista atualizada</div>
     <div class="mermaid">sequenceDiagram
     participant U as Usuário
@@ -724,6 +755,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

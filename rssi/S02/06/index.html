@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Consumo de API REST — Integração com Serviços Externos via Axios</title>
+<title>Aula 6: Proteção de Dados: Criptografia Simétrica e Assimétrica</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2D6A4F;--color-rust:#FFB703;
-  --color-orange:#FFB703;--color-yellow:#FFB703;--color-deep:#1B4332;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10241C;
+  --color-navy:#000;--color-blue:#3D5A80;--color-rust:#EE6C4D;
+  --color-orange:#EE6C4D;--color-yellow:#EE6C4D;--color-deep:#293241;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0F1720;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -39,33 +39,16 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
-   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
-   pre[class*="language-"] never matches anything, so background/padding/scroll
-   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
-   instead of relying on an attribute that's never actually there. */
-.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-.code-wrap pre::-webkit-scrollbar{width:10px;}
-.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
-.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
-.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
-code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
-.code-wrap{position:relative;}
-.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
-.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
-.copy-btn:hover{background:rgba(255,255,255,.32);}
-.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
-.copy-btn-float:hover{background:rgba(255,255,255,.28);}
-.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
-.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
-.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
+.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -200,27 +183,28 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>De Onde Vêm os Dados?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Um Terceiro Lugar Pra Buscar Dado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-cloud"></i><span>O que é uma API REST</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Pedindo Informação Pela Internet</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Instalando e Usando o Axios</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Por que um pacote pra isso?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Axios só existe no Main</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-dollar-sign"></i><span>Aplicando no Projeto</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O handler no main.js</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>preload.js e a tela principal</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Mostrando o valor em dólar na tabela</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>A Promessa da Aula 4</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Lembra da senha em texto puro?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-key"></i><span>O Que É Criptografia</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Cifrar e decifrar</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>Criptografia Simétrica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>A mesma chave cifra e decifra</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O problema: como combinar a chave?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-key"></i><span>Criptografia Assimétrica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Duas chaves, um par inseparável</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que não usar só assimétrica, sempre?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-handshake"></i><span>O Modelo Híbrido: HTTPS de Verdade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>O melhor dos dois mundos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Voltando à captura da Aula 4</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Simétrica x Assimétrica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Fixar</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -231,48 +215,56 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide" data-num="1">
+    <div class="slide">
       <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 01</div>
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
+        <p>Redes e Sistemas de Segurança de Informação (RSSI) — Aula 6</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Consumo de API REST — Integração com Serviços Externos via Axios</div>
+    <div class="bloco-agenda-titulo">Proteção de Dados: Criptografia Simétrica e Assimétrica</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> De Onde Vêm os Dados?</div>
-            <div class="agenda-item-texto">MySQL, fs e agora uma API externa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> A Promessa da Aula 4</div>
+            <div class="agenda-item-texto">Por que HTTPS esconderia a senha capturada</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cloud"></i> O que é uma API REST</div>
-            <div class="agenda-item-texto">Requisição, resposta, JSON</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-key"></i> O Que É Criptografia</div>
+            <div class="agenda-item-texto">Texto legível vira ilegível, e volta com a chave certa</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Instalando e Usando o Axios</div>
-            <div class="agenda-item-texto">Mesma arquitetura, novo destino</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-lock"></i> Criptografia Simétrica</div>
+            <div class="agenda-item-texto">Uma única chave — rápida, mas com um problema</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dollar-sign"></i> Aplicando no Projeto</div>
-            <div class="agenda-item-texto">Cotação do dólar nos insumos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-key"></i> Criptografia Assimétrica</div>
+            <div class="agenda-item-texto">Par de chaves pública/privada</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-handshake"></i> O Modelo Híbrido: HTTPS de Verdade</div>
+            <div class="agenda-item-texto">Como os dois se combinam na prática</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
+          <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
-            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
+            <div class="agenda-item-texto">Resumo comparativo e prévia da Aula 7</div>
           </div>
         </div>
     </div>
@@ -281,290 +273,250 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide topic" data-num="2">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
-        <h1>De Onde Vêm os Dados?</h1>
-        <p>MySQL, fs e agora uma API externa</p>
+        <h1>A Promessa da Aula 4</h1>
+        <p>Por que HTTPS esconderia a senha capturada</p>
       </div>
     </div>
 
-    <div class="slide" data-num="2">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Um Terceiro Lugar Pra Buscar Dado</h1>
+        <div class="slide-number">Slide 02</div>
+        <h1>Lembra da senha em texto puro?</h1>
         
-        <p>Até aqui, nosso app já sabe buscar dado em dois lugares: o <strong>MySQL</strong> (Aulas 1 a 5, dado que a gente mesmo criou e controla) e o <strong>disco local</strong> (Aula 6, arquivos <code>.txt</code>/<code>.json</code> no computador do usuário). Hoje entra um terceiro: um <strong>servidor de outra empresa</strong>, na internet, que a gente não controla — só consome.</p>
+        <p>Na demonstração ao vivo da Aula 4, capturamos <code>GET /login?usuario=aluno&amp;senha=SenhaSecreta123</code> inteiro, legível, na captura do atacante. Na hora, prometemos: "se fosse HTTPS, essa captura não mostraria nada legível". Hoje entendemos exatamente por quê.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-cloud"></i> Hoje: consumir uma API REST externa
+        <i class="fa-solid fa-key"></i> A resposta é criptografia
       </h3>
-      <p>Vamos buscar a <strong>cotação do dólar</strong> numa API pública e gratuita, e usar isso no Gerenciador de Peças 3D — afinal, boa parte dos insumos de impressão 3D (filamento importado, peças de impressora) tem preço de referência em dólar.</p>
+      <p>HTTPS nada mais é que HTTP com uma camada de <strong>criptografia</strong> por baixo (TLS). Pra entender como ela esconde a senha até de quem está no meio do caminho (MITM, Aula 3), precisamos entender os dois tipos de criptografia que existem — e por que precisamos dos dois.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="3">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-cloud"></i>
-        <h1>O que é uma API REST</h1>
-        <p>Requisição, resposta, JSON</p>
+        <i class="fa-solid fa-key"></i>
+        <h1>O Que É Criptografia</h1>
+        <p>Texto legível vira ilegível, e volta com a chave certa</p>
       </div>
     </div>
 
-    <div class="slide" data-num="3">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Pedindo Informação Pela Internet</h1>
+        <div class="slide-number">Slide 03</div>
+        <h1>Cifrar e decifrar</h1>
         
-        <p>Pensa numa API REST como um balcão de atendimento: você faz um <strong>pedido</strong> (uma URL, tipo um endereço) e recebe uma <strong>resposta</strong> — quase sempre em <strong>JSON</strong>, o mesmo formato que a gente já usa desde o semestre passado pra representar array de objetos.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>exemplo de resposta da API</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-text">GET https://economia.awesomeapi.com.br/json/last/USD-BRL
-
-Resposta (JSON):
-{
-  &quot;USDBRL&quot;: {
-    &quot;code&quot;: &quot;USD&quot;,
-    &quot;name&quot;: &quot;Dolar Americano/Real Brasileiro&quot;,
-    &quot;bid&quot;: &quot;5.3521&quot;
-  }
-}</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-circle-info"></i> bid = cotação de compra
-      </h3>
-      <p>O campo que interessa pra gente é o <code>bid</code> — a cotação atual do dólar em reais. É só um texto (<code>string</code>) com o número, então vamos precisar converter pra <code>Number</code> antes de fazer conta com ele.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="4">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plug"></i>
-        <h1>Instalando e Usando o Axios</h1>
-        <p>Mesma arquitetura, novo destino</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="4">
-      <div class="slide-content-wrapper">
-        <h1>Por que um pacote pra isso?</h1>
-        
-        <p>O JavaScript já tem um jeito nativo de fazer requisição (<code>fetch</code>), mas o <strong>Axios</strong> é o pacote mais usado do mercado pra isso: sintaxe mais simples, já entrega a resposta em JSON pronta, e trata erro de rede de forma mais direta.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>terminal</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-bash">npm install axios</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo npm install de sempre
-      </h3>
-      <p>É o mesmo comando que já usamos pro <code>mysql2</code> (Aula 1) — o Axios só mais um pacote na pasta <code>node_modules</code>.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="5">
-      <div class="slide-content-wrapper">
-        <h1>Axios só existe no Main</h1>
-        
-        <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 6 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdvsul8">
-    <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
+        <p><strong>Criptografia</strong> é o processo de transformar um texto legível (texto claro) num texto ilegível (texto cifrado), usando uma <strong>chave</strong> — e só quem tem a chave certa consegue reverter o processo e ler o conteúdo original de novo.</p>
+<div class="bloco-diagrama" id="mmdkaliu">
+    <div class="bloco-diagrama-titulo">Cifrar e decifrar</div>
     <div class="mermaid">flowchart LR
-    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
-    P --&gt;|"invoke"| M["main.js"]
-    M --&gt; BD["MySQL (Aulas 1-5)"]
-    M --&gt; FS["Sistema de arquivos (Aula 6)"]
-    M --&gt; API["API externa via Axios (hoje)"]</div>
-    <div class="bloco-diagrama-legenda">O Main agora fala com três coisas: o banco, o disco, e a internet. O caminho até ele é sempre o mesmo.</div>
+    A["Texto claro&lt;br/&gt;'senha123'"] --&gt;|"cifra com uma chave"| B["Texto cifrado&lt;br/&gt;'x9$kQ_r2!'"]
+    B --&gt;|"decifra com a chave certa"| C["Texto claro&lt;br/&gt;'senha123'"]</div>
+    <div class="bloco-diagrama-legenda">Sem a chave certa, o texto cifrado é só ruído ilegível.</div>
   </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="6">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-dollar-sign"></i>
-        <h1>Aplicando no Projeto</h1>
-        <p>Cotação do dólar nos insumos</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="6">
-      <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
-        
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const axios = require('axios');
-
-ipcMain.handle('cotacao:buscarDolar', async () =&gt; {
-  try {
-    const resposta = await axios.get('https://economia.awesomeapi.com.br/json/last/USD-BRL');
-    return Number(resposta.data.USDBRL.bid);
-  } catch (erro) {
-    console.error('Nao consegui buscar a cotacao:', erro.message);
-    return null;
-  }
-});</code></pre>
-    </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> try/catch, não new Promise
+        <i class="fa-solid fa-shield-halved"></i> Qual pilar da Aula 1 isso protege?
       </h3>
-      <p>Igual ao <code>fs/promises</code> da Aula 6, o Axios já devolve uma Promise de verdade — usamos <code>async</code>/<code>await</code> direto, com <code>try</code>/<code>catch</code> pra tratar o caso da internet cair ou a API sair do ar. Se der erro, devolvemos <code>null</code> em vez de travar o app.</p>
+      <p>Criptografia é a ferramenta técnica por trás da <strong>Confidencialidade</strong> — garantir que só quem deveria ler os dados consegue lê-los, mesmo que eles sejam interceptados no caminho (como no MITM da Aula 3).</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="7">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
-        <h1>preload.js e a tela principal</h1>
-        
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">buscarCotacaoDolar: () =&gt; ipcRenderer.invoke('cotacao:buscarDolar'),</code></pre>
+        <i class="fa-solid fa-lock"></i>
+        <h1>Criptografia Simétrica</h1>
+        <p>Uma única chave — rápida, mas com um problema</p>
+      </div>
     </div>
 
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">let cotacaoDolar = null;
-
-const carregarCotacao = async () =&gt; {
-  cotacaoDolar = await window.api.buscarCotacaoDolar();
-};
-
-carregarCotacao();</code></pre>
-    </div>
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 04</div>
+        <h1>A mesma chave cifra e decifra</h1>
+        
+        <p>Pensa num cofre com uma única chave: quem guarda algo lá dentro e quem vai pegar depois precisam ter uma cópia <strong>da mesma chave</strong>. É exatamente assim que funciona a criptografia simétrica — o algoritmo mais usado hoje é o <strong>AES</strong> (Advanced Encryption Standard).</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Uma variável, carregada uma vez
+        <i class="fa-solid fa-bolt"></i> Ponto forte: velocidade
       </h3>
-      <p>Guardamos a cotação numa variável (igual <code>insumosCarregados</code> da Aula 3) assim que a tela principal abre — não precisamos buscar de novo a cada linha da tabela.</p>
+      <p>Criptografia simétrica é <strong>rápida e leve</strong> — ideal pra cifrar grandes volumes de dados o tempo todo, como o tráfego inteiro de uma conexão HTTPS depois que ela já foi estabelecida.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="8">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Mostrando o valor em dólar na tabela</h1>
+        <div class="slide-number">Slide 05</div>
+        <h1>O problema: como combinar a chave?</h1>
         
-        <p>Com <code>cotacaoDolar</code> já carregada, é só dividir o <code>valor</code> (em reais) de cada insumo por ela, dentro do mesmo <code>carregarInsumos</code> da Aula 3 — reaproveitando também <code>formatarMoeda</code>.</p>
+        <p>Se as duas partes precisam da MESMA chave antes de começar a se comunicar com segurança, como uma manda essa chave pra outra pela rede, sem que alguém consiga interceptar a própria chave no meio do caminho?</p>
 
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js (dentro do map de carregarInsumos)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const valorEmDolar = cotacaoDolar
-  ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
-  : '—';
-
-// na linha da tabela:
-// &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;</code></pre>
-    </div>
-
-    <div class="focus-box">
+    <div class="focus-box" style="border-color:#EE6C4D;border-left-color:#EE6C4D;">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
+        <i class="fa-solid fa-user-secret"></i> O fantasma do MITM (Aula 3) está de volta
       </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar), <code>cotacaoDolar</code> continua <code>null</code> — por isso o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
+      <p>Se você manda a chave secreta em texto puro pela rede, um atacante posicionado no meio (exatamente como no ARP spoofing da Aula 3/4) simplesmente <strong>copia a chave</strong> enquanto ela passa — e a partir daí lê tudo que for cifrado com ela. Criptografia simétrica sozinha não resolve esse problema — só o adia.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="9">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo da requisição</h1>
+        <i class="fa-solid fa-key"></i>
+        <h1>Criptografia Assimétrica</h1>
+        <p>Par de chaves pública/privada</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 06</div>
+        <h1>Duas chaves, um par inseparável</h1>
         
-        <div class="bloco-diagrama" id="mmdozy49">
-    <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
+        <p>Criptografia assimétrica usa um <strong>par de chaves matematicamente ligadas</strong>: uma <strong>pública</strong> (pode ser espalhada livremente, sem medo) e uma <strong>privada</strong> (fica guardada, nunca sai do dono). O algoritmo mais conhecido é o <strong>RSA</strong>.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock-open"></i> Analogia: o cadeado aberto
+      </h3>
+      <p>A chave pública é como um <strong>cadeado aberto</strong> que você distribui pra qualquer um: qualquer pessoa pode pegar esse cadeado e fechar uma caixa com ele. Mas só quem tem a <strong>chave privada</strong> correspondente consegue abrir essa caixa de novo. Não importa quem intercepte o cadeado (chave pública) no caminho — sem a chave privada, ele não abre nada.</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-check"></i> Resolve o problema da distribuição
+      </h3>
+      <p>Ninguém precisa combinar segredo nenhum antes: a chave pública pode ser vista por todo mundo, inclusive por um atacante no meio do caminho — e isso não compromete a segurança.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 07</div>
+        <h1>Por que não usar só assimétrica, sempre?</h1>
+        
+        <p>Se a assimétrica resolve o problema da simétrica, por que não abandonar a simétrica de vez?</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-hourglass-half"></i> O preço: velocidade
+      </h3>
+      <p>As operações matemáticas por trás da criptografia assimétrica são <strong>muito mais pesadas</strong> computacionalmente que as da simétrica. Cifrar o tráfego inteiro de uma conexão só com RSA seria lento demais pra ser prático.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-handshake"></i>
+        <h1>O Modelo Híbrido: HTTPS de Verdade</h1>
+        <p>Como os dois se combinam na prática</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 08</div>
+        <h1>O melhor dos dois mundos</h1>
+        
+        <p>O HTTPS não escolhe entre simétrica e assimétrica — ele usa <strong>as duas</strong>, cada uma no momento certo: a assimétrica resolve o problema de combinar uma chave em segurança; a simétrica cuida do volume de tráfego, rápido, dali em diante.</p>
+<div class="bloco-diagrama" id="mmdcwtu7">
+    <div class="bloco-diagrama-titulo">Handshake simplificado do HTTPS/TLS</div>
     <div class="mermaid">sequenceDiagram
-    participant R as frmPrincipal.js
-    participant P as preload.js
-    participant M as main.js
-    participant API as AwesomeAPI
+    participant C as Vitima (navegador)
+    participant S as Servidor real
 
-    R-&gt;&gt;P: window.api.buscarCotacaoDolar()
-    P-&gt;&gt;M: invoke('cotacao:buscarDolar')
-    M-&gt;&gt;API: axios.get(...)
-    alt API responde
-      API--&gt;&gt;M: { USDBRL: { bid: "5.3521" } }
-      M--&gt;&gt;R: 5.3521
-    else erro de rede
-      API--&gt;&gt;M: falha
-      M--&gt;&gt;R: null
-    end
-    R-&gt;&gt;R: carregarInsumos() usa cotacaoDolar</div>
-    <div class="bloco-diagrama-legenda">Mesma forma das Aulas 2-5 e 6: preload expõe, main.js faz o trabalho pesado (agora com axios), e devolve o resultado pro renderer usar.</div>
+    C-&gt;&gt;S: Ola, quero uma conexao segura
+    S-&gt;&gt;C: Aqui esta minha chave publica
+    C-&gt;&gt;C: Gera uma chave de sessao simetrica aleatoria
+    C-&gt;&gt;S: Chave de sessao, cifrada com a chave publica do servidor
+    S-&gt;&gt;S: Decifra com a chave privada -- so ele consegue
+    Note over C,S: Agora os dois tem a MESMA chave de sessao
+    C-&gt;&gt;S: Todo o trafego dali em diante, cifrado com AES (simetrica, rapida)</div>
+    <div class="bloco-diagrama-legenda">A assimétrica só aparece no início, pra combinar a chave com segurança. O resto da conversa é simétrico.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="10">
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 09</div>
+        <h1>Voltando à captura da Aula 4</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-eye-slash"></i> O que o atacante veria agora
+      </h3>
+      <p>Com HTTPS ativo, mesmo com o ARP spoofing posicionando o atacante no meio do caminho (Aula 3/4), o <code>GET /login?usuario=aluno&amp;senha=...</code> estaria cifrado com a chave de sessão simétrica — uma chave que só a vítima e o servidor real combinaram. O atacante interceptaria só ruído ilegível, não a senha.</p>
+      
+    </div>
+<p>Repare: o ARP spoofing continua funcionando exatamente igual — o atacante continua no meio do caminho. O que muda é que agora não há mais nada legível pra ele ler ali.</p>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
-        <p>Resumo e exercício em Peça Impressa</p>
+        <p>Resumo comparativo e prévia da Aula 7</p>
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Resumo da aula</h1>
+        <div class="slide-number">Slide 10</div>
+        <h1>Simétrica x Assimétrica</h1>
         
         <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">MySQL x fs x API externa</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Origem do dado</th><th>Pacote/API</th><th>Onde vive no código</th></tr></thead><tbody><tr><td>Banco de dados</td><td>mysql2 (Aulas 1-5)</td><td>conexao.js + handlers no main.js</td></tr><tr><td>Disco local</td><td>fs/promises (Aula 6)</td><td>handlers no main.js</td></tr><tr><td>Servidor externo</td><td>axios (hoje)</td><td>handlers no main.js</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Os três seguem o mesmo caminho: preload expõe, ipcMain.handle executa, Renderer só recebe o resultado pronto.</div>
+    <div class="bloco-tabela-titulo">Comparando os dois modelos</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>Simétrica</th><th>Assimétrica</th></tr></thead><tbody><tr><td>Chaves</td><td>1 única chave</td><td>Par (pública + privada)</td></tr><tr><td>Velocidade</td><td>Rápida</td><td>Lenta</td></tr><tr><td>Problema</td><td>Como combinar a chave em segurança</td><td>Nenhum pra distribuição</td></tr><tr><td>Exemplo</td><td>AES</td><td>RSA</td></tr><tr><td>Uso no HTTPS</td><td>Cifra o tráfego (volume)</td><td>Cifra só a troca da chave de sessão</td></tr></tbody></table></div>
+    
   </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>Na Aula 8 tratamos segurança em aplicações Electron — Content Security Policy (CSP) e proteção contra XSS.</p>
+      <p>Na Aula 7 vamos ver como garantir que os dados não foram alterados no caminho (hashes), como provar quem realmente enviou algo (assinaturas digitais) e como o navegador confia na chave pública de um site (certificados digitais).</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa</h1>
+        <div class="slide-number">Desafios</div>
+        <h1>Pra Fixar</h1>
         
         
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Dica
-      </h3>
-      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. Mesma ideia dos handlers de arquivo da Aula 6.</p>
-      
+      <ol><li>Por que a criptografia simétrica sozinha não resolve completamente o problema de um atacante posicionado como Man-in-the-Middle (Aula 3)?</li><li>Na analogia do cadeado aberto, o que representa a chave pública e o que representa a chave privada?</li><li>Por que o HTTPS não usa criptografia assimétrica pra cifrar o tráfego inteiro da conexão, do início ao fim?</li><li>No handshake do HTTPS, o que exatamente é cifrado com a chave pública do servidor — o tráfego inteiro, ou só a chave de sessão simétrica?</li><li>Se um atacante conseguir capturar só a chave PÚBLICA de um servidor, ele consegue decifrar o tráfego? Por quê?</li></ol>
     </div>
         
       </div>
@@ -577,17 +529,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fff2d2',
-    primaryTextColor: '#10241C',
-    primaryBorderColor: '#FFB703',
-    lineColor: '#FFB703',
-    secondaryColor: '#1B4332',
+    primaryColor: '#fce5df',
+    primaryTextColor: '#0F1720',
+    primaryBorderColor: '#EE6C4D',
+    lineColor: '#EE6C4D',
+    secondaryColor: '#293241',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fff2d2',
-    nodeBorder: '#FFB703',
+    mainBkg: '#fce5df',
+    nodeBorder: '#EE6C4D',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FFB703',
+    titleColor: '#EE6C4D',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -597,7 +549,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9e4df'
+    cScale1: '#dce1e8'
   }
 });
 </script>
@@ -605,15 +557,11 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::6';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
-// "topico" (section-divider) slides don't get their own number -- the counter only
-// tracks content slides, matching the numbering already used in the agenda sidebar.
-const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
@@ -636,8 +584,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
-  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
+  pb.style.width=((cur+1)/total*100)+'%';
+  sc.textContent='Slide '+(cur+1)+'/'+total;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -665,32 +613,6 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
-function aulagenCopiarCodigo(btn){
-  const wrap=btn.closest('.code-wrap');
-  const codeEl=wrap&&wrap.querySelector('pre code');
-  if(!codeEl)return;
-  const texto=codeEl.textContent;
-  const marcarCopiado=()=>{
-    const icon=btn.querySelector('i');
-    icon.classList.remove('fa-copy');
-    icon.classList.add('fa-check');
-    btn.classList.add('copiado');
-    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
-  };
-  const fallback=()=>{
-    const ta=document.createElement('textarea');
-    ta.value=texto;
-    ta.style.position='fixed';
-    ta.style.opacity='0';
-    document.body.appendChild(ta);
-    ta.select();
-    try{document.execCommand('copy');marcarCopiado();}catch(e){}
-    document.body.removeChild(ta);
-  };
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
-  }else fallback();
-}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

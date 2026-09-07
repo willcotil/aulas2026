@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Consumo de API REST — Integração com Serviços Externos via Axios</title>
+<title>Aula 7: Proteção de Dados: Hashes, Assinaturas Digitais e Certificados</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2D6A4F;--color-rust:#FFB703;
-  --color-orange:#FFB703;--color-yellow:#FFB703;--color-deep:#1B4332;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10241C;
+  --color-navy:#000;--color-blue:#0F5257;--color-rust:#E63946;
+  --color-orange:#E63946;--color-yellow:#E63946;--color-deep:#06282B;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0A1414;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -200,27 +200,28 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>De Onde Vêm os Dados?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Um Terceiro Lugar Pra Buscar Dado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-cloud"></i><span>O que é uma API REST</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Pedindo Informação Pela Internet</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Instalando e Usando o Axios</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Por que um pacote pra isso?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Axios só existe no Main</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-dollar-sign"></i><span>Aplicando no Projeto</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O handler no main.js</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>preload.js e a tela principal</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Mostrando o valor em dólar na tabela</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-puzzle-piece"></i><span>O Que a Cifra Sozinha Não Resolve</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Cifrar Esconde, Mas Não Prova</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-fingerprint"></i><span>Hash: a Impressão Digital do Dado</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que é um Hash</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Hash é de Mão Única</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-signature"></i><span>Assinatura Digital</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-file-signature"></i><span>Assinatura Digital</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Assinando um Documento Digitalmente</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-id-card"></i><span>Certificados Digitais</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-id-card"></i><span>Certificados Digitais</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Um Problema Que Ficou em Aberto</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Revisitando o Handshake HTTPS da Aula 6</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da Aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -235,44 +236,44 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
+        <p>Redes e Sistemas de Segurança de Informação (RSSI) — Aula 7</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Consumo de API REST — Integração com Serviços Externos via Axios</div>
+    <div class="bloco-agenda-titulo">Proteção de Dados: Hashes, Assinaturas Digitais e Certificados</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> De Onde Vêm os Dados?</div>
-            <div class="agenda-item-texto">MySQL, fs e agora uma API externa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-puzzle-piece"></i> O Que a Cifra Sozinha Não Resolve</div>
+            <div class="agenda-item-texto">Confidencialidade não é tudo</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cloud"></i> O que é uma API REST</div>
-            <div class="agenda-item-texto">Requisição, resposta, JSON</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-fingerprint"></i> Hash: a Impressão Digital do Dado</div>
+            <div class="agenda-item-texto">Verificando integridade e guardando senha</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Instalando e Usando o Axios</div>
-            <div class="agenda-item-texto">Mesma arquitetura, novo destino</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-signature"></i> Assinatura Digital</div>
+            <div class="agenda-item-texto">Invertendo o uso das chaves da Aula 6</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dollar-sign"></i> Aplicando no Projeto</div>
-            <div class="agenda-item-texto">Cotação do dólar nos insumos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-id-card"></i> Certificados Digitais</div>
+            <div class="agenda-item-texto">Quem garante que a chave pública é mesmo dela?</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
-            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
+            <div class="agenda-item-texto">Resumo e prévia da Aula 8</div>
           </div>
         </div>
     </div>
@@ -283,24 +284,24 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-rotate-left"></i>
-        <h1>De Onde Vêm os Dados?</h1>
-        <p>MySQL, fs e agora uma API externa</p>
+        <i class="fa-solid fa-puzzle-piece"></i>
+        <h1>O Que a Cifra Sozinha Não Resolve</h1>
+        <p>Confidencialidade não é tudo</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>Um Terceiro Lugar Pra Buscar Dado</h1>
+        <h1>Cifrar Esconde, Mas Não Prova</h1>
         
-        <p>Até aqui, nosso app já sabe buscar dado em dois lugares: o <strong>MySQL</strong> (Aulas 1 a 5, dado que a gente mesmo criou e controla) e o <strong>disco local</strong> (Aula 6, arquivos <code>.txt</code>/<code>.json</code> no computador do usuário). Hoje entra um terceiro: um <strong>servidor de outra empresa</strong>, na internet, que a gente não controla — só consome.</p>
+        <p>Na Aula 6, criptografia (simétrica ou assimétrica) resolveu <strong>Confidencialidade</strong>: ninguém no meio do caminho consegue LER a mensagem. Mas duas perguntas ficaram sem resposta: como eu sei que a mensagem <strong>não foi alterada</strong> no caminho (Integridade)? E como eu sei que ela <strong>realmente veio de quem diz ter mandado</strong> (Autenticidade)?</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-cloud"></i> Hoje: consumir uma API REST externa
+        <i class="fa-solid fa-signpost"></i> O roteiro de hoje
       </h3>
-      <p>Vamos buscar a <strong>cotação do dólar</strong> numa API pública e gratuita, e usar isso no Gerenciador de Peças 3D — afinal, boa parte dos insumos de impressão 3D (filamento importado, peças de impressora) tem preço de referência em dólar.</p>
       
+      <ul><li><strong>Hash:</strong> prova que o dado não mudou</li><li><strong>Assinatura digital:</strong> prova quem mandou o dado</li><li><strong>Certificado digital:</strong> prova de quem é mesmo uma chave pública</li></ul>
     </div>
         
       </div>
@@ -308,184 +309,142 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-cloud"></i>
-        <h1>O que é uma API REST</h1>
-        <p>Requisição, resposta, JSON</p>
+        <i class="fa-solid fa-fingerprint"></i>
+        <h1>Hash: a Impressão Digital do Dado</h1>
+        <p>Verificando integridade e guardando senha</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Pedindo Informação Pela Internet</h1>
+        <h1>O Que é um Hash</h1>
         
-        <p>Pensa numa API REST como um balcão de atendimento: você faz um <strong>pedido</strong> (uma URL, tipo um endereço) e recebe uma <strong>resposta</strong> — quase sempre em <strong>JSON</strong>, o mesmo formato que a gente já usa desde o semestre passado pra representar array de objetos.</p>
+        <p>Um <strong>hash</strong> é uma função que pega qualquer entrada — uma palavra, uma frase, um arquivo inteiro de 10GB — e devolve uma saída de <strong>tamanho fixo</strong>, tipo uma impressão digital daquele dado. O algoritmo mais usado hoje é o <strong>SHA-256</strong>.</p>
 
     <div class="code-wrap">
-      <div class="file-label"><span>exemplo de resposta da API</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-text">GET https://economia.awesomeapi.com.br/json/last/USD-BRL
+      <div class="file-label"><span>exemplo de hash SHA-256</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">entrada: &quot;aula de rssi&quot;
+hash:    3f4e8a2c9b1d... (sempre 64 caracteres em hexadecimal)
 
-Resposta (JSON):
-{
-  &quot;USDBRL&quot;: {
-    &quot;code&quot;: &quot;USD&quot;,
-    &quot;name&quot;: &quot;Dolar Americano/Real Brasileiro&quot;,
-    &quot;bid&quot;: &quot;5.3521&quot;
-  }
-}</code></pre>
+entrada: &quot;aula de rssi.&quot;  &lt;- so um ponto a mais no final
+hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> bid = cotação de compra
+        <i class="fa-solid fa-bolt"></i> Efeito avalanche
       </h3>
-      <p>O campo que interessa pra gente é o <code>bid</code> — a cotação atual do dólar em reais. É só um texto (<code>string</code>) com o número, então vamos precisar converter pra <code>Number</code> antes de fazer conta com ele.</p>
+      <p>Mudar UM único caractere na entrada muda o hash inteiro, de forma imprevisível. É assim que um hash detecta até a menor alteração no dado original.</p>
       
     </div>
         
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="4">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plug"></i>
-        <h1>Instalando e Usando o Axios</h1>
-        <p>Mesma arquitetura, novo destino</p>
       </div>
     </div>
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <h1>Por que um pacote pra isso?</h1>
+        <h1>Hash é de Mão Única</h1>
         
-        <p>O JavaScript já tem um jeito nativo de fazer requisição (<code>fetch</code>), mas o <strong>Axios</strong> é o pacote mais usado do mercado pra isso: sintaxe mais simples, já entrega a resposta em JSON pronta, e trata erro de rede de forma mais direta.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>terminal</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-bash">npm install axios</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo npm install de sempre
-      </h3>
-      <p>É o mesmo comando que já usamos pro <code>mysql2</code> (Aula 1) — o Axios só mais um pacote na pasta <code>node_modules</code>.</p>
-      
-    </div>
+        <p>Diferente da criptografia da Aula 6, hash <strong>não tem "decifrar"</strong>. Não existe operação pra pegar o hash e voltar pro texto original — e essa é uma característica proposital, não uma limitação.</p>
+<div class="bloco-diagrama" id="mmdum869">
+    <div class="bloco-diagrama-titulo">Verificando integridade de um arquivo baixado</div>
+    <div class="mermaid">flowchart LR
+    A["Arquivo original no servidor"] --&gt; H1["Hash publicado pelo site"]
+    A -."voce baixa".-&gt; B["Arquivo baixado no seu PC"]
+    B --&gt; H2["Voce calcula o hash localmente"]
+    H1 --&gt; C{"H1 = H2?"}
+    H2 --&gt; C
+    C -- Sim --&gt; D["Arquivo integro, nao foi alterado"]
+    C -- Nao --&gt; E["Arquivo corrompido ou adulterado"]</div>
+    <div class="bloco-diagrama-legenda">Sites de download sérios publicam o hash do arquivo oficial ao lado do link — exatamente pra você poder conferir a integridade depois de baixar.</div>
+  </div>
         
       </div>
     </div>
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <h1>Axios só existe no Main</h1>
+        <h1>Guardando Senha: Nunca em Texto Puro</h1>
         
-        <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 6 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdvsul8">
-    <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
-    <div class="mermaid">flowchart LR
-    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
-    P --&gt;|"invoke"| M["main.js"]
-    M --&gt; BD["MySQL (Aulas 1-5)"]
-    M --&gt; FS["Sistema de arquivos (Aula 6)"]
-    M --&gt; API["API externa via Axios (hoje)"]</div>
-    <div class="bloco-diagrama-legenda">O Main agora fala com três coisas: o banco, o disco, e a internet. O caminho até ele é sempre o mesmo.</div>
-  </div>
+        <p>Lembra da Aula 4, capturando uma senha em texto puro via HTTP? Agora pensa no lado do SERVIDOR: se o banco de dados de um site guardar a senha dos usuários como texto puro, um vazamento (tipo o caso Equifax da Aula 1) expõe TODAS as senhas de uma vez.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-database"></i> A prática correta
+      </h3>
+      <p>O servidor guarda só o <strong>hash</strong> da senha, nunca a senha em si. No login, ele calcula o hash da senha digitada e compara com o hash guardado — nunca precisa saber a senha de verdade.</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> E o salt?
+      </h3>
+      <p>Se duas pessoas usam a mesma senha ("123456"), o hash delas seria idêntico — um atacante com uma lista pronta de hashes comuns (rainbow table) quebraria as duas de uma vez. O <strong>salt</strong> é um valor aleatório extra, diferente pra cada usuário, somado à senha antes do hash — assim, mesmo senhas iguais geram hashes diferentes.</p>
+      
+    </div>
         
       </div>
     </div>
 
     <div class="slide topic" data-num="6">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-dollar-sign"></i>
-        <h1>Aplicando no Projeto</h1>
-        <p>Cotação do dólar nos insumos</p>
+        <i class="fa-solid fa-file-signature"></i>
+        <h1>Assinatura Digital</h1>
+        <p>Invertendo o uso das chaves da Aula 6</p>
       </div>
     </div>
 
     <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
+        <h1>Assinando um Documento Digitalmente</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const axios = require('axios');
-
-ipcMain.handle('cotacao:buscarDolar', async () =&gt; {
-  try {
-    const resposta = await axios.get('https://economia.awesomeapi.com.br/json/last/USD-BRL');
-    return Number(resposta.data.USDBRL.bid);
-  } catch (erro) {
-    console.error('Nao consegui buscar a cotacao:', erro.message);
-    return null;
-  }
-});</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> try/catch, não new Promise
-      </h3>
-      <p>Igual ao <code>fs/promises</code> da Aula 6, o Axios já devolve uma Promise de verdade — usamos <code>async</code>/<code>await</code> direto, com <code>try</code>/<code>catch</code> pra tratar o caso da internet cair ou a API sair do ar. Se der erro, devolvemos <code>null</code> em vez de travar o app.</p>
-      
-    </div>
+        <p>Uma assinatura digital combina os dois conceitos de hoje: calcula o <strong>hash</strong> da mensagem, e depois <strong>cifra esse hash</strong> com a chave assimétrica da Aula 6 — mas de um jeito diferente do que vimos lá.</p>
+<ol><li>Quem envia calcula o hash da mensagem original</li><li>Cifra esse hash com a <strong>sua própria chave PRIVADA</strong></li><li>Envia a mensagem original + o hash cifrado (a "assinatura")</li></ol>
         
       </div>
     </div>
 
     <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>preload.js e a tela principal</h1>
+        <h1>A Inversão Que Faz Toda Diferença</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">buscarCotacaoDolar: () =&gt; ipcRenderer.invoke('cotacao:buscarDolar'),</code></pre>
-    </div>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">let cotacaoDolar = null;
-
-const carregarCotacao = async () =&gt; {
-  cotacaoDolar = await window.api.buscarCotacaoDolar();
-};
-
-carregarCotacao();</code></pre>
-    </div>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Confidencialidade x Autenticidade: qual chave cifra o quê</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Objetivo</th><th>Cifra com...</th><th>Só quem decifra</th></tr></thead><tbody><tr><td>Confidencialidade (Aula 6)</td><td>chave PÚBLICA do destinatário</td><td>o destinatário, com sua chave privada</td></tr><tr><td>Autenticidade (hoje)</td><td>chave PRIVADA do remetente</td><td>qualquer um, com a chave pública do remetente</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">Na Aula 6, só o dono da chave privada consegue LER. Na assinatura, qualquer um consegue LER (verificar) — mas só o dono da chave privada conseguiu GERAR aquilo.</div>
+  </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Uma variável, carregada uma vez
+        <i class="fa-solid fa-check-double"></i> Verificando a assinatura
       </h3>
-      <p>Guardamos a cotação numa variável (igual <code>insumosCarregados</code> da Aula 3) assim que a tela principal abre — não precisamos buscar de novo a cada linha da tabela.</p>
+      <p>Quem recebe decifra o hash usando a chave PÚBLICA do remetente, calcula o hash da mensagem recebida, e compara os dois. Se baterem: a mensagem não foi alterada (integridade) E só quem tem aquela chave privada poderia ter cifrado aquele hash (autenticidade + não-repúdio — o remetente não pode negar depois).</p>
       
     </div>
         
       </div>
     </div>
 
+    <div class="slide topic" data-num="8">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-id-card"></i>
+        <h1>Certificados Digitais</h1>
+        <p>Quem garante que a chave pública é mesmo dela?</p>
+      </div>
+    </div>
+
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>Mostrando o valor em dólar na tabela</h1>
+        <h1>Um Problema Que Ficou em Aberto</h1>
         
-        <p>Com <code>cotacaoDolar</code> já carregada, é só dividir o <code>valor</code> (em reais) de cada insumo por ela, dentro do mesmo <code>carregarInsumos</code> da Aula 3 — reaproveitando também <code>formatarMoeda</code>.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js (dentro do map de carregarInsumos)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const valorEmDolar = cotacaoDolar
-  ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
-  : '—';
-
-// na linha da tabela:
-// &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;</code></pre>
-    </div>
+        <p>Assinatura digital resolve autenticidade <strong>se</strong> você já sabe qual é a chave pública verdadeira da outra pessoa. Mas e se um atacante, num ataque Man-in-the-Middle (Aula 3), te entregar a PRÓPRIA chave pública dele, se passando pelo site verdadeiro?</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
+        <i class="fa-solid fa-user-secret"></i> Conectando ao MITM da Aula 3
       </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar), <code>cotacaoDolar</code> continua <code>null</code> — por isso o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
+      <p>Sem um jeito de confirmar a chave pública, um Evil Twin ou um MITM poderia trocar a chave pública real por uma falsa no meio do caminho — e você nunca saberia.</p>
       
     </div>
         
@@ -494,77 +453,75 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo da requisição</h1>
+        <h1>Autoridade Certificadora (CA)</h1>
         
-        <div class="bloco-diagrama" id="mmdozy49">
-    <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
-    <div class="mermaid">sequenceDiagram
-    participant R as frmPrincipal.js
-    participant P as preload.js
-    participant M as main.js
-    participant API as AwesomeAPI
-
-    R-&gt;&gt;P: window.api.buscarCotacaoDolar()
-    P-&gt;&gt;M: invoke('cotacao:buscarDolar')
-    M-&gt;&gt;API: axios.get(...)
-    alt API responde
-      API--&gt;&gt;M: { USDBRL: { bid: "5.3521" } }
-      M--&gt;&gt;R: 5.3521
-    else erro de rede
-      API--&gt;&gt;M: falha
-      M--&gt;&gt;R: null
-    end
-    R-&gt;&gt;R: carregarInsumos() usa cotacaoDolar</div>
-    <div class="bloco-diagrama-legenda">Mesma forma das Aulas 2-5 e 6: preload expõe, main.js faz o trabalho pesado (agora com axios), e devolve o resultado pro renderer usar.</div>
+        <p>Um <strong>certificado digital</strong> é um arquivo que junta a identidade de alguém (ex: o domínio <code>banco.com</code>) com a chave pública dessa entidade — e é <strong>assinado digitalmente</strong> por uma <strong>Autoridade Certificadora (CA)</strong>, uma organização confiável que verificou essa identidade antes de assinar.</p>
+<div class="bloco-diagrama" id="mmdkyj5x">
+    <div class="bloco-diagrama-titulo">Cadeia de confiança</div>
+    <div class="mermaid">flowchart TD
+    CA["Autoridade Certificadora (CA)"] --&gt;|"verifica identidade e assina"| CERT["Certificado: dominio + chave publica + assinatura da CA"]
+    CERT --&gt;|"apresentado pelo"| SITE["Site/servidor"]
+    NAV["Seu navegador"] --&gt;|"ja confia nas CAs conhecidas"| CA
+    NAV --&gt;|"verifica a assinatura do certificado"| CERT</div>
+    <div class="bloco-diagrama-legenda">O navegador já vem com uma lista de CAs em quem confia. Se o certificado foi assinado por uma delas, o navegador aceita a chave pública dentro do certificado como legítima — daí o cadeado.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="10">
+    <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Fechando</h1>
-        <p>Resumo e exercício em Peça Impressa</p>
+        <h1>Revisitando o Handshake HTTPS da Aula 6</h1>
+        
+        <p>Na Aula 6, o handshake do HTTPS/TLS cifrava a chave de sessão com "a chave pública do site" — sem explicar de onde vinha a certeza de que aquela chave pública era mesmo do site. Agora fecha o ciclo: o navegador só aceita essa chave pública porque ela veio dentro de um <strong>certificado válido</strong>, assinado por uma CA confiável.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock"></i> O cadeado do navegador, explicado
+      </h3>
+      <p>Quando o navegador mostra o cadeado, ele já verificou: o certificado foi assinado por uma CA confiável, o domínio bate, e o certificado não expirou. Um certificado inválido ou autoassinado (sem CA confiável) dispara aquele aviso de "conexão não é segura".</p>
+      
+    </div>
+        
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide topic" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>Resumo da aula</h1>
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Resumo e prévia da Aula 8</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>Resumo da Aula</h1>
         
         <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">MySQL x fs x API externa</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Origem do dado</th><th>Pacote/API</th><th>Onde vive no código</th></tr></thead><tbody><tr><td>Banco de dados</td><td>mysql2 (Aulas 1-5)</td><td>conexao.js + handlers no main.js</td></tr><tr><td>Disco local</td><td>fs/promises (Aula 6)</td><td>handlers no main.js</td></tr><tr><td>Servidor externo</td><td>axios (hoje)</td><td>handlers no main.js</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Os três seguem o mesmo caminho: preload expõe, ipcMain.handle executa, Renderer só recebe o resultado pronto.</div>
+    <div class="bloco-tabela-titulo">Hash x Assinatura x Certificado</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Mecanismo</th><th>O que prova</th><th>Exemplo de uso</th></tr></thead><tbody><tr><td>Hash</td><td>Integridade (o dado não mudou)</td><td>Verificar arquivo baixado, guardar senha</td></tr><tr><td>Assinatura digital</td><td>Integridade + Autenticidade + Não-repúdio</td><td>Confirmar quem enviou/assinou algo</td></tr><tr><td>Certificado digital</td><td>De quem é mesmo uma chave pública</td><td>Cadeado do navegador (HTTPS)</td></tr></tbody></table></div>
+    
   </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>Na Aula 8 tratamos segurança em aplicações Electron — Content Security Policy (CSP) e proteção contra XSS.</p>
+      <p>Na Aula 8 saímos da proteção de dados e entramos em defesa de perímetro: firewalls, IDS/IPS e VPNs.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa</h1>
+        <h1>Exercícios</h1>
         
         
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Dica
-      </h3>
-      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. Mesma ideia dos handlers de arquivo da Aula 6.</p>
-      
+      <ol><li>Um site publica o hash SHA-256 de um instalador ao lado do link de download. Explique, em suas palavras, pra que serve esse hash e o que você faria com ele depois de baixar o arquivo.</li><li>Por que armazenar senha como hash (em vez de texto puro) reduz o estrago de um vazamento de banco de dados como o da Aula 1 (caso Equifax)?</li><li>O que é um salt e por que ele impede que duas senhas iguais gerem o mesmo hash?</li><li>Na assinatura digital, por que quem assina usa a própria chave PRIVADA, e não a chave pública do destinatário (como fizemos pra confidencialidade na Aula 6)?</li><li>Se um atacante conseguisse forjar um certificado digital válido pra um site de banco, que tipo de ataque da Aula 3 isso viabilizaria? Explique a conexão.</li><li>Explique com suas palavras por que o cadeado do navegador depende de uma Autoridade Certificadora, e não só da chave pública do próprio site.</li></ol>
     </div>
         
       </div>
@@ -577,17 +534,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fff2d2',
-    primaryTextColor: '#10241C',
-    primaryBorderColor: '#FFB703',
-    lineColor: '#FFB703',
-    secondaryColor: '#1B4332',
+    primaryColor: '#fbdbde',
+    primaryTextColor: '#0A1414',
+    primaryBorderColor: '#E63946',
+    lineColor: '#E63946',
+    secondaryColor: '#06282B',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fff2d2',
-    nodeBorder: '#FFB703',
+    mainBkg: '#fbdbde',
+    nodeBorder: '#E63946',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FFB703',
+    titleColor: '#E63946',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -597,7 +554,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9e4df'
+    cScale1: '#d4e0e1'
   }
 });
 </script>
@@ -605,7 +562,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::7';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
@@ -613,7 +570,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
+const totalConteudo=12;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){

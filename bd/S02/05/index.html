@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Consumo de API REST — Integração com Serviços Externos via Axios</title>
+<title>Aula 5: SQL: Instalação, Conexão e Primeiro Acesso ao SGBD</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2D6A4F;--color-rust:#FFB703;
-  --color-orange:#FFB703;--color-yellow:#FFB703;--color-deep:#1B4332;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10241C;
+  --color-navy:#000;--color-blue:#1B3B5F;--color-rust:#2E86AB;
+  --color-orange:#2E86AB;--color-yellow:#2E86AB;--color-deep:#0D1F30;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#101418;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -39,33 +39,16 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
-   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
-   pre[class*="language-"] never matches anything, so background/padding/scroll
-   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
-   instead of relying on an attribute that's never actually there. */
-.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-.code-wrap pre::-webkit-scrollbar{width:10px;}
-.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
-.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
-.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
-code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
-.code-wrap{position:relative;}
-.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
-.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
-.copy-btn:hover{background:rgba(255,255,255,.32);}
-.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
-.copy-btn-float:hover{background:rgba(255,255,255,.28);}
-.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
-.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
-.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
+.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -200,27 +183,31 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Banco de Dados</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>De Onde Vêm os Dados?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Um Terceiro Lugar Pra Buscar Dado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-cloud"></i><span>O que é uma API REST</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Pedindo Informação Pela Internet</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Instalando e Usando o Axios</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Por que um pacote pra isso?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Axios só existe no Main</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-dollar-sign"></i><span>Aplicando no Projeto</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O handler no main.js</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>preload.js e a tela principal</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Mostrando o valor em dólar na tabela</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Da Teoria pra Prática</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Já sabemos desenhar. Hoje começamos a criar.</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-download"></i><span>Instalando o SGBD</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>SGBD x Cliente: duas coisas diferentes</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Instalando no Windows</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Instalando no Linux (e o caso do MariaDB)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Primeiro Acesso Local</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-server"></i><span>O Servidor da Escola</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Um Servidor Pronto, Não o Seu Computador</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Conectando no Servidor da Escola</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>CREATE DATABASE Existe... Mas Não Pra Vocês, Por Enquanto</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-compass"></i><span>Primeiros Comandos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>SHOW DATABASES;</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>USE: Entrando no Seu Banco</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>SHOW TABLES: Relacionando Tuplas com Tabelas</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Saindo do SGBD</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Resumo dos Comandos de Hoje</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Fixar</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -231,48 +218,49 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide" data-num="1">
+    <div class="slide">
       <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 01</div>
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
+        <p>Banco de Dados (BD) — Aula 5</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Consumo de API REST — Integração com Serviços Externos via Axios</div>
+    <div class="bloco-agenda-titulo">SQL: Instalação, Conexão e Primeiro Acesso ao SGBD</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> De Onde Vêm os Dados?</div>
-            <div class="agenda-item-texto">MySQL, fs e agora uma API externa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Da Teoria pra Prática</div>
+            <div class="agenda-item-texto">Do DER no papel pro banco de dados de verdade</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cloud"></i> O que é uma API REST</div>
-            <div class="agenda-item-texto">Requisição, resposta, JSON</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Instalando e Usando o Axios</div>
-            <div class="agenda-item-texto">Mesma arquitetura, novo destino</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-download"></i> Instalando o SGBD</div>
+            <div class="agenda-item-texto">Windows, Linux e o caso do MariaDB</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
+          <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dollar-sign"></i> Aplicando no Projeto</div>
-            <div class="agenda-item-texto">Cotação do dólar nos insumos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-server"></i> O Servidor da Escola</div>
+            <div class="agenda-item-texto">Suas credenciais de acesso</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-compass"></i> Primeiros Comandos</div>
+            <div class="agenda-item-texto">Navegando na conta da escola</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(17)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
-            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
+            <div class="agenda-item-texto">Resumo dos comandos e prévia da Aula 6</div>
           </div>
         </div>
     </div>
@@ -281,290 +269,335 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide topic" data-num="2">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
-        <h1>De Onde Vêm os Dados?</h1>
-        <p>MySQL, fs e agora uma API externa</p>
+        <h1>Da Teoria pra Prática</h1>
+        <p>Do DER no papel pro banco de dados de verdade</p>
       </div>
     </div>
 
-    <div class="slide" data-num="2">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Um Terceiro Lugar Pra Buscar Dado</h1>
+        <div class="slide-number">Slide 02</div>
+        <h1>Já sabemos desenhar. Hoje começamos a criar.</h1>
         
-        <p>Até aqui, nosso app já sabe buscar dado em dois lugares: o <strong>MySQL</strong> (Aulas 1 a 5, dado que a gente mesmo criou e controla) e o <strong>disco local</strong> (Aula 6, arquivos <code>.txt</code>/<code>.json</code> no computador do usuário). Hoje entra um terceiro: um <strong>servidor de outra empresa</strong>, na internet, que a gente não controla — só consome.</p>
+        <p>Nas Aulas 1 a 3 aprendemos a <strong>desenhar</strong> um banco de dados corretamente — entidades, atributos, chaves, e as três formas normais garantindo que ele não tenha redundância nem anomalia. Isso tudo viveu no papel (ou no DER). A partir de hoje, esse modelo vira um <strong>banco de dados de verdade</strong>, rodando num SGBD.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-cloud"></i> Hoje: consumir uma API REST externa
+        <i class="fa-solid fa-signpost"></i> O caminho das próximas aulas
       </h3>
-      <p>Vamos buscar a <strong>cotação do dólar</strong> numa API pública e gratuita, e usar isso no Gerenciador de Peças 3D — afinal, boa parte dos insumos de impressão 3D (filamento importado, peças de impressora) tem preço de referência em dólar.</p>
       
+      <ul><li><strong>Hoje (Aula 5):</strong> instalar o SGBD e aprender a se conectar nele</li><li><strong>Aula 6 em diante:</strong> <code>CREATE TABLE</code> — transformar cada entidade do DER numa tabela de verdade</li></ul>
     </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="3">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-cloud"></i>
-        <h1>O que é uma API REST</h1>
-        <p>Requisição, resposta, JSON</p>
+        <i class="fa-solid fa-download"></i>
+        <h1>Instalando o SGBD</h1>
+        <p>Windows, Linux e o caso do MariaDB</p>
       </div>
     </div>
 
-    <div class="slide" data-num="3">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Pedindo Informação Pela Internet</h1>
+        <div class="slide-number">Slide 03</div>
+        <h1>SGBD x Cliente: duas coisas diferentes</h1>
         
-        <p>Pensa numa API REST como um balcão de atendimento: você faz um <strong>pedido</strong> (uma URL, tipo um endereço) e recebe uma <strong>resposta</strong> — quase sempre em <strong>JSON</strong>, o mesmo formato que a gente já usa desde o semestre passado pra representar array de objetos.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>exemplo de resposta da API</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-text">GET https://economia.awesomeapi.com.br/json/last/USD-BRL
-
-Resposta (JSON):
-{
-  &quot;USDBRL&quot;: {
-    &quot;code&quot;: &quot;USD&quot;,
-    &quot;name&quot;: &quot;Dolar Americano/Real Brasileiro&quot;,
-    &quot;bid&quot;: &quot;5.3521&quot;
-  }
-}</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-circle-info"></i> bid = cotação de compra
-      </h3>
-      <p>O campo que interessa pra gente é o <code>bid</code> — a cotação atual do dólar em reais. É só um texto (<code>string</code>) com o número, então vamos precisar converter pra <code>Number</code> antes de fazer conta com ele.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="4">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plug"></i>
-        <h1>Instalando e Usando o Axios</h1>
-        <p>Mesma arquitetura, novo destino</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="4">
-      <div class="slide-content-wrapper">
-        <h1>Por que um pacote pra isso?</h1>
-        
-        <p>O JavaScript já tem um jeito nativo de fazer requisição (<code>fetch</code>), mas o <strong>Axios</strong> é o pacote mais usado do mercado pra isso: sintaxe mais simples, já entrega a resposta em JSON pronta, e trata erro de rede de forma mais direta.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>terminal</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-bash">npm install axios</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo npm install de sempre
-      </h3>
-      <p>É o mesmo comando que já usamos pro <code>mysql2</code> (Aula 1) — o Axios só mais um pacote na pasta <code>node_modules</code>.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="5">
-      <div class="slide-content-wrapper">
-        <h1>Axios só existe no Main</h1>
-        
-        <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 6 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdvsul8">
-    <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
+        <p>O <strong>MySQL Server</strong> é o SGBD em si — o programa que roda em segundo plano, guarda os dados de verdade no disco e sabe executar comandos SQL. Ele sozinho não tem tela nenhuma. Pra conversar com ele, usamos um <strong>cliente</strong> — hoje, o cliente de <strong>linha de comando</strong> que já vem junto da instalação.</p>
+<div class="bloco-diagrama" id="mmd84ow0">
+    <div class="bloco-diagrama-titulo">Quem fala com quem</div>
     <div class="mermaid">flowchart LR
-    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
-    P --&gt;|"invoke"| M["main.js"]
-    M --&gt; BD["MySQL (Aulas 1-5)"]
-    M --&gt; FS["Sistema de arquivos (Aula 6)"]
-    M --&gt; API["API externa via Axios (hoje)"]</div>
-    <div class="bloco-diagrama-legenda">O Main agora fala com três coisas: o banco, o disco, e a internet. O caminho até ele é sempre o mesmo.</div>
+    V["Voce, digitando comandos SQL"] --&gt; C["Cliente mysql (linha de comando)"]
+    C --&gt;|"conexao"| S["MySQL Server (SGBD)"]
+    S --&gt; D["Dados gravados no disco"]</div>
+    <div class="bloco-diagrama-legenda">O cliente e o servidor podem ate estar na mesma maquina, mas sao dois programas diferentes conversando entre si.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="6">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-dollar-sign"></i>
-        <h1>Aplicando no Projeto</h1>
-        <p>Cotação do dólar nos insumos</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="6">
-      <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
+        <div class="slide-number">Slide 04</div>
+        <h1>Instalando no Windows</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const axios = require('axios');
-
-ipcMain.handle('cotacao:buscarDolar', async () =&gt; {
-  try {
-    const resposta = await axios.get('https://economia.awesomeapi.com.br/json/last/USD-BRL');
-    return Number(resposta.data.USDBRL.bid);
-  } catch (erro) {
-    console.error('Nao consegui buscar a cotacao:', erro.message);
-    return null;
-  }
-});</code></pre>
-    </div>
+        <p>No Windows, o jeito mais direto é usar o instalador oficial da Oracle, o <strong>MySQL Installer</strong>.</p>
+<ol><li>Baixe o MySQL Installer em <code>dev.mysql.com/downloads/installer</code></li><li>Na tela "Choosing a Setup Type", escolha <strong>Server only</strong> — é só o SGBD que precisamos por enquanto</li><li>Na etapa "Accounts and Roles", defina a senha do usuário <strong>root</strong> — anote ela, vamos precisar dela já já</li><li>Finalize a instalação: o Installer já configura o MySQL Server como um <strong>serviço do Windows</strong>, que liga sozinho com o sistema</li><li>Pra usar o cliente de linha de comando, abra o <strong>MySQL Command Line Client</strong> instalado junto (ou qualquer terminal, chamando <code>mysql</code> diretamente)</li></ol>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> try/catch, não new Promise
+        <i class="fa-solid fa-circle-info"></i> Um instalador só, dois programas
       </h3>
-      <p>Igual ao <code>fs/promises</code> da Aula 6, o Axios já devolve uma Promise de verdade — usamos <code>async</code>/<code>await</code> direto, com <code>try</code>/<code>catch</code> pra tratar o caso da internet cair ou a API sair do ar. Se der erro, devolvemos <code>null</code> em vez de travar o app.</p>
+      <p>O MySQL Installer já traz os dois programas do diagrama anterior: o SGBD (MySQL Server) e o cliente de linha de comando.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="7">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>preload.js e a tela principal</h1>
+        <div class="slide-number">Slide 05</div>
+        <h1>Instalando no Linux (e o caso do MariaDB)</h1>
         
         
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">buscarCotacaoDolar: () =&gt; ipcRenderer.invoke('cotacao:buscarDolar'),</code></pre>
-    </div>
+    
+    <pre><code class="language-bash"># Debian/Ubuntu
+sudo apt install mysql-server
 
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">let cotacaoDolar = null;
+# Arch Linux e varias distros atuais
+sudo pacman -S mariadb</code></pre>
 
-const carregarCotacao = async () =&gt; {
-  cotacaoDolar = await window.api.buscarCotacaoDolar();
-};
-
-carregarCotacao();</code></pre>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-info"></i> MySQL ou MariaDB?
+      </h3>
+      <p>Boa parte das distribuições Linux de hoje — incluindo o Arch — não distribui mais o MySQL original da Oracle. No lugar, oferece o <strong>MariaDB</strong>: um fork de código aberto do MySQL, mantido pela comunidade, compatível nos comandos SQL que vamos usar nesta disciplina. Na prática, muda só o nome do pacote instalado.</p>
+      
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Uma variável, carregada uma vez
+        <i class="fa-solid fa-triangle-exclamation"></i> O comando mysql pode virar mariadb
       </h3>
-      <p>Guardamos a cotação numa variável (igual <code>insumosCarregados</code> da Aula 3) assim que a tela principal abre — não precisamos buscar de novo a cada linha da tabela.</p>
+      <p>A partir da versão 11 do MariaDB, o cliente de linha de comando foi renomeado de <code>mysql</code> pra <code>mariadb</code>. O <code>mysql</code> ainda funciona (por compatibilidade), mas pode aparecer um aviso dizendo que esse nome está obsoleto. Pode ignorar — todo comando que vamos aprender funciona igual nos dois.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="8">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Mostrando o valor em dólar na tabela</h1>
+        <div class="slide-number">Slide 06</div>
+        <h1>Primeiro Acesso Local</h1>
         
-        <p>Com <code>cotacaoDolar</code> já carregada, é só dividir o <code>valor</code> (em reais) de cada insumo por ela, dentro do mesmo <code>carregarInsumos</code> da Aula 3 — reaproveitando também <code>formatarMoeda</code>.</p>
+        
+    
+    <pre><code class="language-bash">mysql -u root -p</code></pre>
+<p>O terminal pede a senha (a que você definiu na instalação). Digitada certinho, o prompt muda pra <code>mysql&gt;</code> — sinal de que você está DENTRO do SGBD.</p>
 
-    <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js (dentro do map de carregarInsumos)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const valorEmDolar = cotacaoDolar
-  ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
-  : '—';
+    
+    <pre><code class="language-text">Enter password: ********
 
-// na linha da tabela:
-// &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;</code></pre>
-    </div>
+Welcome to the MySQL monitor...
+
+mysql&gt;</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
+        <i class="fa-solid fa-check"></i> mysql> é o novo terminal
       </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar), <code>cotacaoDolar</code> continua <code>null</code> — por isso o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
+      <p>A partir daqui, tudo que você digitar é interpretado como comando SQL (ou comando do próprio cliente) — não é mais o terminal do sistema operacional.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="9">
+    <div class="slide topic">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo da requisição</h1>
-        
-        <div class="bloco-diagrama" id="mmdozy49">
-    <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
-    <div class="mermaid">sequenceDiagram
-    participant R as frmPrincipal.js
-    participant P as preload.js
-    participant M as main.js
-    participant API as AwesomeAPI
+        <i class="fa-solid fa-server"></i>
+        <h1>O Servidor da Escola</h1>
+        <p>Nas aulas, vamos usar uma conta já pronta</p>
+      </div>
+    </div>
 
-    R-&gt;&gt;P: window.api.buscarCotacaoDolar()
-    P-&gt;&gt;M: invoke('cotacao:buscarDolar')
-    M-&gt;&gt;API: axios.get(...)
-    alt API responde
-      API--&gt;&gt;M: { USDBRL: { bid: "5.3521" } }
-      M--&gt;&gt;R: 5.3521
-    else erro de rede
-      API--&gt;&gt;M: falha
-      M--&gt;&gt;R: null
-    end
-    R-&gt;&gt;R: carregarInsumos() usa cotacaoDolar</div>
-    <div class="bloco-diagrama-legenda">Mesma forma das Aulas 2-5 e 6: preload expõe, main.js faz o trabalho pesado (agora com axios), e devolve o resultado pro renderer usar.</div>
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 07</div>
+        <h1>Um Servidor Pronto, Não o Seu Computador</h1>
+        
+        <p>A instalação que acabamos de ver é pra você ter no seu próprio computador. Mas, nas aulas, em vez de criar um banco do zero na sua máquina, vamos nos conectar direto — pelo terminal <code>mysql</code> do Linux do laboratório — no <strong>servidor de banco de dados da escola</strong>. Cada aluno já tem uma conta padrão criada lá, sem precisar instalar nada além do cliente.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Exemplo de credenciais (fictícias — não são as suas de verdade)</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Dado</th><th>Valor de exemplo</th><th>Como é formado</th></tr></thead><tbody><tr><td>Endereço do servidor</td><td><code>143.106.241.4</code></td><td>fixo, é o mesmo pra escola inteira</td></tr><tr><td>Usuário</td><td><code>cl231234</code></td><td><code>cl</code> + o seu RA</td></tr><tr><td>Senha</td><td><code>cl*03072008</code></td><td><code>cl</code> + <code>*</code> + sua data de nascimento, sem barras</td></tr><tr><td>Banco de dados</td><td><code>cl231234</code></td><td>igual ao nome do usuário</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Troque pelos SEUS dados
+      </h3>
+      <p>RA <code>231234</code> e nascimento <code>03/07/2008</code> são só um exemplo pra explicar o padrão — não existem de verdade. Na hora de conectar, troque pelo seu RA e sua data de nascimento reais.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 08</div>
+        <h1>Conectando no Servidor da Escola</h1>
+        
+        
+    
+    <pre><code class="language-bash">mysql -h 143.106.241.4 -u cl231234 -p</code></pre>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Cada parte do comando</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Parte</th><th>Significado</th></tr></thead><tbody><tr><td><code>-h 143.106.241.4</code></td><td>endereço do servidor — obrigatório agora, porque ele não está na sua própria máquina</td></tr><tr><td><code>-u cl231234</code></td><td>seu usuário (<code>cl</code> + RA)</td></tr><tr><td><code>-p</code></td><td>avisa que vamos digitar senha (<code>cl</code> + <code>*</code> + data de nascimento sem barras)</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-info"></i> Sem -h, era localhost
+      </h3>
+      <p>Lá na instalação local, sem o <code>-h</code>, o cliente assumia que o servidor estava na própria máquina (<code>localhost</code>). Agora que o servidor está numa máquina remota, o <code>-h</code> com o IP passa a ser obrigatório.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 09</div>
+        <h1>CREATE DATABASE Existe... Mas Não Pra Vocês, Por Enquanto</h1>
+        
+        
+    
+    <pre><code class="language-sql">CREATE DATABASE nome_do_banco;</code></pre>
+<p>Esse comando cria um banco de dados novo e vazio — é o que você usaria na sua instalação local, pra começar um projeto do zero.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Sem permissão no servidor da escola
+      </h3>
+      <p>A conta de vocês no servidor da escola já vem com um banco pronto — o banco com o mesmo nome do usuário (cl + RA). Só que essa conta <strong>não tem permissão pra criar nem apagar bancos</strong> nesse servidor. Se tentar rodar <code>CREATE DATABASE</code>, o SGBD recusa com um erro de permissão — e é proposital: numa aplicação de verdade, cada usuário só deve poder mexer no que é dele.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-compass"></i>
+        <h1>Primeiros Comandos</h1>
+        <p>Já conectados na conta da escola — hora de navegar</p>
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 10</div>
+        <h1>SHOW DATABASES;</h1>
+        
+        <p>Conectados na conta de vocês, o primeiro comando lista os bancos que essa conta enxerga.</p>
+
+    
+    <pre><code class="language-sql">SHOW DATABASES;</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Não esqueça do ;
+      </h3>
+      <p>No cliente de linha de comando, todo comando só executa quando o SGBD encontra o <code>;</code> no final. Repare que ele aparece em <code>SHOW DATABASES;</code>, em <code>USE cl231234;</code> e em <code>SHOW TABLES;</code> — os três próximos comandos. Esquecer o <code>;</code> é o erro mais comum de quem está começando: o terminal fica esperando você continuar digitando.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 11</div>
+        <h1>USE: Entrando no Seu Banco</h1>
+        
+        <p>Diferente da instalação local, aqui vocês não vão criar o banco — ele já existe, com o mesmo nome do usuário. <code>USE</code> entra nele.</p>
+
+    
+    <pre><code class="language-sql">USE cl231234;</code></pre>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Convenção: MAIÚSCULO pras palavras-chave
+      </h3>
+      <p><code>CREATE</code>, <code>USE</code>, <code>SHOW</code> são palavras-chave do SQL — a convenção que vamos seguir a disciplina inteira é escrever palavra-chave em MAIÚSCULO e nome de banco/tabela em minúsculo.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 12</div>
+        <h1>SHOW TABLES: Relacionando Tuplas com Tabelas</h1>
+        
+        
+    
+    <pre><code class="language-sql">SHOW TABLES;</code></pre>
+<p>Lá nas Aulas 1 a 3, uma <strong>tupla</strong> era uma ocorrência de uma entidade — uma linha específica de dados. Agora que estamos dentro de um SGBD de verdade, dá pra traduzir isso direto: cada <strong>tabela</strong> (o que <code>SHOW TABLES</code> lista) é o recipiente que guarda essas tuplas.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Do modelo conceitual pro SGBD</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Conceito (Aulas 1-3)</th><th>Equivalente no SGBD</th></tr></thead><tbody><tr><td>Entidade</td><td>Tabela</td></tr><tr><td>Atributo</td><td>Coluna</td></tr><tr><td>Tupla</td><td>Linha (registro)</td></tr></tbody></table></div>
+    
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="10">
+    <div class="slide">
+      <div class="slide-content-wrapper">
+        <div class="slide-number">Slide 13</div>
+        <h1>Saindo do SGBD</h1>
+        
+        
+    
+    <pre><code class="language-sql">quit;
+-- ou
+exit;</code></pre>
+<p>Os dois fazem a mesma coisa: fecham a conexão e devolvem você pro terminal do sistema operacional. O banco de dados continua existindo no servidor, mesmo depois que você sai.</p>
+        
+      </div>
+    </div>
+
+    <div class="slide topic">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
-        <p>Resumo e exercício em Peça Impressa</p>
+        <p>Resumo dos comandos e prévia da Aula 6</p>
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Resumo da aula</h1>
+        <div class="slide-number">Slide 14</div>
+        <h1>Resumo dos Comandos de Hoje</h1>
         
         <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">MySQL x fs x API externa</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Origem do dado</th><th>Pacote/API</th><th>Onde vive no código</th></tr></thead><tbody><tr><td>Banco de dados</td><td>mysql2 (Aulas 1-5)</td><td>conexao.js + handlers no main.js</td></tr><tr><td>Disco local</td><td>fs/promises (Aula 6)</td><td>handlers no main.js</td></tr><tr><td>Servidor externo</td><td>axios (hoje)</td><td>handlers no main.js</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Os três seguem o mesmo caminho: preload expõe, ipcMain.handle executa, Renderer só recebe o resultado pronto.</div>
+    <div class="bloco-tabela-titulo">Comando x O que faz</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Comando</th><th>O que faz</th></tr></thead><tbody><tr><td><code>mysql -h ip -u usuario -p</code></td><td>Conecta num servidor MySQL/MariaDB remoto via linha de comando</td></tr><tr><td><code>SHOW DATABASES;</code></td><td>Lista os bancos de dados que a conta enxerga</td></tr><tr><td><code>USE nome;</code></td><td>Passa a trabalhar dentro desse banco</td></tr><tr><td><code>SHOW TABLES;</code></td><td>Lista as tabelas do banco atual</td></tr><tr><td><code>CREATE DATABASE nome;</code></td><td>Cria um banco novo — funciona na instalação local, não no servidor da escola</td></tr><tr><td><code>quit;</code> / <code>exit;</code></td><td>Sai do cliente, volta pro terminal</td></tr></tbody></table></div>
+    
   </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>Na Aula 8 tratamos segurança em aplicações Electron — Content Security Policy (CSP) e proteção contra XSS.</p>
+      <p>Na Aula 6 vamos usar <code>CREATE TABLE</code> pra transformar as entidades que já sabemos modelar em tabelas de verdade, com seus tipos de dados.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa</h1>
+        <div class="slide-number">Desafios</div>
+        <h1>Pra Fixar</h1>
         
         
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Dica
-      </h3>
-      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. Mesma ideia dos handlers de arquivo da Aula 6.</p>
-      
+      <ol><li>Instale o MySQL Server (Windows) ou o MariaDB (Linux) na sua própria máquina e conecte localmente com <code>mysql -u root -p</code>, só pra praticar a instalação.</li><li>Conecte no servidor da escola: <code>mysql -h 143.106.241.4 -u</code> seguido do seu usuário (<code>cl</code> + seu RA) e <code>-p</code>, usando sua senha real (<code>cl</code> + <code>*</code> + sua data de nascimento sem barras).</li><li>Rode <code>SHOW DATABASES;</code> e identifique, na lista, o banco com o mesmo nome do seu usuário.</li><li>Entre nesse banco com <code>USE</code> e rode <code>SHOW TABLES;</code> em seguida — o que aparece?</li><li>Tente rodar <code>CREATE DATABASE teste;</code> nesse mesmo servidor e descreva o erro que aparece. Por que isso acontece?</li></ol>
     </div>
         
       </div>
@@ -577,17 +610,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fff2d2',
-    primaryTextColor: '#10241C',
-    primaryBorderColor: '#FFB703',
-    lineColor: '#FFB703',
-    secondaryColor: '#1B4332',
+    primaryColor: '#d9e9f0',
+    primaryTextColor: '#101418',
+    primaryBorderColor: '#2E86AB',
+    lineColor: '#2E86AB',
+    secondaryColor: '#0D1F30',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fff2d2',
-    nodeBorder: '#FFB703',
+    mainBkg: '#d9e9f0',
+    nodeBorder: '#2E86AB',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FFB703',
+    titleColor: '#2E86AB',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -597,7 +630,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9e4df'
+    cScale1: '#d6dce2'
   }
 });
 </script>
@@ -605,15 +638,11 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
+const STORAGE_KEY='aulagen_slide::BancodeDados::5';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
-// "topico" (section-divider) slides don't get their own number -- the counter only
-// tracks content slides, matching the numbering already used in the agenda sidebar.
-const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
@@ -636,8 +665,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
-  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
+  pb.style.width=((cur+1)/total*100)+'%';
+  sc.textContent='Slide '+(cur+1)+'/'+total;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -665,32 +694,6 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
-function aulagenCopiarCodigo(btn){
-  const wrap=btn.closest('.code-wrap');
-  const codeEl=wrap&&wrap.querySelector('pre code');
-  if(!codeEl)return;
-  const texto=codeEl.textContent;
-  const marcarCopiado=()=>{
-    const icon=btn.querySelector('i');
-    icon.classList.remove('fa-copy');
-    icon.classList.add('fa-check');
-    btn.classList.add('copiado');
-    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
-  };
-  const fallback=()=>{
-    const ta=document.createElement('textarea');
-    ta.value=texto;
-    ta.style.position='fixed';
-    ta.style.opacity='0';
-    document.body.appendChild(ta);
-    ta.select();
-    try{document.execCommand('copy');marcarCopiado();}catch(e){}
-    document.body.removeChild(ta);
-  };
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
-  }else fallback();
-}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);
