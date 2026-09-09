@@ -39,16 +39,24 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
 .code-wrap{position:relative;}
 .copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
 .copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
@@ -203,16 +211,17 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Por que nunca excluir direto no clique</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Um clique não pode ser tudo que separa você de perder um dado</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O modal de confirmação</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-bolt"></i><span>Preenchendo o modal sem IPC</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Por que a exclusão não precisa de send/on</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>DELETE SQL parametrizado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>A query do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Do clique em Confirmar até a lista atualizada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>preload.js — expondo excluirInsumo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>frmPrincipal.js — disparando a exclusão</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>O fluxo completo do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-circle-check"></i><span>CRUD completo e exercício final</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Delete em peca_impressa</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Uma peça que falta: o JS do Bootstrap</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-bolt"></i><span>Preenchendo o modal sem IPC</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Por que a exclusão não precisa de send/on</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>DELETE SQL parametrizado</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>A query do Delete</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Do clique em Confirmar até a lista atualizada</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>preload.js — expondo excluirInsumo</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>frmPrincipal.js — disparando a exclusão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O fluxo completo do Delete</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-circle-check"></i><span>CRUD completo e exercício final</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Delete em peca_impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -223,9 +232,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
         
         
         <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 5</p>
@@ -254,28 +262,28 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
             <div class="agenda-item-texto">Delete é destrutivo e irreversível</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-bolt"></i> Preenchendo o modal sem IPC</div>
             <div class="agenda-item-texto">Os dados já estão na tela</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> DELETE SQL parametrizado</div>
             <div class="agenda-item-texto">A query e o perigo do DELETE sem WHERE</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
           <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Do clique em Confirmar até a lista atualizada</div>
             <div class="agenda-item-texto">Handler, preload e recarregamento</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
           <div class="agenda-numero">07</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-circle-check"></i> CRUD completo e exercício final</div>
@@ -288,7 +296,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando o ciclo CRUD</h1>
@@ -296,9 +304,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
         <h1>O botão Excluir</h1>
         
         <p>A coluna Ações da tabela em <code>frmPrincipal.js</code> já tem o botão Editar desde a Aula 4, dentro do mesmo <code>carregarInsumos</code> que já usamos desde a Aula 3. Hoje colocamos o irmão dele ao lado, na mesma célula: o botão <strong>Excluir</strong>.</p>
@@ -346,7 +353,7 @@ const carregarInsumos = async () =&gt; {
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-triangle-exclamation"></i>
         <h1>Por que nunca excluir direto no clique?</h1>
@@ -354,9 +361,8 @@ const carregarInsumos = async () =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
         <h1>Um clique não pode ser tudo que separa você de perder um dado</h1>
         
         <p>Já apagou sem querer uma conversa, uma foto ou o save de um jogo e ficou sem volta? Um botão Excluir que já dispara o DELETE no clique é exatamente isso — só que agora é o insumo de um cliente de verdade que some.</p>
@@ -373,9 +379,8 @@ const carregarInsumos = async () =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
         <h1>O modal de confirmação</h1>
         
         
@@ -419,7 +424,33 @@ const carregarInsumos = async () =&gt; {
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>Uma peça que falta: o JS do Bootstrap</h1>
+        
+        <p>Até agora usamos o Bootstrap só pelo <strong>CSS</strong> — classes como <code>table-striped</code>, <code>btn-danger</code>, <code>modal fade</code> — carregado no <code>&lt;head&gt;</code> de <code>frmPrincipal.html</code> desde o semestre passado. Mas <code>new bootstrap.Modal(...)</code>, que vamos usar já já pra abrir esse modal via JavaScript, é outra coisa: é código do <strong>JS</strong> do Bootstrap, e ele só existe na página se o arquivo certo estiver referenciado.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-html">&lt;!-- perto do fim do &lt;body&gt;, depois do HTML da pagina --&gt;
+
+&lt;!-- NOVO -- sem isso, o objeto &quot;bootstrap&quot; nao existe no JS --&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;frmPrincipal.js&quot;&gt;&lt;/script&gt;</code></pre>
+    </div>
+
+    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> "bootstrap is not defined"
+      </h3>
+      <p>Esquecer esse <code>&lt;script&gt;</code> não quebra o HTML nem o CSS — a página carrega normal, o modal até aparece estilizado se você abrir ele "na unha". O erro só aparece no clique em Excluir, no console: <code>Uncaught ReferenceError: bootstrap is not defined</code>, porque <code>new bootstrap.Modal(...)</code> tenta usar um objeto que não existe.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="6">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-bolt"></i>
         <h1>Preenchendo o modal: sem IPC</h1>
@@ -427,9 +458,8 @@ const carregarInsumos = async () =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
         <h1>Por que a exclusão não precisa de send/on</h1>
         
         
@@ -459,11 +489,11 @@ let idParaExcluir = null;
 const abrirConfirmacaoExclusao = (id) =&gt; {
   const insumo = insumosCarregados.find((item) =&gt; item.id === id);
 
-  document.getElementById('nomeInsumoExcluir').textContent = insumo.nome;
+  document.querySelector('#nomeInsumoExcluir').textContent = insumo.nome;
   idParaExcluir = id;
 
   const modal = new bootstrap.Modal(
-    document.getElementById('modalConfirmarExclusao')
+    document.querySelector('#modalConfirmarExclusao')
   );
   modal.show();
 };</code></pre>
@@ -472,7 +502,7 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-database"></i>
         <h1>DELETE SQL parametrizado</h1>
@@ -480,9 +510,8 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
         <h1>A query do Delete</h1>
         
         
@@ -502,9 +531,8 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
         <h1>O handler no main.js</h1>
         
         
@@ -529,9 +557,8 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
         <h1>preload.js — expondo excluirInsumo</h1>
         
         
@@ -565,20 +592,19 @@ contextBridge.exposeInMainWorld('api', {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
         <h1>frmPrincipal.js — disparando a exclusão</h1>
         
         
     <div class="code-wrap">
       <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">document.getElementById('btnConfirmarExclusao')
+      <pre style="margin-top:0;"><code class="language-javascript">document.querySelector('#btnConfirmarExclusao')
   .addEventListener('click', async () =&gt; {
     await window.api.excluirInsumo(idParaExcluir);
 
     const modal = bootstrap.Modal.getInstance(
-      document.getElementById('modalConfirmarExclusao')
+      document.querySelector('#modalConfirmarExclusao')
     );
     modal.hide();
 
@@ -597,12 +623,11 @@ contextBridge.exposeInMainWorld('api', {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
         <h1>O fluxo completo do Delete</h1>
         
-        <div class="bloco-diagrama" id="mmdcn6un">
+        <div class="bloco-diagrama" id="mmdx9how">
     <div class="bloco-diagrama-titulo">Do clique em Excluir até a lista atualizada</div>
     <div class="mermaid">sequenceDiagram
     participant U as Usuário
@@ -628,9 +653,8 @@ contextBridge.exposeInMainWorld('api', {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 11</div>
         <h1>CRUD completo!</h1>
         
         <p>Com o Delete de hoje, o Gerenciador de Peças 3D fecha o ciclo <strong>CRUD completo</strong> sobre <code>insumo</code> — sempre pelo mesmo caminho: preload → handle → Promise → <code>conexao.query</code>.</p>
@@ -651,9 +675,8 @@ contextBridge.exposeInMainWorld('api', {
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
         <h1>Exercício: Delete em peca_impressa</h1>
         
         
@@ -704,6 +727,10 @@ let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=13;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
@@ -726,8 +753,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
-  sc.textContent='Slide '+(cur+1)+'/'+total;
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
