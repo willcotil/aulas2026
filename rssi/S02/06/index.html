@@ -39,16 +39,33 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -193,18 +210,27 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Lembra da senha em texto puro?</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-key"></i><span>O Que É Criptografia</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Cifrar e decifrar</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>Criptografia Simétrica</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>A mesma chave cifra e decifra</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O problema: como combinar a chave?</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-key"></i><span>Criptografia Assimétrica</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Duas chaves, um par inseparável</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que não usar só assimétrica, sempre?</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-handshake"></i><span>O Modelo Híbrido: HTTPS de Verdade</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>O melhor dos dois mundos</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Voltando à captura da Aula 4</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Simétrica x Assimétrica</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Fixar</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-landmark"></i><span>Um Pouco de História</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Antes dos Computadores: A Máquina Enigma</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Alan Turing e Bletchley Park</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>A Máquina Bombe e a Brecha do Enigma</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>O Jogo da Imitação</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>Criptografia Simétrica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>A mesma chave cifra e decifra</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Exemplo Visual: Cifra de César (Simétrica)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Experimente: Cifra de César Interativa</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O problema: como combinar a chave?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-key"></i><span>Criptografia Assimétrica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Duas chaves, um par inseparável</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>O Que É o RSA, De Verdade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Exemplo Visual: Mini-RSA (Assimétrica)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Por que não usar só assimétrica, sempre?</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><i class="fa-solid fa-handshake"></i><span>O Modelo Híbrido: HTTPS de Verdade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>O melhor dos dois mundos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>Voltando à captura da Aula 4</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>Simétrica x Assimétrica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="25" onclick="showSlide(25);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Fixar</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -215,9 +241,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
         
         
         <p>Redes e Sistemas de Segurança de Informação (RSSI) — Aula 6</p>
@@ -242,26 +267,33 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
         <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-landmark"></i> Um Pouco de História</div>
+            <div class="agenda-item-texto">Enigma, Alan Turing, a Bombe e O Jogo da Imitação</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-lock"></i> Criptografia Simétrica</div>
             <div class="agenda-item-texto">Uma única chave — rápida, mas com um problema</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-key"></i> Criptografia Assimétrica</div>
             <div class="agenda-item-texto">Par de chaves pública/privada</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">05</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(20)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-handshake"></i> O Modelo Híbrido: HTTPS de Verdade</div>
             <div class="agenda-item-texto">Como os dois se combinam na prática</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(23)" role="button" tabindex="0">
+          <div class="agenda-numero">07</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
             <div class="agenda-item-texto">Resumo comparativo e prévia da Aula 7</div>
@@ -273,7 +305,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
         <h1>A Promessa da Aula 4</h1>
@@ -281,9 +313,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
         <h1>Lembra da senha em texto puro?</h1>
         
         <p>Na demonstração ao vivo da Aula 4, capturamos <code>GET /login?usuario=aluno&amp;senha=SenhaSecreta123</code> inteiro, legível, na captura do atacante. Na hora, prometemos: "se fosse HTTPS, essa captura não mostraria nada legível". Hoje entendemos exatamente por quê.</p>
@@ -299,7 +330,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-key"></i>
         <h1>O Que É Criptografia</h1>
@@ -307,13 +338,12 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
         <h1>Cifrar e decifrar</h1>
         
         <p><strong>Criptografia</strong> é o processo de transformar um texto legível (texto claro) num texto ilegível (texto cifrado), usando uma <strong>chave</strong> — e só quem tem a chave certa consegue reverter o processo e ler o conteúdo original de novo.</p>
-<div class="bloco-diagrama" id="mmdkaliu">
+<div class="bloco-diagrama" id="mmdjgdzc">
     <div class="bloco-diagrama-titulo">Cifrar e decifrar</div>
     <div class="mermaid">flowchart LR
     A["Texto claro&lt;br/&gt;'senha123'"] --&gt;|"cifra com uma chave"| B["Texto cifrado&lt;br/&gt;'x9$kQ_r2!'"]
@@ -332,7 +362,107 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="4">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-landmark"></i>
+        <h1>Um Pouco de História</h1>
+        <p>Enigma, Alan Turing, a Bombe e O Jogo da Imitação</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="4">
+      <div class="slide-content-wrapper">
+        <h1>Antes dos Computadores: A Máquina Enigma</h1>
+        
+        <p>Criptografia não nasceu com a internet. Na Segunda Guerra Mundial, a Alemanha usava uma máquina eletromecânica chamada <strong>Enigma</strong> pra cifrar mensagens militares: um teclado, um painel de luzes e um conjunto de rotores que giravam a cada tecla digitada, trocando cada letra por outra de um jeito que mudava a cada caractere.</p>
+<figure class="bloco-imagem" id="imgpxwot">
+    <div class="bloco-imagem-titulo">A máquina Enigma</div>
+    <img src="img/enigma-machine.jpg" alt="Maquina Enigma alema" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>Enigma alemã: teclado, painel de luzes e rotores (Wikimedia Commons).</figcaption>
+  </figure>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-key"></i> Uma cifra simétrica, só que mecânica
+      </h3>
+      <p>O segredo da Enigma era a posição inicial dos rotores e dos cabos do painel — essa configuração era o equivalente à "chave" de hoje, trocada todo santo dia. Quem cifrava e quem decifrava precisava saber exatamente a mesma configuração: era criptografia <strong>simétrica</strong>, só que feita com engrenagens em vez de bits.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>Alan Turing e Bletchley Park</h1>
+        
+        <figure class="bloco-imagem" id="imgif4xg">
+    <div class="bloco-imagem-titulo">Alan Turing (1951)</div>
+    <img src="img/alan-turing.jpg" alt="Retrato de Alan Turing em 1951" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>Alan Turing, matemático e lógico britânico, um dos pais da ciência da computação (Wikimedia Commons).</figcaption>
+  </figure>
+<p>Alan Turing trabalhou em <strong>Bletchley Park</strong>, o centro britânico de decifração de códigos, durante a guerra. Os alemães confiavam que a Enigma era "impossível de quebrar": o número de configurações possíveis de rotores e cabos era astronômico — bilhões e bilhões de combinações.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-infinity"></i> Por que confiavam tanto
+      </h3>
+      <p>Testar todas as combinações na mão levaria mais tempo do que a própria guerra — ou assim os alemães pensavam.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
+        <h1>A Máquina Bombe e a Brecha do Enigma</h1>
+        
+        <figure class="bloco-imagem" id="img1g89z">
+    <div class="bloco-imagem-titulo">Réplica da Bombe</div>
+    <img src="img/bombe-machine.jpg" alt="Replica da maquina Bombe em Bletchley Park" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>Réplica funcional da Bombe de Turing, exposta hoje em Bletchley Park (Wikimedia Commons).</figcaption>
+  </figure>
+<p>Turing projetou a <strong>Bombe</strong>, uma máquina eletromecânica capaz de testar automaticamente milhares de configurações do Enigma por hora — muito mais rápido do que qualquer time humano faria na mão.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Um erro que virou brecha
+      </h3>
+      <p>A Enigma tinha uma peculiaridade matemática: nenhuma letra podia ser cifrada como ela mesma (um "A" nunca virava "A"). Combinado com frases previsíveis que os operadores alemães repetiam todo dia (como o boletim do tempo), essa fraqueza foi o que a Bombe conseguiu explorar sistematicamente pra descobrir a chave do dia.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="7">
+      <div class="slide-content-wrapper">
+        <h1>O Jogo da Imitação</h1>
+        
+        <figure class="bloco-imagem" id="imgyvyuk">
+    <div class="bloco-imagem-titulo">Bletchley Park</div>
+    <img src="img/bletchley-park-mansion.jpg" alt="Mansao de Bletchley Park" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>A mansão de Bletchley Park, cenário real da história (não usamos uma cena do filme aqui por causa de direitos autorais).</figcaption>
+  </figure>
+<p>O filme <strong>O Jogo da Imitação</strong> (2014), com Benedict Cumberbatch no papel de Alan Turing, retrata esse trabalho em Bletchley Park. Numa cena marcante, a equipe percebe que os alemães sempre encerravam certas mensagens com a mesma frase previsível — esse trecho conhecido de antemão (um "crib") foi o que deu à Bombe um ponto de partida pra quebrar a chave do dia.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-film"></i> Recomendação
+      </h3>
+      <p>Vale muito assistir: historiadores estimam que esse trabalho encurtou a guerra em anos, salvando milhões de vidas, e o filme mostra bem a lógica de explorar padrões e fraquezas de uma cifra — o mesmo raciocínio que ainda usamos hoje pra analisar a segurança de um sistema criptográfico.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="8">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-lock"></i>
         <h1>Criptografia Simétrica</h1>
@@ -340,9 +470,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
         <h1>A mesma chave cifra e decifra</h1>
         
         <p>Pensa num cofre com uma única chave: quem guarda algo lá dentro e quem vai pegar depois precisam ter uma cópia <strong>da mesma chave</strong>. É exatamente assim que funciona a criptografia simétrica — o algoritmo mais usado hoje é o <strong>AES</strong> (Advanced Encryption Standard).</p>
@@ -358,9 +487,49 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
+        <h1>Exemplo Visual: Cifra de César (Simétrica)</h1>
+        
+        <p>Pra ver criptografia simétrica funcionando com uma chave bem simples, esquece o AES por um instante: a <strong>cifra de César</strong> desloca cada letra um número fixo de posições no alfabeto. Esse número é a chave — e é a MESMA chave que cifra e decifra, exatamente como no Enigma.</p>
+<div class="bloco-diagrama" id="mmdpdhj4">
+    <div class="bloco-diagrama-titulo">Cifrando 'OI' com a chave 3</div>
+    <div class="mermaid">flowchart LR
+    O["O (posicao 15)"] --&gt;|"+3"| R["R (posicao 18)"]
+    I["I (posicao 9)"] --&gt;|"+3"| L["L (posicao 12)"]</div>
+    <div class="bloco-diagrama-legenda">Cada letra anda 3 posicoes pra frente no alfabeto: 'OI' vira 'RL'.</div>
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-rotate"></i> Decifrando: a mesma chave, ao contrário
+      </h3>
+      <p>Pra decifrar "RL", anda 3 posições PRA TRÁS: R volta pra O, L volta pra I. Só quem sabe que a chave é 3 consegue reverter — e é exatamente essa mesma lógica (chave única, usada nos dois sentidos) que o AES usa, só que com uma matemática bem mais complexa.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>Experimente: Cifra de César Interativa</h1>
+        
+        <div class="bloco-animacao-gsap">
+    <div class="bloco-animacao-gsap-titulo">Cifrando e decifrando em tempo real</div>
+    <div class="gsap-stage" id="gsapnfoe0dw" style="min-height:250px;">
+      
+      <div style='display:flex;gap:24px;flex-wrap:wrap;'><div style='flex:1;min-width:260px;'><div style='font-weight:800;margin-bottom:6px;'>Texto claro</div><input id="gsapnfoe0dw_entradaClara" type='text' placeholder='Digite uma frase...' style='width:100%;padding:10px;border-radius:8px;border:2px solid #ccc;font-size:1.05rem;box-sizing:border-box;'><div style='margin-top:6px;font-size:0.9rem;'>Chave (deslocamento): <input id="gsapnfoe0dw_chaveCifrar" type='number' value='3' min='1' max='25' style='width:60px;padding:4px;border-radius:6px;border:2px solid #ccc;'></div><div style='margin-top:10px;font-weight:800;'>Cifrado:</div><div id="gsapnfoe0dw_saidaCifrada" style='min-height:40px;padding:10px;background:#0B192C;color:#8be9fd;border-radius:8px;font-family:Fira Code,monospace;word-break:break-word;'></div></div><div style='flex:1;min-width:260px;'><div style='font-weight:800;margin-bottom:6px;'>Texto cifrado (cole aqui)</div><input id="gsapnfoe0dw_entradaCifrada" type='text' placeholder='Cole um texto cifrado...' style='width:100%;padding:10px;border-radius:8px;border:2px solid #ccc;font-size:1.05rem;box-sizing:border-box;'><div style='margin-top:6px;font-size:0.9rem;'>Chave (deslocamento): <input id="gsapnfoe0dw_chaveDecifrar" type='number' value='3' min='1' max='25' style='width:60px;padding:4px;border-radius:6px;border:2px solid #ccc;'></div><div style='margin-top:10px;font-weight:800;'>Decifrado:</div><div id="gsapnfoe0dw_saidaDecifrada" style='min-height:40px;padding:10px;background:#0B192C;color:#8be9fd;border-radius:8px;font-family:Fira Code,monospace;word-break:break-word;'></div></div></div>
+    </div>
+    <script>(function(){if(typeof gsap==='undefined')return;try{const cifrarCesar = (texto, chave) => texto.replace(/[a-zA-Z]/g, (c) => { const base = c === c.toUpperCase() ? 65 : 97; return String.fromCharCode(((c.charCodeAt(0) - base + chave) % 26 + 26) % 26 + base); }); const entradaClara = document.querySelector('#gsapnfoe0dw_entradaClara'); const chaveCifrarEl = document.querySelector('#gsapnfoe0dw_chaveCifrar'); const saidaCifrada = document.querySelector('#gsapnfoe0dw_saidaCifrada'); const atualizarCifra = () => { const chave = parseInt(chaveCifrarEl.value, 10) || 0; saidaCifrada.textContent = cifrarCesar(entradaClara.value, chave); }; entradaClara.addEventListener('input', atualizarCifra); chaveCifrarEl.addEventListener('input', atualizarCifra); atualizarCifra(); const entradaCifrada = document.querySelector('#gsapnfoe0dw_entradaCifrada'); const chaveDecifrarEl = document.querySelector('#gsapnfoe0dw_chaveDecifrar'); const saidaDecifrada = document.querySelector('#gsapnfoe0dw_saidaDecifrada'); const atualizarDecifra = () => { const chave = parseInt(chaveDecifrarEl.value, 10) || 0; saidaDecifrada.textContent = cifrarCesar(entradaCifrada.value, -chave); }; entradaCifrada.addEventListener('input', atualizarDecifra); chaveDecifrarEl.addEventListener('input', atualizarDecifra); atualizarDecifra();}catch(e){console.warn('GSAP erro:',e);}})()</script>
+    <div class="bloco-animacao-gsap-legenda">Digite uma frase à esquerda pra ver cifrando sozinho. Cole um texto cifrado à direita (com a mesma chave) pra decifrar.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
         <h1>O problema: como combinar a chave?</h1>
         
         <p>Se as duas partes precisam da MESMA chave antes de começar a se comunicar com segurança, como uma manda essa chave pra outra pela rede, sem que alguém consiga interceptar a própria chave no meio do caminho?</p>
@@ -376,7 +545,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="12">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-key"></i>
         <h1>Criptografia Assimétrica</h1>
@@ -384,9 +553,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
         <h1>Duas chaves, um par inseparável</h1>
         
         <p>Criptografia assimétrica usa um <strong>par de chaves matematicamente ligadas</strong>: uma <strong>pública</strong> (pode ser espalhada livremente, sem medo) e uma <strong>privada</strong> (fica guardada, nunca sai do dono). O algoritmo mais conhecido é o <strong>RSA</strong>.</p>
@@ -410,9 +578,65 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
+        <h1>O Que É o RSA, De Verdade</h1>
+        
+        <p>RSA não é uma sigla aleatória: são as iniciais de <strong>Rivest</strong>, <strong>Shamir</strong> e <strong>Adleman</strong>, os três pesquisadores do MIT que publicaram o algoritmo em 1977. Ele vem da <strong>Teoria dos Números</strong>, o ramo da Matemática que estuda os números inteiros — sobretudo os números primos — hoje aplicada à criptografia de chave pública.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-square-root-variable"></i> Que tipo de conta é essa?
+      </h3>
+      <p>A cifragem em si é só uma função matemática direta de calcular: <strong>exponenciação modular</strong> (elevar um número a uma potência e pegar o resto da divisão) — a mesma conta que fizemos no Mini-RSA. A parte sofisticada não é cifrar; é como as duas chaves são geradas.</p>
+      
+    </div>
+<p>As duas chaves nascem de dois números primos bem grandes (centenas de dígitos), multiplicados pra formar o número <code>n</code> usado nas chaves. Só quem gerou o par conhece esses dois primos originais.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock"></i> Por que ninguém "descobre" a chave privada
+      </h3>
+      <p>Calcular a chave privada a partir da pública exigiria <strong>fatorar</strong> <code>n</code> de volta nos dois primos que o formaram. No Mini-RSA isso é trivial (33 = 3 × 11) — por isso ele só serve de exemplo. Com primos de centenas de dígitos, fatorar <code>n</code> levaria mais tempo que a idade do universo nos computadores de hoje. Essa dificuldade matemática — não um segredo escondido — é o que garante a segurança do RSA.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="14">
+      <div class="slide-content-wrapper">
+        <h1>Exemplo Visual: Mini-RSA (Assimétrica)</h1>
+        
+        <p>O RSA de verdade usa números com centenas de dígitos — mas a lógica matemática por trás dele dá pra ver com números bem pequenos. Vamos cifrar um único número (2) com uma chave pública minúscula, e decifrar de volta com a chave privada correspondente.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">As chaves (geradas a partir de dois números primos pequenos)</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>Chave Pública</th><th>Chave Privada</th></tr></thead><tbody><tr><td>Valores</td><td>n = 33, e = 7</td><td>n = 33, d = 3</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-text">Cifrar com a chave publica (n=33, e=7):
+c = 2^7 mod 33 = 128 mod 33 = 29
+
+Decifrar com a chave privada (n=33, d=3):
+m = 29^3 mod 33 = 24389 mod 33 = 2</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-unlock"></i> Repare no que aconteceu
+      </h3>
+      <p>Qualquer pessoa com a chave pública (n=33, e=7) consegue cifrar o número 2 e chegar em 29 — mas só quem tem a chave privada (d=3) consegue voltar de 29 pra 2. Essa "via de mão única, a não ser que você tenha a chave certa" é a mesma ideia do cadeado aberto do slide anterior, só que expressa em matemática.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="15">
+      <div class="slide-content-wrapper">
         <h1>Por que não usar só assimétrica, sempre?</h1>
         
         <p>Se a assimétrica resolve o problema da simétrica, por que não abandonar a simétrica de vez?</p>
@@ -428,7 +652,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="16">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-handshake"></i>
         <h1>O Modelo Híbrido: HTTPS de Verdade</h1>
@@ -436,13 +660,12 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="16">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
         <h1>O melhor dos dois mundos</h1>
         
         <p>O HTTPS não escolhe entre simétrica e assimétrica — ele usa <strong>as duas</strong>, cada uma no momento certo: a assimétrica resolve o problema de combinar uma chave em segurança; a simétrica cuida do volume de tráfego, rápido, dali em diante.</p>
-<div class="bloco-diagrama" id="mmdcwtu7">
+<div class="bloco-diagrama" id="mmdt6i3q">
     <div class="bloco-diagrama-titulo">Handshake simplificado do HTTPS/TLS</div>
     <div class="mermaid">sequenceDiagram
     participant C as Vitima (navegador)
@@ -461,9 +684,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="17">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
         <h1>Voltando à captura da Aula 4</h1>
         
         
@@ -479,7 +701,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="18">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
@@ -487,14 +709,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="18">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
         <h1>Simétrica x Assimétrica</h1>
         
         <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">Comparando os dois modelos</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>Simétrica</th><th>Assimétrica</th></tr></thead><tbody><tr><td>Chaves</td><td>1 única chave</td><td>Par (pública + privada)</td></tr><tr><td>Velocidade</td><td>Rápida</td><td>Lenta</td></tr><tr><td>Problema</td><td>Como combinar a chave em segurança</td><td>Nenhum pra distribuição</td></tr><tr><td>Exemplo</td><td>AES</td><td>RSA</td></tr><tr><td>Uso no HTTPS</td><td>Cifra o tráfego (volume)</td><td>Cifra só a troca da chave de sessão</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>Simétrica</th><th>Assimétrica</th></tr></thead><tbody><tr><td>Chaves</td><td>1 única chave</td><td>Par (pública + privada)</td></tr><tr><td>Velocidade</td><td>Rápida</td><td>Lenta</td></tr><tr><td>Problema</td><td>Como combinar a chave em segurança</td><td>Nenhum pra distribuição</td></tr><tr><td>Exemplo</td><td>AES (e a Enigma, mecanicamente)</td><td>RSA</td></tr><tr><td>Uso no HTTPS</td><td>Cifra o tráfego (volume)</td><td>Cifra só a troca da chave de sessão</td></tr></tbody></table></div>
     
   </div>
 
@@ -509,14 +730,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="19">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
         <h1>Pra Fixar</h1>
         
         
     <div class="quest-list">
-      <ol><li>Por que a criptografia simétrica sozinha não resolve completamente o problema de um atacante posicionado como Man-in-the-Middle (Aula 3)?</li><li>Na analogia do cadeado aberto, o que representa a chave pública e o que representa a chave privada?</li><li>Por que o HTTPS não usa criptografia assimétrica pra cifrar o tráfego inteiro da conexão, do início ao fim?</li><li>No handshake do HTTPS, o que exatamente é cifrado com a chave pública do servidor — o tráfego inteiro, ou só a chave de sessão simétrica?</li><li>Se um atacante conseguir capturar só a chave PÚBLICA de um servidor, ele consegue decifrar o tráfego? Por quê?</li></ol>
+      <ol><li>Por que a criptografia simétrica sozinha não resolve completamente o problema de um atacante posicionado como Man-in-the-Middle (Aula 3)?</li><li>O que a máquina Enigma tinha em comum com a criptografia simétrica que usamos hoje?</li><li>Usando a lógica da cifra de César vista em aula, qual seria o resultado de cifrar a letra 'A' com a chave 2?</li><li>Na analogia do cadeado aberto, o que representa a chave pública e o que representa a chave privada?</li><li>Por que fatorar o número <code>n</code> de volta nos dois primos originais é tão difícil quando eles são grandes, mas trivial no Mini-RSA (n=33)?</li><li>No exemplo do Mini-RSA, por que qualquer pessoa consegue cifrar um número com a chave pública, mas só uma pessoa consegue decifrar de volta?</li><li>Por que o HTTPS não usa criptografia assimétrica pra cifrar o tráfego inteiro da conexão, do início ao fim?</li><li>No handshake do HTTPS, o que exatamente é cifrado com a chave pública do servidor — o tráfego inteiro, ou só a chave de sessão simétrica?</li></ol>
     </div>
         
       </div>
@@ -562,6 +782,10 @@ let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=19;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
@@ -584,8 +808,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
-  sc.textContent='Slide '+(cur+1)+'/'+total;
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -613,6 +837,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);
