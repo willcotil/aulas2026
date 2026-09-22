@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 8: Introdução a Funções</title>
+<title>Aula 7: Repetições Aninhadas</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -39,16 +39,33 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -62,12 +79,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -109,6 +127,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -179,24 +205,28 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Introdução a Funções</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Agenda da aula</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-circle-question"></i><span>Por que usar funções?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O problema do copiar e colar</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>DRY: Don't Repeat Yourself</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-cube"></i><span>O que é uma função</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Bloco de código nomeado e reutilizável</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>Sintaxe básica em C</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Função void, sem parâmetros</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Uma prévia: parâmetro e retorno</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Declaração vs chamada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Uma vez escrita, chamada quantas vezes precisar</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Onde colocar a função no arquivo</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-table-cells"></i><span>Exemplo prático</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>A tabuada da Aula 5, agora reutilizável</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Exercícios</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Repetições Aninhadas</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Roteiro de Hoje</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Quando um laço não basta</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Treino: Séries x Repetições</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Laço dentro de laço</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Sintaxe: for dentro de for</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Ordem de execução</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Ordem de Execução — Parte 1</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Ordem de Execução — Parte 2</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-table-cells"></i><span>Tabuada completa</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Tabuada Completa (10×10)</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-shapes"></i><span>Desenhando com Laços</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Padrão: Triângulo de Asteriscos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Cuidado: Nomes das Variáveis</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O Bug Clássico do Laço Aninhado</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-shuffle"></i><span>Misturando Tipos de Laço</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Combinando for e while</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>Desafios</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafios (Parte 2 de 2)</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -204,65 +234,84 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
-        <h1>Introdução a Funções</h1>
-        <h2>Dividindo o programa em partes reutilizáveis</h2>
-        <p>Você já copiou e colou o mesmo pedaço de código em três lugares diferentes só pra ele fazer a mesma coisa? Hoje a gente aprende a resolver isso de vez — e a deixar o programa mais organizado no processo.</p>
+        <h1>Repetições Aninhadas</h1>
+        <h2>Aula 7 — Módulo de Repetição em C</h2>
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-layer-group"></i> Um laço dentro do outro
+      </h3>
+      <p>Hoje juntamos tudo que já sabemos sobre <code>for</code>, <code>while</code> e <code>do-while</code> (Aulas 1 a 6) pra resolver problemas que um laço sozinho não dá conta: tabelas, grades e padrões.</p>
+      
+    </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
+        <h1>Roteiro de Hoje</h1>
         
-        <h2>Agenda da aula</h2>
         <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">O que vamos ver hoje</div>
+    <div class="bloco-agenda-titulo">Aula 7</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-circle-question"></i> Por que usar funções?</div>
-            <div class="agenda-item-texto">O problema do copiar e colar</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Quando um laço não basta</div>
+            <div class="agenda-item-texto">Séries x repetições — um exemplo do dia a dia</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cube"></i> O que é uma função</div>
-            <div class="agenda-item-texto">Bloco de código nomeado e reutilizável</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-layer-group"></i> Laço dentro de laço</div>
+            <div class="agenda-item-texto">Sintaxe e primeiro exemplo</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> Sintaxe básica em C</div>
-            <div class="agenda-item-texto">void, parênteses e chaves</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Ordem de execução</div>
+            <div class="agenda-item-texto">Quem roda primeiro, quantas vezes</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Declaração vs chamada</div>
-            <div class="agenda-item-texto">Onde a função nasce e onde ela é usada</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-table-cells"></i> Tabuada completa</div>
+            <div class="agenda-item-texto">De uma linha (Aula 5) pra grade inteira</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-shapes"></i> Desenhando com Laços</div>
+            <div class="agenda-item-texto">Padrões visuais com printf</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
-          <div class="agenda-numero">05</div>
+          <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-table-cells"></i> Exemplo prático</div>
-            <div class="agenda-item-texto">Transformando a tabuada numa função</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Cuidado: Nomes das Variáveis</div>
+            <div class="agenda-item-texto">i e j — escopo aninhado</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
+          <div class="agenda-numero">07</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Exercícios</div>
-            <div class="agenda-item-texto">Sua vez de escrever funções</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-shuffle"></i> Misturando Tipos de Laço</div>
+            <div class="agenda-item-texto">for + while trabalhando juntos</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(17)" role="button" tabindex="0">
+          <div class="agenda-numero">08</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> Desafios</div>
+            <div class="agenda-item-texto">10 exercícios de grades e padrões aninhados</div>
           </div>
         </div>
     </div>
@@ -271,309 +320,305 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-puzzle-piece"></i>
-        <h1>Por que usar funções?</h1>
-        <p>Motivação</p>
+        <i class="fa-solid fa-dumbbell"></i>
+        <h1>Quando um laço só não é suficiente</h1>
+        <p>Séries x repetições — o dia a dia já é aninhado</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
+        <h1>Treino: Séries x Repetições</h1>
         
-        <h2>O problema do copiar e colar</h2>
-        <p>Lá na Aula 1, o problema do código duplicado te fez conhecer o <code>while</code>: em vez de repetir um comando várias vezes seguidas, um laço repete o MESMO trecho sozinho. Só que existe outro tipo de repetição que o laço não resolve: o mesmo trecho copiado em partes BEM DIFERENTES do programa.</p>
-
-    <div class="file-label">relatorios.c (do jeito ruim)</div>
-    <pre style="margin-top:0;"><code class="language-c">printf(&quot;========================\n&quot;);
-printf(&quot;   RELATORIO DE VENDAS\n&quot;);
-printf(&quot;========================\n&quot;);
-
-// ... um monte de codigo no meio ...
-
-printf(&quot;========================\n&quot;);
-printf(&quot;   RELATORIO DE ESTOQUE\n&quot;);
-printf(&quot;========================\n&quot;);
-
-// ... e de novo, mais pra frente ...
-
-printf(&quot;========================\n&quot;);
-printf(&quot;   RELATORIO FINAL\n&quot;);
-printf(&quot;========================\n&quot;);</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
-        
-        <h2>DRY: Don't Repeat Yourself</h2>
-        
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> O risco de copiar e colar
-      </h3>
-      <p>Se um dia você precisar trocar o "=" por "-" nesse separador, vai ter que lembrar de mudar em TODOS os lugares onde copiou. Esquecer um é um bug silencioso — e ninguém avisa.</p>
-      
-    </div>
-
-    <div class="grid-3">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-recycle"></i> Reaproveitar
-          </h3>
-          <p>Escreve uma vez, usa quantas vezes quiser</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-sitemap"></i> Organizar
-          </h3>
-          <p>Programa grande vira várias partes pequenas e claras</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-magnifying-glass"></i> Testar
-          </h3>
-          <p>Fica mais fácil achar erro numa parte pequena isolada</p>
-          
-        </div>
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-cube"></i>
-        <h1>O que é uma função?</h1>
-        <p>Definição</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
-        
-        <h2>Bloco de código nomeado e reutilizável</h2>
-        
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-gamepad"></i> Analogia: combo de jogo
-          </h3>
-          <p>Você grava uma sequência de botões (o combo) uma única vez. Depois é só apertar o atalho pra executar a sequência inteira — quantas vezes quiser.</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-code"></i> Na programação
-          </h3>
-          <p>Você escreve o bloco de código (a função) uma única vez, com um nome. Depois só chama esse nome pra executar o bloco — de qualquer lugar do programa.</p>
-          
-        </div>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Você já usa uma função
-      </h3>
-      <p>Desde o semestre passado você escreve <code>int main() { ... }</code>. main é, tecnicamente, a SUA primeira função! Ela só é especial porque é o ponto onde o programa começa a rodar.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-code"></i>
-        <h1>Sintaxe básica em C</h1>
-        <p>Como escrever uma função</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        
-        <h2>Função void, sem parâmetros</h2>
-        <div class="bloco-tabela">
-    
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Parte</th><th>O que é</th><th>Nesse exemplo</th></tr></thead><tbody><tr><td>Tipo de retorno</td><td>O que a função devolve pra quem chamou</td><td>void = nada, por enquanto</td></tr><tr><td>Nome</td><td>Identifica a função (mesmas regras de nome de variável)</td><td>saudar</td></tr><tr><td>Parênteses ()</td><td>Onde ficam os parâmetros (por enquanto, vazios)</td><td>()</td></tr><tr><td>Chaves { }</td><td>Delimitam o corpo — o que a função realmente faz</td><td>{ ... }</td></tr></tbody></table></div>
-    
+        <div class="bloco-diagrama" id="mmdx482s">
+    <div class="bloco-diagrama-titulo">Um laço dentro do outro (ainda sem nenhuma linha de código)</div>
+    <div class="mermaid">flowchart TD
+  subgraph SERIES["Para cada Serie (1 a 3)"]
+    direction TB
+    subgraph REP["Para cada Repeticao (1 a 12)"]
+      A["Fazer 1 flexao"]
+    end
+  end</div>
+    <div class="bloco-diagrama-legenda">O laço de fora (série) só avança depois que o laço de dentro (repetição) roda TODAS as voltas.</div>
   </div>
-
-    <div class="file-label">saudacao.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
-
-// Função sem parâmetros e sem retorno
-void saudar() {
-    printf(&quot;Bem-vindo ao programa!\n&quot;);
-    printf(&quot;Vamos começar.\n&quot;);
-}
-
-int main() {
-    saudar();   // chamando (executando) a função
-    return 0;
-}</code></pre>
+<p>Repara: pra completar uma série inteira, você repete a repetição várias vezes. Isso já é um laço dentro de outro laço — só que ainda na academia, não no código.</p>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide topic" data-num="4">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
-        
-        <h2>Uma prévia: parâmetro e retorno</h2>
-        
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-hourglass-half"></i> Só uma espiadinha
-      </h3>
-      <p>Os detalhes de como passar valores e devolver resultados a gente estuda com calma na Aula 9. Por hoje, só repare que existe.</p>
-      
+        <i class="fa-solid fa-layer-group"></i>
+        <h1>Formalizando: Laço Dentro de Laço</h1>
+        <p>Sintaxe do laço aninhado em C</p>
+      </div>
     </div>
 
-    <div class="file-label">dobro.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
+    <div class="slide" data-num="4">
+      <div class="slide-content-wrapper">
+        <h1>Sintaxe: for dentro de for</h1>
+        
+        <p>Um <strong>laço aninhado</strong> é um laço inteiro (<code>for</code>, <code>while</code> ou <code>do-while</code>) escrito dentro do corpo de outro laço. Quem está por fora é o <strong>laço externo</strong>; quem está por dentro é o <strong>laço interno</strong> — e o interno pode ser qualquer um dos três tipos que você já conhece.</p>
 
-// Prévia: função com 1 parâmetro e 1 retorno
-int dobro(int numero) {
-    return numero * 2;
-}
-
-int main() {
-    int resultado = dobro(5);
-    printf(&quot;%d\n&quot;, resultado);  // imprime 10
-    return 0;
+    <div class="code-wrap">
+      <div class="file-label"><span>treino.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">for (int serie = 1; serie &lt;= 3; serie++) {          // laco EXTERNO
+    printf(&quot;Serie %d:\n&quot;, serie);
+    for (int rep = 1; rep &lt;= 12; rep++) {           // laco INTERNO
+        printf(&quot;  Repeticao %d\n&quot;, rep);
+    }
 }</code></pre>
+    </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="5">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-diagram-project"></i>
-        <h1>Declaração vs chamada</h1>
-        <p>Onde a função nasce, onde ela é usada</p>
+        <h1>Ordem de Execução</h1>
+        <p>Quem roda primeiro, e quantas vezes no total?</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
+        <h1>Ordem de Execução — Parte 1</h1>
         
-        <h2>Uma vez escrita, chamada quantas vezes precisar</h2>
-        <div class="bloco-diagrama" id="mmd0mcs5">
-    <div class="bloco-diagrama-titulo">Da definição às chamadas</div>
-    <div class="mermaid">flowchart LR
-  D["Definição da função (escrita 1 vez)"] --&gt; C1["Chamada dentro do main()"]
-  D --&gt; C2["Chamada em outra função"]
-  D --&gt; C3["Chamada de novo, quando precisar"]</div>
-    
+        <div class="bloco-diagrama" id="mmd0fh7i">
+    <div class="bloco-diagrama-titulo">Fluxo de um laço aninhado (for dentro de for)</div>
+    <div class="mermaid">flowchart TD
+  A["Laco externo: i = 1"] --&gt; B{"i &lt;= 3?"}
+  B --&gt;|Sim| C["Laco interno: j = 1"]
+  C --&gt; D{"j &lt;= 2?"}
+  D --&gt;|Sim| E["Executa corpo (i, j)"]
+  E --&gt; F["j++"]
+  F --&gt; D
+  D --&gt;|Nao| G["i++"]
+  G --&gt; B
+  B --&gt;|Nao| H["Fim"]</div>
+    <div class="bloco-diagrama-legenda">O laço interno (j) roda por completo a cada única volta do laço externo (i).</div>
   </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
+        <h1>Ordem de Execução — Parte 2</h1>
+        
+        <div class="depurador-bloco" id="dbg2jcu4t">
+  <div class="dbg-titulo">
+    <span class="dbg-titulo-text">Teste de mesa: 2 séries x 2 repetições</span>
+    <button class="dbg-btn" id="dbg2jcu4t-prev" onclick="dbgPrev('dbg2jcu4t')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbg2jcu4t-cur">—</span> / 13</span>
+    <button class="dbg-btn" id="dbg2jcu4t-next" onclick="dbgNext('dbg2jcu4t')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbg2jcu4t')">↺ Reset</button>
+  </div>
+  <div class="dbg-layout">
+    <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">for (int i = 1; i &lt;= 2; i++) {</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline">    for (int j = 1; j &lt;= 2; j++) {</span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">        printf(&quot;i=%d j=%d\n&quot;, i, j);</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    }</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">}</span></div></div>
+    <div class="dbg-vars-panel">
+      <div class="dbg-vars-title">Variáveis</div>
+      <table class="dbg-vars-table"><thead><tr><th>Var</th><th>Valor</th></tr></thead>
+      <tbody class="dbg-vars-body"></tbody></table>
+    </div>
+  </div>
+  <div class="dbg-output" id="dbg2jcu4t-out"></div>
+  <script type="application/json" id="dbg2jcu4t-data">[{"linha":1,"vars":{"i":1}},{"linha":2,"vars":{"i":1,"j":1}},{"linha":3,"vars":{"i":1,"j":1},"saida":"i=1 j=1"},{"linha":2,"vars":{"i":1,"j":2}},{"linha":3,"vars":{"i":1,"j":2},"saida":"i=1 j=2"},{"linha":2,"vars":{"i":1,"j":3}},{"linha":1,"vars":{"i":2}},{"linha":2,"vars":{"i":2,"j":1}},{"linha":3,"vars":{"i":2,"j":1},"saida":"i=2 j=1"},{"linha":2,"vars":{"i":2,"j":2}},{"linha":3,"vars":{"i":2,"j":2},"saida":"i=2 j=2"},{"linha":2,"vars":{"i":2,"j":3}},{"linha":1,"vars":{"i":3}}]</script>
+</div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-recycle"></i> Reuso de verdade
+        <i class="fa-solid fa-calculator"></i> Total de execuções
       </h3>
-      <p>A função é ESCRITA uma única vez. Mas pode ser CHAMADA (executada) várias vezes, de vários lugares do programa. É exatamente isso que resolve o problema do copiar e colar lá do começo da aula.</p>
+      <p>Nesse exemplo: 2 voltas externas × 2 voltas internas = <strong>4</strong> execuções do <code>printf</code>. É sempre externo × interno.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
-        
-        <h2>Onde colocar a função no arquivo</h2>
-        <p>Se a função é definida ANTES do main, o compilador já a conhece quando chega lá. Se você prefere manter o main no topo do arquivo, declare um protótipo — só a "assinatura" da função, terminada em <code>;</code> — antes do main, e escreva o corpo completo depois.</p>
-
-    <div class="file-label">prototipo.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
-
-void saudar();   // protótipo: avisa que a função existe
-
-int main() {
-    saudar();    // chamada - pode vir antes da definição completa
-    return 0;
-}
-
-// definição completa, pode vir depois do main
-void saudar() {
-    printf(&quot;Bem-vindo ao programa!\n&quot;);
-}</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
+    <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-table-cells"></i>
-        <h1>Exemplo prático</h1>
-        <p>Transformando a tabuada numa função</p>
+        <h1>Aplicando: Tabuada Completa</h1>
+        <p>Da Aula 5 (uma linha) pra grade inteira</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
+        <h1>Tabuada Completa (10×10)</h1>
         
-        <h2>A tabuada da Aula 5, agora reutilizável</h2>
         
-    <div class="file-label">tabuada.c</div>
-    <pre style="margin-top:0;"><code class="language-c">#include &lt;stdio.h&gt;
-
-// Função que imprime a tabuada de um número
-void imprimirTabuada(int numero) {
-    for (int i = 1; i &lt;= 10; i++) {
-        printf(&quot;%d x %d = %d\n&quot;, numero, i, numero * i);
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-c">for (int linha = 1; linha &lt;= 10; linha++) {
+    for (int coluna = 1; coluna &lt;= 10; coluna++) {
+        printf(&quot;%4d&quot;, linha * coluna);   // 4 espacos pra alinhar
     }
-}
-
-int main() {
-    imprimirTabuada(2);   // tabuada do 2
-    imprimirTabuada(5);   // tabuada do 5
-    imprimirTabuada(7);   // tabuada do 7
-
-    return 0;
+    printf(&quot;\n&quot;);   // pula linha SO depois que o laco interno termina
 }</code></pre>
+    </div>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Recorte da saída (3×3, dos 10×10 reais)</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>×</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>3</td></tr><tr><td>2</td><td>2</td><td>4</td><td>6</td></tr><tr><td>3</td><td>3</td><td>6</td><td>9</td></tr></tbody></table></div>
+    
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="8">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-shapes"></i>
+        <h1>Desenhando com Laços</h1>
+        <p>Padrões visuais: cada linha, uma repetição diferente</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        <h1>Padrão: Triângulo de Asteriscos</h1>
+        
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-c">for (int linha = 1; linha &lt;= 5; linha++) {
+    for (int coluna = 1; coluna &lt;= linha; coluna++) {   // repete &quot;linha&quot; vezes
+        printf(&quot;*&quot;);
+    }
+    printf(&quot;\n&quot;);
+}</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>saída</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">*
+**
+***
+****
+*****</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-star"></i> Sem a função, seria...
+        <i class="fa-solid fa-lightbulb"></i> O limite pode variar
       </h3>
-      <p>...copiar o <code>for</code> da Aula 5 três vezes (ou mudar o número na mão e recompilar toda hora). O parâmetro <code>numero</code> aqui é só uma prévia — a gente destrincha isso na Aula 9.</p>
+      <p>Repara que o laço interno não vai até um número fixo — vai até <code>linha</code>. O limite de um laço interno pode depender do valor do laço externo. É essa ideia que desenha o padrão.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide topic" data-num="9">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <h1>Cuidado: Nomes das Variáveis</h1>
+        <p>Por que i (fora) e j (dentro), e não os dois i?</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
+      <div class="slide-content-wrapper">
+        <h1>O Bug Clássico do Laço Aninhado</h1>
         
-        <h2>Exercícios: pratique com funções</h2>
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>bug_classico.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">int i;
+for (i = 1; i &lt;= 3; i++) {
+    for (i = 1; i &lt;= 5; i++) {   // BUG: reusa a MESMA variavel i!
+        printf(&quot;*&quot;);
+    }
+    printf(&quot;\n&quot;);
+}
+// ao sair do laco interno, i ja vale 6 -&gt; o laco externo
+// nunca mais volta -&gt; so imprime 1 linha, nao 3</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>corrigido.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">for (int i = 1; i &lt;= 3; i++) {          // i cuida do laco externo
+    for (int j = 1; j &lt;= 5; j++) {      // j cuida do laco interno, sozinho
+        printf(&quot;*&quot;);
+    }
+    printf(&quot;\n&quot;);
+}</code></pre>
+    </div>
+<p>Convenção: <code>i</code> pro laço mais de fora, <code>j</code> pro próximo, <code>k</code> se precisar de um terceiro. Evita esse bug e deixa o código mais fácil de ler.</p>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="10">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-shuffle"></i>
+        <h1>Misturando Tipos de Laço</h1>
+        <p>for por fora, while por dentro — e vice-versa</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>Combinando for e while</h1>
+        
+        <p>Não existe regra de "só <code>for</code> com <code>for</code>". Cada laço aninhado escolhe seu tipo pelo mesmo critério da Aula 6: número de repetições conhecido → <code>for</code>; depende de uma condição em tempo de execução → <code>while</code>/<code>do-while</code>.</p>
+
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-c">for (int rodada = 1; rodada &lt;= 3; rodada++) {        // FOR: 3 rodadas, numero conhecido
+    int palpite;
+    printf(&quot;Rodada %d - digite 1 a 10: &quot;, rodada);
+    scanf(&quot;%d&quot;, &amp;palpite);
+
+    while (palpite &lt; 1 || palpite &gt; 10) {             // WHILE: repete ate ser valido
+        printf(&quot;Invalido! Tente de novo: &quot;);
+        scanf(&quot;%d&quot;, &amp;palpite);
+    }
+}</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-magnifying-glass"></i> Sua ferramenta contra bugs
+      </h3>
+      <p>Hoje vimos a ORDEM de execução com um teste de mesa simples — essa é a ferramenta mais poderosa que vocês têm pra caçar bugs em laços aninhados mais complexos: sempre que o resultado não bater, façam o teste de mesa e sigam o rastro, linha por linha.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>Desafios (Parte 1 de 2)</h1>
+        
         
     <div class="quest-list">
-      <ol><li>Escreva uma função <code>void linha()</code> que imprime uma linha de tracinhos e chame-a 3 vezes dentro do main, separando três blocos de texto diferentes.</li><li>Pegue o cálculo de média com acumulador da Aula 2 e transforme em uma função <code>void calcularMedia()</code> — por enquanto sem parâmetro, só movendo o código de dentro do main pra dentro da função.</li><li>Em uma frase, explique pra um colega a diferença entre DECLARAR uma função e CHAMAR uma função.</li><li>Desafio: crie duas funções void diferentes (por exemplo <code>saudarManha()</code> e <code>saudarNoite()</code>) e use um if/else no main pra chamar a certa, dependendo de um horário digitado pelo usuário.</li></ol>
+      <ol><li>Desafio 1 — Tabuada sob medida: peça um número N ao usuário e imprima a tabuada de N (de N×1 até N×10) usando dois <code>for</code>.</li><li>Desafio 2 — Grade de crafting: imprima uma grade 3×3 de asteriscos (tipo uma mesa de crafting) e depois adapte pra ler do usuário quantas linhas e colunas a grade deve ter.</li><li>Desafio 3 — Pirâmide invertida: imprima um triângulo de asteriscos que começa com 5 e diminui até 1 por linha — o contrário do exemplo que vimos em aula.</li><li>Desafio 4 — Quadrado de 1s: peça um número N ao usuário e imprima um quadrado N×N preenchido só com o número 1, separado por espaço.</li><li>Desafio 5 — Tabuleiro de xadrez: imprima um padrão 8×8 alternando <code>#</code> e <code>.</code>, usando <code>#</code> quando a soma da linha com a coluna for par, e <code>.</code> quando for ímpar.</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Desafios (Parte 2 de 2)</h1>
+        
+        
+    <div class="quest-list">
+      <ol style="counter-reset:quest 5"><li>Desafio 6 — Losango de asteriscos: combine um triângulo crescente com um decrescente pra formar um losango completo de asteriscos (a linha do meio é a mais larga).</li><li>Desafio 7 — Tabuada com limite escolhido: peça dois números, N e M, e imprima a tabuada de N indo só até N×M (não fixo em 10).</li><li>Desafio 8 — Contando a diagonal: percorra uma grade 5×5 e, usando um acumulador, conte quantas posições têm o índice da linha igual ao índice da coluna.</li><li>Desafio 9 — Calendário simplificado: imprima 4 semanas (linhas) de 7 dias (colunas) cada, numerando as posições em sequência de 1 até 28.</li><li>Desafio 10 — Escada numérica: imprima uma escada de 6 degraus onde a linha N repete o número N exatamente N vezes (linha 1: <code>1</code>, linha 2: <code>2 2</code>, linha 3: <code>3 3 3</code>, e assim por diante).</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Dica de ouro
       </h3>
-      <p>Compile e teste depois de escrever CADA função. É bem mais fácil achar um erro numa função pequena do que garimpar um programa inteiro de uma vez.</p>
+      <p>Antes de escrever qualquer <code>for</code>, desenhe no papel como a saída deve ficar. Aí é só perguntar: quantas linhas eu preciso (laço externo)? E em cada linha, quantas repetições (laço interno)?</p>
       
     </div>
         
@@ -615,12 +660,17 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::8';
+const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::7';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=12;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -641,7 +691,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -669,6 +720,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

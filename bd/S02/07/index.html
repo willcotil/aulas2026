@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 5: Laço de Repetição Controlado (for)</title>
+<title>Aula 7: CREATE TABLE: Restrições de Coluna (NOT NULL, DEFAULT, UNIQUE)</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#BD4444;--color-rust:#F1DEC4;
-  --color-orange:#F1DEC4;--color-yellow:#F1DEC4;--color-deep:#677E61;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#211712;
+  --color-navy:#000;--color-blue:#7A1F3D;--color-rust:#F2C14E;
+  --color-orange:#F2C14E;--color-yellow:#F2C14E;--color-deep:#3D0F1E;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#170609;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -39,16 +39,33 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -62,12 +79,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -109,6 +127,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -174,25 +200,30 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Linguagem de Programação</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Banco de Dados</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Aula 5 — Laço for</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Roteiro de hoje</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-hourglass-half"></i><span>Quando você já sabe quantas vezes vai repetir...</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Lembra do contador de pontos?</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>Mesma lógica, com for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Anatomia do for</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Como o for executa, por dentro</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-table-list"></i><span>For na prática: tabuada com número fixo de linhas</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>For também acumula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Média de 4 provas, com for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Cuidados comuns com o for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Sua vez de rodar o for</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Recap</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>O Problema de uma Tabela Sem Restrições</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-asterisk"></i><span>NOT NULL</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>NOT NULL: Essa Coluna Não Pode Ficar Vazia</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-fill-drip"></i><span>DEFAULT</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>DEFAULT: Um Valor Pronto Pra Quando Ninguém Informa</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-fingerprint"></i><span>UNIQUE</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>UNIQUE: Ninguém Mais Pode Repetir Esse Valor</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Combinando Restrições na Mesma Coluna</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-school"></i><span>Prática: Tabelas da Escola</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>aluno e professor, Com Restrições</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>turma e disciplina, Com Restrições</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Resumo das Restrições de Hoje</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Aplicando Restrições</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -200,72 +231,55 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
-        <h1>Aula 5 — Laço for</h1>
-        <h2>Repetição controlada: quando você já sabe quantas vezes vai repetir</h2>
         
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-repeat"></i> Terceiro membro da família dos laços
-      </h3>
-      <p>Você já domina o <code>while</code> (Aula 1) e o <code>do-while</code> (Aula 3). Hoje entra o <code>for</code> — feito sob medida para quando o número de repetições já é conhecido antes mesmo do laço começar.</p>
-      
-    </div>
         
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
-        <h1>Roteiro de hoje</h1>
-        
-        <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Nesta aula</div>
+        <p>Banco de Dados (BD) — Aula 7</p>
+<div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">CREATE TABLE: Restrições de Coluna</div>
     <div class="agenda-lista">
       
-        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-arrows-rotate"></i> Mesma lógica, com for</div>
-            <div class="agenda-item-texto">Reescrevendo o contador de pontos conhecido</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recap</div>
+            <div class="agenda-item-texto">As tabelas da Aula 6, ainda sem restrição nenhuma</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
+          <div class="agenda-numero">02</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-asterisk"></i> NOT NULL</div>
+            <div class="agenda-item-texto">Obrigando o preenchimento de uma coluna</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
-          <div class="agenda-numero">02</div>
+          <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Anatomia do for</div>
-            <div class="agenda-item-texto">Inicialização, condição e incremento juntos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-fill-drip"></i> DEFAULT</div>
+            <div class="agenda-item-texto">Valor padrão quando nada é informado</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-table-list"></i> For na prática: tabuada com número fixo de linhas</div>
-            <div class="agenda-item-texto">Um exemplo completo com teste de mesa</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-layer-group"></i> For também acumula</div>
-            <div class="agenda-item-texto">O padrão acumulador não muda</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-fingerprint"></i> UNIQUE</div>
+            <div class="agenda-item-texto">Impedindo valores repetidos</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Cuidados comuns com o for</div>
-            <div class="agenda-item-texto">Off-by-one e escopo da variável</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-school"></i> Prática: Tabelas da Escola</div>
+            <div class="agenda-item-texto">Recriando aluno, professor, turma e disciplina</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
           <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Sua vez de rodar o for</div>
-            <div class="agenda-item-texto">Hora de treinar</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Resumo e prévia da Aula 8</div>
           </div>
         </div>
     </div>
@@ -274,194 +288,296 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-hourglass-half"></i>
-        <h1>Quando você já sabe quantas vezes vai repetir...</h1>
-        <p>a repetição de hoje já nasce com prazo pra acabar</p>
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Recap</h1>
+        <p>As tabelas da Aula 6, ainda sem restrição nenhuma</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
-        <h1>Lembra do contador de pontos?</h1>
+        <h1>O Problema de uma Tabela Sem Restrições</h1>
         
-        <p>É tipo bater a meta de série na academia: se o treino é <strong>4 séries de 12</strong>, você não fica perguntando a cada repetição "ainda falta?" — você já sabe de cara quantas vezes vai repetir. Olha nosso contador de pontos da Aula 1 com esse olhar: a variável <code>rodada</code> sempre vai de 1 até 5, e isso é sabido <strong>antes</strong> do laço começar.</p>
+        <p>Na Aula 6 criamos <code>aluno</code>, <code>professor</code>, <code>turma</code> e <code>disciplina</code> — mas de propósito, sem nenhuma restrição. Isso significa que, hoje, o MySQL aceitaria cadastrar um aluno <strong>sem nome</strong>, ou dois alunos diferentes com o <strong>mesmo email</strong>.</p>
 
-    <div class="file-label">contador_while.c</div>
-    <pre style="margin-top:0;"><code class="language-c">int pontos = 0;
-int rodada = 1;         // inicializacao, antes do laco
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-sql">-- Isso funciona (e nao deveria):
+INSERT INTO aluno (nome, email, ra, data_nascimento)
+VALUES (NULL, 'repetido@escola.com', 'RA001', '2008-01-01');
 
-while (rodada &lt;= 5) {   // condicao, no while
-    printf(&quot;Rodada %d: %d pts\n&quot;, rodada, pontos);
-    pontos += 10;
-    rodada++;           // incremento, dentro do corpo
-}</code></pre>
-        
-      </div>
+INSERT INTO aluno (nome, email, ra, data_nascimento)
+VALUES ('Outro Aluno', 'repetido@escola.com', 'RA002', '2009-05-10');</code></pre>
     </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
-        <h1>Mesma lógica, com for</h1>
-        
-        
-    <div class="file-label">contador_for.c</div>
-    <pre style="margin-top:0;"><code class="language-c">int pontos = 0;
-
-for (int rodada = 1; rodada &lt;= 5; rodada++) {
-    printf(&quot;Rodada %d: %d pts\n&quot;, rodada, pontos);
-    pontos += 10;
-}</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-compress"></i> As 3 partes moram juntas
+        <i class="fa-solid fa-triangle-exclamation"></i> É aqui que entram as restrições de hoje
       </h3>
-      <p>Inicialização, condição e incremento, que antes ficavam espalhados em três lugares diferentes, agora vivem dentro do mesmo parênteses. Menos chance de esquecer o incremento e criar um laço infinito.</p>
+      <p>Restrições de coluna são regras que o próprio SGBD passa a fiscalizar sozinho, recusando um <code>INSERT</code> que as desrespeite — sem precisar de nenhum código extra verificando isso.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-diagram-project"></i>
-        <h1>Anatomia do for</h1>
-        <p>inicialização; condição; incremento — tudo em um só lugar</p>
+        <i class="fa-solid fa-asterisk"></i>
+        <h1>NOT NULL</h1>
+        <p>Obrigando o preenchimento de uma coluna</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
-        <h1>Como o for executa, por dentro</h1>
+        <h1>NOT NULL: Essa Coluna Não Pode Ficar Vazia</h1>
         
-        <div class="bloco-diagrama" id="mmd35i22">
-    <div class="bloco-diagrama-titulo">Ordem de execução do for</div>
-    <div class="mermaid">flowchart TD
-  A[Inicializacao: executa 1 vez] --&gt; B{Condicao verdadeira?}
-  B --&gt;|Sim| C[Executa o corpo do for]
-  C --&gt; D[Incremento]
-  D --&gt; B
-  B --&gt;|Nao| E[Sai do laco]</div>
-    <div class="bloco-diagrama-legenda">A inicialização só roda uma vez. Depois disso é: testa, executa, incrementa, testa de novo...</div>
-  </div>
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-sql">CREATE TABLE exemplo (
+  nome VARCHAR(100) NOT NULL
+);</code></pre>
+    </div>
 
+    <div class="code-wrap">
+      <div class="file-label"><span>tentando burlar</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">INSERT INTO exemplo (nome) VALUES (NULL);
+-- ERROR 1048 (23000): Column 'nome' cannot be null</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-info"></i> Sem NOT NULL, tudo aceita NULL
+      </h3>
+      <p>Por padrão, toda coluna aceita <code>NULL</code> (ausência de valor) — foi por isso que o <code>INSERT</code> sem nome da Aula 6 funcionava sem reclamar. <code>NOT NULL</code> desliga essa permissão pra uma coluna específica.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="4">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-fill-drip"></i>
+        <h1>DEFAULT</h1>
+        <p>Valor padrão quando nada é informado</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="4">
+      <div class="slide-content-wrapper">
+        <h1>DEFAULT: Um Valor Pronto Pra Quando Ninguém Informa</h1>
+        
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-sql">CREATE TABLE exemplo (
+  turno VARCHAR(20) DEFAULT 'Manha'
+);</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>usando o padrao</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">INSERT INTO exemplo () VALUES ();
+SELECT * FROM exemplo;
+-- turno = 'Manha', preenchido sozinho</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Não impede NULL sozinho
+      </h3>
+      <p><code>DEFAULT</code> só entra em ação quando a coluna é <strong>omitida</strong> do <code>INSERT</code>. Se alguém informar <code>NULL</code> explicitamente (e a coluna não tiver <code>NOT NULL</code> junto), o valor gravado ainda é <code>NULL</code>, não o padrão.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="5">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-fingerprint"></i>
+        <h1>UNIQUE</h1>
+        <p>Impedindo valores repetidos</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>UNIQUE: Ninguém Mais Pode Repetir Esse Valor</h1>
+        
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-sql">CREATE TABLE exemplo (
+  email VARCHAR(100) UNIQUE
+);</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>tentando duplicar</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">INSERT INTO exemplo (email) VALUES ('ana@escola.com');
+INSERT INTO exemplo (email) VALUES ('ana@escola.com');
+-- ERROR 1062 (23000): Duplicate entry 'ana@escola.com' for key 'email'</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-info"></i> UNIQUE permite NULL (às vezes mais de um)
+      </h3>
+      <p>Uma coluna <code>UNIQUE</code> sozinha ainda aceita <code>NULL</code> — e o MySQL trata cada <code>NULL</code> como "desconhecido", então várias linhas com <code>NULL</code> não contam como duplicadas entre si. Combine com <code>NOT NULL</code> quando quiser as duas garantias juntas.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
+        <h1>Combinando Restrições na Mesma Coluna</h1>
+        
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-sql">CREATE TABLE exemplo (
+  email VARCHAR(100) NOT NULL UNIQUE,
+  turno VARCHAR(20) NOT NULL DEFAULT 'Manha'
+);</code></pre>
+    </div>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">DESCRIBE exemplo</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th></tr></thead><tbody><tr><td>email</td><td>varchar(100)</td><td>NO</td><td>UNI</td><td>NULL</td></tr><tr><td>turno</td><td>varchar(20)</td><td>NO</td><td></td><td>Manha</td></tr></tbody></table></div>
     
-    <pre><code class="language-c">for (int rodada = 1; rodada &lt;= 5; rodada++) {
-//   ^inicializacao   ^condicao     ^incremento
-    printf(&quot;Rodada %d\n&quot;, rodada);
-}</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        <h1>For na prática: tabuada com número fixo de linhas</h1>
-        
-        <p>Imprimir a tabuada de um número é o exemplo clássico de for: você <strong>sempre</strong> repete de 1 a 10, nem uma vez a mais, nem a menos.</p>
-<div class="depurador-bloco" id="dbg2u1ij1">
-  <div class="dbg-titulo">
-    <span class="dbg-titulo-text">Tabuada do 7</span>
-    <button class="dbg-btn" id="dbg2u1ij1-prev" onclick="dbgPrev('dbg2u1ij1')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbg2u1ij1-cur">—</span> / 10</span>
-    <button class="dbg-btn" id="dbg2u1ij1-next" onclick="dbgNext('dbg2u1ij1')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbg2u1ij1')">↺ Reset</button>
   </div>
-  <div class="dbg-layout">
-    <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">int numero = 7;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">for (int i = 1; i &lt;= 10; i++) {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    printf(&quot;%d x %d = %d\n&quot;, numero, i, numero * i);</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">}</span></div></div>
-    <div class="dbg-vars-panel">
-      <div class="dbg-vars-title">Variáveis</div>
-      <table class="dbg-vars-table"><thead><tr><th>Var</th><th>Valor</th></tr></thead>
-      <tbody class="dbg-vars-body"></tbody></table>
-    </div>
-  </div>
-  <div class="dbg-output" id="dbg2u1ij1-out"></div>
-  <script type="application/json" id="dbg2u1ij1-data">[{"linha":1,"vars":{"numero":7}},{"linha":3,"vars":{"numero":7,"i":1}},{"linha":4,"vars":{"numero":7,"i":1},"saida":"7 x 1 = 7"},{"linha":3,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7"},{"linha":4,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":3,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":4,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":3,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":4,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28"},{"linha":3,"vars":{"numero":7,"i":11},"saida":"(... segue assim ate 7 x 10 = 70 ...)"}]</script>
-</div>
         
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-layer-group"></i>
-        <h1>For também acumula</h1>
-        <p>o padrão continua o mesmo, só troca o laço por fora</p>
+        <i class="fa-solid fa-school"></i>
+        <h1>Prática: Tabelas da Escola</h1>
+        <p>Recriando aluno, professor, turma e disciplina</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
-        <h1>Média de 4 provas, com for</h1>
+        <h1>aluno e professor, Com Restrições</h1>
         
-        <p>Lembra do acumulador da Aula 2? A lógica de somar valor por valor <strong>não muda nada</strong> — só o controle do laço vira for, porque agora sabemos de antemão: são sempre 4 provas.</p>
-
-    <div class="file-label">media_for.c</div>
-    <pre style="margin-top:0;"><code class="language-c">float soma = 0, nota, media;
-
-for (int prova = 1; prova &lt;= 4; prova++) {
-    printf(&quot;Nota da prova %d: &quot;, prova);
-    scanf(&quot;%f&quot;, &amp;nota);
-    soma += nota;      // acumulador, igual sempre foi
-}
-
-media = soma / 4;
-printf(&quot;Media final: %.2f\n&quot;, media);</code></pre>
         
-      </div>
+    <div class="code-wrap">
+      <div class="file-label"><span>aluno</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">CREATE TABLE aluno (
+  nome VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  ra VARCHAR(20) NOT NULL UNIQUE,
+  data_nascimento DATE NOT NULL
+);</code></pre>
     </div>
 
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
-        <h1>Cuidados comuns com o for</h1>
-        
-        
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-ruler"></i> Off-by-one
-          </h3>
-          <p>Usar <code>&lt;</code> quando era pra ser <code>&lt;=</code> (ou o contrário) faz o laço repetir uma vez a mais ou a menos do que você queria.</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-box"></i> Escopo da variável
-          </h3>
-          <p>Um <code>int i</code> declarado dentro do <code>for( )</code> só existe <strong>dentro</strong> do laço — usar <code>i</code> depois dele dá erro de compilação.</p>
-          
-        </div>
+    <div class="code-wrap">
+      <div class="file-label"><span>professor</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">CREATE TABLE professor (
+  nome VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  formacao VARCHAR(100),
+  data_contratacao DATE NOT NULL
+);</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-signpost"></i> for não aposenta o while
+        <i class="fa-solid fa-circle-info"></i> formacao continua sem NOT NULL
       </h3>
-      <p>Quando você NÃO sabe quantas vezes vai repetir de antemão — como na validação de entrada da Aula 4 — <code>while</code>/<code>do-while</code> continuam sendo a escolha certa. Um comparativo completo entre os dois vem na Aula 6.</p>
+      <p>Nem toda coluna precisa de restrição — <code>formacao</code> continua aceitando <code>NULL</code>, pra representar um professor cuja formação ainda não foi cadastrada no sistema.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
-        <h1>Sua vez de rodar o for</h1>
+        <h1>turma e disciplina, Com Restrições</h1>
         
         
+    <div class="code-wrap">
+      <div class="file-label"><span>turma</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">CREATE TABLE turma (
+  nome VARCHAR(50) NOT NULL UNIQUE,
+  turno VARCHAR(20) NOT NULL DEFAULT 'Manha',
+  ano_letivo INT NOT NULL
+);</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>disciplina</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">CREATE TABLE disciplina (
+  nome VARCHAR(100) NOT NULL UNIQUE,
+  carga_horaria INT NOT NULL DEFAULT 60
+);</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Ainda sem chave primária
+      </h3>
+      <p>Repare que nenhuma dessas tabelas tem <code>PRIMARY KEY</code> — continua de propósito. Isso, junto com o auto incremento, é o assunto da Aula 8.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="9">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Resumo e prévia da Aula 8</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
+      <div class="slide-content-wrapper">
+        <h1>Resumo das Restrições de Hoje</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">NOT NULL x DEFAULT x UNIQUE</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Restrição</th><th>O que faz</th><th>Ainda aceita NULL?</th></tr></thead><tbody><tr><td><code>NOT NULL</code></td><td>Obriga o preenchimento da coluna</td><td>Não</td></tr><tr><td><code>DEFAULT valor</code></td><td>Usa um valor padrão se a coluna for omitida</td><td>Sim, se não tiver NOT NULL junto</td></tr><tr><td><code>UNIQUE</code></td><td>Impede valores repetidos na coluna</td><td>Sim (vários NULLs não contam como duplicados)</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
+      </h3>
+      <p>Na Aula 8 vamos adicionar <code>PRIMARY KEY</code> e <code>AUTO_INCREMENT</code> às tabelas — a peça que falta pra identificar cada linha de forma única.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>Exercícios: Aplicando Restrições</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-file-code"></i> O que entregar
+      </h3>
+      <p>Salve o comando <code>CREATE TABLE</code> de cada exercício num arquivo <code>.sql</code> (ex: <code>livro.sql</code>).</p>
+      
+    </div>
+
     <div class="quest-list">
-      <ol><li>Escreva um for que imprima os números de 1 a 20.</li><li>Reescreva com for um contador de pontos que soma 5 a cada uma de 8 rodadas (igual ao exemplo de hoje, mas com outros números).</li><li>Faça um for que simule um speedrun: o jogador tem exatamente 5 tentativas para bater a fase — imprima o número de cada tentativa.</li><li>Usando o padrão acumulador, some as notas de 6 provas com for e calcule a média final.</li><li>Desafio: o que acontece se você trocar <code>&lt;=</code> por <code>&lt;</code> no for da tabuada? Teste e explique o resultado.</li></ol>
+      <ol><li>Crie a tabela <code>livro</code> com <code>titulo</code> (NOT NULL), <code>isbn</code> (NOT NULL e UNIQUE) e <code>disponivel</code> (DEFAULT 'Sim').</li><li>Rode <code>DESCRIBE livro</code> e confira se as colunas Null/Key/Default aparecem como esperado.</li><li>Crie a tabela <code>funcionario</code> com <code>nome</code> (NOT NULL), <code>email</code> (NOT NULL e UNIQUE) e <code>cargo</code> (DEFAULT 'Nao definido').</li><li>Tente inserir dois funcionários com o mesmo email e explique, com suas palavras, o erro que o MySQL retorna.</li><li>Desafio: pense numa coluna que faria sentido ser UNIQUE mas NÃO NOT NULL (aceitar ficar vazia às vezes) — explique o cenário e escreva o CREATE TABLE dela.</li></ol>
     </div>
         
       </div>
@@ -474,17 +590,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcf9f4',
-    primaryTextColor: '#211712',
-    primaryBorderColor: '#F1DEC4',
-    lineColor: '#F1DEC4',
-    secondaryColor: '#677E61',
+    primaryColor: '#fdf4df',
+    primaryTextColor: '#170609',
+    primaryBorderColor: '#F2C14E',
+    lineColor: '#F2C14E',
+    secondaryColor: '#3D0F1E',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcf9f4',
-    nodeBorder: '#F1DEC4',
+    mainBkg: '#fdf4df',
+    nodeBorder: '#F2C14E',
     clusterBkg: '#f0f4f8',
-    titleColor: '#F1DEC4',
+    titleColor: '#F2C14E',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -494,7 +610,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#f3dddd'
+    cScale1: '#e7d7dc'
   }
 });
 </script>
@@ -502,12 +618,17 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::5';
+const STORAGE_KEY='aulagen_slide::BancodeDados::7';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=10;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -528,7 +649,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -556,6 +678,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Repetições Aninhadas</title>
+<title>Aula 6: Comparativo de Laços (for vs while)</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -39,16 +39,33 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
 .slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
-.slide-number{position:absolute;top:70px;right:40px;background:var(--color-blue);color:#fff;padding:5px 15px;border-radius:20px;font-size:1.2rem;font-weight:800;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
 ul,ol{margin-left:30px;margin-bottom:25px;}
 strong{color:var(--color-rust);font-weight:800;}
-pre[class*="language-"]{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
-code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 :not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
-.file-label{display:inline-block;background:var(--color-blue);color:#fff;padding:6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-15px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
 .focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
 .focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
@@ -62,12 +79,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
 .btn:hover{background:var(--color-orange);}
 .progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
 @media print{
   body,.container{height:auto;overflow:visible;background:#fff;}
   .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
   .fixed-link-bar-btn{color:#000;}
   .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
-  .controls,.progress-bar{display:none!important;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
   .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
@@ -109,6 +127,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
 .bloco-diagrama .mermaid svg{max-width:none!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
 .bloco-animacao{margin:12px 0;}
 .bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
@@ -179,26 +205,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Repetições Aninhadas</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Roteiro de Hoje</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Quando um laço não basta</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Treino: Séries x Repetições</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>Laço dentro de laço</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Sintaxe: for dentro de for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Ordem de execução</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Ordem de Execução — Parte 1</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Ordem de Execução — Parte 2</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-table-cells"></i><span>Tabuada completa</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Tabuada Completa (10×10)</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-shapes"></i><span>Desenhando com Laços</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Padrão: Triângulo de Asteriscos</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Cuidado: Nomes das Variáveis</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O Bug Clássico do Laço Aninhado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-shuffle"></i><span>Misturando Tipos de Laço</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Combinando for e while</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><i class="fa-solid fa-code"></i><span>Desafios</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Comparativo de Laços</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Roteiro de hoje</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-hashtag"></i><span>Por que comparar?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>A pergunta certa antes de codar</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-shuffle"></i><span>Mesmo problema, dois estilos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Contador de pontos: for vs while</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Quando o for começa a doer</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-table"></i><span>Guia de decisão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Tabela de decisão prática</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Fluxograma da escolha</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Desafio: for, while ou do-while?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafio: for, while ou do-while? (Parte 2 de 3)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Desafio: for, while ou do-while? (Parte 3 de 3)</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
 <div class="controls">
   <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
   <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
@@ -206,86 +228,64 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
   <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
 </div>
 <div class="container">
-    <div class="slide">
+    <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 01</div>
-        <h1>Repetições Aninhadas</h1>
-        <h2>Aula 7 — Módulo de Repetição em C</h2>
-        
+        <h1>Comparativo de Laços</h1>
+        <h2>for vs while — qual usar, e quando</h2>
+        <p>Vocês já sabem construir um <code>while</code>, um <code>do-while</code> e um <code>for</code> (Aulas 1, 3 e 5). A pergunta de hoje não é 'como funciona' — é <strong>quando usar qual</strong>.</p>
+
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-layer-group"></i> Um laço dentro do outro
+        <i class="fa-solid fa-scale-balanced"></i> Sem laço novo hoje
       </h3>
-      <p>Hoje juntamos tudo que já sabemos sobre <code>for</code>, <code>while</code> e <code>do-while</code> (Aulas 1 a 6) pra resolver problemas que um laço sozinho não dá conta: tabelas, grades e padrões.</p>
+      <p>O desafio de hoje é escolher entre ferramentas que vocês já dominam — não aprender uma nova.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 02</div>
-        <h1>Roteiro de Hoje</h1>
         
+        <h2>Roteiro de hoje</h2>
         <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Aula 7</div>
+    <div class="bloco-agenda-titulo">O que vamos ver</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Quando um laço não basta</div>
-            <div class="agenda-item-texto">Séries x repetições — um exemplo do dia a dia</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-hashtag"></i> Por que comparar?</div>
+            <div class="agenda-item-texto">Número conhecido de antemão vs. condição só descoberta em tempo de execução</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-layer-group"></i> Laço dentro de laço</div>
-            <div class="agenda-item-texto">Sintaxe e primeiro exemplo</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-shuffle"></i> Mesmo problema, dois estilos</div>
+            <div class="agenda-item-texto">Reescrevendo o contador de pontos lado a lado para provar a equivalência</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Ordem de execução</div>
-            <div class="agenda-item-texto">Quem roda primeiro, quantas vezes</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Quando o for começa a doer</div>
+            <div class="agenda-item-texto">Por que validação de entrada não combina com for</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-table-cells"></i> Tabuada completa</div>
-            <div class="agenda-item-texto">De uma linha (Aula 5) pra grade inteira</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-table"></i> Guia de decisão</div>
+            <div class="agenda-item-texto">Tabela prática e fluxograma pra decidir em segundos</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-shapes"></i> Desenhando com Laços</div>
-            <div class="agenda-item-texto">Padrões visuais com printf</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Cuidado: Nomes das Variáveis</div>
-            <div class="agenda-item-texto">i e j — escopo aninhado</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-shuffle"></i> Misturando Tipos de Laço</div>
-            <div class="agenda-item-texto">for + while trabalhando juntos</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(17)" role="button" tabindex="0">
-          <div class="agenda-numero">08</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-code"></i> Desafios</div>
-            <div class="agenda-item-texto">Praticando o que vimos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Desafio: for, while ou do-while?</div>
+            <div class="agenda-item-texto">15 cenários pra você justificar qual laço usaria</div>
           </div>
         </div>
     </div>
@@ -294,288 +294,181 @@ code[class*="language-"]{font-family:'Fira Code',monospace;text-shadow:none;font
       </div>
     </div>
 
-    <div class="slide topic">
+    <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-dumbbell"></i>
-        <h1>Quando um laço só não é suficiente</h1>
-        <p>Séries x repetições — o dia a dia já é aninhado</p>
+        <i class="fa-solid fa-scale-balanced"></i>
+        <h1>Por que comparar?</h1>
+        <p>Vocês já sabem os dois. Falta saber escolher.</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 03</div>
-        <h1>Treino: Séries x Repetições</h1>
         
-        <div class="bloco-diagrama" id="mmd0qsh4">
-    <div class="bloco-diagrama-titulo">Um laço dentro do outro (ainda sem nenhuma linha de código)</div>
-    <div class="mermaid">flowchart TD
-  subgraph SERIES["Para cada Serie (1 a 3)"]
-    direction TB
-    subgraph REP["Para cada Repeticao (1 a 12)"]
-      A["Fazer 1 flexao"]
-    end
-  end</div>
-    <div class="bloco-diagrama-legenda">O laço de fora (série) só avança depois que o laço de dentro (repetição) roda TODAS as voltas.</div>
-  </div>
-<p>Repara: pra completar uma série inteira, você repete a repetição várias vezes. Isso já é um laço dentro de outro laço — só que ainda na academia, não no código.</p>
-        
-      </div>
-    </div>
+        <h2>A pergunta certa antes de codar</h2>
+        <p>Antes de escrever <code>for</code> ou <code>while</code>, faça uma pergunta simples: <strong>eu já sei quantas vezes isso vai repetir, antes mesmo de começar?</strong> É tipo streak do Duolingo: 'estudar 30 dias seguidos' é contável (for); 'estudar até terminar a lição de hoje' só termina quando terminar (while).</p>
 
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-layer-group"></i>
-        <h1>Formalizando: Laço Dentro de Laço</h1>
-        <p>Sintaxe do laço aninhado em C</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 04</div>
-        <h1>Sintaxe: for dentro de for</h1>
-        
-        <p>Um <strong>laço aninhado</strong> é um laço inteiro (<code>for</code>, <code>while</code> ou <code>do-while</code>) escrito dentro do corpo de outro laço. Quem está por fora é o <strong>laço externo</strong>; quem está por dentro é o <strong>laço interno</strong> — e o interno pode ser qualquer um dos três tipos que você já conhece.</p>
-
-    <div class="file-label">treino.c</div>
-    <pre style="margin-top:0;"><code class="language-c">for (int serie = 1; serie &lt;= 3; serie++) {          // laco EXTERNO
-    printf(&quot;Serie %d:\n&quot;, serie);
-    for (int rep = 1; rep &lt;= 12; rep++) {           // laco INTERNO
-        printf(&quot;  Repeticao %d\n&quot;, rep);
-    }
-}</code></pre>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-diagram-project"></i>
-        <h1>Ordem de Execução</h1>
-        <p>Quem roda primeiro, e quantas vezes no total?</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 05</div>
-        <h1>Ordem de Execução — Parte 1</h1>
-        
-        <div class="bloco-diagrama" id="mmdz22x2">
-    <div class="bloco-diagrama-titulo">Fluxo de um laço aninhado (for dentro de for)</div>
-    <div class="mermaid">flowchart TD
-  A["Laco externo: i = 1"] --&gt; B{"i &lt;= 3?"}
-  B --&gt;|Sim| C["Laco interno: j = 1"]
-  C --&gt; D{"j &lt;= 2?"}
-  D --&gt;|Sim| E["Executa corpo (i, j)"]
-  E --&gt; F["j++"]
-  F --&gt; D
-  D --&gt;|Nao| G["i++"]
-  G --&gt; B
-  B --&gt;|Nao| H["Fim"]</div>
-    <div class="bloco-diagrama-legenda">O laço interno (j) roda por completo a cada única volta do laço externo (i).</div>
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 06</div>
-        <h1>Ordem de Execução — Parte 2</h1>
-        
-        <div class="depurador-bloco" id="dbglpq6yb">
-  <div class="dbg-titulo">
-    <span class="dbg-titulo-text">Teste de mesa: 2 séries x 2 repetições</span>
-    <button class="dbg-btn" id="dbglpq6yb-prev" onclick="dbgPrev('dbglpq6yb')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbglpq6yb-cur">—</span> / 13</span>
-    <button class="dbg-btn" id="dbglpq6yb-next" onclick="dbgNext('dbglpq6yb')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbglpq6yb')">↺ Reset</button>
-  </div>
-  <div class="dbg-layout">
-    <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">for (int i = 1; i &lt;= 2; i++) {</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline">    for (int j = 1; j &lt;= 2; j++) {</span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">        printf(&quot;i=%d j=%d\n&quot;, i, j);</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    }</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">}</span></div></div>
-    <div class="dbg-vars-panel">
-      <div class="dbg-vars-title">Variáveis</div>
-      <table class="dbg-vars-table"><thead><tr><th>Var</th><th>Valor</th></tr></thead>
-      <tbody class="dbg-vars-body"></tbody></table>
-    </div>
-  </div>
-  <div class="dbg-output" id="dbglpq6yb-out"></div>
-  <script type="application/json" id="dbglpq6yb-data">[{"linha":1,"vars":{"i":1}},{"linha":2,"vars":{"i":1,"j":1}},{"linha":3,"vars":{"i":1,"j":1},"saida":"i=1 j=1"},{"linha":2,"vars":{"i":1,"j":2}},{"linha":3,"vars":{"i":1,"j":2},"saida":"i=1 j=2"},{"linha":2,"vars":{"i":1,"j":3}},{"linha":1,"vars":{"i":2}},{"linha":2,"vars":{"i":2,"j":1}},{"linha":3,"vars":{"i":2,"j":1},"saida":"i=2 j=1"},{"linha":2,"vars":{"i":2,"j":2}},{"linha":3,"vars":{"i":2,"j":2},"saida":"i=2 j=2"},{"linha":2,"vars":{"i":2,"j":3}},{"linha":1,"vars":{"i":3}}]</script>
-</div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-calculator"></i> Total de execuções
-      </h3>
-      <p>Nesse exemplo: 2 voltas externas × 2 voltas internas = <strong>4</strong> execuções do <code>printf</code>. É sempre externo × interno.</p>
+    <div class="grid-2">
       
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-hashtag"></i> Sei o número (for)
+          </h3>
+          <p>Contagem conhecida de antemão.</p>
+          <ul style="margin-left:20px"><li>Tabuada de 1 a 10</li><li>Ler N notas de um aluno</li><li>Percorrer as 52 cartas de um baralho</li></ul>
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-circle-question"></i> Depende da condição (while/do-while)
+          </h3>
+          <p>Só se descobre em tempo de execução, quando parar.</p>
+          <ul style="margin-left:20px"><li>Validação de entrada</li><li>Repetir até o usuário digitar 'sair'</li><li>Ler tentativas até acertar o palpite</li></ul>
+        </div>
     </div>
         
       </div>
     </div>
 
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-table-cells"></i>
-        <h1>Aplicando: Tabuada Completa</h1>
-        <p>Da Aula 5 (uma linha) pra grade inteira</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 07</div>
-        <h1>Tabuada Completa (10×10)</h1>
-        
-        
-    
-    <pre><code class="language-c">for (int linha = 1; linha &lt;= 10; linha++) {
-    for (int coluna = 1; coluna &lt;= 10; coluna++) {
-        printf(&quot;%4d&quot;, linha * coluna);   // 4 espacos pra alinhar
-    }
-    printf(&quot;\n&quot;);   // pula linha SO depois que o laco interno termina
-}</code></pre>
-<div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">Recorte da saída (3×3, dos 10×10 reais)</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>×</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td><td>3</td></tr><tr><td>2</td><td>2</td><td>4</td><td>6</td></tr><tr><td>3</td><td>3</td><td>6</td><td>9</td></tr></tbody></table></div>
-    
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-shapes"></i>
-        <h1>Desenhando com Laços</h1>
-        <p>Padrões visuais: cada linha, uma repetição diferente</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 08</div>
-        <h1>Padrão: Triângulo de Asteriscos</h1>
-        
-        
-    
-    <pre><code class="language-c">for (int linha = 1; linha &lt;= 5; linha++) {
-    for (int coluna = 1; coluna &lt;= linha; coluna++) {   // repete &quot;linha&quot; vezes
-        printf(&quot;*&quot;);
-    }
-    printf(&quot;\n&quot;);
-}</code></pre>
-
-    <div class="file-label">saída</div>
-    <pre style="margin-top:0;"><code class="language-text">*
-**
-***
-****
-*****</code></pre>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> O limite pode variar
-      </h3>
-      <p>Repara que o laço interno não vai até um número fixo — vai até <code>linha</code>. O limite de um laço interno pode depender do valor do laço externo. É essa ideia que desenha o padrão.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Cuidado: Nomes das Variáveis</h1>
-        <p>Por que i (fora) e j (dentro), e não os dois i?</p>
-      </div>
-    </div>
-
-    <div class="slide">
-      <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 09</div>
-        <h1>O Bug Clássico do Laço Aninhado</h1>
-        
-        
-    <div class="file-label">bug_classico.c</div>
-    <pre style="margin-top:0;"><code class="language-c">int i;
-for (i = 1; i &lt;= 3; i++) {
-    for (i = 1; i &lt;= 5; i++) {   // BUG: reusa a MESMA variavel i!
-        printf(&quot;*&quot;);
-    }
-    printf(&quot;\n&quot;);
-}
-// ao sair do laco interno, i ja vale 6 -&gt; o laco externo
-// nunca mais volta -&gt; so imprime 1 linha, nao 3</code></pre>
-
-    <div class="file-label">corrigido.c</div>
-    <pre style="margin-top:0;"><code class="language-c">for (int i = 1; i &lt;= 3; i++) {          // i cuida do laco externo
-    for (int j = 1; j &lt;= 5; j++) {      // j cuida do laco interno, sozinho
-        printf(&quot;*&quot;);
-    }
-    printf(&quot;\n&quot;);
-}</code></pre>
-<p>Convenção: <code>i</code> pro laço mais de fora, <code>j</code> pro próximo, <code>k</code> se precisar de um terceiro. Evita esse bug e deixa o código mais fácil de ler.</p>
-        
-      </div>
-    </div>
-
-    <div class="slide topic">
+    <div class="slide topic" data-num="4">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-shuffle"></i>
-        <h1>Misturando Tipos de Laço</h1>
-        <p>for por fora, while por dentro — e vice-versa</p>
+        <h1>Mesmo problema, dois estilos</h1>
+        <p>Se dá pra contar de antemão, os dois resolvem — só muda a roupa</p>
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Slide 10</div>
-        <h1>Combinando for e while</h1>
         
-        <p>Não existe regra de "só <code>for</code> com <code>for</code>". Cada laço aninhado escolhe seu tipo pelo mesmo critério da Aula 6: número de repetições conhecido → <code>for</code>; depende de uma condição em tempo de execução → <code>while</code>/<code>do-while</code>.</p>
+        <h2>Contador de pontos: for vs while</h2>
+        <p>Mesmo problema da Aula 5 (contador de pontos), escrito nos dois estilos. Repare: a lógica de dentro do laço <strong>nem muda</strong> — só a organização de início/condição/incremento.</p>
 
-    
-    <pre><code class="language-c">for (int rodada = 1; rodada &lt;= 3; rodada++) {        // FOR: 3 rodadas, numero conhecido
-    int palpite;
-    printf(&quot;Rodada %d - digite 1 a 10: &quot;, rodada);
-    scanf(&quot;%d&quot;, &amp;palpite);
-
-    while (palpite &lt; 1 || palpite &gt; 10) {             // WHILE: repete ate ser valido
-        printf(&quot;Invalido! Tente de novo: &quot;);
-        scanf(&quot;%d&quot;, &amp;palpite);
-    }
+    <div class="code-wrap">
+      <div class="file-label"><span>contador_for.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">// já sabemos: são exatamente 5 rodadas
+int pontos = 0;
+for (int rodada = 1; rodada &lt;= 5; rodada++) {
+    pontos += 10;
 }</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>contador_while.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">// mesma lógica, peças separadas na mão
+int pontos = 0;
+int rodada = 1;
+while (rodada &lt;= 5) {
+    pontos += 10;
+    rodada++;
+}</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        
+        <h2>Quando o for começa a doer</h2>
+        <p>Tentem escrever a validação de entrada (Aula 4) com for. Pra isso, precisariam saber ANTES quantas vezes o usuário vai errar — e ninguém sabe disso.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>validacao_idade.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">int idade;
+do {
+    printf(&quot;Digite sua idade (0-120): &quot;);
+    scanf(&quot;%d&quot;, &amp;idade);
+} while (idade &lt; 0 || idade &gt; 120);</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-magnifying-glass"></i> Sua ferramenta contra bugs
+        <i class="fa-solid fa-triangle-exclamation"></i> Não force a barra
       </h3>
-      <p>Hoje vimos a ORDEM de execução com um teste de mesa simples — essa é a ferramenta mais poderosa que vocês têm pra caçar bugs em laços aninhados mais complexos: sempre que o resultado não bater, façam o teste de mesa e sigam o rastro, linha por linha.</p>
+      <p>Dá pra 'gambiarrar' um for com uma condição de parada escondida dentro do bloco — mas aí ele só está fingindo ser um while. Use a ferramenta certa pro trabalho certo.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide">
+    <div class="slide topic" data-num="6">
       <div class="slide-content-wrapper">
-        <div class="slide-number">Desafios</div>
-        <h1>Desafios</h1>
+        <i class="fa-solid fa-route"></i>
+        <h1>Guia de decisão</h1>
+        <p>Uma tabela e um fluxograma pra nunca mais travar</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
         
+        <h2>Tabela de decisão prática</h2>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Qual laço usar em cada cenário?</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Cenário</th><th>Sei o nº de repetições antes?</th><th>Roda ao menos 1x sempre?</th><th>Laço</th></tr></thead><tbody><tr><td>Imprimir a tabuada do 7</td><td>Sim (10 linhas)</td><td>—</td><td>for</td></tr><tr><td>Validar um CPF digitado</td><td>Não</td><td>Sim</td><td>do-while</td></tr><tr><td>Somar N notas (professor já disse N)</td><td>Sim</td><td>—</td><td>for</td></tr><tr><td>Repetir menu até escolher "Sair"</td><td>Não</td><td>Sim</td><td>do-while</td></tr><tr><td>Jogar até acabarem as vidas</td><td>Não</td><td>Depende do jogo</td><td>while</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">Regra de bolso: sabe o número de antemão? for. Só sabe pela condição? while ou do-while.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="7">
+      <div class="slide-content-wrapper">
+        
+        <h2>Fluxograma da escolha</h2>
+        <div class="bloco-diagrama" id="mmd5c5t8">
+    <div class="bloco-diagrama-titulo">Qual laço usar?</div>
+    <div class="mermaid">flowchart TD
+  A["Preciso repetir algo"] --&gt; B{"Sei quantas vezes antes de comecar?"}
+  B --&gt;|Sim| C["for"]
+  B --&gt;|Nao| D{"Preciso rodar ao menos uma vez?"}
+  D --&gt;|Sim| E["do-while"]
+  D --&gt;|Nao| F["while"]</div>
+    <div class="bloco-diagrama-legenda">Sabe o número? for. Não sabe, mas roda pelo menos 1x? do-while. Senão, while.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        
+        <h2>Desafio: for, while ou do-while? (Parte 1 de 3)</h2>
         
     <div class="quest-list">
-      <ol><li>Desafio 1 — Tabuada sob medida: peça um número N ao usuário e imprima a tabuada de N (de N×1 até N×10) usando dois <code>for</code>.</li><li>Desafio 2 — Grade de crafting: imprima uma grade 3×3 de asteriscos (tipo uma mesa de crafting) e depois adapte pra ler do usuário quantas linhas e colunas a grade deve ter.</li><li>Desafio 3 — Pirâmide invertida: imprima um triângulo de asteriscos que começa com 5 e diminui até 1 por linha — o contrário do exemplo que vimos em aula.</li></ol>
+      <ol><li>Imprimir a contagem regressiva de 10 até 1 antes do lançamento de um foguete.</li><li>Perguntar repetidamente um PIN de 4 dígitos até o usuário acertar o PIN correto de um caixa eletrônico.</li><li>Percorrer os 7 dias da semana e imprimir o nome de cada um.</li><li>Continuar chamando a "próxima senha" numa fila de atendimento até o atendente digitar 0 pra encerrar o expediente.</li><li>Contar quantos ingressos foram vendidos até o show esgotar, sem saber de antemão quantas pessoas vão comprar.</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
+      <div class="slide-content-wrapper">
+        
+        <h2>Desafio: for, while ou do-while? (Parte 2 de 3)</h2>
+        
+    <div class="quest-list">
+      <ol style="counter-reset:quest 5"><li>Imprimir todos os múltiplos de 3 entre 1 e 50.</li><li>Simular a abertura de um cofre de combinação: o usuário informa uma sequência de números e o programa repete pedindo até ela estar certa.</li><li>Ler a temperatura registrada em cada uma das 24 horas de um dia e calcular a média do dia.</li><li>Continuar atendendo clientes numa fila até ela ficar vazia, sabendo que ela pode já começar vazia.</li><li>Imprimir uma tabela de conversão de 1 a 10 quilômetros para milhas.</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        
+        <h2>Desafio: for, while ou do-while? (Parte 3 de 3)</h2>
+        
+    <div class="quest-list">
+      <ol style="counter-reset:quest 10"><li>Pedir repetidamente um número entre 1 e 6 (simulando um dado) até o usuário digitar um valor válido.</li><li>Contar quantas tentativas um jogador precisa até completar uma fase sem nenhum erro.</li><li>Imprimir os nomes de exatamente 8 convidados de uma lista de formatura, um por linha.</li><li>Simular um caixa eletrônico que continua perguntando "Deseja realizar outra operação? (S/N)" até o cliente responder "N".</li><li>Ler as vendas diárias de uma loja durante os 30 dias de um mês e somar o total vendido.</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Dica de ouro
+        <i class="fa-solid fa-lightbulb"></i> Como responder
       </h3>
-      <p>Antes de escrever qualquer <code>for</code>, desenhe no papel como a saída deve ficar. Aí é só perguntar: quantas linhas eu preciso (laço externo)? E em cada linha, quantas repetições (laço interno)?</p>
+      <p>Para cada cenário, diga: (1) qual laço, (2) por quê — cite se o número de repetições é conhecido e se precisa rodar ao menos uma vez.</p>
       
     </div>
         
@@ -617,12 +510,17 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::7';
+const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::6';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
 const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=10;
 const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
   setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
@@ -643,7 +541,8 @@ const showSlide = (i) => {
   if(i<0)i=0; if(i>=total)i=total-1;
   cur=i;
   slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
-  pb.style.width=((cur+1)/total*100)+'%';
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
   document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
   try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
 }
@@ -671,6 +570,32 @@ document.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
 });
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
 const _dbg={};
 function dbgInit(id){
   const el=document.getElementById(id);

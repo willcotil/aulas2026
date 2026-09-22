@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 5: Laço de Repetição Controlado (for)</title>
+<title>Aula 7: Shell Script: Conceitos, Shebang e Variáveis de Ambiente</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#BD4444;--color-rust:#F1DEC4;
-  --color-orange:#F1DEC4;--color-yellow:#F1DEC4;--color-deep:#677E61;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#211712;
+  --color-navy:#000;--color-blue:#4A5320;--color-rust:#A8E063;
+  --color-orange:#A8E063;--color-yellow:#A8E063;--color-deep:#232B12;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#12160A;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -200,23 +200,29 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Linguagem de Programação</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Fundamentos de Informática</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Aula 5 — Laço for</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Roteiro de hoje</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-hourglass-half"></i><span>Quando você já sabe quantas vezes vai repetir...</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Lembra do contador de pontos?</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>Mesma lógica, com for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Anatomia do for</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Como o for executa, por dentro</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-table-list"></i><span>For na prática: tabuada com número fixo de linhas</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-layer-group"></i><span>For também acumula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Média de 4 provas, com for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Cuidados comuns com o for</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Sua vez de rodar o for</span></button></div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>De Comando Solto a Script</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Um Arquivo Cheio de Comandos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-file-code"></i><span>Criando e Rodando um Script</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Shebang: a Primeira Linha</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Criando o Arquivo do Script</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Dando Permissão de Execução</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Rodando o Script</span></button>
+<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-comment"></i><span>Comentários</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Comentários com #</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-dollar-sign"></i><span>Variáveis</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Criando uma Variável</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Usando uma Variável: o $</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-globe"></i><span>Variáveis de Ambiente</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Variáveis Que Já Existem no Sistema</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Comando Solto x Dentro de um Script</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Praticar</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -229,68 +235,46 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <div class="container">
     <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <h1>Aula 5 — Laço for</h1>
-        <h2>Repetição controlada: quando você já sabe quantas vezes vai repetir</h2>
         
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-repeat"></i> Terceiro membro da família dos laços
-      </h3>
-      <p>Você já domina o <code>while</code> (Aula 1) e o <code>do-while</code> (Aula 3). Hoje entra o <code>for</code> — feito sob medida para quando o número de repetições já é conhecido antes mesmo do laço começar.</p>
-      
-    </div>
         
-      </div>
-    </div>
-
-    <div class="slide" data-num="2">
-      <div class="slide-content-wrapper">
-        <h1>Roteiro de hoje</h1>
-        
-        <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Nesta aula</div>
+        <p>Fundamentos de Informática (FI) — Aula 7</p>
+<div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">Shell Script: Conceitos, Shebang e Variáveis de Ambiente</div>
     <div class="agenda-lista">
       
-        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-arrows-rotate"></i> Mesma lógica, com for</div>
-            <div class="agenda-item-texto">Reescrevendo o contador de pontos conhecido</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> De Comando Solto a Script</div>
+            <div class="agenda-item-texto">O que é um script, de verdade</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Anatomia do for</div>
-            <div class="agenda-item-texto">Inicialização, condição e incremento juntos</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-table-list"></i> For na prática: tabuada com número fixo de linhas</div>
-            <div class="agenda-item-texto">Um exemplo completo com teste de mesa</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-layer-group"></i> For também acumula</div>
-            <div class="agenda-item-texto">O padrão acumulador não muda</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-code"></i> Criando e Rodando um Script</div>
+            <div class="agenda-item-texto">Shebang, touch, chmod +x e ./script.sh</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
-          <div class="agenda-numero">05</div>
+          <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Cuidados comuns com o for</div>
-            <div class="agenda-item-texto">Off-by-one e escopo da variável</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-dollar-sign"></i> Variáveis</div>
+            <div class="agenda-item-texto">Sintaxe, uso com $ e aspas</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dumbbell"></i> Sua vez de rodar o for</div>
-            <div class="agenda-item-texto">Hora de treinar</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-globe"></i> Variáveis de Ambiente</div>
+            <div class="agenda-item-texto">PATH, HOME, USER</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Resumo e prévia da Aula 8</div>
           </div>
         </div>
     </div>
@@ -299,30 +283,58 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
+    <div class="slide topic" data-num="2">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>De Comando Solto a Script</h1>
+        <p>O que é um script, de verdade</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="2">
+      <div class="slide-content-wrapper">
+        <h1>Um Arquivo Cheio de Comandos</h1>
+        
+        <p>Na Aula 6 digitamos comando por comando: <code>mkdir</code>, <code>cp</code>, <code>chmod</code>, <code>grep</code>... Um <strong>script</strong> é simplesmente um arquivo de texto guardando uma <strong>sequência</strong> desses mesmos comandos, pra rodar tudo de uma vez, sem digitar de novo toda hora.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Automação é isso
+      </h3>
+      <p>É exatamente a ideia de automação citada na ementa da disciplina: em vez de repetir manualmente uma sequência de tarefas, você escreve ela uma vez num arquivo e deixa o computador executar sozinho, sempre que precisar.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
     <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-hourglass-half"></i>
-        <h1>Quando você já sabe quantas vezes vai repetir...</h1>
-        <p>a repetição de hoje já nasce com prazo pra acabar</p>
+        <i class="fa-solid fa-file-code"></i>
+        <h1>Criando e Rodando um Script</h1>
+        <p>Shebang, touch, chmod +x e ./script.sh</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Lembra do contador de pontos?</h1>
+        <h1>O Shebang: a Primeira Linha</h1>
         
-        <p>É tipo bater a meta de série na academia: se o treino é <strong>4 séries de 12</strong>, você não fica perguntando a cada repetição "ainda falta?" — você já sabe de cara quantas vezes vai repetir. Olha nosso contador de pontos da Aula 1 com esse olhar: a variável <code>rodada</code> sempre vai de 1 até 5, e isso é sabido <strong>antes</strong> do laço começar.</p>
+        <p>Todo script de shell começa com uma linha especial chamada <strong>shebang</strong>, que avisa ao sistema qual programa deve interpretar o restante do arquivo.</p>
 
     <div class="code-wrap">
-      <div class="file-label"><span>contador_while.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-c">int pontos = 0;
-int rodada = 1;         // inicializacao, antes do laco
+      <div class="file-label"><span>meu_script.sh</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">#!/bin/bash
 
-while (rodada &lt;= 5) {   // condicao, no while
-    printf(&quot;Rodada %d: %d pts\n&quot;, rodada, pontos);
-    pontos += 10;
-    rodada++;           // incremento, dentro do corpo
-}</code></pre>
+echo &quot;Ola, mundo!&quot;</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-info"></i> Não é um comentário comum
+      </h3>
+      <p>O <code>#!</code> no início do arquivo tem um significado especial pro sistema operacional ("rode isso com <code>/bin/bash</code>"). Qualquer outro <code>#</code> no meio do arquivo é só um comentário normal, ignorado pelo interpretador.</p>
+      
     </div>
         
       </div>
@@ -330,59 +342,36 @@ while (rodada &lt;= 5) {   // condicao, no while
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <h1>Mesma lógica, com for</h1>
+        <h1>Criando o Arquivo do Script</h1>
         
-        
+        <p>Lembra do <code>touch</code> da Aula 6? É exatamente o que usamos pra começar um script novo.</p>
+
     <div class="code-wrap">
-      <div class="file-label"><span>contador_for.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-c">int pontos = 0;
-
-for (int rodada = 1; rodada &lt;= 5; rodada++) {
-    printf(&quot;Rodada %d: %d pts\n&quot;, rodada, pontos);
-    pontos += 10;
-}</code></pre>
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash">touch meu_script.sh</code></pre>
     </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-compress"></i> As 3 partes moram juntas
-      </h3>
-      <p>Inicialização, condição e incremento, que antes ficavam espalhados em três lugares diferentes, agora vivem dentro do mesmo parênteses. Menos chance de esquecer o incremento e criar um laço infinito.</p>
-      
-    </div>
+<p>Depois, é só abrir o arquivo num editor de texto (o mesmo que você já usa pra programar em C) e escrever o shebang seguido dos comandos.</p>
         
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="5">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-diagram-project"></i>
-        <h1>Anatomia do for</h1>
-        <p>inicialização; condição; incremento — tudo em um só lugar</p>
       </div>
     </div>
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <h1>Como o for executa, por dentro</h1>
+        <h1>Dando Permissão de Execução</h1>
         
-        <div class="bloco-diagrama" id="mmdtcjm3">
-    <div class="bloco-diagrama-titulo">Ordem de execução do for</div>
-    <div class="mermaid">flowchart TD
-  A[Inicializacao: executa 1 vez] --&gt; B{Condicao verdadeira?}
-  B --&gt;|Sim| C[Executa o corpo do for]
-  C --&gt; D[Incremento]
-  D --&gt; B
-  B --&gt;|Nao| E[Sai do laco]</div>
-    <div class="bloco-diagrama-legenda">A inicialização só roda uma vez. Depois disso é: testa, executa, incrementa, testa de novo...</div>
-  </div>
+        <p>Um arquivo <code>.sh</code> reciém-criado não tem permissão de <strong>execução</strong> por padrão. É aqui que volta o <code>chmod</code> da Aula 6.</p>
 
     <div class="code-wrap">
       <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
-      <pre><code class="language-c">for (int rodada = 1; rodada &lt;= 5; rodada++) {
-//   ^inicializacao   ^condicao     ^incremento
-    printf(&quot;Rodada %d\n&quot;, rodada);
-}</code></pre>
+      <pre><code class="language-bash">chmod +x meu_script.sh</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock-open"></i> Lembrando a Aula 6
+      </h3>
+      <p><code>chmod +x</code> adiciona a permissão de execução (<code>x</code>) pro dono do arquivo — exatamente a mesma sintaxe simbólica que já vimos, só que aplicada a um script em vez de um programa compilado.</p>
+      
     </div>
         
       </div>
@@ -390,91 +379,79 @@ for (int rodada = 1; rodada &lt;= 5; rodada++) {
 
     <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>For na prática: tabuada com número fixo de linhas</h1>
+        <h1>Rodando o Script</h1>
         
-        <p>Imprimir a tabuada de um número é o exemplo clássico de for: você <strong>sempre</strong> repete de 1 a 10, nem uma vez a mais, nem a menos.</p>
-<div class="depurador-bloco" id="dbgpmmezx">
-  <div class="dbg-titulo">
-    <span class="dbg-titulo-text">Tabuada do 7</span>
-    <button class="dbg-btn" id="dbgpmmezx-prev" onclick="dbgPrev('dbgpmmezx')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbgpmmezx-cur">—</span> / 10</span>
-    <button class="dbg-btn" id="dbgpmmezx-next" onclick="dbgNext('dbgpmmezx')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbgpmmezx')">↺ Reset</button>
-  </div>
-  <div class="dbg-layout">
-    <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">int numero = 7;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">for (int i = 1; i &lt;= 10; i++) {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    printf(&quot;%d x %d = %d\n&quot;, numero, i, numero * i);</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">}</span></div></div>
-    <div class="dbg-vars-panel">
-      <div class="dbg-vars-title">Variáveis</div>
-      <table class="dbg-vars-table"><thead><tr><th>Var</th><th>Valor</th></tr></thead>
-      <tbody class="dbg-vars-body"></tbody></table>
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash">./meu_script.sh</code></pre>
     </div>
-  </div>
-  <div class="dbg-output" id="dbgpmmezx-out"></div>
-  <script type="application/json" id="dbgpmmezx-data">[{"linha":1,"vars":{"numero":7}},{"linha":3,"vars":{"numero":7,"i":1}},{"linha":4,"vars":{"numero":7,"i":1},"saida":"7 x 1 = 7"},{"linha":3,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7"},{"linha":4,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":3,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":4,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":3,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":4,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28"},{"linha":3,"vars":{"numero":7,"i":11},"saida":"(... segue assim ate 7 x 10 = 70 ...)"}]</script>
-</div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-route"></i> Por que o ./ na frente?
+      </h3>
+      <p>É o caminho <strong>relativo</strong> que já formalizamos na Aula 6: <code>./</code> significa "a pasta atual". Sem ele, o sistema procuraria <code>meu_script.sh</code> nas pastas do <code>PATH</code> (que vamos ver já já) — e normalmente não encontraria.</p>
+      
+    </div>
         
       </div>
     </div>
 
     <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-layer-group"></i>
-        <h1>For também acumula</h1>
-        <p>o padrão continua o mesmo, só troca o laço por fora</p>
+        <i class="fa-solid fa-comment"></i>
+        <h1>Comentários</h1>
+        <p>Documentando o script com #</p>
       </div>
     </div>
 
     <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>Média de 4 provas, com for</h1>
+        <h1>Comentários com #</h1>
         
-        <p>Lembra do acumulador da Aula 2? A lógica de somar valor por valor <strong>não muda nada</strong> — só o controle do laço vira for, porque agora sabemos de antemão: são sempre 4 provas.</p>
+        <p>Qualquer linha (ou parte de linha) começando com <code>#</code> — exceto a primeira linha do arquivo, que é o shebang — é um comentário: o interpretador ignora completamente.</p>
 
     <div class="code-wrap">
-      <div class="file-label"><span>media_for.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-c">float soma = 0, nota, media;
+      <div class="file-label"><span>backup.sh</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">#!/bin/bash
+# Este script apenas cumprimenta o usuario
+# Autor: voce mesmo
 
-for (int prova = 1; prova &lt;= 4; prova++) {
-    printf(&quot;Nota da prova %d: &quot;, prova);
-    scanf(&quot;%f&quot;, &amp;nota);
-    soma += nota;      // acumulador, igual sempre foi
-}
-
-media = soma / 4;
-printf(&quot;Media final: %.2f\n&quot;, media);</code></pre>
+echo &quot;Ola, mundo!&quot;   # isso tambem e um comentario</code></pre>
     </div>
         
       </div>
     </div>
 
+    <div class="slide topic" data-num="8">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-dollar-sign"></i>
+        <h1>Variáveis</h1>
+        <p>Sintaxe, uso com $ e aspas</p>
+      </div>
+    </div>
+
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>Cuidados comuns com o for</h1>
+        <h1>Criando uma Variável</h1>
         
-        
-    <div class="grid-2">
-      
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-ruler"></i> Off-by-one
-          </h3>
-          <p>Usar <code>&lt;</code> quando era pra ser <code>&lt;=</code> (ou o contrário) faz o laço repetir uma vez a mais ou a menos do que você queria.</p>
-          
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-box"></i> Escopo da variável
-          </h3>
-          <p>Um <code>int i</code> declarado dentro do <code>for( )</code> só existe <strong>dentro</strong> do laço — usar <code>i</code> depois dele dá erro de compilação.</p>
-          
-        </div>
+        <p>Variáveis em shell script não têm tipo declarado — são tratadas como texto por padrão. A regra mais importante: <strong>sem espaço</strong> ao redor do <code>=</code>.</p>
+
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash">nome=&quot;Ana&quot;
+idade=20
+
+# ERRADO -- da erro de sintaxe:
+# nome = &quot;Ana&quot;</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-signpost"></i> for não aposenta o while
+        <i class="fa-solid fa-triangle-exclamation"></i> Diferente do C
       </h3>
-      <p>Quando você NÃO sabe quantas vezes vai repetir de antemão — como na validação de entrada da Aula 4 — <code>while</code>/<code>do-while</code> continuam sendo a escolha certa. Um comparativo completo entre os dois vem na Aula 6.</p>
+      <p>Em C você escreve <code>int idade = 20;</code> com espaços e tipo. Em shell script, o espaço ao redor do <code>=</code> quebra o comando — o shell entende como se você estivesse tentando rodar um comando chamado <code>nome</code> com argumentos.</p>
       
     </div>
         
@@ -483,11 +460,95 @@ printf(&quot;Media final: %.2f\n&quot;, media);</code></pre>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>Sua vez de rodar o for</h1>
+        <h1>Usando uma Variável: o $</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>saudacao.sh</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">#!/bin/bash
+nome=&quot;Ana&quot;
+echo &quot;Ola, $nome!&quot;
+echo 'Ola, $nome!'   # aspas simples NAO substituem a variavel</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-quote-right"></i> Aspas duplas, quase sempre
+      </h3>
+      <p>Use aspas duplas (<code>&quot;nome&quot;</code>) ao redor de uma variável: o valor é substituído normalmente, mas espaços dentro dele não quebram o comando. Aspas simples (<code>'nome'</code>) mostram o texto literal, sem substituir nada.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="10">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-globe"></i>
+        <h1>Variáveis de Ambiente</h1>
+        <p>PATH, HOME, USER</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>Variáveis Que Já Existem no Sistema</h1>
+        
+        <p>Além das variáveis que você cria, o sistema operacional já mantém um conjunto de <strong>variáveis de ambiente</strong>, disponíveis em qualquer terminal ou script.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Variáveis de ambiente comuns</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Variável</th><th>O que guarda</th></tr></thead><tbody><tr><td><code>$HOME</code></td><td>O caminho da sua pasta pessoal</td></tr><tr><td><code>$USER</code></td><td>Seu nome de usuário no sistema</td></tr><tr><td><code>$PATH</code></td><td>As pastas onde o sistema procura por comandos</td></tr><tr><td><code>$PWD</code></td><td>A pasta atual (mesma info do <code>pwd</code>, Aula 6)</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash">echo $HOME
+echo $USER
+
+# Lista TODAS as variaveis de ambiente de uma vez
+printenv</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="11">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Resumo e prévia da Aula 8</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>Comando Solto x Dentro de um Script</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">O que muda hoje</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>No terminal</th><th>Dentro de um script</th></tr></thead><tbody><tr><td>Como roda</td><td>Digitando um por um</td><td>Executando o arquivo (<code>./script.sh</code>)</td></tr><tr><td>Precisa de shebang?</td><td>Não</td><td>Sim, na primeira linha</td></tr><tr><td>Precisa de permissão x?</td><td>Não (já é o próprio shell)</td><td>Sim (<code>chmod +x</code>)</td></tr><tr><td>Reaproveitável?</td><td>Não, precisa redigitar</td><td>Sim, roda quantas vezes quiser</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
+      </h3>
+      <p>Na Aula 8 vamos deixar os scripts interativos: o comando <code>read</code> pra ler o que o usuário digita, e como fazer contas (operações aritméticas) dentro de um script.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Pra Praticar</h1>
         
         
     <div class="quest-list">
-      <ol><li>Escreva um for que imprima os números de 1 a 20.</li><li>Reescreva com for um contador de pontos que soma 5 a cada uma de 8 rodadas (igual ao exemplo de hoje, mas com outros números).</li><li>Faça um for que simule um speedrun: o jogador tem exatamente 5 tentativas para bater a fase — imprima o número de cada tentativa.</li><li>Usando o padrão acumulador, some as notas de 6 provas com for e calcule a média final.</li><li>Desafio: o que acontece se você trocar <code>&lt;=</code> por <code>&lt;</code> no for da tabuada? Teste e explique o resultado.</li></ol>
+      <ol><li>Crie um arquivo <code>ola.sh</code> com o shebang <code>#!/bin/bash</code>, dê permissão de execução com <code>chmod +x</code>, e faça ele imprimir "Ola, mundo!" com <code>echo</code>.</li><li>No mesmo script, crie uma variável <code>curso=&quot;Fundamentos de Informatica&quot;</code> e use <code>echo</code> com ela dentro de aspas duplas pra imprimir uma frase completa.</li><li>Crie um script <code>sistema.sh</code> que imprime, um por linha, o valor de <code>USER</code>, <code>HOME</code> e <code>$PWD</code>.</li><li>Rode <code>printenv</code> no terminal e identifique pelo menos duas variáveis de ambiente diferentes das que vimos em aula.</li><li>Crie um script com pelo menos 3 linhas de comentário explicando o que ele faz, antes dos comandos de verdade.</li><li>Desafio: crie um script <code>organizar.sh</code> que usa <code>mkdir</code> e <code>touch</code> (Aula 6) pra criar uma pasta chamada <code>projeto</code> com dois arquivos vazios dentro, <code>notas.txt</code> e <code>tarefas.txt</code> — tudo automatizado num único arquivo executável.</li></ol>
     </div>
         
       </div>
@@ -500,17 +561,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcf9f4',
-    primaryTextColor: '#211712',
-    primaryBorderColor: '#F1DEC4',
-    lineColor: '#F1DEC4',
-    secondaryColor: '#677E61',
+    primaryColor: '#eff9e3',
+    primaryTextColor: '#12160A',
+    primaryBorderColor: '#A8E063',
+    lineColor: '#A8E063',
+    secondaryColor: '#232B12',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcf9f4',
-    nodeBorder: '#F1DEC4',
+    mainBkg: '#eff9e3',
+    nodeBorder: '#A8E063',
     clusterBkg: '#f0f4f8',
-    titleColor: '#F1DEC4',
+    titleColor: '#A8E063',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -520,7 +581,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#f3dddd'
+    cScale1: '#dee0d7'
   }
 });
 </script>
@@ -528,7 +589,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::5';
+const STORAGE_KEY='aulagen_slide::FundamentosdeInformtica::7';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
@@ -536,7 +597,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=9;
+const totalConteudo=12;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
