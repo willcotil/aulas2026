@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 8: Introdução a Funções</title>
+<title>Aula 9: Introdução a Funções</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -219,7 +219,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Uma vez escrita, chamada quantas vezes precisar</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Onde colocar a função no arquivo</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-table-cells"></i><span>Exemplo prático</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>A tabuada da Aula 5, agora reutilizável</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>A tabuada da Aula 6, agora reutilizável</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-dumbbell"></i><span>Exercícios</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: pratique com funções (Parte 2 de 2)</span></button></div>
 </nav>
@@ -462,7 +462,7 @@ int main() {
       <h3>
         <i class="fa-solid fa-hourglass-half"></i> Só uma espiadinha
       </h3>
-      <p>Os detalhes de como passar valores e devolver resultados a gente estuda com calma na Aula 9. Por hoje, só repare que existe.</p>
+      <p>Os detalhes de como passar valores e devolver resultados a gente estuda com calma na Aula 10. Por hoje, só repare que existe.</p>
       
     </div>
 
@@ -497,7 +497,7 @@ int main() {
       <div class="slide-content-wrapper">
         
         <h2>Uma vez escrita, chamada quantas vezes precisar</h2>
-        <div class="bloco-diagrama" id="mmdz0uw1">
+        <div class="bloco-diagrama" id="mmdg5btm">
     <div class="bloco-diagrama-titulo">Da definição às chamadas</div>
     <div class="mermaid">flowchart LR
   D["Definição da função (escrita 1 vez)"] --&gt; C1["Chamada dentro do main()"]
@@ -554,7 +554,7 @@ void saudar() {
     <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
         
-        <h2>A tabuada da Aula 5, agora reutilizável</h2>
+        <h2>A tabuada da Aula 6, agora reutilizável</h2>
         
     <div class="code-wrap">
       <div class="file-label"><span>tabuada.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
@@ -580,7 +580,7 @@ int main() {
       <h3>
         <i class="fa-solid fa-star"></i> Sem a função, seria...
       </h3>
-      <p>...copiar o <code>for</code> da Aula 5 três vezes (ou mudar o número na mão e recompilar toda hora). O parâmetro <code>numero</code> aqui é só uma prévia — a gente destrincha isso na Aula 9.</p>
+      <p>...copiar o <code>for</code> da Aula 6 três vezes (ou mudar o número na mão e recompilar toda hora). O parâmetro <code>numero</code> aqui é só uma prévia — a gente destrincha isso na Aula 10.</p>
       
     </div>
         
@@ -593,7 +593,7 @@ int main() {
         <h2>Exercícios: pratique com funções (Parte 1 de 2)</h2>
         
     <div class="quest-list">
-      <ol><li>Escreva uma função <code>void linha()</code> que imprime uma linha de tracinhos e chame-a 3 vezes dentro do main, separando três blocos de texto diferentes.</li><li>Pegue o cálculo de média com acumulador da Aula 2 e transforme em uma função <code>void calcularMedia()</code> — por enquanto sem parâmetro, só movendo o código de dentro do main pra dentro da função.</li><li>Em uma frase, explique pra um colega a diferença entre DECLARAR uma função e CHAMAR uma função.</li><li>Escreva uma função <code>void tabuadaDoNove()</code> que imprime a tabuada do número 9 (sem receber parâmetro nenhum) usando um <code>for</code>, e chame-a do main.</li><li>Escreva uma função <code>void desenharQuadrado()</code> que usa um laço aninhado (Aula 7) pra imprimir um quadrado 4×4 de asteriscos, e chame-a duas vezes seguidas no main.</li></ol>
+      <ol><li>Escreva uma função <code>void linha()</code> que imprime uma linha de tracinhos e chame-a 3 vezes dentro do main, separando três blocos de texto diferentes.</li><li>Pegue o cálculo de média com acumulador da Aula 2 e transforme em uma função <code>void calcularMedia()</code> — por enquanto sem parâmetro, só movendo o código de dentro do main pra dentro da função.</li><li>Em uma frase, explique pra um colega a diferença entre DECLARAR uma função e CHAMAR uma função.</li><li>Escreva uma função <code>void tabuadaDoNove()</code> que imprime a tabuada do número 9 (sem receber parâmetro nenhum) usando um <code>for</code>, e chame-a do main.</li><li>Escreva uma função <code>void desenharQuadrado()</code> que usa um laço aninhado (Aula 8) pra imprimir um quadrado 4×4 de asteriscos, e chame-a duas vezes seguidas no main.</li></ol>
     </div>
         
       </div>
@@ -654,7 +654,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::8';
+const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::9';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');

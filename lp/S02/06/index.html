@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 5: Laço de Repetição Controlado (for)</title>
+<title>Aula 6: Laço de Repetição Controlado (for)</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -205,7 +205,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
-  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Aula 5 — Laço for</span></button>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Aula 6 — Laço for</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Roteiro de hoje</span></button>
 <button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-hourglass-half"></i><span>Quando você já sabe quantas vezes vai repetir...</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Lembra do contador de pontos?</span></button>
@@ -229,7 +229,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <div class="container">
     <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
-        <h1>Aula 5 — Laço for</h1>
+        <h1>Aula 6 — Laço for</h1>
         <h2>Repetição controlada: quando você já sabe quantas vezes vai repetir</h2>
         
     <div class="focus-box">
@@ -366,7 +366,7 @@ for (int rodada = 1; rodada &lt;= 5; rodada++) {
       <div class="slide-content-wrapper">
         <h1>Como o for executa, por dentro</h1>
         
-        <div class="bloco-diagrama" id="mmdtcjm3">
+        <div class="bloco-diagrama" id="mmdf90bg">
     <div class="bloco-diagrama-titulo">Ordem de execução do for</div>
     <div class="mermaid">flowchart TD
   A[Inicializacao: executa 1 vez] --&gt; B{Condicao verdadeira?}
@@ -393,13 +393,13 @@ for (int rodada = 1; rodada &lt;= 5; rodada++) {
         <h1>For na prática: tabuada com número fixo de linhas</h1>
         
         <p>Imprimir a tabuada de um número é o exemplo clássico de for: você <strong>sempre</strong> repete de 1 a 10, nem uma vez a mais, nem a menos.</p>
-<div class="depurador-bloco" id="dbgpmmezx">
+<div class="depurador-bloco" id="dbgv066sp">
   <div class="dbg-titulo">
     <span class="dbg-titulo-text">Tabuada do 7</span>
-    <button class="dbg-btn" id="dbgpmmezx-prev" onclick="dbgPrev('dbgpmmezx')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbgpmmezx-cur">—</span> / 10</span>
-    <button class="dbg-btn" id="dbgpmmezx-next" onclick="dbgNext('dbgpmmezx')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbgpmmezx')">↺ Reset</button>
+    <button class="dbg-btn" id="dbgv066sp-prev" onclick="dbgPrev('dbgv066sp')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbgv066sp-cur">—</span> / 10</span>
+    <button class="dbg-btn" id="dbgv066sp-next" onclick="dbgNext('dbgv066sp')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbgv066sp')">↺ Reset</button>
   </div>
   <div class="dbg-layout">
     <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">int numero = 7;</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline"></span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">for (int i = 1; i &lt;= 10; i++) {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    printf(&quot;%d x %d = %d\n&quot;, numero, i, numero * i);</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">}</span></div></div>
@@ -409,8 +409,8 @@ for (int rodada = 1; rodada &lt;= 5; rodada++) {
       <tbody class="dbg-vars-body"></tbody></table>
     </div>
   </div>
-  <div class="dbg-output" id="dbgpmmezx-out"></div>
-  <script type="application/json" id="dbgpmmezx-data">[{"linha":1,"vars":{"numero":7}},{"linha":3,"vars":{"numero":7,"i":1}},{"linha":4,"vars":{"numero":7,"i":1},"saida":"7 x 1 = 7"},{"linha":3,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7"},{"linha":4,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":3,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":4,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":3,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":4,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28"},{"linha":3,"vars":{"numero":7,"i":11},"saida":"(... segue assim ate 7 x 10 = 70 ...)"}]</script>
+  <div class="dbg-output" id="dbgv066sp-out"></div>
+  <script type="application/json" id="dbgv066sp-data">[{"linha":1,"vars":{"numero":7}},{"linha":3,"vars":{"numero":7,"i":1}},{"linha":4,"vars":{"numero":7,"i":1},"saida":"7 x 1 = 7"},{"linha":3,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7"},{"linha":4,"vars":{"numero":7,"i":2},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":3,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14"},{"linha":4,"vars":{"numero":7,"i":3},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":3,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21"},{"linha":4,"vars":{"numero":7,"i":4},"saida":"7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28"},{"linha":3,"vars":{"numero":7,"i":11},"saida":"(... segue assim ate 7 x 10 = 70 ...)"}]</script>
 </div>
         
       </div>
@@ -474,7 +474,7 @@ printf(&quot;Media final: %.2f\n&quot;, media);</code></pre>
       <h3>
         <i class="fa-solid fa-signpost"></i> for não aposenta o while
       </h3>
-      <p>Quando você NÃO sabe quantas vezes vai repetir de antemão — como na validação de entrada da Aula 4 — <code>while</code>/<code>do-while</code> continuam sendo a escolha certa. Um comparativo completo entre os dois vem na Aula 6.</p>
+      <p>Quando você NÃO sabe quantas vezes vai repetir de antemão — como na validação de entrada da Aula 4 — <code>while</code>/<code>do-while</code> continuam sendo a escolha certa. Um comparativo completo entre os dois vem na Aula 7.</p>
       
     </div>
         
@@ -528,7 +528,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::5';
+const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::6';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');

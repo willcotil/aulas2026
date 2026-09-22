@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Repetições Aninhadas</title>
+<title>Aula 8: Repetições Aninhadas</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -237,13 +237,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
     <div class="slide" data-num="1">
       <div class="slide-content-wrapper">
         <h1>Repetições Aninhadas</h1>
-        <h2>Aula 7 — Módulo de Repetição em C</h2>
+        <h2>Aula 8 — Módulo de Repetição em C</h2>
         
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-layer-group"></i> Um laço dentro do outro
       </h3>
-      <p>Hoje juntamos tudo que já sabemos sobre <code>for</code>, <code>while</code> e <code>do-while</code> (Aulas 1 a 6) pra resolver problemas que um laço sozinho não dá conta: tabelas, grades e padrões.</p>
+      <p>Hoje juntamos tudo que já sabemos sobre <code>for</code>, <code>while</code> e <code>do-while</code> (Aulas 1 a 7) pra resolver problemas que um laço sozinho não dá conta: tabelas, grades e padrões.</p>
       
     </div>
         
@@ -255,7 +255,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
         <h1>Roteiro de Hoje</h1>
         
         <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Aula 7</div>
+    <div class="bloco-agenda-titulo">Aula 8</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
@@ -283,7 +283,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-table-cells"></i> Tabuada completa</div>
-            <div class="agenda-item-texto">De uma linha (Aula 5) pra grade inteira</div>
+            <div class="agenda-item-texto">De uma linha (Aula 6) pra grade inteira</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
@@ -332,7 +332,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>Treino: Séries x Repetições</h1>
         
-        <div class="bloco-diagrama" id="mmdx482s">
+        <div class="bloco-diagrama" id="mmdb0jn6">
     <div class="bloco-diagrama-titulo">Um laço dentro do outro (ainda sem nenhuma linha de código)</div>
     <div class="mermaid">flowchart TD
   subgraph SERIES["Para cada Serie (1 a 3)"]
@@ -387,7 +387,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>Ordem de Execução — Parte 1</h1>
         
-        <div class="bloco-diagrama" id="mmd0fh7i">
+        <div class="bloco-diagrama" id="mmd6gnsy">
     <div class="bloco-diagrama-titulo">Fluxo de um laço aninhado (for dentro de for)</div>
     <div class="mermaid">flowchart TD
   A["Laco externo: i = 1"] --&gt; B{"i &lt;= 3?"}
@@ -409,13 +409,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>Ordem de Execução — Parte 2</h1>
         
-        <div class="depurador-bloco" id="dbg2jcu4t">
+        <div class="depurador-bloco" id="dbg7ad15x">
   <div class="dbg-titulo">
     <span class="dbg-titulo-text">Teste de mesa: 2 séries x 2 repetições</span>
-    <button class="dbg-btn" id="dbg2jcu4t-prev" onclick="dbgPrev('dbg2jcu4t')" disabled>◀ Anterior</button>
-    <span class="dbg-step-info">Passo <span id="dbg2jcu4t-cur">—</span> / 13</span>
-    <button class="dbg-btn" id="dbg2jcu4t-next" onclick="dbgNext('dbg2jcu4t')">Próximo ▶</button>
-    <button class="dbg-btn reset" onclick="dbgReset('dbg2jcu4t')">↺ Reset</button>
+    <button class="dbg-btn" id="dbg7ad15x-prev" onclick="dbgPrev('dbg7ad15x')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbg7ad15x-cur">—</span> / 13</span>
+    <button class="dbg-btn" id="dbg7ad15x-next" onclick="dbgNext('dbg7ad15x')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbg7ad15x')">↺ Reset</button>
   </div>
   <div class="dbg-layout">
     <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">for (int i = 1; i &lt;= 2; i++) {</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline">    for (int j = 1; j &lt;= 2; j++) {</span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">        printf(&quot;i=%d j=%d\n&quot;, i, j);</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">    }</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">}</span></div></div>
@@ -425,8 +425,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <tbody class="dbg-vars-body"></tbody></table>
     </div>
   </div>
-  <div class="dbg-output" id="dbg2jcu4t-out"></div>
-  <script type="application/json" id="dbg2jcu4t-data">[{"linha":1,"vars":{"i":1}},{"linha":2,"vars":{"i":1,"j":1}},{"linha":3,"vars":{"i":1,"j":1},"saida":"i=1 j=1"},{"linha":2,"vars":{"i":1,"j":2}},{"linha":3,"vars":{"i":1,"j":2},"saida":"i=1 j=2"},{"linha":2,"vars":{"i":1,"j":3}},{"linha":1,"vars":{"i":2}},{"linha":2,"vars":{"i":2,"j":1}},{"linha":3,"vars":{"i":2,"j":1},"saida":"i=2 j=1"},{"linha":2,"vars":{"i":2,"j":2}},{"linha":3,"vars":{"i":2,"j":2},"saida":"i=2 j=2"},{"linha":2,"vars":{"i":2,"j":3}},{"linha":1,"vars":{"i":3}}]</script>
+  <div class="dbg-output" id="dbg7ad15x-out"></div>
+  <script type="application/json" id="dbg7ad15x-data">[{"linha":1,"vars":{"i":1}},{"linha":2,"vars":{"i":1,"j":1}},{"linha":3,"vars":{"i":1,"j":1},"saida":"i=1 j=1"},{"linha":2,"vars":{"i":1,"j":2}},{"linha":3,"vars":{"i":1,"j":2},"saida":"i=1 j=2"},{"linha":2,"vars":{"i":1,"j":3}},{"linha":1,"vars":{"i":2}},{"linha":2,"vars":{"i":2,"j":1}},{"linha":3,"vars":{"i":2,"j":1},"saida":"i=2 j=1"},{"linha":2,"vars":{"i":2,"j":2}},{"linha":3,"vars":{"i":2,"j":2},"saida":"i=2 j=2"},{"linha":2,"vars":{"i":2,"j":3}},{"linha":1,"vars":{"i":3}}]</script>
 </div>
 
     <div class="focus-box">
@@ -444,7 +444,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-table-cells"></i>
         <h1>Aplicando: Tabuada Completa</h1>
-        <p>Da Aula 5 (uma linha) pra grade inteira</p>
+        <p>Da Aula 6 (uma linha) pra grade inteira</p>
       </div>
     </div>
 
@@ -566,7 +566,7 @@ for (i = 1; i &lt;= 3; i++) {
       <div class="slide-content-wrapper">
         <h1>Combinando for e while</h1>
         
-        <p>Não existe regra de "só <code>for</code> com <code>for</code>". Cada laço aninhado escolhe seu tipo pelo mesmo critério da Aula 6: número de repetições conhecido → <code>for</code>; depende de uma condição em tempo de execução → <code>while</code>/<code>do-while</code>.</p>
+        <p>Não existe regra de "só <code>for</code> com <code>for</code>". Cada laço aninhado escolhe seu tipo pelo mesmo critério da Aula 7: número de repetições conhecido → <code>for</code>; depende de uma condição em tempo de execução → <code>while</code>/<code>do-while</code>.</p>
 
     <div class="code-wrap">
       <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
@@ -660,7 +660,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::7';
+const STORAGE_KEY='aulagen_slide::LinguagemdeProgramao::8';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
