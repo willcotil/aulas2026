@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#0F5257;--color-rust:#E63946;
-  --color-orange:#E63946;--color-yellow:#E63946;--color-deep:#06282B;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0A1414;
+  --color-navy:#000;--color-blue:#E9C46A;--color-rust:#E76F51;
+  --color-orange:#E76F51;--color-yellow:#E76F51;--color-deep:#249D8F;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#122420;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -210,18 +210,26 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Cifrar Esconde, Mas Não Prova</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-fingerprint"></i><span>Hash: a Impressão Digital do Dado</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que é um Hash</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Hash é de Mão Única</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-signature"></i><span>Assinatura Digital</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-file-signature"></i><span>Assinatura Digital</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Assinando um Documento Digitalmente</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-id-card"></i><span>Certificados Digitais</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-id-card"></i><span>Certificados Digitais</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Um Problema Que Ficou em Aberto</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Revisitando o Handshake HTTPS da Aula 6</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da Aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Propriedades de um Hash Criptográfico</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Um Hash Simples, Na Mão</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Calculando o Hash Passo a Passo</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por Que Esse Hash Caseiro Não é Seguro</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-sitemap"></i><span>Hash Também é uma Estrutura de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Tabela Hash: Mesma Palavra, Outro Objetivo</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Hash de Segurança x Hash de Estrutura de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Hash é de Mão Única</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Guardando Senha: Nunca em Texto Puro</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Salt: Evitando Hashes Repetidos</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-file-signature"></i><span>Assinatura Digital</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Assinando um Documento Digitalmente</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>A Inversão Que Faz Toda Diferença</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><i class="fa-solid fa-id-card"></i><span>Certificados Digitais</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Um Problema Que Ficou em Aberto</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Autoridade Certificadora (CA)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>Revisitando o Handshake HTTPS da Aula 6</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>Resumo da Aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -252,25 +260,32 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-fingerprint"></i> Hash: a Impressão Digital do Dado</div>
-            <div class="agenda-item-texto">Verificando integridade e guardando senha</div>
+            <div class="agenda-item-texto">Como funciona, na prática, com a mão na massa</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-sitemap"></i> Hash Também é uma Estrutura de Dados</div>
+            <div class="agenda-item-texto">Mesma palavra, outro objetivo</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-file-signature"></i> Assinatura Digital</div>
             <div class="agenda-item-texto">Invertendo o uso das chaves da Aula 6</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(18)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-id-card"></i> Certificados Digitais</div>
             <div class="agenda-item-texto">Quem garante que a chave pública é mesmo dela?</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
-          <div class="agenda-numero">05</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(22)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
             <div class="agenda-item-texto">Resumo e prévia da Aula 8</div>
@@ -294,7 +309,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>Cifrar Esconde, Mas Não Prova</h1>
         
-        <p>Na Aula 6, criptografia (simétrica ou assimétrica) resolveu <strong>Confidencialidade</strong>: ninguém no meio do caminho consegue LER a mensagem. Mas duas perguntas ficaram sem resposta: como eu sei que a mensagem <strong>não foi alterada</strong> no caminho (Integridade)? E como eu sei que ela <strong>realmente veio de quem diz ter mandado</strong> (Autenticidade)?</p>
+        <p>Na Aula 6, criptografia (simétrica ou assimétrica) resolveu <strong>Confidencialidade</strong>: ninguém no meio do caminho consegue LER a mensagem. Mas duas perguntas ficaram sem resposta: como sabemos que a mensagem <strong>não foi alterada</strong> no caminho (Integridade)? E como sabemos que ela <strong>realmente veio de quem diz ter mandado</strong> (Autenticidade)?</p>
 
     <div class="focus-box">
       <h3>
@@ -311,7 +326,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-fingerprint"></i>
         <h1>Hash: a Impressão Digital do Dado</h1>
-        <p>Verificando integridade e guardando senha</p>
+        <p>Como funciona, na prática, com a mão na massa</p>
       </div>
     </div>
 
@@ -319,7 +334,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>O Que é um Hash</h1>
         
-        <p>Um <strong>hash</strong> é uma função que pega qualquer entrada — uma palavra, uma frase, um arquivo inteiro de 10GB — e devolve uma saída de <strong>tamanho fixo</strong>, tipo uma impressão digital daquele dado. O algoritmo mais usado hoje é o <strong>SHA-256</strong>.</p>
+        <p>Um <strong>hash</strong> é o resultado de uma <strong>função matemática</strong> que pega qualquer entrada — uma palavra, uma frase, um arquivo inteiro de 10GB — e devolve uma saída de <strong>tamanho fixo</strong>, tipo uma impressão digital daquele dado. O algoritmo criptográfico mais usado hoje é o <strong>SHA-256</strong>, que sempre devolve 256 bits (64 caracteres em hexadecimal), não importa o tamanho da entrada.</p>
 
     <div class="code-wrap">
       <div class="file-label"><span>exemplo de hash SHA-256</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
@@ -332,9 +347,9 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-bolt"></i> Efeito avalanche
+        <i class="fa-solid fa-lightbulb"></i> Uma função, não um armazenamento
       </h3>
-      <p>Mudar UM único caractere na entrada muda o hash inteiro, de forma imprevisível. É assim que um hash detecta até a menor alteração no dado original.</p>
+      <p>Hash não é onde o dado fica guardado — é uma CONTA que qualquer computador pode refazer a qualquer momento, sempre chegando no mesmo resultado pra mesma entrada.</p>
       
     </div>
         
@@ -343,10 +358,178 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
+        <h1>Propriedades de um Hash Criptográfico</h1>
+        
+        
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-equals"></i> Determinístico
+          </h3>
+          <p>A mesma entrada sempre gera exatamente o mesmo hash, em qualquer computador, a qualquer momento.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-bolt"></i> Efeito avalanche
+          </h3>
+          <p>Mudar UM único caractere na entrada muda o hash inteiro, de forma imprevisível.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-ruler"></i> Tamanho fixo
+          </h3>
+          <p>Não importa se a entrada tem 3 ou 3 bilhões de caracteres: a saída tem sempre o mesmo tamanho.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-ban"></i> Irreversível
+          </h3>
+          <p>Não existe operação de "decifrar" um hash pra voltar à entrada original — diferente da criptografia da Aula 6.</p>
+          
+        </div>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-shield-halved"></i> E uma quinta propriedade: resistência a colisão
+      </h3>
+      <p>Colisão é quando duas entradas DIFERENTES geram o mesmo hash. Num hash criptográfico como o SHA-256, achar uma colisão de propósito deveria ser praticamente impossível na prática. Já vamos ver um hash caseiro onde isso é fácil demais — e por que isso o desqualifica pra uso em segurança.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>Um Hash Simples, Na Mão</h1>
+        
+        <p>Pra desmistificar o que tem "debaixo do capô" de uma função hash, vamos construir uma versão bem mais simples do que o SHA-256 — só pra fins didáticos, nunca pra usar de verdade: somamos o código ASCII de cada letra do texto e tiramos o resto da divisão por 97.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>hashCaseiro.c</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-c">int hashCaseiro(char texto[]) {
+    int soma = 0;
+    for (int i = 0; texto[i] != 0; i++) {
+        soma = soma + texto[i];   // codigo ASCII da letra
+    }
+    return soma % 97;
+}</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-flask"></i> Por que módulo 97?
+      </h3>
+      <p>O <code>% 97</code> (resto da divisão por 97) é o que garante o TAMANHO FIXO da saída: não importa quão longo seja o texto, o resultado sempre fica entre 0 e 96 — a mesma ideia do SHA-256 sempre devolver 256 bits, só que numa escala bem menor e mais simples de calcular na mão.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
+        <h1>Calculando o Hash Passo a Passo</h1>
+        
+        <p>Vamos rodar o <code>hashCaseiro</code> na palavra "ana", letra por letra, igual um teste de mesa.</p>
+<div class="depurador-bloco" id="dbgz89vil">
+  <div class="dbg-titulo">
+    <span class="dbg-titulo-text">hashCaseiro("ana")</span>
+    <button class="dbg-btn" id="dbgz89vil-prev" onclick="dbgPrev('dbgz89vil')" disabled>◀ Anterior</button>
+    <span class="dbg-step-info">Passo <span id="dbgz89vil-cur">—</span> / 5</span>
+    <button class="dbg-btn" id="dbgz89vil-next" onclick="dbgNext('dbgz89vil')">Próximo ▶</button>
+    <button class="dbg-btn reset" onclick="dbgReset('dbgz89vil')">↺ Reset</button>
+  </div>
+  <div class="dbg-layout">
+    <div class="dbg-code-panel"><div class="dbg-line" data-ln="1"><span class="dbg-linenum">1</span><span class="dbg-codeline">int hashCaseiro(char texto[]) {</span></div><div class="dbg-line" data-ln="2"><span class="dbg-linenum">2</span><span class="dbg-codeline">    int soma = 0;</span></div><div class="dbg-line" data-ln="3"><span class="dbg-linenum">3</span><span class="dbg-codeline">    for (int i = 0; texto[i] != 0; i++) {</span></div><div class="dbg-line" data-ln="4"><span class="dbg-linenum">4</span><span class="dbg-codeline">        soma = soma + texto[i];</span></div><div class="dbg-line" data-ln="5"><span class="dbg-linenum">5</span><span class="dbg-codeline">    }</span></div><div class="dbg-line" data-ln="6"><span class="dbg-linenum">6</span><span class="dbg-codeline">    return soma % 97;</span></div><div class="dbg-line" data-ln="7"><span class="dbg-linenum">7</span><span class="dbg-codeline">}</span></div></div>
+    <div class="dbg-vars-panel">
+      <div class="dbg-vars-title">Variáveis</div>
+      <table class="dbg-vars-table"><thead><tr><th>Var</th><th>Valor</th></tr></thead>
+      <tbody class="dbg-vars-body"></tbody></table>
+    </div>
+  </div>
+  <div class="dbg-output" id="dbgz89vil-out"></div>
+  <script type="application/json" id="dbgz89vil-data">[{"linha":2,"vars":{"texto":"\"ana\"","soma":0}},{"linha":4,"vars":{"i":0,"letra":"'a' = 97","soma":97}},{"linha":4,"vars":{"i":1,"letra":"'n' = 110","soma":207}},{"linha":4,"vars":{"i":2,"letra":"'a' = 97","soma":304}},{"linha":6,"vars":{"soma":304,"resultado":"304 % 97 = 13"},"saida":"hashCaseiro(\"ana\") = 13"}]</script>
+</div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="7">
+      <div class="slide-content-wrapper">
+        <h1>Por Que Esse Hash Caseiro Não é Seguro</h1>
+        
+        <p>Repare: <code>hashCaseiro</code> só soma os códigos das letras — a ORDEM delas não importa pra soma final. Isso quebra a propriedade de resistência a colisão.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>colisao facil de achar</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">hashCaseiro(&quot;ana&quot;) = (97 + 110 + 97) % 97 = 304 % 97 = 13
+hashCaseiro(&quot;naa&quot;) = (110 + 97 + 97) % 97 = 304 % 97 = 13
+
+Duas palavras DIFERENTES, mesmo hash: colisao encontrada em segundos.</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Sem efeito avalanche de verdade
+      </h3>
+      <p>Trocar a ordem das letras nem muda o resultado, e trocar uma letra por outra de código parecido muda pouco a soma. Um hash de verdade como o SHA-256 é projetado com bits se misturando de forma caótica — trocar UM bit da entrada muda, em média, metade dos bits da saída, e achar uma colisão de propósito exigiria uma quantidade absurda de tentativas.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="8">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-sitemap"></i>
+        <h1>Hash Também é uma Estrutura de Dados</h1>
+        <p>Mesma palavra, outro objetivo</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        <h1>Tabela Hash: Mesma Palavra, Outro Objetivo</h1>
+        
+        <p>Sim — "hash" também é o nome de uma estrutura de dados clássica, a <strong>tabela hash</strong> (a base de dicionários e mapas em várias linguagens de programação). A ideia central usa a MESMA função hash: em vez de guardar um valor numa posição qualquer de um array, calculamos <code>indice = hash(chave) % tamanho_do_array</code> e guardamos ali direto — o que torna a busca extremamente rápida, em tempo praticamente constante.</p>
+<div class="bloco-diagrama" id="mmdzy6is">
+    <div class="bloco-diagrama-titulo">Como uma tabela hash usa a função hash</div>
+    <div class="mermaid">flowchart LR
+    K["chave: maria"] --&gt; H["funcao hash"]
+    H --&gt; IDX["indice calculado: 4"]
+    IDX --&gt; ARR["array, posicao 4"]
+    ARR --&gt; V["valor guardado ali"]</div>
+    <div class="bloco-diagrama-legenda">O <code>hashCaseiro</code> de agora poderia, na prática, servir pra calcular esse índice — o objetivo aqui não é segurança, é organizar os dados pra achar rápido depois.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
+      <div class="slide-content-wrapper">
+        <h1>Hash de Segurança x Hash de Estrutura de Dados</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Mesma palavra, objetivos bem diferentes</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Aspecto</th><th>Hash de segurança (SHA-256)</th><th>Hash de estrutura de dados (tabela hash)</th></tr></thead><tbody><tr><td>Objetivo principal</td><td>Provar integridade / esconder senha</td><td>Calcular rápido em que posição guardar um dado</td></tr><tr><td>Requisito mais importante</td><td>Irreversibilidade e resistência a colisão</td><td>Velocidade e boa distribuição dos índices</td></tr><tr><td>O que acontece numa colisão</td><td>Seria uma falha grave de segurança</td><td>É esperado e normal — resolvido com lista encadeada ou outra posição livre</td></tr><tr><td>Exemplo</td><td>SHA-256, usado em senha e integridade</td><td>Função hash interna de um dicionário/mapa da linguagem</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">Vale a curiosidade: o nosso <code>hashCaseiro</code> seria péssimo pra segurança (como já vimos), mas serviria até razoavelmente bem numa tabela hash simples, já que ali colisão é normal e tem solução prevista.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
         <h1>Hash é de Mão Única</h1>
         
-        <p>Diferente da criptografia da Aula 6, hash <strong>não tem "decifrar"</strong>. Não existe operação pra pegar o hash e voltar pro texto original — e essa é uma característica proposital, não uma limitação.</p>
-<div class="bloco-diagrama" id="mmdum869">
+        <p>Voltando à segurança: diferente da criptografia da Aula 6, hash <strong>não tem "decifrar"</strong>. Não existe operação pra pegar o hash e voltar pro texto original — e essa é uma característica proposital, não uma limitação.</p>
+<div class="bloco-diagrama" id="mmdftx25">
     <div class="bloco-diagrama-titulo">Verificando integridade de um arquivo baixado</div>
     <div class="mermaid">flowchart LR
     A["Arquivo original no servidor"] --&gt; H1["Hash publicado pelo site"]
@@ -362,11 +545,11 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="5">
+    <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
         <h1>Guardando Senha: Nunca em Texto Puro</h1>
         
-        <p>Lembra da Aula 4, capturando uma senha em texto puro via HTTP? Agora pensa no lado do SERVIDOR: se o banco de dados de um site guardar a senha dos usuários como texto puro, um vazamento (tipo o caso Equifax da Aula 1) expõe TODAS as senhas de uma vez.</p>
+        <p>Lembra da Aula 4, capturando uma senha em texto puro via HTTP? Agora pensamos no lado do SERVIDOR: se o banco de dados de um site guardar a senha dos usuários como texto puro, um vazamento (tipo o caso Equifax da Aula 1) expõe TODAS as senhas de uma vez.</p>
 
     <div class="focus-box">
       <h3>
@@ -375,19 +558,25 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       <p>O servidor guarda só o <strong>hash</strong> da senha, nunca a senha em si. No login, ele calcula o hash da senha digitada e compara com o hash guardado — nunca precisa saber a senha de verdade.</p>
       
     </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> E o salt?
-      </h3>
-      <p>Se duas pessoas usam a mesma senha ("123456"), o hash delas seria idêntico — um atacante com uma lista pronta de hashes comuns (rainbow table) quebraria as duas de uma vez. O <strong>salt</strong> é um valor aleatório extra, diferente pra cada usuário, somado à senha antes do hash — assim, mesmo senhas iguais geram hashes diferentes.</p>
-      
-    </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="6">
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Salt: Evitando Hashes Repetidos</h1>
+        
+        <p>Se duas pessoas usam a mesma senha ("123456"), o hash delas seria idêntico — um atacante com uma lista pronta de hashes comuns (rainbow table) quebraria as duas de uma vez, só de olhar.</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Sem salt x com salt</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Situação</th><th>Senha</th><th>O que é hasheado</th><th>Hash guardado</th></tr></thead><tbody><tr><td>Sem salt (usuário A)</td><td>123456</td><td>123456</td><td>mesmo hash de qualquer outro 123456</td></tr><tr><td>Sem salt (usuário B)</td><td>123456</td><td>123456</td><td>idêntico ao do usuário A</td></tr><tr><td>Com salt (usuário A)</td><td>123456</td><td>123456 + salt aleatório do A</td><td>único, mesmo com senha igual</td></tr><tr><td>Com salt (usuário B)</td><td>123456</td><td>123456 + salt aleatório do B</td><td>diferente do usuário A</td></tr></tbody></table></div>
+    <div class="bloco-tabela-legenda">O salt é um valor aleatório extra, diferente pra cada usuário, guardado junto (não precisa ser secreto) e somado à senha antes do hash.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="13">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-file-signature"></i>
         <h1>Assinatura Digital</h1>
@@ -395,7 +584,7 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="6">
+    <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
         <h1>Assinando um Documento Digitalmente</h1>
         
@@ -405,7 +594,7 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="7">
+    <div class="slide" data-num="14">
       <div class="slide-content-wrapper">
         <h1>A Inversão Que Faz Toda Diferença</h1>
         
@@ -426,7 +615,7 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide topic" data-num="8">
+    <div class="slide topic" data-num="15">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-id-card"></i>
         <h1>Certificados Digitais</h1>
@@ -434,29 +623,29 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="8">
+    <div class="slide" data-num="15">
       <div class="slide-content-wrapper">
         <h1>Um Problema Que Ficou em Aberto</h1>
         
-        <p>Assinatura digital resolve autenticidade <strong>se</strong> você já sabe qual é a chave pública verdadeira da outra pessoa. Mas e se um atacante, num ataque Man-in-the-Middle (Aula 3), te entregar a PRÓPRIA chave pública dele, se passando pelo site verdadeiro?</p>
+        <p>Assinatura digital resolve autenticidade <strong>se</strong> já sabemos qual é a chave pública verdadeira da outra pessoa. Mas e se um atacante, num ataque Man-in-the-Middle (Aula 3), entregar a PRÓPRIA chave pública dele, se passando pelo site verdadeiro?</p>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-user-secret"></i> Conectando ao MITM da Aula 3
       </h3>
-      <p>Sem um jeito de confirmar a chave pública, um Evil Twin ou um MITM poderia trocar a chave pública real por uma falsa no meio do caminho — e você nunca saberia.</p>
+      <p>Sem um jeito de confirmar a chave pública, um Evil Twin ou um MITM poderia trocar a chave pública real por uma falsa no meio do caminho — e ninguém saberia.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="9">
+    <div class="slide" data-num="16">
       <div class="slide-content-wrapper">
         <h1>Autoridade Certificadora (CA)</h1>
         
         <p>Um <strong>certificado digital</strong> é um arquivo que junta a identidade de alguém (ex: o domínio <code>banco.com</code>) com a chave pública dessa entidade — e é <strong>assinado digitalmente</strong> por uma <strong>Autoridade Certificadora (CA)</strong>, uma organização confiável que verificou essa identidade antes de assinar.</p>
-<div class="bloco-diagrama" id="mmdkyj5x">
+<div class="bloco-diagrama" id="mmdlws37">
     <div class="bloco-diagrama-titulo">Cadeia de confiança</div>
     <div class="mermaid">flowchart TD
     CA["Autoridade Certificadora (CA)"] --&gt;|"verifica identidade e assina"| CERT["Certificado: dominio + chave publica + assinatura da CA"]
@@ -469,11 +658,11 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide" data-num="17">
       <div class="slide-content-wrapper">
         <h1>Revisitando o Handshake HTTPS da Aula 6</h1>
         
-        <p>Na Aula 6, o handshake do HTTPS/TLS cifrava a chave de sessão com "a chave pública do site" — sem explicar de onde vinha a certeza de que aquela chave pública era mesmo do site. Agora fecha o ciclo: o navegador só aceita essa chave pública porque ela veio dentro de um <strong>certificado válido</strong>, assinado por uma CA confiável.</p>
+        <p>Na Aula 6, o handshake do HTTPS/TLS cifrava a chave de sessão com "a chave pública do site" — sem explicar de onde vinha a certeza de que aquela chave pública era mesmo do site. Agora fechamos o ciclo: o navegador só aceita essa chave pública porque ela veio dentro de um <strong>certificado válido</strong>, assinado por uma CA confiável.</p>
 
     <div class="focus-box">
       <h3>
@@ -486,7 +675,7 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide topic" data-num="11">
+    <div class="slide topic" data-num="18">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
@@ -494,7 +683,7 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="18">
       <div class="slide-content-wrapper">
         <h1>Resumo da Aula</h1>
         
@@ -515,13 +704,13 @@ hash:    91a7f0e3d5c2... (completamente diferente!)</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="12">
+    <div class="slide" data-num="19">
       <div class="slide-content-wrapper">
         <h1>Exercícios</h1>
         
         
     <div class="quest-list">
-      <ol><li>Um site publica o hash SHA-256 de um instalador ao lado do link de download. Explique, em suas palavras, pra que serve esse hash e o que você faria com ele depois de baixar o arquivo.</li><li>Por que armazenar senha como hash (em vez de texto puro) reduz o estrago de um vazamento de banco de dados como o da Aula 1 (caso Equifax)?</li><li>O que é um salt e por que ele impede que duas senhas iguais gerem o mesmo hash?</li><li>Na assinatura digital, por que quem assina usa a própria chave PRIVADA, e não a chave pública do destinatário (como fizemos pra confidencialidade na Aula 6)?</li><li>Se um atacante conseguisse forjar um certificado digital válido pra um site de banco, que tipo de ataque da Aula 3 isso viabilizaria? Explique a conexão.</li><li>Explique com suas palavras por que o cadeado do navegador depende de uma Autoridade Certificadora, e não só da chave pública do próprio site.</li></ol>
+      <ol><li>Um site publica o hash SHA-256 de um instalador ao lado do link de download. Explique, em suas palavras, pra que serve esse hash e o que você faria com ele depois de baixar o arquivo.</li><li>Por que armazenar senha como hash (em vez de texto puro) reduz o estrago de um vazamento de banco de dados como o da Aula 1 (caso Equifax)?</li><li>O que é um salt e por que ele impede que duas senhas iguais gerem o mesmo hash guardado no banco?</li><li>Usando o hash caseiro visto em aula (soma dos códigos ASCII módulo 97), calcule na mão o hash da palavra "bob" e confira o resultado.</li><li>Encontre duas palavras curtas diferentes que colidem no hash caseiro (mesma soma de códigos ASCII, logo o mesmo resultado) e explique por que uma colisão dessas praticamente não acontece com o SHA-256 de verdade.</li><li>Explique a diferença de objetivo entre o hash usado pra guardar senha e o hash usado numa tabela hash (estrutura de dados) — e o que acontece de diferente quando cada um sofre uma colisão.</li><li>Na assinatura digital, por que quem assina usa a própria chave PRIVADA, e não a chave pública do destinatário (como fizemos pra confidencialidade na Aula 6)?</li><li>Se um atacante conseguisse forjar um certificado digital válido pra um site de banco, que tipo de ataque da Aula 3 isso viabilizaria? Explique a conexão.</li></ol>
     </div>
         
       </div>
@@ -534,17 +723,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fbdbde',
-    primaryTextColor: '#0A1414',
-    primaryBorderColor: '#E63946',
-    lineColor: '#E63946',
-    secondaryColor: '#06282B',
+    primaryColor: '#fbe5e0',
+    primaryTextColor: '#122420',
+    primaryBorderColor: '#E76F51',
+    lineColor: '#E76F51',
+    secondaryColor: '#249D8F',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fbdbde',
-    nodeBorder: '#E63946',
+    mainBkg: '#fbe5e0',
+    nodeBorder: '#E76F51',
     clusterBkg: '#f0f4f8',
-    titleColor: '#E63946',
+    titleColor: '#E76F51',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -554,7 +743,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d4e0e1'
+    cScale1: '#fbf4e4'
   }
 });
 </script>
@@ -570,7 +759,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=12;
+const totalConteudo=19;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
