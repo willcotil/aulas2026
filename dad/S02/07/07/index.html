@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 7: Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</title>
+<link rel="stylesheet" href="../libs/fonts/fonts.css">
+<link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
+<link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
+<script src="../libs/chart.min.js"></script>
+<script src="../libs/p5.min.js"></script>
+<script src="../libs/gsap.min.js"></script>
+<style>
+:root{
+  --color-navy:#000;--color-blue:#0891B2;--color-rust:#F97316;
+  --color-orange:#F97316;--color-yellow:#F97316;--color-deep:#164E63;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0B1B1E;
+  --text-muted:#64748B;--border-soft:#E2E8F0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+.fa-solid,.fa-brands,.fa-regular{visibility:hidden;}
+html.fonts-ready .fa-solid,html.fonts-ready .fa-brands,html.fonts-ready .fa-regular{visibility:visible;}
+body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-main);overflow:hidden;height:100vh;width:100vw;}
+.container{width:100%;height:100%;position:relative;}
+.fixed-link-bar{position:fixed;top:0;left:0;width:100%;background:var(--color-blue);text-align:center;padding:10px;z-index:1000;border-bottom:4px solid var(--color-orange);}
+.fixed-link-bar-btn{background:none;border:none;color:#fff;text-decoration:none;font-weight:800;font-size:1.2rem;letter-spacing:1px;font-family:inherit;cursor:pointer;padding:0;}
+.fixed-link-bar-btn:hover,.fixed-link-bar-btn:focus-visible{text-decoration:underline;outline:none;}
+.slide{background:var(--slide-bg);padding:80px 60px 40px;position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start;opacity:0;pointer-events:none;transition:opacity .5s ease;z-index:0;overflow:hidden;}
+.slide.active{opacity:1;pointer-events:auto;z-index:1;}
+.slide.topic{background:var(--color-deep);text-align:center;border:8px solid var(--color-orange);}
+.slide.topic h1{color:#fff;font-size:3.5rem;}
+.slide.topic p{color:var(--color-orange);font-size:1.5rem;font-weight:800;}
+.slide.topic i{font-size:5rem;margin-bottom:20px;color:var(--color-rust);}
+.slide.protegido,.slide.protegido *{user-select:none;-webkit-user-select:none;-moz-user-select:none;}
+.slide.protegido .protegido-aviso{margin-top:16px;font-size:.9rem;color:var(--text-muted,#64748b);font-style:italic;display:flex;align-items:center;gap:6px;}
+@media print{.slide.protegido{display:none!important;}}
+/* "rolavel:true" opts a single slide out of the default overflow:hidden, for slides
+   whose content is intentionally longer than one screen (e.g. a long exercise list)
+   instead of splitting into "Parte 1"/"Parte 2". */
+.slide.rolavel{overflow-y:auto;}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
+h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
+p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
+ul,ol{margin-left:30px;margin-bottom:25px;}
+strong{color:var(--color-rust);font-weight:800;}
+/* The "language-xxx" class Prism-style themes expect lives on the inner <code>,
+   never on <pre> itself (componentes.js only puts it on <code>) -- a selector of
+   pre[class*="language-"] never matches anything, so background/padding/scroll
+   have to be scoped to .code-wrap (the wrapper every "codigo" block renders into)
+   instead of relying on an attribute that's never actually there. */
+.code-wrap pre{background:#0B192C;border-radius:12px;font-family:'Fira Code',monospace;font-size:1.15rem;margin:15px 0;padding:20px;border-left:6px solid var(--color-orange);overflow-y:auto;overflow-x:hidden;max-height:min(560px,52vh);white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
+.code-wrap pre::-webkit-scrollbar{width:10px;}
+.code-wrap pre::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);border-radius:8px;}
+.code-wrap pre::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.42);}
+code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-shadow:none;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+:not(pre)>code{font-family:'Fira Code',monospace;background:#EDF2F7;color:var(--color-blue);padding:3px 8px;border-radius:6px;font-size:.9em;font-weight:800;}
+.file-label{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--color-blue);color:#fff;padding:6px 10px 6px 16px;border-radius:8px 8px 0 0;font-family:'Fira Code',monospace;font-size:1.05rem;font-weight:800;margin-bottom:-4px;position:relative;z-index:1;border-bottom:3px solid var(--color-orange);}
+.code-wrap{position:relative;}
+.copy-btn,.copy-btn-float{border:none;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .15s ease,transform .1s ease;}
+.copy-btn{background:rgba(255,255,255,.18);width:28px;height:28px;border-radius:6px;font-size:.95rem;}
+.copy-btn:hover{background:rgba(255,255,255,.32);}
+.copy-btn-float{position:absolute;top:12px;right:12px;z-index:2;background:rgba(255,255,255,.14);width:32px;height:32px;border-radius:6px;font-size:1rem;}
+.copy-btn-float:hover{background:rgba(255,255,255,.28);}
+.copy-btn:active,.copy-btn-float:active{transform:scale(.9);}
+.copy-btn.copiado,.copy-btn-float.copiado{background:#22C55E;}
+.slide.protegido .copy-btn,.slide.protegido .copy-btn-float{display:none;}
+.focus-box{background:#FFFaf0;border:2px solid var(--color-orange);border-left:8px solid var(--color-orange);padding:20px;border-radius:8px;margin:20px 0;}
+.focus-box h3{color:var(--color-rust);margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:1.3rem;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:20px;}
+.card-info{background:var(--slide-bg);padding:25px;border-radius:12px;border:2px solid var(--border-soft);box-shadow:0 4px 6px rgba(0,0,0,.05);}
+.card-info h3{color:var(--color-blue);margin-bottom:15px;font-weight:800;}
+.quest-list ol{counter-reset:quest;list-style:none;padding:0;}
+.quest-list li{background:#fff;margin-bottom:15px;padding:20px 20px 20px 70px;border-radius:12px;position:relative;border:2px solid var(--color-orange);font-size:1.15rem;font-weight:600;}
+.quest-list li::before{content:counter(quest);counter-increment:quest;position:absolute;left:15px;top:50%;transform:translateY(-50%);background:var(--color-rust);color:#fff;width:35px;height:35px;border-radius:50%;text-align:center;font-size:1.2rem;line-height:35px;font-weight:800;}
+.controls{position:fixed;bottom:30px;right:30px;display:flex;gap:15px;z-index:100;background:rgba(255,255,255,.95);padding:12px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);}
+.btn{background:var(--color-blue);border:none;color:#fff;width:55px;height:55px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.5rem;transition:background .2s;}
+.btn:hover{background:var(--color-orange);}
+.progress-bar{position:fixed;bottom:0;left:0;height:10px;background:var(--color-rust);width:0%;transition:width .4s ease;z-index:101;}
+.slide-counter{position:fixed;bottom:30px;left:30px;z-index:100;background:rgba(255,255,255,.95);padding:10px 22px;border-radius:50px;box-shadow:0 4px 15px rgba(0,0,0,.1);border:2px solid var(--color-blue);font-weight:800;font-size:1.05rem;color:var(--color-blue);}
+@media print{
+  body,.container{height:auto;overflow:visible;background:#fff;}
+  .fixed-link-bar{position:static;margin-bottom:20px;background:#fff;border-bottom:2px solid #000;}
+  .fixed-link-bar-btn{color:#000;}
+  .slide{position:relative;opacity:1;display:block;page-break-after:always;height:100vh;overflow:visible;pointer-events:auto;padding:40px;background:#fff;}
+  .controls,.progress-bar,.slide-counter{display:none!important;}
+  .slide.topic{background:#fff!important;color:#000!important;border:4px solid #000;}
+  .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
+  pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
+  h1,h2,p,li,strong{color:#000!important;}
+}
+.depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
+.depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
+.depurador-bloco .dbg-titulo-text{flex:1;}
+.depurador-bloco .dbg-layout{display:grid;grid-template-columns:1fr 200px;}
+.depurador-bloco .dbg-code-panel{background:#0B192C;padding:14px 10px;overflow-x:auto;}
+.depurador-bloco .dbg-line{display:flex;gap:8px;padding:2px 6px;border-radius:4px;transition:background .15s;white-space:pre;}
+.depurador-bloco .dbg-line.active{background:rgba(255,150,0,.35);outline:2px solid rgba(255,150,0,.6);}
+.depurador-bloco .dbg-linenum{color:#555;min-width:24px;text-align:right;user-select:none;flex-shrink:0;}
+.depurador-bloco .dbg-codeline{color:#cdd6f4;}
+.depurador-bloco .dbg-vars-panel{background:#111b2e;padding:12px;border-left:1px solid #1e3a5f;}
+.depurador-bloco .dbg-vars-title{color:#94a3b8;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.depurador-bloco .dbg-vars-table{width:100%;border-collapse:collapse;font-size:1rem;}
+.depurador-bloco .dbg-vars-table th{color:#64748b;font-weight:600;padding:3px 6px;text-align:left;border-bottom:1px solid #1e3a5f;}
+.depurador-bloco .dbg-vars-table td{color:#e2e8f0;padding:3px 6px;}
+.depurador-bloco .dbg-vars-table tr.changed td{color:var(--color-rust,#f90);}
+.depurador-bloco .dbg-btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:3px 10px;cursor:pointer;font-size:.9rem;font-family:inherit;white-space:nowrap;}
+.depurador-bloco .dbg-btn:hover{background:rgba(255,255,255,.32);}
+.depurador-bloco .dbg-btn:disabled{opacity:.35;cursor:default;}
+.depurador-bloco .dbg-btn.reset{background:rgba(0,0,0,.22);border-color:rgba(255,255,255,.2);}
+.depurador-bloco .dbg-step-info{color:rgba(255,255,255,.8);font-size:.9rem;text-align:center;white-space:nowrap;}
+.depurador-bloco .dbg-output{padding:8px 14px;background:#0a1020;color:#86efac;font-size:1rem;border-top:1px solid #1e3a5f;min-height:24px;}
+.depurador-bloco .dbg-output:empty{display:none;}
+/* .slide has overflow:hidden and a fixed viewport height, so any block below
+   (diagrama/animacao/grafico) whose native content size is unpredictable at
+   authoring time (e.g. a tall Mermaid flowchart) gets max-height + overflow:auto
+   as a safety net -- it scrolls internally instead of silently clipping past
+   the bottom of the slide. */
+.bloco-imagem{margin:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.bloco-imagem img{width:100%;max-height:340px;object-fit:contain;border-radius:12px;display:block;}
+.bloco-imagem figcaption{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;font-style:italic;}
+.bloco-imagem .bloco-imagem-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;align-self:flex-start;}
+.bloco-diagrama{margin:12px 0;}
+.bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-der{margin:12px 0;}
+.bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-der .bloco-der-svg{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
+.bloco-der .bloco-der-svg svg{max-width:100%;height:auto;}
+.bloco-der .bloco-der-download{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:.85rem;color:var(--color-blue);text-decoration:none;border:1px solid var(--border-soft,#e2e8f0);border-radius:8px;padding:5px 12px;}
+.bloco-der .bloco-der-download:hover{background:#f1f5f9;}
+.bloco-der .bloco-der-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+@media print{.bloco-der .bloco-der-download{display:none;}}
+.bloco-animacao{margin:12px 0;}
+.bloco-animacao .bloco-animacao-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao .p5-canvas-container{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);}
+.bloco-animacao canvas{display:block;max-width:100%;max-height:min(960px,65vh);border-radius:12px;}
+.bloco-animacao .bloco-animacao-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-grafico{margin:12px 0;}
+.bloco-grafico .bloco-grafico-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-grafico .bloco-grafico-wrap{background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border-soft,#e2e8f0);max-height:min(960px,65vh);overflow:auto;}
+.bloco-grafico .bloco-grafico-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-animacao-gsap{margin:12px 0;}
+.bloco-animacao-gsap .bloco-animacao-gsap-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-animacao-gsap .gsap-stage{border-radius:12px;overflow:auto;background:#f8fafc;border:1px solid var(--border-soft,#e2e8f0);position:relative;display:flex;align-items:center;justify-content:center;padding:16px;max-height:min(960px,65vh);}
+.bloco-animacao-gsap .bloco-animacao-gsap-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-tabela{margin:12px 0;}
+.bloco-tabela .bloco-tabela-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
+.bloco-tabela .bloco-tabela-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-soft,#e2e8f0);}
+.bloco-tabela table{width:100%;border-collapse:collapse;font-size:1.15rem;}
+.bloco-tabela thead tr{background:var(--color-blue,#1E3E62);color:#fff;}
+.bloco-tabela thead th{padding:10px 16px;text-align:left;font-weight:700;white-space:nowrap;}
+.bloco-tabela tbody tr:nth-child(odd){background:#f8fafc;}
+.bloco-tabela tbody tr:nth-child(even){background:#ffffff;}
+.bloco-tabela tbody td{padding:9px 16px;border-bottom:1px solid var(--border-soft,#e2e8f0);vertical-align:top;line-height:1.5;}
+.bloco-tabela .bloco-tabela-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
+.bloco-agenda{margin:16px 0;}
+.bloco-agenda .bloco-agenda-titulo{font-weight:800;color:var(--color-blue);font-size:1.15rem;margin-bottom:20px;}
+.bloco-agenda .agenda-lista{position:relative;}
+.bloco-agenda .agenda-item{display:flex;gap:18px;align-items:flex-start;position:relative;padding-bottom:24px;}
+.bloco-agenda .agenda-item:last-child{padding-bottom:0;}
+.bloco-agenda .agenda-item:not(:last-child)::before{content:'';position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--border-soft,#e2e8f0);}
+.bloco-agenda .agenda-numero{flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--color-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+.bloco-agenda .agenda-conteudo{padding-top:6px;}
+.bloco-agenda .agenda-item-titulo{font-weight:800;color:var(--color-navy);font-size:1.2rem;display:flex;align-items:center;gap:10px;}
+.bloco-agenda .agenda-item-titulo i{color:var(--color-orange);font-size:1.05rem;}
+.bloco-agenda .agenda-item-texto{color:var(--text-muted,#64748b);font-size:0.98rem;margin-top:4px;line-height:1.4;}
+.bloco-agenda .agenda-item-link{cursor:pointer;border-radius:10px;transition:background .15s;}
+.bloco-agenda .agenda-item-link:hover,.bloco-agenda .agenda-item-link:focus-visible{background:rgba(0,0,0,.05);outline:none;}
+.bloco-agenda .agenda-item-link:hover .agenda-item-titulo,.bloco-agenda .agenda-item-link:focus-visible .agenda-item-titulo{color:var(--color-blue);}
+.agenda-toggle{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:250;background:var(--color-blue);color:#fff;border:none;width:34px;height:64px;border-radius:0 12px 12px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:2px 0 10px rgba(0,0,0,.15);transition:left .3s ease,background .2s;}
+.agenda-toggle:hover{background:var(--color-orange);}
+.agenda-toggle.open{left:300px;}
+.agenda-sidebar{position:fixed;top:0;left:0;height:100%;width:300px;background:#fff;box-shadow:4px 0 20px rgba(0,0,0,.18);z-index:240;transform:translateX(-100%);transition:transform .3s ease;display:flex;flex-direction:column;padding-top:60px;}
+.agenda-sidebar.open{transform:translateX(0);}
+.agenda-sidebar-header{padding:14px 18px;font-weight:800;color:var(--color-blue);font-size:1.05rem;border-bottom:2px solid var(--border-soft,#e2e8f0);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agenda-sidebar-list{overflow-y:auto;flex:1;padding:8px;}
+.agenda-side-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text-main);font-size:.92rem;line-height:1.3;}
+.agenda-side-item:hover,.agenda-side-item:focus-visible{background:#f1f5f9;outline:none;}
+.agenda-side-item.active{background:var(--color-blue);color:#fff;}
+.agenda-side-label{flex-shrink:0;font-weight:800;font-size:.72rem;background:var(--color-orange);color:#fff;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.agenda-side-item.active .agenda-side-label{background:#fff;color:var(--color-blue);}
+.agenda-side-topic{font-weight:800;color:var(--color-deep,#0B192C);background:#f8fafc;margin:6px 0;border:1px solid var(--border-soft,#e2e8f0);}
+.agenda-side-topic i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-topic.active{background:var(--color-deep,#0B192C);color:#fff;}
+.agenda-side-topic.active i{color:#fff;}
+.agenda-side-section{font-weight:800;color:var(--color-blue);background:#eef4fb;margin-top:14px;border-left:3px solid var(--color-orange);border-radius:0 8px 8px 0;}
+.agenda-side-section:first-child{margin-top:0;}
+.agenda-side-section i{color:var(--color-orange);width:18px;text-align:center;flex-shrink:0;}
+.agenda-side-section.active{background:var(--color-blue);color:#fff;}
+.agenda-side-section.active i{color:#fff;}
+.agenda-side-sub{padding-left:30px;font-size:.85rem;color:var(--text-muted,#64748b);}
+.agenda-side-sub .agenda-side-label{font-size:.68rem;padding:1px 7px;}
+.agenda-side-sub.agenda-side-topic{padding-left:26px;font-size:.85rem;}
+@media print{.agenda-toggle,.agenda-sidebar{display:none!important;}}</style>
+</head>
+<body>
+<div class="fixed-link-bar">
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+</div>
+<button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
+<nav class="agenda-sidebar">
+  <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
+  <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Saindo do Banco de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Nem todo dado precisa de banco</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-folder-open"></i><span>O Módulo fs do Node</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>fs só existe no Main</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>fs/promises: sem new Promise manual</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-lines"></i><span>Relatório em .txt</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O botão Exportar Relatório</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>main.js: dialog + fs.writeFile</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Backup em .json</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que JSON pra isso</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Exportando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Importando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>O fluxo completo do backup</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: fs em Peça Impressa</span></button></div>
+</nav>
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter" id="slideCounter"></div>
+<div class="controls">
+  <button class="btn" onclick="toggleFullscreen()" title="Tela Cheia (F)"><i class="fa-solid fa-expand"></i></button>
+  <button class="btn" onclick="prevSlide()" title="Anterior (←)"><i class="fa-solid fa-arrow-left"></i></button>
+  <button class="btn" onclick="nextSlide()" title="Próximo (→)"><i class="fa-solid fa-arrow-right"></i></button>
+  <button class="btn" onclick="window.print()" style="background:var(--color-orange)" title="Imprimir"><i class="fa-solid fa-print"></i></button>
+</div>
+<div class="container">
+    <div class="slide" data-num="1">
+      <div class="slide-content-wrapper">
+        
+        
+        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
+<div class="bloco-agenda">
+    <div class="bloco-agenda-titulo">Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</div>
+    <div class="agenda-lista">
+      
+        <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
+          <div class="agenda-numero">01</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Saindo do Banco de Dados</div>
+            <div class="agenda-item-texto">CRUD completo — e agora?</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
+          <div class="agenda-numero">02</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-folder-open"></i> O Módulo fs do Node</div>
+            <div class="agenda-item-texto">Escrever e ler arquivos, com Promises de verdade</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+          <div class="agenda-numero">03</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-lines"></i> Relatório em .txt</div>
+            <div class="agenda-item-texto">Exportando os insumos já carregados na tela</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> Backup em .json</div>
+            <div class="agenda-item-texto">Exportar e reimportar, reaproveitando o Create</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+          <div class="agenda-numero">05</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
+          </div>
+        </div>
+    </div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="2">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Saindo do Banco de Dados</h1>
+        <p>CRUD completo — e agora?</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="2">
+      <div class="slide-content-wrapper">
+        <h1>Nem todo dado precisa de banco</h1>
+        
+        <p>Com o CRUD completo sobre <code>insumo</code> (Aulas 2 a 5), já sabemos guardar dado estruturado no MySQL. Mas nem tudo precisa de banco: um relatório pra imprimir, um backup pra levar pra outro computador, um arquivo de configuração — tudo isso vive bem como arquivo comum, no disco.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-folder-open"></i> Hoje: o módulo fs do Node
+      </h3>
+      <p>Vamos aprender a ler e escrever arquivos locais (<code>.txt</code> e <code>.json</code>) e aplicar isso no mesmo projeto: <strong>exportar um relatório</strong> dos insumos e <strong>fazer backup</strong> deles em JSON.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="3">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-folder-open"></i>
+        <h1>O Módulo fs do Node</h1>
+        <p>Escrever e ler arquivos, com Promises de verdade</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="3">
+      <div class="slide-content-wrapper">
+        <h1>fs só existe no Main</h1>
+        
+        <p>Mesma lógica do <code>mysql2</code> desde a Aula 1: o Renderer roda isolado (<code>contextIsolation</code>), sem acesso direto ao sistema operacional. <code>fs</code> é uma API do Node — só existe no processo <strong>Main</strong>. Pra ler ou escrever um arquivo a pedido do usuário, o caminho continua sendo o mesmo: preload expõe, <code>ipcMain.handle</code> executa.</p>
+<div class="bloco-diagrama" id="mmd9upg1">
+    <div class="bloco-diagrama-titulo">Mesma arquitetura, novo destino</div>
+    <div class="mermaid">flowchart LR
+    R["Renderer"] --&gt;|"window.api"| P["preload.js"]
+    P --&gt;|"invoke"| M["main.js"]
+    M --&gt; BD["MySQL"]
+    M --&gt; FS["Sistema de arquivos (fs)"]</div>
+    <div class="bloco-diagrama-legenda">O Main agora fala com duas coisas: o banco (MySQL) e o disco (fs). O caminho até ele nunca muda.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="4">
+      <div class="slide-content-wrapper">
+        <h1>fs/promises: sem new Promise manual</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-check"></i> Lembra do trabalho que demos com o mysql2?
+      </h3>
+      <p>Toda query precisou de um <code>new Promise</code> manual, porque o <code>mysql2</code> só tinha callback (Aula 1/2). O <code>fs</code> já vem com uma versão baseada em Promise pronta — <code>async</code>/<code>await</code> direto, sem embrulhar nada.</p>
+      
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+// escrever
+await fs.writeFile('anotacoes.txt', 'Impressora comprada em 10/03/2026');
+
+// ler (com tratamento pra arquivo inexistente)
+try {
+  const conteudo = await fs.readFile('anotacoes.txt', 'utf-8');
+  console.log(conteudo);
+} catch (erro) {
+  console.error('Nao consegui ler o arquivo:', erro.message);
+}</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="5">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-file-lines"></i>
+        <h1>Aplicando no Projeto: Relatório em .txt</h1>
+        <p>Exportando os insumos já carregados na tela</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>O botão Exportar Relatório</h1>
+        
+        <p>Igual ao modal de exclusão da Aula 5: os dados já estão na tela, em <code>insumosCarregados</code>. Não precisamos de uma consulta nova ao banco — só montar o texto do relatório a partir do que já temos em memória.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarRelatorio = () =&gt; {
+  const linhas = insumosCarregados.map(
+    (insumo) =&gt; `${insumo.nome} - ${formatarMoeda(insumo.valor)} - ${formatarData(insumo.data_aquisicao)}`
+  );
+
+  window.api.salvarArquivoTexto(linhas.join('\n'));
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Reaproveitando o que já existe
+      </h3>
+      <p><code>formatarMoeda</code> e <code>formatarData</code> são as mesmas funções da Aula 3 — o relatório usa exatamente o mesmo texto que já aparece formatado na tabela.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
+        <h1>main.js: dialog + fs.writeFile</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+ipcMain.handle('arquivo:salvarTexto', async (evento, conteudo) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar relatorio',
+    defaultPath: 'relatorio-insumos.txt',
+    filters: [{ name: 'Texto', extensions: ['txt'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, conteudo);
+});</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">salvarArquivoTexto: (conteudo) =&gt; ipcRenderer.invoke('arquivo:salvarTexto', conteudo),</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-window-restore"></i> dialog.showSaveDialog: revisão do semestre 1
+      </h3>
+      <p>É o mesmo <code>SaveDialog</code> visto na Aula 15 do semestre passado — deixa o USUÁRIO escolher onde salvar, em vez de fixar um caminho no código. Se ele cancelar, <code>filePath</code> some e a função simplesmente retorna.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="7">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-database"></i>
+        <h1>JSON: Backup Estruturado</h1>
+        <p>Exportar e reimportar, reaproveitando o Create</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="7">
+      <div class="slide-content-wrapper">
+        <h1>Por que JSON pra isso</h1>
+        
+        <p><code>insumosCarregados</code> já é o formato que usamos a disciplina inteira: um array de objetos. JSON é exatamente a representação em texto desse formato — por isso ele é a escolha natural pra guardar (ou transportar) esses dados fora do banco.</p>
+
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">// transforma o array de objetos em texto JSON (pra escrever no arquivo)
+JSON.stringify(insumosCarregados, null, 2);
+
+// transforma o texto JSON de volta num array de objetos (depois de ler o arquivo)
+JSON.parse(conteudo);</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        <h1>Exportando o backup</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarBackup = () =&gt; window.api.exportarBackupJson(insumosCarregados);</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:exportarJson', async (evento, dados) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar backup',
+    defaultPath: 'backup-insumos.json',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, JSON.stringify(dados, null, 2));
+});</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
+      <div class="slide-content-wrapper">
+        <h1>Importando o backup</h1>
+        
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:importarJson', async () =&gt; {
+  const { canceled, filePaths } = await dialog.showOpenDialog(janelaPrincipal, {
+    title: 'Escolher backup',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return null;
+
+  const conteudo = await fs.readFile(filePaths[0], 'utf-8');
+  return JSON.parse(conteudo);
+});</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const importarBackup = async () =&gt; {
+  const insumosImportados = await window.api.importarBackupJson();
+  if (!insumosImportados) return; // usuario cancelou
+
+  for (const insumo of insumosImportados) {
+    await window.api.criarInsumo(insumo);
+  }
+
+  carregarInsumos(); // mesma funcao de sempre, mostra os importados
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Um id novo pra cada um
+      </h3>
+      <p><code>criarInsumo</code> faz um INSERT de verdade — cada insumo importado ganha um <strong>id novo</strong> no banco, diferente do id que tinha no backup. Pra este exercício, tudo bem: o objetivo é reaproveitar os dados, não preservar o id original.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>O fluxo completo do backup</h1>
+        
+        <div class="bloco-diagrama" id="mmddltrq">
+    <div class="bloco-diagrama-titulo">Exportar e reimportar</div>
+    <div class="mermaid">sequenceDiagram
+    participant U as Usuario
+    participant R as frmPrincipal.js
+    participant P as preload.js
+    participant M as main.js
+    participant FS as Sistema de arquivos
+    participant BD as MySQL
+
+    Note over U,BD: Exportar
+    U-&gt;&gt;R: clica em Exportar Backup
+    R-&gt;&gt;P: window.api.exportarBackupJson(insumosCarregados)
+    P-&gt;&gt;M: invoke('arquivo:exportarJson', dados)
+    M-&gt;&gt;FS: writeFile(caminho, JSON.stringify(dados))
+
+    Note over U,BD: Importar
+    U-&gt;&gt;R: clica em Importar Backup
+    R-&gt;&gt;P: window.api.importarBackupJson()
+    P-&gt;&gt;M: invoke('arquivo:importarJson')
+    M-&gt;&gt;FS: readFile(caminho)
+    FS--&gt;&gt;M: conteudo (texto JSON)
+    M--&gt;&gt;R: JSON.parse(conteudo)
+    loop cada insumo importado
+      R-&gt;&gt;M: invoke('insumo:criar', insumo)
+      M-&gt;&gt;BD: INSERT INTO insumo
+    end
+    R-&gt;&gt;R: carregarInsumos()</div>
+    <div class="bloco-diagrama-legenda">Exportar só toca o disco. Importar toca o disco pra ler, e depois volta pro caminho já conhecido do Create pra gravar cada registro.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="11">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Resumo e exercício em Peça Impressa</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>Resumo da aula</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Recurso x API x Uso no projeto</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Recurso</th><th>API do fs</th><th>Uso no projeto</th></tr></thead><tbody><tr><td>Relatório</td><td><code>fs.writeFile</code> (texto puro)</td><td>Lista formatada de insumos em <code>.txt</code></td></tr><tr><td>Exportar backup</td><td><code>fs.writeFile</code> + <code>JSON.stringify</code></td><td><code>insumosCarregados</code> inteiro em <code>.json</code></td></tr><tr><td>Importar backup</td><td><code>fs.readFile</code> + <code>JSON.parse</code></td><td>Reaproveita <code>criarInsumo</code> pra regravar cada um</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
+      </h3>
+      <p>Na Aula 8 saímos do disco local e vamos consumir uma API REST externa, com Axios.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Exercício: fs em Peça Impressa</h1>
+        
+        
+    <div class="quest-list">
+      <ol><li>Adicione um botão <strong>Exportar Relatório</strong> na tela de peças, reaproveitando o array de peças já carregadas (título, cor e peso de cada uma) — mesmo padrão de <code>exportarRelatorio</code>.</li><li>Exponha <code>exportarBackupJson</code>/<code>importarBackupJson</code> no <code>preload.js</code> (podem ser as MESMAS funções genéricas já usadas pra insumo — repare que <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> no <code>main.js</code> não sabem nem precisam saber se os dados são de insumo ou de peça).</li><li>No <code>frmPrincipal.js</code>, crie <code>exportarBackupPecas</code> e <code>importarBackupPecas</code>, reaproveitando <code>criarPeca</code> pra regravar cada peça importada.</li><li>Teste o ciclo completo: exporte um backup de peças, apague uma peça de teste (Delete da Aula 5), e importe o backup de volta.</li></ol>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Dica
+      </h3>
+      <p>Repare que os handlers <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> do <code>main.js</code> são <strong>genéricos</strong> — não têm nada de insumo ou peça no nome. Você já pode reaproveitá-los sem duplicar código nenhum no main.js.</p>
+      
+    </div>
+        
+      </div>
+    </div></div>
+<script src="../libs/prism/prism.min.js"></script>
+<script src="../libs/prism/prism-autoloader.min.js"></script>
+<script type="module">
+import mermaid from '../libs/mermaid/mermaid.esm.min.mjs';
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#fee6d5',
+    primaryTextColor: '#0B1B1E',
+    primaryBorderColor: '#F97316',
+    lineColor: '#F97316',
+    secondaryColor: '#164E63',
+    tertiaryColor: '#f5f7fa',
+    background: '#ffffff',
+    mainBkg: '#fee6d5',
+    nodeBorder: '#F97316',
+    clusterBkg: '#f0f4f8',
+    titleColor: '#F97316',
+    edgeLabelBackground: '#ffffff',
+    fontFamily: 'Nunito, sans-serif',
+    fontSize: '22px',
+    // cScale1 (mermaid timeline section backgrounds, e.g. every 2nd block) defaults to
+    // secondaryColor = cor_deep, which is already near-black — mermaid then darkens it
+    // further, producing a solid black block that clashes with the palette and, combined
+    // with the equally dark default label color, was unreadable. Feed it the same light
+    // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
+    // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
+    cScale1: '#d3ebf1'
+  }
+});
+</script>
+<script>
+// Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
+// -- e.g. after the professor edits a slide and reloads to check it -- lands back where
+// the viewer was instead of jumping to slide 1.
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
+let cur=0;
+try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
+const slides=document.querySelectorAll('.slide');
+const total=slides.length;
+// "topico" (section-divider) slides don't get their own number -- the counter only
+// tracks content slides, matching the numbering already used in the agenda sidebar.
+const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
+const totalConteudo=12;
+const pb=document.querySelector('#progressBar');
+const sc=document.querySelector('#slideCounter');
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
+  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+}else document.documentElement.classList.add('fonts-ready');
+const agendaToggle=document.querySelector('.agenda-toggle');
+const agendaSidebar=document.querySelector('.agenda-sidebar');
+const toggleAgendaSidebar = () => {
+  const open=agendaSidebar.classList.toggle('open');
+  agendaToggle.classList.toggle('open',open);
+  agendaToggle.innerHTML='<i class="fa-solid '+(open?'fa-xmark':'fa-bars')+'"></i>';
+}
+const closeAgendaSidebar = () => {
+  agendaSidebar.classList.remove('open');
+  agendaToggle.classList.remove('open');
+  agendaToggle.innerHTML='<i class="fa-solid fa-bars"></i>';
+}
+const showSlide = (i) => {
+  if(i<0)i=0; if(i>=total)i=total-1;
+  cur=i;
+  slides.forEach((s,j)=>{s.classList.remove('active');if(j===cur)s.classList.add('active');});
+  pb.style.width=(numerosConteudo[cur]/totalConteudo*100)+'%';
+  sc.textContent='Slide '+numerosConteudo[cur]+'/'+totalConteudo;
+  document.querySelectorAll('.agenda-side-item').forEach(el=>{el.classList.toggle('active',Number(el.dataset.idx)===cur);});
+  try{ localStorage.setItem(STORAGE_KEY,String(cur)); }catch(e){}
+}
+const nextSlide = () => {showSlide(cur+1);}
+const prevSlide = () => {showSlide(cur-1);}
+const toggleFullscreen = () => {if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter')nextSlide();
+  else if(e.key==='ArrowLeft')prevSlide();
+  else if(e.key.toLowerCase()==='f')toggleFullscreen();
+  else if(e.key==='Escape')closeAgendaSidebar();
+});
+showSlide(cur);
+// Blocks copy/right-click/print only on slides authored with "protegido":true --
+// this is a deterrent (discourages casual copy-paste of an assignment), not real
+// protection: nothing served to a browser can stop an OS-level screenshot, and a
+// determined student can still read the page source. Say so plainly if asked.
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('copy',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('cut',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closest('.slide.protegido'))e.preventDefault();});
+document.addEventListener('keydown',e=>{
+  const ativo=document.querySelector('.slide.active');
+  if(!ativo||!ativo.classList.contains('protegido'))return;
+  const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&(k==='c'||k==='x'||k==='a'||k==='p'||k==='s'))e.preventDefault();
+});
+function aulagenCopiarCodigo(btn){
+  const wrap=btn.closest('.code-wrap');
+  const codeEl=wrap&&wrap.querySelector('pre code');
+  if(!codeEl)return;
+  const texto=codeEl.textContent;
+  const marcarCopiado=()=>{
+    const icon=btn.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    btn.classList.add('copiado');
+    setTimeout(()=>{icon.classList.remove('fa-check');icon.classList.add('fa-copy');btn.classList.remove('copiado');},1500);
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=texto;
+    ta.style.position='fixed';
+    ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{document.execCommand('copy');marcarCopiado();}catch(e){}
+    document.body.removeChild(ta);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(marcarCopiado).catch(fallback);
+  }else fallback();
+}
+const _dbg={};
+function dbgInit(id){
+  const el=document.getElementById(id);
+  const dataEl=document.getElementById(id+'-data');
+  if(!el||!dataEl) return;
+  try{ _dbg[id]={passos:JSON.parse(dataEl.textContent),cur:-1,prevVars:{}}; }catch(e){ return; }
+  dbgRender(id);
+}
+function dbgNext(id){ const s=_dbg[id]; if(s&&s.cur<s.passos.length-1){s.cur++;dbgRender(id);} }
+function dbgPrev(id){ const s=_dbg[id]; if(s&&s.cur>0){s.cur--;dbgRender(id);} }
+function dbgReset(id){ const s=_dbg[id]; if(s){s.cur=-1;s.prevVars={};dbgRender(id);} }
+function dbgRender(id){
+  const el=document.getElementById(id);
+  const s=_dbg[id];
+  if(!el||!s) return;
+  const passo=s.cur>=0?s.passos[s.cur]:null;
+  el.querySelectorAll('.dbg-line').forEach(l=>l.classList.remove('active'));
+  if(passo&&passo.linha!=null){
+    const al=el.querySelector('.dbg-line[data-ln="'+passo.linha+'"]');
+    if(al){ al.classList.add('active'); al.scrollIntoView({block:'nearest'}); }
+  }
+  const tbody=el.querySelector('.dbg-vars-body');
+  if(tbody){
+    const vars=passo?passo.vars:{};
+    tbody.innerHTML=Object.entries(vars).map(([k,v])=>{
+      const changed=s.prevVars[k]!==undefined&&String(s.prevVars[k])!==String(v);
+      return '<tr class="'+(changed?'changed':'')+'"><td>'+k+'</td><td>'+v+'</td></tr>';
+    }).join('');
+    if(passo) s.prevVars={...vars};
+  }
+  const outEl=document.getElementById(id+'-out');
+  if(outEl) outEl.textContent=passo&&passo.saida?passo.saida:'';
+  const curEl=document.getElementById(id+'-cur');
+  if(curEl) curEl.textContent=s.cur>=0?s.cur+1:'—';
+  const prevBtn=document.getElementById(id+'-prev');
+  const nextBtn=document.getElementById(id+'-next');
+  if(prevBtn) prevBtn.disabled=s.cur<=0;
+  if(nextBtn) nextBtn.disabled=!s.passos.length||s.cur>=s.passos.length-1;
+}
+document.querySelectorAll('.depurador-bloco').forEach(el=>dbgInit(el.id));
+</script>
+</body>
+</html>
