@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 6: Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</title>
+<title>Aula 7: Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -236,7 +236,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 6</p>
+        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
 <div class="bloco-agenda">
     <div class="bloco-agenda-titulo">Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</div>
     <div class="agenda-lista">
@@ -320,7 +320,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
         <h1>fs só existe no Main</h1>
         
         <p>Mesma lógica do <code>mysql2</code> desde a Aula 1: o Renderer roda isolado (<code>contextIsolation</code>), sem acesso direto ao sistema operacional. <code>fs</code> é uma API do Node — só existe no processo <strong>Main</strong>. Pra ler ou escrever um arquivo a pedido do usuário, o caminho continua sendo o mesmo: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdpcyt7">
+<div class="bloco-diagrama" id="mmd9upg1">
     <div class="bloco-diagrama-titulo">Mesma arquitetura, novo destino</div>
     <div class="mermaid">flowchart LR
     R["Renderer"] --&gt;|"window.api"| P["preload.js"]
@@ -542,7 +542,7 @@ JSON.parse(conteudo);</code></pre>
       <div class="slide-content-wrapper">
         <h1>O fluxo completo do backup</h1>
         
-        <div class="bloco-diagrama" id="mmdqjig3">
+        <div class="bloco-diagrama" id="mmddltrq">
     <div class="bloco-diagrama-titulo">Exportar e reimportar</div>
     <div class="mermaid">sequenceDiagram
     participant U as Usuario
@@ -598,7 +598,7 @@ JSON.parse(conteudo);</code></pre>
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>Na Aula 7 saímos do disco local e vamos consumir uma API REST externa, com Axios.</p>
+      <p>Na Aula 8 saímos do disco local e vamos consumir uma API REST externa, com Axios.</p>
       
     </div>
         
@@ -660,7 +660,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::6';
+const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::7';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');

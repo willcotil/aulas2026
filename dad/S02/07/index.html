@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 7: Consumo de API REST — Integração com Serviços Externos via Axios</title>
+<title>Aula 7: Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2D6A4F;--color-rust:#FFB703;
-  --color-orange:#FFB703;--color-yellow:#FFB703;--color-deep:#1B4332;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10241C;
+  --color-navy:#000;--color-blue:#0891B2;--color-rust:#F97316;
+  --color-orange:#F97316;--color-yellow:#F97316;--color-deep:#164E63;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0B1B1E;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -206,21 +206,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>De Onde Vêm os Dados?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Um Terceiro Lugar Pra Buscar Dado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-cloud"></i><span>O que é uma API REST</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Pedindo Informação Pela Internet</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><i class="fa-solid fa-plug"></i><span>Instalando e Usando o Axios</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Por que um pacote pra isso?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Axios só existe no Main</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-dollar-sign"></i><span>Aplicando no Projeto</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O handler no main.js</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>preload.js e a tela principal</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Mostrando o valor em dólar na tabela</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-topic agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Saindo do Banco de Dados</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Nem todo dado precisa de banco</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-folder-open"></i><span>O Módulo fs do Node</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>fs só existe no Main</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>fs/promises: sem new Promise manual</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-lines"></i><span>Relatório em .txt</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O botão Exportar Relatório</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>main.js: dialog + fs.writeFile</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>Backup em .json</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que JSON pra isso</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Exportando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Importando o backup</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>O fluxo completo do backup</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: fs em Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -237,38 +238,38 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
         
         <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 7</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">Consumo de API REST — Integração com Serviços Externos via Axios</div>
+    <div class="bloco-agenda-titulo">Sistema de Arquivos (fs) — Leitura e Escrita de Arquivos Locais</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> De Onde Vêm os Dados?</div>
-            <div class="agenda-item-texto">MySQL, fs e agora uma API externa</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Saindo do Banco de Dados</div>
+            <div class="agenda-item-texto">CRUD completo — e agora?</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-cloud"></i> O que é uma API REST</div>
-            <div class="agenda-item-texto">Requisição, resposta, JSON</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-folder-open"></i> O Módulo fs do Node</div>
+            <div class="agenda-item-texto">Escrever e ler arquivos, com Promises de verdade</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(5)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-plug"></i> Instalando e Usando o Axios</div>
-            <div class="agenda-item-texto">Mesma arquitetura, novo destino</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-lines"></i> Relatório em .txt</div>
+            <div class="agenda-item-texto">Exportando os insumos já carregados na tela</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-dollar-sign"></i> Aplicando no Projeto</div>
-            <div class="agenda-item-texto">Cotação do dólar nos insumos</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> Backup em .json</div>
+            <div class="agenda-item-texto">Exportar e reimportar, reaproveitando o Create</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
@@ -284,22 +285,22 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
     <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
-        <h1>De Onde Vêm os Dados?</h1>
-        <p>MySQL, fs e agora uma API externa</p>
+        <h1>Saindo do Banco de Dados</h1>
+        <p>CRUD completo — e agora?</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>Um Terceiro Lugar Pra Buscar Dado</h1>
+        <h1>Nem todo dado precisa de banco</h1>
         
-        <p>Até aqui, nosso app já sabe buscar dado em dois lugares: o <strong>MySQL</strong> (Aulas 1 a 5, dado que a gente mesmo criou e controla) e o <strong>disco local</strong> (Aula 6, arquivos <code>.txt</code>/<code>.json</code> no computador do usuário). Hoje entra um terceiro: um <strong>servidor de outra empresa</strong>, na internet, que a gente não controla — só consome.</p>
+        <p>Com o CRUD completo sobre <code>insumo</code> (Aulas 2 a 5), já sabemos guardar dado estruturado no MySQL. Mas nem tudo precisa de banco: um relatório pra imprimir, um backup pra levar pra outro computador, um arquivo de configuração — tudo isso vive bem como arquivo comum, no disco.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-cloud"></i> Hoje: consumir uma API REST externa
+        <i class="fa-solid fa-folder-open"></i> Hoje: o módulo fs do Node
       </h3>
-      <p>Vamos buscar a <strong>cotação do dólar</strong> numa API pública e gratuita, e usar isso no Gerenciador de Peças 3D — afinal, boa parte dos insumos de impressão 3D (filamento importado, peças de impressora) tem preço de referência em dólar.</p>
+      <p>Vamos aprender a ler e escrever arquivos locais (<code>.txt</code> e <code>.json</code>) e aplicar isso no mesmo projeto: <strong>exportar um relatório</strong> dos insumos e <strong>fazer backup</strong> deles em JSON.</p>
       
     </div>
         
@@ -308,158 +309,157 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-cloud"></i>
-        <h1>O que é uma API REST</h1>
-        <p>Requisição, resposta, JSON</p>
+        <i class="fa-solid fa-folder-open"></i>
+        <h1>O Módulo fs do Node</h1>
+        <p>Escrever e ler arquivos, com Promises de verdade</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Pedindo Informação Pela Internet</h1>
+        <h1>fs só existe no Main</h1>
         
-        <p>Pensa numa API REST como um balcão de atendimento: você faz um <strong>pedido</strong> (uma URL, tipo um endereço) e recebe uma <strong>resposta</strong> — quase sempre em <strong>JSON</strong>, o mesmo formato que a gente já usa desde o semestre passado pra representar array de objetos.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>exemplo de resposta da API</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-text">GET https://economia.awesomeapi.com.br/json/last/USD-BRL
-
-Resposta (JSON):
-{
-  &quot;USDBRL&quot;: {
-    &quot;code&quot;: &quot;USD&quot;,
-    &quot;name&quot;: &quot;Dolar Americano/Real Brasileiro&quot;,
-    &quot;bid&quot;: &quot;5.3521&quot;
-  }
-}</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-circle-info"></i> bid = cotação de compra
-      </h3>
-      <p>O campo que interessa pra gente é o <code>bid</code> — a cotação atual do dólar em reais. É só um texto (<code>string</code>) com o número, então vamos precisar converter pra <code>Number</code> antes de fazer conta com ele.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="4">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-plug"></i>
-        <h1>Instalando e Usando o Axios</h1>
-        <p>Mesma arquitetura, novo destino</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="4">
-      <div class="slide-content-wrapper">
-        <h1>Por que um pacote pra isso?</h1>
-        
-        <p>O JavaScript já tem um jeito nativo de fazer requisição (<code>fetch</code>), mas o <strong>Axios</strong> é o pacote mais usado do mercado pra isso: sintaxe mais simples, já entrega a resposta em JSON pronta, e trata erro de rede de forma mais direta.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>terminal</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-bash">npm install axios</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo npm install de sempre
-      </h3>
-      <p>É o mesmo comando que já usamos pro <code>mysql2</code> (Aula 1) — o Axios só mais um pacote na pasta <code>node_modules</code>.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="5">
-      <div class="slide-content-wrapper">
-        <h1>Axios só existe no Main</h1>
-        
-        <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 6 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdvsul8">
-    <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
+        <p>Mesma lógica do <code>mysql2</code> desde a Aula 1: o Renderer roda isolado (<code>contextIsolation</code>), sem acesso direto ao sistema operacional. <code>fs</code> é uma API do Node — só existe no processo <strong>Main</strong>. Pra ler ou escrever um arquivo a pedido do usuário, o caminho continua sendo o mesmo: preload expõe, <code>ipcMain.handle</code> executa.</p>
+<div class="bloco-diagrama" id="mmd9upg1">
+    <div class="bloco-diagrama-titulo">Mesma arquitetura, novo destino</div>
     <div class="mermaid">flowchart LR
     R["Renderer"] --&gt;|"window.api"| P["preload.js"]
     P --&gt;|"invoke"| M["main.js"]
-    M --&gt; BD["MySQL (Aulas 1-5)"]
-    M --&gt; FS["Sistema de arquivos (Aula 6)"]
-    M --&gt; API["API externa via Axios (hoje)"]</div>
-    <div class="bloco-diagrama-legenda">O Main agora fala com três coisas: o banco, o disco, e a internet. O caminho até ele é sempre o mesmo.</div>
+    M --&gt; BD["MySQL"]
+    M --&gt; FS["Sistema de arquivos (fs)"]</div>
+    <div class="bloco-diagrama-legenda">O Main agora fala com duas coisas: o banco (MySQL) e o disco (fs). O caminho até ele nunca muda.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="6">
+    <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-dollar-sign"></i>
-        <h1>Aplicando no Projeto</h1>
-        <p>Cotação do dólar nos insumos</p>
+        <h1>fs/promises: sem new Promise manual</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-check"></i> Lembra do trabalho que demos com o mysql2?
+      </h3>
+      <p>Toda query precisou de um <code>new Promise</code> manual, porque o <code>mysql2</code> só tinha callback (Aula 1/2). O <code>fs</code> já vem com uma versão baseada em Promise pronta — <code>async</code>/<code>await</code> direto, sem embrulhar nada.</p>
+      
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
+
+// escrever
+await fs.writeFile('anotacoes.txt', 'Impressora comprada em 10/03/2026');
+
+// ler (com tratamento pra arquivo inexistente)
+try {
+  const conteudo = await fs.readFile('anotacoes.txt', 'utf-8');
+  console.log(conteudo);
+} catch (erro) {
+  console.error('Nao consegui ler o arquivo:', erro.message);
+}</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="5">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-file-lines"></i>
+        <h1>Aplicando no Projeto: Relatório em .txt</h1>
+        <p>Exportando os insumos já carregados na tela</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
+      <div class="slide-content-wrapper">
+        <h1>O botão Exportar Relatório</h1>
+        
+        <p>Igual ao modal de exclusão da Aula 5: os dados já estão na tela, em <code>insumosCarregados</code>. Não precisamos de uma consulta nova ao banco — só montar o texto do relatório a partir do que já temos em memória.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarRelatorio = () =&gt; {
+  const linhas = insumosCarregados.map(
+    (insumo) =&gt; `${insumo.nome} - ${formatarMoeda(insumo.valor)} - ${formatarData(insumo.data_aquisicao)}`
+  );
+
+  window.api.salvarArquivoTexto(linhas.join('\n'));
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lightbulb"></i> Reaproveitando o que já existe
+      </h3>
+      <p><code>formatarMoeda</code> e <code>formatarData</code> são as mesmas funções da Aula 3 — o relatório usa exatamente o mesmo texto que já aparece formatado na tabela.</p>
+      
+    </div>
+        
       </div>
     </div>
 
     <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
+        <h1>main.js: dialog + fs.writeFile</h1>
         
         
     <div class="code-wrap">
       <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const axios = require('axios');
+      <pre style="margin-top:0;"><code class="language-javascript">const fs = require('fs/promises');
 
-ipcMain.handle('cotacao:buscarDolar', async () =&gt; {
-  try {
-    const resposta = await axios.get('https://economia.awesomeapi.com.br/json/last/USD-BRL');
-    return Number(resposta.data.USDBRL.bid);
-  } catch (erro) {
-    console.error('Nao consegui buscar a cotacao:', erro.message);
-    return null;
-  }
+ipcMain.handle('arquivo:salvarTexto', async (evento, conteudo) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar relatorio',
+    defaultPath: 'relatorio-insumos.txt',
+    filters: [{ name: 'Texto', extensions: ['txt'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, conteudo);
 });</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">salvarArquivoTexto: (conteudo) =&gt; ipcRenderer.invoke('arquivo:salvarTexto', conteudo),</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> try/catch, não new Promise
+        <i class="fa-solid fa-window-restore"></i> dialog.showSaveDialog: revisão do semestre 1
       </h3>
-      <p>Igual ao <code>fs/promises</code> da Aula 6, o Axios já devolve uma Promise de verdade — usamos <code>async</code>/<code>await</code> direto, com <code>try</code>/<code>catch</code> pra tratar o caso da internet cair ou a API sair do ar. Se der erro, devolvemos <code>null</code> em vez de travar o app.</p>
+      <p>É o mesmo <code>SaveDialog</code> visto na Aula 15 do semestre passado — deixa o USUÁRIO escolher onde salvar, em vez de fixar um caminho no código. Se ele cancelar, <code>filePath</code> some e a função simplesmente retorna.</p>
       
     </div>
         
       </div>
     </div>
 
+    <div class="slide topic" data-num="7">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-database"></i>
+        <h1>JSON: Backup Estruturado</h1>
+        <p>Exportar e reimportar, reaproveitando o Create</p>
+      </div>
+    </div>
+
     <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>preload.js e a tela principal</h1>
+        <h1>Por que JSON pra isso</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">buscarCotacaoDolar: () =&gt; ipcRenderer.invoke('cotacao:buscarDolar'),</code></pre>
-    </div>
+        <p><code>insumosCarregados</code> já é o formato que usamos a disciplina inteira: um array de objetos. JSON é exatamente a representação em texto desse formato — por isso ele é a escolha natural pra guardar (ou transportar) esses dados fora do banco.</p>
 
     <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">let cotacaoDolar = null;
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-javascript">// transforma o array de objetos em texto JSON (pra escrever no arquivo)
+JSON.stringify(insumosCarregados, null, 2);
 
-const carregarCotacao = async () =&gt; {
-  cotacaoDolar = await window.api.buscarCotacaoDolar();
-};
-
-carregarCotacao();</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-lightbulb"></i> Uma variável, carregada uma vez
-      </h3>
-      <p>Guardamos a cotação numa variável (igual <code>insumosCarregados</code> da Aula 3) assim que a tela principal abre — não precisamos buscar de novo a cada linha da tabela.</p>
-      
+// transforma o texto JSON de volta num array de objetos (depois de ler o arquivo)
+JSON.parse(conteudo);</code></pre>
     </div>
         
       </div>
@@ -467,26 +467,27 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>Mostrando o valor em dólar na tabela</h1>
+        <h1>Exportando o backup</h1>
         
-        <p>Com <code>cotacaoDolar</code> já carregada, é só dividir o <code>valor</code> (em reais) de cada insumo por ela, dentro do mesmo <code>carregarInsumos</code> da Aula 3 — reaproveitando também <code>formatarMoeda</code>.</p>
-
+        
     <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js (dentro do map de carregarInsumos)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const valorEmDolar = cotacaoDolar
-  ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
-  : '—';
-
-// na linha da tabela:
-// &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;</code></pre>
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarBackup = () =&gt; window.api.exportarBackupJson(insumosCarregados);</code></pre>
     </div>
 
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
-      </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar), <code>cotacaoDolar</code> continua <code>null</code> — por isso o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
-      
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:exportarJson', async (evento, dados) =&gt; {
+  const { canceled, filePath } = await dialog.showSaveDialog(janelaPrincipal, {
+    title: 'Salvar backup',
+    defaultPath: 'backup-insumos.json',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return;
+
+  await fs.writeFile(filePath, JSON.stringify(dados, null, 2));
+});</code></pre>
     </div>
         
       </div>
@@ -494,34 +495,88 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo da requisição</h1>
+        <h1>Importando o backup</h1>
         
-        <div class="bloco-diagrama" id="mmdozy49">
-    <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
+        
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('arquivo:importarJson', async () =&gt; {
+  const { canceled, filePaths } = await dialog.showOpenDialog(janelaPrincipal, {
+    title: 'Escolher backup',
+    filters: [{ name: 'JSON', extensions: ['json'] }]
+  });
+
+  if (canceled) return null;
+
+  const conteudo = await fs.readFile(filePaths[0], 'utf-8');
+  return JSON.parse(conteudo);
+});</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const importarBackup = async () =&gt; {
+  const insumosImportados = await window.api.importarBackupJson();
+  if (!insumosImportados) return; // usuario cancelou
+
+  for (const insumo of insumosImportados) {
+    await window.api.criarInsumo(insumo);
+  }
+
+  carregarInsumos(); // mesma funcao de sempre, mostra os importados
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Um id novo pra cada um
+      </h3>
+      <p><code>criarInsumo</code> faz um INSERT de verdade — cada insumo importado ganha um <strong>id novo</strong> no banco, diferente do id que tinha no backup. Pra este exercício, tudo bem: o objetivo é reaproveitar os dados, não preservar o id original.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>O fluxo completo do backup</h1>
+        
+        <div class="bloco-diagrama" id="mmddltrq">
+    <div class="bloco-diagrama-titulo">Exportar e reimportar</div>
     <div class="mermaid">sequenceDiagram
+    participant U as Usuario
     participant R as frmPrincipal.js
     participant P as preload.js
     participant M as main.js
-    participant API as AwesomeAPI
+    participant FS as Sistema de arquivos
+    participant BD as MySQL
 
-    R-&gt;&gt;P: window.api.buscarCotacaoDolar()
-    P-&gt;&gt;M: invoke('cotacao:buscarDolar')
-    M-&gt;&gt;API: axios.get(...)
-    alt API responde
-      API--&gt;&gt;M: { USDBRL: { bid: "5.3521" } }
-      M--&gt;&gt;R: 5.3521
-    else erro de rede
-      API--&gt;&gt;M: falha
-      M--&gt;&gt;R: null
+    Note over U,BD: Exportar
+    U-&gt;&gt;R: clica em Exportar Backup
+    R-&gt;&gt;P: window.api.exportarBackupJson(insumosCarregados)
+    P-&gt;&gt;M: invoke('arquivo:exportarJson', dados)
+    M-&gt;&gt;FS: writeFile(caminho, JSON.stringify(dados))
+
+    Note over U,BD: Importar
+    U-&gt;&gt;R: clica em Importar Backup
+    R-&gt;&gt;P: window.api.importarBackupJson()
+    P-&gt;&gt;M: invoke('arquivo:importarJson')
+    M-&gt;&gt;FS: readFile(caminho)
+    FS--&gt;&gt;M: conteudo (texto JSON)
+    M--&gt;&gt;R: JSON.parse(conteudo)
+    loop cada insumo importado
+      R-&gt;&gt;M: invoke('insumo:criar', insumo)
+      M-&gt;&gt;BD: INSERT INTO insumo
     end
-    R-&gt;&gt;R: carregarInsumos() usa cotacaoDolar</div>
-    <div class="bloco-diagrama-legenda">Mesma forma das Aulas 2-5 e 6: preload expõe, main.js faz o trabalho pesado (agora com axios), e devolve o resultado pro renderer usar.</div>
+    R-&gt;&gt;R: carregarInsumos()</div>
+    <div class="bloco-diagrama-legenda">Exportar só toca o disco. Importar toca o disco pra ler, e depois volta pro caminho já conhecido do Create pra gravar cada registro.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide topic" data-num="10">
+    <div class="slide topic" data-num="11">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
@@ -529,41 +584,41 @@ carregarCotacao();</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
         <h1>Resumo da aula</h1>
         
         <div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">MySQL x fs x API externa</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Origem do dado</th><th>Pacote/API</th><th>Onde vive no código</th></tr></thead><tbody><tr><td>Banco de dados</td><td>mysql2 (Aulas 1-5)</td><td>conexao.js + handlers no main.js</td></tr><tr><td>Disco local</td><td>fs/promises (Aula 6)</td><td>handlers no main.js</td></tr><tr><td>Servidor externo</td><td>axios (hoje)</td><td>handlers no main.js</td></tr></tbody></table></div>
-    <div class="bloco-tabela-legenda">Os três seguem o mesmo caminho: preload expõe, ipcMain.handle executa, Renderer só recebe o resultado pronto.</div>
+    <div class="bloco-tabela-titulo">Recurso x API x Uso no projeto</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Recurso</th><th>API do fs</th><th>Uso no projeto</th></tr></thead><tbody><tr><td>Relatório</td><td><code>fs.writeFile</code> (texto puro)</td><td>Lista formatada de insumos em <code>.txt</code></td></tr><tr><td>Exportar backup</td><td><code>fs.writeFile</code> + <code>JSON.stringify</code></td><td><code>insumosCarregados</code> inteiro em <code>.json</code></td></tr><tr><td>Importar backup</td><td><code>fs.readFile</code> + <code>JSON.parse</code></td><td>Reaproveita <code>criarInsumo</code> pra regravar cada um</td></tr></tbody></table></div>
+    
   </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p>Na Aula 8 tratamos segurança em aplicações Electron — Content Security Policy (CSP) e proteção contra XSS.</p>
+      <p>Na Aula 8 saímos do disco local e vamos consumir uma API REST externa, com Axios.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa</h1>
+        <h1>Exercício: fs em Peça Impressa</h1>
         
         
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
+      <ol><li>Adicione um botão <strong>Exportar Relatório</strong> na tela de peças, reaproveitando o array de peças já carregadas (título, cor e peso de cada uma) — mesmo padrão de <code>exportarRelatorio</code>.</li><li>Exponha <code>exportarBackupJson</code>/<code>importarBackupJson</code> no <code>preload.js</code> (podem ser as MESMAS funções genéricas já usadas pra insumo — repare que <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> no <code>main.js</code> não sabem nem precisam saber se os dados são de insumo ou de peça).</li><li>No <code>frmPrincipal.js</code>, crie <code>exportarBackupPecas</code> e <code>importarBackupPecas</code>, reaproveitando <code>criarPeca</code> pra regravar cada peça importada.</li><li>Teste o ciclo completo: exporte um backup de peças, apague uma peça de teste (Delete da Aula 5), e importe o backup de volta.</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Dica
       </h3>
-      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. Mesma ideia dos handlers de arquivo da Aula 6.</p>
+      <p>Repare que os handlers <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> do <code>main.js</code> são <strong>genéricos</strong> — não têm nada de insumo ou peça no nome. Você já pode reaproveitá-los sem duplicar código nenhum no main.js.</p>
       
     </div>
         
@@ -577,17 +632,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fff2d2',
-    primaryTextColor: '#10241C',
-    primaryBorderColor: '#FFB703',
-    lineColor: '#FFB703',
-    secondaryColor: '#1B4332',
+    primaryColor: '#fee6d5',
+    primaryTextColor: '#0B1B1E',
+    primaryBorderColor: '#F97316',
+    lineColor: '#F97316',
+    secondaryColor: '#164E63',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fff2d2',
-    nodeBorder: '#FFB703',
+    mainBkg: '#fee6d5',
+    nodeBorder: '#F97316',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FFB703',
+    titleColor: '#F97316',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -597,7 +652,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9e4df'
+    cScale1: '#d3ebf1'
   }
 });
 </script>
@@ -613,7 +668,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
+const totalConteudo=12;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
