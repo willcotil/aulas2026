@@ -220,7 +220,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>turma e disciplina, Com Restrições</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Resumo das Restrições de Hoje</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Aplicando Restrições</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício 1: Livraria</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício 2: Clínica</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -565,19 +566,31 @@ INSERT INTO exemplo (email) VALUES ('ana@escola.com');
 
     <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
-        <h1>Exercícios: Aplicando Restrições</h1>
+        <h1>Exercício 1: Livraria</h1>
         
         
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-file-code"></i> O que entregar
       </h3>
-      <p>Salve o comando <code>CREATE TABLE</code> de cada exercício num arquivo <code>.sql</code> (ex: <code>livro.sql</code>).</p>
+      <p>(1) Uma descrição do DER com a lista de atributos, o tipo escolhido pra cada um e as restrições (NOT NULL, DEFAULT, UNIQUE), acompanhada da justificativa de cada escolha; e (2) o(s) comando(s) <code>CREATE TABLE</code> correspondente(s), salvos num arquivo <code>.sql</code>.</p>
       
     </div>
 
     <div class="quest-list">
-      <ol><li>Crie a tabela <code>livro</code> com <code>titulo</code> (NOT NULL), <code>isbn</code> (NOT NULL e UNIQUE) e <code>disponivel</code> (DEFAULT 'Sim').</li><li>Rode <code>DESCRIBE livro</code> e confira se as colunas Null/Key/Default aparecem como esperado.</li><li>Crie a tabela <code>funcionario</code> com <code>nome</code> (NOT NULL), <code>email</code> (NOT NULL e UNIQUE) e <code>cargo</code> (DEFAULT 'Nao definido').</li><li>Tente inserir dois funcionários com o mesmo email e explique, com suas palavras, o erro que o MySQL retorna.</li><li>Desafio: pense numa coluna que faria sentido ser UNIQUE mas NÃO NOT NULL (aceitar ficar vazia às vezes) — explique o cenário e escreva o CREATE TABLE dela.</li></ol>
+      <ol><li>Uma livraria quer organizar o cadastro do seu acervo. Para cada livro, ela precisa guardar o título, o ISBN (o código que identifica de forma única cada edição e nunca pode faltar), o autor, o ano de publicação, o preço de venda e a quantidade de exemplares disponíveis em estoque — sendo que um livro recém-cadastrado, se ninguém informar a quantidade, deve começar com 0 exemplares. Para cada editora responsável pelos livros, ela precisa guardar o nome (que não pode se repetir entre editoras diferentes) e um e-mail de contato. Desenhe o DER das entidades <code>livro</code> e <code>editora</code>, escolhendo o tipo de dado e as restrições de coluna mais adequados pra cada atributo, com uma justificativa curta pra cada escolha (por que aquele tipo, por que aquela restrição — ou por que nenhuma). Em seguida, a partir do seu DER, escreva os comandos <code>CREATE TABLE</code> para <code>livro</code> e <code>editora</code>, usando somente o que já vimos até aqui (tipos de dados, <code>NOT NULL</code>, <code>DEFAULT</code> e <code>UNIQUE</code> — ainda sem chave primária, isso é assunto da Aula 8).</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>Exercício 2: Clínica</h1>
+        
+        
+    <div class="quest-list">
+      <ol style="counter-reset:quest 1"><li>Uma clínica popular quer digitalizar o cadastro de pacientes e médicos. Para cada paciente, ela precisa guardar o nome completo, o CPF (que identifica a pessoa de forma única e nunca pode ficar em branco), a data de nascimento, um telefone de contato e o plano de saúde do paciente — sendo que muitos pacientes não têm plano de saúde, e nesse caso o sistema deve registrar automaticamente 'Particular'. Para cada médico, ela precisa guardar o nome, o CRM (registro profissional que também identifica o médico de forma única e obrigatória) e a especialidade. Desenhe o DER das entidades <code>paciente</code> e <code>medico</code>, escolhendo o tipo de dado e as restrições de coluna mais adequados pra cada atributo, com uma justificativa curta pra cada escolha. Em seguida, a partir do seu DER, escreva os comandos <code>CREATE TABLE</code> para <code>paciente</code> e <code>medico</code>, usando somente o que já vimos até aqui (tipos de dados, <code>NOT NULL</code>, <code>DEFAULT</code> e <code>UNIQUE</code> — ainda sem chave primária).</li></ol>
     </div>
         
       </div>
@@ -626,7 +639,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=10;
+const totalConteudo=11;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
