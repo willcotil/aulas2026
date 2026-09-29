@@ -125,7 +125,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 .bloco-diagrama{margin:12px 0;}
 .bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
-.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .mermaid svg{max-width:100%!important;height:auto!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-der{margin:12px 0;}
 .bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
@@ -380,7 +380,7 @@ Resposta (JSON):
         <h1>Axios só existe no Main</h1>
         
         <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 7 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmdhdfnh">
+<div class="bloco-diagrama" id="mmde64r4">
     <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
     <div class="mermaid">flowchart LR
     R["Renderer"] --&gt;|"window.api"| P["preload.js"]
@@ -469,23 +469,46 @@ carregarCotacao();</code></pre>
       <div class="slide-content-wrapper">
         <h1>Mostrando o valor em dólar na tabela</h1>
         
-        <p>Com <code>cotacaoDolar</code> já carregada, é só dividir o <code>valor</code> (em reais) de cada insumo por ela, dentro do mesmo <code>carregarInsumos</code> da Aula 3 — reaproveitando também <code>formatarMoeda</code>.</p>
+        <p>Com <code>cotacaoDolar</code> já carregada, é só calcular o <code>valorEmDolar</code> de cada insumo dentro do mesmo <code>.map</code> do <code>carregarInsumos</code> (Aula 3), e acrescentar ele ao lado do <code>formatarMoeda</code> que já está lá — o resto da função (botões de Editar/Excluir) continua exatamente igual.</p>
 
     <div class="code-wrap">
-      <div class="file-label"><span>src/renderer/frmPrincipal.js (dentro do map de carregarInsumos)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const valorEmDolar = cotacaoDolar
-  ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
-  : '—';
+      <div class="file-label"><span>src/renderer/frmPrincipal.js (carregarInsumos atualizado)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">const carregarInsumos = async () =&gt; {
+  insumosCarregados = await window.api.listarInsumos();
 
-// na linha da tabela:
-// &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;</code></pre>
+  const linhas = insumosCarregados
+    .map((insumo) =&gt; {
+      const valorEmDolar = cotacaoDolar
+        ? `US$ ${(insumo.valor / cotacaoDolar).toFixed(2)}`
+        : '—';
+
+      return `
+        &lt;tr&gt;
+          &lt;td&gt;${insumo.tipo}&lt;/td&gt;
+          &lt;td&gt;${insumo.nome}&lt;/td&gt;
+          &lt;td&gt;${formatarMoeda(insumo.valor)} (${valorEmDolar})&lt;/td&gt;
+          &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
+          &lt;td&gt;
+            &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;
+              Editar
+            &lt;/button&gt;
+            &lt;button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;
+              Excluir
+            &lt;/button&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;`;
+    })
+    .join('');
+
+  document.querySelector('#tbodyInsumos').innerHTML = linhas;
+};</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
       </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar), <code>cotacaoDolar</code> continua <code>null</code> — por isso o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
+      <p>Se <code>carregarCotacao</code> falhou (API fora do ar) — ou ainda não terminou de carregar na primeira vez que a tabela renderiza — <code>cotacaoDolar</code> continua <code>null</code>, e o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
       
     </div>
         
@@ -496,7 +519,7 @@ carregarCotacao();</code></pre>
       <div class="slide-content-wrapper">
         <h1>O fluxo completo da requisição</h1>
         
-        <div class="bloco-diagrama" id="mmdqsa91">
+        <div class="bloco-diagrama" id="mmdbmpn0">
     <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
     <div class="mermaid">sequenceDiagram
     participant R as frmPrincipal.js

@@ -125,7 +125,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 .bloco-diagrama{margin:12px 0;}
 .bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
-.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .mermaid svg{max-width:100%!important;height:auto!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-der{margin:12px 0;}
 .bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
@@ -218,10 +218,11 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por que JSON pra isso</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Exportando o backup</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Importando o backup</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>O fluxo completo do backup</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: fs em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Os Botões, com os IDs Certos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O fluxo completo do backup</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Resumo da aula</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: fs em Peça Impressa</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -269,7 +270,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
             <div class="agenda-item-texto">Exportar e reimportar, reaproveitando o Create</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
@@ -320,7 +321,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
         <h1>fs só existe no Main</h1>
         
         <p>Mesma lógica do <code>mysql2</code> desde a Aula 1: o Renderer roda isolado (<code>contextIsolation</code>), sem acesso direto ao sistema operacional. <code>fs</code> é uma API do Node — só existe no processo <strong>Main</strong>. Pra ler ou escrever um arquivo a pedido do usuário, o caminho continua sendo o mesmo: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmd9upg1">
+<div class="bloco-diagrama" id="mmdgkmla">
     <div class="bloco-diagrama-titulo">Mesma arquitetura, novo destino</div>
     <div class="mermaid">flowchart LR
     R["Renderer"] --&gt;|"window.api"| P["preload.js"]
@@ -472,7 +473,22 @@ JSON.parse(conteudo);</code></pre>
         
     <div class="code-wrap">
       <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const exportarBackup = () =&gt; window.api.exportarBackupJson(insumosCarregados);</code></pre>
+      <pre style="margin-top:0;"><code class="language-javascript">const exportarBackup = () =&gt; {
+  const dados = insumosCarregados.map((insumo) =&gt; ({
+    ...insumo,
+    data_aquisicao: insumo.data_aquisicao.toISOString().slice(0, 10),
+  }));
+
+  window.api.exportarBackupJson(dados);
+};</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Cuidado: Date no JSON vira texto completo
+      </h3>
+      <p><code>JSON.stringify</code> transforma um <code>Date</code> num texto ISO <strong>completo</strong>, tipo <code>2026-08-05T03:00:00.000Z</code> (data + hora + fuso). A coluna <code>data_aquisicao</code> no banco é do tipo <code>DATE</code>, que só aceita <code>AAAA-MM-DD</code> — esse texto completo faz o MySQL recusar o <code>INSERT</code> na hora de reimportar (<code>ER_TRUNCATED_WRONG_VALUE</code>). Por isso cortamos a data pros 10 primeiros caracteres (<code>AAAA-MM-DD</code>) com <code>.toISOString().slice(0, 10)</code> ANTES de exportar.</p>
+      
     </div>
 
     <div class="code-wrap">
@@ -488,6 +504,11 @@ JSON.parse(conteudo);</code></pre>
 
   await fs.writeFile(filePath, JSON.stringify(dados, null, 2));
 });</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">exportarBackupJson: (dados) =&gt; ipcRenderer.invoke('arquivo:exportarJson', dados),</code></pre>
     </div>
         
       </div>
@@ -511,6 +532,11 @@ JSON.parse(conteudo);</code></pre>
   const conteudo = await fs.readFile(filePaths[0], 'utf-8');
   return JSON.parse(conteudo);
 });</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/main/preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">importarBackupJson: () =&gt; ipcRenderer.invoke('arquivo:importarJson'),</code></pre>
     </div>
 
     <div class="code-wrap">
@@ -540,9 +566,48 @@ JSON.parse(conteudo);</code></pre>
 
     <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
+        <h1>Os Botões, com os IDs Certos</h1>
+        
+        <p>Falta uma peça: os TRÊS botões de verdade na tela (<code>frmPrincipal.html</code>), e o código que liga cada um à função certa — sem isso, nada acontece quando alguém clica.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-html">&lt;div class=&quot;d-flex gap-2 mb-3&quot;&gt;
+  &lt;button class=&quot;btn btn-outline-secondary&quot; id=&quot;btnExportarRelatorio&quot;&gt;
+    Exportar Relatório
+  &lt;/button&gt;
+  &lt;button class=&quot;btn btn-outline-primary&quot; id=&quot;btnExportarBackup&quot;&gt;
+    Exportar Backup
+  &lt;/button&gt;
+  &lt;button class=&quot;btn btn-outline-success&quot; id=&quot;btnImportarBackup&quot;&gt;
+    Importar Backup
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>src/renderer/frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-javascript">document.querySelector('#btnExportarRelatorio').addEventListener('click', exportarRelatorio);
+document.querySelector('#btnExportarBackup').addEventListener('click', exportarBackup);
+document.querySelector('#btnImportarBackup').addEventListener('click', importarBackup);</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-link"></i> querySelector, sempre pelo id
+      </h3>
+      <p>Mesmo padrão de sempre: cada botão recebe um <code>id</code> único no HTML, e o JS usa <code>querySelector('#id')</code> pra pegar o elemento e ligar o clique à função — nenhuma novidade aqui, só reaproveitando o mesmo padrão das Aulas anteriores.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
         <h1>O fluxo completo do backup</h1>
         
-        <div class="bloco-diagrama" id="mmddltrq">
+        <div class="bloco-diagrama" id="mmdlks53">
     <div class="bloco-diagrama-titulo">Exportar e reimportar</div>
     <div class="mermaid">sequenceDiagram
     participant U as Usuario
@@ -576,7 +641,7 @@ JSON.parse(conteudo);</code></pre>
       </div>
     </div>
 
-    <div class="slide topic" data-num="11">
+    <div class="slide topic" data-num="12">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
@@ -584,7 +649,7 @@ JSON.parse(conteudo);</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
         <h1>Resumo da aula</h1>
         
@@ -605,20 +670,20 @@ JSON.parse(conteudo);</code></pre>
       </div>
     </div>
 
-    <div class="slide" data-num="12">
+    <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
         <h1>Exercício: fs em Peça Impressa</h1>
         
         
     <div class="quest-list">
-      <ol><li>Adicione um botão <strong>Exportar Relatório</strong> na tela de peças, reaproveitando o array de peças já carregadas (título, cor e peso de cada uma) — mesmo padrão de <code>exportarRelatorio</code>.</li><li>Exponha <code>exportarBackupJson</code>/<code>importarBackupJson</code> no <code>preload.js</code> (podem ser as MESMAS funções genéricas já usadas pra insumo — repare que <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> no <code>main.js</code> não sabem nem precisam saber se os dados são de insumo ou de peça).</li><li>No <code>frmPrincipal.js</code>, crie <code>exportarBackupPecas</code> e <code>importarBackupPecas</code>, reaproveitando <code>criarPeca</code> pra regravar cada peça importada.</li><li>Teste o ciclo completo: exporte um backup de peças, apague uma peça de teste (Delete da Aula 5), e importe o backup de volta.</li></ol>
+      <ol><li>Adicione um botão <strong>Exportar Relatório</strong> na tela de peças (id <code>btnExportarRelatorioPecas</code>), reaproveitando o array de peças já carregadas (título, cor e peso de cada uma) — mesmo padrão de <code>exportarRelatorio</code> — e ligue o botão à função com <code>addEventListener</code>.</li><li>Exponha <code>exportarBackupJson</code>/<code>importarBackupJson</code> no <code>preload.js</code> (podem ser as MESMAS funções genéricas já usadas pra insumo — repare que <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> no <code>main.js</code> não sabem nem precisam saber se os dados são de insumo ou de peça).</li><li>No <code>frmPrincipal.js</code>, crie <code>exportarBackupPecas</code> e <code>importarBackupPecas</code>, reaproveitando <code>criarPeca</code> pra regravar cada peça importada — lembre de aplicar a MESMA correção de data (<code>.toISOString().slice(0, 10)</code>) na coluna <code>data_impressao</code> antes de exportar, já que ela também é do tipo <code>DATE</code>.</li><li>Adicione os botões <strong>Exportar Backup</strong> e <strong>Importar Backup</strong> nessa mesma tela (ids <code>btnExportarBackupPecas</code> e <code>btnImportarBackupPecas</code>), ligando cada um à função correspondente com <code>addEventListener</code>.</li><li>Teste o ciclo completo: exporte um backup de peças, apague uma peça de teste (Delete da Aula 5), e importe o backup de volta.</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Dica
       </h3>
-      <p>Repare que os handlers <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> do <code>main.js</code> são <strong>genéricos</strong> — não têm nada de insumo ou peça no nome. Você já pode reaproveitá-los sem duplicar código nenhum no main.js.</p>
+      <p>Repare que os handlers <code>arquivo:exportarJson</code>/<code>arquivo:importarJson</code> do <code>main.js</code> são <strong>genéricos</strong> — não têm nada de insumo ou peça no nome. Você já pode reaproveitá-los sem duplicar código nenhum no main.js. E não esqueça da data: <code>data_impressao</code> é <code>DATE</code> igual <code>data_aquisicao</code> de insumo, então precisa do mesmo corte pros 10 primeiros caracteres antes de exportar.</p>
       
     </div>
         
@@ -668,7 +733,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=12;
+const totalConteudo=13;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){

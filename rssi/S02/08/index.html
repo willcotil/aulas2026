@@ -125,7 +125,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 .bloco-diagrama{margin:12px 0;}
 .bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
-.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .mermaid svg{max-width:100%!important;height:auto!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-der{margin:12px 0;}
 .bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
@@ -207,22 +207,31 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Aquele Comando Já Era Um Firewall</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Lembra do iptables --limit?</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Refresher: Endereço, Porta e Protocolo</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-filter"></i><span>Como o Firewall Decide</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Uma Lista de Regras, Em Ordem</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Stateless x Stateful</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-eye"></i><span>IDS e IPS: Vigiar x Agir</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>IDS: A Câmera de Segurança</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>IPS: O Segurança Que Age</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Como Eles Detectam um Ataque</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>VPN: Um Túnel Seguro</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O Que Uma VPN Faz de Verdade</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Dois Jeitos de Usar uma VPN</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Defesa em Camadas</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Resumo e Próximos Passos</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Fixar</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Lembra do iptables da Aula 4?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Explicando o Comando, Parte por Parte</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Firewall de Software ou de Hardware</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Refresher: Endereço, Porta e Protocolo</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-filter"></i><span>Como o Firewall Decide</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Uma Lista de Regras, Em Ordem</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Duas Palavras em Inglês: Stateless e Stateful</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>Stateless x Stateful, Na Prática</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-eye"></i><span>IDS e IPS: Vigiar x Agir</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>IDS: A Câmera de Segurança</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>IPS: O Guarda Que Age</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Onde o IDS e o IPS Vivem: NIDS x HIDS</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Por Que o IPS Tem Que Estar Em Linha</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Como o IPS Bloqueia de Verdade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>IDS x IPS, Lado a Lado</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Inspeção Além do Cabeçalho: Deep Packet Inspection</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 16</span><span>Como Eles Detectam um Ataque</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><i class="fa-solid fa-lock"></i><span>VPN: Um Túnel Seguro</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 17</span><span>O Que é um Túnel, Afinal?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Slide 18</span><span>O Que Uma VPN Faz de Verdade</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="22" onclick="showSlide(22);closeAgendaSidebar();"><span class="agenda-side-label">Slide 19</span><span>Dois Jeitos de Usar uma VPN</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="23" onclick="showSlide(23);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="24" onclick="showSlide(24);closeAgendaSidebar();"><span class="agenda-side-label">Slide 20</span><span>Defesa em Camadas</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="25" onclick="showSlide(25);closeAgendaSidebar();"><span class="agenda-side-label">Slide 21</span><span>Resumo e Próximos Passos</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="26" onclick="showSlide(26);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Pra Fixar</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -246,31 +255,31 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Aquele Comando Já Era Um Firewall</div>
-            <div class="agenda-item-texto">Revisitando o iptables --limit da Aula 4</div>
+            <div class="agenda-item-texto">Revisitando o iptables da Aula 4, por completo</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-filter"></i> Como o Firewall Decide</div>
             <div class="agenda-item-texto">Regras, ordem e o tipo stateless x stateful</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-eye"></i> IDS e IPS: Vigiar x Agir</div>
-            <div class="agenda-item-texto">Detectar e alertar, ou detectar e bloquear</div>
+            <div class="agenda-item-texto">Como cada um funciona por dentro, tecnicamente</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(19)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-lock"></i> VPN: Um Túnel Seguro</div>
-            <div class="agenda-item-texto">Criptografia formando um túnel sobre a internet</div>
+            <div class="agenda-item-texto">O que é um túnel, e como a criptografia entra nisso</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(23)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
@@ -287,21 +296,27 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
         <h1>Aquele Comando Já Era Um Firewall</h1>
-        <p>Revisitando o iptables --limit da Aula 4</p>
+        <p>Revisitando o iptables da Aula 4, por completo</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>Lembra do iptables --limit?</h1>
+        <h1>Lembra do iptables da Aula 4?</h1>
         
-        <p>Na demonstração ao vivo da Aula 4, quando o SYN flood começou a derrubar o serviço, mitigamos com um comando <code>iptables --limit</code>. Na hora, tratamos ele só como "o comando que resolve" — hoje formalizamos o que ele realmente é: uma <strong>regra de firewall</strong>.</p>
+        <p>Na demonstração ao vivo da Aula 4, quando o SYN flood começou a derrubar o serviço, mitigamos com dois comandos <code>iptables</code>. Na hora, vimos eles rodando — hoje vamos ver o comando <strong>completo</strong> nas duas linhas, e entender exatamente o que cada parte faz.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>ddos.sh (Aula 4, comando completo)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">iptables -A INPUT -p tcp --dport 80 --syn -m limit --limit 5/s --limit-burst 10 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 --syn -j DROP</code></pre>
+    </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-shield-halved"></i> Firewall: um filtro de pacotes
+        <i class="fa-solid fa-shield-halved"></i> Firewall: um filtro de pacotes baseado em regras
       </h3>
-      <p>Um <strong>firewall</strong> examina cada pacote que tenta entrar (ou sair) de uma rede e decide, com base em <strong>regras</strong>, se deixa passar (<code>ACCEPT</code>) ou bloqueia (<code>DROP</code>). A regra da Aula 4 dizia, em essência: "limite a quantidade de pacotes SYN por segundo vindos de um IP" — isso é filtragem baseada em regra, a definição exata de firewall.</p>
+      <p>Essas duas linhas juntas formam exatamente a definição de <strong>firewall</strong>: um mecanismo que examina cada pacote que tenta entrar numa rede e decide, com base numa lista de <strong>regras</strong>, se deixa passar (<code>ACCEPT</code>) ou bloqueia (<code>DROP</code>).</p>
       
     </div>
         
@@ -309,6 +324,42 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
     </div>
 
     <div class="slide" data-num="3">
+      <div class="slide-content-wrapper">
+        <h1>Explicando o Comando, Parte por Parte</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">O que cada pedaço do comando significa</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Parte do comando</th><th>O que significa</th></tr></thead><tbody><tr><td><code>-A INPUT</code></td><td>Adiciona (Append) essa regra na cadeia INPUT — o conjunto de regras que filtra o que entra na máquina</td></tr><tr><td><code>-p tcp</code></td><td>Só se aplica a pacotes do protocolo TCP</td></tr><tr><td><code>--dport 80</code></td><td>Só pacotes com porta de destino 80 (o serviço web que a vítima expunha)</td></tr><tr><td><code>--syn</code></td><td>Só pacotes que abrem uma conexão NOVA — a flag SYN do three-way handshake (Aula 3)</td></tr><tr><td><code>-m limit --limit 5/s --limit-burst 10</code></td><td>Módulo de limite de taxa: aceita até 5 pacotes desse tipo por segundo, com uma rajada inicial de até 10</td></tr><tr><td><code>-j ACCEPT</code> / <code>-j DROP</code></td><td>O "jump": a ação final — aceitar (deixar passar) ou descartar (bloquear) o pacote</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-list-ol"></i> Duas regras, uma dupla função
+      </h3>
+      <p>A primeira linha aceita só até o limite (5/s, rajada de 10). A segunda linha — igual à primeira, mas sem o <code>-m limit</code> — bloqueia TUDO que sobrar. A ORDEM entre as duas importa: se a regra <code>DROP</code> viesse primeiro, ela bloquearia tudo antes mesmo de chegar na regra que aceita. Já vamos ver por que essa ordem de regras é tão importante.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="4">
+      <div class="slide-content-wrapper">
+        <h1>Firewall de Software ou de Hardware</h1>
+        
+        <p>O <code>iptables</code> que acabamos de destrinchar é um firewall de <strong>software</strong>, embutido no próprio kernel do Linux — não precisa de nenhum equipamento extra, só do sistema operacional. Mas empresas maiores também usam firewalls de <strong>hardware</strong>: aparelhos dedicados, instalados fisicamente entre a internet e a rede interna.</p>
+<figure class="bloco-imagem" id="imgpwfmo">
+    
+    <img src="img/firewall-hardware.jpg" alt="Equipamento de firewall instalado em um rack de rede, ao lado de servidores" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>Um firewall de hardware, instalado no rack junto com servidores e switches — mesma lógica de regras do iptables, só que rodando num dispositivo próprio, otimizado pra filtrar tráfego em alta velocidade. (Foto: Wikimedia Commons, CC BY 2.0)</figcaption>
+  </figure>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
         <h1>Refresher: Endereço, Porta e Protocolo</h1>
         
@@ -325,7 +376,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide topic" data-num="4">
+    <div class="slide topic" data-num="6">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-filter"></i>
         <h1>Como o Firewall Decide</h1>
@@ -333,33 +384,46 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide" data-num="4">
+    <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
         <h1>Uma Lista de Regras, Em Ordem</h1>
         
-        <p>Um firewall guarda uma <strong>lista</strong> de regras, checadas de cima pra baixo. A primeira regra que "casa" com o pacote decide o destino dele — as regras depois dela nem são olhadas.</p>
-<div class="bloco-diagrama" id="mmdgge20">
+        <p>Um firewall guarda uma <strong>lista</strong> de regras, checadas de cima pra baixo. A primeira regra que "casa" com o pacote decide o destino dele — é exatamente por isso que a ordem das duas regras do <code>iptables</code> de hoje importa tanto.</p>
+<div class="bloco-diagrama" id="mmdnzgna">
     <div class="bloco-diagrama-titulo">Decisão de um firewall</div>
-    <div class="mermaid">flowchart TD
-    A["Pacote chega"] --&gt; B{"Casa com a Regra 1?"}
-    B --&gt;|Sim| C["Aplica: ACCEPT ou DROP"]
-    B --&gt;|Nao| D{"Casa com a Regra 2?"}
-    D --&gt;|Sim| C
-    D --&gt;|Nao| E["... continua ate a ultima regra"]
-    E --&gt; F["Regra padrao (geralmente DROP)"]</div>
-    <div class="bloco-diagrama-legenda">Se nenhuma regra especifica casar, vale a regra padrao do firewall (normalmente bloquear tudo que nao foi liberado).</div>
+    <div class="mermaid">flowchart LR
+    A["Pacote chega"] --&gt; B{"Bateu com uma regra?"}
+    B --&gt;|"Sim, a primeira que bateu"| C["Aplica ACCEPT ou DROP dessa regra"]
+    B --&gt;|"Nao, nenhuma bateu"| D["Regra padrao (geralmente DROP)"]</div>
+    <div class="bloco-diagrama-legenda">Se nenhuma regra específica casar, vale a regra padrão do firewall (normalmente bloquear tudo que não foi liberado).</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="5">
+    <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>Stateless x Stateful</h1>
+        <h1>Duas Palavras em Inglês: Stateless e Stateful</h1>
         
-        <p>Existem dois jeitos de um firewall analisar o tráfego.</p>
-<div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">Dois tipos de firewall</div>
+        <p>Antes de qualquer coisa, vamos traduzir: <code>stateless</code> vem de <code>state</code> (<strong>estado</strong>) + <code>less</code> (<strong>sem</strong>) — ou seja, <strong>"sem estado"</strong>. <code>stateful</code> vem de <code>state</code> (<strong>estado</strong>) + <code>ful</code> (<strong>cheio de, com</strong>) — ou seja, <strong>"com estado"</strong>.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-brain"></i> O que é esse "estado", afinal?
+      </h3>
+      <p>Aqui, <strong>estado</strong> significa a MEMÓRIA de uma conexão em andamento: quem iniciou ela, se já houve troca de pacotes antes, em que ponto do handshake (Aula 3) ela está. Um firewall "com estado" guarda essa memória; um "sem estado" não guarda nada.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        <h1>Stateless x Stateful, Na Prática</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Sem estado x Com estado</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>Stateless (sem estado)</th><th>Stateful (com estado)</th></tr></thead><tbody><tr><td>Como analisa</td><td>Cada pacote isoladamente</td><td>Acompanha a conexão inteira</td></tr><tr><td>Sabe se é resposta de algo que você pediu?</td><td>Não</td><td>Sim</td></tr><tr><td>Desempenho</td><td>Mais leve</td><td>Um pouco mais pesado</td></tr><tr><td>Uso típico hoje</td><td>Regras simples e rápidas</td><td>A maioria dos firewalls modernos</td></tr></tbody></table></div>
     
   </div>
@@ -368,70 +432,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Por que isso importa
       </h3>
-      <p>Um firewall stateful entende que um pacote de resposta faz parte de uma conexão que VOCÊ iniciou — e libera ele automaticamente, sem precisar de uma regra específica pra cada resposta possível.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="6">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-eye"></i>
-        <h1>IDS e IPS: Vigiar x Agir</h1>
-        <p>Detectar e alertar, ou detectar e bloquear</p>
-      </div>
-    </div>
-
-    <div class="slide" data-num="6">
-      <div class="slide-content-wrapper">
-        <h1>IDS: A Câmera de Segurança</h1>
-        
-        <p>Um <strong>IDS</strong> (Intrusion Detection System) monitora o tráfego da rede procurando sinais de ataque — e, quando encontra, <strong>avisa</strong> um administrador. Ele não bloqueia nada sozinho: é análise e alerta.</p>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-video"></i> Analogia
-      </h3>
-      <p>IDS é como uma <strong>câmera de segurança</strong>: ela grava e avisa que alguém estranho entrou, mas não impede fisicamente ninguém de entrar.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="7">
-      <div class="slide-content-wrapper">
-        <h1>IPS: O Segurança Que Age</h1>
-        
-        <p>Um <strong>IPS</strong> (Intrusion Prevention System) faz a mesma análise que o IDS, mas fica <strong>em linha</strong> com o tráfego (o tráfego passa por dentro dele) — e quando detecta um ataque, <strong>bloqueia automaticamente</strong>, sem esperar um humano agir.</p>
-<div class="bloco-tabela">
-    <div class="bloco-tabela-titulo">IDS x IPS</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>IDS</th><th>IPS</th></tr></thead><tbody><tr><td>Posição na rede</td><td>Observa uma cópia do tráfego</td><td>Fica no meio do caminho do tráfego</td></tr><tr><td>Ação ao detectar</td><td>Alerta um administrador</td><td>Bloqueia automaticamente</td></tr><tr><td>Risco</td><td>Ataque real pode passar antes de alguém agir</td><td>Um falso positivo pode bloquear tráfego legítimo</td></tr></tbody></table></div>
-    
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="8">
-      <div class="slide-content-wrapper">
-        <h1>Como Eles Detectam um Ataque</h1>
-        
-        
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-fingerprint"></i> Por assinatura
-      </h3>
-      <p>Compara o tráfego com um banco de <strong>padrões conhecidos</strong> de ataques já catalogados — mesma lógica do antivírus por assinatura que vimos na Aula 2 pra malware. Detecta rápido o que já é conhecido, mas não pega ataque novo.</p>
-      
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-chart-line"></i> Por anomalia
-      </h3>
-      <p>Aprende o que é tráfego "normal" pra aquela rede e alerta quando algo foge muito desse padrão — consegue pegar ataques novos, mas tem mais chance de dar falso positivo (marcar tráfego legítimo como suspeito).</p>
+      <p>Um firewall stateful entende que um pacote de resposta faz parte de uma conexão que VOCÊ iniciou — e libera ele automaticamente, sem precisar de uma regra específica pra cada resposta possível. Um stateless trataria esse mesmo pacote de resposta como se fosse um pacote qualquer, desconectado de qualquer histórico.</p>
       
     </div>
         
@@ -440,30 +441,236 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="9">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-lock"></i>
-        <h1>VPN: Um Túnel Seguro</h1>
-        <p>Criptografia formando um túnel sobre a internet</p>
+        <i class="fa-solid fa-eye"></i>
+        <h1>IDS e IPS: Vigiar x Agir</h1>
+        <p>Como cada um funciona por dentro, tecnicamente</p>
       </div>
     </div>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>O Que Uma VPN Faz de Verdade</h1>
+        <h1>IDS: A Câmera de Segurança</h1>
         
-        <p>Uma <strong>VPN</strong> (Virtual Private Network) cria um <strong>túnel criptografado</strong> entre dois pontos, passando por cima de uma rede pública (a internet) como se fosse uma rede privada direta. E o que cifra esse túnel é exatamente o que já estudamos: a combinação de criptografia simétrica e assimétrica da Aula 6, do mesmo jeito que o handshake HTTPS/TLS estabelece uma conexão segura.</p>
-<div class="bloco-diagrama" id="mmdj8t7e">
-    <div class="bloco-diagrama-titulo">Um tunel dentro da internet publica</div>
-    <div class="mermaid">flowchart LR
-    A["Seu dispositivo"] --&gt;|"Tunel VPN criptografado"| B["Servidor VPN"]
-    B --&gt; C["Rede interna / Internet"]
-    D["Internet publica (todo o resto)"]</div>
-    <div class="bloco-diagrama-legenda">De fora, quem intercepta so ve trafego cifrado passando -- exatamente como no MITM da Aula 3, so que agora sem nada legivel pra capturar.</div>
-  </div>
+        <p>Traduzindo primeiro: <strong>Intrusion Detection System</strong> = intrusion (<strong>intrusão</strong>) + detection (<strong>detecção</strong>) + system (<strong>sistema</strong>) — ou seja, <strong>Sistema de Detecção de Intrusão</strong>, conhecido pela sigla <strong>IDS</strong>. Ele monitora o tráfego da rede procurando sinais de ataque — e, quando encontra, <strong>avisa</strong> um administrador. Não bloqueia nada sozinho: é só análise e alerta.</p>
+<figure class="bloco-imagem" id="imgom764">
+    
+    <img src="img/camera-seguranca.jpg" alt="Câmera de vigilância (CFTV) instalada observando um ambiente" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>Um IDS funciona como essa câmera: grava e avisa que algo estranho está acontecendo, mas não impede fisicamente nada sozinho. (Foto: Wikimedia Commons, domínio público)</figcaption>
+  </figure>
         
       </div>
     </div>
 
     <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>IPS: O Guarda Que Age</h1>
+        
+        <p>Traduzindo: <strong>Intrusion Prevention System</strong> = intrusion (<strong>intrusão</strong>) + prevention (<strong>prevenção</strong>) + system (<strong>sistema</strong>) — ou seja, <strong>Sistema de Prevenção de Intrusão</strong>, sigla <strong>IPS</strong>. Ele faz a mesma análise que o IDS, mas fica <strong>em linha</strong> com o tráfego (o tráfego passa por dentro dele) — e quando detecta um ataque, <strong>bloqueia automaticamente</strong>, sem esperar um humano agir.</p>
+<figure class="bloco-imagem" id="img1nesn">
+    
+    <img src="img/guarda-seguranca.jpg" alt="Guarda de segurança em pé, uniformizado, vigiando uma entrada" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    <figcaption>Um IPS funciona como um guarda de verdade na porta: além de perceber o problema, ele age e barra a entrada na hora. (Foto: Wikimedia Commons, CC BY-SA)</figcaption>
+  </figure>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>Onde o IDS e o IPS Vivem: NIDS x HIDS</h1>
+        
+        <p>Traduzindo mais duas siglas: <strong>NIDS</strong> = Network IDS (<strong>IDS baseado em rede</strong>) e <strong>HIDS</strong> = Host IDS (<strong>IDS baseado em hospedeiro</strong>, ou seja, um computador específico). Cada um vigia um lugar diferente.</p>
+
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-network-wired"></i> NIDS (baseado em rede)
+          </h3>
+          <p>Fica ligado a um ponto da rede e enxerga TODO o tráfego que passa por ali, de qualquer máquina — precisa de uma porta espelhada (SPAN) no switch ou de um TAP físico pra conseguir ver esse tráfego.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-desktop"></i> HIDS (baseado em hospedeiro)
+          </h3>
+          <p>Roda como um programa instalado dentro de UM computador específico, monitorando logs, chamadas de sistema e integridade de arquivos só daquela máquina.</p>
+          
+        </div>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-circle-info"></i> Por que precisa de porta espelhada?
+      </h3>
+      <p>Lembra do switch do semestre passado? Ele aprende o endereço MAC de cada porta e entrega o quadro só pro destino certo — ele NÃO deixa outras máquinas verem esse tráfego por padrão. Pra um NIDS enxergar tudo, o switch precisa ser configurado com uma porta espelhada (SPAN) que copia o tráfego de todas as outras portas pra ele, ou usa-se um TAP (equipamento que intercepta fisicamente o cabo). É por isso que "ligar um IDS na rede" não é só plugar um cabo.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Por Que o IPS Tem Que Estar Em Linha</h1>
+        
+        <p>O IDS pode ficar só OBSERVANDO uma cópia do tráfego (via SPAN/TAP) sem interferir em nada — se ele travar, o tráfego real nem percebe. Já o IPS PRECISA estar no caminho FÍSICO do tráfego (inline) pra conseguir bloquear algo em tempo real — ele se torna, literalmente, mais um ponto que todo o tráfego atravessa.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Um ponto único de falha
+      </h3>
+      <p>Se o IPS travar ou ficar sobrecarregado, isso pode derrubar a rede inteira que passa por ele — diferente do IDS, que é só um observador passivo e nunca vira gargalo.</p>
+      
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-toggle-on"></i> Fail-open x fail-closed
+      </h3>
+      <p>Traduzindo: <code>fail</code> (<strong>falhar</strong>) + <code>open</code> (<strong>aberto</strong>) ou <code>closed</code> (<strong>fechado</strong>). <strong>Fail-open</strong>: se o IPS quebrar, deixa o tráfego passar direto sem filtro nenhum (prioriza disponibilidade). <strong>Fail-closed</strong>: se quebrar, bloqueia tudo (prioriza segurança). É uma escolha de trade-off que toda empresa precisa decidir na hora de instalar um IPS.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="13">
+      <div class="slide-content-wrapper">
+        <h1>Como o IPS Bloqueia de Verdade</h1>
+        
+        <p>Detectar um ataque é só metade do trabalho do IPS — ele também precisa agir sozinho, sem esperar um humano. Existem três formas comuns:</p>
+<ol><li><strong>Descartar o pacote (<code>drop</code>)</strong> — a mesma ação <code>DROP</code> do firewall que já vimos hoje.</li><li><strong>Derrubar a conexão com um TCP RESET (RST)</strong> — o IPS manda um pacote falso de "reset" pros dois lados da conexão, fazendo cada um achar que o outro cortou a comunicação.</li><li><strong>Atualizar a regra do firewall na hora</strong> — o IPS insere dinamicamente uma nova regra bloqueando aquele IP de origem por um tempo (uma "lista negra" temporária), literalmente escrevendo uma regra <code>iptables</code> nova sozinho.</li></ol>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="14">
+      <div class="slide-content-wrapper">
+        <h1>IDS x IPS, Lado a Lado</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Comparação direta</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>IDS (câmera)</th><th>IPS (guarda)</th></tr></thead><tbody><tr><td>Posição na rede</td><td>Fora do caminho (SPAN/TAP)</td><td>Inline, no caminho do tráfego</td></tr><tr><td>Ação ao detectar</td><td>Alerta um administrador</td><td>Drop, TCP RESET ou nova regra de firewall</td></tr><tr><td>Risco</td><td>Ataque real pode passar antes de alguém agir</td><td>Ponto único de falha / falso positivo bloqueia tráfego legítimo</td></tr></tbody></table></div>
+    
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="15">
+      <div class="slide-content-wrapper">
+        <h1>Inspeção Além do Cabeçalho: Deep Packet Inspection</h1>
+        
+        <p>O firewall que vimos hoje só olha o CABEÇALHO do pacote (IP, porta, protocolo) — nunca abre o CONTEÚDO que está sendo transportado, nem mesmo um firewall stateful. IDS/IPS vão além: usam <strong>Deep Packet Inspection</strong> (<strong>Inspeção Profunda de Pacotes</strong>) — abrem o payload e procuram padrões específicos dentro do conteúdo de verdade, até a camada de aplicação (camada 7 do modelo OSI, visto no semestre passado).</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>o que um firewall NUNCA veria</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">Requisicao HTTP chegando na porta 80:
+GET /login?usuario=admin&amp;senha=x' OR '1'='1 HTTP/1.1
+
+Firewall: so ve &quot;TCP, porta 80&quot; -- deixa passar sem pestanejar.
+IDS/IPS (DPI): abre o payload e encontra o padrao &quot;' OR '1'='1&quot;
+dentro da URL -- uma assinatura classica de SQL Injection.</code></pre>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="16">
+      <div class="slide-content-wrapper">
+        <h1>Como Eles Detectam um Ataque</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-fingerprint"></i> Por assinatura
+      </h3>
+      <p>Compara o payload com um banco de <strong>padrões conhecidos</strong> de ataques já catalogados — mesma lógica do antivírus por assinatura que vimos na Aula 2 pra malware. Detecta rápido o que já é conhecido, mas não pega ataque novo.</p>
+      
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>regra de assinatura, estilo real (Snort)</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">alert tcp any any -&gt; any 80 (msg:&quot;Possivel SQL Injection&quot;; content:&quot;' OR '1'='1&quot;; sid:1000001;)</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-chart-line"></i> Por anomalia
+      </h3>
+      <p>Aprende um "baseline" (linha de base) do que é tráfego normal pra aquela rede — por exemplo, ~50 conexões novas por minuto num servidor — e alerta quando algo foge muito desse padrão (tipo 5.000 conexões/minuto do nada, o mesmo sinal de um DDoS da Aula 3). Consegue pegar ataques novos, mas tem mais chance de dar falso positivo.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="17">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-lock"></i>
+        <h1>VPN: Um Túnel Seguro</h1>
+        <p>O que é um túnel, e como a criptografia entra nisso</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="17">
+      <div class="slide-content-wrapper">
+        <h1>O Que é um Túnel, Afinal?</h1>
+        
+        <p>Antes de falar de VPN, vale entender a palavra-chave: por que chamamos isso de <strong>"túnel"</strong>? Pensa num túnel de verdade, furado dentro de uma montanha: ele cria um caminho PROTEGIDO e DIRETO entre dois pontos, atravessando um terreno hostil (a montanha) sem expor quem está passando por dentro — só existem duas aberturas, a entrada e a saída; o meio do caminho fica escondido de quem está do lado de fora.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-route"></i> Na rede, a "montanha" é a internet pública
+      </h3>
+      <p>Um túnel de rede (tunneling) usa a mesma ideia: em vez de mandar o pacote original exposto direto pela internet (terreno que não controlamos), a gente <strong>encapsula</strong> ele — embrulha o pacote original inteiro dentro de um NOVO pacote externo — antes de mandar. Só nos dois pontos definidos (entrada e saída do túnel) o pacote é desembrulhado de volta ao original.</p>
+      
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>encapsulamento: um pacote dentro do outro</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">Pacote original (o que sua aplicacao quer mandar):
+[ dados da aplicacao ]
+
+Depois do tunelamento (encapsulamento):
+[ cabecalho do tunel [ dados da aplicacao ] ]
+
+O pacote original virou so o &quot;conteudo&quot; (payload) de um
+pacote novo, maior, que sabe atravessar a internet publica.</code></pre>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock"></i> E a criptografia, onde entra?
+      </h3>
+      <p>Encapsular sozinho já cria o "caminho" (túnel), mas qualquer um que capturasse esse pacote no meio do caminho ainda conseguiria abrir e ler o conteúdo. É a <strong>criptografia</strong> (Aula 6) que torna esse túnel PRIVADO de verdade — cifra o que vai dentro do encapsulamento, tornando ilegível pra quem intercepta no meio da internet pública.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="18">
+      <div class="slide-content-wrapper">
+        <h1>O Que Uma VPN Faz de Verdade</h1>
+        
+        <p>Agora sim, traduzindo a sigla: <strong>Virtual Private Network</strong> = virtual (<strong>virtual</strong>) + private (<strong>privada</strong>) + network (<strong>rede</strong>) — ou seja, <strong>Rede Privada Virtual</strong>, sigla <strong>VPN</strong>. Ela junta os dois conceitos que acabamos de ver: um <strong>túnel</strong> (encapsulamento) que é <strong>criptografado</strong> (privado de verdade) entre dois pontos, passando por cima da internet pública como se fosse uma rede privada direta — usando a mesma combinação de criptografia simétrica e assimétrica da Aula 6, do jeito que o handshake HTTPS/TLS estabelece uma conexão segura.</p>
+<div class="bloco-diagrama" id="mmddle5w">
+    <div class="bloco-diagrama-titulo">Um túnel dentro da internet pública</div>
+    <div class="mermaid">flowchart LR
+    A["Seu dispositivo"] --&gt;|"Tunel VPN criptografado"| B["Servidor VPN"]
+    B --&gt; C["Rede interna / Internet"]
+    D["Internet publica (todo o resto)"]</div>
+    <div class="bloco-diagrama-legenda">De fora, quem intercepta só vê o pacote encapsulado e cifrado passando — exatamente como no MITM da Aula 3, só que agora sem nada legível pra capturar.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="19">
       <div class="slide-content-wrapper">
         <h1>Dois Jeitos de Usar uma VPN</h1>
         
@@ -497,7 +704,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide topic" data-num="11">
+    <div class="slide topic" data-num="20">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
@@ -505,25 +712,25 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="20">
       <div class="slide-content-wrapper">
         <h1>Defesa em Camadas</h1>
         
         <p>Nenhum desses três mecanismos sozinho resolve tudo — cada um cobre uma parte diferente da defesa, e usados juntos formam camadas.</p>
-<div class="bloco-diagrama" id="mmdis2k4">
+<div class="bloco-diagrama" id="mmd5gtly">
     <div class="bloco-diagrama-titulo">As tres camadas trabalhando juntas</div>
     <div class="mermaid">flowchart LR
     I["Internet"] --&gt; F["Firewall: filtra pacotes na borda"]
     F --&gt; P["IDS/IPS: monitora e reage a padroes de ataque"]
     P --&gt; R["Rede interna protegida"]
     V["VPN: tunel seguro pra quem acessa de fora"] --&gt; R</div>
-    <div class="bloco-diagrama-legenda">Firewall decide QUEM entra. IDS/IPS vigia o QUE passa. VPN protege COMO um acesso remoto legitimo acontece.</div>
+    <div class="bloco-diagrama-legenda">Firewall decide QUEM entra. IDS/IPS vigia o QUE passa. VPN protege COMO um acesso remoto legítimo acontece.</div>
   </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="12">
+    <div class="slide" data-num="21">
       <div class="slide-content-wrapper">
         <h1>Resumo e Próximos Passos</h1>
         
@@ -544,13 +751,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide" data-num="13">
+    <div class="slide" data-num="22">
       <div class="slide-content-wrapper">
         <h1>Pra Fixar</h1>
         
         
     <div class="quest-list">
-      <ol><li>Por que o comando <code>iptables --limit</code> usado na Aula 4 conta como uma regra de firewall?</li><li>Qual a diferença prática entre um firewall stateless e um stateful ao lidar com o pacote de RESPOSTA de uma conexão que você mesmo iniciou?</li><li>Explique com suas palavras a diferença entre IDS e IPS usando a analogia da câmera x seguránça.</li><li>Um ataque totalmente novo, nunca visto antes, tem mais chance de ser pego por detecção por assinatura ou por anomalia? Por quê?</li><li>Que tipos de criptografia (vistos na Aula 6) uma VPN usa pra formar seu túnel seguro?</li><li>Por que o túnel Cloudflare usado na Aula 4 não é considerado uma VPN completa?</li><li>Numa empresa com duas filiais que precisam compartilhar a rede interna o tempo todo, qual tipo de VPN faz mais sentido: acesso remoto ou site-to-site?</li></ol>
+      <ol><li>Nas duas regras de <code>iptables</code> mostradas em aula, por que existem DUAS regras (uma com <code>-m limit</code> e <code>-j ACCEPT</code>, outra só com <code>-j DROP</code>) em vez de uma só? O que aconteceria se a ordem das duas fosse invertida?</li><li>Qual a diferença prática entre um firewall stateless e um stateful ao lidar com o pacote de RESPOSTA de uma conexão que você mesmo iniciou?</li><li>Por que um IDS ligado num switch comum, sem porta espelhada (SPAN) nem TAP, não consegue ver o tráfego dos outros dispositivos da rede?</li><li>Explique por que um IPS precisa ficar inline (no caminho físico do tráfego), enquanto um IDS pode ficar fora do caminho, só analisando uma cópia.</li><li>Cite as três formas que um IPS usa pra bloquear um ataque detectado.</li><li>Por que o firewall sozinho — mesmo stateful — nunca detectaria uma tentativa de SQL Injection escondida dentro do corpo de uma requisição HTTP?</li><li>Um ataque totalmente novo, nunca visto antes, tem mais chance de ser pego por detecção por assinatura ou por anomalia? Por quê?</li><li>Explique com suas palavras por que uma VPN é chamada de "túnel", separando o que é encapsulamento do que é criptografia.</li><li>Numa empresa com duas filiais que precisam compartilhar a rede interna o tempo todo, qual tipo de VPN faz mais sentido: acesso remoto ou site-to-site?</li></ol>
     </div>
         
       </div>
@@ -599,7 +806,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=13;
+const totalConteudo=22;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
