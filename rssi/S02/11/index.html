@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 5: CRUD: Delete (Remoção) — Modais de confirmação e Delete SQL</title>
+<title>Aula 11: Normas e Recomendações: ISO 27000 e Políticas de Segurança</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2B2D42;--color-rust:#EF233C;
-  --color-orange:#EF233C;--color-yellow:#EF233C;--color-deep:#1B1B2F;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#101010;
+  --color-navy:#000;--color-blue:#8A3324;--color-rust:#4FB5A3;
+  --color-orange:#4FB5A3;--color-yellow:#4FB5A3;--color-deep:#431A12;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#170A07;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -38,7 +38,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    whose content is intentionally longer than one screen (e.g. a long exercise list)
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
-.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;transform-origin:top center;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
@@ -90,6 +90,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
+  .slide-content-wrapper{transform:none!important;}
 }
 .depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
@@ -200,28 +201,30 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando o ciclo CRUD</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-trash"></i><span>O botão Excluir</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Por que nunca excluir direto no clique</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Um clique não pode ser tudo que separa você de perder um dado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O modal de confirmação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Uma peça que falta: o JS do Bootstrap</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-bolt"></i><span>Preenchendo o modal sem IPC</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Por que a exclusão não precisa de send/on</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>DELETE SQL parametrizado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>A query do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Do clique em Confirmar até a lista atualizada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>preload.js — expondo excluirInsumo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>frmPrincipal.js — disparando a exclusão</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O fluxo completo do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-circle-check"></i><span>CRUD completo e exercício final</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Delete em peca_impressa</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Por Que Normas?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Da Técnica Pra Organização</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que é uma Norma Técnica</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><i class="fa-solid fa-sitemap"></i><span>Família ISO 27000</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Não é UMA Norma, é uma Família</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>A Confusão Mais Comum</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>SGSI: O Sistema Por Trás da Norma</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><i class="fa-solid fa-arrows-rotate"></i><span>O Ciclo PDCA</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>PDCA: Um SGSI Nunca Fica "Pronto"</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>As Quatro Etapas, uma a uma</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Certificação ISO 27001 na Prática</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-file-signature"></i><span>Política de Segurança (PSI)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Onde o SGSI Vira Regra Pro Dia a Dia</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Exemplos de Cláusulas Reais de uma PSI</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>Classificação da Informação</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>Norma Técnica x Lei</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Normas na Prática</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -236,58 +239,44 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 5</p>
+        <p>Redes e Sistemas de Segurança de Informação (RSSI) — Aula 11</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">CRUD: Delete (Remoção) — Modais de confirmação e Delete SQL</div>
+    <div class="bloco-agenda-titulo">Normas e Recomendações: ISO 27000 e Políticas de Segurança</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando o ciclo CRUD</div>
-            <div class="agenda-item-texto">Recapitulando Create, Read e Update antes do Delete</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Por Que Normas?</div>
+            <div class="agenda-item-texto">Retomando a prévia da Aula 1</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(4)" role="button" tabindex="0">
           <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-trash"></i> O botão Excluir</div>
-            <div class="agenda-item-texto">Novo botão na coluna Ações da tabela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-sitemap"></i> Família ISO 27000</div>
+            <div class="agenda-item-texto">27001 x 27002 e o SGSI</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(8)" role="button" tabindex="0">
           <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Por que nunca excluir direto no clique</div>
-            <div class="agenda-item-texto">Delete é destrutivo e irreversível</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-arrows-rotate"></i> O Ciclo PDCA</div>
+            <div class="agenda-item-texto">Melhoria contínua e certificação</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-bolt"></i> Preenchendo o modal sem IPC</div>
-            <div class="agenda-item-texto">Os dados já estão na tela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-signature"></i> Política de Segurança (PSI)</div>
+            <div class="agenda-item-texto">O documento que normatiza as pessoas</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(16)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> DELETE SQL parametrizado</div>
-            <div class="agenda-item-texto">A query e o perigo do DELETE sem WHERE</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Do clique em Confirmar até a lista atualizada</div>
-            <div class="agenda-item-texto">Handler, preload e recarregamento</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-circle-check"></i> CRUD completo e exercício final</div>
-            <div class="agenda-item-texto">Fechando o ciclo e preparando a Avaliação 1</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Norma x lei, prévia da Aula 12</div>
           </div>
         </div>
     </div>
@@ -298,127 +287,76 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Fechando o ciclo CRUD</h1>
-        <p>Create, Read e Update já funcionam — hoje entra o Delete</p>
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Por Que Normas?</h1>
+        <p>Retomando a prévia da Aula 1</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>O botão Excluir</h1>
+        <h1>Da Técnica Pra Organização</h1>
         
-        <p>A coluna Ações da tabela em <code>frmPrincipal.js</code> já tem o botão Editar desde a Aula 4, dentro do mesmo <code>carregarInsumos</code> que já usamos desde a Aula 3. Hoje colocamos o irmão dele ao lado, na mesma célula: o botão <strong>Excluir</strong>.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">// carregarInsumos ja existe desde a Aula 3/4 -- so adicionamos
-// o botao Excluir do lado do Editar, na mesma celula de Acoes
-const carregarInsumos = async () =&gt; {
-  insumosCarregados = await window.api.listarInsumos();
-
-  const linhas = insumosCarregados.map((insumo) =&gt; `
-    &lt;tr&gt;
-      &lt;td&gt;${insumo.tipo}&lt;/td&gt;
-      &lt;td&gt;${insumo.nome}&lt;/td&gt;
-      &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
-      &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
-      &lt;td&gt;
-        &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
-        &lt;button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;Excluir&lt;/button&gt;
-      &lt;/td&gt;
-    &lt;/tr&gt;
-  `).join('');
-
-  document.querySelector('#tbodyInsumos').innerHTML = linhas;
-};</code></pre>
-    </div>
+        <p>Das Aulas 2 a 9, vimos ferramentas e mecanismos técnicos: criptografia, hash, firewall, IDS/IPS, VPN. Mas nenhuma ferramenta sozinha garante segurança se as PESSOAS da organização não seguirem um padrão mínimo de comportamento — lembra da estrutura Pessoas/Processos/Tecnologia da Aula 1? Hoje é sobre a parte de <strong>processos</strong>: as normas que formalizam o que uma organização deve fazer.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo truque do id
+        <i class="fa-solid fa-lightbulb"></i> A Aula 1 só citou de passagem
       </h3>
-      <p>Os dois botões pegam o id do mesmo jeito: <code>insumo.id</code>, vindo do array <code>insumosCarregados</code> que a Aula 4 já guarda na memória para busca.</p>
-      
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-table-cells"></i> Não esqueça do colspan
-      </h3>
-      <p>Como agora são dois botões na mesma célula, atualize o cabeçalho em <code>frmPrincipal.html</code>: <code>&lt;th&gt;Ações&lt;/th&gt;</code> vira <code>&lt;th colspan=&quot;2&quot;&gt;Ações&lt;/th&gt;</code>.</p>
+      <p>Lá atrás mencionamos ISO 27001 e LGPD como prévia. Hoje desenvolvemos a ISO 27000 de verdade; a LGPD fica pra Aula 12.</p>
       
     </div>
         
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="3">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Por que nunca excluir direto no clique?</h1>
-        <p>Delete é destrutivo e irreversível</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Um clique não pode ser tudo que separa você de perder um dado</h1>
+        <h1>O Que é uma Norma Técnica</h1>
         
-        <p>Já apagou sem querer uma conversa, uma foto ou o save de um jogo e ficou sem volta? Um botão Excluir que já dispara o DELETE no clique é exatamente isso — só que agora é o insumo de um cliente de verdade que some.</p>
+        <p>Uma <strong>norma técnica</strong> é um documento que descreve, de forma padronizada, como fazer algo corretamente — publicado por uma organização reconhecida (no caso de segurança da informação, a ISO, International Organization for Standardization). Ela não é lei: nenhuma empresa é OBRIGADA por decreto a segui-la.</p>
 
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
+    <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-skull-crossbones"></i> Delete não tem Ctrl+Z
+        <i class="fa-solid fa-circle-info"></i> Então por que empresas seguem mesmo assim?
       </h3>
-      <p>Diferente de um erro de digitação, que dá pra corrigir com um novo Update, uma linha apagada do banco se foi de vez. Por isso toda exclusão precisa de uma confirmação explícita antes de disparar a query.</p>
+      <p>Seguir a norma (e principalmente se CERTIFICAR nela) vira um diferencial de confiança: clientes, parceiros e até contratos exigem a certificação como prova de que a segurança da empresa foi auditada por terceiros.</p>
       
     </div>
-<p>A solução: reaproveitar o <strong>modal do Bootstrap</strong> que já usamos desde o semestre 1 — só que agora com uma mensagem clara, tipo <em>"Tem certeza que deseja excluir o insumo X? Essa ação não pode ser desfeita."</em></p>
         
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="4">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-sitemap"></i>
+        <h1>Família ISO 27000</h1>
+        <p>27001 x 27002 e o SGSI</p>
       </div>
     </div>
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <h1>O modal de confirmação</h1>
+        <h1>Não é UMA Norma, é uma Família</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-html">&lt;div class=&quot;modal fade&quot; id=&quot;modalConfirmarExclusao&quot; tabindex=&quot;-1&quot;&gt;
-  &lt;div class=&quot;modal-dialog&quot;&gt;
-    &lt;div class=&quot;modal-content&quot;&gt;
-      &lt;div class=&quot;modal-header&quot;&gt;
-        &lt;h5 class=&quot;modal-title&quot;&gt;Confirmar exclusão&lt;/h5&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;modal-body&quot;&gt;
-        &lt;p&gt;
-          Tem certeza que deseja excluir o insumo
-          &lt;strong id=&quot;nomeInsumoExcluir&quot;&gt;&lt;/strong&gt;?
-          &lt;br&gt;
-          Essa ação não pode ser desfeita.
-        &lt;/p&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;modal-footer&quot;&gt;
-        &lt;button class=&quot;btn btn-secondary&quot; data-bs-dismiss=&quot;modal&quot;&gt;
-          Cancelar
-        &lt;/button&gt;
-        &lt;button class=&quot;btn btn-danger&quot; id=&quot;btnConfirmarExclusao&quot;&gt;
-          Excluir
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-    </div>
+        <p>"ISO 27000" na verdade nomeia uma FAMÍLIA inteira de normas sobre segurança da informação, cada uma com um foco específico. As duas mais citadas no mercado são a ISO 27001 e a ISO 27002 — e é muito comum confundir as duas.</p>
 
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-cube"></i> Nada de novo aqui
-      </h3>
-      <p>É o mesmo componente modal do Bootstrap de sempre — só com um id e uma mensagem pensados pra exclusão.</p>
+    <div class="grid-2">
       
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-certificate"></i> ISO 27001
+          </h3>
+          <p>Define os REQUISITOS de um Sistema de Gestão de Segurança da Informação (SGSI). É a norma CERTIFICÁVEL — uma empresa pode ser auditada e receber o certificado.</p>
+          
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-list-check"></i> ISO 27002
+          </h3>
+          <p>É um CÓDIGO DE BOAS PRÁTICAS: uma lista detalhada de controles de segurança recomendados (ex: controle de acesso, backup, criptografia). NÃO é certificável sozinha — serve de apoio pra implementar a 27001.</p>
+          
+        </div>
     </div>
         
       </div>
@@ -426,77 +364,37 @@ const carregarInsumos = async () =&gt; {
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <h1>Uma peça que falta: o JS do Bootstrap</h1>
+        <h1>A Confusão Mais Comum</h1>
         
-        <p>Até agora usamos o Bootstrap só pelo <strong>CSS</strong> — classes como <code>table-striped</code>, <code>btn-danger</code>, <code>modal fade</code> — carregado no <code>&lt;head&gt;</code> de <code>frmPrincipal.html</code> desde o semestre passado. Mas <code>new bootstrap.Modal(...)</code>, que vamos usar já já pra abrir esse modal via JavaScript, é outra coisa: é código do <strong>JS</strong> do Bootstrap, e ele só existe na página se o arquivo certo estiver referenciado.</p>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">ISO 27001 x ISO 27002</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>ISO 27001</th><th>ISO 27002</th></tr></thead><tbody><tr><td>O que é</td><td>Requisitos do SGSI (o QUE fazer)</td><td>Catálogo de controles (COMO fazer)</td></tr><tr><td>Certificável?</td><td>Sim — uma empresa pode ser auditada e certificada</td><td>Não — é referência, não tem certificação própria</td></tr><tr><td>Usada como</td><td>"Checklist obrigatório" do SGSI</td><td>"Catálogo de opções" de controles pra atender o checklist</td></tr></tbody></table></div>
+    
+  </div>
 
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-html">&lt;!-- perto do fim do &lt;body&gt;, depois do HTML da pagina --&gt;
-
-&lt;!-- NOVO -- sem isso, o objeto &quot;bootstrap&quot; nao existe no JS --&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;frmPrincipal.js&quot;&gt;&lt;/script&gt;</code></pre>
-    </div>
-
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
+    <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> "bootstrap is not defined"
+        <i class="fa-solid fa-triangle-exclamation"></i> Não existe "empresa certificada ISO 27002"
       </h3>
-      <p>Esquecer esse <code>&lt;script&gt;</code> não quebra o HTML nem o CSS — a página carrega normal, o modal até aparece estilizado se você abrir ele "na unha". O erro só aparece no clique em Excluir, no console: <code>Uncaught ReferenceError: bootstrap is not defined</code>, porque <code>new bootstrap.Modal(...)</code> tenta usar um objeto que não existe.</p>
+      <p>Essa frase, comum em propaganda, está tecnicamente errada — só a ISO 27001 gera certificação. A 27002 é usada DENTRO do processo de implementar a 27001, não certificada sozinha.</p>
       
     </div>
         
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="6">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-bolt"></i>
-        <h1>Preenchendo o modal: sem IPC</h1>
-        <p>Diferente da edição — os dados já estão na tela</p>
       </div>
     </div>
 
     <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>Por que a exclusão não precisa de send/on</h1>
+        <h1>SGSI: O Sistema Por Trás da Norma</h1>
         
-        
-    <div class="grid-2">
+        <p><strong>SGSI</strong> (Sistema de Gestão de Segurança da Informação) é o conjunto de políticas, processos e controles que uma organização mantém pra proteger CID (Confidencialidade, Integridade, Disponibilidade — Aula 1) das suas informações. Não é um software: é uma estrutura de gestão, com donos, processos documentados e revisão periódica.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-shield-halved"></i> A ISO 27001 é o requisito do SGSI
+      </h3>
+      <p>Quando uma empresa diz que é "certificada ISO 27001", o que foi auditado de verdade é o SGSI dela — não um produto ou um sistema específico.</p>
       
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-pen"></i> Editar (Aula 4)
-          </h3>
-          
-          <ul style="margin-left:20px"><li>Precisa buscar o registro completo no banco</li><li>Usa <code>insumo:abrirEdicao</code> + <code>send</code>/<code>on</code></li><li>O <code>main.js</code> devolve o insumo pro renderer</li></ul>
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-trash"></i> Excluir (hoje)
-          </h3>
-          
-          <ul style="margin-left:20px"><li>O id e o nome já estão no array <code>insumosCarregados</code></li><li>Nenhuma viagem até o banco é necessária antes de abrir o modal</li><li>O JavaScript preenche o modal direto, via DOM</li></ul>
-        </div>
-    </div>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">// Array `insumosCarregados` já existe desde a Aula 4 (busca por id)
-let idParaExcluir = null;
-
-const abrirConfirmacaoExclusao = (id) =&gt; {
-  const insumo = insumosCarregados.find((item) =&gt; item.id === id);
-
-  document.querySelector('#nomeInsumoExcluir').textContent = insumo.nome;
-  idParaExcluir = id;
-
-  const modal = new bootstrap.Modal(
-    document.querySelector('#modalConfirmarExclusao')
-  );
-  modal.show();
-};</code></pre>
     </div>
         
       </div>
@@ -504,119 +402,83 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
 
     <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-database"></i>
-        <h1>DELETE SQL parametrizado</h1>
-        <p>Sem WHERE, o DELETE apaga a tabela inteira</p>
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <h1>O Ciclo PDCA</h1>
+        <p>Melhoria contínua e certificação</p>
       </div>
     </div>
 
     <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>A query do Delete</h1>
+        <h1>PDCA: Um SGSI Nunca Fica "Pronto"</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-sql">DELETE FROM insumo WHERE id = ?</code></pre>
-    </div>
-
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
-      <h3>
-        <i class="fa-solid fa-radiation"></i> O perigo do DELETE sem WHERE
-      </h3>
-      <p><code>DELETE FROM insumo;</code> (sem WHERE) apaga TODAS as linhas da tabela de uma vez. Assim como no Update da Aula 4, o <code>?</code> parametrizado garante que só a linha certa seja afetada — e evita SQL Injection.</p>
-      
-    </div>
+        <p>A ISO 27001 exige que o SGSI siga um ciclo de melhoria contínua chamado <strong>PDCA</strong> — as iniciais de Plan, Do, Check e Act.</p>
+<div class="bloco-diagrama" id="mmdvokz2">
+    <div class="bloco-diagrama-titulo">O ciclo PDCA do SGSI</div>
+    <div class="mermaid">flowchart LR
+    P["Plan: planejar o SGSI"] --&gt; D["Do: implementar os controles"]
+    D --&gt; C["Check: auditar e monitorar"]
+    C --&gt; A["Act: corrigir e melhorar"]
+    A --&gt; P</div>
+    <div class="bloco-diagrama-legenda">O ciclo nunca para: cada volta aperfeicoa o SGSI com base no que a auditoria encontrou.</div>
+  </div>
         
       </div>
     </div>
 
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
+        <h1>As Quatro Etapas, uma a uma</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (evento, id) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = 'DELETE FROM insumo WHERE id = ?';
-
-    conexao.query(sql, [id], (erro, resultado) =&gt; {
-      if (erro) {
-        reject(erro);
-        return;
-      }
-      resolve(resultado);
-    });
-  });
-});</code></pre>
-    </div>
-<p>Mesmo padrão do Create/Read/Update: <code>new Promise</code> por fora, <code>conexao.query</code> por dentro, <code>resolve</code> no sucesso e <code>reject</code> no erro.</p>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="9">
-      <div class="slide-content-wrapper">
-        <h1>preload.js — expondo excluirInsumo</h1>
-        
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
-
-contextBridge.exposeInMainWorld('api', {
-  criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo),
-  listarInsumos: () =&gt; ipcRenderer.invoke('insumo:listar'),
-  editarInsumo: (insumo) =&gt; ipcRenderer.send('insumo:abrirEdicao', insumo),
-  atualizarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:atualizar', insumo),
-
-  // NOVO -- invoke/handle: o frmPrincipal.js espera a exclusao terminar
-  // antes de fechar o modal e recarregar a lista
-  excluirInsumo: (id) =&gt; ipcRenderer.invoke('insumo:excluir', id),
-
-  aoReceberInsumoParaEditar: (callback) =&gt;
-    ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo))
-});</code></pre>
-    </div>
+        <ul><li><strong>Plan (planejar):</strong> mapear riscos (fórmula da Aula 1: Risco = Ameaça x Vulnerabilidade x Impacto) e definir quais controles da ISO 27002 vão ser aplicados</li><li><strong>Do (fazer):</strong> implementar de verdade os controles planejados — instalar o firewall, treinar os funcionários, publicar a política</li><li><strong>Check (checar):</strong> auditar, monitorar e medir se os controles estão funcionando como deveriam</li><li><strong>Act (agir):</strong> corrigir falhas encontradas na auditoria e melhorar o que não funcionou — e o ciclo recomeça</li></ul>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-plug"></i> O mesmo objeto de sempre
+        <i class="fa-solid fa-circle-info"></i> Por que isso importa pra certificação
       </h3>
-      <p>É o mesmo <code>api</code> exposto desde a Aula 2 — só ganhou o <code>excluirInsumo</code>. Tudo o mais (<code>editarInsumo</code> via <code>send</code>, <code>aoReceberInsumoParaEditar</code> escutando <code>insumo:preencher</code>) continua exatamente como a Aula 4 deixou.</p>
+      <p>Um auditor da ISO 27001 não verifica só "a empresa tem firewall?" — ele verifica se existe um ciclo PDCA de verdade rodando, com evidências de planejamento, execução, checagem e correção.</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>frmPrincipal.js — disparando a exclusão</h1>
+        <h1>Certificação ISO 27001 na Prática</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">document.querySelector('#btnConfirmarExclusao')
-  .addEventListener('click', async () =&gt; {
-    await window.api.excluirInsumo(idParaExcluir);
-
-    const modal = bootstrap.Modal.getInstance(
-      document.querySelector('#modalConfirmarExclusao')
-    );
-    modal.hide();
-
-    carregarInsumos(); // mesma função da Aula 3
-  });</code></pre>
-    </div>
+        <p>A certificação é feita por um ORGANISMO CERTIFICADOR externo e independente — a própria empresa não pode se autocertificar. O auditor externo analisa documentos, entrevista funcionários e verifica evidências reais de que o SGSI (e o ciclo PDCA) funciona na prática, não só no papel.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-rotate"></i> Recarregar sempre
+        <i class="fa-solid fa-graduation-cap"></i> Certificação não é pra sempre
       </h3>
-      <p><code>carregarInsumos()</code> é a mesma função desde a Aula 3 — recarregar a lista depois de criar, editar OU excluir garante que a tela nunca fica desatualizada.</p>
+      <p>A certificação ISO 27001 tem validade limitada e exige auditorias periódicas de manutenção — coerente com a ideia de melhoria CONTÍNUA do PDCA.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="10">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-file-signature"></i>
+        <h1>Política de Segurança (PSI)</h1>
+        <p>O documento que normatiza as pessoas</p>
+      </div>
+    </div>
+
+    <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>Onde o SGSI Vira Regra Pro Dia a Dia</h1>
+        
+        <p>A <strong>Política de Segurança da Informação (PSI)</strong> é o documento oficial, aprovado pela direção da organização, que diz O QUE é esperado de CADA pessoa que usa os sistemas da empresa — é a tradução prática do SGSI pra quem trabalha lá todo dia, inclusive quem nunca ouviu falar de ISO 27001.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-users"></i> Não é só pro time de TI
+      </h3>
+      <p>Toda pessoa que usa um computador, e-mail ou sistema da empresa assina um termo de ciência da PSI — reflete de novo a estrutura Pessoas/Processos/Tecnologia da Aula 1: nem toda falha de segurança é técnica (lembra da engenharia social da Aula 2?).</p>
       
     </div>
         
@@ -625,63 +487,71 @@ contextBridge.exposeInMainWorld('api', {
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo do Delete</h1>
+        <h1>Exemplos de Cláusulas Reais de uma PSI</h1>
         
-        <div class="bloco-diagrama" id="mmdx9how">
-    <div class="bloco-diagrama-titulo">Do clique em Excluir até a lista atualizada</div>
-    <div class="mermaid">sequenceDiagram
-    participant U as Usuário
-    participant R as Renderer (frmPrincipal.js)
-    participant P as preload.js
-    participant M as main.js
-    participant BD as MySQL
-
-    U-&gt;&gt;R: Clica em Excluir
-    R-&gt;&gt;R: abrirConfirmacaoExclusao(id) preenche o modal
-    U-&gt;&gt;R: Clica em Confirmar
-    R-&gt;&gt;P: window.api.excluirInsumo(id)
-    P-&gt;&gt;M: invoke('insumo:excluir', id)
-    M-&gt;&gt;BD: DELETE FROM insumo WHERE id = ?
-    BD--&gt;&gt;M: resultado
-    M--&gt;&gt;P: resolve(resultado)
-    P--&gt;&gt;R: retorno do invoke
-    R-&gt;&gt;R: carregarInsumos()
-    R--&gt;&gt;U: Lista atualizada</div>
-    <div class="bloco-diagrama-legenda">As duas primeiras trocas (U→R) acontecem só no navegador, sem tocar o banco — é por isso que o modal de confirmação não precisa de IPC.</div>
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="12">
-      <div class="slide-content-wrapper">
-        <h1>CRUD completo!</h1>
-        
-        <p>Com o Delete de hoje, o Gerenciador de Peças 3D fecha o ciclo <strong>CRUD completo</strong> sobre <code>insumo</code> — sempre pelo mesmo caminho: preload → handle → Promise → <code>conexao.query</code>.</p>
-<div class="bloco-tabela">
-    
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Operação</th><th>Verbo IPC</th><th>Comando SQL</th></tr></thead><tbody><tr><td>Create</td><td>insumo:criar</td><td>INSERT INTO insumo (...) VALUES (...)</td></tr><tr><td>Read</td><td>insumo:listar</td><td>SELECT * FROM insumo</td></tr><tr><td>Update</td><td>insumo:atualizar</td><td>UPDATE insumo SET ... WHERE id = ?</td></tr><tr><td>Delete</td><td>insumo:excluir</td><td>DELETE FROM insumo WHERE id = ?</td></tr></tbody></table></div>
-    
-  </div>
+        <ul><li>Senhas: comprimento mínimo, troca periódica, proibição de compartilhar com colegas</li><li>Dispositivos pessoais: regras pra usar o próprio celular/notebook pra acessar sistemas da empresa (BYOD)</li><li>E-mail e navegação: o que pode e não pode ser acessado durante o expediente</li><li>Backup: frequência mínima e onde os backups devem ficar guardados</li><li>Uso de mídia removível: restrições a pendrive/HD externo em máquinas corporativas</li><li>Consequências: o que acontece se um funcionário descumprir a política</li></ul>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-graduation-cap"></i> Próxima aula: Avaliação 1
+        <i class="fa-solid fa-file-contract"></i> A PSI vira a 27002 em regras concretas
       </h3>
-      <p>A Aula 6 é a Avaliação 1, com foco em Persistência de Dados e CRUD. O Delete de hoje é a última peça que faltava pra revisar tudo.</p>
+      <p>Cada cláusula dessas corresponde a um ou mais CONTROLES da ISO 27002 — a PSI é onde o catálogo de boas práticas vira regra escrita, específica daquela organização.</p>
       
     </div>
         
       </div>
     </div>
 
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Classificação da Informação</h1>
+        
+        <p>Uma PSI geralmente define níveis de sigilo pra classificar cada informação da empresa — nem tudo precisa do mesmo nível de proteção (lembra de Confidencialidade, Aula 1).</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Níveis típicos de classificação</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Nível</th><th>Exemplo</th></tr></thead><tbody><tr><td>Pública</td><td>Site institucional, material de marketing</td></tr><tr><td>Interna</td><td>Comunicados internos, manuais de processo</td></tr><tr><td>Confidencial</td><td>Planilha de salários, contratos com clientes</td></tr><tr><td>Restrita</td><td>Chaves de criptografia (Aula 6), senhas de administrador</td></tr></tbody></table></div>
+    
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="13">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Norma x lei, prévia da Aula 12</p>
+      </div>
+    </div>
+
     <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Delete em peca_impressa</h1>
+        <h1>Norma Técnica x Lei</h1>
+        
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Diferença fundamental</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>Norma técnica (ex: ISO 27001)</th><th>Lei (ex: LGPD)</th></tr></thead><tbody><tr><td>Quem publica</td><td>Organização de normalização (ISO)</td><td>Estado (Poder Legislativo)</td></tr><tr><td>Obrigatória?</td><td>Não — adesão voluntária</td><td>Sim — vale pra todo mundo, sem escolha</td></tr><tr><td>Consequência de não seguir</td><td>Perde o certificado, perde confiança de mercado</td><td>Multa e sanção legal</td></tr></tbody></table></div>
+    
+  </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
+      </h3>
+      <p>Na Aula 12 vamos pra LGPD e GDPR — leis de proteção de dados que, diferente da ISO 27001, são obrigatórias por lei.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="14">
+      <div class="slide-content-wrapper">
+        <h1>Exercícios: Normas na Prática</h1>
         
         
     <div class="quest-list">
-      <ol><li>Adicione o botão Excluir na coluna Ações da tabela de peças impressas.</li><li>Crie o modal de confirmação de exclusão (pode copiar o de insumo e trocar os ids e textos).</li><li>Implemente <code>ipcMain.handle('peca:excluir', ...)</code> em main.js com <code>DELETE FROM peca_impressa WHERE id = ?</code>.</li><li>Exponha <code>excluirPeca</code> no <code>preload.js</code>, no mesmo objeto <code>api</code>.</li><li>No <code>frmPrincipal.js</code>, chame <code>window.api.excluirPeca(id)</code> no clique de Confirmar e recarregue a lista de peças.</li></ol>
+      <ol><li>Explique com suas palavras a diferença entre ISO 27001 e ISO 27002, usando o exemplo "o QUE fazer" x "COMO fazer".</li><li>Para cada etapa do ciclo PDCA (Plan, Do, Check, Act), dê um exemplo concreto de ação que uma escola (como o COTIL) poderia tomar pra proteger os dados dos alunos.</li><li>Escreva 3 cláusulas de uma PSI fictícia pra um laboratório de informática escolar, cobrindo pelo menos: uso de pendrive, senha de login e uso de celular.</li><li>Classifique cada item na tabela de níveis de sigilo vista hoje: (a) a grade horária da escola, (b) o boletim de notas de um aluno específico, (c) a senha do roteador Wi-Fi da sala dos professores.</li><li>Desafio: pesquise e explique por que uma empresa pode escolher gastar tempo e dinheiro pra se certificar na ISO 27001 mesmo sem nenhuma lei exigir isso.</li></ol>
     </div>
         
       </div>
@@ -694,17 +564,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcd7dc',
-    primaryTextColor: '#101010',
-    primaryBorderColor: '#EF233C',
-    lineColor: '#EF233C',
-    secondaryColor: '#1B1B2F',
+    primaryColor: '#dff2ee',
+    primaryTextColor: '#170A07',
+    primaryBorderColor: '#4FB5A3',
+    lineColor: '#4FB5A3',
+    secondaryColor: '#431A12',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcd7dc',
-    nodeBorder: '#EF233C',
+    mainBkg: '#dff2ee',
+    nodeBorder: '#4FB5A3',
     clusterBkg: '#f0f4f8',
-    titleColor: '#EF233C',
+    titleColor: '#4FB5A3',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -714,7 +584,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9d9dd'
+    cScale1: '#eadad8'
   }
 });
 </script>
@@ -722,7 +592,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::5';
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::11';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
@@ -730,13 +600,45 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=13;
+const totalConteudo=14;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
-  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
-  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+  document.fonts.ready.then(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();});
+  setTimeout(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();},3000);
 }else document.documentElement.classList.add('fonts-ready');
+// Fits each slide's content to the real screen instead of letting it silently
+// clip (.slide has overflow:hidden) -- school monitors range from 1024x768 up to
+// 1920x1080, and content authored without seeing either can't be trusted to fit.
+// Content up to 768px tall (fits a 1024x768 screen already) stays at natural size
+// -- "fixed", per the brief, rather than stretched to fill a taller screen. Content
+// from 769-1000px scales (uniformly, so text/diagrams shrink or grow in proportion,
+// never stretched) to exactly fill the slide's own height on whatever screen it's
+// actually displayed on. Past 1000px natural height the right fix is splitting the
+// slide in two at authoring time (see docs/guia-componentes.md) -- this is only a
+// safety net so an oversized slide that slips through still shows in full, shrunk,
+// instead of being cut off.
+function ajustarEscalaSlides(){
+  document.querySelectorAll('.slide').forEach(slideEl=>{
+    if(slideEl.classList.contains('rolavel'))return;
+    const wrap=slideEl.querySelector('.slide-content-wrapper');
+    if(!wrap)return;
+    wrap.style.transform='none';
+    const cs=getComputedStyle(slideEl);
+    const disponivel=slideEl.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    const natural=wrap.scrollHeight;
+    if(natural>768&&disponivel>0){
+      wrap.style.transform='scale('+(disponivel/natural)+')';
+    }
+  });
+}
+window.addEventListener('load',ajustarEscalaSlides);
+window.addEventListener('resize',ajustarEscalaSlides);
+// Mermaid renders its SVGs asynchronously after its own module script runs, which
+// can change a slide's natural content height well after the passes above already
+// measured it -- one more pass after a short delay catches that without needing a
+// callback into the mermaid module itself.
+setTimeout(ajustarEscalaSlides,1200);
 const agendaToggle=document.querySelector('.agenda-toggle');
 const agendaSidebar=document.querySelector('.agenda-sidebar');
 const toggleAgendaSidebar = () => {

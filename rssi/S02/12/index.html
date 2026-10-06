@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 5: CRUD: Delete (Remoção) — Modais de confirmação e Delete SQL</title>
+<title>Aula 12: Legislação: LGPD, GDPR e Privacidade de Dados</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2B2D42;--color-rust:#EF233C;
-  --color-orange:#EF233C;--color-yellow:#EF233C;--color-deep:#1B1B2F;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#101010;
+  --color-navy:#000;--color-blue:#6B2D5C;--color-rust:#FFB400;
+  --color-orange:#FFB400;--color-yellow:#FFB400;--color-deep:#35152E;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#120A10;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -38,7 +38,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    whose content is intentionally longer than one screen (e.g. a long exercise list)
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
-.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;transform-origin:top center;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
@@ -90,6 +90,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
+  .slide-content-wrapper{transform:none!important;}
 }
 .depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
@@ -200,28 +201,27 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando o ciclo CRUD</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-trash"></i><span>O botão Excluir</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Por que nunca excluir direto no clique</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Um clique não pode ser tudo que separa você de perder um dado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O modal de confirmação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Uma peça que falta: o JS do Bootstrap</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-bolt"></i><span>Preenchendo o modal sem IPC</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Por que a exclusão não precisa de send/on</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>DELETE SQL parametrizado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>A query do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Do clique em Confirmar até a lista atualizada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>preload.js — expondo excluirInsumo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>frmPrincipal.js — disparando a exclusão</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O fluxo completo do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-circle-check"></i><span>CRUD completo e exercício final</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Delete em peca_impressa</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Norma x Lei</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Da Norma Voluntária Pra Lei Obrigatória</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-scale-balanced"></i><span>LGPD: Conceitos Fundamentais</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>O Que é a LGPD</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Os Papéis da LGPD</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Bases Legais: Quando Tratar um Dado é Permitido</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-user-shield"></i><span>Direitos do Titular</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O Que Você Pode Exigir de uma Empresa</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-earth-americas"></i><span>GDPR e Comparação</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>GDPR: A Lei Que Veio Antes</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>LGPD x GDPR, Lado a Lado</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Fiscalização e Multas no Brasil</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo de Hoje</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: LGPD e GDPR na Prática</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -236,58 +236,44 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 5</p>
+        <p>Redes e Sistemas de Segurança de Informação (RSSI) — Aula 12</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">CRUD: Delete (Remoção) — Modais de confirmação e Delete SQL</div>
+    <div class="bloco-agenda-titulo">Legislação: LGPD, GDPR e Privacidade de Dados</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando o ciclo CRUD</div>
-            <div class="agenda-item-texto">Recapitulando Create, Read e Update antes do Delete</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
-          <div class="agenda-numero">02</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-trash"></i> O botão Excluir</div>
-            <div class="agenda-item-texto">Novo botão na coluna Ações da tabela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Norma x Lei</div>
+            <div class="agenda-item-texto">Retomando a Aula 11</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
+          <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Por que nunca excluir direto no clique</div>
-            <div class="agenda-item-texto">Delete é destrutivo e irreversível</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-scale-balanced"></i> LGPD: Conceitos Fundamentais</div>
+            <div class="agenda-item-texto">Dado pessoal, papéis e bases legais</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
+          <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-bolt"></i> Preenchendo o modal sem IPC</div>
-            <div class="agenda-item-texto">Os dados já estão na tela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-user-shield"></i> Direitos do Titular</div>
+            <div class="agenda-item-texto">O que a lei garante a cada pessoa</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-earth-americas"></i> GDPR e Comparação</div>
+            <div class="agenda-item-texto">A lei europeia e sua extraterritorialidade</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> DELETE SQL parametrizado</div>
-            <div class="agenda-item-texto">A query e o perigo do DELETE sem WHERE</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Do clique em Confirmar até a lista atualizada</div>
-            <div class="agenda-item-texto">Handler, preload e recarregamento</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-circle-check"></i> CRUD completo e exercício final</div>
-            <div class="agenda-item-texto">Fechando o ciclo e preparando a Avaliação 1</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Multas, casos reais e prévia da Aula 13</div>
           </div>
         </div>
     </div>
@@ -298,55 +284,23 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Fechando o ciclo CRUD</h1>
-        <p>Create, Read e Update já funcionam — hoje entra o Delete</p>
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Norma x Lei</h1>
+        <p>Retomando a Aula 11</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>O botão Excluir</h1>
+        <h1>Da Norma Voluntária Pra Lei Obrigatória</h1>
         
-        <p>A coluna Ações da tabela em <code>frmPrincipal.js</code> já tem o botão Editar desde a Aula 4, dentro do mesmo <code>carregarInsumos</code> que já usamos desde a Aula 3. Hoje colocamos o irmão dele ao lado, na mesma célula: o botão <strong>Excluir</strong>.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">// carregarInsumos ja existe desde a Aula 3/4 -- so adicionamos
-// o botao Excluir do lado do Editar, na mesma celula de Acoes
-const carregarInsumos = async () =&gt; {
-  insumosCarregados = await window.api.listarInsumos();
-
-  const linhas = insumosCarregados.map((insumo) =&gt; `
-    &lt;tr&gt;
-      &lt;td&gt;${insumo.tipo}&lt;/td&gt;
-      &lt;td&gt;${insumo.nome}&lt;/td&gt;
-      &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
-      &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
-      &lt;td&gt;
-        &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
-        &lt;button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;Excluir&lt;/button&gt;
-      &lt;/td&gt;
-    &lt;/tr&gt;
-  `).join('');
-
-  document.querySelector('#tbodyInsumos').innerHTML = linhas;
-};</code></pre>
-    </div>
+        <p>A Aula 11 fechou com uma distinção importante: a ISO 27001 é uma norma TÉCNICA — nenhuma lei obriga uma empresa a segui-la. Hoje vemos o outro lado: leis de verdade, que OBRIGAM organizações a proteger dados pessoais, com multa pra quem descumpre.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo truque do id
+        <i class="fa-solid fa-gavel"></i> Duas leis, dois territórios
       </h3>
-      <p>Os dois botões pegam o id do mesmo jeito: <code>insumo.id</code>, vindo do array <code>insumosCarregados</code> que a Aula 4 já guarda na memória para busca.</p>
-      
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-table-cells"></i> Não esqueça do colspan
-      </h3>
-      <p>Como agora são dois botões na mesma célula, atualize o cabeçalho em <code>frmPrincipal.html</code>: <code>&lt;th&gt;Ações&lt;/th&gt;</code> vira <code>&lt;th colspan=&quot;2&quot;&gt;Ações&lt;/th&gt;</code>.</p>
+      <p>A <strong>LGPD</strong> (Lei Geral de Proteção de Dados) é brasileira. A <strong>GDPR</strong> (General Data Protection Regulation) é da União Europeia, e foi uma das principais inspirações da LGPD.</p>
       
     </div>
         
@@ -355,148 +309,72 @@ const carregarInsumos = async () =&gt; {
 
     <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Por que nunca excluir direto no clique?</h1>
-        <p>Delete é destrutivo e irreversível</p>
+        <i class="fa-solid fa-scale-balanced"></i>
+        <h1>LGPD: Conceitos Fundamentais</h1>
+        <p>Dado pessoal, papéis e bases legais</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Um clique não pode ser tudo que separa você de perder um dado</h1>
+        <h1>O Que é a LGPD</h1>
         
-        <p>Já apagou sem querer uma conversa, uma foto ou o save de um jogo e ficou sem volta? Um botão Excluir que já dispara o DELETE no clique é exatamente isso — só que agora é o insumo de um cliente de verdade que some.</p>
+        <p>A <strong>LGPD</strong> (Lei 13.709/2018, em vigor desde 2020) regula como empresas, governos e qualquer organização podem coletar, armazenar, usar e compartilhar DADOS PESSOAIS de pessoas no Brasil — seu nome, CPF, e-mail, localização, histórico de compras, e muito mais.</p>
 
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
+    <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-skull-crossbones"></i> Delete não tem Ctrl+Z
+        <i class="fa-solid fa-id-card"></i> Dado pessoal x dado pessoal sensível
       </h3>
-      <p>Diferente de um erro de digitação, que dá pra corrigir com um novo Update, uma linha apagada do banco se foi de vez. Por isso toda exclusão precisa de uma confirmação explícita antes de disparar a query.</p>
+      <p><strong>Dado pessoal</strong>: identifica uma pessoa (nome, e-mail, CPF). <strong>Dado pessoal SENSÍVEL</strong>: exige proteção redobrada — saúde, biometria, orientação sexual, religião, dado genético. Lembra da classificação da informação da Aula 11? Dado sensível é praticamente sempre 'Restrito'.</p>
       
     </div>
-<p>A solução: reaproveitar o <strong>modal do Bootstrap</strong> que já usamos desde o semestre 1 — só que agora com uma mensagem clara, tipo <em>"Tem certeza que deseja excluir o insumo X? Essa ação não pode ser desfeita."</em></p>
         
       </div>
     </div>
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <h1>O modal de confirmação</h1>
+        <h1>Os Papéis da LGPD</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-html">&lt;div class=&quot;modal fade&quot; id=&quot;modalConfirmarExclusao&quot; tabindex=&quot;-1&quot;&gt;
-  &lt;div class=&quot;modal-dialog&quot;&gt;
-    &lt;div class=&quot;modal-content&quot;&gt;
-      &lt;div class=&quot;modal-header&quot;&gt;
-        &lt;h5 class=&quot;modal-title&quot;&gt;Confirmar exclusão&lt;/h5&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;modal-body&quot;&gt;
-        &lt;p&gt;
-          Tem certeza que deseja excluir o insumo
-          &lt;strong id=&quot;nomeInsumoExcluir&quot;&gt;&lt;/strong&gt;?
-          &lt;br&gt;
-          Essa ação não pode ser desfeita.
-        &lt;/p&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;modal-footer&quot;&gt;
-        &lt;button class=&quot;btn btn-secondary&quot; data-bs-dismiss=&quot;modal&quot;&gt;
-          Cancelar
-        &lt;/button&gt;
-        &lt;button class=&quot;btn btn-danger&quot; id=&quot;btnConfirmarExclusao&quot;&gt;
-          Excluir
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-cube"></i> Nada de novo aqui
-      </h3>
-      <p>É o mesmo componente modal do Bootstrap de sempre — só com um id e uma mensagem pensados pra exclusão.</p>
-      
-    </div>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Quem é quem na LGPD</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Papel</th><th>O que é</th></tr></thead><tbody><tr><td>Titular</td><td>A pessoa dona do dado pessoal (você, ao se cadastrar num site)</td></tr><tr><td>Controlador</td><td>Quem DECIDE o que fazer com o dado (a empresa dona do sistema)</td></tr><tr><td>Operador</td><td>Quem TRATA o dado seguindo as ordens do controlador (ex: uma empresa de hospedagem contratada)</td></tr><tr><td>ANPD</td><td>Autoridade Nacional de Proteção de Dados — o órgão do governo que fiscaliza e aplica multas</td></tr></tbody></table></div>
+    
+  </div>
         
       </div>
     </div>
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <h1>Uma peça que falta: o JS do Bootstrap</h1>
+        <h1>Bases Legais: Quando Tratar um Dado é Permitido</h1>
         
-        <p>Até agora usamos o Bootstrap só pelo <strong>CSS</strong> — classes como <code>table-striped</code>, <code>btn-danger</code>, <code>modal fade</code> — carregado no <code>&lt;head&gt;</code> de <code>frmPrincipal.html</code> desde o semestre passado. Mas <code>new bootstrap.Modal(...)</code>, que vamos usar já já pra abrir esse modal via JavaScript, é outra coisa: é código do <strong>JS</strong> do Bootstrap, e ele só existe na página se o arquivo certo estiver referenciado.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-html">&lt;!-- perto do fim do &lt;body&gt;, depois do HTML da pagina --&gt;
-
-&lt;!-- NOVO -- sem isso, o objeto &quot;bootstrap&quot; nao existe no JS --&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;frmPrincipal.js&quot;&gt;&lt;/script&gt;</code></pre>
-    </div>
-
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
-      <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> "bootstrap is not defined"
-      </h3>
-      <p>Esquecer esse <code>&lt;script&gt;</code> não quebra o HTML nem o CSS — a página carrega normal, o modal até aparece estilizado se você abrir ele "na unha". O erro só aparece no clique em Excluir, no console: <code>Uncaught ReferenceError: bootstrap is not defined</code>, porque <code>new bootstrap.Modal(...)</code> tenta usar um objeto que não existe.</p>
-      
-    </div>
+        <p>A LGPD não exige consentimento pra TUDO — ela define várias BASES LEGAIS diferentes que justificam o tratamento de um dado pessoal. As mais comuns:</p>
+<ul><li><strong>Consentimento</strong>: o titular autorizou explicitamente (ex: aceitar os termos de um app)</li><li><strong>Cumprimento de obrigação legal</strong>: a empresa é OBRIGADA por outra lei a guardar aquele dado (ex: nota fiscal)</li><li><strong>Execução de contrato</strong>: o dado é necessário pra entregar o serviço contratado (ex: endereço pra entrega)</li><li><strong>Legítimo interesse</strong>: a empresa tem um interesse real e específico, desde que não viole os direitos do titular (ex: prevenção a fraude)</li></ul>
         
       </div>
     </div>
 
     <div class="slide topic" data-num="6">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-bolt"></i>
-        <h1>Preenchendo o modal: sem IPC</h1>
-        <p>Diferente da edição — os dados já estão na tela</p>
+        <i class="fa-solid fa-user-shield"></i>
+        <h1>Direitos do Titular</h1>
+        <p>O que a lei garante a cada pessoa</p>
       </div>
     </div>
 
     <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>Por que a exclusão não precisa de send/on</h1>
+        <h1>O Que Você Pode Exigir de uma Empresa</h1>
         
-        
-    <div class="grid-2">
+        <ul><li><strong>Acesso</strong>: saber quais dados seus a empresa guarda</li><li><strong>Correção</strong>: pedir correção de um dado desatualizado ou errado</li><li><strong>Eliminação</strong>: pedir que seus dados sejam apagados</li><li><strong>Portabilidade</strong>: levar seus dados pra outra empresa/serviço</li><li><strong>Revogação do consentimento</strong>: retirar uma autorização dada antes, a qualquer momento</li></ul>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-lock"></i> A lei também exige medidas técnicas
+      </h3>
+      <p>O Art. 46 da LGPD obriga controlador e operador a adotar medidas de segurança técnicas e administrativas pra proteger dados pessoais — ou seja, tudo que vimos nas Aulas 6 a 9 (criptografia, hash, firewall, VPN) deixa de ser só 'boa prática' e vira, na prática, uma exigência legal quando há dado pessoal envolvido.</p>
       
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-pen"></i> Editar (Aula 4)
-          </h3>
-          
-          <ul style="margin-left:20px"><li>Precisa buscar o registro completo no banco</li><li>Usa <code>insumo:abrirEdicao</code> + <code>send</code>/<code>on</code></li><li>O <code>main.js</code> devolve o insumo pro renderer</li></ul>
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-trash"></i> Excluir (hoje)
-          </h3>
-          
-          <ul style="margin-left:20px"><li>O id e o nome já estão no array <code>insumosCarregados</code></li><li>Nenhuma viagem até o banco é necessária antes de abrir o modal</li><li>O JavaScript preenche o modal direto, via DOM</li></ul>
-        </div>
-    </div>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">// Array `insumosCarregados` já existe desde a Aula 4 (busca por id)
-let idParaExcluir = null;
-
-const abrirConfirmacaoExclusao = (id) =&gt; {
-  const insumo = insumosCarregados.find((item) =&gt; item.id === id);
-
-  document.querySelector('#nomeInsumoExcluir').textContent = insumo.nome;
-  idParaExcluir = id;
-
-  const modal = new bootstrap.Modal(
-    document.querySelector('#modalConfirmarExclusao')
-  );
-  modal.show();
-};</code></pre>
     </div>
         
       </div>
@@ -504,27 +382,23 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
 
     <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-database"></i>
-        <h1>DELETE SQL parametrizado</h1>
-        <p>Sem WHERE, o DELETE apaga a tabela inteira</p>
+        <i class="fa-solid fa-earth-americas"></i>
+        <h1>GDPR e Comparação</h1>
+        <p>A lei europeia e sua extraterritorialidade</p>
       </div>
     </div>
 
     <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>A query do Delete</h1>
+        <h1>GDPR: A Lei Que Veio Antes</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-sql">DELETE FROM insumo WHERE id = ?</code></pre>
-    </div>
+        <p>A <strong>GDPR</strong> (General Data Protection Regulation) é o regulamento de proteção de dados da União Europeia, em vigor desde 2018 — dois anos antes da LGPD, que se inspirou fortemente nela.</p>
 
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
+    <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-radiation"></i> O perigo do DELETE sem WHERE
+        <i class="fa-solid fa-globe"></i> Extraterritorialidade: a lei segue o dado, não a empresa
       </h3>
-      <p><code>DELETE FROM insumo;</code> (sem WHERE) apaga TODAS as linhas da tabela de uma vez. Assim como no Update da Aula 4, o <code>?</code> parametrizado garante que só a linha certa seja afetada — e evita SQL Injection.</p>
+      <p>A GDPR (e também a LGPD) se aplica mesmo a empresas de FORA da Europa (ou do Brasil), desde que elas tratem dados de pessoas que estão lá. Uma loja virtual brasileira que vende pra cidadãos europeus precisa respeitar a GDPR, mesmo sem ter sede na Europa.</p>
       
     </div>
         
@@ -533,59 +407,36 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
 
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
+        <h1>LGPD x GDPR, Lado a Lado</h1>
         
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Comparação direta</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th></th><th>LGPD (Brasil)</th><th>GDPR (União Europeia)</th></tr></thead><tbody><tr><td>Em vigor desde</td><td>2020 (lei de 2018)</td><td>2018</td></tr><tr><td>Autoridade fiscalizadora</td><td>ANPD</td><td>Uma autoridade de proteção de dados em cada país-membro</td></tr><tr><td>Multa máxima</td><td>Até 2% do faturamento, limitado a R$ 50 milhões por infração</td><td>Até 4% do faturamento global ou €20 milhões (o que for maior)</td></tr><tr><td>Abrangência</td><td>Dados de pessoas no Brasil, mesmo com empresa estrangeira</td><td>Dados de cidadãos da UE, mesmo com empresa de fora (extraterritorialidade)</td></tr></tbody></table></div>
+    
+  </div>
         
-    <div class="code-wrap">
-      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (evento, id) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = 'DELETE FROM insumo WHERE id = ?';
-
-    conexao.query(sql, [id], (erro, resultado) =&gt; {
-      if (erro) {
-        reject(erro);
-        return;
-      }
-      resolve(resultado);
-    });
-  });
-});</code></pre>
+      </div>
     </div>
-<p>Mesmo padrão do Create/Read/Update: <code>new Promise</code> por fora, <code>conexao.query</code> por dentro, <code>resolve</code> no sucesso e <code>reject</code> no erro.</p>
-        
+
+    <div class="slide topic" data-num="9">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Multas, casos reais e prévia da Aula 13</p>
       </div>
     </div>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>preload.js — expondo excluirInsumo</h1>
+        <h1>Fiscalização e Multas no Brasil</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
-
-contextBridge.exposeInMainWorld('api', {
-  criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo),
-  listarInsumos: () =&gt; ipcRenderer.invoke('insumo:listar'),
-  editarInsumo: (insumo) =&gt; ipcRenderer.send('insumo:abrirEdicao', insumo),
-  atualizarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:atualizar', insumo),
-
-  // NOVO -- invoke/handle: o frmPrincipal.js espera a exclusao terminar
-  // antes de fechar o modal e recarregar a lista
-  excluirInsumo: (id) =&gt; ipcRenderer.invoke('insumo:excluir', id),
-
-  aoReceberInsumoParaEditar: (callback) =&gt;
-    ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo))
-});</code></pre>
-    </div>
+        <p>A <strong>ANPD</strong> investiga denúncias e vazamentos, e pode aplicar multa de até 2% do faturamento da empresa (limitada a R$ 50 milhões POR infração) — além de poder determinar bloqueio ou eliminação dos dados tratados irregularmente.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-plug"></i> O mesmo objeto de sempre
+        <i class="fa-solid fa-triangle-exclamation"></i> Caso real: vazamento Serasa (2021)
       </h3>
-      <p>É o mesmo <code>api</code> exposto desde a Aula 2 — só ganhou o <code>excluirInsumo</code>. Tudo o mais (<code>editarInsumo</code> via <code>send</code>, <code>aoReceberInsumoParaEditar</code> escutando <code>insumo:preencher</code>) continua exatamente como a Aula 4 deixou.</p>
+      <p>Em 2021, dados de cerca de 220 milhões de CPFs vazaram de uma base ligada à Serasa Experian — um dos maiores vazamentos já registrados no Brasil, investigado sob a LGPD. A primeira multa efetivamente aplicada pela ANPD veio em 2023, contra uma empresa de telemarketing (Telekall), por uso irregular de dados sem base legal.</p>
       
     </div>
         
@@ -594,29 +445,19 @@ contextBridge.exposeInMainWorld('api', {
 
     <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
-        <h1>frmPrincipal.js — disparando a exclusão</h1>
+        <h1>Resumo de Hoje</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">document.querySelector('#btnConfirmarExclusao')
-  .addEventListener('click', async () =&gt; {
-    await window.api.excluirInsumo(idParaExcluir);
-
-    const modal = bootstrap.Modal.getInstance(
-      document.querySelector('#modalConfirmarExclusao')
-    );
-    modal.hide();
-
-    carregarInsumos(); // mesma função da Aula 3
-  });</code></pre>
-    </div>
+        <div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">O que levamos da aula</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Conceito</th><th>Resumo</th></tr></thead><tbody><tr><td>LGPD</td><td>Lei brasileira que regula o tratamento de dados pessoais, fiscalizada pela ANPD</td></tr><tr><td>GDPR</td><td>Regulamento europeu equivalente, mais antigo, multas ainda maiores</td></tr><tr><td>Dado sensível</td><td>Saúde, biometria, religião etc. — proteção redobrada</td></tr><tr><td>Art. 46 da LGPD</td><td>Exige medidas técnicas (criptografia, controle de acesso) por lei, não só por boa prática</td></tr></tbody></table></div>
+    
+  </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-rotate"></i> Recarregar sempre
+        <i class="fa-solid fa-graduation-cap"></i> Próxima aula
       </h3>
-      <p><code>carregarInsumos()</code> é a mesma função desde a Aula 3 — recarregar a lista depois de criar, editar OU excluir garante que a tela nunca fica desatualizada.</p>
+      <p>A Aula 13 trata de gestão de crise: auditoria básica e resposta a incidentes — exatamente o que uma empresa como a do caso Serasa precisa fazer quando um vazamento acontece, incluindo a obrigação legal de notificar a ANPD e os titulares afetados.</p>
       
     </div>
         
@@ -625,63 +466,11 @@ contextBridge.exposeInMainWorld('api', {
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo do Delete</h1>
-        
-        <div class="bloco-diagrama" id="mmdx9how">
-    <div class="bloco-diagrama-titulo">Do clique em Excluir até a lista atualizada</div>
-    <div class="mermaid">sequenceDiagram
-    participant U as Usuário
-    participant R as Renderer (frmPrincipal.js)
-    participant P as preload.js
-    participant M as main.js
-    participant BD as MySQL
-
-    U-&gt;&gt;R: Clica em Excluir
-    R-&gt;&gt;R: abrirConfirmacaoExclusao(id) preenche o modal
-    U-&gt;&gt;R: Clica em Confirmar
-    R-&gt;&gt;P: window.api.excluirInsumo(id)
-    P-&gt;&gt;M: invoke('insumo:excluir', id)
-    M-&gt;&gt;BD: DELETE FROM insumo WHERE id = ?
-    BD--&gt;&gt;M: resultado
-    M--&gt;&gt;P: resolve(resultado)
-    P--&gt;&gt;R: retorno do invoke
-    R-&gt;&gt;R: carregarInsumos()
-    R--&gt;&gt;U: Lista atualizada</div>
-    <div class="bloco-diagrama-legenda">As duas primeiras trocas (U→R) acontecem só no navegador, sem tocar o banco — é por isso que o modal de confirmação não precisa de IPC.</div>
-  </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="12">
-      <div class="slide-content-wrapper">
-        <h1>CRUD completo!</h1>
-        
-        <p>Com o Delete de hoje, o Gerenciador de Peças 3D fecha o ciclo <strong>CRUD completo</strong> sobre <code>insumo</code> — sempre pelo mesmo caminho: preload → handle → Promise → <code>conexao.query</code>.</p>
-<div class="bloco-tabela">
-    
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Operação</th><th>Verbo IPC</th><th>Comando SQL</th></tr></thead><tbody><tr><td>Create</td><td>insumo:criar</td><td>INSERT INTO insumo (...) VALUES (...)</td></tr><tr><td>Read</td><td>insumo:listar</td><td>SELECT * FROM insumo</td></tr><tr><td>Update</td><td>insumo:atualizar</td><td>UPDATE insumo SET ... WHERE id = ?</td></tr><tr><td>Delete</td><td>insumo:excluir</td><td>DELETE FROM insumo WHERE id = ?</td></tr></tbody></table></div>
-    
-  </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-graduation-cap"></i> Próxima aula: Avaliação 1
-      </h3>
-      <p>A Aula 6 é a Avaliação 1, com foco em Persistência de Dados e CRUD. O Delete de hoje é a última peça que faltava pra revisar tudo.</p>
-      
-    </div>
-        
-      </div>
-    </div>
-
-    <div class="slide" data-num="13">
-      <div class="slide-content-wrapper">
-        <h1>Exercício: Delete em peca_impressa</h1>
+        <h1>Exercícios: LGPD e GDPR na Prática</h1>
         
         
     <div class="quest-list">
-      <ol><li>Adicione o botão Excluir na coluna Ações da tabela de peças impressas.</li><li>Crie o modal de confirmação de exclusão (pode copiar o de insumo e trocar os ids e textos).</li><li>Implemente <code>ipcMain.handle('peca:excluir', ...)</code> em main.js com <code>DELETE FROM peca_impressa WHERE id = ?</code>.</li><li>Exponha <code>excluirPeca</code> no <code>preload.js</code>, no mesmo objeto <code>api</code>.</li><li>No <code>frmPrincipal.js</code>, chame <code>window.api.excluirPeca(id)</code> no clique de Confirmar e recarregue a lista de peças.</li></ol>
+      <ol><li>Explique a diferença entre dado pessoal e dado pessoal sensível, dando 2 exemplos de cada.</li><li>Para cada cenário, identifique a base legal mais adequada pro tratamento do dado: (a) uma loja guarda seu endereço pra entregar o produto comprado; (b) uma rede social usa sua localização só porque você marcou 'sim' numa caixinha de permissão; (c) um banco é obrigado por outra lei a guardar seus dados fiscais por 5 anos.</li><li>Cite 2 direitos do titular vistos hoje e explique, com suas palavras, uma situação em que você usaria cada um.</li><li>Explique o que significa 'extraterritorialidade' usando o exemplo da loja virtual brasileira que vende pra Europa.</li><li>Desafio: pesquise sobre o caso Serasa (2021) ou outro vazamento de dados brasileiro, e explique quais medidas técnicas das Aulas 6 a 9 (criptografia, hash, controle de acesso) poderiam ter reduzido o impacto.</li></ol>
     </div>
         
       </div>
@@ -694,17 +483,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcd7dc',
-    primaryTextColor: '#101010',
-    primaryBorderColor: '#EF233C',
-    lineColor: '#EF233C',
-    secondaryColor: '#1B1B2F',
+    primaryColor: '#fff2d1',
+    primaryTextColor: '#120A10',
+    primaryBorderColor: '#FFB400',
+    lineColor: '#FFB400',
+    secondaryColor: '#35152E',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcd7dc',
-    nodeBorder: '#EF233C',
+    mainBkg: '#fff2d1',
+    nodeBorder: '#FFB400',
     clusterBkg: '#f0f4f8',
-    titleColor: '#EF233C',
+    titleColor: '#FFB400',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -714,7 +503,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9d9dd'
+    cScale1: '#e4d9e2'
   }
 });
 </script>
@@ -722,7 +511,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::5';
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::12';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
@@ -730,13 +519,45 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=13;
+const totalConteudo=11;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
-  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
-  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+  document.fonts.ready.then(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();});
+  setTimeout(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();},3000);
 }else document.documentElement.classList.add('fonts-ready');
+// Fits each slide's content to the real screen instead of letting it silently
+// clip (.slide has overflow:hidden) -- school monitors range from 1024x768 up to
+// 1920x1080, and content authored without seeing either can't be trusted to fit.
+// Content up to 768px tall (fits a 1024x768 screen already) stays at natural size
+// -- "fixed", per the brief, rather than stretched to fill a taller screen. Content
+// from 769-1000px scales (uniformly, so text/diagrams shrink or grow in proportion,
+// never stretched) to exactly fill the slide's own height on whatever screen it's
+// actually displayed on. Past 1000px natural height the right fix is splitting the
+// slide in two at authoring time (see docs/guia-componentes.md) -- this is only a
+// safety net so an oversized slide that slips through still shows in full, shrunk,
+// instead of being cut off.
+function ajustarEscalaSlides(){
+  document.querySelectorAll('.slide').forEach(slideEl=>{
+    if(slideEl.classList.contains('rolavel'))return;
+    const wrap=slideEl.querySelector('.slide-content-wrapper');
+    if(!wrap)return;
+    wrap.style.transform='none';
+    const cs=getComputedStyle(slideEl);
+    const disponivel=slideEl.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    const natural=wrap.scrollHeight;
+    if(natural>768&&disponivel>0){
+      wrap.style.transform='scale('+(disponivel/natural)+')';
+    }
+  });
+}
+window.addEventListener('load',ajustarEscalaSlides);
+window.addEventListener('resize',ajustarEscalaSlides);
+// Mermaid renders its SVGs asynchronously after its own module script runs, which
+// can change a slide's natural content height well after the passes above already
+// measured it -- one more pass after a short delay catches that without needing a
+// callback into the mermaid module itself.
+setTimeout(ajustarEscalaSlides,1200);
 const agendaToggle=document.querySelector('.agenda-toggle');
 const agendaSidebar=document.querySelector('.agenda-sidebar');
 const toggleAgendaSidebar = () => {

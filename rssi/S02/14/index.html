@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aula 5: CRUD: Delete (Remoção) — Modais de confirmação e Delete SQL</title>
+<title>Aula 14: Laboratório Prático: Análise de Logs e Identificação de Invasão</title>
 <link rel="stylesheet" href="../libs/fonts/fonts.css">
 <link rel="stylesheet" href="../libs/fontawesome/css/all.min.css">
 <link href="../libs/prism/prism-tomorrow.min.css" rel="stylesheet">
@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#2B2D42;--color-rust:#EF233C;
-  --color-orange:#EF233C;--color-yellow:#EF233C;--color-deep:#1B1B2F;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#101010;
+  --color-navy:#000;--color-blue:#1F4E4A;--color-rust:#E07A5F;
+  --color-orange:#E07A5F;--color-yellow:#E07A5F;--color-deep:#0C2524;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#0A1312;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -38,7 +38,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    whose content is intentionally longer than one screen (e.g. a long exercise list)
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
-.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;transform-origin:top center;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
@@ -90,6 +90,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
+  .slide-content-wrapper{transform:none!important;}
 }
 .depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
@@ -200,28 +201,27 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 </head>
 <body>
 <div class="fixed-link-bar">
-  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Desenvolvimento de Aplicações Desktop</button>
+  <button class="fixed-link-bar-btn" onclick="showSlide(0)" title="Voltar para a agenda">Redes e Sistemas de Segurança de Informação</button>
 </div>
 <button class="agenda-toggle" onclick="toggleAgendaSidebar()" title="Agenda da aula (Esc fecha)"><i class="fa-solid fa-bars"></i></button>
 <nav class="agenda-sidebar">
   <div class="agenda-sidebar-header"><i class="fa-solid fa-list-check"></i> Agenda da aula</div>
   <div class="agenda-sidebar-list"><button class="agenda-side-item agenda-side-sub" data-idx="0" onclick="showSlide(0);closeAgendaSidebar();"><span class="agenda-side-label">Slide 01</span><span>Slide 01</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando o ciclo CRUD</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><i class="fa-solid fa-trash"></i><span>O botão Excluir</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-triangle-exclamation"></i><span>Por que nunca excluir direto no clique</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>Um clique não pode ser tudo que separa você de perder um dado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O modal de confirmação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Uma peça que falta: o JS do Bootstrap</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><i class="fa-solid fa-bolt"></i><span>Preenchendo o modal sem IPC</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Por que a exclusão não precisa de send/on</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-database"></i><span>DELETE SQL parametrizado</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>A query do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><i class="fa-solid fa-diagram-project"></i><span>Do clique em Confirmar até a lista atualizada</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>preload.js — expondo excluirInsumo</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>frmPrincipal.js — disparando a exclusão</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O fluxo completo do Delete</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-circle-check"></i><span>CRUD completo e exercício final</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Delete em peca_impressa</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="1" onclick="showSlide(1);closeAgendaSidebar();"><i class="fa-solid fa-rotate-left"></i><span>Recapitulando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="2" onclick="showSlide(2);closeAgendaSidebar();"><span class="agenda-side-label">Slide 02</span><span>Hoje é Sobre Ler a Evidência</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="3" onclick="showSlide(3);closeAgendaSidebar();"><i class="fa-solid fa-server"></i><span>Preparando o Ambiente</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>A Mesma Topologia, uma Regra a Mais</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>Ligando as Outras Duas Fontes de Log</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-file-lines"></i><span>Lendo o Log do Firewall</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Refazendo o Ataque (Sem Avisar o Que É)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>O Que o Log Sozinho Já Nos Conta</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-magnifying-glass"></i><span>Caçando o ARP Spoofing</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Refazendo o MITM (Aulas 4 e 9)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>A Assinatura Clássica do ARP Spoofing</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Cruzando as Três Evidências</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Escrevendo o Relatório de Incidente</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Checklist do Laboratório de Hoje</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -236,58 +236,44 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         
         
-        <p>Desenvolvimento de Aplicações Desktop (DAD) — Aula 5</p>
+        <p>Redes e Sistemas de Segurança de Informação (RSSI) — Aula 14</p>
 <div class="bloco-agenda">
-    <div class="bloco-agenda-titulo">CRUD: Delete (Remoção) — Modais de confirmação e Delete SQL</div>
+    <div class="bloco-agenda-titulo">Laboratório Prático: Análise de Logs e Identificação de Invasão</div>
     <div class="agenda-lista">
       
         <div class="agenda-item agenda-item-link" onclick="showSlide(1)" role="button" tabindex="0">
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando o ciclo CRUD</div>
-            <div class="agenda-item-texto">Recapitulando Create, Read e Update antes do Delete</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(2)" role="button" tabindex="0">
-          <div class="agenda-numero">02</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-trash"></i> O botão Excluir</div>
-            <div class="agenda-item-texto">Novo botão na coluna Ações da tabela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recapitulando</div>
+            <div class="agenda-item-texto">A fase de Identificação do PICERL, na prática</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
-          <div class="agenda-numero">03</div>
+          <div class="agenda-numero">02</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-triangle-exclamation"></i> Por que nunca excluir direto no clique</div>
-            <div class="agenda-item-texto">Delete é destrutivo e irreversível</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-server"></i> Preparando o Ambiente</div>
+            <div class="agenda-item-texto">A topologia da Aula 4, agora com logging</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(7)" role="button" tabindex="0">
-          <div class="agenda-numero">04</div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(6)" role="button" tabindex="0">
+          <div class="agenda-numero">03</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-bolt"></i> Preenchendo o modal sem IPC</div>
-            <div class="agenda-item-texto">Os dados já estão na tela</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-file-lines"></i> Lendo o Log do Firewall</div>
+            <div class="agenda-item-texto">Identificando o SYN flood pela evidência</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+          <div class="agenda-numero">04</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-magnifying-glass"></i> Caçando o ARP Spoofing</div>
+            <div class="agenda-item-texto">A assinatura do MITM na captura</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-database"></i> DELETE SQL parametrizado</div>
-            <div class="agenda-item-texto">A query e o perigo do DELETE sem WHERE</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(11)" role="button" tabindex="0">
-          <div class="agenda-numero">06</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-diagram-project"></i> Do clique em Confirmar até a lista atualizada</div>
-            <div class="agenda-item-texto">Handler, preload e recarregamento</div>
-          </div>
-        </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
-          <div class="agenda-numero">07</div>
-          <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-circle-check"></i> CRUD completo e exercício final</div>
-            <div class="agenda-item-texto">Fechando o ciclo e preparando a Avaliação 1</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
+            <div class="agenda-item-texto">Linha do tempo, relatório e prévia da Avaliação 3</div>
           </div>
         </div>
     </div>
@@ -298,55 +284,23 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="2">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Fechando o ciclo CRUD</h1>
-        <p>Create, Read e Update já funcionam — hoje entra o Delete</p>
+        <i class="fa-solid fa-rotate-left"></i>
+        <h1>Recapitulando</h1>
+        <p>A fase de Identificação do PICERL, na prática</p>
       </div>
     </div>
 
     <div class="slide" data-num="2">
       <div class="slide-content-wrapper">
-        <h1>O botão Excluir</h1>
+        <h1>Hoje é Sobre Ler a Evidência</h1>
         
-        <p>A coluna Ações da tabela em <code>frmPrincipal.js</code> já tem o botão Editar desde a Aula 4, dentro do mesmo <code>carregarInsumos</code> que já usamos desde a Aula 3. Hoje colocamos o irmão dele ao lado, na mesma célula: o botão <strong>Excluir</strong>.</p>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">// carregarInsumos ja existe desde a Aula 3/4 -- so adicionamos
-// o botao Excluir do lado do Editar, na mesma celula de Acoes
-const carregarInsumos = async () =&gt; {
-  insumosCarregados = await window.api.listarInsumos();
-
-  const linhas = insumosCarregados.map((insumo) =&gt; `
-    &lt;tr&gt;
-      &lt;td&gt;${insumo.tipo}&lt;/td&gt;
-      &lt;td&gt;${insumo.nome}&lt;/td&gt;
-      &lt;td&gt;${formatarMoeda(insumo.valor)}&lt;/td&gt;
-      &lt;td&gt;${formatarData(insumo.data_aquisicao)}&lt;/td&gt;
-      &lt;td&gt;
-        &lt;button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;editarInsumo(${insumo.id})&quot;&gt;Editar&lt;/button&gt;
-        &lt;button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;abrirConfirmacaoExclusao(${insumo.id})&quot;&gt;Excluir&lt;/button&gt;
-      &lt;/td&gt;
-    &lt;/tr&gt;
-  `).join('');
-
-  document.querySelector('#tbodyInsumos').innerHTML = linhas;
-};</code></pre>
-    </div>
+        <p>A Aula 13 explicou que a fase de Identificação do PICERL depende de reconhecer sinais de que algo anômalo está acontecendo — e que a principal matéria-prima pra isso é o LOG, a trilha de auditoria. Hoje vamos abrir logs de verdade e procurar essas evidências, sem assistir o ataque acontecer ao vivo.</p>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Mesmo truque do id
+        <i class="fa-solid fa-lightbulb"></i> Os ataques já são conhecidos; a habilidade é nova
       </h3>
-      <p>Os dois botões pegam o id do mesmo jeito: <code>insumo.id</code>, vindo do array <code>insumosCarregados</code> que a Aula 4 já guarda na memória para busca.</p>
-      
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-table-cells"></i> Não esqueça do colspan
-      </h3>
-      <p>Como agora são dois botões na mesma célula, atualize o cabeçalho em <code>frmPrincipal.html</code>: <code>&lt;th&gt;Ações&lt;/th&gt;</code> vira <code>&lt;th colspan=&quot;2&quot;&gt;Ações&lt;/th&gt;</code>.</p>
+      <p>Vamos reusar o MESMO SYN flood e o MESMO ARP spoofing das Aulas 4 e 9 — a novidade de hoje não é o ataque, é aprender a RECONHECER esses ataques só pelo rastro que deixam.</p>
       
     </div>
         
@@ -355,148 +309,104 @@ const carregarInsumos = async () =&gt; {
 
     <div class="slide topic" data-num="3">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h1>Por que nunca excluir direto no clique?</h1>
-        <p>Delete é destrutivo e irreversível</p>
+        <i class="fa-solid fa-server"></i>
+        <h1>Preparando o Ambiente</h1>
+        <p>A topologia da Aula 4, agora com logging</p>
       </div>
     </div>
 
     <div class="slide" data-num="3">
       <div class="slide-content-wrapper">
-        <h1>Um clique não pode ser tudo que separa você de perder um dado</h1>
+        <h1>A Mesma Topologia, uma Regra a Mais</h1>
         
-        <p>Já apagou sem querer uma conversa, uma foto ou o save de um jogo e ficou sem volta? Um botão Excluir que já dispara o DELETE no clique é exatamente isso — só que agora é o insumo de um cliente de verdade que some.</p>
+        <p>Sobem os mesmos containers <code>vitima</code>, <code>atacante</code> e <code>servico</code> na rede <code>rssi-labnet</code> (Aula 4). O <code>servico</code> já tem as regras de firewall da Aula 9 — hoje acrescentamos só UMA linha nova, pra registrar em log o que está sendo descartado.</p>
 
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
+    <div class="code-wrap">
+      <div class="file-label"><span>no servico, logo apos a regra de rate-limit da Aula 9</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">iptables -A INPUT -p tcp --dport 80 --syn \
+  -j LOG --log-prefix &quot;SYN-FLOOD-DROP: &quot; --log-level 4</code></pre>
+    </div>
+
+    <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-skull-crossbones"></i> Delete não tem Ctrl+Z
+        <i class="fa-solid fa-circle-info"></i> Por que essa regra vem DEPOIS do rate-limit
       </h3>
-      <p>Diferente de um erro de digitação, que dá pra corrigir com um novo Update, uma linha apagada do banco se foi de vez. Por isso toda exclusão precisa de uma confirmação explícita antes de disparar a query.</p>
+      <p>Essa regra só é alcançada pelos pacotes SYN que JÁ passaram do limite da Aula 9 (o rate-limit aceitou os primeiros, essa aqui loga o resto antes de cair no DROP padrão).</p>
       
     </div>
-<p>A solução: reaproveitar o <strong>modal do Bootstrap</strong> que já usamos desde o semestre 1 — só que agora com uma mensagem clara, tipo <em>"Tem certeza que deseja excluir o insumo X? Essa ação não pode ser desfeita."</em></p>
         
       </div>
     </div>
 
     <div class="slide" data-num="4">
       <div class="slide-content-wrapper">
-        <h1>O modal de confirmação</h1>
+        <h1>Ligando as Outras Duas Fontes de Log</h1>
         
         
     <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-html">&lt;div class=&quot;modal fade&quot; id=&quot;modalConfirmarExclusao&quot; tabindex=&quot;-1&quot;&gt;
-  &lt;div class=&quot;modal-dialog&quot;&gt;
-    &lt;div class=&quot;modal-content&quot;&gt;
-      &lt;div class=&quot;modal-header&quot;&gt;
-        &lt;h5 class=&quot;modal-title&quot;&gt;Confirmar exclusão&lt;/h5&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;modal-body&quot;&gt;
-        &lt;p&gt;
-          Tem certeza que deseja excluir o insumo
-          &lt;strong id=&quot;nomeInsumoExcluir&quot;&gt;&lt;/strong&gt;?
-          &lt;br&gt;
-          Essa ação não pode ser desfeita.
-        &lt;/p&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;modal-footer&quot;&gt;
-        &lt;button class=&quot;btn btn-secondary&quot; data-bs-dismiss=&quot;modal&quot;&gt;
-          Cancelar
-        &lt;/button&gt;
-        &lt;button class=&quot;btn btn-danger&quot; id=&quot;btnConfirmarExclusao&quot;&gt;
-          Excluir
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;</code></pre>
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash"># captura de ARP em background, salvando pra analisar depois
+docker exec -d servico tcpdump -i eth0 arp -w /var/log/arp_captura.pcap
+
+# log de acesso do servico ja vem ativo por padrao na imagem rssi-lab:latest
+docker exec servico tail -f /var/log/servico-access.log</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-cube"></i> Nada de novo aqui
+        <i class="fa-solid fa-list-check"></i> Três fontes, prontas
       </h3>
-      <p>É o mesmo componente modal do Bootstrap de sempre — só com um id e uma mensagem pensados pra exclusão.</p>
+      <p>Log do firewall (acabamos de ligar), captura de ARP (rodando em background) e log de acesso (já vinha ativo) — as três evidências de hoje.</p>
       
     </div>
         
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="5">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-file-lines"></i>
+        <h1>Lendo o Log do Firewall</h1>
+        <p>Identificando o SYN flood pela evidência</p>
       </div>
     </div>
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
-        <h1>Uma peça que falta: o JS do Bootstrap</h1>
+        <h1>Refazendo o Ataque (Sem Avisar o Que É)</h1>
         
-        <p>Até agora usamos o Bootstrap só pelo <strong>CSS</strong> — classes como <code>table-striped</code>, <code>btn-danger</code>, <code>modal fade</code> — carregado no <code>&lt;head&gt;</code> de <code>frmPrincipal.html</code> desde o semestre passado. Mas <code>new bootstrap.Modal(...)</code>, que vamos usar já já pra abrir esse modal via JavaScript, é outra coisa: é código do <strong>JS</strong> do Bootstrap, e ele só existe na página se o arquivo certo estiver referenciado.</p>
+        
+    <div class="code-wrap">
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash">docker exec atacante hping3 -S --flood -V -p 80 servico</code></pre>
+    </div>
 
     <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.html</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-html">&lt;!-- perto do fim do &lt;body&gt;, depois do HTML da pagina --&gt;
-
-&lt;!-- NOVO -- sem isso, o objeto &quot;bootstrap&quot; nao existe no JS --&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;frmPrincipal.js&quot;&gt;&lt;/script&gt;</code></pre>
+      <div class="file-label"><span>no servico</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">dmesg | grep SYN-FLOOD-DROP | tail -5</code></pre>
     </div>
 
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
-      <h3>
-        <i class="fa-solid fa-triangle-exclamation"></i> "bootstrap is not defined"
-      </h3>
-      <p>Esquecer esse <code>&lt;script&gt;</code> não quebra o HTML nem o CSS — a página carrega normal, o modal até aparece estilizado se você abrir ele "na unha". O erro só aparece no clique em Excluir, no console: <code>Uncaught ReferenceError: bootstrap is not defined</code>, porque <code>new bootstrap.Modal(...)</code> tenta usar um objeto que não existe.</p>
-      
+    <div class="code-wrap">
+      <div class="file-label"><span>exemplo de saida</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">[12345.678] SYN-FLOOD-DROP: IN=eth0 OUT= MAC=... SRC=172.20.0.3 DST=172.20.0.4 LEN=60 PROTO=TCP SPT=51324 DPT=80 SYN
+[12345.679] SYN-FLOOD-DROP: IN=eth0 OUT= MAC=... SRC=172.20.0.3 DST=172.20.0.4 LEN=60 PROTO=TCP SPT=38211 DPT=80 SYN</code></pre>
     </div>
         
-      </div>
-    </div>
-
-    <div class="slide topic" data-num="6">
-      <div class="slide-content-wrapper">
-        <i class="fa-solid fa-bolt"></i>
-        <h1>Preenchendo o modal: sem IPC</h1>
-        <p>Diferente da edição — os dados já estão na tela</p>
       </div>
     </div>
 
     <div class="slide" data-num="6">
       <div class="slide-content-wrapper">
-        <h1>Por que a exclusão não precisa de send/on</h1>
+        <h1>O Que o Log Sozinho Já Nos Conta</h1>
         
-        
-    <div class="grid-2">
+        <ul><li><code>SRC=172.20.0.3</code> identifica o IP de origem — sem precisar ver o ataque acontecendo, já sabemos QUEM</li><li>Centenas de linhas no mesmo segundo, todas com <code>DPT=80 SYN</code>, indicam volume anormal — não parece tráfego legítimo</li><li>O timestamp de cada linha permite calcular a taxa real de pacotes por segundo do ataque</li></ul>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-graduation-cap"></i> Isso é Identificação de verdade
+      </h3>
+      <p>Um analista de segurança real raramente VÊ o ataque ao vivo — ele lê esse tipo de log DEPOIS e reconstrói o que aconteceu. Foi exatamente isso que você acabou de fazer.</p>
       
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-pen"></i> Editar (Aula 4)
-          </h3>
-          
-          <ul style="margin-left:20px"><li>Precisa buscar o registro completo no banco</li><li>Usa <code>insumo:abrirEdicao</code> + <code>send</code>/<code>on</code></li><li>O <code>main.js</code> devolve o insumo pro renderer</li></ul>
-        </div>
-        <div class="card-info">
-          <h3>
-            <i class="fa-solid fa-trash"></i> Excluir (hoje)
-          </h3>
-          
-          <ul style="margin-left:20px"><li>O id e o nome já estão no array <code>insumosCarregados</code></li><li>Nenhuma viagem até o banco é necessária antes de abrir o modal</li><li>O JavaScript preenche o modal direto, via DOM</li></ul>
-        </div>
-    </div>
-
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">// Array `insumosCarregados` já existe desde a Aula 4 (busca por id)
-let idParaExcluir = null;
-
-const abrirConfirmacaoExclusao = (id) =&gt; {
-  const insumo = insumosCarregados.find((item) =&gt; item.id === id);
-
-  document.querySelector('#nomeInsumoExcluir').textContent = insumo.nome;
-  idParaExcluir = id;
-
-  const modal = new bootstrap.Modal(
-    document.querySelector('#modalConfirmarExclusao')
-  );
-  modal.show();
-};</code></pre>
     </div>
         
       </div>
@@ -504,28 +414,31 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
 
     <div class="slide topic" data-num="7">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-database"></i>
-        <h1>DELETE SQL parametrizado</h1>
-        <p>Sem WHERE, o DELETE apaga a tabela inteira</p>
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <h1>Caçando o ARP Spoofing</h1>
+        <p>A assinatura do MITM na captura</p>
       </div>
     </div>
 
     <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
-        <h1>A query do Delete</h1>
+        <h1>Refazendo o MITM (Aulas 4 e 9)</h1>
         
         
     <div class="code-wrap">
-      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-sql">DELETE FROM insumo WHERE id = ?</code></pre>
+      <button type="button" class="copy-btn-float" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button>
+      <pre><code class="language-bash">docker exec atacante arpspoof -i eth0 -t vitima servico</code></pre>
     </div>
 
-    <div class="focus-box" style="border-color:#EF233C;border-left-color:#EF233C;">
-      <h3>
-        <i class="fa-solid fa-radiation"></i> O perigo do DELETE sem WHERE
-      </h3>
-      <p><code>DELETE FROM insumo;</code> (sem WHERE) apaga TODAS as linhas da tabela de uma vez. Assim como no Update da Aula 4, o <code>?</code> parametrizado garante que só a linha certa seja afetada — e evita SQL Injection.</p>
-      
+    <div class="code-wrap">
+      <div class="file-label"><span>no servico, parando a captura e lendo</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-bash">docker exec servico tcpdump -r /var/log/arp_captura.pcap -n</code></pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>exemplo de saida</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-text">10:15:02 ARP, Reply 172.20.0.4 is-at aa:bb:cc:dd:ee:ff
+10:15:09 ARP, Reply 172.20.0.4 is-at 11:22:33:44:55:66</code></pre>
     </div>
         
       </div>
@@ -533,90 +446,62 @@ const abrirConfirmacaoExclusao = (id) =&gt; {
 
     <div class="slide" data-num="8">
       <div class="slide-content-wrapper">
-        <h1>O handler no main.js</h1>
+        <h1>A Assinatura Clássica do ARP Spoofing</h1>
         
         
-    <div class="code-wrap">
-      <div class="file-label"><span>main.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">ipcMain.handle('insumo:excluir', (evento, id) =&gt; {
-  return new Promise((resolve, reject) =&gt; {
-    const sql = 'DELETE FROM insumo WHERE id = ?';
-
-    conexao.query(sql, [id], (erro, resultado) =&gt; {
-      if (erro) {
-        reject(erro);
-        return;
-      }
-      resolve(resultado);
-    });
-  });
-});</code></pre>
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Mesmo IP, MACs diferentes, em segundos
+      </h3>
+      <p>O MESMO IP (<code>172.20.0.4</code>, o <code>servico</code>) respondendo com DOIS MACs diferentes num intervalo curtíssimo é a assinatura clássica de ARP spoofing (Aula 3): numa rede normal, um IP corresponde sempre ao MESMO MAC. Essa inconsistência é a evidência que não depende de ver o ataque ao vivo.</p>
+      
     </div>
-<p>Mesmo padrão do Create/Read/Update: <code>new Promise</code> por fora, <code>conexao.query</code> por dentro, <code>resolve</code> no sucesso e <code>reject</code> no erro.</p>
+<p>Repare que essa evidência vem de uma fonte DIFERENTE da regra de firewall: o ARP spoofing acontece numa camada que o <code>iptables</code> (camada de rede/transporte) nem enxerga — por isso precisamos de uma captura de pacotes dedicada pra ARP.</p>
         
+      </div>
+    </div>
+
+    <div class="slide topic" data-num="9">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <h1>Fechando</h1>
+        <p>Linha do tempo, relatório e prévia da Avaliação 3</p>
       </div>
     </div>
 
     <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
-        <h1>preload.js — expondo excluirInsumo</h1>
+        <h1>Cruzando as Três Evidências</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>preload.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">const { contextBridge, ipcRenderer } = require('electron');
-
-contextBridge.exposeInMainWorld('api', {
-  criarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:criar', insumo),
-  listarInsumos: () =&gt; ipcRenderer.invoke('insumo:listar'),
-  editarInsumo: (insumo) =&gt; ipcRenderer.send('insumo:abrirEdicao', insumo),
-  atualizarInsumo: (insumo) =&gt; ipcRenderer.invoke('insumo:atualizar', insumo),
-
-  // NOVO -- invoke/handle: o frmPrincipal.js espera a exclusao terminar
-  // antes de fechar o modal e recarregar a lista
-  excluirInsumo: (id) =&gt; ipcRenderer.invoke('insumo:excluir', id),
-
-  aoReceberInsumoParaEditar: (callback) =&gt;
-    ipcRenderer.on('insumo:preencher', (evento, insumo) =&gt; callback(insumo))
-});</code></pre>
-    </div>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-plug"></i> O mesmo objeto de sempre
-      </h3>
-      <p>É o mesmo <code>api</code> exposto desde a Aula 2 — só ganhou o <code>excluirInsumo</code>. Tudo o mais (<code>editarInsumo</code> via <code>send</code>, <code>aoReceberInsumoParaEditar</code> escutando <code>insumo:preencher</code>) continua exatamente como a Aula 4 deixou.</p>
-      
-    </div>
+        <div class="bloco-diagrama" id="mmdoruum">
+    <div class="bloco-diagrama-titulo">Tres fontes de evidencia, um relatorio</div>
+    <div class="mermaid">flowchart LR
+    A["Log do firewall (SYN flood)"] --&gt; R["Relatorio de incidente"]
+    B["Captura ARP (MITM)"] --&gt; R
+    C["Log de acesso (servico)"] --&gt; R</div>
+    <div class="bloco-diagrama-legenda">Cada evidencia sozinha conta uma parte da historia; juntas, reconstroem o incidente inteiro.</div>
+  </div>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Linha do tempo reconstruída</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Horário</th><th>Evidência</th><th>O que indica</th></tr></thead><tbody><tr><td>10:14:50</td><td>Log do firewall começa a registrar SYN-FLOOD-DROP</td><td>Início do SYN flood</td></tr><tr><td>10:15:02</td><td>Captura ARP: primeira resposta legítima</td><td>Estado normal da rede</td></tr><tr><td>10:15:09</td><td>Captura ARP: segunda resposta, MAC diferente</td><td>Início do ARP spoofing</td></tr><tr><td>10:15:11</td><td>Log de acesso: requisição suspeita vinda do MAC forjado</td><td>Confirmação do MITM em andamento</td></tr></tbody></table></div>
+    
+  </div>
         
       </div>
     </div>
 
     <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
-        <h1>frmPrincipal.js — disparando a exclusão</h1>
+        <h1>Escrevendo o Relatório de Incidente</h1>
         
-        
-    <div class="code-wrap">
-      <div class="file-label"><span>frmPrincipal.js</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
-      <pre style="margin-top:0;"><code class="language-javascript">document.querySelector('#btnConfirmarExclusao')
-  .addEventListener('click', async () =&gt; {
-    await window.api.excluirInsumo(idParaExcluir);
-
-    const modal = bootstrap.Modal.getInstance(
-      document.querySelector('#modalConfirmarExclusao')
-    );
-    modal.hide();
-
-    carregarInsumos(); // mesma função da Aula 3
-  });</code></pre>
-    </div>
+        <p>A fase de Lições Aprendidas (Aula 13) exige documentar o que aconteceu. Um relatório básico de incidente responde, no mínimo:</p>
+<ul><li>O QUE aconteceu (tipo de ataque identificado)</li><li>QUANDO começou e terminou (linha do tempo)</li><li>COMO foi identificado (qual evidência/log)</li><li>QUAL foi o IMPACTO (o que foi comprometido: Disponibilidade? Confidencialidade?)</li><li>QUE AÇÃO foi tomada em resposta</li></ul>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-rotate"></i> Recarregar sempre
+        <i class="fa-solid fa-scale-balanced"></i> Esse relatório é a base da notificação da LGPD
       </h3>
-      <p><code>carregarInsumos()</code> é a mesma função desde a Aula 3 — recarregar a lista depois de criar, editar OU excluir garante que a tela nunca fica desatualizada.</p>
+      <p>É exatamente esse tipo de documento que embasa a notificação obrigatória à ANPD e aos titulares (Art. 48, Aula 12) quando o incidente envolve dado pessoal.</p>
       
     </div>
         
@@ -625,63 +510,19 @@ contextBridge.exposeInMainWorld('api', {
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>O fluxo completo do Delete</h1>
+        <h1>Checklist do Laboratório de Hoje</h1>
         
-        <div class="bloco-diagrama" id="mmdx9how">
-    <div class="bloco-diagrama-titulo">Do clique em Excluir até a lista atualizada</div>
-    <div class="mermaid">sequenceDiagram
-    participant U as Usuário
-    participant R as Renderer (frmPrincipal.js)
-    participant P as preload.js
-    participant M as main.js
-    participant BD as MySQL
-
-    U-&gt;&gt;R: Clica em Excluir
-    R-&gt;&gt;R: abrirConfirmacaoExclusao(id) preenche o modal
-    U-&gt;&gt;R: Clica em Confirmar
-    R-&gt;&gt;P: window.api.excluirInsumo(id)
-    P-&gt;&gt;M: invoke('insumo:excluir', id)
-    M-&gt;&gt;BD: DELETE FROM insumo WHERE id = ?
-    BD--&gt;&gt;M: resultado
-    M--&gt;&gt;P: resolve(resultado)
-    P--&gt;&gt;R: retorno do invoke
-    R-&gt;&gt;R: carregarInsumos()
-    R--&gt;&gt;U: Lista atualizada</div>
-    <div class="bloco-diagrama-legenda">As duas primeiras trocas (U→R) acontecem só no navegador, sem tocar o banco — é por isso que o modal de confirmação não precisa de IPC.</div>
-  </div>
         
-      </div>
-    </div>
-
-    <div class="slide" data-num="12">
-      <div class="slide-content-wrapper">
-        <h1>CRUD completo!</h1>
-        
-        <p>Com o Delete de hoje, o Gerenciador de Peças 3D fecha o ciclo <strong>CRUD completo</strong> sobre <code>insumo</code> — sempre pelo mesmo caminho: preload → handle → Promise → <code>conexao.query</code>.</p>
-<div class="bloco-tabela">
-    
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Operação</th><th>Verbo IPC</th><th>Comando SQL</th></tr></thead><tbody><tr><td>Create</td><td>insumo:criar</td><td>INSERT INTO insumo (...) VALUES (...)</td></tr><tr><td>Read</td><td>insumo:listar</td><td>SELECT * FROM insumo</td></tr><tr><td>Update</td><td>insumo:atualizar</td><td>UPDATE insumo SET ... WHERE id = ?</td></tr><tr><td>Delete</td><td>insumo:excluir</td><td>DELETE FROM insumo WHERE id = ?</td></tr></tbody></table></div>
-    
-  </div>
-
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-graduation-cap"></i> Próxima aula: Avaliação 1
+        <i class="fa-solid fa-file-code"></i> O que entregar
       </h3>
-      <p>A Aula 6 é a Avaliação 1, com foco em Persistência de Dados e CRUD. O Delete de hoje é a última peça que faltava pra revisar tudo.</p>
+      <p>Print de cada evidência, mais o relatório de incidente escrito.</p>
       
     </div>
-        
-      </div>
-    </div>
 
-    <div class="slide" data-num="13">
-      <div class="slide-content-wrapper">
-        <h1>Exercício: Delete em peca_impressa</h1>
-        
-        
     <div class="quest-list">
-      <ol><li>Adicione o botão Excluir na coluna Ações da tabela de peças impressas.</li><li>Crie o modal de confirmação de exclusão (pode copiar o de insumo e trocar os ids e textos).</li><li>Implemente <code>ipcMain.handle('peca:excluir', ...)</code> em main.js com <code>DELETE FROM peca_impressa WHERE id = ?</code>.</li><li>Exponha <code>excluirPeca</code> no <code>preload.js</code>, no mesmo objeto <code>api</code>.</li><li>No <code>frmPrincipal.js</code>, chame <code>window.api.excluirPeca(id)</code> no clique de Confirmar e recarregue a lista de peças.</li></ol>
+      <ol><li>Print do <code>dmesg | grep SYN-FLOOD-DROP</code> mostrando pelo menos 5 linhas do ataque, com o <code>SRC</code> identificado.</li><li>Print da leitura do <code>arp_captura.pcap</code> mostrando as duas respostas ARP com MACs diferentes pro mesmo IP.</li><li>Uma tabela de linha do tempo (como a vista hoje) reconstruindo a ordem dos eventos a partir dos horários reais que você observou.</li><li>Um relatório de incidente completo (O QUE, QUANDO, COMO, IMPACTO, AÇÃO), seguindo a estrutura vista hoje, sobre o ataque que você identificou.</li><li>Desafio: no log de acesso do <code>servico</code>, procure por uma requisição que NÃO deveria ter chegado até ali, considerando a regra de firewall da Aula 9 — explique por que ela passou (dica: pense em qual regra permite esse tráfego especificamente).</li></ol>
     </div>
         
       </div>
@@ -694,17 +535,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fcd7dc',
-    primaryTextColor: '#101010',
-    primaryBorderColor: '#EF233C',
-    lineColor: '#EF233C',
-    secondaryColor: '#1B1B2F',
+    primaryColor: '#f9e7e2',
+    primaryTextColor: '#0A1312',
+    primaryBorderColor: '#E07A5F',
+    lineColor: '#E07A5F',
+    secondaryColor: '#0C2524',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fcd7dc',
-    nodeBorder: '#EF233C',
+    mainBkg: '#f9e7e2',
+    nodeBorder: '#E07A5F',
     clusterBkg: '#f0f4f8',
-    titleColor: '#EF233C',
+    titleColor: '#E07A5F',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -714,7 +555,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#d9d9dd'
+    cScale1: '#d7dfde'
   }
 });
 </script>
@@ -722,7 +563,7 @@ mermaid.initialize({
 // Remembers the last slide viewed (per lesson, via localStorage) so a browser refresh
 // -- e.g. after the professor edits a slide and reloads to check it -- lands back where
 // the viewer was instead of jumping to slide 1.
-const STORAGE_KEY='aulagen_slide::DesenvolvimentodeAplicaesDesktop::5';
+const STORAGE_KEY='aulagen_slide::RedeseSistemasdeSeguranadeInformao::14';
 let cur=0;
 try{ const salvo=Number(localStorage.getItem(STORAGE_KEY)); if(Number.isFinite(salvo)&&salvo>=0) cur=salvo; }catch(e){}
 const slides=document.querySelectorAll('.slide');
@@ -730,13 +571,45 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=13;
+const totalConteudo=11;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
-  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
-  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+  document.fonts.ready.then(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();});
+  setTimeout(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();},3000);
 }else document.documentElement.classList.add('fonts-ready');
+// Fits each slide's content to the real screen instead of letting it silently
+// clip (.slide has overflow:hidden) -- school monitors range from 1024x768 up to
+// 1920x1080, and content authored without seeing either can't be trusted to fit.
+// Content up to 768px tall (fits a 1024x768 screen already) stays at natural size
+// -- "fixed", per the brief, rather than stretched to fill a taller screen. Content
+// from 769-1000px scales (uniformly, so text/diagrams shrink or grow in proportion,
+// never stretched) to exactly fill the slide's own height on whatever screen it's
+// actually displayed on. Past 1000px natural height the right fix is splitting the
+// slide in two at authoring time (see docs/guia-componentes.md) -- this is only a
+// safety net so an oversized slide that slips through still shows in full, shrunk,
+// instead of being cut off.
+function ajustarEscalaSlides(){
+  document.querySelectorAll('.slide').forEach(slideEl=>{
+    if(slideEl.classList.contains('rolavel'))return;
+    const wrap=slideEl.querySelector('.slide-content-wrapper');
+    if(!wrap)return;
+    wrap.style.transform='none';
+    const cs=getComputedStyle(slideEl);
+    const disponivel=slideEl.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    const natural=wrap.scrollHeight;
+    if(natural>768&&disponivel>0){
+      wrap.style.transform='scale('+(disponivel/natural)+')';
+    }
+  });
+}
+window.addEventListener('load',ajustarEscalaSlides);
+window.addEventListener('resize',ajustarEscalaSlides);
+// Mermaid renders its SVGs asynchronously after its own module script runs, which
+// can change a slide's natural content height well after the passes above already
+// measured it -- one more pass after a short delay catches that without needing a
+// callback into the mermaid module itself.
+setTimeout(ajustarEscalaSlides,1200);
 const agendaToggle=document.querySelector('.agenda-toggle');
 const agendaSidebar=document.querySelector('.agenda-sidebar');
 const toggleAgendaSidebar = () => {
