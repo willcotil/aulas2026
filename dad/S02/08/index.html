@@ -221,7 +221,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O fluxo completo da requisição</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa e Mais da AwesomeAPI</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Cotação em Peça Impressa (Parte 1)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Mais da AwesomeAPI (Parte 2)</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -381,7 +382,7 @@ Resposta (JSON):
         <h1>Axios só existe no Main</h1>
         
         <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 7 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmd0hrse">
+<div class="bloco-diagrama" id="mmd9kvum">
     <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
     <div class="mermaid">flowchart LR
     R["Renderer"] --&gt;|"window.api"| P["preload.js"]
@@ -522,7 +523,7 @@ carregarCotacao().then(() =&gt; {
       <div class="slide-content-wrapper">
         <h1>O fluxo completo da requisição</h1>
         
-        <div class="bloco-diagrama" id="mmd0nglh">
+        <div class="bloco-diagrama" id="mmd1axv9">
     <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
     <div class="mermaid">sequenceDiagram
     participant R as frmPrincipal.js
@@ -578,7 +579,19 @@ carregarCotacao().then(() =&gt; {
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa e Mais da AwesomeAPI</h1>
+        <h1>Exercícios: Cotação em Peça Impressa (Parte 1)</h1>
+        
+        
+    <div class="quest-list">
+      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Aplique na tela de Peças Impressas o mesmo <code>.then()</code> que corrigimos hoje em <code>frmPrincipal.js</code>: garanta que <code>carregarPecas()</code> só rode depois que a cotação terminar de carregar, nunca em paralelo.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Exercícios: Mais da AwesomeAPI (Parte 2)</h1>
         
         
     <div class="focus-box">
@@ -590,7 +603,7 @@ carregarCotacao().then(() =&gt; {
     </div>
 
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Aplique na tela de Peças Impressas o mesmo <code>.then()</code> que corrigimos hoje em <code>frmPrincipal.js</code>: garanta que <code>carregarPecas()</code> só rode depois que a cotação terminar de carregar, nunca em paralelo.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li><li>Crie um handler <code>cotacao:buscarYuan</code> (mesmíssimo padrão do <code>cotacao:buscarDolar</code>, só trocando o endpoint pra <code>CNY-BRL</code>) e mostre a cotação do Yuan ao lado da do dólar na tela principal — pra insumos comprados direto de fornecedores chineses, essa conversação é mais útil que a do dólar.</li><li>Desafio: usando <code>Promise.all</code>, busque ao mesmo tempo a cotação do dólar E a do yuan (duas chamadas <code>axios.get</code> em paralelo, ou um único <code>.../json/last/USD-BRL,CNY-BRL</code>) — sem esperar uma terminar pra começar a outra. Pesquise como <code>Promise.all</code> funciona antes de tentar.</li><li>Desafio maior: pesquise o endpoint de histórico <code>/json/daily/USD-BRL/7</code> da AwesomeAPI e crie um handler <code>cotacao:buscarHistorico</code> que devolve a cotação dos últimos 7 dias. Na tela, mostre se a cotação de hoje está MAIOR ou MENOR que a de 7 dias atrás — um sinal simples de "tendência de alta" ou "tendência de baixa" pra quem vai decidir comprar insumo importado agora ou esperar.</li></ol>
+      <ol style="counter-reset:quest 5"><li>Crie um handler <code>cotacao:buscarYuan</code> (mesmíssimo padrão do <code>cotacao:buscarDolar</code>, só trocando o endpoint pra <code>CNY-BRL</code>) e mostre a cotação do Yuan ao lado da do dólar na tela principal — pra insumos comprados direto de fornecedores chineses, essa conversação é mais útil que a do dólar.</li><li>Desafio: usando <code>Promise.all</code>, busque ao mesmo tempo a cotação do dólar E a do yuan (duas chamadas <code>axios.get</code> em paralelo, ou um único <code>.../json/last/USD-BRL,CNY-BRL</code>) — sem esperar uma terminar pra começar a outra. Pesquise como <code>Promise.all</code> funciona antes de tentar.</li><li>Desafio maior: pesquise o endpoint de histórico <code>/json/daily/USD-BRL/7</code> da AwesomeAPI e crie um handler <code>cotacao:buscarHistorico</code> que devolve a cotação dos últimos 7 dias. Na tela, mostre se a cotação de hoje está MAIOR ou MENOR que a de 7 dias atrás — um sinal simples de "tendência de alta" ou "tendência de baixa" pra quem vai decidir comprar insumo importado agora ou esperar.</li></ol>
     </div>
 
     <div class="focus-box">
@@ -647,7 +660,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
+const totalConteudo=12;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
