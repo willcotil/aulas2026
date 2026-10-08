@@ -38,7 +38,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    whose content is intentionally longer than one screen (e.g. a long exercise list)
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
-.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;transform-origin:top center;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
@@ -90,6 +90,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
+  .slide-content-wrapper{transform:none!important;}
 }
 .depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
@@ -220,7 +221,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>O fluxo completo da requisição</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Cotação em Peça Impressa e Mais da AwesomeAPI</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -380,7 +381,7 @@ Resposta (JSON):
         <h1>Axios só existe no Main</h1>
         
         <p>Mesma regra da Aula 1 (<code>mysql2</code>) e da Aula 7 (<code>fs</code>): o Renderer roda isolado, sem acesso direto a nada de fora da janela. Requisição HTTP pra um servidor externo é responsabilidade do <strong>Main</strong> — o caminho continua: preload expõe, <code>ipcMain.handle</code> executa.</p>
-<div class="bloco-diagrama" id="mmde64r4">
+<div class="bloco-diagrama" id="mmd0hrse">
     <div class="bloco-diagrama-titulo">Três destinos, uma arquitetura só</div>
     <div class="mermaid">flowchart LR
     R["Renderer"] --&gt;|"window.api"| P["preload.js"]
@@ -451,14 +452,16 @@ const carregarCotacao = async () =&gt; {
   cotacaoDolar = await window.api.buscarCotacaoDolar();
 };
 
-carregarCotacao();</code></pre>
+carregarCotacao().then(() =&gt; {
+  carregarInsumos();
+});</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Uma variável, carregada uma vez
+        <i class="fa-solid fa-lightbulb"></i> O .then() garante a ordem certa
       </h3>
-      <p>Guardamos a cotação numa variável (igual <code>insumosCarregados</code> da Aula 3) assim que a tela principal abre — não precisamos buscar de novo a cada linha da tabela.</p>
+      <p><code>carregarCotacao</code> é <code>async</code>, então chamar ela já devolve uma Promise — com <code>.then()</code> em cima dessa chamada, <code>carregarInsumos()</code> só roda DEPOIS que <code>cotacaoDolar</code> já foi preenchida, nunca antes. Sem esse <code>.then()</code>, as duas rodariam em paralelo, e a tabela podia renderizar pela primeira vez com a cotação ainda <code>null</code>.</p>
       
     </div>
         
@@ -508,7 +511,7 @@ carregarCotacao();</code></pre>
       <h3>
         <i class="fa-solid fa-circle-info"></i> E se a cotação não carregou?
       </h3>
-      <p>Se <code>carregarCotacao</code> falhou (API fora do ar) — ou ainda não terminou de carregar na primeira vez que a tabela renderiza — <code>cotacaoDolar</code> continua <code>null</code>, e o <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
+      <p>Se <code>carregarCotacao</code> falhou (API fora do ar, sem internet), <code>cotacaoDolar</code> continua <code>null</code> — e graças ao <code>.then()</code> do slide anterior, isso só pode acontecer por causa de uma falha real, nunca porque a cotação ainda não tinha chegado. O <code>? :</code> mostra um travessão <code>—</code> em vez de tentar dividir por <code>null</code> e quebrar a tela.</p>
       
     </div>
         
@@ -519,7 +522,7 @@ carregarCotacao();</code></pre>
       <div class="slide-content-wrapper">
         <h1>O fluxo completo da requisição</h1>
         
-        <div class="bloco-diagrama" id="mmdbmpn0">
+        <div class="bloco-diagrama" id="mmd0nglh">
     <div class="bloco-diagrama-titulo">Buscando a cotação do dólar</div>
     <div class="mermaid">sequenceDiagram
     participant R as frmPrincipal.js
@@ -575,18 +578,26 @@ carregarCotacao();</code></pre>
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Cotação em Peça Impressa</h1>
+        <h1>Exercício: Cotação em Peça Impressa e Mais da AwesomeAPI</h1>
         
         
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-yen-sign"></i> A mesma API tem mais pra oferecer
+      </h3>
+      <p>Boa parte do filamento e das peças de impressora usadas no projeto vem da China (AliExpress) — então o <strong>Yuan (CNY)</strong> é tão relevante quanto o dólar pra quem compra insumo importado. A mesma AwesomeAPI de hoje também tem um endpoint de <strong>histórico</strong> (<code>/json/daily/{moeda}/{dias}</code>) — ótimo pra responder uma pergunta real: "a cotação subiu ou caiu essa semana? é um bom momento pra comprar?"</p>
+      
+    </div>
+
     <div class="quest-list">
-      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li></ol>
+      <ol><li>Reaproveite <code>window.api.buscarCotacaoDolar()</code> (já exposto no preload.js) na tela de Peças Impressas — não precisa criar handler novo, é o mesmo <code>cotacao:buscarDolar</code> de sempre.</li><li>Em <code>carregarPecas</code> (ou onde sua tabela de peças é montada), mostre também o custo em dólar do material usado — pense em qual campo de <code>peca_impressa</code> representa um valor em reais pra converter.</li><li>Aplique na tela de Peças Impressas o mesmo <code>.then()</code> que corrigimos hoje em <code>frmPrincipal.js</code>: garanta que <code>carregarPecas()</code> só rode depois que a cotação terminar de carregar, nunca em paralelo.</li><li>Trate o caso de a cotação não ter carregado (API fora do ar), igual foi feito pra insumo — nunca deixe a tela quebrar por causa disso.</li><li>Teste desconectando a internet antes de abrir o app: confirme que a tela dos insumos continua funcionando normalmente, só sem o valor em dólar.</li><li>Crie um handler <code>cotacao:buscarYuan</code> (mesmíssimo padrão do <code>cotacao:buscarDolar</code>, só trocando o endpoint pra <code>CNY-BRL</code>) e mostre a cotação do Yuan ao lado da do dólar na tela principal — pra insumos comprados direto de fornecedores chineses, essa conversação é mais útil que a do dólar.</li><li>Desafio: usando <code>Promise.all</code>, busque ao mesmo tempo a cotação do dólar E a do yuan (duas chamadas <code>axios.get</code> em paralelo, ou um único <code>.../json/last/USD-BRL,CNY-BRL</code>) — sem esperar uma terminar pra começar a outra. Pesquise como <code>Promise.all</code> funciona antes de tentar.</li><li>Desafio maior: pesquise o endpoint de histórico <code>/json/daily/USD-BRL/7</code> da AwesomeAPI e crie um handler <code>cotacao:buscarHistorico</code> que devolve a cotação dos últimos 7 dias. Na tela, mostre se a cotação de hoje está MAIOR ou MENOR que a de 7 dias atrás — um sinal simples de "tendência de alta" ou "tendência de baixa" pra quem vai decidir comprar insumo importado agora ou esperar.</li></ol>
     </div>
 
     <div class="focus-box">
       <h3>
         <i class="fa-solid fa-lightbulb"></i> Dica
       </h3>
-      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. Mesma ideia dos handlers de arquivo da Aula 7.</p>
+      <p>O handler <code>cotacao:buscarDolar</code> no <code>main.js</code> é <strong>genérico</strong> — não sabe nem precisa saber se quem está pedindo a cotação é a tela de insumo ou a de peça. O handler do Yuan e o de histórico seguem exatamente a mesma receita, só trocando a URL chamada dentro do <code>axios.get</code>.</p>
       
     </div>
         
@@ -640,9 +651,41 @@ const totalConteudo=11;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
-  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
-  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+  document.fonts.ready.then(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();});
+  setTimeout(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();},3000);
 }else document.documentElement.classList.add('fonts-ready');
+// Fits each slide's content to the real screen instead of letting it silently
+// clip (.slide has overflow:hidden) -- school monitors range from 1024x768 up to
+// 1920x1080, and content authored without seeing either can't be trusted to fit.
+// Content up to 768px tall (fits a 1024x768 screen already) stays at natural size
+// -- "fixed", per the brief, rather than stretched to fill a taller screen. Content
+// from 769-1000px scales (uniformly, so text/diagrams shrink or grow in proportion,
+// never stretched) to exactly fill the slide's own height on whatever screen it's
+// actually displayed on. Past 1000px natural height the right fix is splitting the
+// slide in two at authoring time (see docs/guia-componentes.md) -- this is only a
+// safety net so an oversized slide that slips through still shows in full, shrunk,
+// instead of being cut off.
+function ajustarEscalaSlides(){
+  document.querySelectorAll('.slide').forEach(slideEl=>{
+    if(slideEl.classList.contains('rolavel'))return;
+    const wrap=slideEl.querySelector('.slide-content-wrapper');
+    if(!wrap)return;
+    wrap.style.transform='none';
+    const cs=getComputedStyle(slideEl);
+    const disponivel=slideEl.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    const natural=wrap.scrollHeight;
+    if(natural>768&&disponivel>0){
+      wrap.style.transform='scale('+(disponivel/natural)+')';
+    }
+  });
+}
+window.addEventListener('load',ajustarEscalaSlides);
+window.addEventListener('resize',ajustarEscalaSlides);
+// Mermaid renders its SVGs asynchronously after its own module script runs, which
+// can change a slide's natural content height well after the passes above already
+// measured it -- one more pass after a short delay catches that without needing a
+// callback into the mermaid module itself.
+setTimeout(ajustarEscalaSlides,1200);
 const agendaToggle=document.querySelector('.agenda-toggle');
 const agendaSidebar=document.querySelector('.agenda-sidebar');
 const toggleAgendaSidebar = () => {
