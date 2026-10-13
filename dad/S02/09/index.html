@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#7F1D1D;--color-rust:#FBBF24;
-  --color-orange:#FBBF24;--color-yellow:#FBBF24;--color-deep:#450A0A;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#1A0A0A;
+  --color-navy:#000;--color-blue:#2D6A4F;--color-rust:#FFB703;
+  --color-orange:#FFB703;--color-yellow:#FFB703;--color-deep:#1B4332;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#10241C;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -38,7 +38,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-body);color:var(--text-
    whose content is intentionally longer than one screen (e.g. a long exercise list)
    instead of splitting into "Parte 1"/"Parte 2". */
 .slide.rolavel{overflow-y:auto;}
-.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;}
+.slide-content-wrapper{max-width:1000px;width:100%;margin:0 auto;transform-origin:top center;}
 h1{font-size:2.8rem;font-weight:800;line-height:1.2;margin-bottom:20px;color:var(--color-navy);}
 h2{font-size:2rem;font-weight:800;color:var(--color-blue);margin-bottom:20px;border-bottom:3px solid var(--color-orange);padding-bottom:10px;display:inline-block;}
 p,li{font-size:1.2rem;color:var(--text-main);line-height:1.6;margin-bottom:15px;}
@@ -90,6 +90,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
   .slide.topic h1,.slide.topic p,.slide.topic i{color:#000!important;}
   pre,.card-info,.focus-box{border:2px solid #000;color:#000;background:#fff;}
   h1,h2,p,li,strong{color:#000!important;}
+  .slide-content-wrapper{transform:none!important;}
 }
 .depurador-bloco{border:2px solid var(--color-blue);border-radius:12px;overflow:hidden;margin:15px 0;font-family:'Fira Code',monospace;font-size:1.05rem;}
 .depurador-bloco .dbg-titulo{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--color-blue);color:#fff;font-weight:700;font-size:1.05rem;}
@@ -220,7 +221,9 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Sanitização x CSP: Defesas Diferentes</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo da aula</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Blindando Peça Impressa</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Projeto de Revisão: Sistema de Entregas</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Sistema de Entregas (Parte 1 — CRUD e Segurança)</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercício: Sistema de Entregas (Parte 2 — JSON e API de CEP)</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -272,7 +275,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
-            <div class="agenda-item-texto">Resumo e exercício em Peça Impressa</div>
+            <div class="agenda-item-texto">Resumo e projeto de revisão: Sistema de Entregas</div>
           </div>
         </div>
     </div>
@@ -513,7 +516,7 @@ document.querySelector('#tbodyInsumos').innerHTML = linhas;</code></pre>
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
-        <p>Resumo e exercício em Peça Impressa</p>
+        <p>Resumo e projeto de revisão: Sistema de Entregas</p>
       </div>
     </div>
 
@@ -523,7 +526,7 @@ document.querySelector('#tbodyInsumos').innerHTML = linhas;</code></pre>
         
         <div class="bloco-tabela">
     <div class="bloco-tabela-titulo">As duas defesas de hoje</div>
-    <div class="bloco-tabela-wrap"><table><thead><tr><th>Defesa</th><th>O que faz</th><th>Onde aplicar</th></tr></thead><tbody><tr><td>escaparHtml</td><td>Troca <, >, ", ' por código de texto seguro</td><td>Todo dado de texto livre antes de ir pro innerHTML</td></tr><tr><td>CSP (meta tag)</td><td>Bloqueia execução de script fora do permitido</td><td><head> de cada HTML do projeto</td></tr></tbody></table></div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Defesa</th><th>O que faz</th><th>Onde aplicar</th></tr></thead><tbody><tr><td>escaparHtml</td><td>Troca <code>&lt;</code>, <code>&gt;</code>, <code>&quot;</code>, <code>'</code> por código de texto seguro</td><td>Todo dado de texto livre antes de ir pro innerHTML</td></tr><tr><td>CSP (meta tag)</td><td>Bloqueia execução de script fora do permitido</td><td><code>&lt;head&gt;</code> de cada HTML do projeto</td></tr></tbody></table></div>
     
   </div>
 
@@ -540,18 +543,68 @@ document.querySelector('#tbodyInsumos').innerHTML = linhas;</code></pre>
 
     <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
-        <h1>Exercício: Blindando Peça Impressa</h1>
+        <h1>Projeto de Revisão: Sistema de Entregas</h1>
         
-        
-    <div class="quest-list">
-      <ol><li>Em <code>carregarPecas</code>, aplique <code>escaparHtml</code> (pode reaproveitar a MESMA função já criada pra insumo) em todo campo de texto livre da peça impressa (título, cor).</li><li>Teste o ataque: cadastre uma peça com <code>&lt;img src=&quot;x&quot; onerror=&quot;alert('XSS!')&quot;&gt;</code> no título, e confirme que, ANTES da correção, o alerta dispara.</li><li>Depois de aplicar <code>escaparHtml</code>, cadastre a mesma peça de teste de novo e confirme que agora o texto aparece na tela como texto puro, sem o alerta disparar.</li><li>Adicione a mesma tag <code>&lt;meta http-equiv=&quot;Content-Security-Policy&quot;&gt;</code> da Aula de hoje em <code>frmPeca.html</code>, <code>frmInsumo.html</code> e <code>frmPrincipal.html</code> (se ainda não tiver).</li></ol>
+        <p>A partir daqui é um exercício de revisão <strong>pra entrega</strong> — não estende o Gerenciador de Peças 3D, é um projeto NOVO e independente (pode ser uma tela nova dentro do mesmo app Electron, ou um app novo — o importante é implementar tudo sozinho, sem copiar e colar código de insumo/peça). A ideia é juntar numa única tela TUDO que vimos das Aulas 1 a 9.</p>
+
+    <div class="code-wrap">
+      <div class="file-label"><span>tabela entregas</span><button type="button" class="copy-btn" onclick="aulagenCopiarCodigo(this)" title="Copiar código" aria-label="Copiar código"><i class="fa-solid fa-copy"></i></button></div>
+      <pre style="margin-top:0;"><code class="language-sql">CREATE TABLE entregas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  destinatario VARCHAR(100) NOT NULL,
+  produto VARCHAR(100) NOT NULL,
+  quantidade INT NOT NULL,
+  cep VARCHAR(9) NOT NULL,
+  endereco VARCHAR(255),
+  data_entrega DATE NOT NULL
+);</code></pre>
     </div>
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-lightbulb"></i> Dica
+        <i class="fa-solid fa-circle-info"></i> Por que uma tabela nova e simples
       </h3>
-      <p><code>escaparHtml</code> não tem nada de específico de insumo ou peça — é uma função genérica de texto. Pode até mover ela pra um arquivo compartilhado se quiser evitar duplicar em <code>frmPrincipal.js</code>.</p>
+      <p>Poucas colunas é de propósito: o objetivo não é o banco ser complexo, é você aplicar sozinho TODO o padrão preload → handle → Promise → conexao.query (Aulas 2-5), mais fs (Aula 7), Axios (Aula 8) e CSP/escaparHtml (hoje) — sem nenhuma aula explicando o passo a passo dessa vez.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>Exercício: Sistema de Entregas (Parte 1 — CRUD e Segurança)</h1>
+        
+        
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-file-code"></i> O que entregar
+      </h3>
+      <p>Cada item abaixo vale nota. Rode o projeto e tire print de cada etapa funcionando.</p>
+      
+    </div>
+
+    <div class="quest-list">
+      <ol><li>CRUD completo de entregas: Create (formulário → IPC → INSERT), Read (tabela carregada ao abrir a tela), Update (editar um registro existente) e Delete (com modal de confirmação) — seguindo o mesmo padrão preload → handle → Promise → conexao.query das Aulas 2 a 5.</li><li>Valide ANTES de enviar pro banco: quantidade precisa ser um número inteiro maior que zero (recuse negativo e zero), CEP precisa ter exatamente 8 dígitos numéricos, e nenhum campo obrigatório pode ficar vazio. Mostre uma mensagem de erro clara pro usuário quando a validação falhar, sem deixar o registro inválido chegar ao INSERT/UPDATE.</li><li>Aplique escaparHtml (Aula 9) em todo campo de texto livre (destinatário, produto, endereço) antes de montar a tabela com innerHTML.</li><li>Adicione a tag <code>&lt;meta http-equiv=&quot;Content-Security-Policy&quot;&gt;</code> no HTML da tela de entregas, igual vimos hoje.</li><li>Teste o ataque: cadastre uma entrega com <code>&lt;img src=&quot;x&quot; onerror=&quot;alert('XSS!')&quot;&gt;</code> no campo destinatário e confirme que, com escaparHtml aplicado, o texto aparece como texto puro, sem o alerta disparar.</li></ol>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="13">
+      <div class="slide-content-wrapper">
+        <h1>Exercício: Sistema de Entregas (Parte 2 — JSON e API de CEP)</h1>
+        
+        
+    <div class="quest-list">
+      <ol style="counter-reset:quest 5"><li>Exporte todas as entregas cadastradas pra um arquivo .json, reaproveitando o padrão da Aula 7 (JSON.stringify + dialog.showSaveDialog).</li><li>Importe um backup .json de entregas (dialog.showOpenDialog + JSON.parse), reaproveitando a função de criar entrega pra regravar cada registro no banco — igual fizemos com insumo na Aula 7.</li><li>No formulário, ao digitar o CEP, busque o endereço completo numa API de CEP (ex: ViaCEP — https://viacep.com.br/ws/SEU_CEP/json/) via Axios (Aula 8), e preencha automaticamente o campo de endereço com o que a API devolver.</li><li>Trate o caso de CEP inválido ou inexistente (a ViaCEP devolve {"erro": true} nesse caso) e o caso da API estar fora do ar — nos dois casos, avise o usuário sem travar o formulário.</li></ol>
+    </div>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-star"></i> Desafio
+      </h3>
+      <p>Pesquise outro campo devolvido pela API de CEP (ex: código do IBGE da cidade, DDD) e mostre ele em algum lugar da tela, mesmo que não seja salvo no banco.</p>
       
     </div>
         
@@ -565,17 +618,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fef3d8',
-    primaryTextColor: '#1A0A0A',
-    primaryBorderColor: '#FBBF24',
-    lineColor: '#FBBF24',
-    secondaryColor: '#450A0A',
+    primaryColor: '#fff2d2',
+    primaryTextColor: '#10241C',
+    primaryBorderColor: '#FFB703',
+    lineColor: '#FFB703',
+    secondaryColor: '#1B4332',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fef3d8',
-    nodeBorder: '#FBBF24',
+    mainBkg: '#fff2d2',
+    nodeBorder: '#FFB703',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FBBF24',
+    titleColor: '#FFB703',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -585,7 +638,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#e8d6d6'
+    cScale1: '#d9e4df'
   }
 });
 </script>
@@ -601,13 +654,45 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
+const totalConteudo=13;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
-  document.fonts.ready.then(()=>document.documentElement.classList.add('fonts-ready'));
-  setTimeout(()=>document.documentElement.classList.add('fonts-ready'),3000);
+  document.fonts.ready.then(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();});
+  setTimeout(()=>{document.documentElement.classList.add('fonts-ready');ajustarEscalaSlides();},3000);
 }else document.documentElement.classList.add('fonts-ready');
+// Fits each slide's content to the real screen instead of letting it silently
+// clip (.slide has overflow:hidden) -- school monitors range from 1024x768 up to
+// 1920x1080, and content authored without seeing either can't be trusted to fit.
+// Content up to 768px tall (fits a 1024x768 screen already) stays at natural size
+// -- "fixed", per the brief, rather than stretched to fill a taller screen. Content
+// from 769-1000px scales (uniformly, so text/diagrams shrink or grow in proportion,
+// never stretched) to exactly fill the slide's own height on whatever screen it's
+// actually displayed on. Past 1000px natural height the right fix is splitting the
+// slide in two at authoring time (see docs/guia-componentes.md) -- this is only a
+// safety net so an oversized slide that slips through still shows in full, shrunk,
+// instead of being cut off.
+function ajustarEscalaSlides(){
+  document.querySelectorAll('.slide').forEach(slideEl=>{
+    if(slideEl.classList.contains('rolavel'))return;
+    const wrap=slideEl.querySelector('.slide-content-wrapper');
+    if(!wrap)return;
+    wrap.style.transform='none';
+    const cs=getComputedStyle(slideEl);
+    const disponivel=slideEl.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0);
+    const natural=wrap.scrollHeight;
+    if(natural>768&&disponivel>0){
+      wrap.style.transform='scale('+(disponivel/natural)+')';
+    }
+  });
+}
+window.addEventListener('load',ajustarEscalaSlides);
+window.addEventListener('resize',ajustarEscalaSlides);
+// Mermaid renders its SVGs asynchronously after its own module script runs, which
+// can change a slide's natural content height well after the passes above already
+// measured it -- one more pass after a short delay catches that without needing a
+// callback into the mermaid module itself.
+setTimeout(ajustarEscalaSlides,1200);
 const agendaToggle=document.querySelector('.agenda-toggle');
 const agendaSidebar=document.querySelector('.agenda-sidebar');
 const toggleAgendaSidebar = () => {
