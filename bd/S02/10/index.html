@@ -125,7 +125,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 .bloco-diagrama{margin:12px 0;}
 .bloco-diagrama .bloco-diagrama-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
 .bloco-diagrama .mermaid{background:#f8fafc;border-radius:12px;padding:24px;border:1px solid var(--border-soft,#e2e8f0);overflow:auto;text-align:center;max-height:min(960px,65vh);}
-.bloco-diagrama .mermaid svg{max-width:none!important;}
+.bloco-diagrama .mermaid svg{max-width:100%!important;height:auto!important;}
 .bloco-diagrama .bloco-diagrama-legenda{font-size:0.95rem;color:var(--text-muted,#64748b);text-align:center;margin-top:6px;font-style:italic;}
 .bloco-der{margin:12px 0;}
 .bloco-der .bloco-der-titulo{font-weight:700;color:var(--color-blue);font-size:1.05rem;margin-bottom:8px;}
@@ -212,15 +212,17 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-sub" data-idx="4" onclick="showSlide(4);closeAgendaSidebar();"><span class="agenda-side-label">Slide 03</span><span>FOREIGN KEY: A Sintaxe</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="5" onclick="showSlide(5);closeAgendaSidebar();"><span class="agenda-side-label">Slide 04</span><span>O Que a FK Garante na Prática</span></button>
 <button class="agenda-side-item agenda-side-section" data-idx="6" onclick="showSlide(6);closeAgendaSidebar();"><i class="fa-solid fa-user-graduate"></i><span>1:N na Prática: Aluno e Turma</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>Onde a Chave Estrangeira Fica</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Recriando aluno com a FK</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-chalkboard-user"></i><span>N:N na Prática: Professor e Disciplina</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Por Que N:N Não Cabe numa FK Direta</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>A Tabela professor_disciplina</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Registrando Quem Leciona O Quê</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>1:N x N:N na Implementação</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Conectando as Tabelas</span></button></div>
+<button class="agenda-side-item agenda-side-sub" data-idx="7" onclick="showSlide(7);closeAgendaSidebar();"><span class="agenda-side-label">Slide 05</span><span>O Relacionamento Antes do CREATE TABLE</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="8" onclick="showSlide(8);closeAgendaSidebar();"><span class="agenda-side-label">Slide 06</span><span>Onde a Chave Estrangeira Fica</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>Recriando aluno com a FK</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><i class="fa-solid fa-chalkboard-user"></i><span>N:N na Prática: Professor e Disciplina</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>O Relacionamento Antes da Tabela Associativa</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Por Que N:N Não Cabe numa FK Direta</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>A Tabela professor_disciplina</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>Registrando Quem Leciona O Quê</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>1:N x N:N na Implementação</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: Conectando as Tabelas</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -244,7 +246,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
           <div class="agenda-numero">01</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-rotate-left"></i> Recap</div>
-            <div class="agenda-item-texto">O id já existe em todas as tabelas desde a Aula 8</div>
+            <div class="agenda-item-texto">O id já existe em todas as tabelas desde a Aula 9</div>
           </div>
         </div>
         <div class="agenda-item agenda-item-link" onclick="showSlide(3)" role="button" tabindex="0">
@@ -261,14 +263,14 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
             <div class="agenda-item-texto">A FK vai no lado "muitos"</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(9)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(10)" role="button" tabindex="0">
           <div class="agenda-numero">04</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-chalkboard-user"></i> N:N na Prática: Professor e Disciplina</div>
             <div class="agenda-item-texto">Tabela associativa com chave composta</div>
           </div>
         </div>
-        <div class="agenda-item agenda-item-link" onclick="showSlide(13)" role="button" tabindex="0">
+        <div class="agenda-item agenda-item-link" onclick="showSlide(15)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
             <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
@@ -285,7 +287,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-rotate-left"></i>
         <h1>Recap</h1>
-        <p>O id já existe em todas as tabelas desde a Aula 8</p>
+        <p>O id já existe em todas as tabelas desde a Aula 9</p>
       </div>
     </div>
 
@@ -293,7 +295,7 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>Tabelas Isoladas, Domínio Conectado</h1>
         
-        <p>Desde a Aula 8, <code>aluno</code>, <code>professor</code>, <code>turma</code> e <code>disciplina</code> têm um <code>id</code> (PRIMARY KEY + AUTO_INCREMENT). Mas as quatro tabelas continuam <strong>isoladas</strong> — nada no banco ainda diz que um aluno pertence a uma turma, ou que um professor leciona uma disciplina.</p>
+        <p>Desde a Aula 9, <code>aluno</code>, <code>professor</code>, <code>turma</code> e <code>disciplina</code> têm um <code>id</code> (PRIMARY KEY + AUTO_INCREMENT). Mas as quatro tabelas continuam <strong>isoladas</strong> — nada no banco ainda diz que um aluno pertence a uma turma, ou que um professor leciona uma disciplina.</p>
 
     <div class="focus-box">
       <h3>
@@ -374,10 +376,24 @@ INSERT INTO filho (pai_id) VALUES (99);  -- ERRO
 
     <div class="slide" data-num="5">
       <div class="slide-content-wrapper">
+        <h1>O Relacionamento Antes do CREATE TABLE</h1>
+        
+        <div class="bloco-der">
+    <div class="bloco-der-titulo">ALUNO — TURMA (1:N)</div>
+    <div class="bloco-der-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="20 4 540 158" width="540" height="158"><rect x="20" y="4" width="540" height="158" fill="#ffffff"/><g><path d="M 120 83 L 290 83" fill="none" stroke="#475569" stroke-width="1.8"/><path d="M 460 83 L 290 83" fill="none" stroke="#475569" stroke-width="1.8"/></g><g><g transform="translate(60,60)"><rect x="0" y="0" width="120" height="46" rx="5" ry="5" fill="#f8fafc" stroke="#334155" stroke-width="2"/><text x="60" y="23" text-anchor="middle" dominant-baseline="central" font-size="14" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' font-weight="600" fill="#0f172a">ALUNO</text></g><g transform="translate(400,60)"><rect x="0" y="0" width="120" height="46" rx="5" ry="5" fill="#f8fafc" stroke="#334155" stroke-width="2"/><text x="60" y="23" text-anchor="middle" dominant-baseline="central" font-size="14" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' font-weight="600" fill="#0f172a">TURMA</text></g><g transform="translate(220,44)"><polygon points="70,0 140,39 70,78 0,39" fill="#fef3c7" stroke="#d97706" stroke-width="2"/><text x="70" y="39" text-anchor="middle" dominant-baseline="central" font-size="13" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' font-weight="500" fill="#78350f">pertence</text></g></g><g><text x="194" y="93" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' fill="#0f172a">(1,1)</text><text x="386" y="73" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' fill="#0f172a">(0,N)</text></g></svg></div>
+    <a class="bloco-der-download" href="der/aula10-aluno-turma.mer" download title="Abrir/editar em https://willcotil.github.io/mer/"><i class="fa-solid fa-download"></i> Baixar .mer (editável em https://willcotil.github.io/mer/)</a>
+    <div class="bloco-der-legenda">Cada aluno pertence a exatamente 1 turma; cada turma pode ter de 0 a N alunos. É esse desenho que a FK turma_id em aluno vai materializar.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="6">
+      <div class="slide-content-wrapper">
         <h1>Onde a Chave Estrangeira Fica</h1>
         
         <p>No nosso domínio, um <strong>aluno pertence a uma turma</strong>, e uma <strong>turma tem vários alunos</strong> — um relacionamento <strong>1:N</strong>. A regra pra decidir onde colocar a FK: ela sempre fica no lado "muitos".</p>
-<div class="bloco-diagrama" id="mmdbbuox">
+<div class="bloco-diagrama" id="mmdo3x79">
     <div class="bloco-diagrama-titulo">1:N -- aluno (muitos) e turma (um)</div>
     <div class="mermaid">flowchart LR
     A["aluno (muitos)"] --&gt;|"turma_id aponta pra"| T["turma (um)"]</div>
@@ -387,7 +403,7 @@ INSERT INTO filho (pai_id) VALUES (99);  -- ERRO
       </div>
     </div>
 
-    <div class="slide" data-num="6">
+    <div class="slide" data-num="7">
       <div class="slide-content-wrapper">
         <h1>Recriando aluno com a FK</h1>
         
@@ -426,7 +442,7 @@ INSERT INTO filho (pai_id) VALUES (99);  -- ERRO
       </div>
     </div>
 
-    <div class="slide topic" data-num="7">
+    <div class="slide topic" data-num="8">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-chalkboard-user"></i>
         <h1>N:N na Prática: Professor e Disciplina</h1>
@@ -434,7 +450,21 @@ INSERT INTO filho (pai_id) VALUES (99);  -- ERRO
       </div>
     </div>
 
-    <div class="slide" data-num="7">
+    <div class="slide" data-num="8">
+      <div class="slide-content-wrapper">
+        <h1>O Relacionamento Antes da Tabela Associativa</h1>
+        
+        <div class="bloco-der">
+    <div class="bloco-der-titulo">PROFESSOR — DISCIPLINA (N:N)</div>
+    <div class="bloco-der-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="20 4 552 158" width="552" height="158"><rect x="20" y="4" width="552" height="158" fill="#ffffff"/><g><path d="M 122 83 L 294 83" fill="none" stroke="#475569" stroke-width="1.8"/><path d="M 466 83 L 294 83" fill="none" stroke="#475569" stroke-width="1.8"/></g><g><g transform="translate(60,60)"><rect x="0" y="0" width="124" height="46" rx="5" ry="5" fill="#f8fafc" stroke="#334155" stroke-width="2"/><text x="62" y="23" text-anchor="middle" dominant-baseline="central" font-size="14" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' font-weight="600" fill="#0f172a">PROFESSOR</text></g><g transform="translate(400,60)"><rect x="0" y="0" width="132" height="46" rx="5" ry="5" fill="#f8fafc" stroke="#334155" stroke-width="2"/><text x="66" y="23" text-anchor="middle" dominant-baseline="central" font-size="14" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' font-weight="600" fill="#0f172a">DISCIPLINA</text></g><g transform="translate(224,44)"><polygon points="70,0 140,39 70,78 0,39" fill="#fef3c7" stroke="#d97706" stroke-width="2"/><text x="70" y="39" text-anchor="middle" dominant-baseline="central" font-size="13" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' font-weight="500" fill="#78350f">leciona</text></g></g><g><text x="198" y="93" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' fill="#0f172a">(1,N)</text><text x="386" y="73" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" font-family='"Inter","Segoe UI",ui-sans-serif,system-ui,sans-serif' fill="#0f172a">(1,N)</text></g></svg></div>
+    <a class="bloco-der-download" href="der/aula10-professor-disciplina.mer" download title="Abrir/editar em https://willcotil.github.io/mer/"><i class="fa-solid fa-download"></i> Baixar .mer (editável em https://willcotil.github.io/mer/)</a>
+    <div class="bloco-der-legenda">Um professor leciona de 1 a N disciplinas; uma disciplina é lecionada por 1 a N professores. Esse N:N é exatamente o que a tabela associativa professor_disciplina resolve.</div>
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="9">
       <div class="slide-content-wrapper">
         <h1>Por Que N:N Não Cabe numa FK Direta</h1>
         
@@ -451,7 +481,7 @@ INSERT INTO filho (pai_id) VALUES (99);  -- ERRO
       </div>
     </div>
 
-    <div class="slide" data-num="8">
+    <div class="slide" data-num="10">
       <div class="slide-content-wrapper">
         <h1>A Tabela professor_disciplina</h1>
         
@@ -469,16 +499,16 @@ INSERT INTO filho (pai_id) VALUES (99);  -- ERRO
 
     <div class="focus-box">
       <h3>
-        <i class="fa-solid fa-key"></i> Chave primária composta
+        <i class="fa-solid fa-key"></i> A chave composta da Aula 9, agora de verdade
       </h3>
-      <p>A <code>PRIMARY KEY</code> aqui usa <strong>duas colunas juntas</strong> — o par <code>(professor_id, disciplina_id)</code> precisa ser único, mas cada coluna sozinha pode se repetir em outras linhas (o mesmo professor aparece em várias linhas, lecionando disciplinas diferentes).</p>
+      <p>Essa é a <code>PRIMARY KEY (professor_id, disciplina_id)</code> que vimos na Aula 9: o par precisa ser único, mas cada FK sozinha pode se repetir em outras linhas (o mesmo professor aparece lecionando disciplinas diferentes).</p>
       
     </div>
         
       </div>
     </div>
 
-    <div class="slide" data-num="9">
+    <div class="slide" data-num="11">
       <div class="slide-content-wrapper">
         <h1>Registrando Quem Leciona O Quê</h1>
         
@@ -496,7 +526,7 @@ INSERT INTO professor_disciplina (professor_id, disciplina_id) VALUES (3, 2);</c
       </div>
     </div>
 
-    <div class="slide topic" data-num="10">
+    <div class="slide topic" data-num="12">
       <div class="slide-content-wrapper">
         <i class="fa-solid fa-flag-checkered"></i>
         <h1>Fechando</h1>
@@ -504,7 +534,7 @@ INSERT INTO professor_disciplina (professor_id, disciplina_id) VALUES (3, 2);</c
       </div>
     </div>
 
-    <div class="slide" data-num="10">
+    <div class="slide" data-num="12">
       <div class="slide-content-wrapper">
         <h1>1:N x N:N na Implementação</h1>
         
@@ -525,7 +555,7 @@ INSERT INTO professor_disciplina (professor_id, disciplina_id) VALUES (3, 2);</c
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="13">
       <div class="slide-content-wrapper">
         <h1>Exercícios: Conectando as Tabelas</h1>
         
@@ -588,7 +618,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
+const totalConteudo=13;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){

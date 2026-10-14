@@ -1,0 +1,156 @@
+{
+  "_type": "mer-editor-v1",
+  "_version": "1.0",
+  "_created": "2026-09-30T18:45:21.233Z",
+  "nodes": [
+    {
+      "id": "aluno",
+      "kind": "entity",
+      "x": 60,
+      "y": 60,
+      "width": 120,
+      "height": 46,
+      "autoSize": true,
+      "label": "ALUNO",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "turma",
+      "kind": "entity",
+      "x": 400,
+      "y": 60,
+      "width": 120,
+      "height": 46,
+      "autoSize": true,
+      "label": "TURMA",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "professor",
+      "kind": "entity",
+      "x": 1080,
+      "y": 60,
+      "width": 124,
+      "height": 46,
+      "autoSize": true,
+      "label": "PROFESSOR",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "disciplina",
+      "kind": "entity",
+      "x": 1420,
+      "y": 60,
+      "width": 132,
+      "height": 46,
+      "autoSize": true,
+      "label": "DISCIPLINA",
+      "style": {
+        "fill": "#f8fafc",
+        "stroke": "#334155"
+      },
+      "props": {}
+    },
+    {
+      "id": "rel_0",
+      "kind": "relationship",
+      "x": 220,
+      "y": 44,
+      "width": 140,
+      "height": 78,
+      "autoSize": true,
+      "label": "pertence",
+      "style": {
+        "fill": "#fef3c7",
+        "stroke": "#d97706"
+      },
+      "props": {}
+    },
+    {
+      "id": "rel_1",
+      "kind": "relationship",
+      "x": 1244,
+      "y": 44,
+      "width": 140,
+      "height": 78,
+      "autoSize": true,
+      "label": "leciona",
+      "style": {
+        "fill": "#fef3c7",
+        "stroke": "#d97706"
+      },
+      "props": {}
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_0a",
+      "kind": "connection",
+      "sourceId": "aluno",
+      "targetId": "rel_0",
+      "sourceCardinality": "(1,1)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_0b",
+      "kind": "connection",
+      "sourceId": "turma",
+      "targetId": "rel_0",
+      "sourceCardinality": "(0,N)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_1a",
+      "kind": "connection",
+      "sourceId": "professor",
+      "targetId": "rel_1",
+      "sourceCardinality": "(1,N)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    },
+    {
+      "id": "e_1b",
+      "kind": "connection",
+      "sourceId": "disciplina",
+      "targetId": "rel_1",
+      "sourceCardinality": "(1,N)",
+      "targetCardinality": "",
+      "sourceParticipation": "partial",
+      "targetParticipation": "partial",
+      "fkAttributeId": null,
+      "waypoints": [],
+      "label": ""
+    }
+  ],
+  "canvas": {
+    "offsetX": 0,
+    "offsetY": 0,
+    "scale": 1
+  }
+}
