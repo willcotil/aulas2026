@@ -12,9 +12,9 @@
 <script src="../libs/gsap.min.js"></script>
 <style>
 :root{
-  --color-navy:#000;--color-blue:#6B2D5C;--color-rust:#FFB400;
-  --color-orange:#FFB400;--color-yellow:#FFB400;--color-deep:#35152E;
-  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#120A10;
+  --color-navy:#000;--color-blue:#1E3E62;--color-rust:#FF6500;
+  --color-orange:#FF6500;--color-yellow:#FF6500;--color-deep:#0B192C;
+  --bg-body:#F5F7FA;--slide-bg:#FFF;--text-main:#101820;
   --text-muted:#64748B;--border-soft:#E2E8F0;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -218,10 +218,16 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 <button class="agenda-side-item agenda-side-section" data-idx="9" onclick="showSlide(9);closeAgendaSidebar();"><i class="fa-solid fa-earth-americas"></i><span>GDPR e Comparação</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="10" onclick="showSlide(10);closeAgendaSidebar();"><span class="agenda-side-label">Slide 07</span><span>GDPR: A Lei Que Veio Antes</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="11" onclick="showSlide(11);closeAgendaSidebar();"><span class="agenda-side-label">Slide 08</span><span>LGPD x GDPR, Lado a Lado</span></button>
-<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-flag-checkered"></i><span>Fechando</span></button>
+<button class="agenda-side-item agenda-side-section" data-idx="12" onclick="showSlide(12);closeAgendaSidebar();"><i class="fa-solid fa-gavel"></i><span>Fiscalização e Casos Reais</span></button>
 <button class="agenda-side-item agenda-side-sub" data-idx="13" onclick="showSlide(13);closeAgendaSidebar();"><span class="agenda-side-label">Slide 09</span><span>Fiscalização e Multas no Brasil</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>Resumo de Hoje</span></button>
-<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: LGPD e GDPR na Prática</span></button></div>
+<button class="agenda-side-item agenda-side-section" data-idx="14" onclick="showSlide(14);closeAgendaSidebar();"><i class="fa-solid fa-user-gear"></i><span>O Papel do Profissional de TI</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="15" onclick="showSlide(15);closeAgendaSidebar();"><span class="agenda-side-label">Slide 10</span><span>LGPD Não é Só Papel</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="16" onclick="showSlide(16);closeAgendaSidebar();"><span class="agenda-side-label">Slide 11</span><span>O Que Você Já Viu Nesta Disciplina Que Serve Pra Isso</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="17" onclick="showSlide(17);closeAgendaSidebar();"><span class="agenda-side-label">Slide 12</span><span>E Nas Outras Disciplinas da Área</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="18" onclick="showSlide(18);closeAgendaSidebar();"><span class="agenda-side-label">Slide 13</span><span>E Compartilhar Dado com IA, Pode?</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="19" onclick="showSlide(19);closeAgendaSidebar();"><span class="agenda-side-label">Slide 14</span><span>Checklist Pra Levar Com Você</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="20" onclick="showSlide(20);closeAgendaSidebar();"><span class="agenda-side-label">Slide 15</span><span>Resumo de Hoje</span></button>
+<button class="agenda-side-item agenda-side-sub" data-idx="21" onclick="showSlide(21);closeAgendaSidebar();"><span class="agenda-side-label">Desafios</span><span>Exercícios: LGPD e GDPR na Prática</span></button></div>
 </nav>
 <div class="progress-bar" id="progressBar"></div>
 <div class="slide-counter" id="slideCounter"></div>
@@ -272,8 +278,15 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
         <div class="agenda-item agenda-item-link" onclick="showSlide(12)" role="button" tabindex="0">
           <div class="agenda-numero">05</div>
           <div class="agenda-conteudo">
-            <div class="agenda-item-titulo"><i class="fa-solid fa-flag-checkered"></i> Fechando</div>
-            <div class="agenda-item-texto">Multas, casos reais e prévia da Aula 13</div>
+            <div class="agenda-item-titulo"><i class="fa-solid fa-gavel"></i> Fiscalização e Casos Reais</div>
+            <div class="agenda-item-texto">Multas, ANPD e o caso Serasa</div>
+          </div>
+        </div>
+        <div class="agenda-item agenda-item-link" onclick="showSlide(14)" role="button" tabindex="0">
+          <div class="agenda-numero">06</div>
+          <div class="agenda-conteudo">
+            <div class="agenda-item-titulo"><i class="fa-solid fa-user-gear"></i> O Papel do Profissional de TI</div>
+            <div class="agenda-item-texto">Da lei pro código, e prévia da Aula 13</div>
           </div>
         </div>
     </div>
@@ -320,14 +333,17 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
         <h1>O Que é a LGPD</h1>
         
         <p>A <strong>LGPD</strong> (Lei 13.709/2018, em vigor desde 2020) regula como empresas, governos e qualquer organização podem coletar, armazenar, usar e compartilhar DADOS PESSOAIS de pessoas no Brasil — seu nome, CPF, e-mail, localização, histórico de compras, e muito mais.</p>
-
-    <div class="focus-box">
-      <h3>
-        <i class="fa-solid fa-id-card"></i> Dado pessoal x dado pessoal sensível
-      </h3>
-      <p><strong>Dado pessoal</strong>: identifica uma pessoa (nome, e-mail, CPF). <strong>Dado pessoal SENSÍVEL</strong>: exige proteção redobrada — saúde, biometria, orientação sexual, religião, dado genético. Lembra da classificação da informação da Aula 11? Dado sensível é praticamente sempre 'Restrito'.</p>
-      
-    </div>
+<figure class="bloco-imagem" id="img8ezul">
+    
+    <img src="img/dados.png" alt="Comparação cômica entre um dado comum (d6) chamado de feio, que responde que não se importa, e um dado sensível (d20) chamado de feio, que responde que se sentiu ofendido" loading="lazy"
+         onerror="this.style.minHeight='80px';this.style.background='#f0f4f8';this.style.border='2px dashed #cbd5e1';">
+    
+  </figure>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Dado pessoal sensível, na letra da lei</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>Categoria</th><th>Por que é considerada sensível</th></tr></thead><tbody><tr><td>Saúde</td><td>Pode gerar discriminação em plano de saúde, seguro ou emprego se exposta</td></tr><tr><td>Biometria (digital, face, íris)</td><td>Identifica a pessoa de forma única e permanente — não dá pra 'trocar a senha' se vazar</td></tr><tr><td>Dado genético</td><td>Revela predisposições a doenças, inclusive de parentes que nem deram consentimento</td></tr><tr><td>Origem racial ou étnica</td><td>Historicamente usada como base de discriminação e preconceito</td></tr><tr><td>Orientação sexual</td><td>Exposição pode gerar discriminação, violência ou constrangimento</td></tr><tr><td>Convicção religiosa</td><td>Pode gerar perseguição ou discriminação religiosa</td></tr><tr><td>Opinião política</td><td>Pode gerar perseguição política ou discriminação no emprego</td></tr><tr><td>Filiação sindical</td><td>Pode gerar retaliação trabalhista contra o empregado</td></tr></tbody></table></div>
+    
+  </div>
         
       </div>
     </div>
@@ -336,7 +352,8 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       <div class="slide-content-wrapper">
         <h1>Os Papéis da LGPD</h1>
         
-        <div class="bloco-tabela">
+        <p>Quando a lei fala em proteger um dado pessoal, ela não trata todo mundo envolvido do mesmo jeito — cada parte tem uma responsabilidade diferente sobre aquele dado. A LGPD dá um nome oficial a cada um desses <strong>papéis</strong>, pra deixar claro quem decide o quê e quem pode ser responsabilizado se algo der errado.</p>
+<div class="bloco-tabela">
     <div class="bloco-tabela-titulo">Quem é quem na LGPD</div>
     <div class="bloco-tabela-wrap"><table><thead><tr><th>Papel</th><th>O que é</th></tr></thead><tbody><tr><td>Titular</td><td>A pessoa dona do dado pessoal (você, ao se cadastrar num site)</td></tr><tr><td>Controlador</td><td>Quem DECIDE o que fazer com o dado (a empresa dona do sistema)</td></tr><tr><td>Operador</td><td>Quem TRATA o dado seguindo as ordens do controlador (ex: uma empresa de hospedagem contratada)</td></tr><tr><td>ANPD</td><td>Autoridade Nacional de Proteção de Dados — o órgão do governo que fiscaliza e aplica multas</td></tr></tbody></table></div>
     
@@ -420,9 +437,9 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
 
     <div class="slide topic" data-num="9">
       <div class="slide-content-wrapper">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <h1>Fechando</h1>
-        <p>Multas, casos reais e prévia da Aula 13</p>
+        <i class="fa-solid fa-gavel"></i>
+        <h1>Fiscalização e Casos Reais</h1>
+        <p>Como a lei é aplicada na prática</p>
       </div>
     </div>
 
@@ -443,7 +460,108 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
+    <div class="slide topic" data-num="10">
+      <div class="slide-content-wrapper">
+        <i class="fa-solid fa-user-gear"></i>
+        <h1>O Papel do Profissional de TI</h1>
+        <p>Da lei pro código: como aplicamos a LGPD no dia a dia</p>
+      </div>
+    </div>
+
     <div class="slide" data-num="10">
+      <div class="slide-content-wrapper">
+        <h1>LGPD Não é Só Papel</h1>
+        
+        <p>A LGPD não fica só no contrato ou na política da empresa — o <strong>Art. 46</strong> exige "medidas técnicas e administrativas" pra proteger dado pessoal. E quem implementa essas medidas técnicas somos nós: quem desenvolve o sistema, quem administra o banco, quem configura a rede.</p>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-triangle-exclamation"></i> Relembrando o caso Serasa
+      </h3>
+      <p>O vazamento de 220 milhões de CPFs que acabamos de ver não foi um problema jurídico — foi uma falha técnica em algum ponto da cadeia: banco mal protegido, acesso mal controlado, rede mal defendida. A lei pune a empresa, mas é a arquitetura técnica que evita ou permite um vazamento desses.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="11">
+      <div class="slide-content-wrapper">
+        <h1>O Que Você Já Viu Nesta Disciplina Que Serve Pra Isso</h1>
+        
+        <p>Boa parte do que vimos desde a Aula 6 não foi só "segurança por segurança" — é exatamente o tipo de medida técnica que a LGPD exige:</p>
+<div class="bloco-tabela">
+    <div class="bloco-tabela-titulo">Técnica x exigência da LGPD</div>
+    <div class="bloco-tabela-wrap"><table><thead><tr><th>O que vimos</th><th>Pra que serve na LGPD</th></tr></thead><tbody><tr><td>Criptografia simétrica/assimétrica (Aula 6)</td><td>Garante confidencialidade do dado armazenado ou transmitido — a base técnica do Art. 46</td></tr><tr><td>Hash + salt pra senha (Aula 7)</td><td>Senha nunca fica em texto puro; se o banco vazar, a senha continua protegida</td></tr><tr><td>Assinatura digital e certificado (Aula 7)</td><td>Garante integridade e autenticidade de documentos e comunicações com dado pessoal</td></tr><tr><td>Firewall, IDS/IPS (Aula 8)</td><td>Reduz a superfície de ataque que levaria a um vazamento como o da Serasa</td></tr><tr><td>VPN (Aulas 8 e 9)</td><td>Protege o dado pessoal em trânsito entre sistemas, filiais ou equipe remota</td></tr><tr><td>ISO 27001 / PSI (Aula 11)</td><td>Documenta e audita essas medidas técnicas como política organizacional formal</td></tr></tbody></table></div>
+    
+  </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="12">
+      <div class="slide-content-wrapper">
+        <h1>E Nas Outras Disciplinas da Área</h1>
+        
+        <p>A LGPD também molda decisões que você toma fora da RSSI — no banco de dados que modela e no código que escreve:</p>
+
+    <div class="grid-2">
+      
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-database"></i> Banco de Dados
+          </h3>
+          
+          <ul style="margin-left:20px"><li>Nunca armazenar senha em texto puro — sempre hash com salt</li><li>Criptografar colunas sensíveis (CPF, saúde, etc.)</li><li>Controle de acesso por permissão de usuário/role no SGBD</li><li>Registrar logs de quem acessou quais dados</li></ul>
+        </div>
+        <div class="card-info">
+          <h3>
+            <i class="fa-solid fa-code"></i> Programação
+          </h3>
+          
+          <ul style="margin-left:20px"><li>Coletar só o dado pessoal que o sistema realmente precisa (minimização)</li><li>Validar e sanitizar toda entrada do usuário</li><li>Aplicar controle de acesso também na aplicação, não só no banco</li><li>Implementar de verdade a exclusão quando o titular pedir</li></ul>
+        </div>
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="13">
+      <div class="slide-content-wrapper">
+        <h1>E Compartilhar Dado com IA, Pode?</h1>
+        
+        <p>Ferramentas de IA generativa (ChatGPT, Claude, Gemini...) viraram parte do dia a dia — mas colar dado pessoal num prompt sem pensar também é TRATAMENTO DE DADO, e cai direto na LGPD.</p>
+<ul><li><strong>Precisa de base legal</strong>: mandar dado pessoal pra um serviço de IA externo é compartilhar com um operador — só vale com consentimento, execução de contrato etc.</li><li><strong>Dado sensível é ainda mais crítico</strong>: colar prontuário médico ou dado biométrico num prompt sem consentimento explícito é violação direta</li><li><strong>Transferência internacional</strong>: a maioria dos provedores de IA processa fora do Brasil — o Art. 33 exige garantias específicas pra isso</li><li><strong>Uso em treinamento</strong>: se o serviço usa o que você manda pra treinar o modelo, isso é mais uma finalidade que precisa de base legal e transparência</li><li><strong>Anonimização mitiga</strong>: dado anonimizado (sem como reidentificar a pessoa) sai do escopo da LGPD (Art. 12) — por isso é a prática mais segura antes de usar IA</li></ul>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-robot"></i> Na prática
+      </h3>
+      <p>É por isso que muitas empresas proíbem colar dado real de cliente em ferramentas de IA pública sem um contrato de processamento de dados (DPA) assinado com o provedor.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="14">
+      <div class="slide-content-wrapper">
+        <h1>Checklist Pra Levar Com Você</h1>
+        
+        <ol><li>Nunca guarde senha em texto puro — hash com salt, sempre</li><li>Criptografe dado sensível em repouso e em trânsito (HTTPS/TLS)</li><li>Aplique controle de acesso: nem todo mundo no sistema precisa ver todo dado</li><li>Colete só o que for necessário — dado que você não tem, não pode vazar</li><li>Tenha uma rotina real de exclusão de dado quando o titular pedir</li><li>Registre log de acesso a dado pessoal, pra rastrear se algo der errado</li><li>Pense duas vezes antes de colar dado real num prompt de IA</li><li>Documente tudo isso numa política de segurança (PSI, Aula 11)</li></ol>
+
+    <div class="focus-box">
+      <h3>
+        <i class="fa-solid fa-handshake"></i> Conclusão
+      </h3>
+      <p>LGPD não é tarefa de 'outro departamento' — é parte do seu trabalho técnico, seja você quem programa, quem administra o banco, quem cuida da rede ou quem usa IA no dia a dia.</p>
+      
+    </div>
+        
+      </div>
+    </div>
+
+    <div class="slide" data-num="15">
       <div class="slide-content-wrapper">
         <h1>Resumo de Hoje</h1>
         
@@ -464,13 +582,13 @@ code[class*="language-"]{font-family:'Fira Code',monospace;color:#e5e5e5;text-sh
       </div>
     </div>
 
-    <div class="slide" data-num="11">
+    <div class="slide" data-num="16">
       <div class="slide-content-wrapper">
         <h1>Exercícios: LGPD e GDPR na Prática</h1>
         
         
     <div class="quest-list">
-      <ol><li>Explique a diferença entre dado pessoal e dado pessoal sensível, dando 2 exemplos de cada.</li><li>Para cada cenário, identifique a base legal mais adequada pro tratamento do dado: (a) uma loja guarda seu endereço pra entregar o produto comprado; (b) uma rede social usa sua localização só porque você marcou 'sim' numa caixinha de permissão; (c) um banco é obrigado por outra lei a guardar seus dados fiscais por 5 anos.</li><li>Cite 2 direitos do titular vistos hoje e explique, com suas palavras, uma situação em que você usaria cada um.</li><li>Explique o que significa 'extraterritorialidade' usando o exemplo da loja virtual brasileira que vende pra Europa.</li><li>Desafio: pesquise sobre o caso Serasa (2021) ou outro vazamento de dados brasileiro, e explique quais medidas técnicas das Aulas 6 a 9 (criptografia, hash, controle de acesso) poderiam ter reduzido o impacto.</li></ol>
+      <ol><li>Explique a diferença entre dado pessoal e dado pessoal sensível, dando 2 exemplos de cada.</li><li>Para cada cenário, identifique a base legal mais adequada pro tratamento do dado: (a) uma loja guarda seu endereço pra entregar o produto comprado; (b) uma rede social usa sua localização só porque você marcou 'sim' numa caixinha de permissão; (c) um banco é obrigado por outra lei a guardar seus dados fiscais por 5 anos.</li><li>Cite 2 direitos do titular vistos hoje e explique, com suas palavras, uma situação em que você usaria cada um.</li><li>Explique o que significa 'extraterritorialidade' usando o exemplo da loja virtual brasileira que vende pra Europa.</li><li>Relacione 3 técnicas vistas nas Aulas 6 a 11 (criptografia, hash, firewall, VPN, ISO 27001...) com o Art. 46 da LGPD, explicando o que cada uma protege.</li><li>Um colega quer colar a lista de clientes da empresa (nome, CPF, telefone) num chat de IA pra gerar uma análise rápida. Isso é um problema pela LGPD? Por quê, e o que ele poderia fazer diferente?</li><li>Desafio: pesquise sobre o caso Serasa (2021) ou outro vazamento de dados brasileiro, e explique quais medidas técnicas das Aulas 6 a 9 (criptografia, hash, controle de acesso) poderiam ter reduzido o impacto.</li></ol>
     </div>
         
       </div>
@@ -483,17 +601,17 @@ mermaid.initialize({
   startOnLoad: true,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#fff2d1',
-    primaryTextColor: '#120A10',
-    primaryBorderColor: '#FFB400',
-    lineColor: '#FFB400',
-    secondaryColor: '#35152E',
+    primaryColor: '#ffe3d1',
+    primaryTextColor: '#101820',
+    primaryBorderColor: '#FF6500',
+    lineColor: '#FF6500',
+    secondaryColor: '#0B192C',
     tertiaryColor: '#f5f7fa',
     background: '#ffffff',
-    mainBkg: '#fff2d1',
-    nodeBorder: '#FFB400',
+    mainBkg: '#ffe3d1',
+    nodeBorder: '#FF6500',
     clusterBkg: '#f0f4f8',
-    titleColor: '#FFB400',
+    titleColor: '#FF6500',
     edgeLabelBackground: '#ffffff',
     fontFamily: 'Nunito, sans-serif',
     fontSize: '22px',
@@ -503,7 +621,7 @@ mermaid.initialize({
     // with the equally dark default label color, was unreadable. Feed it the same light
     // tint recipe used for primaryColor/mainBkg (just based on cor_principal instead of
     // cor_destaque) so it lands in the same light/legible family after mermaid's darkening.
-    cScale1: '#e4d9e2'
+    cScale1: '#d7dce3'
   }
 });
 </script>
@@ -519,7 +637,7 @@ const total=slides.length;
 // "topico" (section-divider) slides don't get their own number -- the counter only
 // tracks content slides, matching the numbering already used in the agenda sidebar.
 const numerosConteudo=Array.from(slides).map(s=>Number(s.dataset.num||0));
-const totalConteudo=11;
+const totalConteudo=16;
 const pb=document.querySelector('#progressBar');
 const sc=document.querySelector('#slideCounter');
 if(document.fonts&&document.fonts.ready){
